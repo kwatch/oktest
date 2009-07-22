@@ -38,6 +38,14 @@ def _err(actual, op, expected, message=None, format=None):
     return ex
 
 
+def _re_compile(expected, arg):
+    if type(expected) == type(re.compile('')):
+        rexp = expected
+    else:
+        rexp = re.compile(expected, arg or 0)
+    return rexp
+
+
 def ok(actual, op, expected=True, arg=None):
     result = None
     format = "%s " + op + " %s"
@@ -49,8 +57,8 @@ def ok(actual, op, expected=True, arg=None):
     elif op == '>=':     result = actual >= expected
     elif op == '<' :     result = actual <  expected
     elif op == '<=':     result = actual <= expected
-    elif op == '=~':     result = bool(re.compile(expected, arg or 0).search(actual))
-    elif op == '!~':     result = not re.compile(expected, arg or 0).search(actual)
+    elif op == '=~':     result = bool(_re_compile(expected, arg).search(actual))
+    elif op == '!~':     result = not  _re_compile(expected, arg).search(actual)
     elif op == 'is':     result = actual is expected
     elif op == 'is not': result = actual is not expected
     elif op == 'in':     result = actual in expected
