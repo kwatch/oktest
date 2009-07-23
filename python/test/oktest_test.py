@@ -132,3 +132,37 @@ expected = r"""
    _test_.py:13: ok("foo", '!~', re.compile(r'\w+'))
 """[1:]
 do_test_with(desc, script, expected)
+
+
+###
+desc = "op function"
+script = r"""
+from oktest import *
+import os
+class FooTest(object):
+    def before_all(cls):
+        open('foobar.txt', 'w').write('foobar')
+        os.mkdir('foobar.d')
+    before_all = classmethod(before_all)
+    def after_all(cls):
+        os.unlink('foobar.txt')
+        os.rmdir('foobar.d')
+    after_all = classmethod(after_all)
+    #
+    def test_isfile(self):
+        ok("foobar.txt", os.path.isfile)
+    def test_isdir(self):
+        ok("foobar.d", os.path.isdir)
+    def test_isnotfile(self):
+        ok("foobar.d", os.path.isfile, False)
+    def test_isnotdir(self):
+        ok("foobar.txt", os.path.isdir, False)
+invoke_tests('FooTest', 'BarTest')
+"""[1:]
+expected = r"""
+* FooTest.test_isdir ... [ok]
+* FooTest.test_isfile ... [ok]
+* FooTest.test_isnotdir ... [ok]
+* FooTest.test_isnotfile ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
