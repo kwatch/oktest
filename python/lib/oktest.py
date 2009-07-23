@@ -47,8 +47,7 @@ def _re_compile(expected, arg):
 
 
 def ok(actual, op, expected=True, arg=None):
-    result = None
-    format = "%s " + op + " %s"
+    result = format = None
     if False:
         pass
     elif op == '==':     result = actual == expected
@@ -69,6 +68,7 @@ def ok(actual, op, expected=True, arg=None):
         format = func.__name__ + "(%s) == %s"
     else:
         raise ValueError("%s: unknown operator" % repr(op))
+    if format is None: format = "%s " + op + " %s"
     #
     if result is True:  return _test_ok(actual, op, expected)
     if result is False: return _test_ng(actual, op, expected, format=format)
