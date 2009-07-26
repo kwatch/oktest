@@ -47,7 +47,7 @@ def _re_compile(expected, arg):
 
 
 def ok(actual, op, expected=True, arg=None):
-    result = format = None
+    result = format = message = None
     if False:
         pass
     elif op == '==':     result = actual == expected
@@ -62,6 +62,30 @@ def ok(actual, op, expected=True, arg=None):
     elif op == 'is not': result = actual is not expected
     elif op == 'in':     result = actual in expected
     elif op == 'not in': result = actual not in expected
+    elif op == 'raises':
+        ex = None
+        error_class = expected
+        try:
+            actual()
+        except Exception:
+            ex = sys.exc_info()[1]
+        if ex is None:
+            message = "%s should be raised : failed" % error_class.__name__
+        elif not isinstance(ex, error_class):
+            message = "%s is kind of %s : failed" % (repr(ex), error_class.__name__)
+        elif arg is not None and ex.message != arg:
+            message = "%s == %s : failed" % (repr(ex.message), repr(arg))
+        result = message is None and True or False
+    elif op == 'not raise':
+        ex = None
+        error_class = expected
+        try:
+            actual()
+        except Exception:
+            ex = sys.exc_info()[1]
+        if ex is not None and isinstance(ex, error_class):
+            message = "%s should not be raised : failed" % error_class.__name__
+        result = message is None and True or False
     elif isinstance(op, types.FunctionType):
         func = op
         result = func(actual) == expected
@@ -71,7 +95,7 @@ def ok(actual, op, expected=True, arg=None):
     if format is None: format = "%s " + op + " %s"
     #
     if result is True:  return _test_ok(actual, op, expected)
-    if result is False: return _test_ng(actual, op, expected, format=format)
+    if result is False: return _test_ng(actual, op, expected, format=format, message=message)
     raise Exception("** internal error: result=%s" % repr(result))
 
 
@@ -118,10 +142,13 @@ def _matched_class_objects(*classes):
 
 def invoke_tests(*classes):
     class_objects = _matched_class_objects(*classes)
+    target = os.environ.get('TEST', None)
     for cls in class_objects:
         try:
             _invoke(cls, 'before_all')
             method_names = [ m for m in dir(cls) if m.startswith('test') ]
+            if target:
+                method_names = [ t for t in method_names if t.find(target) >= 0 ]
             method_names.sort()
             for method_name in method_names:
                 obj = cls()
