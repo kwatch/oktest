@@ -120,6 +120,12 @@ def ok(actual, op, expected=True, arg=None):
     elif op == 'is not': result = actual is not expected
     elif op == 'in':     result = actual in expected
     elif op == 'not in': result = actual not in expected
+    elif op == 'is a' or op == 'isinstance':
+        result = isinstance(actual, expected)
+        message = "isinstance(%s, %s) : failed." % (repr(actual), expected.__name__)
+    elif op == 'is not a' or op == 'not isinstance':
+        result = not isinstance(actual, expected)
+        message = "not isinstance(%s, %s) : failed." % (repr(actual), expected.__name__)
     elif isinstance(op, types.FunctionType):
         func = op
         result = func(actual) == expected

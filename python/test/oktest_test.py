@@ -325,6 +325,37 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 ###
+desc = "op 'is a', 'not is a'"
+script = r"""
+from oktest import *
+class Val(object):
+  def __init__(self, val):
+    self.val = val
+  def __repr__(self):
+    return "<Val val=%s>" % self.val
+class FooTest(object):
+    def test_is_a(self):
+        ok(Val(123), 'is a', Val)
+    def test_is_not_a(self):
+        ok(123, 'is not a', Val)
+class BarTest(object):
+    def test_is_a(self):
+        ok(123, 'is a', Val)
+    def test_is_not_a(self):
+        ok(Val(123), 'is not a', Val)
+invoke_tests('FooTest', 'BarTest')
+"""[1:]
+expected = r"""
+* FooTest.test_is_a ... [ok]
+* FooTest.test_is_not_a ... [ok]
+* BarTest.test_is_a ... [NG] isinstance(123, Val) : failed.
+   _test_.py:14: ok(123, 'is a', Val)
+* BarTest.test_is_not_a ... [NG] not isinstance(<Val val=123>, Val) : failed.
+   _test_.py:16: ok(Val(123), 'is not a', Val)
+"""[1:]
+do_test_with(desc, script, expected)
+
+###
 desc = "op 'raises'"
 script = r"""
 from oktest import *
