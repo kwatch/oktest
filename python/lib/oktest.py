@@ -46,10 +46,13 @@ def _re_compile(expected, arg):
     return rexp
 
 
+HANDLERS = {}
+
+
 def ok(actual, op, expected=True, arg=None):
     result = format = message = None
-    if False:
-        pass
+    func = HANDLERS.get(op, None)
+    if func:  return func(actual, op, expected, arg)
     elif op == '==':     result = actual == expected
     elif op == '!=':     result = actual != expected
     elif op == '>' :     result = actual >  expected
