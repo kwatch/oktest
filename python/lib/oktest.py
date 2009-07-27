@@ -223,6 +223,12 @@ def invoke_test(obj, method_name):
     except Exception:
         ex = sys.exc_info()[1]
         stdout.write("[NG] %s\n" % str(ex))
-        #tb = traceback.extract_tb(sys.exc_info()[2])
-        #for filename, linenum, funcname, linetext in tb:
-        #    stdout.write("  %s:%s: %s\n" % (filename, linenum, linetext))
+        if not isinstance(ex, TestFailedError):
+            tb = traceback.extract_tb(sys.exc_info()[2])
+            iter = tb.__iter__()
+            for filename, linenum, funcname, linetext in iter:
+                base = os.path.basename(filename)
+                if base != 'oktest.py' and base != 'oktest.pyc':
+                    break
+            for filename, linenum, funcname, linetext in iter:
+                stdout.write("  - %s:%s: %s\n" % (filename, linenum, linetext))
