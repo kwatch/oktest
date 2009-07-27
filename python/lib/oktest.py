@@ -56,6 +56,7 @@ def _re_compile(expected, arg):
 
 
 HANDLERS = {}
+
 def _handle_text_eq(actual, op, expected, arg):
     if actual == expected:
         return _test_ok(actual, op, expected)
@@ -69,6 +70,38 @@ def _handle_text_eq(actual, op, expected, arg):
         return _test_ng(actual, op, expected, format=format)
 HANDLERS['eq'] = _handle_text_eq
 HANDLERS['=='] = _handle_text_eq
+
+def _handle_raises(actual, op, expected, arg):
+    callable, error_class = actual, expected
+    ex = message = None
+    try:
+        callable()
+    except Exception:
+        ex = sys.exc_info()[1]
+    if ex is None:
+        message = "%s should be raised : failed" % error_class.__name__
+    elif not isinstance(ex, error_class):
+        message = "%s is kind of %s : failed" % (repr(ex), error_class.__name__)
+    elif arg is not None and ex.message != arg:
+        message = "%s == %s : failed" % (repr(ex.message), repr(arg))
+    result = message is None and True or False
+    if result is True:  return _test_ok(actual, op, expected)
+    if result is False: return _test_ng(actual, op, expected, message=message)
+HANDLERS['raises'] = _handle_raises
+
+def _handle_not_raise(actual, op, expected, arg):
+    callable, error_class = actual, expected
+    ex = message = None
+    try:
+        callable()
+    except Exception:
+        ex = sys.exc_info()[1]
+    if ex is not None and isinstance(ex, error_class):
+        message = "%s should not be raised : failed" % error_class.__name__
+    result = message is None and True or False
+    if result is True:  return _test_ok(actual, op, expected)
+    if result is False: return _test_ng(actual, op, expected, message=message)
+HANDLERS['not raise'] = _handle_not_raise
 
 
 def ok(actual, op, expected=True, arg=None):
@@ -87,30 +120,6 @@ def ok(actual, op, expected=True, arg=None):
     elif op == 'is not': result = actual is not expected
     elif op == 'in':     result = actual in expected
     elif op == 'not in': result = actual not in expected
-    elif op == 'raises':
-        ex = None
-        error_class = expected
-        try:
-            actual()
-        except Exception:
-            ex = sys.exc_info()[1]
-        if ex is None:
-            message = "%s should be raised : failed" % error_class.__name__
-        elif not isinstance(ex, error_class):
-            message = "%s is kind of %s : failed" % (repr(ex), error_class.__name__)
-        elif arg is not None and ex.message != arg:
-            message = "%s == %s : failed" % (repr(ex.message), repr(arg))
-        result = message is None and True or False
-    elif op == 'not raise':
-        ex = None
-        error_class = expected
-        try:
-            actual()
-        except Exception:
-            ex = sys.exc_info()[1]
-        if ex is not None and isinstance(ex, error_class):
-            message = "%s should not be raised : failed" % error_class.__name__
-        result = message is None and True or False
     elif isinstance(op, types.FunctionType):
         func = op
         result = func(actual) == expected
