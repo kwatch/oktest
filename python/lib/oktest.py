@@ -10,6 +10,15 @@ __all__ = ('TestFailedError', 'ok', 'invoke_tests')
 
 import sys, os, re, types, traceback
 
+python2 = sys.version_info[0] == 2
+python3 = sys.version_info[0] == 3
+if python2:
+    _unicode = unicode
+    _strtype = (str, unicode)
+if python3:
+    _unicode = str
+    _strtype = (str, bytes)
+
 
 class TestFailedError(Exception):
     pass
@@ -47,12 +56,25 @@ def _re_compile(expected, arg):
 
 
 HANDLERS = {}
+def _handle_text_eq(actual, op, expected, arg):
+    if actual == expected:
+        return _test_ok(actual, op, expected)
+    elif isinstance(actual, _strtype)   and actual.find("\n") > 0 and \
+         isinstance(expected, _strtype) and expected.find("\n") > 0:
+        message = 'texts should be equal : failed\n'
+        message += _text_diff(expected, actual)
+        return _test_ng(actual, op, expected, message=message)
+    else:
+        format = '%s ' + op + ' %s'
+        return _test_ng(actual, op, expected, format=format)
+HANDLERS['eq'] = _handle_text_eq
+HANDLERS['=='] = _handle_text_eq
 
 
 def ok(actual, op, expected=True, arg=None):
     result = format = message = None
     func = HANDLERS.get(op, None)
-    if func:  return func(actual, op, expected, arg)
+    if func: return func(actual, op, expected, arg)
     elif op == '==':     result = actual == expected
     elif op == '!=':     result = actual != expected
     elif op == '>' :     result = actual >  expected
@@ -119,6 +141,34 @@ def _invoke(obj, callable_name):
         return f.__call__(obj)
     else:
         return f.__call__()
+
+
+def _write_file(filename, content, encoding='utf-8'):
+    if encoding is None: encoding = 'utf-8'
+    if isinstance(content, _unicode):
+        content = content.encode(encoding)
+    f = open(filename, 'wb')
+    try:
+        f.write(content)
+    finally:
+        f.close()
+
+
+def _text_diff(text1, text2, encoding='utf-8'):
+    file1, file2 = '.tmp.file1', '.tmp.file2'
+    _write_file(file1, text1, encoding=encoding)
+    _write_file(file2, text2, encoding=encoding)
+    try:
+        f = os.popen("diff -u %s %s" % (file1, file2))
+        try:
+            output = f.read()
+        finally:
+            f.close()
+    finally:
+        os.unlink(file1)
+        os.unlink(file2)
+    mesg = re.sub(r'.*?\n', '', output, 2)
+    return mesg
 
 
 stdout = sys.stdout
