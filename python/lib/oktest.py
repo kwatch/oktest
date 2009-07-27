@@ -20,7 +20,9 @@ if python3:
     _strtype = (str, bytes)
 
 
+##
 ## test failed error
+##
 
 class TestFailedError(Exception):
     pass
@@ -49,7 +51,9 @@ def _err(actual, op, expected, message=None, format=None):
     return ex
 
 
-### handlers
+##
+## handlers
+##
 
 HANDLERS = {}
 
@@ -131,7 +135,9 @@ def _write_file(filename, content, encoding='utf-8'):
         f.close()
 
 
+##
 ## ok()
+##
 
 def ok(actual, op, expected=True, arg=None):
     result = format = message = None
@@ -184,7 +190,9 @@ def _re_compile(expected, arg):
     return rexp
 
 
+##
 ## invoke_tests()
+##
 
 stdout = sys.stdout
 stderr = sys.stderr
