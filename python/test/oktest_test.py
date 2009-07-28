@@ -5,7 +5,10 @@
 ###
 
 import sys, os, re
-from StringIO import StringIO
+try:
+    from StringIO import StringIO    # Python 2.x
+except ImportError:
+    from io import StringIO          # Python 3.x
 if os.path.isdir('lib'):
     sys.path.append('lib')
     os.environ['PYTHONPATH'] ='lib'

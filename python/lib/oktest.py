@@ -15,9 +15,11 @@ python3 = sys.version_info[0] == 3
 if python2:
     _unicode = unicode
     _strtype = (str, unicode)
+    _class_types = (types.TypeType, types.ClassType)
 if python3:
     _unicode = str
     _strtype = (str, bytes)
+    _class_types = (type, )
 
 
 ##
@@ -84,8 +86,8 @@ def _handle_raises(actual, op, expected, arg):
         message = "%s should be raised : failed" % error_class.__name__
     elif not isinstance(ex, error_class):
         message = "%s is kind of %s : failed" % (repr(ex), error_class.__name__)
-    elif arg is not None and ex.message != arg:
-        message = "%s == %s : failed" % (repr(ex.message), repr(arg))
+    elif arg is not None and str(ex) != arg:
+        message = "%s == %s : failed" % (repr(str(ex)), repr(arg))
     result = message is None and True or False
     if result is True:  return _test_ok(actual, op, expected)
     if result is False: return _test_ng(actual, op, expected, message=message)
@@ -244,24 +246,26 @@ def _invoke(obj, callable_name):
     f = getattr(obj, callable_name)
     if not hasattr(f, '__call__'):
         raise TypeError('%s: not a callable.' % callable_name)
-    if isinstance(obj, types.ClassType):
-        return f.__call__(obj)
-    else:
-        return f.__call__()
+    if python2:
+        if isinstance(obj, _class_types):
+            return f(obj)
+        else:
+            return f()
+    elif python3:
+        return f()
 
 
 def _matched_class_objects(*classes):
-    class_types = (types.TypeType, types.ClassType)
     class_objects = []
     for c in classes:
-        if isinstance(c, class_types):
+        if isinstance(c, _class_types):
             class_objects.append(c)
         elif isinstance(c, str):
             rexp = re.compile(c)
             globals = sys._getframe(2).f_globals
             for k in globals:
                 v = globals.get(k)
-                if rexp.search(k) and isinstance(v, class_types):
+                if rexp.search(k) and isinstance(v, _class_types):
                     class_objects.append(v)
         else:
             raise ValueError('%s: expected class object or rexp string.' % repr(c))
