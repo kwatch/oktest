@@ -63,8 +63,8 @@ HANDLERS = {}
 def _handle_text_eq(actual, op, expected, arg):
     if actual == expected:
         return _test_ok(actual, op, expected)
-    elif isinstance(actual, _strtype)   and actual.find("\n") > 0 and \
-         isinstance(expected, _strtype) and expected.find("\n") > 0:
+    elif isinstance(actual, _strtype)   and actual.find("\n") >= 0 and \
+         isinstance(expected, _strtype) and expected.find("\n") >= 0:
         message = 'texts should be equal : failed\n'
         message += _text_diff(expected, actual)
         return _test_ng(actual, op, expected, message=message)
