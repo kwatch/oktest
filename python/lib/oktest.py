@@ -237,6 +237,7 @@ def invoke_test(obj, method_name):
                 base = os.path.basename(filename)
                 if base != 'oktest.py' and base != 'oktest.pyc':
                     break
+            stdout.write(    "  - %s:%s: %s\n" % (filename, linenum, linetext))
             for filename, linenum, funcname, linetext in iter:
                 stdout.write("  - %s:%s: %s\n" % (filename, linenum, linetext))
 
