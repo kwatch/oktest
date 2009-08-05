@@ -246,13 +246,7 @@ def _invoke(obj, callable_name):
     f = getattr(obj, callable_name)
     if not hasattr(f, '__call__'):
         raise TypeError('%s: not a callable.' % callable_name)
-    if python2:
-        if isinstance(obj, _class_types):
-            return f(obj)
-        else:
-            return f()
-    elif python3:
-        return f()
+    return f()
 
 
 def _matched_class_objects(*classes):
