@@ -16,10 +16,15 @@ if python2:
     _unicode = unicode
     _strtype = (str, unicode)
     _class_types = (types.TypeType, types.ClassType)
+    def _func_firstlineno(func):
+        return func.im_func.func_code.co_firstlineno
 if python3:
     _unicode = str
     _strtype = (str, bytes)
     _class_types = (type, )
+    def _func_firstlineno(func):
+        return func.__code__.co_firstlineno
+
 
 
 ##
@@ -206,11 +211,12 @@ def invoke_tests(*classes):
     for cls in class_objects:
         try:
             _invoke(cls, 'before_all')
-            method_names = [ m for m in dir(cls) if m.startswith('test') ]
+            method_tuples = [ (m, getattr(cls, m)) for m in dir(cls) if m.startswith('test') ]
             if target:
-                method_names = [ t for t in method_names if t.find(target) >= 0 ]
-            method_names.sort()
-            for method_name in method_names:
+                method_names = [ t for t in method_tuples if t[0].find(target) >= 0 ]
+            method_tuples.sort(key=lambda t: _func_firstlineno(t[1]))
+            for t in method_tuples:
+                method_name = t[0]
                 obj = cls()
                 obj.name = method_name
                 invoke_test(obj, method_name)

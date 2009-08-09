@@ -201,18 +201,18 @@ class BarTest(object):
 invoke_tests('FooTest', 'BarTest')
 """[1:]
 expected = r"""
-* FooTest.test_ge ... [ok]
 * FooTest.test_gt ... [ok]
-* FooTest.test_le ... [ok]
+* FooTest.test_ge ... [ok]
 * FooTest.test_lt ... [ok]
-* BarTest.test_ge ... [NG] 1 >= 2 : failed.
-   _test_.py:15: ok(1, '>=', 2)
+* FooTest.test_le ... [ok]
 * BarTest.test_gt ... [NG] 2 > 2 : failed.
    _test_.py:13: ok(2, '>', 2)
-* BarTest.test_le ... [NG] 2 <= 1 : failed.
-   _test_.py:19: ok(2, '<=', 1)
+* BarTest.test_ge ... [NG] 1 >= 2 : failed.
+   _test_.py:15: ok(1, '>=', 2)
 * BarTest.test_lt ... [NG] 2 < 2 : failed.
    _test_.py:17: ok(2, '<', 2)
+* BarTest.test_le ... [NG] 2 <= 1 : failed.
+   _test_.py:19: ok(2, '<=', 1)
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -453,9 +453,9 @@ class FooTest(object):
 invoke_tests('FooTest', 'BarTest')
 """[1:]
 expected = r"""
-* FooTest.test_isdir ... [ok]
 * FooTest.test_isfile ... [ok]
-* FooTest.test_isnotdir ... [ok]
+* FooTest.test_isdir ... [ok]
 * FooTest.test_isnotfile ... [ok]
+* FooTest.test_isnotdir ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
