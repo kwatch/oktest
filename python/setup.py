@@ -28,8 +28,8 @@ detail   = (
            )
 license  = 'MIT License'
 platforms = 'any'
-download = 'http://downloads.sourceforge.net/oktest/%s-%s.tar.gz' % (name, version)
-#download = 'http://jaist.dl.sourceforge.net/sourceforge/tenjin/%s-%s.tar.gz' % (name, version)
+#download = 'http://downloads.sourceforge.net/oktest/Oktest-%s.tar.gz' % version
+download = 'http://pypi.python.org/packages/source/O/Oktest/Oktest-%s.tar.gz' % version
 classifiers = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
@@ -37,6 +37,7 @@ classifiers = [
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2.3',
     'Programming Language :: Python :: 2.4',
     'Programming Language :: Python :: 2.5',
     'Programming Language :: Python :: 2.6',
@@ -44,7 +45,7 @@ classifiers = [
     'Programming Language :: Python :: 3.0',
     'Programming Language :: Python :: 3.1',
     'Topic :: Software Development :: Libraries :: Python Modules',
-    'Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries',
+    'Topic :: Software Development :: Testing'
 ]
 
 
