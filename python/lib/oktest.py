@@ -1,273 +1,484 @@
+# -*- coding: utf-8 -*-
+
 ###
-### $Release:$
-### $Copyright$
-### $License$
+### oktest.py -- new style test utility
+###
+### $Release: $
+### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
+### $License: MIT License $
 ###
 
-
-__all__ = ('TestFailedError', 'ok', 'invoke_tests')
-
+__all__ = ('ok', 'run')
 
 import sys, os, re, types, traceback
 
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
 if python2:
-    _unicode = unicode
-    _strtype = (str, unicode)
-    _class_types = (types.TypeType, types.ClassType)
+    def _is_class(obj):
+        return isinstance(obj, (types.TypeType, types.ClassType))
     def _func_firstlineno(func):
         return func.im_func.func_code.co_firstlineno
 if python3:
-    _unicode = str
-    _strtype = (str, bytes)
-    _class_types = (type, )
+    def _is_class(obj):
+        return isinstance(obj, (type, ))
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
 
 
+class TestFailed(AssertionError):
 
-##
-## test failed error
-##
+    def __init__(self, mesg, file=None, line=None):
+        AssertionError.__init__(self, mesg)
+        self.file = file
+        self.line = line
 
-class TestFailedError(Exception):
-    pass
+#class Null(object):
+#    def __str__(self):
+#        return ''
+#    def __repr__(self):
+#        return ''
+#NULL = Null()
 
+def _msg(target, op, other=None):
+    if   op.endswith('()'):   msg = '%r%s'     % (target, op)
+    elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
+    else:                     msg = '%r %s %r' % (target, op, other)
+    return msg
 
-def _err(actual, op, expected, message=None, format=None):
-    if message:
-        pass
-    elif format:
-        message = format % (repr(actual), repr(expected)) + ' : failed.'
-    else:
-        message = '%s %s %s : failed.' % (repr(actual), op, repr(expected))
-    #
-    tuples = traceback.extract_stack(sys._getframe())
-    tuples.reverse()
-    for filepath, linenum, funcname, linetext in tuples:
-        filename = os.path.basename(filepath)
-        if filename != 'oktest.py' and filename != 'oktest.pyc':
-            message = message + "\n   %s:%s: %s" % (filename, linenum, linetext)
-            break
-    #
-    ex = TestFailedError(message)
-    ex.actual   = actual
-    ex.op       = op
-    ex.expected = expected
-    return ex
+def _failed(msg, postfix=' : failed.'):
+    frame = sys._getframe(2)
+    file = frame.f_code.co_filename
+    line = frame.f_lineno
+    if postfix: msg += postfix
+    raise TestFailed(msg, file=file, line=line)
 
 
-##
-## handlers
-##
+class ValueObject(object):
 
-HANDLERS = {}
+    def __init__(self, value):
+        self.value = value
 
+    def __eq__(self, other):
+        if self.value == other:  return True
+        _failed(_msg(self.value, '==', other))
 
-def _handle_text_eq(actual, op, expected, arg):
-    if actual == expected:
-        return _test_ok(actual, op, expected)
-    elif isinstance(actual, _strtype)   and actual.find("\n") >= 0 and \
-         isinstance(expected, _strtype) and expected.find("\n") >= 0:
-        message = 'texts should be equal : failed\n'
-        message += _text_diff(expected, actual)
-        return _test_ng(actual, op, expected, message=message)
-    else:
-        format = '%s ' + op + ' %s'
-        return _test_ng(actual, op, expected, format=format)
-HANDLERS['eq'] = _handle_text_eq
-HANDLERS['=='] = _handle_text_eq
+    def __ne__(self, other):
+        if self.value != other:  return True
+        _failed(_msg(self.value, '!=', other))
 
+    def __gt__(self, other):
+        if self.value > other:  return True
+        _failed(_msg(self.value, '>', other))
 
-def _handle_raises(actual, op, expected, arg):
-    callable, error_class = actual, expected
-    ex = message = None
-    try:
-        callable()
-    except Exception:
-        ex = sys.exc_info()[1]
-    if ex is None:
-        message = "%s should be raised : failed" % error_class.__name__
-    elif not isinstance(ex, error_class):
-        message = "%s is kind of %s : failed" % (repr(ex), error_class.__name__)
-    elif arg is not None and str(ex) != arg:
-        message = "%s == %s : failed" % (repr(str(ex)), repr(arg))
-    result = message is None and True or False
-    if result is True:  return _test_ok(actual, op, expected)
-    if result is False: return _test_ng(actual, op, expected, message=message)
-HANDLERS['raises'] = _handle_raises
+    def __ge__(self, other):
+        if self.value >= other:  return True
+        _failed(_msg(self.value, '>=', other))
 
+    def __lt__(self, other):
+        if self.value < other:  return True
+        _failed(_msg(self.value, '<', other))
 
-def _handle_not_raise(actual, op, expected, arg):
-    callable, error_class = actual, expected
-    ex = message = None
-    try:
-        callable()
-    except Exception:
-        ex = sys.exc_info()[1]
-    if ex is not None and isinstance(ex, error_class):
-        message = "%s should not be raised : failed" % error_class.__name__
-    result = message is None and True or False
-    if result is True:  return _test_ok(actual, op, expected)
-    if result is False: return _test_ng(actual, op, expected, message=message)
-HANDLERS['not raise'] = _handle_not_raise
+    def __le__(self, other):
+        if self.value <= other:  return True
+        _failed(_msg(self.value, '<=', other))
 
+#    def __contains__(self, other):
+#        if self.value in other:  return True
+#        _failed(_msg(self.value, 'in', other))
+    def in_(self, other):
+        if self.value in other:  return True
+        _failed(_msg(self.value, 'in', other))
 
-def _text_diff(text1, text2, encoding='utf-8'):
-    file1, file2 = '.tmp.file1', '.tmp.file2'
-    _write_file(file1, text1, encoding=encoding)
-    _write_file(file2, text2, encoding=encoding)
-    try:
-        f = os.popen("diff -u %s %s" % (file1, file2))
-        try:
-            output = f.read()
-        finally:
-            f.close()
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-    mesg = re.sub(r'.*?\n', '', output, 2)
-    return mesg
+    def not_in(self, other):
+        if self.value not in other:  return True
+        _failed(_msg(self.value, 'not in', other))
 
+    def contains(self, other):
+        if other in self.value:  return True
+        _failed(_msg(other, 'in', self.value))
 
-def _write_file(filename, content, encoding='utf-8'):
-    if encoding is None: encoding = 'utf-8'
-    if isinstance(content, _unicode):
-        content = content.encode(encoding)
-    f = open(filename, 'wb')
-    try:
-        f.write(content)
-    finally:
-        f.close()
+    def not_contain(self, other):
+        if other in self.value:  return True
+        _failed(_msg(other, 'not in', self.value))
 
+    def is_(self, other):
+        if self.value is other:  return True
+        _failed(_msg(self.value, 'is', other))
 
-##
-## ok()
-##
+    def is_not(self, other):
+        if self.value is not other:  return True
+        _failed(_msg(self.value, 'is not', other))
 
-def ok(actual, op, expected=True, arg=None):
-    result = format = message = None
-    func = HANDLERS.get(op, None)
-    if func: return func(actual, op, expected, arg)
-    elif op == '==':     result = actual == expected
-    elif op == '!=':     result = actual != expected
-    elif op == '>' :     result = actual >  expected
-    elif op == '>=':     result = actual >= expected
-    elif op == '<' :     result = actual <  expected
-    elif op == '<=':     result = actual <= expected
-    elif op == '=~':     result = bool(_re_compile(expected, arg).search(actual))
-    elif op == '!~':     result = not  _re_compile(expected, arg).search(actual)
-    elif op == 'is':     result = actual is expected
-    elif op == 'is not': result = actual is not expected
-    elif op == 'in':     result = actual in expected
-    elif op == 'not in': result = actual not in expected
-    elif op == 'is a' or op == 'isinstance':
-        result = isinstance(actual, expected)
-        message = "isinstance(%s, %s) : failed." % (repr(actual), expected.__name__)
-    elif op == 'is not a' or op == 'not isinstance':
-        result = not isinstance(actual, expected)
-        message = "not isinstance(%s, %s) : failed." % (repr(actual), expected.__name__)
-    elif isinstance(op, types.FunctionType):
-        func = op
-        result = func(actual) == expected
-        format = func.__name__ + "(%s) == %s"
-    else:
-        raise ValueError("%s: unknown operator" % repr(op))
-    if format is None: format = "%s " + op + " %s"
-    #
-    if result is True:  return _test_ok(actual, op, expected)
-    if result is False: return _test_ng(actual, op, expected, format=format, message=message)
-    raise Exception("** internal error: result=%s" % repr(result))
+    def is_a(self, other):
+        if isinstance(self.value, other):  return True
+        _failed("isinstance(%r, %s)" % (self.value, other.__name__))
 
+    def is_not_a(self, other):
+        if not isinstance(self.value, other):  return True
+        _failed("not isinstance(%r, %s)" % (self.value, other.__name__))
 
-def _test_ok(actual, op, expected):
-    return True
-
-
-def _test_ng(actual, op, expected, message=None, format=None):
-    raise _err(actual, op, expected, message=message, format=format)
-
-
-def _re_compile(expected, arg):
-    if type(expected) == type(re.compile('')):
-        rexp = expected
-    else:
-        rexp = re.compile(expected, arg or 0)
-    return rexp
-
-
-##
-## invoke_tests()
-##
-
-stdout = sys.stdout
-stderr = sys.stderr
-
-
-def invoke_tests(*classes):
-    class_objects = _matched_class_objects(*classes)
-    target = os.environ.get('TEST', None)
-    for cls in class_objects:
-        try:
-            _invoke(cls, 'before_all')
-            method_tuples = [ (m, getattr(cls, m)) for m in dir(cls) if m.startswith('test') ]
-            if target:
-                method_names = [ t for t in method_tuples if t[0].find(target) >= 0 ]
-            method_tuples.sort(key=lambda t: _func_firstlineno(t[1]))
-            for t in method_tuples:
-                method_name = t[0]
-                obj = cls()
-                obj.name = method_name
-                invoke_test(obj, method_name)
-        finally:
-            _invoke(cls, 'after_all')
-
-
-def invoke_test(obj, method_name):
-    try:
-        stdout.write("* %s.%s ... " % (obj.__class__.__name__, method_name))
-        try:
-            _invoke(obj, 'before_each')
-            _invoke(obj, method_name)
-        finally:
-            _invoke(obj, 'after_each')
-        stdout.write("[ok]\n")
-    except Exception:
-        ex = sys.exc_info()[1]
-        stdout.write("[NG] %s\n" % str(ex))
-        if not isinstance(ex, TestFailedError):
-            tb = traceback.extract_tb(sys.exc_info()[2])
-            iter = tb.__iter__()
-            for filename, linenum, funcname, linetext in iter:
-                base = os.path.basename(filename)
-                if base != 'oktest.py' and base != 'oktest.pyc':
-                    break
-            stdout.write(    "  - %s:%s: %s\n" % (filename, linenum, linetext))
-            for filename, linenum, funcname, linetext in iter:
-                stdout.write("  - %s:%s: %s\n" % (filename, linenum, linetext))
-
-
-def _invoke(obj, callable_name):
-    if not hasattr(obj, callable_name): return None
-    f = getattr(obj, callable_name)
-    if not hasattr(f, '__call__'):
-        raise TypeError('%s: not a callable.' % callable_name)
-    return f()
-
-
-def _matched_class_objects(*classes):
-    class_objects = []
-    for c in classes:
-        if isinstance(c, _class_types):
-            class_objects.append(c)
-        elif isinstance(c, str):
-            rexp = re.compile(c)
-            globals = sys._getframe(2).f_globals
-            for k in globals:
-                v = globals.get(k)
-                if rexp.search(k) and isinstance(v, _class_types):
-                    class_objects.append(v)
+    def matches(self, pattern):
+        if isinstance(pattern, type(re.compile('x'))):
+            if pattern.search(self.value):  return True
+            _failed("re.search(%r, %r)" % (pattern.pattern, self.value))
         else:
-            raise ValueError('%s: expected class object or rexp string.' % repr(c))
-    return class_objects
+            if re.search(pattern, self.value):  return True
+            _failed("re.search(%r, %r)" % (pattern, self.value))
+
+    def not_match(self, pattern):
+        if isinstance(pattern, type(re.compile('x'))):
+            if not pattern.search(self.value):  return True
+            _failed("not re.search(%r, %r)" % (pattern.pattern, self.value))
+        else:
+            if not re.search(pattern, self.value):  return True
+            _failed("not re.search(%r, %r)" % (pattern, self.value))
+
+    def is_file(self):
+        if os.path.isfile(self.value):  return True
+        _failed('os.path.isfile(%r)' % self.value)
+
+    def is_not_file(self):
+        if not os.path.isfile(self.value):  return True
+        _failed('not os.path.isfile(%r)' % self.value)
+
+    def is_dir(self):
+        if os.path.isdir(self.value):  return True
+        _failed('os.path.isdir(%r)' % self.value)
+
+    def is_not_dir(self):
+        if not os.path.isdir(self.value):  return True
+        _failed('not os.path.isdir(%r)' % self.value)
+
+    def exists(self):
+        if os.path.exists(self.value):  return True
+        _failed('os.path.exists(%r)' % self.value)
+
+    def not_exist(self):
+        if not os.path.exists(self.value):  return True
+        _failed('not os.path.exists(%r)' % self.value)
+
+    def raises(self, exception_class, errmsg=None):
+        try:
+            self.value()
+        except:
+            ex = sys.exc_info()[1]
+            if not isinstance(ex, exception_class):
+                _failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__))
+                #raise
+            if errmsg is None or ex.args[0] == errmsg:
+                return
+            #_failed("expected %r but got %r" % (errmsg, ex.message))
+            _failed("%r == %r" % (ex.args[0], errmsg))
+        _failed('%s should be raised' % exception_class.__name__)
+
+    def not_raise(self, exception_class=Exception):
+        try:
+            self.value()
+        except:
+            ex = sys.exc_info()[1]
+            if isinstance(ex, exception_class):
+                _failed('%s should not be raised' % exception_class.__name__)
+
+
+VALUE_OBJECT = ValueObject
+
+
+def ok(value):
+    return VALUE_OBJECT(value)
+
+
+class TestClassRunner(object):
+
+    def __init__(self, klass, reporter=None):
+        self.klass = klass
+        if reporter is None:  reporter = REPORTER()
+        self.reporter = reporter
+
+    def run(self):
+        klass = self.klass
+        reporter = self.reporter
+        ## gather test methods
+        tuples = []   # pairs of method name and function
+        for k in dir(klass):
+            v = getattr(klass, k)
+            if k.startswith('test') and hasattr(v, '__call__'):
+                tuples.append((k, v))
+        ## filer by $TEST environment variable
+        pattern = os.environ.get('TEST')
+        def _test_name(name):
+            return re.sub(r'^test_?', '', name)
+        if pattern:
+            regexp = re.compile(pattern)
+            tuples = [ t for t in tuples if regexp.search(_test_name(t[0])) ]
+        ## sort by linenumber
+        tuples.sort(key=lambda t: _func_firstlineno(t[1]))
+        ## invoke before_all()
+        reporter.before_all(klass)
+        if hasattr(klass, 'before_all'):
+            klass.before_all()
+        ## invoke test methods
+        count = 0
+        for method_name, func in tuples:
+            ## create instance object for each test
+            try:
+                obj = klass()
+            except ValueError:     # unittest.TestCase raises ValueError
+                obj = klass(method_name)
+            obj.__name__ = _test_name(method_name)
+            obj._testMethodName = method_name    # unittest.TestCase compatible
+            obj._testMethodDoc = func.__doc__    # unittest.TestCase compatible
+            ## invoke before_each() or setUp()
+            reporter.before_each(obj)
+            if   hasattr(obj, 'before_each'):  obj.before_each()
+            elif hasattr(obj, 'setUp'):        obj.setUp()
+            try:
+                func(obj)
+                reporter.print_ok(obj)
+            #except TestFailed, ex:
+            except AssertionError, ex:
+                count += 1
+                reporter.print_failed(obj, ex)
+            except Exception, ex:
+                count += 1
+                reporter.print_error(obj, ex)
+            finally:
+                ## invoke before_each() or tearDown()
+                if   hasattr(obj, 'after_each'):  obj.after_each()
+                elif hasattr(obj, 'tearDown'):    obj.tearDown()
+                reporter.after_each(obj)
+        ## invoke after_all()
+        if hasattr(klass, 'after_all'):
+            klass.after_all()
+        reporter.after_all(klass)
+        return count
+
+
+TEST_CLASS_RUNNER = TestClassRunner
+
+
+def run(*classes):
+    class_list = []
+    pat_type = type(re.compile('x'))
+    vars = None
+    for arg in classes:
+        if isinstance(arg, (basestring, pat_type)):
+            pattern = isinstance(arg, pat_type) and arg or re.compile(arg)
+            if vars is None: vars = sys._getframe(1).f_locals
+            class_list.extend( vars[k] for k in vars if pattern.match(k) )
+        elif _is_class(arg):
+            klass = arg
+            class_list.append(klass)
+        else:
+            raise Exception("%r: not a class nor pattern string." % arg)
+    #
+    count = 0
+    for klass in class_list:
+        runner = TEST_CLASS_RUNNER(klass, REPORTER())
+        count += runner.run()
+    return count
+
+
+OUT = sys.stdout
+
+
+class Reporter(object):
+
+    def before_all(self, klass):
+        pass
+
+    def after_all(self, klass):
+        pass
+
+    def before_each(self, obj):
+        pass
+
+    def after_each(self, obj):
+        pass
+
+    def print_ok(self, obj):
+        pass
+
+    def print_failed(self, obj, ex):
+        pass
+
+    def print_error(self, obj, ex):
+        pass
+
+
+class BaseReporter(Reporter):
+
+    def before_all(self, klass):
+        self.klass = klass
+
+    def _test_ident(self, obj):
+        return '%s#%s' % (self.klass.__name__, obj._testMethodName)
+
+    def _get_line_text(self, file, line):
+        if not hasattr(self, '_lines'):
+            self._lines = {}
+        if file not in self._lines:
+            f = open(file)
+            s = f.read()
+            f.close()
+            self._lines[file] = s.splitlines(True)
+        return self._lines[file][line-1]
+
+    def _get_location(self, ex):
+        if hasattr(ex, 'file') and hasattr(ex, 'line'):
+            text = self._get_line_text(ex.file, ex.line).strip()
+            return (ex.file, ex.line, text)
+        else:
+            tb = traceback.extract_tb(sys.exc_info()[2])
+            for file, line, func, text in tb:
+                if os.path.basename(file) not in ('oktest.py', 'oktest.pyc'):
+                    return (file, line, text)
+            return (None, None, None)
+
+
+## NOTICE! reporter spec will be changed frequently
+class SimpleReporter(BaseReporter):
+
+    def before_all(self, klass):
+        self.klass = klass
+        OUT.write("### %s\n" % klass.__name__)
+        self.buf = []
+
+    def after_all(self, klass):
+        OUT.write("\n")
+        OUT.write("".join(self.buf))
+
+    def print_ok(self, obj):
+        OUT.write(".")
+
+    def print_failed(self, obj, ex):
+        OUT.write("f")
+        self.buf.append("Failed: %s()\n" % self._test_ident(obj))
+        self.buf.append("   %s\n" % ex.args[0])
+        file, line, text = self._get_location(ex)
+        if file:
+            self.buf.append("   %s:%s:  %s\n" % (file, line, text))
+
+    def print_error(self, obj, ex):
+        OUT.write('E')
+        self.buf.append("ERROR: %s()\n" % self._test_ident(obj))
+        self.buf.append("  %s: %s\n" % (ex.__class__.__name__, str(ex)))
+        #traceback.print_exc(file=sys.stdout)
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
+                break
+        self.buf.append(    "  - %s:%s:  %s\n" % (filename, linenum, linetext))
+        for filename, linenum, funcname, linetext in iter:
+            self.buf.append("  - %s:%s:  %s\n" % (filename, linenum, linetext))
+        tb = iter = None
+
+
+## NOTICE! reporter spec will be changed frequently
+class OldStyleReporter(BaseReporter):
+
+    def before_all(self, klass):
+        self.klass = klass
+
+    def after_all(self, klass):
+        pass
+
+    def _test_ident(self, obj):
+        return '%s.%s' % (self.klass.__name__, obj._testMethodName)
+
+    def before_each(self, obj):
+        OUT.write("* %s ... " % self._test_ident(obj))
+
+    def print_ok(self, obj):
+        OUT.write("[ok]\n")
+
+    def print_failed(self, obj, ex):
+        OUT.write("[NG] %s\n" % ex.args[0])
+        file, line, text = self._get_location(ex)
+        if file:
+            OUT.write("   %s:%s: %s\n" % (file, line, text))
+
+    def print_error(self, obj, ex):
+        OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, str(ex)))
+        #traceback.print_exc(file=sys.stdout)
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
+                break
+        OUT.write(    "  - %s:%s:  %s\n" % (filename, linenum, linetext))
+        for filename, linenum, funcname, linetext in iter:
+            OUT.write("  - %s:%s:  %s\n" % (filename, linenum, linetext))
+        tb = iter = None
+
+
+## NOTICE! reporter spec will be changed frequently
+class TapStyleReporter(BaseReporter):
+
+    def before_all(self, klass):
+        self.klass = klass
+        OUT.write("### %s\n" % klass.__name__)
+
+    def after_all(self, klass):
+        OUT.write("\n")
+
+    def print_ok(self, obj):
+        OUT.write("ok     # %s\n" % self._test_ident(obj))
+
+    def print_failed(self, obj, ex):
+        OUT.write("not ok # %s\n" % self._test_ident(obj))
+        OUT.write("   #  %s\n" % ex.args[0])
+        file, line, text = self._get_location(ex)
+        if file:
+            OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
+
+    def print_error(self, obj, ex):
+        OUT.write("ERROR  # %s\n" % self._test_ident(obj))
+        OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, str(ex)))
+        #traceback.print_exc(file=sys.stdout)
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for file, line, func, text in iter:
+            if os.path.basename(file) not in ('oktest.py', 'oktest.pyc'):
+                break
+        OUT.write(    "   #  %s:%s:  %s" % (file, line, text))
+        for filename, linenum, funcname, linetext in iter:
+            OUT.write("   #  %s:%s:  %s" % (file, line, text))
+        tb = iter = None
+
+
+REPORTER = SimpleReporter
+#REPORTER = OldStyleReporter
+#REPORTER = TapStyleReporter
+if os.environ.get('OKTEST_REPORTER'):
+    REPORTER = globals().get(os.environ.get('OKTEST_REPORTER'))
+    if not REPORTER:
+        raise ValueError("%s: reporter class not found." % os.environ.get('OKTEST_REPORTER'))
+
+
+if __name__ == '__main__':
+
+    class MyTest(object):
+        def before_each(self):
+            self.L = [10, 20, 30]
+        def test_ex1(self):
+            ok (len(self.L)) == 3
+            ok (sum(self.L)) == 60
+        def test_ex2(self):
+            ok (self.L[-1]) > 31
+
+    run(MyTest)
+
+    import unittest
+    class MyTestCase(unittest.TestCase):
+        def setUp(self):
+            self.L = [10, 20, 30]
+        def test_ex1(self):
+            ok (len(self.L)) == 3
+            ok (sum(self.L)) == 60
+        def test_ex2(self):
+            ok (self.L[-1]) > 31
+
+    #unittest.main()
+    run(MyTestCase)
