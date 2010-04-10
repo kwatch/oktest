@@ -435,7 +435,7 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 ###
-desc = "op function"
+desc = "op 'is_file', 'is_dir'"
 script = r"""
 from oktest import *
 import os
@@ -466,6 +466,43 @@ expected = r"""
 * FooTest.test_isnotdir ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
+
+###
+desc = "op 'not_ok'"
+script = r"""
+from oktest import *
+import os
+class FooTest(object):
+    def before_all(cls):
+        open('foobar.txt', 'w').write('foobar')
+        os.mkdir('foobar.d')
+    before_all = classmethod(before_all)
+    def after_all(cls):
+        os.unlink('foobar.txt')
+        os.rmdir('foobar.d')
+    after_all = classmethod(after_all)
+    #
+    def test_isfile(self):
+        not_ok ("xxxxxx.txt").is_file()
+        not_ok ("foobar.d").is_file()
+        not_ok ("foobar.txt").is_not_file()
+    def test_isdir(self):
+        not_ok ("xxxxxx.d").is_dir()
+        not_ok ("foobar.txt").is_dir()
+        not_ok ("foobar.d").is_not_dir()
+    def test_matches(self):
+        not_ok ("foobar").matches("\d+")
+        not_ok ("123").not_match("\d+")
+run('FooTest', 'BarTest')
+"""[1:]
+expected = r"""
+* FooTest.test_isfile ... [ok]
+* FooTest.test_isdir ... [ok]
+* FooTest.test_matches ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+
 
 
 ### dummy_file (with with-statement)

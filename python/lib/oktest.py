@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'run', 'dummy_file', 'dummy_dir', 'chdir')
+__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'chdir')
 
 import sys, os, re, types, traceback
 
@@ -40,139 +40,153 @@ def _msg(target, op, other=None):
     else:                     msg = '%r %s %r' % (target, op, other)
     return msg
 
-def _failed(msg, postfix=' : failed.'):
-    frame = sys._getframe(2)
-    file = frame.f_code.co_filename
-    line = frame.f_lineno
-    if postfix: msg += postfix
-    raise TestFailed(msg, file=file, line=line)
-
 
 class ValueObject(object):
 
     def __init__(self, value):
         self.value = value
+        self._bool = True
+
+    #def not_(self):
+    #    self._bool = not self._bool
+    #    return self
+
+    def _failed(self, msg, postfix=' : failed.', depth=2):
+        frame = sys._getframe(depth)
+        file = frame.f_code.co_filename
+        line = frame.f_lineno
+        if self._bool == False:
+            msg = 'not ' + msg
+        if postfix:
+            msg += postfix
+        raise TestFailed(msg, file=file, line=line)
 
     def __eq__(self, other):
-        if self.value == other:  return True
-        _failed(_msg(self.value, '==', other))
+        if (self.value == other) == self._bool:  return True
+        self._failed(_msg(self.value, '==', other))
 
     def __ne__(self, other):
-        if self.value != other:  return True
-        _failed(_msg(self.value, '!=', other))
+        if (self.value != other) == self._bool:  return True
+        self._failed(_msg(self.value, '!=', other))
 
     def __gt__(self, other):
-        if self.value > other:  return True
-        _failed(_msg(self.value, '>', other))
+        if (self.value > other) == self._bool:  return True
+        self._failed(_msg(self.value, '>', other))
 
     def __ge__(self, other):
-        if self.value >= other:  return True
-        _failed(_msg(self.value, '>=', other))
+        if (self.value >= other) == self._bool:  return True
+        self._failed(_msg(self.value, '>=', other))
 
     def __lt__(self, other):
-        if self.value < other:  return True
-        _failed(_msg(self.value, '<', other))
+        if (self.value < other) == self._bool:  return True
+        self._failed(_msg(self.value, '<', other))
 
     def __le__(self, other):
-        if self.value <= other:  return True
-        _failed(_msg(self.value, '<=', other))
+        if (self.value <= other) == self._bool:  return True
+        self._failed(_msg(self.value, '<=', other))
 
 #    def __contains__(self, other):
-#        if self.value in other:  return True
-#        _failed(_msg(self.value, 'in', other))
+#        if (self.value in other) == self._bool:  return True
+#        self._failed(_msg(self.value, 'in', other))
     def in_(self, other):
-        if self.value in other:  return True
-        _failed(_msg(self.value, 'in', other))
+        if (self.value in other) == self._bool:  return True
+        self._failed(_msg(self.value, 'in', other))
 
     def not_in(self, other):
-        if self.value not in other:  return True
-        _failed(_msg(self.value, 'not in', other))
+        if (self.value not in other) == self._bool:  return True
+        self._failed(_msg(self.value, 'not in', other))
 
     def contains(self, other):
-        if other in self.value:  return True
-        _failed(_msg(other, 'in', self.value))
+        if (other in self.value) == self._bool:  return True
+        self._failed(_msg(other, 'in', self.value))
 
     def not_contain(self, other):
-        if other in self.value:  return True
-        _failed(_msg(other, 'not in', self.value))
+        if (other in self.value) == self._bool:  return True
+        self._failed(_msg(other, 'not in', self.value))
 
     def is_(self, other):
-        if self.value is other:  return True
-        _failed(_msg(self.value, 'is', other))
+        if (self.value is other) == self._bool:  return True
+        self._failed(_msg(self.value, 'is', other))
 
     def is_not(self, other):
-        if self.value is not other:  return True
-        _failed(_msg(self.value, 'is not', other))
+        if (self.value is not other) == self._bool:  return True
+        self._failed(_msg(self.value, 'is not', other))
 
     def is_a(self, other):
-        if isinstance(self.value, other):  return True
-        _failed("isinstance(%r, %s)" % (self.value, other.__name__))
+        if (isinstance(self.value, other)) == self._bool:  return True
+        self._failed("isinstance(%r, %s)" % (self.value, other.__name__))
 
     def is_not_a(self, other):
-        if not isinstance(self.value, other):  return True
-        _failed("not isinstance(%r, %s)" % (self.value, other.__name__))
+        if (not isinstance(self.value, other)) == self._bool:  return True
+        self._failed("not isinstance(%r, %s)" % (self.value, other.__name__))
 
     def matches(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
-            if pattern.search(self.value):  return True
-            _failed("re.search(%r, %r)" % (pattern.pattern, self.value))
+            if bool(pattern.search(self.value)) == self._bool:  return True
+            self._failed("re.search(%r, %r)" % (pattern.pattern, self.value))
         else:
-            if re.search(pattern, self.value):  return True
-            _failed("re.search(%r, %r)" % (pattern, self.value))
+            if bool(re.search(pattern, self.value)) == self._bool:  return True
+            self._failed("re.search(%r, %r)" % (pattern, self.value))
 
     def not_match(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
-            if not pattern.search(self.value):  return True
-            _failed("not re.search(%r, %r)" % (pattern.pattern, self.value))
+            if (not pattern.search(self.value)) == self._bool:  return True
+            self._failed("not re.search(%r, %r)" % (pattern.pattern, self.value))
         else:
-            if not re.search(pattern, self.value):  return True
-            _failed("not re.search(%r, %r)" % (pattern, self.value))
+            if (not re.search(pattern, self.value)) == self._bool:  return True
+            self._failed("not re.search(%r, %r)" % (pattern, self.value))
 
     def is_file(self):
-        if os.path.isfile(self.value):  return True
-        _failed('os.path.isfile(%r)' % self.value)
+        if (os.path.isfile(self.value)) == self._bool:  return True
+        self._failed('os.path.isfile(%r)' % self.value)
 
     def is_not_file(self):
-        if not os.path.isfile(self.value):  return True
-        _failed('not os.path.isfile(%r)' % self.value)
+        if (not os.path.isfile(self.value)) == self._bool:  return True
+        self._failed('not os.path.isfile(%r)' % self.value)
 
     def is_dir(self):
-        if os.path.isdir(self.value):  return True
-        _failed('os.path.isdir(%r)' % self.value)
+        if (os.path.isdir(self.value)) == self._bool:  return True
+        self._failed('os.path.isdir(%r)' % self.value)
 
     def is_not_dir(self):
-        if not os.path.isdir(self.value):  return True
-        _failed('not os.path.isdir(%r)' % self.value)
+        if (not os.path.isdir(self.value)) == self._bool:  return True
+        self._failed('not os.path.isdir(%r)' % self.value)
 
     def exists(self):
-        if os.path.exists(self.value):  return True
-        _failed('os.path.exists(%r)' % self.value)
+        if (os.path.exists(self.value)) == self._bool:  return True
+        self._failed('os.path.exists(%r)' % self.value)
 
     def not_exist(self):
-        if not os.path.exists(self.value):  return True
-        _failed('not os.path.exists(%r)' % self.value)
+        if (not os.path.exists(self.value)) == self._bool:  return True
+        self._failed('not os.path.exists(%r)' % self.value)
 
     def raises(self, exception_class, errmsg=None):
-        try:
-            self.value()
-        except:
-            ex = sys.exc_info()[1]
-            if not isinstance(ex, exception_class):
-                _failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__))
-                #raise
-            if errmsg is None or ex.args[0] == errmsg:
-                return
-            #_failed("expected %r but got %r" % (errmsg, ex.message))
-            _failed("%r == %r" % (ex.args[0], errmsg))
-        _failed('%s should be raised' % exception_class.__name__)
+        return self._raise_or_not(exception_class, errmsg, self._bool)
 
     def not_raise(self, exception_class=Exception):
-        try:
-            self.value()
-        except:
-            ex = sys.exc_info()[1]
-            if isinstance(ex, exception_class):
-                _failed('%s should not be raised' % exception_class.__name__)
+        return self._raise_or_not(exception_class, None, not self._bool)
+
+    def _raise_or_not(self, exception_class, errmsg, flag_raise):
+        if flag_raise:
+            try:
+                self.value()
+            except:
+                ex = sys.exc_info()[1]
+                if not isinstance(ex, exception_class):
+                    self._failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
+                    #raise
+                if errmsg is None or ex.args[0] == errmsg:
+                    return
+                #self._failed("expected %r but got %r" % (errmsg, ex.message))
+                self._failed("%r == %r" % (ex.args[0], errmsg), depth=3)
+            self._failed('%s should be raised' % exception_class.__name__, depth=3)
+        else:
+            try:
+                self.value()
+            except:
+                ex = sys.exc_info()[1]
+                if isinstance(ex, exception_class):
+                    self._failed('%s should not be raised' % exception_class.__name__, depth=3)
 
 
 VALUE_OBJECT = ValueObject
@@ -180,6 +194,11 @@ VALUE_OBJECT = ValueObject
 
 def ok(value):
     return VALUE_OBJECT(value)
+
+def not_ok(value):
+    v = ok(value)
+    v._bool = False
+    return v
 
 
 class TestClassRunner(object):
