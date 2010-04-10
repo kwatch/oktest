@@ -41,6 +41,10 @@ def _msg(target, op, other=None):
     return msg
 
 
+def deprecated(f):
+    return f
+
+
 class ValueObject(object):
 
     def __init__(self, value):
@@ -92,6 +96,7 @@ class ValueObject(object):
         if (self.value in other) == self._bool:  return True
         self._failed(_msg(self.value, 'in', other))
 
+    @deprecated
     def not_in(self, other):
         if (self.value not in other) == self._bool:  return True
         self._failed(_msg(self.value, 'not in', other))
@@ -100,6 +105,7 @@ class ValueObject(object):
         if (other in self.value) == self._bool:  return True
         self._failed(_msg(other, 'in', self.value))
 
+    @deprecated
     def not_contain(self, other):
         if (other in self.value) == self._bool:  return True
         self._failed(_msg(other, 'not in', self.value))
@@ -116,6 +122,7 @@ class ValueObject(object):
         if (isinstance(self.value, other)) == self._bool:  return True
         self._failed("isinstance(%r, %s)" % (self.value, other.__name__))
 
+    @deprecated
     def is_not_a(self, other):
         if (not isinstance(self.value, other)) == self._bool:  return True
         self._failed("not isinstance(%r, %s)" % (self.value, other.__name__))
@@ -128,6 +135,7 @@ class ValueObject(object):
             if bool(re.search(pattern, self.value)) == self._bool:  return True
             self._failed("re.search(%r, %r)" % (pattern, self.value))
 
+    @deprecated
     def not_match(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
             if (not pattern.search(self.value)) == self._bool:  return True
@@ -140,6 +148,7 @@ class ValueObject(object):
         if (os.path.isfile(self.value)) == self._bool:  return True
         self._failed('os.path.isfile(%r)' % self.value)
 
+    @deprecated
     def is_not_file(self):
         if (not os.path.isfile(self.value)) == self._bool:  return True
         self._failed('not os.path.isfile(%r)' % self.value)
@@ -148,6 +157,7 @@ class ValueObject(object):
         if (os.path.isdir(self.value)) == self._bool:  return True
         self._failed('os.path.isdir(%r)' % self.value)
 
+    @deprecated
     def is_not_dir(self):
         if (not os.path.isdir(self.value)) == self._bool:  return True
         self._failed('not os.path.isdir(%r)' % self.value)
@@ -156,6 +166,7 @@ class ValueObject(object):
         if (os.path.exists(self.value)) == self._bool:  return True
         self._failed('os.path.exists(%r)' % self.value)
 
+    @deprecated
     def not_exist(self):
         if (not os.path.exists(self.value)) == self._bool:  return True
         self._failed('not os.path.exists(%r)' % self.value)
@@ -163,6 +174,7 @@ class ValueObject(object):
     def raises(self, exception_class, errmsg=None):
         return self._raise_or_not(exception_class, errmsg, self._bool)
 
+    @deprecated
     def not_raise(self, exception_class=Exception):
         return self._raise_or_not(exception_class, None, not self._bool)
 
