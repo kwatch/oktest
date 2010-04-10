@@ -19,7 +19,7 @@ Oktest is a new-style testing library for Python.
     ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))
     not_ok (u'foo').is_a(int)  # same as assert_(not isinstance(u'foo', int))
     ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
-    not_ok ('A.txt').is_file() # same as assert_(not os.path.isfile('A.txt'))
+    not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
 
 You can use ok() instead of 'assertXxx()' in unittest.
 
@@ -139,10 +139,10 @@ Reference
 :ok (func).raises(error_class[, errmsg=None]):
 	Raise AssertionError unless func() raises error_class.
 
-:not_ok (val)
+:not_ok (val):
 	Opposite of ok(val). For example, 'not_ok ("foo").matches(r'\d+')' is True.
 
-:run(*classes):
+:run(\*classes):
 	Invokes tests of each class.
 	Argument can be regular expression string.
 	For example, run(r'.*Test$') invokes tests of Example1Test, Example2Test, and so on.
