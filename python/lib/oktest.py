@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'run')
+__all__ = ('ok', 'run', 'dummy_file', 'dummy_dir', 'chdir')
 
 import sys, os, re, types, traceback
 
@@ -33,12 +33,6 @@ class TestFailed(AssertionError):
         self.file = file
         self.line = line
 
-#class Null(object):
-#    def __str__(self):
-#        return ''
-#    def __repr__(self):
-#        return ''
-#NULL = Null()
 
 def _msg(target, op, other=None):
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
@@ -282,6 +276,10 @@ def run(*classes):
 OUT = sys.stdout
 
 
+##
+## Reporter
+##
+
 class Reporter(object):
 
     def before_all(self, klass):
@@ -455,6 +453,85 @@ if os.environ.get('OKTEST_REPORTER'):
     REPORTER = globals().get(os.environ.get('OKTEST_REPORTER'))
     if not REPORTER:
         raise ValueError("%s: reporter class not found." % os.environ.get('OKTEST_REPORTER'))
+
+
+##
+## helpers
+##
+
+class _Context(object):
+
+    def __enter__(self, *args):
+        return self
+
+    def __exit__(self, *args):
+        return self
+
+    def __call__(self, func, *args):
+        self.__enter__()
+        try:
+            func(*args)
+        finally:
+            self.__exit__()
+
+
+class DummyFile(_Context):
+
+    def __init__(self, filename, content):
+        self.filename = filename
+        self.path     = os.path.abspath(filename)
+        self.content  = content
+
+    def __enter__(self, *args):
+        f = open(self.path, 'w')
+        try:
+            f.write(self.content)
+        finally:
+            f.close()
+        return self
+
+    def __exit__(self, *args):
+        os.unlink(self.path)
+
+
+class DummyDir(_Context):
+
+    def __init__(self, dirname):
+        self.dirname = dirname
+        self.path    = os.path.abspath(dirname)
+
+    def __enter__(self, *args):
+        os.mkdir(self.path)
+        return self
+
+    def __exit__(self, *args):
+        import shutil
+        shutil.rmtree(self.path)
+
+
+class Chdir(_Context):
+
+    def __init__(self, dirname):
+        self.dirname = dirname
+        self.path    = os.path.abspath(dirname)
+        self.back_to = os.getcwd()
+
+    def __enter__(self, *args):
+        os.chdir(self.path)
+        return self
+
+    def __exit__(self, *args):
+        os.chdir(self.back_to)
+
+
+def dummy_file(filename, content):
+    return DummyFile(filename, content)
+
+def dummy_dir(dirname):
+    return DummyDir(dirname)
+
+def chdir(path):
+    return Chdir(path)
 
 
 if __name__ == '__main__':

@@ -3,12 +3,18 @@
 ### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
+from __future__ import with_statement
 
 import sys, os, re
-try:
-    from StringIO import StringIO    # Python 2.x
-except ImportError:
-    from io import StringIO          # Python 3.x
+python2 = sys.version_info[0] == 2
+python3 = sys.version_info[0] == 3
+if python2:
+    from StringIO import StringIO
+    with_statement_supported = sys.version_info[1] >= 5
+if python3:
+    from io import StringIO
+    with_statement_supported = True
+
 for path in ['lib', '../lib']:
     if os.path.isdir(path):
         sys.path.append(path)
@@ -459,4 +465,115 @@ expected = r"""
 * FooTest.test_isnotfile ... [ok]
 * FooTest.test_isnotdir ... [ok]
 """[1:]
+do_test_with(desc, script, expected)
+
+
+### dummy_file (with with-statement)
+desc = "dummy_file (with with-statement)"
+script = r"""
+from __future__ import with_statement
+from oktest import *
+class FooTest(object):
+    def test_dummy_file(self):
+        with dummy_file('_dummy_.txt', 'hogehoge') as f:
+            ok (f.filename) == '_dummy_.txt'
+            ok (f.filename).is_file()
+            ok (open(f.filename).read()) == 'hogehoge'
+        ok (f.filename).not_exist()
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_file ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### dummy_file (without with-statement)
+desc = "dummy_file (without with-statement)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_dummy_file2(self):
+        filename = '_dummy_.txt'
+        def f():
+            ok (filename).is_file()
+            ok (open(filename).read()) == 'hogehoge'
+        dummy_file(filename, 'hogehoge')(f)
+        ok (filename).not_exist()
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_file2 ... [ok]\n"
+do_test_with(desc, script, expected)
+
+### dummy_dir (with with-statement)
+desc = "dummy_dir (with with-statement)"
+script = r"""
+from __future__ import with_statement
+from oktest import *
+class FooTest(object):
+    def test_dummy_dir(self):
+        with dummy_dir('_dummy_.d') as d:
+            ok (d.dirname) == '_dummy_.d'
+            ok (d.dirname).is_dir()
+        ok (d.dirname).not_exist()
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_dir ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### dummy_dir (without with-statement)
+desc = "dummy_dir (without with-statement)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_dummy_dir2(self):
+        dirname = '_dummy_.d'
+        def f():
+            ok (dirname).is_dir()
+        dummy_dir(dirname)(f)
+        ok (dirname).not_exist()
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_dir2 ... [ok]\n"
+do_test_with(desc, script, expected)
+
+### chdir (with with-statement)
+desc = "chdir (with with-statement)"
+script = r"""
+from __future__ import with_statement
+import os
+from oktest import *
+class FooTest(object):
+    def test_chdir(self):
+        with dummy_dir('_dummy_.d'):
+            pwd = os.getcwd()
+            with chdir('_dummy_.d') as d:
+                ok (d.dirname) == '_dummy_.d'
+                ok (os.getcwd()) != pwd
+                ok (os.getcwd()) == os.path.join(pwd, '_dummy_.d')
+            ok (os.getcwd()) == pwd
+run(FooTest)
+"""
+expected = "* FooTest.test_chdir ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### chdir (without with-statement)
+desc = "chdir (without with-statement)"
+script = r"""
+import os
+from oktest import *
+class FooTest(object):
+    def test_chdir2(self):
+        def f():
+            pwd = os.getcwd()
+            def g():
+                ok (os.path.basename(os.getcwd())) == '_dummy_.d'
+                ok (os.getcwd()) != pwd
+                ok (os.getcwd()) == os.path.join(pwd, '_dummy_.d')
+            chdir('_dummy_.d')(g)
+            ok (os.getcwd()) == pwd
+        dummy_dir('_dummy_.d')(f)
+run(FooTest)
+"""
+expected = "* FooTest.test_chdir2 ... [ok]\n"
 do_test_with(desc, script, expected)
