@@ -262,17 +262,18 @@ class TestClassRunner(object):
             if   hasattr(obj, 'before_each'):  obj.before_each()
             elif hasattr(obj, 'setUp'):        obj.setUp()
             try:
-                func(obj)
-                reporter.print_ok(obj)
-            #except TestFailed, ex:
-            except AssertionError:
-                ex = sys.exc_info()[1]
-                count += 1
-                reporter.print_failed(obj, ex)
-            except Exception:
-                ex = sys.exc_info()[1]
-                count += 1
-                reporter.print_error(obj, ex)
+                try:
+                    func(obj)
+                    reporter.print_ok(obj)
+                #except TestFailed, ex:
+                except AssertionError:
+                    ex = sys.exc_info()[1]
+                    count += 1
+                    reporter.print_failed(obj, ex)
+                except Exception:
+                    ex = sys.exc_info()[1]
+                    count += 1
+                    reporter.print_error(obj, ex)
             finally:
                 ## invoke before_each() or tearDown()
                 if   hasattr(obj, 'after_each'):  obj.after_each()
