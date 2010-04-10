@@ -23,7 +23,7 @@ Oktest is a new-style testing library for Python.
 
 You can use ok() instead of 'assertXxx()' in unittest.
 
-Oktest requires Python 2.4 or later. Oktest is ready for Python 3.
+Oktest requires Python 2.3 or later. Oktest is ready for Python 3.
 
 NOTICE!! Oktest is a young project and specification may change in the future.
 
