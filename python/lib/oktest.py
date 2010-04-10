@@ -15,11 +15,15 @@ import sys, os, re, types, traceback
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
 if python2:
+    def _is_string(val):
+        return isinstance(val, (str, unicode))
     def _is_class(obj):
         return isinstance(obj, (types.TypeType, types.ClassType))
     def _func_firstlineno(func):
         return func.im_func.func_code.co_firstlineno
 if python3:
+    def _is_string(val):
+        return isinstance(val, (str, bytes))
     def _is_class(obj):
         return isinstance(obj, (type, ))
     def _func_firstlineno(func):
@@ -261,10 +265,12 @@ class TestClassRunner(object):
                 func(obj)
                 reporter.print_ok(obj)
             #except TestFailed, ex:
-            except AssertionError, ex:
+            except AssertionError:
+                ex = sys.exc_info()[1]
                 count += 1
                 reporter.print_failed(obj, ex)
-            except Exception, ex:
+            except Exception:
+                ex = sys.exc_info()[1]
                 count += 1
                 reporter.print_error(obj, ex)
             finally:
@@ -287,7 +293,7 @@ def run(*classes):
     pat_type = type(re.compile('x'))
     vars = None
     for arg in classes:
-        if isinstance(arg, (basestring, pat_type)):
+        if _is_string(arg) or isinstance(arg, pat_type):
             pattern = isinstance(arg, pat_type) and arg or re.compile(arg)
             if vars is None: vars = sys._getframe(1).f_locals
             class_list.extend( vars[k] for k in vars if pattern.match(k) )
