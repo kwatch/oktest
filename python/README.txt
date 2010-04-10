@@ -16,8 +16,10 @@ Oktest is a new-style testing library for Python.
     ok (s) == 'foo'            # same as assertEqual(s, 'foo')
     ok (s) != 'foo'            # same as assertNotEqual(s, 'foo')
     ok (f).raises(ValueError)  # same as assertRaises(ValueError, f)
-    ok ('file.txt').is_file()  # same as assert_(os.path.isfile('file.txt'))
-    ok (u'123').is_a(unicode)  # same as assert_(isinstance(u'123', unicode))
+    ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))
+    not_ok (u'foo').is_a(int)  # same as assert_(not isinstance(u'foo', int))
+    ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
+    not_ok ('A.txt').is_file() # same as assert_(not os.path.isfile('A.txt'))
 
 You can use ok() instead of 'assertXxx()' in unittest.
 
@@ -109,14 +111,8 @@ Reference
 :ok (val1).in_(val2):
 	Raise AssertionError unless val in val2.
 
-:ok (val1).not_in(val2):
-	Raise AssertionError unless val not in val2.
-
 :ok (val1).contains(val2):
-	Raise AssertionError unless va2 in val1.
-
-:ok (val1).contains(val2):
-	Raise AssertionError unless va2 not in val1.
+	Raise AssertionError unless va2 in val1. This is opposite of in_().
 
 :ok (val1).is_(val2):
 	Raise AssertionError unless va2 is val1.
@@ -127,40 +123,24 @@ Reference
 :ok (val1).is_a(val2):
 	Raise AssertionError unless isinstance(val1, val2).
 
-:ok (val1).is_not_a(val2):
-	Raise AssertionError if isinstance(val1, val2).
-
 :ok (val1).matches(val2):
 	If val2 is a string, raise AssertionError unless re.search(val2, val1).
 	If val2 is a re.Pattern object, raise AssertionError unless val2.search(val1).
 
-:ok (val1).not_match(val2):
-	If val2 is a string, raise AssertionError if re.search(val2, val1).
-	If val2 is a re.Pattern object, raise AssertionError if val2.search(val1).
-
 :ok (path).is_file():
 	Raise AssertionError unless os.path.isfile(path).
-
-:ok (path).is_not_file():
-	Raise AssertionError if os.path.isfile(path).
 
 :ok (path).is_dir():
 	Raise AssertionError unless os.path.isdir(path).
 
-:ok (path).is_not_dir():
-	Raise AssertionError if os.path.isdir(path).
-
 :ok (path).exists():
 	Raise AssertionError unless os.path.exists(path).
-
-:ok (path).not_exist():
-	Raise AssertionError if os.path.exists(path).
 
 :ok (func).raises(error_class[, errmsg=None]):
 	Raise AssertionError unless func() raises error_class.
 
-:ok (func).not_raise(error_class):
-	Raise AssertionError if func() raises error_class.
+:not_ok (val)
+	Opposite of ok(val). For example, 'not_ok ("foo").matches(r'\d+')' is True.
 
 :run(*classes):
 	Invokes tests of each class.
