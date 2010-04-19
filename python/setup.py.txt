@@ -21,7 +21,7 @@ author   = 'makoto kuwata'
 email    = 'kwa@kuwata-lab.com'
 maintainer = author
 maintainer_email = email
-url      = 'http://www.kuwata-lab.com/oktest/'
+url      = 'http://pypi.python.org/pypi'
 desc     = 'a new-style testing library'
 detail   = (
            'Oktest is a new-style testing library.\n'

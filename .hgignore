@@ -4,3 +4,4 @@ syntax:glob
 *.pyc
 dist/*
 tmp/*
+archives/*

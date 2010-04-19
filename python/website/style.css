@@ -1,0 +1,68 @@
+
+body {
+	Xbackground: #6C6;
+	background: #323232;
+	font-size: 100%;
+	line-height: 150%;
+	color: #444;
+}
+div.document {
+	width: 700px;
+	margin-left: auto;
+	margin-right: auto;
+	Xbackground: #FFC;
+	background: #B9B99D;
+	padding: 20px;
+}
+div.section {
+	background: #FFF;
+	padding: 1px 20px 10px 20px;
+	margin: 20px 0;
+}
+
+h1 {
+	font-size: 180%;
+	background: #449DBF;
+	Xbackground: #238EC6;
+	color: #FFF;
+	margin: 0;
+	padding: 30px 15px;
+}
+
+div.section h2 {
+	font-size: 150%;
+	Xborder: solid 1px #FFC;
+	Xbackground: #393;
+	Xpadding: 10px;
+	Xcolor: #FFF;
+	Xcolor: #090;
+	color: #238EC6;
+}
+
+pre {
+	background: #EEE;
+	border: solid 1px #CCC;
+	padding: 5px 10px;
+}
+
+dl.docutils dt {
+	font-weight: bold;
+	border: dotted #090;
+	border-width: 0 0 1px 0;
+	display: inline;
+	font: gothic;
+	color: #333;
+}
+
+dl.docutils dd {
+	margin-bottom: 10px;
+	font: sanserif;
+}
+
+
+th.field-name {
+	text-align: left;
+}
+td.field-body {
+	text-align: left;
+}
