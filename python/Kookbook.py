@@ -107,3 +107,31 @@ def task_uninstall(c):
 def task_clean(c):
     pass
     from glob import glob
+
+@recipe
+@product('website/index.html')
+@ingreds('README.txt')
+def file_website_index_html(c):
+    #opts = '--stylesheet-path=website/style.css --link-stylesheet'
+    #with chdir('website'):
+    #    system(c%'rst2html.py $(opts) ../README.txt > index.html')
+    opts = '--stylesheet-path=style.css --link-stylesheet --strip-class=field --strip-class=field-name --strip-class=field-body'
+    system(c%'rst2html.py $(opts) $(ingred) > $(product)')
+    def f(s):
+        s = s.replace('$Release: $', '$Release: %s $' % release)
+        s = s.replace('$Release$', release)
+        s = s.replace('README', 'Oktest - a new style testing library -')
+        #s = re.sub(r'^<h(\d)>(.*?)</h\d>', r, s)
+        pat = re.compile(r'^<h(\d)>(.*?)</h\d>', re.M)
+        def r(m):
+            n = int(m.group(1)) + 1
+            s = m.group(2)
+            return '\n<h%s>%s</h%s>' % (n, s, n)
+        s = re.sub(pat, r, s)
+        return s
+    edit(c.product, by=f)
+
+@recipe
+@ingreds('website/index.html')
+def task_website(c):
+    pass
