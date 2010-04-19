@@ -1,5 +1,5 @@
 ###
-### $Release: 0.2.0 $
+### $Release: 0.2.1 $
 ### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -16,15 +16,36 @@ else:
 
 
 name     = 'Oktest'
-version  = '0.2.0'
+version  = '0.2.1'
 author   = 'makoto kuwata'
 email    = 'kwa@kuwata-lab.com'
 maintainer = author
 maintainer_email = email
-url      = 'http://www.kuwata-lab.com/oktest/'
+url      = 'http://pypi.python.org/pypi'
 desc     = 'a new-style testing library'
 detail   = (
-           'Oktest is a new-style testing library.\n'
+            "Oktest is a new-style testing library.\n"
+            "::\n"
+            "\n"
+            "from oktest import ok\n"
+            "ok (x) > 0                 # same as assert_(x > 0)\n"
+            "ok (s) == 'foo'            # same as assertEqual(s, 'foo')\n"
+            "ok (s) != 'foo'            # same as assertNotEqual(s, 'foo')\n"
+            "ok (f).raises(ValueError)  # same as assertRaises(ValueError, f)\n"
+            "ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))\n"
+            "not_ok (u'foo').is_a(int)  # same as assert_(not isinstance(u'foo', int))\n"
+            "ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))\n"
+            "not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))\n"
+            "\n"
+            "You can use ok() instead of 'assertXxx()' in unittest.\n"
+            "\n"
+            "Oktest requires Python 2.3 or later. Oktest is ready for Python 3.\n"
+            "\n"
+            "NOTICE!! Oktest is a young project and specification may change in the future.\n"
+            "\n"
+            "See README_ for details.\n"
+            "\n"
+            ".. _README: http://packages.python.org/Oktest\n"
            )
 license  = 'MIT License'
 platforms = 'any'
