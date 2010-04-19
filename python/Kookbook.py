@@ -130,6 +130,8 @@ def file_website_index_html(c):
         s = re.sub(pat, r, s)
         return s
     edit(c.product, by=f)
+    with chdir("website"):
+        system("zip -r ../Oktest.zip index.html style.css")
 
 @recipe
 @ingreds('website/index.html')
