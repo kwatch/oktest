@@ -28,6 +28,22 @@ Oktest requires Python 2.3 or later. Oktest is ready for Python 3.
 NOTICE!! Oktest is a young project and specification may change in the future.
 
 
+Download
+--------
+
+http://pypi.python.org/pypi/Oktest/
+
+Installation::
+
+    ## if you have installed easy_install:
+    $ sudo easy_install Oktest
+    ## or download Oktest-$Release$.tar.gz and install it
+    $ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-$Release$.tar.gz
+    $ tar xzf Oktest-$Release$.tar.gz
+    $ cd Oktest-$Release$/
+    $ sudo python setup.py install
+
+
 Example
 -------
 
@@ -90,72 +106,72 @@ test_example.py::
 Reference
 ---------
 
-:ok (val1) == val2:
-	Raise AssertionError unless val == val2.
+ok (x) == y
+	Raise AssertionError unless x == y.
 
-:ok (val1) != val2:
-	Raise AssertionError unless val != val2.
+ok (x) != y
+	Raise AssertionError unless x != y.
 
-:ok (val1) > val2:
-	Raise AssertionError unless val > val2.
+ok (x) > y
+	Raise AssertionError unless x > y.
 
-:ok (val1) >= val2:
-	Raise AssertionError unless val >= val2.
+ok (x) >= y
+	Raise AssertionError unless x >= y.
 
-:ok (val1) < val2:
-	Raise AssertionError unless val < val2.
+ok (x) < y
+	Raise AssertionError unless x < y.
 
-:ok (val1) <= val2:
-	Raise AssertionError unless val <= val2.
+ok (x) <= y
+	Raise AssertionError unless x <= y.
 
-:ok (val1).in_(val2):
-	Raise AssertionError unless val in val2.
+ok (x).in_(y)
+	Raise AssertionError unless x in y.
 
-:ok (val1).contains(val2):
-	Raise AssertionError unless va2 in val1. This is opposite of in_().
+ok (x).contains(y)
+	Raise AssertionError unless y in x. This is opposite of in_().
 
-:ok (val1).is_(val2):
-	Raise AssertionError unless va2 is val1.
+ok (x).is_(y)
+	Raise AssertionError unless x is y.
 
-:ok (val1).is_not(val2):
-	Raise AssertionError if va2 is val1.
+ok (x).is_not(y)
+	Raise AssertionError if x is y.
 
-:ok (val1).is_a(val2):
-	Raise AssertionError unless isinstance(val1, val2).
+ok (x).is_a(y)
+	Raise AssertionError unless isinstance(x, y).
 
-:ok (val1).matches(val2):
-	If val2 is a string, raise AssertionError unless re.search(val2, val1).
-	If val2 is a re.Pattern object, raise AssertionError unless val2.search(val1).
+ok (x).matches(y)
+	If y is a string, raise AssertionError unless re.search(y, x).
+	If y is a re.pattern object, raise AssertionError unless y.search(x).
 
-:ok (path).is_file():
+ok (path).is_file()
 	Raise AssertionError unless os.path.isfile(path).
 
-:ok (path).is_dir():
+ok (path).is_dir()
 	Raise AssertionError unless os.path.isdir(path).
 
-:ok (path).exists():
+ok (path).exists()
 	Raise AssertionError unless os.path.exists(path).
 
-:ok (func).raises(error_class[, errmsg=None]):
+ok (func).raises(error_class[, errmsg=None])
 	Raise AssertionError unless func() raises error_class.
 
-:not_ok (val):
-	Opposite of ok(val). For example, 'not_ok ("foo").matches(r'\d+')' is True.
+not_ok (x)
+	Opposite of ok(x). For example, 'not_ok ("foo").matches(r"[0-9]+")' is True.
 
-:run(\*classes):
+run(\*classes)
 	Invokes tests of each class.
 	Argument can be regular expression string.
 	For example, run(r'.*Test$') invokes tests of Example1Test, Example2Test, and so on.
 
-:dummy_file(filename, content):
+dummy_file(filename, content)
 	Create dummy file with specified content.
 	For example, 'with dummy_file("A.txt", "aaa") ...' creates dummy file 'A.txt' with content 'aaa' and it will be removed automatically at the end of with-statement block.
 
-:dummy_dir(dirname):
+dummy_dir(dirname)
 	Create dummy directory.
 	For example, 'with dummy_dir("tmp.d") ...' creates dummy directory 'tmp.txt' and it will be removed automatically at the end of with-statement block.
 
-:chdir(dirname):
+chdir(dirname)
 	Change current directory to dirname temporarily.
 	For example, 'with chdir("lib") ...' changes current directory to 'lib' and back-to original directory at the end of with-statement block.
 
