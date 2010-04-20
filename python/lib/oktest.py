@@ -183,10 +183,10 @@ class ValueObject(object):
                 if not isinstance(ex, exception_class):
                     self._failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
                     #raise
-                if errmsg is None or ex.args[0] == errmsg:
+                if errmsg is None or str(ex) == errmsg:
                     return
                 #self._failed("expected %r but got %r" % (errmsg, ex.message))
-                self._failed("%r == %r" % (ex.args[0], errmsg), depth=3)
+                self._failed("%r == %r" % (str(ex), errmsg), depth=3)
             self._failed('%s should be raised' % exception_class.__name__, depth=3)
         else:
             try:
