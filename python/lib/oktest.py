@@ -377,10 +377,10 @@ class SimpleReporter(BaseReporter):
         OUT.write("".join(self.buf))
 
     def print_ok(self, obj):
-        OUT.write(".")
+        OUT.write("."); OUT.flush()
 
     def print_failed(self, obj, ex):
-        OUT.write("f")
+        OUT.write("f"); OUT.flush()
         self.buf.append("Failed: %s()\n" % self._test_ident(obj))
         self.buf.append("   %s\n" % ex.args[0])
         file, line, text = self._get_location(ex)
@@ -388,7 +388,7 @@ class SimpleReporter(BaseReporter):
             self.buf.append("   %s:%s:  %s\n" % (file, line, text))
 
     def print_error(self, obj, ex):
-        OUT.write('E')
+        OUT.write('E'); OUT.flush()
         self.buf.append("ERROR: %s()\n" % self._test_ident(obj))
         self.buf.append("  %s: %s\n" % (ex.__class__.__name__, str(ex)))
         #traceback.print_exc(file=sys.stdout)
