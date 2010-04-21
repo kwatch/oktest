@@ -372,13 +372,19 @@ from oktest import *
 class FooTest(object):
     def test_raises1(self):
         def f(): raise ValueError('errmsg1')
-        ok (f).raises(ValueError)
+        ok (f).raises(ValueError)             # ValueError
     def test_raises2(self):
         def f(): raise ValueError('errmsg1')
-        ok (f).raises(ValueError, 'errmsg1')
+        ok (f).raises(ValueError, 'errmsg1')   # ValueError + errmsg
     def test_raises3(self):
         def f(): raise ValueError('errmsg1')
-        ok (f).raises(Exception, 'errmsg1')
+        ok (f).raises(Exception, 'errmsg1')    # Exception + errmsg
+    def test_raises4(self):
+        def f(): raise ValueError('errmsg1')
+        ok (f).raises(Exception)                # f.exception
+        assert hasattr(f, 'exception')
+        assert isinstance(f.exception, ValueError)
+        assert str(f.exception) == 'errmsg1'
 class BarTest(object):
     def test_raises1(self):
         def f(): pass
@@ -395,12 +401,13 @@ expected = r"""
 * FooTest.test_raises1 ... [ok]
 * FooTest.test_raises2 ... [ok]
 * FooTest.test_raises3 ... [ok]
+* FooTest.test_raises4 ... [ok]
 * BarTest.test_raises1 ... [NG] Exception should be raised : failed.
-   _test_.py:15: ok (f).raises(Exception)
+   _test_.py:21: ok (f).raises(Exception)
 * BarTest.test_raises2 ... [NG] ValueError('errmsg1',) is kind of NameError : failed.
-   _test_.py:18: ok (f).raises(NameError)
+   _test_.py:24: ok (f).raises(NameError)
 * BarTest.test_raises3 ... [NG] 'errmsg1' == 'errmsg2' : failed.
-   _test_.py:21: ok (f).raises(ValueError, 'errmsg2')
+   _test_.py:27: ok (f).raises(ValueError, 'errmsg2')
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -411,10 +418,13 @@ from oktest import *
 class FooTest(object):
     def test_not_raises1(self):
         def f(): return 1
-        ok (f).not_raise(Exception)
+        ok (f).not_raise(Exception)              # Exception
     def test_not_raises2(self):
         def f(): raise ValueError('errmsg1')
-        ok (f).not_raise(NameError)
+        ok (f).not_raise(NameError)              # NameError
+        assert hasattr(f, 'exception')
+        assert isinstance(f.exception, ValueError)
+        assert str(f.exception) == 'errmsg1'
 class BarTest(object):
     def test_not_raises1(self):
         def f(): raise ValueError('errmsg1')
@@ -428,9 +438,9 @@ expected = r"""
 * FooTest.test_not_raises1 ... [ok]
 * FooTest.test_not_raises2 ... [ok]
 * BarTest.test_not_raises1 ... [NG] Exception should not be raised : failed.
-   _test_.py:12: ok (f).not_raise(Exception)
+   _test_.py:15: ok (f).not_raise(Exception)
 * BarTest.test_not_raises2 ... [NG] ValueError should not be raised : failed.
-   _test_.py:15: ok (f).not_raise(ValueError)
+   _test_.py:18: ok (f).not_raise(ValueError)
 """[1:]
 do_test_with(desc, script, expected)
 

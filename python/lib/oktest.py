@@ -180,6 +180,7 @@ class ValueObject(object):
                 self.value()
             except:
                 ex = sys.exc_info()[1]
+                self.value.exception = ex
                 if not isinstance(ex, exception_class):
                     self._failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
                     #raise
@@ -193,6 +194,7 @@ class ValueObject(object):
                 self.value()
             except:
                 ex = sys.exc_info()[1]
+                self.value.exception = ex
                 if isinstance(ex, exception_class):
                     self._failed('%s should not be raised' % exception_class.__name__, depth=3)
 
