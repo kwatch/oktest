@@ -154,6 +154,7 @@ ok (path).exists()
 
 ok (func).raises(error_class[, errmsg=None])
 	Raise AssertionError unless func() raises error_class.
+	It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.
 
 not_ok (x)
 	Opposite of ok(x). For example, 'not_ok ("foo").matches(r"[0-9]+")' is True.
