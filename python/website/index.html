@@ -11,7 +11,7 @@
 <div class="document" id="readme">
 <h1 class="title">Oktest - a new style testing library -</h1>
 
-<p>$Release: 0.2.1 $</p>
+<p>$Release: 0.2.2 $</p>
 <div class="section" id="overview">
 
 <h2>Overview</h2>
@@ -39,10 +39,10 @@ not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
 <pre class="literal-block">
 ## if you have installed easy_install:
 $ sudo easy_install Oktest
-## or download Oktest-0.2.1.tar.gz and install it
-$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.2.1.tar.gz
-$ tar xzf Oktest-0.2.1.tar.gz
-$ cd Oktest-0.2.1/
+## or download Oktest-0.2.2.tar.gz and install it
+$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.2.2.tar.gz
+$ tar xzf Oktest-0.2.2.tar.gz
+$ cd Oktest-0.2.2/
 $ sudo python setup.py install
 </pre>
 </div>
@@ -141,7 +141,8 @@ If y is a re.pattern object, raise AssertionError unless y.search(x).</dd>
 <dt>ok (path).exists()</dt>
 <dd>Raise AssertionError unless os.path.exists(path).</dd>
 <dt>ok (func).raises(error_class[, errmsg=None])</dt>
-<dd>Raise AssertionError unless func() raises error_class.</dd>
+<dd>Raise AssertionError unless func() raises error_class.
+It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.</dd>
 <dt>not_ok (x)</dt>
 <dd>Opposite of ok(x). For example, 'not_ok (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</dd>
 <dt>run(*classes)</dt>

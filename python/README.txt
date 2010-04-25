@@ -2,7 +2,7 @@
 README
 ======
 
-$Release: $
+$Release: 0.2.2 $
 
 
 Overview
