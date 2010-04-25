@@ -1,0 +1,27 @@
+=======
+CHANGES
+=======
+
+$Release: 0.2.2 $
+
+
+Release 0.2.2
+-------------
+
+* enhanced to set 'f.exception' after 'ok (f).raises(Exception)'
+  to get raised exception object
+* changed to flush output after '.'/'f'/'E' printed
+* change to get exception message by 'str(ex)' instead of 'ex.message'
+
+
+Release 0.2.1
+-------------
+
+* fix 'REAMDE.txt'
+* fix 'setup.py'
+
+
+Release 0.2.0
+-------------
+
+* public release
