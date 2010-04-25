@@ -424,7 +424,7 @@ class OldStyleReporter(BaseReporter):
         OUT.write("[ok]\n")
 
     def print_failed(self, obj, ex):
-        OUT.write("[NG] %s\n" % ex.args[0])
+        OUT.write("[NG] %s\n" % str(ex))
         file, line, text = self._get_location(ex)
         if file:
             OUT.write("   %s:%s: %s\n" % (file, line, text))
