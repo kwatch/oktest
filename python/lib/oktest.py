@@ -54,9 +54,9 @@ DIFF = True
 
 def _diff(target, other):
     from difflib import unified_diff
-    if DIFF == 'repr':
-        expected = [ repr(line) + "\n" for line in other.splitlines(True) ]
-        actual   = [ repr(line) + "\n" for line in target.splitlines(True) ]
+    if hasattr(DIFF, '__call__'):
+        expected = [ DIFF(line) + "\n" for line in other.splitlines(True) ]
+        actual   = [ DIFF(line) + "\n" for line in target.splitlines(True) ]
     else:
         if other.find("\n") == -1 and target.find("\n") == -1:
             expected, actual = [other + "\n"], [target + "\n"]

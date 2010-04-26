@@ -668,12 +668,12 @@ desc = "diff (oktest.DIFF == 'repr')"
 script = r"""
 from oktest import *
 import oktest
-oktest.DIFF = 'repr'
+oktest.DIFF = repr
 class FooTest(object):
     def test1(self):
-       ok ('foo') == 'foo1'
+        ok ('foo') == 'foo1'
     def test2(self):
-       ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+        ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
 run(FooTest)
 """[1:]
 expected = r"""
