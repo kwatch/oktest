@@ -32,17 +32,37 @@ if python3:
 
 class TestFailed(AssertionError):
 
-    def __init__(self, mesg, file=None, line=None):
+    def __init__(self, mesg, file=None, line=None, diff=None):
         AssertionError.__init__(self, mesg)
         self.file = file
         self.line = line
+        self.diff = diff
 
 
 def _msg(target, op, other=None):
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
     elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
     else:                     msg = '%r %s %r' % (target, op, other)
+    if op == '==' and target != other and _is_string(target) and _is_string(other):
+        if DIFF:
+            diff = _diff(target, other)
+            return (msg, diff)
     return msg
+
+
+DIFF = True
+
+def _diff(target, other):
+    from difflib import unified_diff
+    if DIFF == 'repr':
+        expected = [ repr(line) + "\n" for line in other.splitlines(True) ]
+        actual   = [ repr(line) + "\n" for line in target.splitlines(True) ]
+    else:
+        expected, actual = other.splitlines(True), target.splitlines(True)
+        for lines in (expected, actual):
+            if not lines[-1].endswith("\n"):
+                lines[-1] += "\n\\ No newline at end of string\n"
+    return ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
 
 
 #def deprecated(f):
@@ -63,11 +83,14 @@ class ValueObject(object):
         frame = sys._getframe(depth)
         file = frame.f_code.co_filename
         line = frame.f_lineno
+        diff = None
+        if isinstance(msg, tuple):
+            msg, diff = msg
         if self._bool == False:
             msg = 'not ' + msg
         if postfix:
             msg += postfix
-        raise TestFailed(msg, file=file, line=line)
+        raise TestFailed(msg, file=file, line=line, diff=diff)
 
     def __eq__(self, other):
         if (self.value == other) == self._bool:  return True
@@ -388,6 +411,8 @@ class SimpleReporter(BaseReporter):
         file, line, text = self._get_location(ex)
         if file:
             self.buf.append("   %s:%s:  %s\n" % (file, line, text))
+        if getattr(ex, 'diff', None):
+            self.buf.append(ex.diff)
 
     def print_error(self, obj, ex):
         OUT.write('E'); OUT.flush()
@@ -428,6 +453,8 @@ class OldStyleReporter(BaseReporter):
         file, line, text = self._get_location(ex)
         if file:
             OUT.write("   %s:%s: %s\n" % (file, line, text))
+        if getattr(ex, 'diff', None):
+            OUT.write(ex.diff)
 
     def print_error(self, obj, ex):
         OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, str(ex)))
@@ -446,6 +473,8 @@ class OldStyleReporter(BaseReporter):
 ## NOTICE! reporter spec will be changed frequently
 class TapStyleReporter(BaseReporter):
 
+    BOL_PATTERN = re.compile(r'^', re.M)
+
     def before_all(self, klass):
         self.klass = klass
         OUT.write("### %s\n" % klass.__name__)
@@ -462,6 +491,8 @@ class TapStyleReporter(BaseReporter):
         file, line, text = self._get_location(ex)
         if file:
             OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
+        if getattr(ex, 'diff', None):
+            OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
 
     def print_error(self, obj, ex):
         OUT.write("ERROR  # %s\n" % self._test_ident(obj))

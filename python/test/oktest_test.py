@@ -134,6 +134,8 @@ do_test_with(desc, script, expected)
 ###
 desc = "op '=='"
 script = r"""
+import oktest
+oktest.DIFF = False
 from oktest import *
 class FooTest(object):
     def test_inteq(self):
@@ -151,9 +153,9 @@ expected = r"""
 * FooTest.test_inteq ... [ok]
 * FooTest.test_streq ... [ok]
 * BarTest.test_inteq ... [NG] 16 == 15 : failed.
-   _test_.py:9: ok (4*4) == 15
+   _test_.py:11: ok (4*4) == 15
 * BarTest.test_streq ... [NG] 'FOO' == 'foo' : failed.
-   _test_.py:11: ok ("foo".upper()) == 'foo'
+   _test_.py:13: ok ("foo".upper()) == 'foo'
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -623,4 +625,98 @@ class FooTest(object):
 run(FooTest)
 """
 expected = "* FooTest.test_chdir2 ... [ok]\n"
+do_test_with(desc, script, expected)
+
+
+### diff (oktest.DIFF = True)
+desc = "diff (oktest.DIFF = True)"
+script = r"""
+from oktest import *
+import oktest
+oktest.DIFF = True
+class FooTest(object):
+    def test1(self):
+       ok ('foo') == 'foo1'
+    def test2(self):
+       ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+run(FooTest)
+"""[1:]
+expected = r"""
+* FooTest.test1 ... [NG] 'foo' == 'foo1' : failed.
+   _test_.py:6: ok ('foo') == 'foo1'
+--- expected 
++++ actual 
+@@ -1,1 +1,1 @@
+-foo1
+\ No newline at end of string
++foo
+\ No newline at end of string
+* FooTest.test2 ... [NG] 'AAA\nBBB\nCCC\n' == 'AAA\n888\nCCC' : failed.
+   _test_.py:8: ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+--- expected 
++++ actual 
+@@ -1,3 +1,3 @@
+ AAA
+-888
+-CCC
+\ No newline at end of string
++BBB
++CCC
+"""[1:]
+do_test_with(desc, script, expected)
+
+
+### diff (oktest.DIFF == 'repr')
+desc = "diff (oktest.DIFF == 'repr')"
+script = r"""
+from oktest import *
+import oktest
+oktest.DIFF = 'repr'
+class FooTest(object):
+    def test1(self):
+       ok ('foo') == 'foo1'
+    def test2(self):
+       ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+run(FooTest)
+"""[1:]
+expected = r"""
+* FooTest.test1 ... [NG] 'foo' == 'foo1' : failed.
+   _test_.py:6: ok ('foo') == 'foo1'
+--- expected 
++++ actual 
+@@ -1,1 +1,1 @@
+-'foo1'
++'foo'
+* FooTest.test2 ... [NG] 'AAA\nBBB\nCCC\n' == 'AAA\n888\nCCC' : failed.
+   _test_.py:8: ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+--- expected 
++++ actual 
+@@ -1,3 +1,3 @@
+ 'AAA\n'
+-'888\n'
+-'CCC'
++'BBB\n'
++'CCC\n'
+"""[1:]
+do_test_with(desc, script, expected)
+
+### diff (oktest.DIFF == False)
+desc = "diff (oktest.DIFF == False)"
+script = r"""
+from oktest import *
+import oktest
+oktest.DIFF = False
+class FooTest(object):
+    def test1(self):
+       ok ('foo') == 'foo1'
+    def test2(self):
+       ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+run(FooTest)
+"""[1:]
+expected = r"""
+* FooTest.test1 ... [NG] 'foo' == 'foo1' : failed.
+   _test_.py:6: ok ('foo') == 'foo1'
+* FooTest.test2 ... [NG] 'AAA\nBBB\nCCC\n' == 'AAA\n888\nCCC' : failed.
+   _test_.py:8: ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+"""[1:]
 do_test_with(desc, script, expected)
