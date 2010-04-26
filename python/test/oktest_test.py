@@ -648,9 +648,7 @@ expected = r"""
 +++ actual 
 @@ -1,1 +1,1 @@
 -foo1
-\ No newline at end of string
 +foo
-\ No newline at end of string
 * FooTest.test2 ... [NG] 'AAA\nBBB\nCCC\n' == 'AAA\n888\nCCC' : failed.
    _test_.py:8: ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
 --- expected 
@@ -664,7 +662,6 @@ expected = r"""
 +CCC
 """[1:]
 do_test_with(desc, script, expected)
-
 
 ### diff (oktest.DIFF == 'repr')
 desc = "diff (oktest.DIFF == 'repr')"

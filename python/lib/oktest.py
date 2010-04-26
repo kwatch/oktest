@@ -58,10 +58,13 @@ def _diff(target, other):
         expected = [ repr(line) + "\n" for line in other.splitlines(True) ]
         actual   = [ repr(line) + "\n" for line in target.splitlines(True) ]
     else:
-        expected, actual = other.splitlines(True), target.splitlines(True)
-        for lines in (expected, actual):
-            if not lines[-1].endswith("\n"):
-                lines[-1] += "\n\\ No newline at end of string\n"
+        if other.find("\n") == -1 and target.find("\n") == -1:
+            expected, actual = [other + "\n"], [target + "\n"]
+        else:
+            expected, actual = other.splitlines(True), target.splitlines(True)
+            for lines in (expected, actual):
+                if not lines[-1].endswith("\n"):
+                    lines[-1] += "\n\\ No newline at end of string\n"
     return ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
 
 
