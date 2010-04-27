@@ -103,6 +103,75 @@ test_example.py::
 	#run('.*Test$')  # specify class names by regular expression
 
 
+Unified Diff
+------------
+
+'ok(x) == y' prints unified diff (diff -u) if:
+
+* both x and y are str or unicode
+* and x != y
+* and oktest.DIFF is True or 'repr'
+* and invoked with oktest.run()
+
+For example::
+
+    ## foo_test.py
+    from oktest import *
+    
+    class FooTest(object):
+    
+        def test1(self):
+            s1 = ( "AAA\n"
+                   "BBB\n"
+                   "CCC\n" )
+            s2 = ( "AAA\n"
+                   "CCC\n"
+                   "DDD\n" )
+            ok (s1) == s2
+    
+    if __name__ == '__main__':
+        run(FooTest)
+
+If you run this script, you'll find that unified diff is displayed.
+
+Output result::
+
+    $ python foo_test.py
+    ### FooTest
+    f
+    Failed: FooTest#test1()
+       'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
+       foo_test.py:13:  ok (s1) == s2
+    --- expected 
+    +++ actual 
+    @@ -1,3 +1,3 @@
+     AAA
+    +BBB
+     CCC
+    -DDD
+
+If you set 'oktest.DIFF' to 'repr', each line is preprocessed by repr(). This is very useful to show non-visible characters. For example::
+
+    $ vi foo_test.py    # add 'import oktest; oktest.DIFF = repr'
+    $ python foo_test.py
+    ### FooTest
+    f
+    Failed: FooTest#test1()
+       'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
+       hoge.py:15:  ok (s1) == s2
+    --- expected 
+    +++ actual 
+    @@ -1,3 +1,3 @@
+     'AAA\n'
+    +'BBB\n'
+     'CCC\n'
+    -'DDD\n'
+
+If you set 'oktest.DIFF' to False, unified diff is not displayed.
+
+Notice that this feature is only available with oktest.run() and not available with unittest module.
+
+
 Reference
 ---------
 
@@ -188,7 +257,7 @@ Tips
 ToDo
 ----
 
-* [_] print 'diff -u' when two strings are different
+* [v] print 'diff -u' when two strings are different
 * [_] improve reporters
 * [_] make package(?)
 
