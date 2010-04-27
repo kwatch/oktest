@@ -40,6 +40,22 @@ def task_test(c):
 
 
 @recipe
+def task_edit(c):
+    def replacer(s):
+        s = re.sub(r'\$Release:.*\$',    '$Release: %s $'   % release,   s)
+        s = re.sub(r'\$Copyright:.* \$', '$Copyright: %s $' % copyright, s)
+        s = re.sub(r'\$License:.*\$',    '$License: %s $'   % license,   s)
+        return s
+    f = open('MANIFEST')
+    manifest = f.read()
+    f.close()
+    filenames = manifest.splitlines()
+    filenames.remove('Kookbook.py')
+    filenames.append('README.wiki')
+    edit(filenames, by=replacer)
+
+
+@recipe
 def task_package(c):
     """create package"""
     ## remove files
