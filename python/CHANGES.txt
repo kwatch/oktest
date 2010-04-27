@@ -5,6 +5,12 @@ CHANGES
 $Release: 0.2.2 $
 
 
+Release 0.3.0
+-------------
+
+* enhanced 'ok (s1) == s2' to display unified diff (diff -u)
+
+
 Release 0.2.2
 -------------
 
