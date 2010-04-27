@@ -19,19 +19,11 @@ import os, re
 from glob import glob
 from kook.utils import read_file, write_file
 
-release = prop('release', '0.2.2')
-package = prop('package', 'Oktest')
+release   = prop('release', '0.2.2')
+package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010 kuwata-lab.com all rights reserved")
-
 license         = "MIT License"
-#python_basepath = "/Library/Frameworks/Python.framework/Versions/2.4"
-#site_packages_path = "%s/lib/python2.4/site-packages" % python_basepath
-python_basepath = "/usr/local/lib/python2.5"
-site_packages_path = "%s/site-packages" % python_basepath
-script_file     = "pytenjin"
-library_files   = [ "tenjin.py" ]
-
-kook_default_product = 'test'
+#kook_default_product = 'test'
 
 
 @recipe
@@ -46,10 +38,7 @@ def task_edit(c):
         s = re.sub(r'\$Copyright:.* \$', '$Copyright: %s $' % copyright, s)
         s = re.sub(r'\$License:.*\$',    '$License: %s $'   % license,   s)
         return s
-    f = open('MANIFEST')
-    manifest = f.read()
-    f.close()
-    filenames = manifest.splitlines()
+    filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
     filenames.append('README.wiki')
     edit(filenames, by=replacer)
