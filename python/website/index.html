@@ -105,6 +105,72 @@ if __name__ == '__main__':
     #run('.*Test$')  # specify class names by regular expression
 </pre>
 </div>
+<div class="section" id="unified-diff">
+
+<h2>Unified Diff</h2>
+<p>'ok(x) == y' prints unified diff (diff -u) if:</p>
+<ul class="simple">
+<li>both x and y are str or unicode</li>
+<li>and x != y</li>
+<li>and oktest.DIFF is True or 'repr'</li>
+<li>and invoked with oktest.run()</li>
+</ul>
+<p>For example:</p>
+<pre class="literal-block">
+## foo_test.py
+from oktest import *
+
+class FooTest(object):
+
+    def test1(self):
+        s1 = ( &quot;AAA\n&quot;
+               &quot;BBB\n&quot;
+               &quot;CCC\n&quot; )
+        s2 = ( &quot;AAA\n&quot;
+               &quot;CCC\n&quot;
+               &quot;DDD\n&quot; )
+        ok (s1) == s2
+
+if __name__ == '__main__':
+    run(FooTest)
+</pre>
+<p>If you run this script, you'll find that unified diff is displayed.</p>
+<p>Output result:</p>
+<pre class="literal-block">
+$ python foo_test.py
+### FooTest
+f
+Failed: FooTest#test1()
+   'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
+   foo_test.py:13:  ok (s1) == s2
+--- expected
++++ actual
+&#64;&#64; -1,3 +1,3 &#64;&#64;
+ AAA
++BBB
+ CCC
+-DDD
+</pre>
+<p>If you set 'oktest.DIFF' to 'repr', each line is preprocessed by repr(). This is very useful to show non-visible characters. For example:</p>
+<pre class="literal-block">
+$ vi foo_test.py    # add 'import oktest; oktest.DIFF = repr'
+$ python foo_test.py
+### FooTest
+f
+Failed: FooTest#test1()
+   'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
+   hoge.py:15:  ok (s1) == s2
+--- expected
++++ actual
+&#64;&#64; -1,3 +1,3 &#64;&#64;
+ 'AAA\n'
++'BBB\n'
+ 'CCC\n'
+-'DDD\n'
+</pre>
+<p>If you set 'oktest.DIFF' to False, unified diff is not displayed.</p>
+<p>Notice that this feature is only available with oktest.run() and not available with unittest module.</p>
+</div>
 <div class="section" id="reference">
 
 <h2>Reference</h2>
@@ -172,7 +238,7 @@ For example, 'with chdir(&quot;lib&quot;) ...' changes current directory to 'lib
 
 <h2>ToDo</h2>
 <ul class="simple">
-<li>[_] print 'diff -u' when two strings are different</li>
+<li>[v] print 'diff -u' when two strings are different</li>
 <li>[_] improve reporters</li>
 <li>[_] make package(?)</li>
 </ul>
