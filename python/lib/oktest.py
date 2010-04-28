@@ -30,13 +30,15 @@ if python3:
         return func.__code__.co_firstlineno
 
 
-class TestFailed(AssertionError):
-
-    def __init__(self, mesg, file=None, line=None, diff=None):
-        AssertionError.__init__(self, mesg)
-        self.file = file
-        self.line = line
-        self.diff = diff
+## not used for compatibility with unittest
+#class TestFailed(AssertionError):
+#
+#    def __init__(self, mesg, file=None, line=None, diff=None):
+#        AssertionError.__init__(self, mesg)
+#        self.file = file
+#        self.line = line
+#        self.diff = diff
+#
 
 
 def _msg(target, op, other=None):
@@ -93,7 +95,10 @@ class ValueObject(object):
             msg = 'not ' + msg
         if postfix:
             msg += postfix
-        raise TestFailed(msg, file=file, line=line, diff=diff)
+        #raise TestFailed(msg, file=file, line=line, diff=diff)
+        ex = AssertionError(msg)
+        ex.file = file;  ex.line = line;  ex.diff = diff
+        raise ex
 
     def __eq__(self, other):
         if (self.value == other) == self._bool:  return True
