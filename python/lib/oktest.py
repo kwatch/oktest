@@ -30,6 +30,8 @@ if python3:
         return func.__code__.co_firstlineno
 
 
+__unittest = True    # see unittest.TestResult._is_relevant_tb_level()
+
 ## not used for compatibility with unittest
 #class TestFailed(AssertionError):
 #
