@@ -25,13 +25,14 @@ os.environ['OKTEST_REPORTER'] = 'OldStyleReporter'
 import oktest
 
 echo = sys.stdout.write
+python_command = os.environ.get('PYTHON', 'python')
 
 def do_test_with(desc, script, expected):
     filename = '_test_.py'
     try:
         echo("- %s..." % desc)
         open(filename, 'w').write(script)
-        output = os.popen('python '+filename).read()
+        output = os.popen(python_command + ' ' + filename).read()
         if isinstance(output, str):
             output = re.sub(r' at 0x[0-9a-f]{6}', '', output)
         if output == expected:
