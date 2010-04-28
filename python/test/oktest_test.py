@@ -732,7 +732,6 @@ class FooTest(unittest.TestCase):
   def test2(self):
     ok (1+1) == 3
 unittest.main()
-print '<<<', sys.stderr.getvalue(), '>>>'
 """[1:]
 expected = r"""
 .F
