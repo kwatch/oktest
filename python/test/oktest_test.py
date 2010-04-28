@@ -717,3 +717,36 @@ expected = r"""
    _test_.py:8: ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
 """[1:]
 do_test_with(desc, script, expected)
+
+
+## unittest compatibility
+desc = "unittest compatibility"
+script = r"""
+from oktest import *
+import sys
+sys.stderr = sys.stdout
+import unittest
+class FooTest(unittest.TestCase):
+  def test1(self):
+    ok (1+1) == 2
+  def test2(self):
+    ok (1+1) == 3
+unittest.main()
+print '<<<', sys.stderr.getvalue(), '>>>'
+"""[1:]
+expected = r"""
+.F
+======================================================================
+FAIL: test2 (__main__.FooTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "_test_.py", line 9, in test2
+    ok (1+1) == 3
+AssertionError: 2 == 3 : failed.
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+FAILED (failures=1)
+"""[1:]
+do_test_with(desc, script, expected)
