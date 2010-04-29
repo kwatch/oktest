@@ -115,8 +115,13 @@ class FooTest(object):
     #
     def test_1(self):
         print('test_1() called.')
+        ok (1+1) == 2
     def test_2(self):
         print('test_2() called.')
+        ok (1+1) == 3
+    def test_3(self):
+        print('test_3() called.')
+        int('abc')
 run('FooTest')
 """[1:]
 expected = r"""
@@ -127,7 +132,13 @@ test_1() called.
 after() called.
 * FooTest.test_2 ... before() called.
 test_2() called.
-[ok]
+[NG] 2 == 3 : failed.
+   _test_.py:19: ok (1+1) == 3
+after() called.
+* FooTest.test_3 ... before() called.
+test_3() called.
+[ERROR] ValueError: invalid literal for int() with base 10: 'abc'
+  - _test_.py:22:  int('abc')
 after() called.
 after_all() called.
 """[1:]
@@ -145,8 +156,13 @@ class FooTest(object):
     #
     def test_1(self):
         print('test_1() called.')
+        ok (1+1) == 2
     def test_2(self):
         print('test_2() called.')
+        ok (1+1) == 3
+    def test_3(self):
+        print('test_3() called.')
+        int('abc')
 run('FooTest')
 """[1:]
 expected = r"""
@@ -156,7 +172,13 @@ test_1() called.
 tearDown() called.
 * FooTest.test_2 ... setUp() called.
 test_2() called.
-[ok]
+[NG] 2 == 3 : failed.
+   _test_.py:13: ok (1+1) == 3
+tearDown() called.
+* FooTest.test_3 ... setUp() called.
+test_3() called.
+[ERROR] ValueError: invalid literal for int() with base 10: 'abc'
+  - _test_.py:16:  int('abc')
 tearDown() called.
 """[1:]
 do_test_with(desc, script, expected)
