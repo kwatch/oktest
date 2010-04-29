@@ -19,10 +19,10 @@ import os, re
 from glob import glob
 from kook.utils import read_file, write_file
 
-release   = prop('release', '0.2.2')
+release   = prop('release', '0.3.0')
 package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010 kuwata-lab.com all rights reserved")
-license         = "MIT License"
+license   = "MIT License"
 #kook_default_product = 'test'
 
 

@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-$Release: 0.2.2 $
+$Release: 0.3.0 $
 
 
 Release 0.3.0
@@ -14,6 +14,8 @@ Release 0.3.0
    disabled in the future)
 * improved compatibility with unittest module
 * (internal) 'ValueObject' class is renamed to 'AssertionObject'
+* (internal) 'Reporter#before_each()' and '#after_each()' are renamed into
+  '#before()' and '#after()'
 
 
 Release 0.2.2
