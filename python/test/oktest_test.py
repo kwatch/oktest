@@ -96,6 +96,7 @@ expected = r"""
 """[1:]
 do_test_with(desc, script, expected)
 
+
 ###
 desc = "before_all/before_each/after_each/after_all"
 script = r"""
@@ -107,10 +108,10 @@ class FooTest(object):
     def after_all(cls):
         print('after_all() called.')
     after_all  = classmethod(after_all)
-    def before_each(self):
-        print('before_each() called.')
-    def after_each(self):
-        print('after_each() called.')
+    def before(self):
+        print('before() called.')
+    def after(self):
+        print('after() called.')
     #
     def test_1(self):
         print('test_1() called.')
@@ -120,17 +121,46 @@ run('FooTest')
 """[1:]
 expected = r"""
 before_all() called.
-* FooTest.test_1 ... before_each() called.
+* FooTest.test_1 ... before() called.
 test_1() called.
 [ok]
-after_each() called.
-* FooTest.test_2 ... before_each() called.
+after() called.
+* FooTest.test_2 ... before() called.
 test_2() called.
 [ok]
-after_each() called.
+after() called.
 after_all() called.
 """[1:]
 do_test_with(desc, script, expected)
+
+###
+desc = "setUp()/tearDown()"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def setUp(self):
+        print('setUp() called.')
+    def tearDown(self):
+        print('tearDown() called.')
+    #
+    def test_1(self):
+        print('test_1() called.')
+    def test_2(self):
+        print('test_2() called.')
+run('FooTest')
+"""[1:]
+expected = r"""
+* FooTest.test_1 ... setUp() called.
+test_1() called.
+[ok]
+tearDown() called.
+* FooTest.test_2 ... setUp() called.
+test_2() called.
+[ok]
+tearDown() called.
+"""[1:]
+do_test_with(desc, script, expected)
+
 
 ###
 desc = "op '=='"
