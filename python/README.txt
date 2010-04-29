@@ -67,11 +67,11 @@ test_example.py::
             shutil.rmtree('tmp.d')
 
         ## invoked before each test
-        def before_all(self):
+        def before(self):   # or setUp(self)
             self.val = ['aaa', 'bbb', 'ccc']
 
         ## invoked after each test
-        def after_all(self):
+        def after(self):    # or tearDown(self)
             pass
 
         ## test methods
