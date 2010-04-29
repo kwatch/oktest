@@ -9,8 +9,11 @@ Release 0.3.0
 -------------
 
 * enhanced 'ok (s1) == s2' to display unified diff (diff -u)
-* improved compatibility with unittest module
 * changed to call 'before()/after()' instead of 'before_each()/after_each()'
+  (currently 'before_each()/after_each()' is also enabled but they will be
+   disabled in the future)
+* improved compatibility with unittest module
+* (internal) 'ValueObject' class is renamed to 'AssertionObject'
 
 
 Release 0.2.2
