@@ -287,8 +287,8 @@ class TestClassRunner(object):
             obj.__name__ = _test_name(method_name)
             obj._testMethodName = method_name    # unittest.TestCase compatible
             obj._testMethodDoc = func.__doc__    # unittest.TestCase compatible
-            ## invoke before_each() or setUp()
-            reporter.before_each(obj)
+            ## invoke before() or setUp()
+            reporter.before(obj)
             if   hasattr(obj, 'before'):       obj.before()
             elif hasattr(obj, 'before_each'):  obj.before_each()  # for backward compatibility
             elif hasattr(obj, 'setUp'):        obj.setUp()
@@ -306,11 +306,11 @@ class TestClassRunner(object):
                     count += 1
                     reporter.print_error(obj, ex)
             finally:
-                ## invoke before() or tearDown()
+                ## invoke after() or tearDown()
                 if   hasattr(obj, 'after'):       obj.after()
                 elif hasattr(obj, 'after_each'):  obj.after_each()  # for backward compatibility
                 elif hasattr(obj, 'tearDown'):    obj.tearDown()
-                reporter.after_each(obj)
+                reporter.after(obj)
         ## invoke after_all()
         if hasattr(klass, 'after_all'):
             klass.after_all()
@@ -358,10 +358,10 @@ class Reporter(object):
     def after_all(self, klass):
         pass
 
-    def before_each(self, obj):
+    def before(self, obj):
         pass
 
-    def after_each(self, obj):
+    def after(self, obj):
         pass
 
     def print_ok(self, obj):
@@ -457,7 +457,7 @@ class OldStyleReporter(BaseReporter):
     def _test_ident(self, obj):
         return '%s.%s' % (self.klass.__name__, obj._testMethodName)
 
-    def before_each(self, obj):
+    def before(self, obj):
         OUT.write("* %s ... " % self._test_ident(obj))
 
     def print_ok(self, obj):
@@ -615,7 +615,7 @@ def chdir(path):
 if __name__ == '__main__':
 
     class MyTest(object):
-        def before_each(self):
+        def before(self):
             self.L = [10, 20, 30]
         def test_ex1(self):
             ok (len(self.L)) == 3
