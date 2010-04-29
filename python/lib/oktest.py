@@ -286,7 +286,8 @@ class TestClassRunner(object):
             obj._testMethodDoc = func.__doc__    # unittest.TestCase compatible
             ## invoke before_each() or setUp()
             reporter.before_each(obj)
-            if   hasattr(obj, 'before_each'):  obj.before_each()
+            if   hasattr(obj, 'before'):       obj.before()
+            elif hasattr(obj, 'before_each'):  obj.before_each()  # for backward compatibility
             elif hasattr(obj, 'setUp'):        obj.setUp()
             try:
                 try:
@@ -302,8 +303,9 @@ class TestClassRunner(object):
                     count += 1
                     reporter.print_error(obj, ex)
             finally:
-                ## invoke before_each() or tearDown()
-                if   hasattr(obj, 'after_each'):  obj.after_each()
+                ## invoke before() or tearDown()
+                if   hasattr(obj, 'after'):       obj.after()
+                elif hasattr(obj, 'after_each'):  obj.after_each()  # for backward compatibility
                 elif hasattr(obj, 'tearDown'):    obj.tearDown()
                 reporter.after_each(obj)
         ## invoke after_all()
