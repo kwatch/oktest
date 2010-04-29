@@ -10,6 +10,7 @@ Release 0.3.0
 
 * enhanced 'ok (s1) == s2' to display unified diff (diff -u)
 * improved compatibility with unittest module
+* changed to call 'before()/after()' instead of 'before_each()/after_each()'
 
 
 Release 0.2.2
