@@ -76,7 +76,7 @@ def _diff(target, other):
 #    return f
 
 
-class AssertObject(object):
+class AssertionObject(object):
 
     def __init__(self, value):
         self.value = value
@@ -232,11 +232,11 @@ class AssertObject(object):
                     self._failed('%s should not be raised' % exception_class.__name__, depth=3)
 
 
-ASSERT_OBJECT = AssertObject
+ASSERTION_OBJECT = AssertionObject
 
 
 def ok(value):
-    return ASSERT_OBJECT(value)
+    return ASSERTION_OBJECT(value)
 
 def not_ok(value):
     v = ok(value)
