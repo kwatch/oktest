@@ -97,10 +97,13 @@ class AssertionObject(object):
             msg = 'not ' + msg
         if postfix:
             msg += postfix
-        #raise TestFailed(msg, file=file, line=line, diff=diff)
+        raise self._assertion_error(msg, file, line, diff)
+
+    def _assertion_error(self, msg, file, line, diff):
+        #return TestFailed(msg, file=file, line=line, diff=diff)
         ex = AssertionError(msg)
         ex.file = file;  ex.line = line;  ex.diff = diff
-        raise ex
+        return ex
 
     def __eq__(self, other):
         if (self.value == other) == self._bool:  return True
