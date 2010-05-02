@@ -802,3 +802,35 @@ Ran 2 tests in 0.000s
 FAILED (failures=1)
 """[1:]
 do_test_with(desc, script, expected)
+
+
+## simple reporter
+desc = "simple reporter"
+script = r"""
+from oktest import *
+import sys
+sys.stderr = sys.stdout
+import unittest
+class FooTest(object):
+  def test_success(self):
+    ok (1+1) == 2
+  def test_failed(self):
+    ok (1+1) == 3
+  def test_error(self):
+    ok (int('aaa')) == 0
+run(FooTest)
+"""[1:]
+expected = r"""
+### FooTest
+.fE
+Failed: FooTest#test_failed()
+  2 == 3 : failed.
+  File "_test_.py", line 9
+    ok (1+1) == 3
+ERROR: FooTest#test_error()
+  ValueError: invalid literal for int() with base 10: 'aaa'
+  File "_test_.py", line 11, in test_error
+    ok (int('aaa')) == 0
+"""[1:]
+os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
+do_test_with(desc, script, expected)
