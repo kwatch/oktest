@@ -49,8 +49,9 @@ def _msg(target, op, other=None):
     else:                     msg = '%r %s %r' % (target, op, other)
     if op == '==' and target != other and _is_string(target) and _is_string(other):
         if DIFF:
-            diff = _diff(target, other)
-            return (msg, diff)
+            if python2 or isinstance(target, str) and isinstance(other, str):
+                diff = _diff(target, other)
+                return (msg, diff)
     return msg
 
 
