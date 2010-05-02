@@ -27,7 +27,7 @@ import oktest
 echo = sys.stdout.write
 python_command = os.environ.get('PYTHON', 'python')
 
-def do_test_with(desc, script, expected):
+def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[01]s')):
     filename = '_test_.py'
     try:
         echo("- %s..." % desc)
@@ -36,6 +36,8 @@ def do_test_with(desc, script, expected):
         if isinstance(output, str):
             output = re.sub(r' at 0x[0-9a-f]{6}', '', output)
         if output == expected:
+            echo("done.\n")
+        elif _pat.sub('', output) == _pat.sub('', expected):
             echo("done.\n")
         else:
             echo("FAILED.\n")
