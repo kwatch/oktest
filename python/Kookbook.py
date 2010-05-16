@@ -25,10 +25,12 @@ copyright = prop('copyright', "copyright(c) 2010 kuwata-lab.com all rights reser
 license   = "MIT License"
 #kook_default_product = 'test'
 
+python = prop('python', 'python')
+
 
 @recipe
 def task_test(c):
-    system("python test/oktest_test.py")
+    system(c%"$(python) test/oktest_test.py")
 
 
 @recipe
@@ -45,7 +47,8 @@ def task_edit(c):
 
 
 @recipe
-def task_package(c):
+@spices('-a: create egg files for 2.4-2.7')
+def task_package(c, *args, **kwargs):
     """create package"""
     ## remove files
     pattern = c%"dist/$(package)-$(release)*"
@@ -62,8 +65,8 @@ def task_package(c):
     cp('setup.py.txt', 'setup.py')
     edit('setup.py', by=repl)
     ## setup
-    system('python setup.py sdist')
-    #system('python setup.py sdist --keep-temp')
+    system(c%'$(python) setup.py sdist')
+    #system(c%'$(python) setup.py sdist --keep-temp')
     with chdir('dist') as d:
         #pkgs = kook.util.glob2(c%"$(package)-$(release).tar.gz");
         #pkg = pkgs[0]
@@ -75,18 +78,28 @@ def task_package(c):
         #echo("*** debug: pkg=%s, dir=%s" % (pkg, dir))
         edit(c%"$(dir)/**/*", by=repl)
         #with chdir(dir):
-        #    system("python setup.py egg_info --egg-base .")
+        #    system(c%"$(python) setup.py egg_info --egg-base .")
         #    rm("*.pyc")
         mv(pkg, c%"$(pkg).bkup")
         #tar_czf(c%"$(dir).tar.gz", dir)
         system(c%"tar -cf $(dir).tar $(dir)")
         system(c%"gzip -f9 $(dir).tar")
         ## create *.egg file
+        opt_a = kwargs.get('a')
         with chdir(dir):
-            system("python setup.py bdist_egg")
-            mv("dist/*.egg", "..")
-            rm_rf("build", "dist")
-
+            if opt_a:
+                pythons = [
+                    '/opt/local/bin/python2.7',
+                    '/opt/local/bin/python2.6',
+                    '/opt/local/bin/python2.5',
+                    '/opt/local/bin/python2.4',
+                ]
+            else:
+                pythons = [ python ]
+            for py in pythons:
+                system(c%'$(py) setup.py bdist_egg')
+                mv("dist/*.egg", "..")
+                rm_rf("build", "dist")
 
 @recipe
 def task_uninstall(c):
