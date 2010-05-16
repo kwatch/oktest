@@ -105,26 +105,6 @@ def task_package(c, *args, **kwargs):
                 rm_rf("build", "dist")
 
 @recipe
-def task_uninstall(c):
-    #script_file    = "$python_basepath/bin/" + script_file;
-    #library_files  = [ os.path.join(site_packages_path, item) for item in library_files ]
-    #compiled_files = [ item + '.c' for item in library_files ]
-    script_file = "/usr/local/bin/pytenjin"
-    dir = site_packages_dir
-    library_files = "$dir/$(package)*"
-    rm(script_file, library_files)
-    filename = "$dir/easy-install.pth"
-    if os.path.exists(filename):
-        s = read_file(filename)
-        pattern = r'/^\.\/$(package)-.*\n/m'
-        if re.match(pattern, s):
-            s = re.sub(pattern, s)
-        write_file(filename, s)
-        repl = ((pattern, ''), )
-        edit(filename, by=repl)
-
-
-@recipe
 def task_clean(c):
     pass
     from glob import glob
