@@ -36,9 +36,9 @@ def task_test(c):
 @recipe
 def task_edit(c):
     def replacer(s):
-        s = re.sub(r'\$Release:.*\$',    '$Release: %s $'   % release,   s)
-        s = re.sub(r'\$Copyright:.* \$', '$Copyright: %s $' % copyright, s)
-        s = re.sub(r'\$License:.*\$',    '$License: %s $'   % license,   s)
+        s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
+        s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
+        s = re.sub(r'\$License:[^%]*?\$',    '$License: %s $'   % license,   s)
         return s
     filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
@@ -56,11 +56,14 @@ def task_package(c, *args, **kwargs):
         rm_rf(pattern)
     ## edit files
     repl = (
-        (r'\$Release\$', release),
-        (r'\$Release:.*?\$', '$Release: %s $' % release),
+        (r'\$Release\$',   release),
         (r'\$Copyright\$', copyright),
-        (r'\$Package\$', package),
-        (r'\$License\$', license),
+        (r'\$License\$',   license),
+        (r'\$Package\$',   package),
+        (r'\$Release:[^%]*?\$',   '$Release: %s $'   % release),
+        (r'\$Copyright:[^%]*?\$', '$Copyright: %s $' % copyright),
+        (r'\$License:[^%]*?\$',   '$License: %s $'   % license),
+        (r'X\.X\.X',   release),
     )
     cp('setup.py.txt', 'setup.py')
     edit('setup.py', by=repl)
