@@ -9,7 +9,7 @@
 ##
 ## cookbook for pykook -- you must install pykook at first.
 ## pykook is a build tool like Rake. you can define your task in Python.
-## http://pypi.python.org/pypi/Kook/0.0.1
+## http://pypi.python.org/pypi/Kook/
 ## http://www.kuwata-lab.com/kook/pykook-users-guide.html
 ##
 
@@ -104,10 +104,11 @@ def task_package(c, *args, **kwargs):
                 mv("dist/*.egg", "..")
                 rm_rf("build", "dist")
 
+
 @recipe
 def task_clean(c):
-    pass
-    from glob import glob
+    rm_rf('**/*.pyc', 'dist', c%'$(package).zip')
+
 
 @recipe
 @product('website/index.html')
@@ -119,8 +120,8 @@ def file_website_index_html(c):
     opts = '--stylesheet-path=style.css --link-stylesheet --strip-class=field --strip-class=field-name --strip-class=field-body'
     system(c%'rst2html.py $(opts) $(ingred) > $(product)')
     def f(s):
-        s = s.replace('$Release: $', '$Release: %s $' % release)
-        s = s.replace('$Release$', release)
+        s = s.replace('$Release:[^%]*?$', '$Release: %s $' % release)
+        s = s.replace('$'+'Release'+'$', release)
         s = s.replace('README', 'Oktest - a new style testing library -')
         #s = re.sub(r'^<h(\d)>(.*?)</h\d>', r, s)
         pat = re.compile(r'^<h(\d)>(.*?)</h\d>', re.M)
