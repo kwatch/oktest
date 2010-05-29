@@ -492,11 +492,8 @@ module Oktest
 
   def self.run(*classes)
     reporter = REPORTER.new
-    classes.each do |cls|
-      runner = Runner.new(reporter)
-      runner.run(cls)
-    end
-    reporter
+    runner = Runner.new(reporter)
+    classes.each {|cls| runner.run(cls) }
   end
 
 
