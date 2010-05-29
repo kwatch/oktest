@@ -491,7 +491,9 @@ module Oktest
 
 
   def self.run(*classes)
-    reporter = REPORTER.new
+    opts = classes.last.is_a?(Hash) ? classes.pop() : {}
+    reporter_class = opts[:verbose] ? VerboseReporter : REPORTER
+    reporter = reporter_class.new(opts[:out])
     runner = Runner.new(reporter)
     classes.each {|cls| runner.run(cls) }
   end

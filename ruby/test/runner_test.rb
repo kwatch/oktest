@@ -184,4 +184,45 @@ END
     ENV.delete('TEST')
   end
 
+  # ----------------------------------------
+
+  class BazTest2
+    include Oktest::TestCase
+    def test_foo; ok(1+1) == 2; end
+    def test_bar; ok(1+1) == 3; end
+  end
+
+  def _assert_equal(expected, actual)
+    expected = expected.gsub(%r|^    \./test/|, '    test/') if expected != actual
+    assert_equal(expected, actual)
+  end
+
+  def test_oktest_run
+    ## :out option
+      out = StringIO.new
+      Oktest.run(BazTest2, :out=>out)
+      expected = <<'END'
+### OktestRunnerTest::BazTest2
+.f
+Failed: test_bar()
+    2 == 3: failed.
+    ./test/runner_test.rb:196:in `test_bar'
+      def test_bar; ok(1+1) == 3; end
+END
+      _assert_equal expected, out.string
+    ## :verbose option
+      out = StringIO.new
+      Oktest.run(BazTest2, :out=>out, :verbose=>true)
+      expected = <<'END'
+### OktestRunnerTest::BazTest2
+- test_foo ... ok
+- test_bar ... FAILED
+    2 == 3: failed.
+    ./test/runner_test.rb:196:in `test_bar'
+      def test_bar; ok(1+1) == 3; end
+
+END
+      _assert_equal expected, out.string
+  end
+
 end
