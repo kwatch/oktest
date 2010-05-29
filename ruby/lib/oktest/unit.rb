@@ -10,6 +10,14 @@ require 'test/unit'
 
 module Oktest
 
+  remove_const(:AssertionFailed)
+  parent_class = defined?(Test::Unit::AssertionFailedError) ? Test::Unit::AssertionFailedError \
+               : defined?(MiniTest::Assertion) ? MiniTest::Assertion \
+               : Exception
+  class AssertionFailed < parent_class
+    attr_accessor :diff
+  end
+
 
   module TestUnitHelper
 
