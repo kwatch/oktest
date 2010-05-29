@@ -14,6 +14,10 @@ require 'oktest'
 
 class OktestRunnerTest < Test::Unit::TestCase
 
+  def case_if(desc)
+    yield
+  end
+
   def _runner(reporter_class=Oktest::REPORTER)
     @out = StringIO.new
     @reporter = reporter_class.new(@out)
@@ -167,19 +171,25 @@ END
 
   def test_ENV_TEST
     ## $TEST limits test names
-    ENV['TEST'] = 'bar'
-    _runner().run(BazTest1)
-    assert_equal({:bar=>true}, BazTest1.invoked)
+    case_if "ENV['TEST'] is specified" do
+      ENV['TEST'] = 'bar'
+      _runner().run(BazTest1)
+      assert_equal({:bar=>true}, BazTest1.invoked)
+    end
     ## partial match
-    BazTest1.invoked.clear
-    ENV['TEST'] = 'ba'
-    _runner().run(BazTest1)
-    assert_equal({:bar=>true, :baz=>true}, BazTest1.invoked)
+    case_if "ENV['TEST'] matches to several test methods" do
+      BazTest1.invoked.clear
+      ENV['TEST'] = 'ba'
+      _runner().run(BazTest1)
+      assert_equal({:bar=>true, :baz=>true}, BazTest1.invoked)
+    end
     ## if $TEST is not set then all tests are invoked
-    ENV.delete('TEST')
-    BazTest1.invoked.clear
-    _runner().run(BazTest1)
-    assert_equal({:foo=>true, :bar=>true, :baz=>true}, BazTest1.invoked)
+    case_if "ENV['TEST'] is not specified" do
+      ENV.delete('TEST')
+      BazTest1.invoked.clear
+      _runner().run(BazTest1)
+      assert_equal({:foo=>true, :bar=>true, :baz=>true}, BazTest1.invoked)
+    end
   ensure
     ENV.delete('TEST')
   end
@@ -199,6 +209,7 @@ END
 
   def test_oktest_run
     ## :out option
+    case_if ':out option is specified' do
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out)
       expected = <<'END'
@@ -206,11 +217,13 @@ END
 .f
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:196:in `test_bar'
+    ./test/runner_test.rb:202:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
       _assert_equal expected, out.string
+    end
     ## :verbose option
+    case_if ':verbose option is specified' do
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out, :verbose=>true)
       expected = <<'END'
@@ -218,11 +231,12 @@ END
 - test_foo ... ok
 - test_bar ... FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:196:in `test_bar'
+    ./test/runner_test.rb:202:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 
 END
       _assert_equal expected, out.string
+    end
   end
 
 end
