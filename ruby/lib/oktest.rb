@@ -240,26 +240,29 @@ module Oktest
     end
 
     def self.included(klass)
-      klass.class_eval do
 
-        def self.method_added(name)
-          dict = (@_test_method_names_dict ||= {})
-          name = name.to_s
-          if name =~ /\Atest_?/
-            dict[name].nil?  or
-              raise NameError.new("#{self.name}##{name}(): already defined (please change test method name).")
-            dict[name] = dict.size()
+      def klass.method_added(name)
+        dict = (@_test_method_names_dict ||= {})
+        name = name.to_s
+        if name =~ /\Atest_?/
+          ## if test method name is duplicated, raise error
+          dict[name].nil?  or
+            raise NameError.new("#{self.name}##{name}(): already defined (please change test method name).")
+          dict[name] = dict.size()
+          ## if ENV['TEST'] is set, remove unmatched method
+          if ENV['TEST']
+            remove_method(name) unless name.sub(/\Atest_?/, '').index(ENV['TEST'])
           end
         end
-
-        def self.test(desc, &block)
-          @_test_count ||= 0
-          @_test_count += 1
-          method_name = "test_%03d_%s" % [@_test_count, desc.to_s.gsub(/[^\w]/, '_')]
-          define_method(method_name, block)
-        end
-
       end
+
+      def klass.test(desc, &block)
+        @_test_count ||= 0
+        @_test_count += 1
+        method_name = "test_%03d_%s" % [@_test_count, desc.to_s.gsub(/[^\w]/, '_')]
+        define_method(method_name, block)
+      end
+
     end
 
   end
@@ -470,7 +473,7 @@ module Oktest
         begin
           obj.__send__(method_name)
           reporter.print_ok(obj)
-        rescue AssertionFailed => ex
+        rescue Oktest::AssertionFailed => ex
           count += 1
           reporter.print_failed(obj, ex)
         rescue Exception => ex
