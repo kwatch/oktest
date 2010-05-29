@@ -35,7 +35,7 @@ module Oktest
     end
 
 
-    module TestCaseHelper
+    module TestCase
 
       def ok(actual=nil)
         actual = yield if block_given?       # experimental
@@ -45,32 +45,6 @@ module Oktest
       def not_ok(actual=nil)
         actual = yield if block_given?       # experimental
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
-      end
-
-      def self.included(klass)
-
-        def klass.method_added(name)
-          dict = (@_test_method_names_dict ||= {})
-          name = name.to_s
-          if name =~ /\Atest_?/
-            ## if test method name is duplicated, raise error
-            dict[name].nil?  or
-              raise NameError.new("#{self.name}##{name}(): already defined (please change test method name).")
-            dict[name] = dict.size()
-            ## if ENV['TEST'] is set, remove unmatched method
-            if ENV['TEST']
-              remove_method(name) unless name.sub(/\Atest_?/, '').index(ENV['TEST'])
-            end
-          end
-        end
-
-        def klass.test(desc, &block)
-          @_test_count ||= 0
-          @_test_count += 1
-          method_name = "test_%03d_%s" % [@_test_count, desc.to_s.gsub(/[^\w]/, '_')]
-          define_method(method_name, block)
-        end
-
       end
 
     end
@@ -84,6 +58,7 @@ end
 
 class ::Test::Unit::TestCase
 
-  include Oktest::TestUnitHelper::TestCaseHelper
+  include Oktest::TestCase
+  include Oktest::TestUnitHelper::TestCase
 
 end
