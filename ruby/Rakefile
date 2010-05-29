@@ -1,0 +1,15 @@
+###
+### $Release: $
+### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
+### $License: MIT License $
+###
+
+task :default => :test
+
+task :test do
+  Dir.glob("test/*").each do |fpath|
+    #sh "ruby -I lib #{fpath}"
+    puts "## load(#{fpath.inspect})"
+    load(fpath)
+  end
+end
