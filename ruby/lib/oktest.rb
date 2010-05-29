@@ -309,18 +309,14 @@ module Oktest
       @out.flush if @_flush
     end
 
-    def write2(str)
-      write(str)
-    end
-
-    def print_backtrace(ex)
+    def print_backtrace(ex, out=@out)
       ex.backtrace.each do |str|
-        write2("    #{str}\n")
+        out << "    #{str}\n"
         if str =~ /\A(.*):(\d+):in `(.*?)'/
           filepath, linenum, method = $1, $2.to_i, $3
           #break if method =~ /\Atest_?/
           line = get_line(filepath, linenum)
-          write2("      #{line.strip}\n") if line
+          out << "      #{line.strip}\n" if line
           break if method =~ /\Atest_?/
         end
       end
@@ -352,11 +348,6 @@ module Oktest
       @buf = nil
     end
 
-    def write2(str)
-      @buf << str
-    end
-    private :write2
-
     def before(obj)
     end
 
@@ -369,18 +360,18 @@ module Oktest
 
     def print_failed(obj, ex)
       write("f")
-      write2("Failed: #{_test_ident(obj)}()\n")
-      write2("    #{ex.message}\n")
-      print_backtrace(ex)
+      @buf << "Failed: #{_test_ident(obj)}()\n"
+      @buf << "    #{ex.message}\n"
+      print_backtrace(ex, @buf)
       #assert ex.is_a?(AssertionFailed)
-      write2(ex.diff) if ex.diff
+      @buf << ex.diff if ex.diff
     end
 
     def print_error(obj, ex)
       write("E")
       @buf << "ERROR: #{_test_ident(obj)}()\n"
       @buf << "    #{ex.class.name}: #{ex.message}\n"
-      print_backtrace(ex)
+      print_backtrace(ex, @buf)
     end
 
   end
@@ -410,15 +401,15 @@ module Oktest
     def print_failed(obj, ex)
       write("FAILED\n")
       write("    #{ex.message}\n")
-      print_backtrace(ex)
+      print_backtrace(ex, @out)
       #assert ex.is_a?(AssertionFailed)
-      write2(ex.diff) if ex.diff
+      write(ex.diff) if ex.diff
     end
 
     def print_error(obj, ex)
       write("ERROR\n")
       write("  #{ex.class.name}: #{ex.message}\n")
-      print_backtrace(ex)
+      print_backtrace(ex, @out)
     end
 
   end
