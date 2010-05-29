@@ -6,8 +6,54 @@
 
 module Oktest
 
+  @DIFF = ENV['DIFF'] || File.file?('/usr/bin/diff')
+
+  def self.DIFF
+    @DIFF
+  end
+
+  def self.DIFF=(command)
+    @DIFF = command
+  end
+
+  def self.diff(actual, expected)
+    ## actual and expected should be different
+    return nil if actual == expected
+    ## both actual and expected should be String
+    return nil unless actual.is_a?(String) && expected.is_a?(String)
+    ## either actual or expected should have enough length
+    return nil if actual.length < 10 && expected.length < 10
+    ## diff command
+    command = Oktest.DIFF
+    return nil unless command
+    command = 'diff -u' if command == true
+    ## diff
+    require 'tempfile' unless defined?(Tempfile)
+    output = nil
+    #Tempfile.open('actual') do |af|    # af.path file is not removed. why?
+    #  af.write(actual); af.flush()
+    #  Tempfile.open('expected') do |ef|
+    #    ef.write(expected); ef.flush()
+    #    #output = `#{command} #{ef.path} #{af.path}`
+    #    output = IO.popen(cmd="#{command} #{ef.path} #{af.path}") {|io| io.read }
+    #  end
+    #end
+    af = ef = nil
+    begin
+      af = Tempfile.open('actual')   ; af.write(actual)   ; af.flush
+      ef = Tempfile.open('expected') ; ef.write(expected) ; ef.flush
+      #output = `#{command} #{ef.path} #{af.path}`
+      output = IO.popen("#{command} #{ef.path} #{af.path}") {|io| io.read() }
+    ensure
+      af.close if ef
+      ef.close if ef
+    end
+    return output.sub(/\A.*?\n.*?\n/, "--- expected\n+++ actual\n")
+  end
+
 
   class AssertionFailed < Exception
+    attr_accessor :diff
   end
 
 
@@ -22,7 +68,12 @@ module Oktest
     end
 
     def ==(expected)
-      do_assert(@actual == expected, expected, '==', '!=')
+      begin
+        do_assert(@actual == expected, expected, '==', '!=')
+      rescue AssertionFailed => ex
+        ex.diff = Oktest.diff(@actual, expected) if @actual != expected
+        raise ex
+      end
     end
 
 #    def !=(expected)
@@ -321,6 +372,8 @@ module Oktest
       write2("Failed: #{_test_ident(obj)}()\n")
       write2("    #{ex.message}\n")
       print_backtrace(ex)
+      #assert ex.is_a?(AssertionFailed)
+      write2(ex.diff) if ex.diff
     end
 
     def print_error(obj, ex)
@@ -358,6 +411,8 @@ module Oktest
       write("FAILED\n")
       write("    #{ex.message}\n")
       print_backtrace(ex)
+      #assert ex.is_a?(AssertionFailed)
+      write2(ex.diff) if ex.diff
     end
 
     def print_error(obj, ex)

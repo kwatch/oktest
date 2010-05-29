@@ -38,7 +38,7 @@ class OktestReporterTest < Test::Unit::TestCase
     out = StringIO.new
     reporter = @klass.new(out)
     runner = Oktest::Runner.new(reporter)
-    runner.run(ExampleTest)
+    runner.run(@testcase)
     actual = out.string
     @debug  and $stderr.puts "\033[0;31m*** debug: out.string=#{out.string}\033[0m"
     expected = @expected
@@ -48,6 +48,7 @@ class OktestReporterTest < Test::Unit::TestCase
 
   def test_verbose_reporter
     @klass    = Oktest::VerboseReporter
+    @testcase = ExampleTest
     @debug    = false
     @expected = \
 %q"### OktestReporterTest::ExampleTest
@@ -71,6 +72,7 @@ class OktestReporterTest < Test::Unit::TestCase
 
   def test_simple_reporter
     @klass    = Oktest::SimpleReporter
+    @testcase = ExampleTest
     @debug    = false
     @expected = \
 %q"### OktestReporterTest::ExampleTest
@@ -89,6 +91,68 @@ Failed: test_fail_nested()
       _foo(1+1, 3)
 "
     _test()
+  end
+
+  # ----------------------------------------
+
+  class DiffTest
+    include Oktest::TestCase
+    def test_long    # diff should be dipslayed
+      expected = "AAA\nBBB\nCCC\n"
+      actual   = "AAA\nCCC\nDDD\n"
+      ok(actual) == expected
+    end
+    def test_short    # diff should not be displayed because actuala and expected are too short
+      expected = "AAABBBCCC"
+      actual   = "AAACCCDDD"
+      ok(actual) == expected
+    end
+  end
+
+  def test_diff
+    @klass = Oktest::SimpleReporter
+    @testcase = DiffTest
+    orig = Oktest.DIFF
+    ## if Oktest.DIFF is false then diff is not displayed
+    Oktest.DIFF = false
+    @expected = <<'END'
+### OktestReporterTest::DiffTest
+ff
+Failed: test_long()
+    "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
+    ./test/reporter_test.rb:103:in `test_long'
+      ok(actual) == expected
+Failed: test_short()
+    "AAACCCDDD" == "AAABBBCCC": failed.
+    ./test/reporter_test.rb:108:in `test_short'
+      ok(actual) == expected
+END
+    _test()
+    ## if Oktest.DIFF is true then diff is displayed
+    Oktest.DIFF = true
+    @expected = <<'END'
+### OktestReporterTest::DiffTest
+ff
+Failed: test_long()
+    "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
+    ./test/reporter_test.rb:103:in `test_long'
+      ok(actual) == expected
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ AAA
+-BBB
+ CCC
++DDD
+Failed: test_short()
+    "AAACCCDDD" == "AAABBBCCC": failed.
+    ./test/reporter_test.rb:108:in `test_short'
+      ok(actual) == expected
+END
+    _test()
+    ##
+  ensure
+    Oktest.DIFF = orig
   end
 
 
