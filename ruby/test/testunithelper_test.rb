@@ -209,4 +209,12 @@ END
     end
   end
 
+  ##
+  test "subclass of Test::Unit::TestCae is not included in Oktest::TestCase._subclasses()" do
+    assert ! Oktest::TestCase._subclasses().include?(FugarTest0)
+  end
+  test "Oktest::TestUnitHelper::TestCae is not included in Oktest::TestCase._subclasses()" do
+    assert ! Oktest::TestCase._subclasses().include?(Oktest::TestUnitHelper::TestCase)
+  end
+
 end

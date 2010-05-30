@@ -269,7 +269,7 @@ module Oktest
     end
 
     def self.included(klass)
-      @_subclasses << klass
+      @_subclasses << klass if klass.is_a?(Class)
       klass.class_eval do
         extend Oktest::TestCaseClassMethod
       end
