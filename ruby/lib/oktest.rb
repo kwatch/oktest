@@ -238,6 +238,29 @@ module Oktest
       return ret
     end
 
+    def dummy_file(pairs)
+      fnames = []
+      begin
+        pairs.each do |fname, content|
+          fnames << fname
+          File.open(fname, 'wb') {|f| f.write(content) }
+          yield
+        end
+      ensure
+        File.unlink(*fnames)
+      end
+    end
+
+    def dummy_dir(*paths)
+      require 'fileutils' unless defined?(FileUtils)
+      begin
+        paths.each {|path| FileUtils.mkdir_p(path) }
+        yield
+      ensure
+        paths.reverse.each {|path| FileUtils.rm_rf(path) }
+      end
+    end
+
     ## marker method to represent pre-condition
     def pre_cond; yield; end
 

@@ -137,6 +137,66 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
 
   ##
+  ## dummy_file(), dummy_dir()
+  ##
+  def test_dummy_file()
+    extend Oktest::TestCase
+    ## dummy file should be remove after block yielded
+    if true
+      assert ! File.exist?('A.txt')
+      dummy_file('A.txt'=>'AAA') do
+        assert File.exist?('A.txt')
+        assert_equal 'AAA', File.read('A.txt')
+      end
+      assert ! File.exist?('A.txt')
+    end
+    ## directory should be created in ahead
+    if true
+      ex = assert_raise(Errno::ENOENT) do
+        dummy_file('xxx/A.txt'=>'AAA') do
+          nil
+        end
+      end
+      assert_equal "No such file or directory - xxx/A.txt", ex.message
+    end
+  end
+
+  def test_dummy_dir()
+    extend Oktest::TestCase
+    ## dummy file should be remove after block yielded
+    if true
+      begin
+        assert ! File.exist?('xxx.d')
+        assert ! File.exist?('yyy.d')
+        dummy_dir('xxx.d', 'yyy.d/zzz') do
+          assert File.directory?('xxx.d')
+          assert File.directory?('yyy.d')
+          assert File.directory?('yyy.d/zzz')
+          File.open('xxx.d/A.txt', 'w') {|f| f.write("dummy") }
+          File.open('yyy.d/zzz/B.txt', 'w') {|f| f.write("dummy") }
+        end
+        assert ! File.exist?('xxx.d')
+        assert ! File.exist?('yyy.d/zzz')
+        assert   File.exist?('yyy.d')
+      ensure
+        require 'fileutils'
+        FileUtils.rm_rf(['xxx.d', 'yyy.d'])
+      end
+    end
+    ## directory should be created in ahead
+    if true
+      ex = assert_raise(Errno::ENOENT) do
+        dummy_file('xxx/A.txt'=>'AAA') do
+          nil
+        end
+      end
+      assert_equal "No such file or directory - xxx/A.txt", ex.message
+    end
+  end
+
+
+
+  ##
   ## 'include Oktest::TestCase' sets Oktest::TestCase._subclasses automatically
   ##
   def test__subclasses
