@@ -78,7 +78,7 @@ module Oktest
           linenum = __LINE__ - 2
           ## append output of 'diff -u' into error message
           diff = Oktest.diff(actual, expected)
-          ex.message << "\n" << diff if diff
+          ex.message << "\n" << diff.chomp if diff && ! diff.empty?
           ## remove 'oktest/unit.rb' from backtrace (not to change output message)
           idx = ex.backtrace.index {|bt| bt.index("#{__FILE__}:#{linenum}:") }
           #idx = ex.backtrace.index {|bt| bt =~ %r`/oktest/unit\.rb:` }

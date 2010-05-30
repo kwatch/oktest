@@ -184,7 +184,6 @@ test_fail2a(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:57]:
  CCC
 +DDD
 
-
   4) Failure:
 test_fail2b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:60]:
 "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
