@@ -200,16 +200,6 @@ module Oktest
       "#{@actual.inspect} #{op} #{expected.inspect}: failed."
     end
 
-#--
-#    def check2(flag, expr)
-#      if @negative
-#        flag = ! flag
-#        expr = "! #{expr}"
-#      end
-#      return true if flag
-#      raise new_assertion_failed("#{expr}: failed.")
-#    end
-#++
     def check2(flag)
       flag = ! flag if @negative
       return true if flag

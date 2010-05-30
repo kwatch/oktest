@@ -28,6 +28,8 @@ module Oktest
 
     class AssertionObject < Oktest::AssertionObject
 
+      private
+
       def do_assert(flag, expected, op, negative_op)   # for Test::Unit
         begin
           flag, msg = check(flag, expected, op, negative_op)
@@ -71,12 +73,10 @@ module Oktest
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
       end
 
-      def self.included(klass)
-        klass.class_eval do
-          def self.inherited(cls)
-            super
-            extend Oktest::TestCaseClassMethod
-          end
+      def self.included(klass)   # :nodoc:
+        def klass.inherited(cls)
+          super
+          extend Oktest::TestCaseClassMethod
         end
       end
 
@@ -91,12 +91,6 @@ end
 
 class ::Test::Unit::TestCase
 
-  #include Oktest::TestCase
   include Oktest::TestUnitHelper::TestCase
-
-#  def self.inherited(klass)
-#    super
-#    extend Oktest::TestCaseClassMethod
-#  end
 
 end
