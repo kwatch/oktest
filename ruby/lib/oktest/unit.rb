@@ -59,7 +59,7 @@ module Oktest
 
 
     module TestCase
-      include Oktest::TestCaseUtil
+      include Oktest::TestCase
 
       def ok(actual=nil)
         actual = yield if block_given?       # experimental
@@ -69,6 +69,15 @@ module Oktest
       def not_ok(actual=nil)
         actual = yield if block_given?       # experimental
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
+      end
+
+      def self.included(klass)
+        klass.class_eval do
+          def self.inherited(cls)
+            super
+            extend Oktest::TestCaseClassMethod
+          end
+        end
       end
 
     end
@@ -85,9 +94,9 @@ class ::Test::Unit::TestCase
   #include Oktest::TestCase
   include Oktest::TestUnitHelper::TestCase
 
-  def self.inherited(klass)
-    super
-    extend Oktest::TestCaseClassMethod
-  end
+#  def self.inherited(klass)
+#    super
+#    extend Oktest::TestCaseClassMethod
+#  end
 
 end
