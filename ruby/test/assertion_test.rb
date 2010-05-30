@@ -230,11 +230,13 @@ class OktestAssertionTest < Test::Unit::TestCase
       errmsg = "undefined method `foo' for nil:NilClass"
       case_when "expected exception is raised" do
         pr = proc { nil.foo }
+        ex = nil
         assert_nothing_raised do
-          ok(pr).raise?(NoMethodError, errmsg)
+          ex = ok(pr).raise?(NoMethodError, errmsg)
         end
         assert_kind_of NoMethodError, pr.exception
         assert_equal "undefined method `foo' for nil:NilClass", pr.exception.message
+        assert_same pr.exception, ex
       end
       case_when "subclass of expected exception class is raised" do
         pr = proc { nil.foo }

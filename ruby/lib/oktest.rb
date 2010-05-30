@@ -140,9 +140,11 @@ module Oktest
     def raise?(exception_class, message=nil)
       if @negative
         _should_not_raise(exception_class)
+        ex = nil
       else
-        _should_raise(exception_class, message)
+        ex = _should_raise(exception_class, message)
       end
+      return ex
     end
 
     private
@@ -161,6 +163,7 @@ module Oktest
           raise new_assertion_failed("#{ex.message.inspect} == #{message.inspect}: failed.", 2)
       end
       raise new_assertion_failed("#{exception_class.name} expected but not raised.", 2) if not_raised
+      return ex
     end
 
     def _should_not_raise(exception_class=Exception)
