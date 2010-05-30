@@ -213,6 +213,8 @@ module Oktest
 
   module Helper
 
+    module_function
+
     def ok(actual=nil)
       actual = yield if block_given?       # experimental
       return Oktest::AssertionObject.new(self, actual, false)
