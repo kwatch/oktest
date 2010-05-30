@@ -204,6 +204,7 @@ END
 
   def _assert_equal(expected, actual)
     expected = expected.gsub(%r|^    \./test/|, '    test/') if expected != actual
+    expected = expected.gsub(%r|test/runner_test\.rb|, __FILE__) if expected != actual && RUBY_VERSION >= '1.9'
     assert_equal(expected, actual)
   end
 

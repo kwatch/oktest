@@ -43,6 +43,7 @@ class OktestReporterTest < Test::Unit::TestCase
     @debug  and $stderr.puts "\033[0;31m*** debug: out.string=#{out.string}\033[0m"
     expected = @expected
     expected = expected.gsub(%r|^    \./test/|, '    test/') if expected != actual
+    expected = expected.gsub(%r|test/reporter_test\.rb|, __FILE__) if expected != actual && RUBY_VERSION >= '1.9'
     assert_equal(expected, actual)
   end
 
@@ -120,11 +121,11 @@ Failed: test_fail_nested()
 ff
 Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
-    ./test/reporter_test.rb:103:in `test_long'
+    ./test/reporter_test.rb:104:in `test_long'
       ok(actual) == expected
 Failed: test_short()
     "AAACCCDDD" == "AAABBBCCC": failed.
-    ./test/reporter_test.rb:108:in `test_short'
+    ./test/reporter_test.rb:109:in `test_short'
       ok(actual) == expected
 END
     _test()
@@ -135,7 +136,7 @@ END
 ff
 Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
-    ./test/reporter_test.rb:103:in `test_long'
+    ./test/reporter_test.rb:104:in `test_long'
       ok(actual) == expected
 --- expected
 +++ actual
@@ -146,7 +147,7 @@ Failed: test_long()
 +DDD
 Failed: test_short()
     "AAACCCDDD" == "AAABBBCCC": failed.
-    ./test/reporter_test.rb:108:in `test_short'
+    ./test/reporter_test.rb:109:in `test_short'
       ok(actual) == expected
 END
     _test()

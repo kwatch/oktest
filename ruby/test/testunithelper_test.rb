@@ -82,6 +82,7 @@ class TestUnitHelperTest < Test::Unit::TestCase
     actual.sub!(rexp, '')
     expected.sub!(rexp, '')
     expected.gsub!(%r|\./test/|, 'test/') if actual != expected
+    expected = expected.gsub(%r|test/testunithelper_test\.rb|, __FILE__) if expected != actual && RUBY_VERSION >= '1.9'
     assert_equal expected, actual
   ensure
     _teardown_FugarTest0()
@@ -101,21 +102,21 @@ Finished in 0.014489 seconds.
   1) Failure:
 test_fail1a(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:51:in `test_fail1a'
-     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:94:in `_do_test_with_testunit'
      ./test/testunithelper_test.rb:76:in `test_basic']:
 <false> is not true.
 
   2) Failure:
 test_fail1b(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:54:in `test_fail1b'
-     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:94:in `_do_test_with_testunit'
      ./test/testunithelper_test.rb:76:in `test_basic']:
 2 == 3: failed.
 
   3) Failure:
 test_fail2a(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:57:in `test_fail2a'
-     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:94:in `_do_test_with_testunit'
      ./test/testunithelper_test.rb:76:in `test_basic']:
 <"AAA\nBBB\nCCC\n"> expected but was
 <"AAA\nCCC\nDDD\n">.
@@ -123,7 +124,7 @@ test_fail2a(TestUnitHelperTest::FugarTest0)
   4) Failure:
 test_fail2b(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:60:in `test_fail2b'
-     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:94:in `_do_test_with_testunit'
      ./test/testunithelper_test.rb:76:in `test_basic']:
 "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
 
@@ -168,6 +169,7 @@ test_fail2b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:60]:
 
 10 tests, 11 assertions, 4 failures, 0 errors, 0 skips
 END
+    [actual, expected].each {|s| s.sub!(/\ALoaded suite.*?\n/, '') }  # delete first line
     return actual, expected
   ensure
     MiniTest::Unit::TestCase.class_eval do

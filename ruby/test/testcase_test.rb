@@ -47,7 +47,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
   end
 
   def test_test
-    test_method_names = HogeTest2.instance_methods.grep(/\Atest_/).sort
+    test_method_names = HogeTest2.instance_methods().collect {|sym| sym.to_s }.grep(/\Atest_/).sort
     expected = ['test_001_1_1_should_be_2', 'test_002_1_1_should_be_0']
     assert_equal expected, test_method_names
   end

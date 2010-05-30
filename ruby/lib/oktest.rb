@@ -428,7 +428,7 @@ module Oktest
     end
 
     def test_method_names_from(klass)
-      test_method_names = klass.instance_methods(true).grep(/\Atest/).sort()
+      test_method_names = klass.instance_methods(true).collect {|sym| sym.to_s }.grep(/\Atest/).sort()
       dict = klass.instance_variable_get('@_test_method_names_dict')
       if dict
         dict = dict.dup()   # key: test method name (String), value: index (Integer)
