@@ -517,16 +517,22 @@ module Oktest
     reporter = reporter_class.new(opts[:out])
     runner = Runner.new(reporter)
     classes.each {|cls| runner.run(cls) }
-    @_run = true
-  end
-
-  def self._run?   # :nodoc:
-    return @_run
+    self.run_at_exit = false
   end
 
   def self.run_all
     classes = Oktest::TestCase._subclasses()
     self.run(*classes)
+  end
+
+  @_run_at_exit = true
+
+  def self.run_at_exit?
+    return @_run_at_exit
+  end
+
+  def self.run_at_exit=(flag)
+    @_run_at_exit = flag
   end
 
 

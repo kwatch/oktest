@@ -238,13 +238,13 @@ END
 END
       _assert_equal expected, out.string
     end
-    ## set '@_run = true'
-    case_for 'Oktest._run?' do
-      Oktest.instance_variable_set('@_run', false)
-      assert_equal false, Oktest._run?
+    ## set '@_run_at_exit = true'
+    case_for 'Oktest.run_at_exit?' do
+      Oktest.run_at_exit = true
+      assert_equal true, Oktest.run_at_exit?
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out)
-      assert_equal true, Oktest._run?
+      assert_equal false, Oktest.run_at_exit?
     end
   end
 
