@@ -104,7 +104,7 @@ module Oktest
       do_assert(@actual =~ expected, expected, '=~', '!~')
     end
 
-    def nearly_equal(expected, delta)
+    def in_delta?(expected, delta)
       flag = expected - delta <= @actual && @actual <= expected + delta
       check2(flag) { "(#{(expected - delta).inspect} <= #{@actual.inspect} <= #{(expected + delta).inspect})" }
     end

@@ -115,15 +115,15 @@ class OktestAssertionTest < Test::Unit::TestCase
     end
   end
 
-  def test_nearly_equal
-    case_for "ok().nearly_equal" do
-      assert_nothing_raised { ok(3.14159).nearly_equal(3.1415, 0.0001) }
-      ex = assert_raise(_E) { ok(3.14159).nearly_equal(3.1415, 0.00001) }
+  def test_in_delta?
+    case_for "ok().in_delta?" do
+      assert_nothing_raised { ok(3.14159).in_delta?(3.1415, 0.0001) }
+      ex = assert_raise(_E) { ok(3.14159).in_delta?(3.1415, 0.00001) }
       assert_equal '(3.14149 <= 3.14159 <= 3.14151): failed.', ex.message
     end
-    case_for "not_ok().nearly_equal" do
-      assert_nothing_raised { not_ok(3.14159).nearly_equal(3.1415, 0.00001) }
-      ex = assert_raise(_E) { not_ok(3.14159).nearly_equal(3.1415, 0.0001) }
+    case_for "not_ok().in_delta?" do
+      assert_nothing_raised { not_ok(3.14159).in_delta?(3.1415, 0.00001) }
+      ex = assert_raise(_E) { not_ok(3.14159).in_delta?(3.1415, 0.0001) }
       assert_equal '! (3.1414 <= 3.14159 <= 3.1416): failed.', ex.message
     end
   end
