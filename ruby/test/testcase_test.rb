@@ -13,22 +13,26 @@ require 'oktest';  Oktest.run_at_exit = false
 
 class OktestTestCaseTest < Test::Unit::TestCase
 
+  def spec(desc); yield; end
+
   ##
   ## duplicated method should be reported
   ##
 
   def test_method_added
-    ex = assert_raise(NameError) do
-      eval <<-END, binding(), __FILE__, __LINE__+1
-      class HogeTest1
-        include Oktest::TestCase
-        def test1; ok(1+1)==2; end
-        def test1; ok(1+1)==2; end    # duplicated method
+    spec "duplicated method should be reported" do
+      ex = assert_raise(NameError) do
+        eval <<-END, binding(), __FILE__, __LINE__+1
+        class HogeTest1
+          include Oktest::TestCase
+          def test1; ok(1+1)==2; end
+          def test1; ok(1+1)==2; end    # duplicated method
+        end
+        END
       end
-      END
+      expected = "OktestTestCaseTest::HogeTest1#test1(): already defined (please change test method name)."
+      assert_equal expected, ex.message
     end
-    expected = "OktestTestCaseTest::HogeTest1#test1(): already defined (please change test method name)."
-    assert_equal expected, ex.message
   end
 
 
@@ -47,9 +51,11 @@ class OktestTestCaseTest < Test::Unit::TestCase
   end
 
   def test_test
-    test_method_names = HogeTest2.instance_methods().collect {|sym| sym.to_s }.grep(/\Atest_/).sort
-    expected = ['test_001_1_1_should_be_2', 'test_002_1_1_should_be_0']
-    assert_equal expected, test_method_names
+    spec "test() defines test method" do
+      test_method_names = HogeTest2.instance_methods().collect {|sym| sym.to_s }.grep(/\Atest_/).sort
+      expected = ['test_001_1_1_should_be_2', 'test_002_1_1_should_be_0']
+      assert_equal expected, test_method_names
+    end
   end
 
 
@@ -82,19 +88,27 @@ class OktestTestCaseTest < Test::Unit::TestCase
   end
 
   def test_pre_cond
-    assert_equal true, HogeTest3.new.call_pre_cond
+    spec "just invokes block" do
+      assert_equal true, HogeTest3.new.call_pre_cond
+    end
   end
 
   def test_post_cond
-    assert_equal true, HogeTest3.new.call_post_cond
+    spec "just invokes block" do
+      assert_equal true, HogeTest3.new.call_post_cond
+    end
   end
 
-  def test_case_for
-    assert_equal true, HogeTest3.new.call_spec_of
+  def test_spec_of
+    spec "just invokes block" do
+      assert_equal true, HogeTest3.new.call_spec_of
+    end
   end
 
-  def test_case_if
-    assert_equal true, HogeTest3.new.call_spec
+  def test_spec
+    spec "just invokes block" do
+      assert_equal true, HogeTest3.new.call_spec
+    end
   end
 
 
@@ -104,8 +118,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
   def test_capture_io
     extend Oktest::TestCase
-    ## captures $stdout and $stderr
-    if true
+    spec "captures $stdout and $stderr" do
       sout, serr = capture_io() do
         $stdout.write("Suzumiya")
         $stderr.write("Haruhi")
@@ -113,16 +126,14 @@ class OktestTestCaseTest < Test::Unit::TestCase
       assert_equal "Suzumiya", sout
       assert_equal "Haruhi", serr
     end
-    ## takes string as $stdin
-    if true
+    spec "takes string as $stdin" do
       sout, serr = capture_io("Haruhi Suzumiya") do
         input = $stdin.read()
         $stdout.write("input=#{input.inspect}")
       end
       assert_equal 'input="Haruhi Suzumiya"', sout
     end
-    ## restore $stdin, $stdout, and $stderr after block yielded
-    if true
+    spec "restore $stdin, $stdout, and $stderr after block yielded" do
       stdin, stdout, stderr = $stdin, $stdout, $stderr
       sout, serr = capture_io("sos") do
         assert_not_same stdin,  $stdin
@@ -141,8 +152,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
   ##
   def test_dummy_file()
     extend Oktest::TestCase
-    ## dummy file should be remove after block yielded
-    if true
+    spec "dummy file should be remove after block yielded" do
       assert ! File.exist?('A.txt')
       dummy_file('A.txt'=>'AAA') do
         assert File.exist?('A.txt')
@@ -150,8 +160,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
       end
       assert ! File.exist?('A.txt')
     end
-    ## directory should be created in ahead
-    if true
+    spec "directory should be created in ahead" do
       ex = assert_raise(Errno::ENOENT) do
         dummy_file('xxx/A.txt'=>'AAA') do
           nil
@@ -163,8 +172,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
   def test_dummy_dir()
     extend Oktest::TestCase
-    ## dummy file should be remove after block yielded
-    if true
+    spec "dummy file should be remove after block yielded" do
       begin
         assert ! File.exist?('xxx.d')
         assert ! File.exist?('yyy.d')
@@ -183,8 +191,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
         FileUtils.rm_rf(['xxx.d', 'yyy.d'])
       end
     end
-    ## directory should be created in ahead
-    if true
+    spec "directory should be created in ahead" do
       ex = assert_raise(Errno::ENOENT) do
         dummy_file('xxx/A.txt'=>'AAA') do
           nil
@@ -200,9 +207,11 @@ class OktestTestCaseTest < Test::Unit::TestCase
   ## 'include Oktest::TestCase' sets Oktest::TestCase._subclasses automatically
   ##
   def test__subclasses
-    classes = Oktest::TestCase._subclasses()
-    assert classes.include?(HogeTest2)
-    assert classes.include?(HogeTest3)
+    spec "Oktest::TestCase._subclasses() contains class objects which include Oktest::TestCase module" do
+      classes = Oktest::TestCase._subclasses()
+      assert classes.include?(HogeTest2)
+      assert classes.include?(HogeTest3)
+    end
   end
 
 

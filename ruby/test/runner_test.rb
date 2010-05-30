@@ -9,10 +9,12 @@ $: << path unless $:.include?(path)
 
 require 'test/unit'
 require 'stringio'
-require 'oktest/unit';  Oktest.run_at_exit = false
+require 'oktest';  Oktest.run_at_exit = false
 
 
 class OktestRunnerTest < Test::Unit::TestCase
+
+  def spec(desc); yield; end
 
   def _capture_io
     stdout, stderr = $stdout, $stderr
@@ -238,7 +240,7 @@ END
 .f
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:234:in `test_bar'
+    ./test/runner_test.rb:236:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
   VERBOSE_OUTPUT_BazTest2 = <<'END'
@@ -246,7 +248,7 @@ END
 - test_foo ... ok
 - test_bar ... FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:234:in `test_bar'
+    ./test/runner_test.rb:236:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 
 END
