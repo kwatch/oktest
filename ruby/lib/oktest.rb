@@ -113,7 +113,7 @@ module Oktest
       check2(File.file?(@actual)) { "File.file?(#{@actual.inspect})" }
     end
 
-    def directory?
+    def dir?
       check2(File.directory?(@actual)) { "File.directory?(#{@actual.inspect})" }
     end
 

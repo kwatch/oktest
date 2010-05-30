@@ -141,15 +141,15 @@ class OktestAssertionTest < Test::Unit::TestCase
     end
   end
 
-  def test_directory?
-    case_for "ok().directory?" do
-      assert_nothing_raised { ok('.').directory? }
-      ex = assert_raise(_E) { ok('notexist').directory? }
+  def test_dir?
+    case_for "ok().dir?" do
+      assert_nothing_raised { ok('.').dir? }
+      ex = assert_raise(_E) { ok('notexist').dir? }
       assert_equal "File.directory?(\"notexist\"): failed.", ex.message
     end
-    case_for "not_ok().directory?" do
-      assert_nothing_raised { not_ok('notexist').directory? }
-      ex = assert_raise(_E) { not_ok('.').directory? }
+    case_for "not_ok().dir?" do
+      assert_nothing_raised { not_ok('notexist').dir? }
+      ex = assert_raise(_E) { not_ok('.').dir? }
       assert_equal "! File.directory?(\".\"): failed.", ex.message
     end
   end
