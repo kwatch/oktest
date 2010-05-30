@@ -28,7 +28,7 @@ class OktestRunnerTest < Test::Unit::TestCase
     return ret
   end
 
-  def _runner(reporter_class=Oktest.REPORTER())
+  def _runner(reporter_class=Oktest::REPORTER)
     @reporter = reporter_class.new()
     @runner = Oktest::Runner.new(@reporter)
     return @runner
