@@ -120,6 +120,13 @@ test_fail2a(TestUnitHelperTest::FugarTest0)
      ./test/testunithelper_test.rb:76:in `test_basic']:
 <"AAA\nBBB\nCCC\n"> expected but was
 <"AAA\nCCC\nDDD\n">.
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ AAA
+-BBB
+ CCC
++DDD
 
   4) Failure:
 test_fail2b(TestUnitHelperTest::FugarTest0)
@@ -162,6 +169,14 @@ test_fail1b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:54]:
 test_fail2a(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:57]:
 <"AAA\nBBB\nCCC\n"> expected but was
 <"AAA\nCCC\nDDD\n">.
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ AAA
+-BBB
+ CCC
++DDD
+
 
   4) Failure:
 test_fail2b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:60]:

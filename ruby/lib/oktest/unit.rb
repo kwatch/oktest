@@ -71,6 +71,22 @@ module Oktest
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
       end
 
+      def assert_equal(expected, actual, message=nil)
+        begin
+          super
+        rescue Oktest::ASSERTION_FAILED => ex
+          linenum = __LINE__ - 2
+          ## append output of 'diff -u' into error message
+          diff = Oktest.diff(actual, expected)
+          ex.message << "\n" << diff if diff
+          ## remove 'oktest/unit.rb' from backtrace (not to change output message)
+          idx = ex.backtrace.index {|bt| bt.index("#{__FILE__}:#{linenum}:") }
+          #idx = ex.backtrace.index {|bt| bt =~ %r`/oktest/unit\.rb:` }
+          ex.backtrace.delete_at(idx) if idx
+          raise ex
+        end
+      end
+
       def self.included(klass)   # :nodoc:
         def klass.inherited(cls)
           super
