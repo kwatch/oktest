@@ -319,6 +319,14 @@ END
 - test_001_dummy1 ... ok
 
 END
+    expected2 = <<'END'
+Loaded suite _test_at_exit
+Started
+.
+Finished in 0.000525 seconds.
+
+1 tests, 1 assertions, 0 failures, 0 errors, 0 skips
+END
     fname = '_test_at_exit.rb'
     spec "if neither run() nor run_all() is called then run at exit" do
       File.open(fname, 'w') {|f| f.write(content1) }
@@ -332,9 +340,14 @@ END
       File.open(fname, 'w') {|f| f.write(content1 + "Oktest.run_at_exit = false\n") }
       assert_equal "", `ruby #{fname}`
     end
-    spec "subclasses of Test::Unit::TestCase are not run" do
+    spec "subclasses of Test::Unit::TestCase are also run" do
       File.open(fname, 'w') {|f| f.write(content2) }
-      assert_equal expected, `ruby #{fname}`
+      exp = expected + expected2
+      actual = `ruby #{fname}`
+      [exp, actual].each {|s| s.sub!(/Finished in \d+\.\d+ seconds/, '') }
+      rexp = /, 0 skips\n\z/
+      exp.sub!(rexp, "\n") unless actual =~ rexp
+      assert_equal exp, actual
     end
   ensure
     File.unlink(fname) if File.exist?(fname)

@@ -552,8 +552,9 @@ end
 
 
 at_exit do
-  if ! $! && Oktest.run_at_exit?  # && ! defined?(Test::Unit)
-    status = Oktest.run_all()
-    exit(status)
+  ex = $!
+  if (! ex || ex.is_a?(SystemExit)) && Oktest.run_at_exit? # && ! defined?(Test::Unit)
+    Oktest.run_all()
+    raise ex if ex
   end
 end
