@@ -54,7 +54,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
 
   ##
-  ## pre_cond() and post_cond()
+  ## pre_cond(), post_cond(), case_for(), case_if()
   ##
 
   class HogeTest3
@@ -69,6 +69,16 @@ class OktestTestCaseTest < Test::Unit::TestCase
       post_cond { done = true }
       return done
     end
+    def call_case_for
+      done = false
+      case_for("desc") { done = true }
+      return done
+    end
+    def call_case_if
+      done = false
+      case_if("desc") { done = true }
+      return done
+    end
   end
 
   def test_pre_cond
@@ -77,6 +87,14 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
   def test_post_cond
     assert_equal true, HogeTest3.new.call_post_cond
+  end
+
+  def test_case_for
+    assert_equal true, HogeTest3.new.call_case_for
+  end
+
+  def test_case_if
+    assert_equal true, HogeTest3.new.call_case_if
   end
 
 
