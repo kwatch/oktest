@@ -98,4 +98,14 @@ class OktestTestCaseTest < Test::Unit::TestCase
   end
 
 
+  ##
+  ## 'include Oktest::TestCase' sets Oktest::TestCase._subclasses automatically
+  ##
+  def test__subclasses
+    classes = Oktest::TestCase._subclasses()
+    assert classes.include?(HogeTest2)
+    assert classes.include?(HogeTest3)
+  end
+
+
 end

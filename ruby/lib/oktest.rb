@@ -262,7 +262,14 @@ module Oktest
     ## marker method to describe test case
     def case_if(desc); yield; end
 
+    @_subclasses = []
+
+    def self._subclasses    # :nodoc:
+      return @_subclasses
+    end
+
     def self.included(klass)
+      @_subclasses << klass
       klass.class_eval do
         extend Oktest::TestCaseClassMethod
       end
