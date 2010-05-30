@@ -14,9 +14,9 @@ require 'oktest'
 
 class OktestRunnerTest < Test::Unit::TestCase
 
-  def case_if(desc)
-    yield
-  end
+  def case_if(desc); yield; end
+
+  def case_for(desc); yield; end
 
   def _runner(reporter_class=Oktest.REPORTER())
     @out = StringIO.new
@@ -237,6 +237,14 @@ END
 
 END
       _assert_equal expected, out.string
+    end
+    ## set '@_run = true'
+    case_for 'Oktest._run?' do
+      Oktest.instance_variable_set('@_run', false)
+      assert_equal false, Oktest._run?
+      out = StringIO.new
+      Oktest.run(BazTest2, :out=>out)
+      assert_equal true, Oktest._run?
     end
   end
 

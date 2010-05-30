@@ -517,6 +517,11 @@ module Oktest
     reporter = reporter_class.new(opts[:out])
     runner = Runner.new(reporter)
     classes.each {|cls| runner.run(cls) }
+    @_run = true
+  end
+
+  def self._run?   # :nodoc:
+    return @_run
   end
 
   def self.run_all
