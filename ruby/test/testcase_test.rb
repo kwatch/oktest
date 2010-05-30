@@ -99,6 +99,44 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
 
   ##
+  ## capture_io()
+  ##
+
+  def test_capture_io
+    extend Oktest::TestCase
+    ## captures $stdout and $stderr
+    if true
+      sout, serr = capture_io() do
+        $stdout.write("Suzumiya")
+        $stderr.write("Haruhi")
+      end
+      assert_equal "Suzumiya", sout
+      assert_equal "Haruhi", serr
+    end
+    ## takes string as $stdin
+    if true
+      sout, serr = capture_io("Haruhi Suzumiya") do
+        input = $stdin.read()
+        $stdout.write("input=#{input.inspect}")
+      end
+      assert_equal 'input="Haruhi Suzumiya"', sout
+    end
+    ## restore $stdin, $stdout, and $stderr after block yielded
+    if true
+      stdin, stdout, stderr = $stdin, $stdout, $stderr
+      sout, serr = capture_io("sos") do
+        assert_not_same stdin,  $stdin
+        assert_not_same stdout, $stdout
+        assert_not_same stderr, $stderr
+      end
+      assert_same stdin,  $stdin
+      assert_same stdout, $stdout
+      assert_same stderr, $stderr
+    end
+  end
+
+
+  ##
   ## 'include Oktest::TestCase' sets Oktest::TestCase._subclasses automatically
   ##
   def test__subclasses

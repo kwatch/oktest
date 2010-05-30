@@ -223,6 +223,21 @@ module Oktest
       return Oktest::AssertionObject.new(self, actual, true)
     end
 
+    def capture_io(stdin_str=nil)
+      require 'stringio' unless defined?(StringIO)
+      stdout, stderr = $stdout, $stderr
+      $stdout, $stderr = StringIO.new, StringIO.new
+      stdin, $stdin = $stdin, StringIO.new(stdin_str) if stdin_str
+      begin
+        yield
+        ret = [$stdout.string, $stderr.string]
+      ensure
+        $stdout, $stderr = stdout, stderr
+        $stdin = stdin if stdin_str
+      end
+      return ret
+    end
+
     ## marker method to represent pre-condition
     def pre_cond; yield; end
 
