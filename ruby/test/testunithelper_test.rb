@@ -71,11 +71,27 @@ class TestUnitHelperTest < Test::Unit::TestCase
 
   def test_basic
     _setup_FugarTest0()
+    begin
+      require 'test/unit/ui/console/testrunner'
+      actual, expected = _do_test_with_testunit()
+    rescue LoadError
+      require 'minitest/unit'
+      actual, expected = _do_test_with_minitest()
+    end
+    rexp = /^Finished in \d+.\d+ seconds\.$/
+    actual.sub!(rexp, '')
+    expected.sub!(rexp, '')
+    expected.gsub!(%r|\./test/|, 'test/') if actual != expected
+    assert_equal expected, actual
+  ensure
+    _teardown_FugarTest0()
+  end
+
+  def _do_test_with_testunit()
     io = StringIO.new
-    require 'test/unit/ui/console/testrunner'
     runner = Test::Unit::UI::Console::TestRunner.new(FugarTest0, Test::Unit::UI::NORMAL, io)
     runner.start()
-    #$stderr.puts "\033[0;31m*** debug: io.string=#{io.string}\033[0m"
+    actual = io.string
     expected = <<'END'
 Loaded suite TestUnitHelperTest::FugarTest0
 Started
@@ -85,38 +101,79 @@ Finished in 0.014489 seconds.
   1) Failure:
 test_fail1a(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:51:in `test_fail1a'
-     ./test/testunithelper_test.rb:77:in `test_basic']:
+     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:76:in `test_basic']:
 <false> is not true.
 
   2) Failure:
 test_fail1b(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:54:in `test_fail1b'
-     ./test/testunithelper_test.rb:77:in `test_basic']:
+     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:76:in `test_basic']:
 2 == 3: failed.
 
   3) Failure:
 test_fail2a(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:57:in `test_fail2a'
-     ./test/testunithelper_test.rb:77:in `test_basic']:
+     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:76:in `test_basic']:
 <"AAA\nBBB\nCCC\n"> expected but was
 <"AAA\nCCC\nDDD\n">.
 
   4) Failure:
 test_fail2b(TestUnitHelperTest::FugarTest0)
     [./test/testunithelper_test.rb:60:in `test_fail2b'
-     ./test/testunithelper_test.rb:77:in `test_basic']:
+     ./test/testunithelper_test.rb:93:in `_do_test_with_testunit'
+     ./test/testunithelper_test.rb:76:in `test_basic']:
 "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
 
 10 tests, 11 assertions, 4 failures, 0 errors
 END
+    return actual, expected
+  end
+
+  def _do_test_with_minitest
+    ## TODO: how to run only a TestCase in MiniTest?
+    suites = nil
+    MiniTest::Unit::TestCase.class_eval do
+      suites = @@test_suites
+      @@test_suites = {FugarTest0 => true}
+    end
+    io = StringIO.new
+    MiniTest::Unit.output = io
+    MiniTest::Unit.new.run([])
     actual = io.string
-    rexp = /^Finished in \d+.\d+ seconds\.$/
-    actual.sub!(rexp, '')
-    expected.sub!(rexp, '')
-    expected.gsub!(%r|\./test/|, 'test/') if actual != expected
-    assert_equal expected, actual
+    expected = <<'END'
+Loaded suite test/testunithelper_test
+Started
+..FFFF....
+Finished in 0.003155 seconds.
+
+  1) Failure:
+test_fail1a(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:51]:
+Failed assertion, no message given.
+
+  2) Failure:
+test_fail1b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:54]:
+2 == 3: failed.
+
+  3) Failure:
+test_fail2a(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:57]:
+<"AAA\nBBB\nCCC\n"> expected but was
+<"AAA\nCCC\nDDD\n">.
+
+  4) Failure:
+test_fail2b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:60]:
+"AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
+
+10 tests, 11 assertions, 4 failures, 0 errors, 0 skips
+END
+    return actual, expected
   ensure
-    _teardown_FugarTest0()
+    MiniTest::Unit::TestCase.class_eval do
+      @@test_suites = suites
+    end
+    MiniTest::Unit.output = $stdout
   end
 
 
