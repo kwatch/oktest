@@ -72,6 +72,10 @@ module Oktest
       rescue AssertionFailed => ex
         ex.diff = Oktest.diff(@actual, expected) if @actual != expected
         raise ex
+      rescue ASSERTION_FAILED => ex
+        diff = Oktest.diff(@actual, expected) if @actual != expected
+        ex.message << "\n" << diff.chomp() if diff && ! diff.empty?
+        raise ex
       end
     end
 

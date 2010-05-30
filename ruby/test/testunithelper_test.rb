@@ -134,6 +134,13 @@ test_fail2b(TestUnitHelperTest::FugarTest0)
      ./test/testunithelper_test.rb:94:in `_do_test_with_testunit'
      ./test/testunithelper_test.rb:76:in `test_basic']:
 "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ AAA
+-BBB
+ CCC
++DDD
 
 10 tests, 11 assertions, 4 failures, 0 errors
 END
@@ -181,6 +188,13 @@ test_fail2a(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:57]:
   4) Failure:
 test_fail2b(TestUnitHelperTest::FugarTest0) [./test/testunithelper_test.rb:60]:
 "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ AAA
+-BBB
+ CCC
++DDD
 
 10 tests, 11 assertions, 4 failures, 0 errors, 0 skips
 END
