@@ -103,9 +103,9 @@ Failed: test_fail_nested()
       actual   = "AAA\nCCC\nDDD\n"
       ok(actual) == expected
     end
-    def test_short    # diff should not be displayed because actuala and expected are too short
-      expected = "AAABBBCCC"
-      actual   = "AAACCCDDD"
+    def test_no_newline    # diff should not be displayed because both actual and expected doesn't contain newline character
+      expected = "AAABBBCCCXXXYYYZZZ"
+      actual   = "AAACCCDDDXXXYYYZZZ"
       ok(actual) == expected
     end
   end
@@ -123,9 +123,9 @@ Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
     ./test/reporter_test.rb:104:in `test_long'
       ok(actual) == expected
-Failed: test_short()
-    "AAACCCDDD" == "AAABBBCCC": failed.
-    ./test/reporter_test.rb:109:in `test_short'
+Failed: test_no_newline()
+    "AAACCCDDDXXXYYYZZZ" == "AAABBBCCCXXXYYYZZZ": failed.
+    ./test/reporter_test.rb:109:in `test_no_newline'
       ok(actual) == expected
 END
     _test()
@@ -145,9 +145,9 @@ Failed: test_long()
 -BBB
  CCC
 +DDD
-Failed: test_short()
-    "AAACCCDDD" == "AAABBBCCC": failed.
-    ./test/reporter_test.rb:109:in `test_short'
+Failed: test_no_newline()
+    "AAACCCDDDXXXYYYZZZ" == "AAABBBCCCXXXYYYZZZ": failed.
+    ./test/reporter_test.rb:109:in `test_no_newline'
       ok(actual) == expected
 END
     _test()

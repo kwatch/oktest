@@ -21,8 +21,8 @@ module Oktest
     return nil if actual == expected
     ## both actual and expected should be String
     return nil unless actual.is_a?(String) && expected.is_a?(String)
-    ## either actual or expected should have enough length
-    return nil if actual.length < 10 && expected.length < 10
+    ## either actual or expected should contain "\n"
+    return nil unless actual.index("\n") || expected.index("\n")
     ## diff command
     command = Oktest.DIFF
     return nil unless command
