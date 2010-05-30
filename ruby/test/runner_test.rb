@@ -233,6 +233,23 @@ END
     def test_foo; ok(1+1) == 2; end
     def test_bar; ok(1+1) == 3; end
   end
+  SIMPLE_OUTPUT_BazTest2 = <<'END'
+### OktestRunnerTest::BazTest2
+.f
+Failed: test_bar()
+    2 == 3: failed.
+    ./test/runner_test.rb:234:in `test_bar'
+      def test_bar; ok(1+1) == 3; end
+END
+  VERBOSE_OUTPUT_BazTest2 = <<'END'
+### OktestRunnerTest::BazTest2
+- test_foo ... ok
+- test_bar ... FAILED
+    2 == 3: failed.
+    ./test/runner_test.rb:234:in `test_bar'
+      def test_bar; ok(1+1) == 3; end
+
+END
 
   def _assert_equal(expected, actual)
     expected = expected.gsub(%r|^    \./test/|, '    test/') if expected != actual
@@ -245,29 +262,14 @@ END
     spec 'if :out option is specified then output is stealed by it' do
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out)
-      expected = <<'END'
-### OktestRunnerTest::BazTest2
-.f
-Failed: test_bar()
-    2 == 3: failed.
-    ./test/runner_test.rb:234:in `test_bar'
-      def test_bar; ok(1+1) == 3; end
-END
+      expected = SIMPLE_OUTPUT_BazTest2
       _assert_equal expected, out.string
     end
     ## :verbose option
     spec 'if :verbose option is specified then test method names are displayed' do
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out, :verbose=>true)
-      expected = <<'END'
-### OktestRunnerTest::BazTest2
-- test_foo ... ok
-- test_bar ... FAILED
-    2 == 3: failed.
-    ./test/runner_test.rb:234:in `test_bar'
-      def test_bar; ok(1+1) == 3; end
-
-END
+      expected = VERBOSE_OUTPUT_BazTest2
       _assert_equal expected, out.string
     end
     ## set '@_run_at_exit = true'
