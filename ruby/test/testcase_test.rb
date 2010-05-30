@@ -69,14 +69,14 @@ class OktestTestCaseTest < Test::Unit::TestCase
       post_cond { done = true }
       return done
     end
-    def call_case_for
+    def call_spec_of
       done = false
-      case_for("desc") { done = true }
+      spec_of("desc") { done = true }
       return done
     end
-    def call_case_if
+    def call_spec
       done = false
-      case_if("desc") { done = true }
+      spec("desc") { done = true }
       return done
     end
   end
@@ -90,11 +90,11 @@ class OktestTestCaseTest < Test::Unit::TestCase
   end
 
   def test_case_for
-    assert_equal true, HogeTest3.new.call_case_for
+    assert_equal true, HogeTest3.new.call_spec_of
   end
 
   def test_case_if
-    assert_equal true, HogeTest3.new.call_case_if
+    assert_equal true, HogeTest3.new.call_spec
   end
 
 

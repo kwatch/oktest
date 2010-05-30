@@ -14,10 +14,6 @@ require 'oktest';  Oktest.run_at_exit = false
 
 class OktestRunnerTest < Test::Unit::TestCase
 
-  def spec(desc)
-    yield
-  end
-
   def _runner(reporter_class=Oktest.REPORTER())
     @out = StringIO.new
     @reporter = reporter_class.new(@out)
@@ -225,7 +221,7 @@ END
 .f
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:209:in `test_bar'
+    ./test/runner_test.rb:205:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
       _assert_equal expected, out.string
@@ -239,7 +235,7 @@ END
 - test_foo ... ok
 - test_bar ... FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:209:in `test_bar'
+    ./test/runner_test.rb:205:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 
 END

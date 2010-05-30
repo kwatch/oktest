@@ -257,10 +257,10 @@ module Oktest
     def post_cond; yield; end
 
     ## marker method to describe test case
-    def case_for(desc); yield; end
+    def spec_of(desc); yield; end
 
     ## marker method to describe test case
-    def case_if(desc); yield; end
+    def spec(desc); yield; end
 
     @_subclasses = []
 
