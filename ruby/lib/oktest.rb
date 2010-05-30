@@ -307,7 +307,7 @@ module Oktest
   class BaseReporter < Reporter
 
     def initialize(out=nil)
-      @out = out || $stderr
+      @out = out || $stdout
       @_flush = @out.respond_to?(:flush)
     end
 
