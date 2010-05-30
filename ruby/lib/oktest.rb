@@ -519,5 +519,10 @@ module Oktest
     classes.each {|cls| runner.run(cls) }
   end
 
+  def self.run_all
+    classes = Oktest::TestCase._subclasses()
+    self.run(*classes)
+  end
+
 
 end
