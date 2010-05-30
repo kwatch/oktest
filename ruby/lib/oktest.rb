@@ -6,14 +6,11 @@
 
 module Oktest
 
-  @DIFF = ENV['DIFF'] || File.file?('/usr/bin/diff')
-
-  def self.DIFF
-    @DIFF
-  end
+  DIFF = ENV['DIFF'] || File.file?('/usr/bin/diff')
 
   def self.DIFF=(command)
-    @DIFF = command
+    remove_const(:DIFF)
+    const_set(:DIFF, command)
   end
 
   def self.diff(actual, expected)
@@ -24,7 +21,7 @@ module Oktest
     ## either actual or expected should contain "\n"
     return nil unless actual.index("\n") || expected.index("\n")
     ## diff command
-    command = Oktest.DIFF
+    command = Oktest::DIFF
     return nil unless command
     command = 'diff -u' if command == true
     ## diff

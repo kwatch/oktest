@@ -113,7 +113,7 @@ Failed: test_fail_nested()
   def test_diff
     @klass = Oktest::SimpleReporter
     @testcase = DiffTest
-    orig = Oktest.DIFF
+    orig = Oktest::DIFF
     ## if Oktest.DIFF is false then diff is not displayed
     Oktest.DIFF = false
     @expected = <<'END'
