@@ -238,6 +238,33 @@ module Oktest
   end
 
 
+  module TestCaseClassMethod
+
+    def method_added(name)
+      dict = (@_test_method_names_dict ||= {})
+      name = name.to_s
+      if name =~ /\Atest_?/
+        ## if test method name is duplicated, raise error
+        dict[name].nil?  or
+          raise NameError.new("#{self.name}##{name}(): already defined (please change test method name).")
+        dict[name] = dict.size()
+        ## if ENV['TEST'] is set, remove unmatched method
+        if ENV['TEST']
+          remove_method(name) unless name.sub(/\Atest_?/, '').index(ENV['TEST'])
+        end
+      end
+    end
+
+    def test(desc, &block)
+      @_test_count ||= 0
+      @_test_count += 1
+      method_name = "test_%03d_%s" % [@_test_count, desc.to_s.gsub(/[^\w]/, '_')]
+      define_method(method_name, block)
+    end
+
+  end
+
+
   module TestCase
     include TestCaseUtil
 
@@ -252,29 +279,9 @@ module Oktest
     end
 
     def self.included(klass)
-
-      def klass.method_added(name)
-        dict = (@_test_method_names_dict ||= {})
-        name = name.to_s
-        if name =~ /\Atest_?/
-          ## if test method name is duplicated, raise error
-          dict[name].nil?  or
-            raise NameError.new("#{self.name}##{name}(): already defined (please change test method name).")
-          dict[name] = dict.size()
-          ## if ENV['TEST'] is set, remove unmatched method
-          if ENV['TEST']
-            remove_method(name) unless name.sub(/\Atest_?/, '').index(ENV['TEST'])
-          end
-        end
+      klass.class_eval do
+        extend Oktest::TestCaseClassMethod
       end
-
-      def klass.test(desc, &block)
-        @_test_count ||= 0
-        @_test_count += 1
-        method_name = "test_%03d_%s" % [@_test_count, desc.to_s.gsub(/[^\w]/, '_')]
-        define_method(method_name, block)
-      end
-
     end
 
   end
