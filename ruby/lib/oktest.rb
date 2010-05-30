@@ -238,7 +238,7 @@ module Oktest
   end
 
 
-  module TestCaseClassMethod
+  module ClassMethodHelper
 
     def method_added(name)
       dict = (@_test_method_names_dict ||= {})
@@ -277,7 +277,7 @@ module Oktest
     def self.included(klass)
       @_subclasses << klass if klass.is_a?(Class)
       klass.class_eval do
-        extend Oktest::TestCaseClassMethod
+        extend Oktest::ClassMethodHelper
       end
     end
 

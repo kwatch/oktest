@@ -76,7 +76,7 @@ module Oktest
       def self.included(klass)   # :nodoc:
         def klass.inherited(cls)
           super
-          extend Oktest::TestCaseClassMethod
+          extend Oktest::ClassMethodHelper
         end
       end
 
