@@ -211,6 +211,33 @@ module Oktest
   end
 
 
+  module Helper
+
+    def ok(actual=nil)
+      actual = yield if block_given?       # experimental
+      return Oktest::AssertionObject.new(self, actual, false)
+    end
+
+    def not_ok(actual=nil)
+      actual = yield if block_given?       # experimental
+      return Oktest::AssertionObject.new(self, actual, true)
+    end
+
+    ## marker method to represent pre-condition
+    def pre_cond; yield; end
+
+    ## marker method to represent post-condition
+    def post_cond; yield; end
+
+    ## marker method to describe test case
+    def spec_of(desc); yield; end
+
+    ## marker method to describe test case
+    def spec(desc); yield; end
+
+  end
+
+
   module TestCaseClassMethod
 
     def method_added(name)
@@ -239,28 +266,7 @@ module Oktest
 
 
   module TestCase
-
-    def ok(actual=nil)
-      actual = yield if block_given?       # experimental
-      return Oktest::AssertionObject.new(self, actual, false)
-    end
-
-    def not_ok(actual=nil)
-      actual = yield if block_given?       # experimental
-      return Oktest::AssertionObject.new(self, actual, true)
-    end
-
-    ## marker method to represent pre-condition
-    def pre_cond; yield; end
-
-    ## marker method to represent post-condition
-    def post_cond; yield; end
-
-    ## marker method to describe test case
-    def spec_of(desc); yield; end
-
-    ## marker method to describe test case
-    def spec(desc); yield; end
+    include Helper
 
     @_subclasses = []
 

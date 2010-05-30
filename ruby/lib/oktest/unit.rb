@@ -61,7 +61,7 @@ module Oktest
 
 
     module TestCase
-      include Oktest::TestCase
+      include Oktest::Helper
 
       def ok(actual=nil)
         actual = yield if block_given?       # experimental
