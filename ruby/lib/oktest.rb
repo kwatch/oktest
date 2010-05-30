@@ -537,3 +537,11 @@ module Oktest
 
 
 end
+
+
+at_exit do
+  if ! $! && Oktest.run_at_exit?  # && ! defined?(Test::Unit)
+    status = Oktest.run_all()
+    exit(status)
+  end
+end

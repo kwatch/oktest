@@ -248,4 +248,64 @@ END
     end
   end
 
+  # ----------------------------------------
+
+  def test_at_exit
+    content1 = <<'END'
+$: << './lib' << '../lib'
+require 'oktest'
+Oktest.REPORTER = Oktest::VerboseReporter
+
+class FooTest
+  include Oktest::TestCase
+  test 'dummy1' do
+    ok(1+1) == 2
+  end
+end
+END
+    content2 = <<'END'
+$: << './lib' << '../lib'
+require 'test/unit'
+require 'oktest/unit'
+Oktest.REPORTER = Oktest::VerboseReporter
+
+class FooTest
+  include Oktest::TestCase
+  test 'dummy1' do
+    ok(1+1) == 2
+  end
+end
+
+class BarTest < Test::Unit::TestCase
+  test 'dummy2' do
+    ok(1+1) == 2
+  end
+end
+END
+    expected = <<'END'
+### FooTest
+- test_001_dummy1 ... ok
+
+END
+    fname = '_test_at_exit.rb'
+    case_if "neither run() nor run_all() is called then run at exit" do
+      File.open(fname, 'w') {|f| f.write(content1) }
+      assert_equal expected, `ruby #{fname}`
+    end
+    case_if "either run() or runall() is called then do nothing" do
+      File.open(fname, 'w') {|f| f.write(content1 + "Oktest.run()\n") }
+      assert_equal "", `ruby #{fname}`
+    end
+    case_if "Oktest.run_at_exit=false then do nothing" do
+      File.open(fname, 'w') {|f| f.write(content1 + "Oktest.run_at_exit = false\n") }
+      assert_equal "", `ruby #{fname}`
+    end
+    case_if "subclasses of Test::Unit::TestCase are not run" do
+      File.open(fname, 'w') {|f| f.write(content2) }
+      assert_equal expected, `ruby #{fname}`
+    end
+  ensure
+    File.unlink(fname) if File.exist?(fname)
+  end
+
 end
