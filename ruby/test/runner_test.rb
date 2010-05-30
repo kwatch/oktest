@@ -14,9 +14,9 @@ require 'oktest';  Oktest.run_at_exit = false
 
 class OktestRunnerTest < Test::Unit::TestCase
 
-  def case_if(desc); yield; end
-
-  def case_for(desc); yield; end
+  def spec(desc)
+    yield
+  end
 
   def _runner(reporter_class=Oktest.REPORTER())
     @out = StringIO.new
@@ -98,20 +98,26 @@ class OktestRunnerTest < Test::Unit::TestCase
 ...
 END
     assert_equal expected, @out.string
-    ## before_all()/after_all() should be called only once
+    #
     counts = FooTest1.counts
-    assert_equal 1, counts[:before_all]
-    assert_equal 1, counts[:after_all]
-    ## before()/after() should be called for each test
-    assert_equal 3, counts[:before]
-    assert_equal 3, counts[:after]
-    ## setup()/teardown() should not be called if before()/after() defined
-    assert_equal 0, counts[:setup]
-    assert_equal 0, counts[:teardown]
-    ## setup()/teardown() should be called if before()/after() not defined
+    spec "before_all()/after_all() should be called only once" do
+      assert_equal 1, counts[:before_all]
+      assert_equal 1, counts[:after_all]
+    end
+    spec "before()/after() should be called for each test" do
+      assert_equal 3, counts[:before]
+      assert_equal 3, counts[:after]
+    end
+    spec "setup()/teardown() should not be called if before()/after() defined" do
+      assert_equal 0, counts[:setup]
+      assert_equal 0, counts[:teardown]
+    end
+    #
     counts = FooTest2.counts
-    assert_equal 3, counts[:setup]
-    assert_equal 3, counts[:teardown]
+    spec "setup()/teardown() should be called if before()/after() not defined" do
+      assert_equal 3, counts[:setup]
+      assert_equal 3, counts[:teardown]
+    end
   end
 
   # ----------------------------------------
@@ -144,9 +150,9 @@ END
     #Oktest.run(FooTest)
     runner = _runner(Oktest::VerboseReporter)
     runner.run(BarTest2)
-    ## test methods are called in order as they are defined (except included methods)
-    assert_equal %w[test_aaa test_xxx test_foo test_bar test_001_baz], runner.test_method_names_from(BarTest2)
-    expected = <<END
+    spec "test methods are called in order as they are defined (except included methods)" do
+      assert_equal %w[test_aaa test_xxx test_foo test_bar test_001_baz], runner.test_method_names_from(BarTest2)
+      expected = <<END
 ### OktestRunnerTest::BarTest2
 - test_aaa ... ok
 - test_xxx ... ok
@@ -155,7 +161,8 @@ END
 - test_001_baz ... ok
 
 END
-    assert_equal expected, @out.string
+      assert_equal expected, @out.string
+    end
   end
 
   # ----------------------------------------
@@ -171,20 +178,20 @@ END
 
   def test_ENV_TEST
     ## $TEST limits test names
-    case_if "ENV['TEST'] is specified" do
+    spec "if ENV['TEST'] is specified then test method names are filtered by it" do
       ENV['TEST'] = 'bar'
       _runner().run(BazTest1)
       assert_equal({:bar=>true}, BazTest1.invoked)
     end
     ## partial match
-    case_if "ENV['TEST'] matches to several test methods" do
+    spec "ENV['TEST'] allows partial matching to test method names" do
       BazTest1.invoked.clear
       ENV['TEST'] = 'ba'
       _runner().run(BazTest1)
       assert_equal({:bar=>true, :baz=>true}, BazTest1.invoked)
     end
     ## if $TEST is not set then all tests are invoked
-    case_if "ENV['TEST'] is not specified" do
+    spec "if ENV['TEST'] is not specified then nothing is filtered" do
       ENV.delete('TEST')
       BazTest1.invoked.clear
       _runner().run(BazTest1)
@@ -210,7 +217,7 @@ END
 
   def test_oktest_run
     ## :out option
-    case_if ':out option is specified' do
+    spec 'if :out option is specified then output is stealed by it' do
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out)
       expected = <<'END'
@@ -218,13 +225,13 @@ END
 .f
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:202:in `test_bar'
+    ./test/runner_test.rb:209:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
       _assert_equal expected, out.string
     end
     ## :verbose option
-    case_if ':verbose option is specified' do
+    spec 'if :verbose option is specified then test method names are displayed' do
       out = StringIO.new
       Oktest.run(BazTest2, :out=>out, :verbose=>true)
       expected = <<'END'
@@ -232,14 +239,14 @@ END
 - test_foo ... ok
 - test_bar ... FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:202:in `test_bar'
+    ./test/runner_test.rb:209:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 
 END
       _assert_equal expected, out.string
     end
     ## set '@_run_at_exit = true'
-    case_for 'Oktest.run_at_exit?' do
+    spec 'if called then disabled run-at-exist' do
       Oktest.run_at_exit = true
       assert_equal true, Oktest.run_at_exit?
       out = StringIO.new
@@ -288,19 +295,19 @@ END
 
 END
     fname = '_test_at_exit.rb'
-    case_if "neither run() nor run_all() is called then run at exit" do
+    spec "if neither run() nor run_all() is called then run at exit" do
       File.open(fname, 'w') {|f| f.write(content1) }
       assert_equal expected, `ruby #{fname}`
     end
-    case_if "either run() or runall() is called then do nothing" do
+    spec "if either run() or runall() is called then do nothing" do
       File.open(fname, 'w') {|f| f.write(content1 + "Oktest.run()\n") }
       assert_equal "", `ruby #{fname}`
     end
-    case_if "Oktest.run_at_exit=false then do nothing" do
+    spec "if Oktest.run_at_exit=false then do nothing" do
       File.open(fname, 'w') {|f| f.write(content1 + "Oktest.run_at_exit = false\n") }
       assert_equal "", `ruby #{fname}`
     end
-    case_if "subclasses of Test::Unit::TestCase are not run" do
+    spec "subclasses of Test::Unit::TestCase are not run" do
       File.open(fname, 'w') {|f| f.write(content2) }
       assert_equal expected, `ruby #{fname}`
     end
