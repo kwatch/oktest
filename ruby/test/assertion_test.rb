@@ -170,16 +170,16 @@ class OktestAssertionTest < Test::Unit::TestCase
     end
   end
 
-  def test_equal?
+  def test_same?
     obj = {}
-    case_for "ok().equal?" do
-      assert_nothing_raised { ok(obj).equal? obj }
-      ex = assert_raise(_E) { ok(obj).equal? obj.dup }
+    case_for "ok().same?" do
+      assert_nothing_raised { ok(obj).same? obj }
+      ex = assert_raise(_E) { ok(obj).same? obj.dup }
       assert_equal "{}.equal?({}): failed.", ex.message
     end
-    case_for "not_ok().equal?" do
-      assert_nothing_raised { not_ok(obj).equal? obj.dup }
-      ex = assert_raise(_E) { not_ok(obj).equal? obj }
+    case_for "not_ok().same?" do
+      assert_nothing_raised { not_ok(obj).same? obj.dup }
+      ex = assert_raise(_E) { not_ok(obj).same? obj }
       assert_equal "! {}.equal?({}): failed.", ex.message
     end
   end

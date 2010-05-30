@@ -121,7 +121,7 @@ module Oktest
       check2(File.exist?(@actual)) { "File.exist?(#{@actual.inspect})" }
     end
 
-    def equal?(expected)
+    def same?(expected)
       check2(@actual.equal?(expected)) { "#{@actual.inspect}.equal?(#{expected.inspect})" }
     end
 
