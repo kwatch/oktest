@@ -9,7 +9,7 @@ $: << path unless $:.include?(path)
 
 require 'test/unit'
 require 'stringio'
-require 'oktest'
+require 'oktest';  Oktest.run_at_exit = false
 
 
 class OktestRunnerTest < Test::Unit::TestCase

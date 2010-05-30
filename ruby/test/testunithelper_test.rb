@@ -8,7 +8,7 @@ path = File.class_eval { expand_path(join(dirname(__FILE__), '..', 'lib')) }
 $: << path unless $:.include?(path)
 
 require 'test/unit'
-require 'oktest/unit'
+require 'oktest/unit';  Oktest.run_at_exit = false
 require 'stringio'
 
 
