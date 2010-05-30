@@ -532,9 +532,10 @@ module Oktest
     self.run_at_exit = false
   end
 
-  def self.run_all
+  def self.run_all(opts={})
     classes = Oktest::TestCase._subclasses()
-    self.run(*classes)
+    args = classes + [opts]
+    self.run(*args)
   end
 
   @_run_at_exit = true

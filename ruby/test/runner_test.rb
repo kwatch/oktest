@@ -282,6 +282,39 @@ END
     end
   end
 
+  class BazTest3
+    include Oktest::TestCase
+    def test_xxx; ok(2*2) == 4; end
+  end
+
+  def test_oktest_run_all
+    _subclasses_bkup = Oktest::TestCase.instance_variable_get('@_subclasses')
+    Oktest::TestCase.instance_variable_set('@_subclasses', [BazTest2, BazTest3])
+    ## :out option
+    spec 'if :out option is specified then output is stealed by it' do
+      out = StringIO.new
+      Oktest.run_all(:out=>out)
+      expected = SIMPLE_OUTPUT_BazTest2 + "### OktestRunnerTest::BazTest3\n.\n"
+      _assert_equal expected, out.string
+    end
+    ## :verbose option
+    spec 'if :verbose option is specified then test method names are displayed' do
+      out = StringIO.new
+      Oktest.run_all(:out=>out, :verbose=>true)
+      expected = VERBOSE_OUTPUT_BazTest2 + "### OktestRunnerTest::BazTest3\n- test_xxx ... ok\n\n"
+      _assert_equal expected, out.string
+    end
+    ## set '@_run_at_exit = true'
+    spec 'if called then disabled run-at-exist' do
+      Oktest.run_at_exit = true
+      assert_equal true, Oktest.run_at_exit?
+      _capture_io { Oktest.run_all() }
+      assert_equal false, Oktest.run_at_exit?
+    end
+  ensure
+    Oktest::TestCase.instance_variable_set('@_subclasses', _subclasses_bkup)
+  end
+
   # ----------------------------------------
 
   def test_at_exit
