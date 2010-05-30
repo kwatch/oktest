@@ -59,6 +59,7 @@ module Oktest
 
 
     module TestCase
+      include Oktest::TestCaseUtil
 
       def ok(actual=nil)
         actual = yield if block_given?       # experimental
@@ -68,14 +69,6 @@ module Oktest
       def not_ok(actual=nil)
         actual = yield if block_given?       # experimental
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
-      end
-
-      def pre_cond
-        yield
-      end
-
-      def post_cond
-        yield
       end
 
     end

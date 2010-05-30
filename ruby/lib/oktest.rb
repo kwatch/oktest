@@ -221,24 +221,34 @@ module Oktest
   end
 
 
+  module TestCaseUtil
+
+    ## marker method to represent pre-condition
+    def pre_cond; yield; end
+
+    ## marker method to represent post-condition
+    def post_cond; yield; end
+
+    ## marker method to describe test case
+    def case_for(desc); yield; end
+
+    ## marker method to describe test case
+    def case_if(desc); yield; end
+
+  end
+
+
   module TestCase
+    include TestCaseUtil
 
     def ok(actual=nil)
-      actual = yield if block_given?
+      actual = yield if block_given?       # experimental
       return Oktest::AssertionObject.new(self, actual, false)
     end
 
     def not_ok(actual=nil)
-      actual = yield if block_given?
+      actual = yield if block_given?       # experimental
       return Oktest::AssertionObject.new(self, actual, true)
-    end
-
-    def pre_cond
-      yield
-    end
-
-    def post_cond
-      yield
     end
 
     def self.included(klass)
