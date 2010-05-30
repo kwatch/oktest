@@ -9,14 +9,25 @@ $: << path unless $:.include?(path)
 
 require 'test/unit'
 require 'stringio'
-require 'oktest';  Oktest.run_at_exit = false
+require 'oktest/unit';  Oktest.run_at_exit = false
 
 
 class OktestRunnerTest < Test::Unit::TestCase
 
+  def _capture_io
+    stdout, stderr = $stdout, $stderr
+    begin
+      $stdout, $stderr = StringIO.new, StringIO.new
+      yield
+      ret = [$stdout.string, $stderr.string]
+    ensure
+      $stdout, $stderr = stdout, stderr
+    end
+    return ret
+  end
+
   def _runner(reporter_class=Oktest.REPORTER())
-    @out = StringIO.new
-    @reporter = reporter_class.new(@out)
+    @reporter = reporter_class.new()
     @runner = Oktest::Runner.new(@reporter)
     return @runner
   end
@@ -84,16 +95,18 @@ class OktestRunnerTest < Test::Unit::TestCase
 
   def test_run
     #Oktest.run(FooTest)
-    runner = _runner(Oktest::SimpleReporter)
-    runner.run(FooTest1)
-    runner.run(FooTest2)
+    sout, serr = _capture_io do
+      runner = _runner(Oktest::SimpleReporter)
+      runner.run(FooTest1)
+      runner.run(FooTest2)
+    end
     expected = <<END
 ### OktestRunnerTest::FooTest1
 ...
 ### OktestRunnerTest::FooTest2
 ...
 END
-    assert_equal expected, @out.string
+    assert_equal expected, sout
     #
     counts = FooTest1.counts
     spec "before_all()/after_all() should be called only once" do
@@ -144,8 +157,11 @@ END
   def test_test_method_names
     ##
     #Oktest.run(FooTest)
-    runner = _runner(Oktest::VerboseReporter)
-    runner.run(BarTest2)
+    runner = nil
+    sout, serr = _capture_io() do
+      runner = _runner(Oktest::VerboseReporter)
+      runner.run(BarTest2)
+    end
     spec "test methods are called in order as they are defined (except included methods)" do
       assert_equal %w[test_aaa test_xxx test_foo test_bar test_001_baz], runner.test_method_names_from(BarTest2)
       expected = <<END
@@ -157,7 +173,7 @@ END
 - test_001_baz ... ok
 
 END
-      assert_equal expected, @out.string
+      assert_equal expected, sout
     end
   end
 
@@ -176,21 +192,21 @@ END
     ## $TEST limits test names
     spec "if ENV['TEST'] is specified then test method names are filtered by it" do
       ENV['TEST'] = 'bar'
-      _runner().run(BazTest1)
+      _capture_io() { _runner().run(BazTest1) }
       assert_equal({:bar=>true}, BazTest1.invoked)
     end
     ## partial match
     spec "ENV['TEST'] allows partial matching to test method names" do
       BazTest1.invoked.clear
       ENV['TEST'] = 'ba'
-      _runner().run(BazTest1)
+      _capture_io() { _runner().run(BazTest1) }
       assert_equal({:bar=>true, :baz=>true}, BazTest1.invoked)
     end
     ## if $TEST is not set then all tests are invoked
     spec "if ENV['TEST'] is not specified then nothing is filtered" do
       ENV.delete('TEST')
       BazTest1.invoked.clear
-      _runner().run(BazTest1)
+      _capture_io() { _runner().run(BazTest1) }
       assert_equal({:foo=>true, :bar=>true, :baz=>true}, BazTest1.invoked)
     end
   ensure
@@ -221,7 +237,7 @@ END
 .f
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:205:in `test_bar'
+    ./test/runner_test.rb:221:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
       _assert_equal expected, out.string
@@ -235,7 +251,7 @@ END
 - test_foo ... ok
 - test_bar ... FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:205:in `test_bar'
+    ./test/runner_test.rb:221:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 
 END
