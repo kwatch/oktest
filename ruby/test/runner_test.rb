@@ -18,7 +18,7 @@ class OktestRunnerTest < Test::Unit::TestCase
     yield
   end
 
-  def _runner(reporter_class=Oktest::REPORTER)
+  def _runner(reporter_class=Oktest.REPORTER())
     @out = StringIO.new
     @reporter = reporter_class.new(@out)
     @runner = Oktest::Runner.new(@reporter)

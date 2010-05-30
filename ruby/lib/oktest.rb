@@ -428,7 +428,15 @@ module Oktest
   end
 
 
-  REPORTER = SimpleReporter
+  @REPORTER = SimpleReporter
+
+  def self.REPORTER
+    @REPORTER
+  end
+
+  def self.REPORTER=(reporter_class)
+    @REPORTER = reporter_class
+  end
 
 
   class Runner
@@ -505,7 +513,7 @@ module Oktest
 
   def self.run(*classes)
     opts = classes.last.is_a?(Hash) ? classes.pop() : {}
-    reporter_class = opts[:verbose] ? VerboseReporter : REPORTER
+    reporter_class = opts[:verbose] ? VerboseReporter : Oktest.REPORTER()
     reporter = reporter_class.new(opts[:out])
     runner = Runner.new(reporter)
     classes.each {|cls| runner.run(cls) }
