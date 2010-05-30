@@ -223,11 +223,13 @@ module Oktest
 
   module TestCase
 
-    def ok(actual)
+    def ok(actual=nil)
+      actual = yield if block_given?
       return Oktest::AssertionObject.new(self, actual, false)
     end
 
-    def not_ok(actual)
+    def not_ok(actual=nil)
+      actual = yield if block_given?
       return Oktest::AssertionObject.new(self, actual, true)
     end
 
