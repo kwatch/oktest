@@ -53,6 +53,8 @@ module Oktest
     attr_accessor :diff
   end
 
+  ASSERTION_FAILED = AssertionFailed
+
 
   class AssertionObject
 

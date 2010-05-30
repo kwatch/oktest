@@ -12,15 +12,13 @@ module Oktest
 
   MINITEST_DEFINED = !! defined?(MiniTest)
 
+  remove_const(:ASSERTION_FAILED)
+  ASSERTION_FAILED = MINITEST_DEFINED ? MiniTest::Assertion : Test::Unit::AssertionFailedError  # :nodoc:
+  #ASSERTION_FAILED.class_eval { attr_accessor :diff }
+
   remove_const(:AssertionFailed)
-  if MINITEST_DEFINED
-    class AssertionFailed < MiniTest::Assertion   # :nodoc:
-      attr_accessor :diff
-    end
-  else
-    class AssertionFailed < Test::Unit::AssertionFailedError     # :nodoc:
-      attr_accessor :diff
-    end
+  class AssertionFailed < ASSERTION_FAILED                # :nodoc:
+    attr_accessor :diff
   end
 
 
