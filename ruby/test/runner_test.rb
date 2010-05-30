@@ -78,6 +78,8 @@ class OktestRunnerTest < Test::Unit::TestCase
 
     def setup    ;  @@counts[:setup]    += 1 ;  end
     def teardown ;  @@counts[:teardown] += 1 ;  end
+    def before_all ; @@counts[:_before_all_] += 1 ;  end
+    def after_all  ; @@counts[:_after_all_]  += 1 ;  end
 
     def test_foo
       ok(1+1) == 2
@@ -126,6 +128,17 @@ END
     spec "setup()/teardown() should be called if before()/after() not defined" do
       assert_equal 3, counts[:setup]
       assert_equal 3, counts[:teardown]
+    end
+    spec "before_all()/after_all() should not be called if they are not class methods" do
+      assert_equal 0, counts[:_before_all_]
+      assert_equal 0, counts[:_after_all_]
+    end
+    spec "if before_all()/after_all() is defined as instance method then warned it" do
+      expected = <<'END'
+WARNING: OktestRunnerTest::FooTest2#before_all() should be class method (but defined as instance method)
+WARNING: OktestRunnerTest::FooTest2#after_all() should be class method (but defined as instance method)
+END
+      assert_equal expected, serr
     end
   end
 
@@ -237,7 +250,7 @@ END
 .f
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:221:in `test_bar'
+    ./test/runner_test.rb:234:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
       _assert_equal expected, out.string
@@ -251,7 +264,7 @@ END
 - test_foo ... ok
 - test_bar ... FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:221:in `test_bar'
+    ./test/runner_test.rb:234:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 
 END

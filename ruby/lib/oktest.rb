@@ -457,6 +457,10 @@ module Oktest
       return test_method_names
     end
 
+    def warning(msg)
+      warn "WARNING: #{msg}"
+    end
+
     def run(klass)
       reporter = @reporter
       ## gather test methods
@@ -468,7 +472,11 @@ module Oktest
       # nothing
       ## invoke before_all()
       reporter.before_all(klass)
-      klass.before_all() if klass.respond_to?(:before_all)
+      if klass.respond_to?(:before_all)
+        klass.before_all()
+      elsif klass.method_defined?(:before_all)
+        warning "#{klass.name}#before_all() should be class method (but defined as instance method)"
+      end
       ## invoke test methods
       count = 0
       flag_before   = klass.method_defined?(:before)
@@ -503,7 +511,11 @@ module Oktest
         end
       end
       ## invoke after_all()
-      klass.after_all() if klass.respond_to?(:after_all)
+      if klass.respond_to?(:after_all)
+        klass.after_all()
+      elsif klass.method_defined?(:after_all)
+        warning "#{klass.name}#after_all() should be class method (but defined as instance method)"
+      end
       reporter.after_all(klass)
       ##
       return count
