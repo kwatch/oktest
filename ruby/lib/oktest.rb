@@ -136,6 +136,10 @@ module Oktest
       check2(@actual.include?(expected)) { "#{@actual.inspect}.include?(#{expected.inspect})" }
     end
 
+    def nil?
+      check2(@actual.nil?) { "#{@actual.inspect}.nil?" }
+    end
+
     def empty?
       check2(@actual.empty?) { "#{@actual.inspect}.empty?" }
     end

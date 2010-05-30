@@ -212,6 +212,19 @@ class OktestAssertionTest < Test::Unit::TestCase
     end
   end
 
+  def test_nil?
+    case_for "ok().nil?" do
+      assert_nothing_raised { ok(nil).nil? }
+      ex = assert_raise(_E) { ok(false).nil? }
+      assert_equal "false.nil?: failed.", ex.message
+    end
+    case_for "not_ok().nil?" do
+      assert_nothing_raised { not_ok(false).nil? }
+      ex = assert_raise(_E) { not_ok(nil).nil? }
+      assert_equal "! nil.nil?: failed.", ex.message
+    end
+  end
+
   def test_empty?
     case_for "ok().empty?" do
       assert_nothing_raised { ok([]).empty? }
