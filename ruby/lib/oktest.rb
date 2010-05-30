@@ -269,10 +269,10 @@ module Oktest
     ## marker method to represent post-condition
     def post_cond; yield; end
 
-    ## marker method to describe test case
-    def spec_of(desc); yield; end
+    ## marker method to describe target of specification
+    def target(desc); yield; end
 
-    ## marker method to describe test case
+    ## marker method to describe specification
     def spec(desc); yield; end
 
   end

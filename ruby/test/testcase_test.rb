@@ -75,9 +75,9 @@ class OktestTestCaseTest < Test::Unit::TestCase
       post_cond { done = true }
       return done
     end
-    def call_spec_of
+    def call_target
       done = false
-      spec_of("desc") { done = true }
+      target("desc") { done = true }
       return done
     end
     def call_spec
@@ -99,9 +99,9 @@ class OktestTestCaseTest < Test::Unit::TestCase
     end
   end
 
-  def test_spec_of
+  def test_target
     spec "just invokes block" do
-      assert_equal true, HogeTest3.new.call_spec_of
+      assert_equal true, HogeTest3.new.call_target
     end
   end
 
