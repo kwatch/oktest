@@ -85,5 +85,5 @@ setup(
     package_dir={'': 'lib'},
     #scripts=['bin/pytenjin'],
     #packages=['tenjin'],
-    zip_safe = False,
+    #zip_safe = False,
 )
