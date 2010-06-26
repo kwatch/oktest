@@ -67,6 +67,8 @@ def _diff(target, other):
             expected, actual = [other + "\n"], [target + "\n"]
         else:
             expected, actual = other.splitlines(True), target.splitlines(True)
+            if not expected: expected.append('')
+            if not actual:   actual.append('')
             for lines in (expected, actual):
                 if not lines[-1].endswith("\n"):
                     lines[-1] += "\n\\ No newline at end of string\n"

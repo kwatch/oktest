@@ -694,6 +694,8 @@ class FooTest(object):
        ok ('foo') == 'foo1'
     def test2(self):
        ok ("AAA\nBBB\nCCC\n") == "AAA\n888\nCCC"
+    def test3(self):   # bug: [ERROR] IndexError: list index out of range
+       ok ("") == "\n"
 run(FooTest)
 """[1:]
 expected = r"""
@@ -715,6 +717,14 @@ expected = r"""
 \ No newline at end of string
 +BBB
 +CCC
+* FooTest.test3 ... [NG] '' == '\n' : failed.
+   _test_.py:10: ok ("") == "\n"
+--- expected 
++++ actual 
+@@ -1,1 +1,1 @@
+-
++
+\ No newline at end of string
 """[1:]
 do_test_with(desc, script, expected)
 
