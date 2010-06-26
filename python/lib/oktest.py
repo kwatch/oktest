@@ -389,6 +389,7 @@ class BaseReporter(Reporter):
         if not hasattr(self, '_lines'):
             self._lines = {}
         if file not in self._lines:
+            if not os.path.isfile(file): return None
             f = open(file)
             s = f.read()
             f.close()
@@ -397,7 +398,8 @@ class BaseReporter(Reporter):
 
     def _get_location(self, ex):
         if hasattr(ex, 'file') and hasattr(ex, 'line'):
-            text = self._get_line_text(ex.file, ex.line).strip()
+            text = self._get_line_text(ex.file, ex.line)
+            if text: text = text.strip()
             return (ex.file, ex.line, None, text)
         else:
             tb = traceback.extract_tb(sys.exc_info()[2])
