@@ -62,6 +62,12 @@ def task_edit(c):
 
 
 @recipe
+def task_register(c):
+    """regsiter information into PyPI"""
+    system("python setup.py register")
+
+
+@recipe
 @spices('-a: create egg files for 2.4-2.7')
 def task_package(c, *args, **kwargs):
     """create package"""
