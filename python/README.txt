@@ -253,6 +253,10 @@ Tips
 ----
 
 * You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST="ex[0-9]+"' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.
+  ::
+
+    ### filter test by name
+    $ TEST='ex[0-9]' python test/foobar_test.py
 
 * If you want to output format, create oktest.Reporter subclass and set it to oktest.REPORTER variable.
 
