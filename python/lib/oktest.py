@@ -132,6 +132,13 @@ class AssertionObject(object):
         if (self.value <= other) == self._bool:  return True
         self._failed(_msg(self.value, '<=', other))
 
+    def in_delta(self, other, delta):
+        if (self.value <= other - delta) == self._bool:
+            self._failed(_msg(self.value, '>', other - delta))
+        if (self.value >= other + delta) == self._bool:
+            self._failed(_msg(self.value, '<', other + delta))
+        return True
+
 #    def __contains__(self, other):
 #        if (self.value in other) == self._bool:  return True
 #        self._failed(_msg(self.value, 'in', other))

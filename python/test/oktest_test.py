@@ -281,6 +281,25 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 ###
+desc = "in_delta()'"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_in_delta(self):
+        ok (3.14159).in_delta(3.1415, 0.0001)
+class BarTest(object):
+    def test_in_delta(self):
+        ok (3.14159).in_delta(3.1415, 0.00001)
+run('FooTest', 'BarTest')
+"""[1:]
+expected = r"""
+* FooTest.test_in_delta ... [ok]
+* BarTest.test_in_delta ... [NG] 3.1415899999999999 < 3.1415100000000002 : failed.
+   _test_.py:7: ok (3.14159).in_delta(3.1415, 0.00001)
+"""[1:]
+do_test_with(desc, script, expected)
+
+###
 desc = "op '.matches'"
 script = r"""
 from oktest import *
