@@ -1,5 +1,5 @@
 ###
-### $Release: 0.3.0 $
+### $Release: 0.4.0 $
 ### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -16,7 +16,7 @@ else:
 
 
 name     = 'Oktest'
-version  = '0.3.0'
+version  = '0.4.0'
 author   = 'makoto kuwata'
 email    = 'kwa@kuwata-lab.com'
 maintainer = author

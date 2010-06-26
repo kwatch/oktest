@@ -187,6 +187,8 @@ Failed: FooTest#test1()
 <dd>Raise AssertionError unless x &lt; y.</dd>
 <dt>ok (x) &lt;= y</dt>
 <dd>Raise AssertionError unless x &lt;= y.</dd>
+<dt>ok (x).in_delta(y, delta)</dt>
+<dd>Raise AssertionError unless y-delta &lt; x &lt; y+delta.</dd>
 <dt>ok (x).in_(y)</dt>
 <dd>Raise AssertionError unless x in y.</dd>
 <dt>ok (x).contains(y)</dt>
@@ -229,9 +231,15 @@ For example, 'with chdir(&quot;lib&quot;) ...' changes current directory to 'lib
 <div class="section" id="tips">
 
 <h2>Tips</h2>
-<ul class="simple">
-<li>You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST=&quot;ex[0-9]+&quot;' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.</li>
-<li>If you want to output format, create oktest.Reporter subclass and set it to oktest.REPORTER variable.</li>
+<ul>
+<li><p class="first">You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST=&quot;ex[0-9]+&quot;' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.</p>
+<pre class="literal-block">
+### filter test by name
+$ TEST='ex[0-9]' python test/foobar_test.py
+</pre>
+</li>
+<li><p class="first">If you want to output format, create oktest.Reporter subclass and set it to oktest.REPORTER variable.</p>
+</li>
 </ul>
 </div>
 <div class="section" id="todo">
