@@ -193,6 +193,9 @@ ok (x) < y
 ok (x) <= y
 	Raise AssertionError unless x <= y.
 
+ok (x).in_delta(y, delta)
+	Raise AssertionError unless y-delta < x < y+delta.
+
 ok (x).in_(y)
 	Raise AssertionError unless x in y.
 
