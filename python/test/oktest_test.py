@@ -39,6 +39,8 @@ def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[01]s')):
             echo("done.\n")
         elif _pat.sub('', output) == _pat.sub('', expected):
             echo("done.\n")
+        elif output == expected.replace('--- expected ', '--- expected').replace('+++ actual ', '+++ actual'):   # for Python 3.x
+            echo("done.\n")
         else:
             echo("FAILED.\n")
             if (isinstance(output, str) and isinstance(expected, str)):
@@ -297,6 +299,8 @@ expected = r"""
 * BarTest.test_in_delta ... [NG] 3.1415899999999999 < 3.1415100000000002 : failed.
    _test_.py:7: ok (3.14159).in_delta(3.1415, 0.00001)
 """[1:]
+if repr(3.14159) == '3.14159':    # for Python 3.x
+    expected = expected.replace('3.1415899999999999', '3.14159')
 do_test_with(desc, script, expected)
 
 ###
