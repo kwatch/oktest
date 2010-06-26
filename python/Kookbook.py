@@ -32,6 +32,21 @@ python = prop('python', 'python')
 def task_test(c):
     system(c%"$(python) test/oktest_test.py")
 
+@recipe
+def task_test_all(c):
+    "do test with python 2.5, 2.6, 2.7, 3.0, 3.1"
+    versions = [
+        ('2.5', '/opt/local/bin/python2.5'),
+        ('2.6', '/opt/local/bin/python2.6'),
+        ('2.7', '/opt/local/bin/python2.7'),
+        ('3.0', '/usr/local/python/3.0.1/bin/python'),
+        ('3.1', '/usr/local/python/3.1/bin/python'),
+    ]
+    for ver, bin in versions:
+        print("#")
+        print("# python " + ver)
+        print("#")
+        system(c%"PYTHON=$(bin) $(bin) test/oktest_test.py")
 
 @recipe
 def task_edit(c):
