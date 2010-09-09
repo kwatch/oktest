@@ -572,7 +572,7 @@ class _Context(object):
         return self
 
     def __exit__(self, *args):
-        return self
+        return None
 
     def __call__(self, func, *args):
         self.__enter__()
@@ -626,6 +626,7 @@ class DummyEnvironVars(_Context):
         for k in self.kwargs:
             self.original[k] = os.environ.get(k, None)
         os.environ.update(self.kwargs)
+        return self
 
     def __exit__(self, *args):
         for k in self.original:

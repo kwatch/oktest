@@ -820,13 +820,20 @@ script = r"""
 from __future__ import with_statement
 from oktest import *
 class FooTest(object):
-    def test_spec(self):
+    def test_spec1(self):
         with spec('1+1 is 2') as sp:
             ok (1+1) == 2
         ok (sp.desc) == '1+1 is 2'
+    def test_spec2(self):
+        with spec('1-1 is 0') as sp:
+            ok (1-1) == -1
 run(FooTest)
 """
-expected = "* FooTest.test_spec ... [ok]\n"
+expected = """
+* FooTest.test_spec1 ... [ok]
+* FooTest.test_spec2 ... [NG] 0 == -1 : failed.
+   _test_.py:11: ok (1-1) == -1
+"""[1:]
 if with_statement_supported:
     do_test_with(desc, script, expected)
 
