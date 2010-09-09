@@ -705,6 +705,22 @@ run(FooTest)
 expected = "* FooTest.test_chdir2 ... [ok]\n"
 do_test_with(desc, script, expected)
 
+### spec (with with-statement)
+desc = "spec (with with-statement)"
+script = r"""
+from __future__ import with_statement
+from oktest import *
+class FooTest(object):
+    def test_spec(self):
+        with spec('1+1 is 2') as sp:
+            ok (1+1) == 2
+        ok (sp.desc) == '1+1 is 2'
+run(FooTest)
+"""
+expected = "* FooTest.test_spec ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
 
 ### diff (oktest.DIFF = True)
 desc = "diff (oktest.DIFF = True)"
