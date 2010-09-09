@@ -594,6 +594,46 @@ do_test_with(desc, script, expected)
 
 
 
+### run (with class objects)
+desc = "run (with class objects)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_1(self):
+        ok (1+1) == 2
+class BarTest(object):
+    def test_2(self):
+        ok (1+1) == 2
+run(FooTest, BarTest)
+"""
+expected = r"""
+* FooTest.test_1 ... [ok]
+* BarTest.test_2 ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+### run (with pattern)
+desc = "run (pattern)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_1(self):
+        ok (1+1) == 2
+class BarTestCase(object):
+    def test_2(self):
+        ok (1+1) == 2
+class BazTestCase(object):
+    def test_3(self):
+        ok (1+1) == 2
+run('.*TestCase$')
+"""
+expected = r"""
+* BarTestCase.test_2 ... [ok]
+* BazTestCase.test_3 ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+
 
 ### dummy_file (with with-statement)
 desc = "dummy_file (with with-statement)"
