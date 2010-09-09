@@ -43,6 +43,14 @@ __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
 #
 
 
+def ex2msg(ex):
+    #return ex.message   # deprecated since Python 2.6
+    #return str(ex)      # may be empty
+    #return ex.args[0]   # ex.args may be empty (ex. AssertionError)
+    #return (ex.args or ['(no error message)'])[0]
+    return str(ex) or '(no error message)'
+
+
 def _msg(target, op, other=None):
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
     elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
@@ -230,10 +238,10 @@ class AssertionObject(object):
                 if not isinstance(ex, exception_class):
                     self._failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
                     #raise
-                if errmsg is None or str(ex) == errmsg:
+                if errmsg is None or str(ex) == errmsg:  # don't use ex2msg(ex)!
                     return
-                #self._failed("expected %r but got %r" % (errmsg, ex.message))
-                self._failed("%r == %r" % (str(ex), errmsg), depth=3)
+                #self._failed("expected %r but got %r" % (errmsg, str(ex)))
+                self._failed("%r == %r" % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
             self._failed('%s should be raised' % exception_class.__name__, depth=3)
         else:
             try:
@@ -452,7 +460,7 @@ class SimpleReporter(BaseReporter):
     def print_failed(self, obj, ex):
         OUT.write("f"); OUT.flush()
         self._write("Failed: %s()\n" % self._test_ident(obj))
-        self._write("  %s\n" % ex.args[0])
+        self._write("  %s\n" % ex2msg(ex))
         file, line, func, text = self._get_location(ex)
         if file:
             #self._write("   %s:%s:  %s\n" % (file, line, text))
@@ -463,7 +471,7 @@ class SimpleReporter(BaseReporter):
     def print_error(self, obj, ex):
         OUT.write('E'); OUT.flush()
         self._write("ERROR: %s()\n" % self._test_ident(obj))
-        self._write("  %s: %s\n" % (ex.__class__.__name__, str(ex)))
+        self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         #traceback.print_exc(file=sys.stdout)
         tb = traceback.extract_tb(sys.exc_info()[2])
         iter = tb.__iter__()
@@ -495,7 +503,7 @@ class OldStyleReporter(BaseReporter):
         OUT.write("[ok]\n")
 
     def print_failed(self, obj, ex):
-        OUT.write("[NG] %s\n" % str(ex))
+        OUT.write("[NG] %s\n" % ex2msg(ex))
         file, line, func, text = self._get_location(ex)
         if file:
             OUT.write("   %s:%s: %s\n" % (file, line, text))
@@ -503,7 +511,7 @@ class OldStyleReporter(BaseReporter):
             OUT.write(ex.diff)
 
     def print_error(self, obj, ex):
-        OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, str(ex)))
+        OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         #traceback.print_exc(file=sys.stdout)
         tb = traceback.extract_tb(sys.exc_info()[2])
         iter = tb.__iter__()
@@ -533,7 +541,7 @@ class TapStyleReporter(BaseReporter):
 
     def print_failed(self, obj, ex):
         OUT.write("not ok # %s\n" % self._test_ident(obj))
-        OUT.write("   #  %s\n" % ex.args[0])
+        OUT.write("   #  %s\n" % ex2msg(ex))
         file, line, func, text = self._get_location(ex)
         if file:
             OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
@@ -542,7 +550,7 @@ class TapStyleReporter(BaseReporter):
 
     def print_error(self, obj, ex):
         OUT.write("ERROR  # %s\n" % self._test_ident(obj))
-        OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, str(ex)))
+        OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         #traceback.print_exc(file=sys.stdout)
         tb = traceback.extract_tb(sys.exc_info()[2])
         iter = tb.__iter__()
