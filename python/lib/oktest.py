@@ -331,9 +331,11 @@ class TestClassRunner(object):
 TEST_CLASS_RUNNER = TestClassRunner
 
 
+TARGET_PATTERN = '.*Test(Case)?$'
+
 def run(*classes):
     if len(classes) == 0:
-        classes = ('.*Test(Case)?$', )
+        classes = (TARGET_PATTERN, )
     class_list = []
     pat_type = type(re.compile('x'))
     vars = None
