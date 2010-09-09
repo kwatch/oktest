@@ -663,6 +663,53 @@ run(FooTest)
 expected = "* FooTest.test_dummy_dir2 ... [ok]\n"
 do_test_with(desc, script, expected)
 
+### dummy_environ_vars (with with-statement)
+desc = "dummy_environ_vars (with with-statement)"
+script = r"""
+from __future__ import with_statement
+import os
+from oktest import *
+class FooTest(object):
+    def test_dummy_environ_vars(self):
+        os.environ['AAAA'] = 'hoge'
+        os.environ['CCCC'] = ''
+        with dummy_environ_vars(AAAA='aaa', BBBB='bbb', CCCC='ccc'):
+            ok (os.environ['AAAA']) == 'aaa'
+            ok (os.environ['BBBB']) == 'bbb'
+            ok (os.environ['CCCC']) == 'ccc'
+        ok (os.environ.get('AAAA')) == 'hoge'
+        ok ('BBBB' not in os.environ) == True
+        ok ('CCCC' in os.environ) == True
+        ok (os.environ.get('CCCC')) == ''
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_environ_vars ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### dummy_environ_vars (without with-statement)
+desc = "dummy_environ_vars (without with-statement)"
+script = r"""
+import os
+from oktest import *
+class FooTest(object):
+    def test_dummy_environ_vars2(self):
+        os.environ['AAAA'] = 'hoge'
+        os.environ['CCCC'] = ''
+        def f():
+            ok (os.environ['AAAA']) == 'aaa'
+            ok (os.environ['BBBB']) == 'bbb'
+            ok (os.environ['CCCC']) == 'ccc'
+        dummy_environ_vars(AAAA='aaa', BBBB='bbb', CCCC='ccc')(f)
+        ok (os.environ.get('AAAA')) == 'hoge'
+        ok ('BBBB' not in os.environ) == True
+        ok ('CCCC' in os.environ) == True
+        ok (os.environ.get('CCCC')) == ''
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_environ_vars2 ... [ok]\n"
+do_test_with(desc, script, expected)
+
 ### chdir (with with-statement)
 desc = "chdir (with with-statement)"
 script = r"""
