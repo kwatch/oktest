@@ -332,6 +332,8 @@ TEST_CLASS_RUNNER = TestClassRunner
 
 
 def run(*classes):
+    if len(classes) == 0:
+        classes = ('.*Test(Case)?$', )
     class_list = []
     pat_type = type(re.compile('x'))
     vars = None

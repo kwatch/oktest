@@ -613,7 +613,7 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 ### run (with pattern)
-desc = "run (pattern)"
+desc = "run (with pattern)"
 script = r"""
 from oktest import *
 class FooTest(object):
@@ -630,6 +630,28 @@ run('.*TestCase$')
 expected = r"""
 * BarTestCase.test_2 ... [ok]
 * BazTestCase.test_3 ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+### run (without args)
+desc = "run (without args)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_1(self):
+        ok (1+1) == 2
+class BarTestCase(object):
+    def test_2(self):
+        ok (1+1) == 2
+class BazTestCase(object):
+    def test_3(self):
+        ok (1+1) == 2
+run()
+"""
+expected = r"""
+* BarTestCase.test_2 ... [ok]
+* BazTestCase.test_3 ... [ok]
+* FooTest.test_1 ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
 
