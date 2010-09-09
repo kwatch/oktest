@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'chdir')
+__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'chdir', 'spec')
 
 import sys, os, re, types, traceback
 
@@ -629,6 +629,12 @@ class Chdir(_Context):
         os.chdir(self.back_to)
 
 
+class Spec(_Context):
+
+    def __init__(self, desc):
+        self.desc = desc
+
+
 def dummy_file(filename, content):
     return DummyFile(filename, content)
 
@@ -637,6 +643,9 @@ def dummy_dir(dirname):
 
 def chdir(path):
     return Chdir(path)
+
+def spec(desc):
+    return Spec(desc)
 
 
 if __name__ == '__main__':
