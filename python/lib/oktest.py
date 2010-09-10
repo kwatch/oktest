@@ -341,25 +341,26 @@ TEST_RUNNER = TestRunner
 
 TARGET_PATTERN = '.*Test(Case)?$'
 
-def run(*classes):
-    if len(classes) == 0:
-        classes = (TARGET_PATTERN, )
-    class_list = []
-    pat_type = type(re.compile('x'))
+def run(*targets):
+    if len(targets) == 0:
+        targets = (TARGET_PATTERN, )
+    target_list = []
+    rexp_type = type(re.compile('x'))
     vars = None
-    for arg in classes:
-        if _is_string(arg) or isinstance(arg, pat_type):
-            pattern = isinstance(arg, pat_type) and arg or re.compile(arg)
-            if vars is None: vars = sys._getframe(1).f_locals
-            class_list.extend( vars[k] for k in vars if pattern.match(k) )
-        elif _is_class(arg):
+    for arg in targets:
+        if _is_class(arg):
             klass = arg
-            class_list.append(klass)
+            target_list.append(klass)
+        elif _is_string(arg) or isinstance(arg, rexp_type):
+            rexp = _is_string(arg) and re.compile(arg) or arg
+            if vars is None: vars = sys._getframe(1).f_locals
+            klasses = [ vars[k] for k in vars if rexp.search(k) and _is_class(vars[k]) ]
+            target_list.extend(klasses)
         else:
             raise Exception("%r: not a class nor pattern string." % arg)
     #
     count = 0
-    for klass in class_list:
+    for klass in target_list:
         runner = TEST_RUNNER(klass, REPORTER())
         count += runner.run()
     return count
