@@ -90,9 +90,9 @@ def _diff(target, other):
 
 class AssertionObject(object):
 
-    def __init__(self, value):
+    def __init__(self, value, _bool=True):
         self.value = value
-        self._bool = True
+        self._bool = _bool
 
     #def not_(self):
     #    self._bool = not self._bool
@@ -258,12 +258,12 @@ ASSERTION_OBJECT = AssertionObject
 
 
 def ok(value):
-    return ASSERTION_OBJECT(value)
+    obj = ASSERTION_OBJECT(value, True)
+    return obj
 
 def not_ok(value):
-    v = ok(value)
-    v._bool = False
-    return v
+    obj = ASSERTION_OBJECT(value, False)
+    return obj
 
 
 class TestRunner(object):
