@@ -216,6 +216,9 @@ ok (x).is_not(y)
 ok (x).is_a(y)
 	Raise AssertionError unless isinstance(x, y).
 
+ok (x).hasattr(y)
+	Raise AssertionError unless hasattr(x, y).
+
 ok (x).matches(y)
 	If y is a string, raise AssertionError unless re.search(y, x).
 	If y is a re.pattern object, raise AssertionError unless y.search(x).
@@ -337,7 +340,7 @@ spec(description)
 Tips
 ----
 
-* If you call ok() or not_ok() but forget to do assertion, oktest will warn about it. ::
+* If you call ok() or not_ok() but forget to do assertion, oktest warns it. ::
 
     import oktest
     from oktest import ok, not_ok
