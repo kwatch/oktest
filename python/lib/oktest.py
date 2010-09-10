@@ -731,7 +731,7 @@ def dummy_dir(dirname):
 def dummy_environ_vars(**kwargs):
     return DummyEnvironVars(**kwargs)
 
-def dummy_values(dictionary, items_, **kwargs):
+def dummy_values(dictionary, items_=None, **kwargs):
     return DummyValues(dictionary, items_, **kwargs)
 
 def chdir(path):
