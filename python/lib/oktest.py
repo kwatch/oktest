@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_environ_vars', 'chdir', 'spec')
+__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_environ_vars', 'dummy_values', 'chdir', 'spec')
 
 import sys, os, re, types, traceback
 
@@ -648,6 +648,33 @@ class DummyEnvironVars(_Context):
         self.original.clear()
 
 
+class DummyValues(_Context):
+
+    def __init__(self, dictionary, items_=None, **kwargs):
+        self.dict = dictionary
+        self.items = {}
+        if isinstance(items_, dict):
+            self.items.update(items_)
+        if kwargs:
+            self.items.update(kwargs)
+
+    def __enter__(self):
+        self.original = d = {}
+        for k in self.items:
+            if k in self.dict:
+                d[k] = self.dict[k]
+        self.dict.update(self.items)
+        return self
+
+    def __exit__(self, *args):
+        for k in self.items:
+            if k in self.original:
+                self.dict[k] = self.original[k]
+            else:
+                del self.dict[k]
+        self.__dict__.clear()
+
+
 class Chdir(_Context):
 
     def __init__(self, dirname):
@@ -677,6 +704,9 @@ def dummy_dir(dirname):
 
 def dummy_environ_vars(**kwargs):
     return DummyEnvironVars(**kwargs)
+
+def dummy_values(dictionary, items_, **kwargs):
+    return DummyValues(dictionary, items_, **kwargs)
 
 def chdir(path):
     return Chdir(path)

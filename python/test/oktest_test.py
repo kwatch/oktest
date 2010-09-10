@@ -772,6 +772,41 @@ run(FooTest)
 expected = "* FooTest.test_dummy_environ_vars2 ... [ok]\n"
 do_test_with(desc, script, expected)
 
+### dummy_values (with with-statement)
+desc = "dummy_values (with with-statement)"
+script = r"""
+from __future__ import with_statement
+import os
+from oktest import *
+class FooTest(object):
+    def test_dummy_values(self):
+        d = {'A': 10, 'B': 20, 'C': 30 }
+        with dummy_values(d, {999: 0}, A=100, B=200):
+            ok (d) == {'A': 100, 'B': 200, 'C': 30, 999: 0}
+        ok (d) == {'A': 10, 'B': 20, 'C': 30 }
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_values ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### dummy_values (without with-statement)
+desc = "dummy_values (without with-statement)"
+script = r"""
+import os
+from oktest import *
+class FooTest(object):
+    def test_dummy_values2(self):
+        d = {'A': 10, 'B': 20, 'C': 30 }
+        def f():
+            ok (d) == {'A': 100, 'B': 200, 'C': 30, 999: 0}
+        dummy_values(d, {999: 0}, A=100, B=200)(f)
+        ok (d) == {'A': 10, 'B': 20, 'C': 30 }
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_values2 ... [ok]\n"
+do_test_with(desc, script, expected)
+
 ### chdir (with with-statement)
 desc = "chdir (with with-statement)"
 script = r"""
@@ -836,6 +871,7 @@ expected = """
 """[1:]
 if with_statement_supported:
     do_test_with(desc, script, expected)
+
 
 
 ### diff (oktest.DIFF = True)
