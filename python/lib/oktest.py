@@ -30,6 +30,10 @@ if python3:
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
 
+def _get_location(depth=0):
+    frame = sys._getframe(depth+1)
+    return (frame.f_code.co_filename, frame.f_lineno)
+
 
 __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
 
@@ -99,9 +103,7 @@ class AssertionObject(object):
     #    return self
 
     def _failed(self, msg, postfix=' : failed.', depth=2):
-        frame = sys._getframe(depth)
-        file = frame.f_code.co_filename
-        line = frame.f_lineno
+        file, line = _get_location(depth)
         diff = None
         if isinstance(msg, tuple):
             msg, diff = msg
