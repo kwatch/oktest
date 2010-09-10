@@ -265,7 +265,7 @@ def not_ok(value):
     return v
 
 
-class TestClassRunner(object):
+class TestRunner(object):
 
     def __init__(self, klass, reporter=None):
         self.klass = klass
@@ -336,7 +336,7 @@ class TestClassRunner(object):
         return count
 
 
-TEST_CLASS_RUNNER = TestClassRunner
+TEST_RUNNER = TestRunner
 
 
 TARGET_PATTERN = '.*Test(Case)?$'
@@ -360,7 +360,7 @@ def run(*classes):
     #
     count = 0
     for klass in class_list:
-        runner = TEST_CLASS_RUNNER(klass, REPORTER())
+        runner = TEST_RUNNER(klass, REPORTER())
         count += runner.run()
     return count
 
