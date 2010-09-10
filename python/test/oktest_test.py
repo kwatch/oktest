@@ -807,6 +807,59 @@ run(FooTest)
 expected = "* FooTest.test_dummy_values2 ... [ok]\n"
 do_test_with(desc, script, expected)
 
+### dummy_attrs (with with-statement)
+desc = "dummy_attrs (with with-statement)"
+script = r"""
+from __future__ import with_statement
+import os
+from oktest import *
+class Foo(object):
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+class FooTest(object):
+    def test_dummy_attrs(self):
+        obj = Foo(10, 20)
+        with dummy_attrs(obj, x=100, z=300):
+          ok (obj.x) == 100
+          ok (obj.y) == 20
+          ok (obj.z) == 300
+        #
+        ok (obj.x) == 10
+        ok (obj.y) == 20
+        ok (hasattr(obj, 'z')) == False
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_attrs ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### dummy_attrs (without with-statement)
+desc = "dummy_attrs (without with-statement)"
+script = r"""
+import os
+from oktest import *
+class Foo(object):
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+class FooTest(object):
+    def test_dummy_attrs2(self):
+        obj = Foo(10, 20)
+        def f():
+          ok (obj.x) == 100
+          ok (obj.y) == 20
+          ok (obj.z) == 300
+        dummy_attrs(obj, x=100, z=300)(f)
+        #
+        ok (obj.x) == 10
+        ok (obj.y) == 20
+        ok (hasattr(obj, 'z')) == False
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_attrs2 ... [ok]\n"
+do_test_with(desc, script, expected)
+
 ### chdir (with with-statement)
 desc = "chdir (with with-statement)"
 script = r"""

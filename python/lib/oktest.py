@@ -8,7 +8,8 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_environ_vars', 'chdir', 'spec', 'using')
+__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using',
+           'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars')
 
 import sys, os, re, types, traceback
 
@@ -708,6 +709,9 @@ def dummy_dir(dirname):
 
 def dummy_values(dictionary, items_=None, **kwargs):
     return DummyValues(dictionary, items_, **kwargs)
+
+def dummy_attrs(object, items_=None, **kwargs):
+    return DummyValues(object.__dict__, items_, **kwargs)
 
 def dummy_environ_vars(**kwargs):
     return DummyValues(os.environ, **kwargs)
