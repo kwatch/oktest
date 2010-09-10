@@ -692,6 +692,7 @@ class Using(_Context):
     def __enter__(self):
         self.locals = sys._getframe(1).f_locals
         self.start_names = self.locals.keys()
+        if python3: self.start_names = list(self.start_names)
         return self
 
     def __exit__(self, *args):
