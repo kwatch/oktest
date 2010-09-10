@@ -872,6 +872,27 @@ expected = """
 if with_statement_supported:
     do_test_with(desc, script, expected)
 
+### using (with with-statement)
+desc = "using (with with-statement)"
+script = r"""
+from __future__ import with_statement
+from oktest import *
+class FooTest(object):
+    pass
+with using(FooTest):
+    def test_1(self):
+        ok (1+1) == 2
+    def test_2(self):
+        ok (1*1) == 1
+run(FooTest)
+"""
+expected = """
+* FooTest.test_1 ... [ok]
+* FooTest.test_2 ... [ok]
+"""[1:]
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
 
 
 ### diff (oktest.DIFF = True)

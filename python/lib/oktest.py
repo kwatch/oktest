@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_environ_vars', 'dummy_values', 'chdir', 'spec')
+__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_environ_vars', 'dummy_values', 'chdir', 'spec', 'using')
 
 import sys, os, re, types, traceback
 
@@ -696,6 +696,31 @@ class Spec(_Context):
         self.desc = desc
 
 
+class Using(_Context):
+    """ex.
+         class MyTest(object):
+            pass
+         with oktest.Using(MyTest):
+            def test_1(self):
+              ok (1+1) == 2
+         if __name__ == '__main__':
+            oktest.run(MyTest)
+    """
+    def __init__(self, klass):
+        self.klass = klass
+
+    def __enter__(self):
+        self.locals = sys._getframe(1).f_locals
+        self.start_names = self.locals.keys()
+        return self
+
+    def __exit__(self, *args):
+        curr_names = self.locals.keys()
+        diff_names = list(set(curr_names) - set(self.start_names))
+        for name in diff_names:
+            setattr(self.klass, name, self.locals[name])
+
+
 def dummy_file(filename, content):
     return DummyFile(filename, content)
 
@@ -713,6 +738,9 @@ def chdir(path):
 
 def spec(desc):
     return Spec(desc)
+
+def using(klass):
+    return Using(klass)
 
 
 if __name__ == '__main__':
