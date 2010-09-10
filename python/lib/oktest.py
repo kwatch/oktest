@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_environ_vars', 'dummy_values', 'chdir', 'spec', 'using')
+__all__ = ('ok', 'not_ok', 'run', 'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_environ_vars', 'chdir', 'spec', 'using')
 
 import sys, os, re, types, traceback
 
@@ -627,28 +627,6 @@ class DummyDir(_Context):
         shutil.rmtree(self.path)
 
 
-class DummyEnvironVars(_Context):
-
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-        self.original = {}
-
-    def __enter__(self):
-        for k in self.kwargs:
-            self.original[k] = os.environ.get(k, None)
-        os.environ.update(self.kwargs)
-        return self
-
-    def __exit__(self, *args):
-        for k in self.original:
-            v = self.original[k]
-            if v is None:
-                del os.environ[k]
-            else:
-                os.environ[k] = v
-        self.original.clear()
-
-
 class DummyValues(_Context):
 
     def __init__(self, dictionary, items_=None, **kwargs):
@@ -728,11 +706,11 @@ def dummy_file(filename, content):
 def dummy_dir(dirname):
     return DummyDir(dirname)
 
-def dummy_environ_vars(**kwargs):
-    return DummyEnvironVars(**kwargs)
-
 def dummy_values(dictionary, items_=None, **kwargs):
     return DummyValues(dictionary, items_, **kwargs)
+
+def dummy_environ_vars(**kwargs):
+    return DummyValues(os.environ, **kwargs)
 
 def chdir(path):
     return Chdir(path)
