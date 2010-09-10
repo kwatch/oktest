@@ -223,6 +223,11 @@ class AssertionObject(object):
         self._failed("not isinstance(%r, %s)" % (self.value, other.__name__))
 
     @assertion_op
+    def hasattr(self, name):
+        if hasattr(self.value, name) == self._bool:  return True
+        self._failed("hasattr(%r, %r)" % (self.value, name))
+
+    @assertion_op
     def matches(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
             if bool(pattern.search(self.value)) == self._bool:  return True

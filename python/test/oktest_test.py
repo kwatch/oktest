@@ -450,6 +450,25 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 ###
+desc = "op 'hasattr'"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_hasattr(self):
+        ok ("s").hasattr("__class__")
+class BarTest(object):
+    def test_hasattr(self):
+        ok ("s").hasattr("xxxxx")
+run('FooTest', 'BarTest')
+"""[1:]
+expected = r"""
+* FooTest.test_hasattr ... [ok]
+* BarTest.test_hasattr ... [NG] hasattr('s', 'xxxxx') : failed.
+   _test_.py:7: ok ("s").hasattr("xxxxx")
+"""[1:]
+do_test_with(desc, script, expected)
+
+###
 desc = "op 'raises'"
 script = r"""
 from oktest import *
