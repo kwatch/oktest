@@ -90,6 +90,7 @@ def _diff(target, other):
 
 def assertion_op(func):
     def deco(self, *args):
+        self._tested = True
         return func(self, *args)
     if python2:
         deco.func_name = func.func_name
@@ -107,6 +108,16 @@ class AssertionObject(object):
     def __init__(self, value, _bool=True):
         self.value = value
         self._bool = _bool
+        self._tested = False
+        self._location = None
+
+    def __del__(self):
+        if self._tested is False:
+            msg = "%s() is called but not tested." % (self._bool and 'ok' or 'not_ok')
+            if self._location:
+                msg += " (file '%s', line %s)" % self._location
+            #import warnings; warnings.warn(msg)
+            sys.stderr.write("*** warning: oktest: %s\n" % msg)
 
     #def not_(self):
     #    self._bool = not self._bool
@@ -297,10 +308,12 @@ ASSERTION_OBJECT = AssertionObject
 
 def ok(value):
     obj = ASSERTION_OBJECT(value, True)
+    obj._location = _get_location(1)
     return obj
 
 def not_ok(value):
     obj = ASSERTION_OBJECT(value, False)
+    obj._location = _get_location(1)
     return obj
 
 

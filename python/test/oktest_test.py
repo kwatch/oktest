@@ -33,6 +33,10 @@ def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[01]s')):
         echo("- %s..." % desc)
         open(filename, 'w').write(script)
         output = os.popen(python_command + ' ' + filename).read()
+        #sin, sout, serr = os.popen(python_command + ' ' + filename)
+        #sin.close()
+        #output = sout.read();  sout.close()
+        #output_err = serr.read();  serr.close()
         if isinstance(output, str):
             output = re.sub(r' at 0x[0-9a-f]{6}', '', output)
         if output == expected:
@@ -1110,4 +1114,30 @@ ERROR: FooTest#test_error()
     ok (int('aaa')) == 0
 """[1:]
 os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
+do_test_with(desc, script, expected)
+del os.environ['OKTEST_REPORTER']
+
+
+## checking tested or not
+desc = "checking tested or not"
+script = r"""
+from oktest import *
+import sys
+sys.stderr = sys.stdout
+import unittest
+class FooTest(object):
+  def test_1(self):
+    ok (1+1) == 2
+  def test_2(self):
+    ok (1+1)
+  def test_3(self):
+    not_ok (1+1)
+run(FooTest)
+"""[1:]
+expected = r"""
+### FooTest
+.*** warning: oktest: ok() is called but not tested. (file '_test_.py', line 9)
+.*** warning: oktest: not_ok() is called but not tested. (file '_test_.py', line 11)
+.
+"""[1:]
 do_test_with(desc, script, expected)
