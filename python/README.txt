@@ -23,7 +23,7 @@ Oktest is a new-style testing library for Python.
 
 You can use ok() instead of 'assertXxx()' in unittest.
 
-Oktest requires Python 2.3 or later. Oktest is ready for Python 3.
+Oktest requires Python 2.4 or later. Oktest is ready for Python 3.
 
 NOTICE!! Oktest is a young project and specification may change in the future.
 
@@ -49,7 +49,7 @@ Example
 
 test_example.py::
 
-    from oktest import ok, run
+    from oktest import ok, not_ok, run
     import sys, os
 
     ## no need to extend TestCase class
@@ -57,12 +57,12 @@ test_example.py::
 
         ## invoked only once before all tests
         @classmethod
-        def before_all(self):
+        def before_all(cls):
             os.mkdir('tmp.d')
 
         ## invoked only once after all tests done
         @classmethod
-        def after_all(self):
+        def after_all(cls):
             import shutil
             shutil.rmtree('tmp.d')
 
@@ -97,10 +97,15 @@ test_example.py::
 
     ## invoke tests
     if __name__ == '__main__':
-        from oktest import run
         run(Example1Test, Example2Test)
 	## or
-	#run('.*Test$')  # specify class names by regular expression
+	#run(r'.*Test$')  # specify class names by regular expression
+	## or
+	#run()            # same as run(r'.*Test(Case)$')
+
+
+NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
+See the example at the bottom of this document.
 
 
 Unified Diff
@@ -172,8 +177,8 @@ If you set 'oktest.DIFF' to False, unified diff is not displayed.
 Notice that this feature is only available with oktest.run() and not available with unittest module.
 
 
-Reference
----------
+Assertion Reference
+-------------------
 
 ok (x) == y
 	Raise AssertionError unless x == y.
@@ -226,31 +231,123 @@ ok (path).exists()
 
 ok (func).raises(error_class[, errmsg=None])
 	Raise AssertionError unless func() raises error_class.
-	It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.
+	It sets raised exception into 'func.exception' therefore you can do another test with raised exception object. ::
+
+	    obj = "foobar"
+	    def f():
+	        obj.name
+	    ok (f).raises(AttributeError, "'str' object has no attribute 'name'")
+	    ok (f.exception.message) == "'str' object has no attribute 'name'"
 
 not_ok (x)
-	Opposite of ok(x). For example, 'not_ok ("foo").matches(r"[0-9]+")' is True.
+	Opposite of ok(x). For example, 'not_ok ("foo").matches(r"[0-9]+")' is True. ::
+
+	    fname = 'file.txt'
+	    open(fname, 'w').write('foo')
+	    ok (fname).is_file()            # file exists
+	    os.unlink(fname)
+	    not_ok (fname).is_file()        # file doesn't exist
+
+
+Helpers Reference
+-----------------
 
 run(\*classes)
 	Invokes tests of each class.
-	Argument can be regular expression string.
-	For example, run(r'.*Test$') invokes tests of Example1Test, Example2Test, and so on.
+	Argument can be regular expression string. ::
+
+	    import oktest
+	    oktest.run(FooTest, BarTest)  # invokes FooTest and BarTest
+	    oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
+	    oktest.run()                  # same as oktest.run('.*Test(Case)$')
 
 dummy_file(filename, content)
-	Create dummy file with specified content.
-	For example, 'with dummy_file("A.txt", "aaa") ...' creates dummy file 'A.txt' with content 'aaa' and it will be removed automatically at the end of with-statement block.
+	Create dummy file with specified content. ::
+
+	    import os
+	    assert not os.path.exists("A.txt")        # file doesn't exist
+	    with oktest.dummy_file("A.txt", "aaa"):
+	        assert os.path.isfile("A.txt")        # file is created!
+	        # do something
+	    assert not os.path.exists("A.txt")        # file is removed
 
 dummy_dir(dirname)
-	Create dummy directory.
-	For example, 'with dummy_dir("tmp.d") ...' creates dummy directory 'tmp.txt' and it will be removed automatically at the end of with-statement block.
+	Create dummy directory. ::
+
+	    import os
+	    assert not os.path.exists("tmpdir")       # directory doesn't exist
+	    with oktest.dummy_dir("tmpdir"):
+	        assert os.path.isdir("tmpdir")        # directory is created!
+		# do something
+	    assert not os.path.exists("tmpdir")       # directory is removed
+
+dummy_values(dictionary, items_=None, \*\*kwargs):
+	Change dictionary's values temporarily. ::
+
+	    d = {'A':10, 'B':20}
+	    with oktest.dummy_values(d, A=1000, X=2000):
+	        assert d['A'] == 1000                 # dictionary values are changed!
+		assert d['B'] == 20
+		assert d['X'] == 2000
+		# do something
+	    assert d == {'A':10, 'B':20}              # values are backed
+
+dummy_attrs(object, items_=None, \*\*kwargs):
+	Change object's attributes temporarily.
+	This is same as dummy_values(object.__dict__, \*\*kwargs). ::
+
+	    class Hello(object):
+	        pass
+	    obj = Hello()
+	    obj.x = 10
+	    obj.y = 20
+	    with oktest.dummy_attrs(obj, x=90, z=100):
+	        assert obj.x == 90                    # attributes are changed!
+		assert obj.y == 20
+		assert obj.z == 100 
+	        # do something
+	    assert obj.x == 10                        # attributes are backed
+	    assert obj.y == 20
+	    assert not hasattr(obj, 'z')
 
 chdir(dirname)
-	Change current directory to dirname temporarily.
-	For example, 'with chdir("lib") ...' changes current directory to 'lib' and back-to original directory at the end of with-statement block.
+	Change current directory to dirname temporarily. ::
+
+            import os
+	    cwd = os.getcwd()                         # current working directory
+	    with oktest.chdir("/var/tmp"):
+	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
+		# do something
+	    assert os.getcwd() == cwd                 # back to the original place
+
+spec(description)
+	Represents spec description. This is just marker function, but very useful for readability.
+	**It is strongly recommended to use spec() helper for readability of tests.** ::
+
+	    class NumericTest(object):
+	        def test_integer(self):
+		    with spec("1+1 should be equal to 2."):
+		        ok (1+1) == 2
+		    with spec("1/0 should be error."):
+		        def f(): 1/0
+			ok (f).raises(ZeroDivisionError,
+			              "integer division or modulo by zero")
 
 
 Tips
 ----
+
+* If you call ok() or not_ok() but forget to do assertion, oktest will warn about it. ::
+
+    import oktest
+    from oktest import ok, not_ok
+    
+    class FooTest(object):
+       def test_1(self):
+         #ok (1+1) == 2
+         ok (1+1)         # missing assertion
+
+    oktest.run()   #=> warning: ok() is called but not tested.
 
 * You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST="ex[0-9]+"' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.
   ::
@@ -264,9 +361,10 @@ Tips
 ToDo
 ----
 
-* [v] print 'diff -u' when two strings are different
+* [v] print unified diff when two strings are different
 * [_] improve reporters
 * [_] make package(?)
+* [v] report assertion objects which are not tested
 
 
 License
