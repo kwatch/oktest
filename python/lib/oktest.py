@@ -783,6 +783,28 @@ def using(klass):
     return Using(klass)
 
 
+##
+## undocumented
+##
+
+def flatten(arr, type=(list, tuple)):
+    L = []
+    for x in arr:
+        if isinstance(x, type):
+            L.extend(flatten(x))
+        else:
+            L.append(x)
+    return L
+
+def rm_rf(*fnames):
+    for fname in flatten(fnames):
+        if os.path.isfile(fname):
+            os.unlink(fname)
+        elif os.path.isdir(fname):
+            from shutil import rmtree
+            rmtree(fname)
+
+
 if __name__ == '__main__':
 
     class MyTest(object):

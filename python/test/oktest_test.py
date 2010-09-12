@@ -970,6 +970,63 @@ if with_statement_supported:
     do_test_with(desc, script, expected)
 
 
+## flatten
+desc = "flatten()"
+script = r"""
+from oktest import ok, run, flatten
+class FooTest(object):
+    def test_flatten(self):
+        ok (flatten([1, [2, 3, [4, 5, [[[6]]]], [7, 8]]])) == [1,2,3,4,5,6,7,8]
+run(FooTest)
+"""
+expected = """
+* FooTest.test_flatten ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+## rm_rf()
+desc = "rm_rf()"
+script = r"""
+import os
+from oktest import ok, not_ok, run, flatten, rm_rf
+class FooTest(object):
+    def setup(self):
+        os.mkdir('_rm_rf')
+        os.mkdir('_rm_rf/A')
+        os.mkdir('_rm_rf/B')
+        os.mkdir('_rm_rf/B/C')
+        open('_rm_rf/B/C/X.txt', 'w').write('xxx')
+        open('_rm_rf/Y.txt', 'w').write('yyy')
+        assert os.path.isfile('_rm_rf/B/C/X.txt')
+        assert os.path.isfile('_rm_rf/Y.txt')
+    def after(setup):
+        import shutil
+        if os.path.isdir('_rm_rf'):
+            shutil.rmtree('_rm_rf')
+    def test_remove_files_recursively(self):
+        args = ['_rm_rf/A', '_rm_rf/B', '_rm_rf/Y.txt']
+        rm_rf(*args)
+        for arg in flatten(args):
+            ok (os.path.exists(arg)) == False
+    def test_flatten_args(self):
+        args = ['_rm_rf/A', ['_rm_rf/B', '_rm_rf/Y.txt']]
+        rm_rf(args)
+        for arg in flatten(args):
+            ok (os.path.exists(arg)) == False
+    def test_ignore_unexist_files(self):
+        args = ['_rm_rf/A', '_rm_rf/K', '_rm_rf/Z.txt']
+        def f():
+            rm_rf(*args)
+        not_ok (f).raises(Exception)
+run(FooTest)
+"""
+expected = """
+* FooTest.test_remove_files_recursively ... [ok]
+* FooTest.test_flatten_args ... [ok]
+* FooTest.test_ignore_unexist_files ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
 
 ### diff (oktest.DIFF = True)
 desc = "diff (oktest.DIFF = True)"
