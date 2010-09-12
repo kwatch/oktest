@@ -9,13 +9,14 @@ Release 0.5.0
 -------------
 
 * change default argument of 'run()' to '.*Test(Case)$'.
-* new helper function 'help()' which describes test specification.
+* enhanced to report untested AssertionObject.
+* new helper function 'spec()' which describes test specification.
 * new helper function 'dummy_values()' which changes dictionary temporarily.
 * new helper function 'dummy_attrs()' which changes object's attributes temporarily.
-* enhanced to report untested AssertionObject.
 * 'TestCaseRunner' class is renamed to 'TestRunner'.
 * (undocumented) new helper function 'dummy_environ_vars()'.
 * (undocumented) new helper function 'using()'.
+* (uncodumented) add rm_rf()
 
 
 Release 0.4.0
