@@ -50,6 +50,7 @@ def task_test_all(c):
 
 @recipe
 def task_edit(c):
+    """update $Release$, $Copyrigh$, and $License$ in files"""
     def replacer(s):
         s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
         s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
@@ -135,6 +136,7 @@ def task_clean(c):
 @product('website/index.html')
 @ingreds('README.txt')
 def file_website_index_html(c):
+    "create 'website/index.html' from 'README.txt'"
     #opts = '--stylesheet-path=website/style.css --link-stylesheet'
     #with chdir('website'):
     #    system(c%'rst2html.py $(opts) ../README.txt > index.html')
