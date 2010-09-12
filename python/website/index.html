@@ -28,7 +28,7 @@ ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
 not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
 </pre>
 <p>You can use ok() instead of 'assertXxx()' in unittest.</p>
-<p>Oktest requires Python 2.3 or later. Oktest is ready for Python 3.</p>
+<p>Oktest requires Python 2.4 or later. Oktest is ready for Python 3.</p>
 <p>NOTICE!! Oktest is a young project and specification may change in the future.</p>
 </div>
 <div class="section" id="download">
@@ -51,7 +51,7 @@ $ sudo python setup.py install
 <h2>Example</h2>
 <p>test_example.py:</p>
 <pre class="literal-block">
-from oktest import ok, run
+from oktest import ok, not_ok, run
 import sys, os
 
 ## no need to extend TestCase class
@@ -59,12 +59,12 @@ class Example1Test(object):
 
     ## invoked only once before all tests
     &#64;classmethod
-    def before_all(self):
+    def before_all(cls):
         os.mkdir('tmp.d')
 
     ## invoked only once after all tests done
     &#64;classmethod
-    def after_all(self):
+    def after_all(cls):
         import shutil
         shutil.rmtree('tmp.d')
 
@@ -99,11 +99,14 @@ class Example2Test(unittest.TestCase):
 
 ## invoke tests
 if __name__ == '__main__':
-    from oktest import run
     run(Example1Test, Example2Test)
     ## or
-    #run('.*Test$')  # specify class names by regular expression
+    #run(r'.*Test$')  # specify class names by regular expression
+    ## or
+    #run()            # same as run(r'.*Test(Case)$')
 </pre>
+<p>NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
+See the example at the bottom of this document.</p>
 </div>
 <div class="section" id="unified-diff">
 
@@ -171,9 +174,9 @@ Failed: FooTest#test1()
 <p>If you set 'oktest.DIFF' to False, unified diff is not displayed.</p>
 <p>Notice that this feature is only available with oktest.run() and not available with unittest module.</p>
 </div>
-<div class="section" id="reference">
+<div class="section" id="assertion-reference">
 
-<h2>Reference</h2>
+<h2>Assertion Reference</h2>
 <dl class="docutils">
 <dt>ok (x) == y</dt>
 <dd>Raise AssertionError unless x == y.</dd>
@@ -199,6 +202,8 @@ Failed: FooTest#test1()
 <dd>Raise AssertionError if x is y.</dd>
 <dt>ok (x).is_a(y)</dt>
 <dd>Raise AssertionError unless isinstance(x, y).</dd>
+<dt>ok (x).hasattr(y)</dt>
+<dd>Raise AssertionError unless hasattr(x, y).</dd>
 <dt>ok (x).matches(y)</dt>
 <dd>If y is a string, raise AssertionError unless re.search(y, x).
 If y is a re.pattern object, raise AssertionError unless y.search(x).</dd>
@@ -209,29 +214,139 @@ If y is a re.pattern object, raise AssertionError unless y.search(x).</dd>
 <dt>ok (path).exists()</dt>
 <dd>Raise AssertionError unless os.path.exists(path).</dd>
 <dt>ok (func).raises(error_class[, errmsg=None])</dt>
-<dd>Raise AssertionError unless func() raises error_class.
-It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.</dd>
+<dd><p class="first">Raise AssertionError unless func() raises error_class.
+It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.</p>
+<pre class="last literal-block">
+obj = &quot;foobar&quot;
+def f():
+    obj.name
+ok (f).raises(AttributeError, &quot;'str' object has no attribute 'name'&quot;)
+ok (f.exception.message) == &quot;'str' object has no attribute 'name'&quot;
+</pre>
+</dd>
 <dt>not_ok (x)</dt>
-<dd>Opposite of ok(x). For example, 'not_ok (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</dd>
+<dd><p class="first">Opposite of ok(x). For example, 'not_ok (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
+<pre class="last literal-block">
+fname = 'file.txt'
+open(fname, 'w').write('foo')
+ok (fname).is_file()            # file exists
+os.unlink(fname)
+not_ok (fname).is_file()        # file doesn't exist
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="helpers-reference">
+
+<h2>Helpers Reference</h2>
+<dl class="docutils">
 <dt>run(*classes)</dt>
-<dd>Invokes tests of each class.
-Argument can be regular expression string.
-For example, run(r'.*Test$') invokes tests of Example1Test, Example2Test, and so on.</dd>
+<dd><p class="first">Invokes tests of each class.
+Argument can be regular expression string.</p>
+<pre class="last literal-block">
+import oktest
+oktest.run(FooTest, BarTest)  # invokes FooTest and BarTest
+oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
+oktest.run()                  # same as oktest.run('.*Test(Case)$')
+</pre>
+</dd>
 <dt>dummy_file(filename, content)</dt>
-<dd>Create dummy file with specified content.
-For example, 'with dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;) ...' creates dummy file 'A.txt' with content 'aaa' and it will be removed automatically at the end of with-statement block.</dd>
+<dd><p class="first">Create dummy file with specified content.</p>
+<pre class="last literal-block">
+import os
+assert not os.path.exists(&quot;A.txt&quot;)        # file doesn't exist
+with oktest.dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;):
+    assert os.path.isfile(&quot;A.txt&quot;)        # file is created!
+    # do something
+assert not os.path.exists(&quot;A.txt&quot;)        # file is removed
+</pre>
+</dd>
 <dt>dummy_dir(dirname)</dt>
-<dd>Create dummy directory.
-For example, 'with dummy_dir(&quot;tmp.d&quot;) ...' creates dummy directory 'tmp.txt' and it will be removed automatically at the end of with-statement block.</dd>
+<dd><p class="first">Create dummy directory.</p>
+<pre class="last literal-block">
+import os
+assert not os.path.exists(&quot;tmpdir&quot;)       # directory doesn't exist
+with oktest.dummy_dir(&quot;tmpdir&quot;):
+    assert os.path.isdir(&quot;tmpdir&quot;)        # directory is created!
+    # do something
+assert not os.path.exists(&quot;tmpdir&quot;)       # directory is removed
+</pre>
+</dd>
+<dt>dummy_values(dictionary, items_=None, **kwargs):</dt>
+<dd><p class="first">Change dictionary's values temporarily.</p>
+<pre class="last literal-block">
+d = {'A':10, 'B':20}
+with oktest.dummy_values(d, A=1000, X=2000):
+    assert d['A'] == 1000                 # dictionary values are changed!
+    assert d['B'] == 20
+    assert d['X'] == 2000
+    # do something
+assert d == {'A':10, 'B':20}              # values are backed
+</pre>
+</dd>
+<dt>dummy_attrs(object, items_=None, **kwargs):</dt>
+<dd><p class="first">Change object's attributes temporarily.
+This is same as dummy_values(object.__dict__, **kwargs).</p>
+<pre class="last literal-block">
+class Hello(object):
+    pass
+obj = Hello()
+obj.x = 10
+obj.y = 20
+with oktest.dummy_attrs(obj, x=90, z=100):
+    assert obj.x == 90                    # attributes are changed!
+    assert obj.y == 20
+    assert obj.z == 100
+    # do something
+assert obj.x == 10                        # attributes are backed
+assert obj.y == 20
+assert not hasattr(obj, 'z')
+</pre>
+</dd>
 <dt>chdir(dirname)</dt>
-<dd>Change current directory to dirname temporarily.
-For example, 'with chdir(&quot;lib&quot;) ...' changes current directory to 'lib' and back-to original directory at the end of with-statement block.</dd>
+<dd><p class="first">Change current directory to dirname temporarily.</p>
+<pre class="last literal-block">
+import os
+cwd = os.getcwd()                         # current working directory
+with oktest.chdir(&quot;/var/tmp&quot;):
+    assert os.getcwd() == &quot;/var/tmp&quot;      # current directory is changed!
+    # do something
+assert os.getcwd() == cwd                 # back to the original place
+</pre>
+</dd>
+<dt>spec(description)</dt>
+<dd><p class="first">Represents spec description. This is just marker function, but very useful for readability.
+<strong>It is strongly recommended to use spec() helper for readability of tests.</strong></p>
+<pre class="last literal-block">
+class NumericTest(object):
+    def test_integer(self):
+        with spec(&quot;1+1 should be equal to 2.&quot;):
+            ok (1+1) == 2
+        with spec(&quot;1/0 should be error.&quot;):
+            def f(): 1/0
+            ok (f).raises(ZeroDivisionError,
+                          &quot;integer division or modulo by zero&quot;)
+</pre>
+</dd>
 </dl>
 </div>
 <div class="section" id="tips">
 
 <h2>Tips</h2>
 <ul>
+<li><p class="first">If you call ok() or not_ok() but forget to do assertion, oktest warns it.</p>
+<pre class="literal-block">
+import oktest
+from oktest import ok, not_ok
+
+class FooTest(object):
+   def test_1(self):
+     #ok (1+1) == 2
+     ok (1+1)         # missing assertion
+
+oktest.run()   #=&gt; warning: ok() is called but not tested.
+</pre>
+</li>
 <li><p class="first">You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST=&quot;ex[0-9]+&quot;' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.</p>
 <pre class="literal-block">
 ### filter test by name
@@ -246,9 +361,10 @@ $ TEST='ex[0-9]' python test/foobar_test.py
 
 <h2>ToDo</h2>
 <ul class="simple">
-<li>[v] print 'diff -u' when two strings are different</li>
+<li>[v] print unified diff when two strings are different</li>
 <li>[_] improve reporters</li>
 <li>[_] make package(?)</li>
+<li>[v] report assertion objects which are not tested</li>
 </ul>
 </div>
 <div class="section" id="license">
