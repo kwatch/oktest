@@ -803,30 +803,3 @@ def rm_rf(*fnames):
         elif os.path.isdir(fname):
             from shutil import rmtree
             rmtree(fname)
-
-
-if __name__ == '__main__':
-
-    class MyTest(object):
-        def before(self):
-            self.L = [10, 20, 30]
-        def test_ex1(self):
-            ok (len(self.L)) == 3
-            ok (sum(self.L)) == 60
-        def test_ex2(self):
-            ok (self.L[-1]) > 31
-
-    run(MyTest)
-
-    import unittest
-    class MyTestCase(unittest.TestCase):
-        def setUp(self):
-            self.L = [10, 20, 30]
-        def test_ex1(self):
-            ok (len(self.L)) == 3
-            ok (sum(self.L)) == 60
-        def test_ex2(self):
-            ok (self.L[-1]) > 31
-
-    #unittest.main()
-    run(MyTestCase)
