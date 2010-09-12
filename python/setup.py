@@ -39,7 +39,7 @@ detail   = (
             "\n"
             "You can use ok() instead of 'assertXxx()' in unittest.\n"
             "\n"
-            "Oktest requires Python 2.3 or later. Oktest is ready for Python 3.\n"
+            "Oktest requires Python 2.4 or later. Oktest is ready for Python 3.\n"
             "\n"
             "NOTICE!! Oktest is a young project and specification may change in the future.\n"
             "\n"
@@ -58,7 +58,7 @@ classifiers = [
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2.3',
+    #'Programming Language :: Python :: 2.3',
     'Programming Language :: Python :: 2.4',
     'Programming Language :: Python :: 2.5',
     'Programming Language :: Python :: 2.6',
@@ -85,5 +85,5 @@ setup(
     package_dir={'': 'lib'},
     #scripts=['bin/pytenjin'],
     #packages=['tenjin'],
-    #zip_safe = False,
+    zip_safe = False,
 )
