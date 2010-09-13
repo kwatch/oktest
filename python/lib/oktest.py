@@ -22,6 +22,11 @@ if python2:
         return isinstance(obj, (types.TypeType, types.ClassType))
     def _func_firstlineno(func):
         return func.im_func.func_code.co_firstlineno
+    def _read_file(fname):
+        f = open(fname)
+        s = f.read()
+        f.close()
+        return s
 if python3:
     def _is_string(val):
         return isinstance(val, (str, bytes))
@@ -29,6 +34,13 @@ if python3:
         return isinstance(obj, (type, ))
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
+    def _read_file(fname, encoding='utf-8'):
+        #with open(fname, encoding=encoding) as f:
+        #    s = f.read()
+        f = open(fname, encoding=encoding)
+        s = f.read()
+        f.close()
+        return s
 
 def _get_location(depth=0):
     frame = sys._getframe(depth+1)
@@ -467,9 +479,7 @@ class BaseReporter(Reporter):
             self._lines = {}
         if file not in self._lines:
             if not os.path.isfile(file): return None
-            f = open(file)
-            s = f.read()
-            f.close()
+            s = _read_file(file)
             self._lines[file] = s.splitlines(True)
         return self._lines[file][line-1]
 
