@@ -233,11 +233,13 @@ module Oktest
       actual = yield if block_given?       # experimental
       return Oktest::AssertionObject.new(self, actual, false)
     end
+    alias ok_ ok
 
     def not_ok(actual=nil)
       actual = yield if block_given?       # experimental
       return Oktest::AssertionObject.new(self, actual, true)
     end
+    alias not_ok_ not_ok
 
     def capture_io(stdin_str=nil)
       require 'stringio' unless defined?(StringIO)
