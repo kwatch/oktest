@@ -79,9 +79,13 @@ module Oktest
       end
     end
 
-#    def !=(expected)
-#      do_assert(@actual == expected, expected, '!=', '==')
-#    end
+    if Object.new.respond_to?(:'!=')
+      eval <<-'END'
+    def !=(expected)
+      do_assert(@actual == expected, expected, '!=', '==')
+    end
+      END
+    end
 
     def >(expected)
       do_assert(@actual > expected, expected, '>', '<=')
