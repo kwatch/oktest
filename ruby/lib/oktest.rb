@@ -294,7 +294,7 @@ module Oktest
     def target(desc); yield; end
 
     ## marker method to describe specification
-    def spec(desc); yield; end
+    def spec(desc); yield if block_given?; end
 
   end
 
