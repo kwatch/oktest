@@ -212,6 +212,23 @@ class OktestAssertionTest < Test::Unit::TestCase
     end
   end
 
+  def test_is_a?
+    val= 1
+    case_for "ok().is_a?" do
+      assert_nothing_raised { ok(val).is_a?(Fixnum) }
+      assert_nothing_raised { ok(val).is_a?(Integer) }
+      ex = assert_raise(_E) { ok(val).is_a?(Float) }
+      assert_equal "1.is_a?(Float): failed.", ex.message
+    end
+    case_for "not_ok().is_a?" do
+      assert_nothing_raised { not_ok(val).is_a?(Float) }
+      ex = assert_raise(_E) { not_ok(val).is_a?(Fixnum) }
+      assert_equal "! 1.is_a?(Fixnum): failed.", ex.message
+      ex = assert_raise(_E) { not_ok(val).is_a?(Integer) }
+      assert_equal "! 1.is_a?(Integer): failed.", ex.message
+    end
+  end
+
   def test_nil?
     case_for "ok().nil?" do
       assert_nothing_raised { ok(nil).nil? }

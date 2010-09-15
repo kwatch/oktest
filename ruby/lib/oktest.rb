@@ -140,6 +140,11 @@ module Oktest
       check2(@actual.include?(expected)) { "#{@actual.inspect}.include?(#{expected.inspect})" }
     end
 
+    def is_a?(expected)
+      check2(@actual.is_a?(expected)) { "#{@actual.inspect}.is_a?(#{expected})" }
+    end
+    alias kind_of? is_a?
+
     def nil?
       check2(@actual.nil?) { "#{@actual.inspect}.nil?" }
     end
