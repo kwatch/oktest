@@ -21,7 +21,8 @@ if python2:
     def _is_class(obj):
         return isinstance(obj, (types.TypeType, types.ClassType))
     def _func_firstlineno(func):
-        return func.im_func.func_code.co_firstlineno
+        func = getattr(func, 'im_func', func)
+        return func.func_code.co_firstlineno
     def _read_file(fname):
         f = open(fname)
         s = f.read()
