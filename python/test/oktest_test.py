@@ -99,8 +99,8 @@ class BarTest(object):
 run('.*Test$')
 """[1:]
 expected = r"""
-* BarTest.test_minus ... [ok]
 * FooTest.test_plus ... [ok]
+* BarTest.test_minus ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -672,9 +672,35 @@ class BazTestCase(object):
 run()
 """
 expected = r"""
+* FooTest.test_1 ... [ok]
 * BarTestCase.test_2 ... [ok]
 * BazTestCase.test_3 ... [ok]
-* FooTest.test_1 ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+## _min_firstlineno_of_methods
+desc = "_min_firstlineno_of_methods"
+script = r"""
+import oktest                  # 1
+class FooTest(object):         # 2
+    def test_2(self):          # 3
+        pass                   # 4
+    def test_1(self):          # 5
+        pass                   # 6
+class BarTest(FooTest):        # 7
+    def test_1(self):          # 8
+        pass                   # 9
+class BazTest(FooTest):        # 10
+    def _test_1(self):         # 11
+        pass                   # 12
+print(oktest._min_firstlineno_of_methods(FooTest))   #=> 3
+print(oktest._min_firstlineno_of_methods(BarTest))   #=> 8
+print(oktest._min_firstlineno_of_methods(BazTest))   #=> -1
+"""[1:]
+expected = r"""
+3
+8
+-1
 """[1:]
 do_test_with(desc, script, expected)
 

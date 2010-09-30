@@ -425,6 +425,8 @@ def run(*targets):
             rexp = _is_string(arg) and re.compile(arg) or arg
             if vars is None: vars = sys._getframe(1).f_locals
             klasses = [ vars[k] for k in vars if rexp.search(k) and _is_class(vars[k]) ]
+            if TESTCLASS_SORT_KEY:
+                klasses.sort(key=TESTCLASS_SORT_KEY)
             target_list.extend(klasses)
         else:
             raise Exception("%r: not a class nor pattern string." % arg)
@@ -437,6 +439,17 @@ def run(*targets):
 
 
 OUT = sys.stdout
+
+
+def _min_firstlineno_of_methods(klass):
+    func_types = (types.FunctionType, types.MethodType)
+    d = klass.__dict__
+    linenos = [ _func_firstlineno(d[k]) for k in d
+                if k.startswith('test') and type(d[k]) in func_types ]
+    return linenos and min(linenos) or -1
+
+TESTCLASS_SORT_KEY = _min_firstlineno_of_methods
+
 
 
 ##
