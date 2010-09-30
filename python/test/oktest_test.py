@@ -38,7 +38,7 @@ def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[01]s')):
         #output = sout.read();  sout.close()
         #output_err = serr.read();  serr.close()
         if isinstance(output, str):
-            output = re.sub(r' at 0x[0-9a-f]{6}', '', output)
+            output = re.sub(r' at 0x[0-9a-f]{6,9}', '', output)
         if output == expected:
             echo("done.\n")
         elif _pat.sub('', output) == _pat.sub('', expected):
@@ -994,6 +994,86 @@ expected = """
 """[1:]
 if with_statement_supported:
     do_test_with(desc, script, expected)
+
+
+### intercept (function)
+desc = "intercept (function)"
+script = r"""
+from oktest import *
+def f(x, y):
+    return x + y
+f = intercept(f)
+f(10, 20)
+print(f._args)    #=> (10, 20)
+print(f._kwargs)  #=> {}
+print(f._return)  #=> 30
+"""[1:]
+expected = """
+(10, 20)
+{}
+30
+"""[1:]
+do_test_with(desc, script, expected)
+
+### intercept (instance method)
+desc = "intercept (instance method)"
+script = r"""
+from oktest import *
+class Hello(object):
+    def hello(self, name):
+        return 'Hello %s!' % name
+#
+obj = Hello()
+obj.hello = intercept(obj.hello)
+print(obj.hello('World'))  #=> Hello World!
+print(obj.hello._args)     #=> ('World',)
+print(obj.hello._kwargs)   #=> {}
+print(obj.hello._return)   #=> Hello World!
+print("--")
+Hello.hello = intercept(Hello.hello)
+obj2 = Hello()
+print(obj2.hello('WORLD'))  #=> Hello WORLD!
+print(obj2.hello._args)     #=> ('WORLD',)
+print(obj2.hello._kwargs)   #=> {}
+print(obj2.hello._return)   #=> Hello WORLD!
+"""[1:]
+expected = """
+Hello World!
+('World',)
+{}
+Hello World!
+--
+Hello WORLD!
+('WORLD',)
+{}
+Hello WORLD!
+"""[1:]
+if python3:
+    expected = expected.replace("('WORLD',)", "(<__main__.Hello object>, 'WORLD')")
+do_test_with(desc, script, expected)
+
+### intercept (class method)
+desc = "intercept (class method)"
+script = r"""
+from oktest import *
+class Hello(object):
+    @classmethod
+    def hello2(cls, name):
+        return 'Hi %s!' % name
+#
+Hello.hello2 = intercept(Hello.hello2)
+print(Hello.hello2('world'))  #=> Hi world!
+print(Hello.hello2._args)     #=> ('world',)
+print(Hello.hello2._kwargs)   #=> {}
+print(Hello.hello2._return)   #=> Hi world!
+"""[1:]
+expected = """
+Hi world!
+('world',)
+{}
+Hi world!
+"""[1:]
+do_test_with(desc, script, expected)
 
 
 ## flatten

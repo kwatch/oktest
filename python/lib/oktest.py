@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using',
+__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using', 'intercept',
            'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars')
 
 import sys, os, re, types, traceback
@@ -809,6 +809,41 @@ def spec(desc):
 
 def using(klass):
     return Using(klass)
+
+
+def intercept(func):
+    """intercept function or method to record arguments and return value.
+       ex.
+         def f(x, y):
+           return x + y
+         f = intercept(f)
+         f(10, 20)
+         f._args    #=> (10, 20)
+         f._kwargs  #=> {}
+         f._return  #=> 30
+    """
+    def _copy_attrs(func, newfunc):
+        for k in ('func_name', '__name__', '__doc__'):
+            if hasattr(func, k):
+                setattr(newfunc, k, getattr(func, k))
+    if type(func) is types.FunctionType:      # function
+        def newfunc(*args, **kwargs):         # no 'self'
+            newfunc._args, newfunc._kwargs = args, kwargs
+            newfunc._return = ret = func(*args, **kwargs)
+            return ret
+        _copy_attrs(func, newfunc)
+        return newfunc
+    elif type(func) is types.MethodType:      # method (instance or class)
+        def newfunc(self, *args, **kwargs):   # has 'self'
+            newfunc._args, newfunc._kwargs = args, kwargs
+            if _is_unbound(func): args = (self, ) + args    # call with 'self' if unbound method
+            newfunc._return = ret = func(*args, **kwargs)
+            return ret
+        _copy_attrs(func, newfunc)
+        if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
+        if python3:  return types.MethodType(newfunc, func.__self__)
+    else:
+        raise TypeError("%r: intercept() supports only function or method." % (func, ))
 
 
 ##
