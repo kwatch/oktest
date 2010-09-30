@@ -20,6 +20,8 @@ if python2:
         return isinstance(val, (str, unicode))
     def _is_class(obj):
         return isinstance(obj, (types.TypeType, types.ClassType))
+    def _is_unbound(method):
+        return not method.im_self
     def _func_firstlineno(func):
         func = getattr(func, 'im_func', func)
         return func.func_code.co_firstlineno
@@ -33,6 +35,8 @@ if python3:
         return isinstance(val, (str, bytes))
     def _is_class(obj):
         return isinstance(obj, (type, ))
+    def _is_unbound(method):
+        return not method.__self__
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
     def _read_file(fname, encoding='utf-8'):
