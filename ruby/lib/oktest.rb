@@ -665,10 +665,8 @@ module Oktest
       private
 
       def intercept
-        Thread.current[:__interceptor] = self
-        class << @object
-          intr = Thread.current[:__interceptor]
-          Thread.current[:__interceptor] = nil
+        intr = self
+        (class << @object; self; end).class_eval do
           method = intr.method
           alias_name = "__#{method}_#{rand().to_s[2..-1]}"
           alias_method alias_name, method
