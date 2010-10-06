@@ -232,7 +232,9 @@ class OktestTestCaseTest < Test::Unit::TestCase
     end
     spec "can take block for mocking." do
       obj = Hello.new
+      orig = nil
       intr = intercept(obj, :hello) do |name|
+        orig = obj.__intercepted_hello(name)
         "Bonjor #{name}!"
       end
       ok_(intr.called) == false
@@ -240,6 +242,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
       ok_(intr.called) == true
       ok_(intr.args)   ==  ["SOS"]
       ok_(intr.return) == "Bonjor SOS!"
+      ok_(orig) == "Hello SOS!"
     end
   end
 

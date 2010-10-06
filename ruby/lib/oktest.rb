@@ -320,7 +320,7 @@ module Oktest
     ##    end
     ##    obj = Hello.new
     ##    intr = intercept(obj, :hello) do |name|
-    ##      "Bonjor #{name}!"
+    ##      "Bonjor #{name}!"   # or `obj.__intercepted_hello(name)'
     ##    end
     ##    intr.called  #=> false
     ##    obj.hello('World')   #=> "Bonjor World!"
@@ -668,7 +668,7 @@ module Oktest
         intr = self
         (class << @object; self; end).class_eval do
           method = intr.method
-          alias_name = "__#{method}_#{rand().to_s[2..-1]}"
+          alias_name = "__intercepted_#{method}"
           alias_method alias_name, method
           define_method(method) do |*args|
             intr.called = true
