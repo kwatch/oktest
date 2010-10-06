@@ -1000,18 +1000,18 @@ if with_statement_supported:
 desc = "intercept (function)"
 script = r"""
 from oktest import *
-def f(x, y):
-    return x + y
+def f(x, y, z=0):
+    return x + y + z
 f = intercept(f)
-f(10, 20)
-print(f._args)    #=> (10, 20)
-print(f._kwargs)  #=> {}
-print(f._return)  #=> 30
+f(10, 20, z=7)
+print f._args    #=> (10, 20)
+print f._kwargs  #=> {'z': 7}
+print f._return  #=> 37
 """[1:]
 expected = """
 (10, 20)
-{}
-30
+{'z': 7}
+37
 """[1:]
 do_test_with(desc, script, expected)
 

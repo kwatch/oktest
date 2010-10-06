@@ -814,13 +814,13 @@ def using(klass):
 def intercept(func):
     """intercept function or method to record arguments and return value.
        ex.
-         def f(x, y):
-           return x + y
-         f = intercept(f)
-         f(10, 20)
-         f._args    #=> (10, 20)
-         f._kwargs  #=> {}
-         f._return  #=> 30
+           def f(x, y, z=0):
+               return x + y + z
+           f = intercept(f)
+           f(10, 20, z=7)   #=> 37
+           print f._args    #=> (10, 20)
+           print f._kwargs  #=> {'z': 7}
+           print f._return  #=> 37
     """
     def _copy_attrs(func, newfunc):
         for k in ('func_name', '__name__', '__doc__'):
