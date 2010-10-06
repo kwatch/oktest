@@ -105,10 +105,8 @@ class OktestRunnerTest < Test::Unit::TestCase
       runner.run(FooTest2)
     end
     expected = <<END
-### OktestRunnerTest::FooTest1
-...
-### OktestRunnerTest::FooTest2
-...
+### OktestRunnerTest::FooTest1: ... (3 tests, 0 specs)
+### OktestRunnerTest::FooTest2: ... (3 tests, 0 specs)
 END
     assert_equal expected, sout
     #
@@ -181,12 +179,12 @@ END
       assert_equal %w[test_aaa test_xxx test_foo test_bar test_001_baz], runner.test_method_names_from(BarTest2)
       expected = <<END
 ### OktestRunnerTest::BarTest2
-- test_aaa ... ok
-- test_xxx ... ok
-- test_foo ... ok
-- test_bar ... ok
-- test_001_baz ... ok
-
+- test_aaa:  ok
+- test_xxx:  ok
+- test_foo:  ok
+- test_bar:  ok
+- test_001_baz:  ok
+ (5 tests, 0 specs)
 END
       assert_equal expected, sout
     end
@@ -236,21 +234,20 @@ END
     def test_bar; ok(1+1) == 3; end
   end
   SIMPLE_OUTPUT_BazTest2 = <<'END'
-### OktestRunnerTest::BazTest2
-.f
+### OktestRunnerTest::BazTest2: .f (2 tests, 0 specs)
 Failed: test_bar()
     2 == 3: failed.
-    ./test/runner_test.rb:236:in `test_bar'
+    ./test/runner_test.rb:234:in `test_bar'
       def test_bar; ok(1+1) == 3; end
 END
   VERBOSE_OUTPUT_BazTest2 = <<'END'
 ### OktestRunnerTest::BazTest2
-- test_foo ... ok
-- test_bar ... FAILED
+- test_foo:  ok
+- test_bar:  FAILED
     2 == 3: failed.
-    ./test/runner_test.rb:236:in `test_bar'
+    ./test/runner_test.rb:234:in `test_bar'
       def test_bar; ok(1+1) == 3; end
-
+ (2 tests, 0 specs)
 END
 
   def _assert_equal(expected, actual)
@@ -296,14 +293,16 @@ END
     spec 'if :out option is specified then output is stealed by it' do
       out = StringIO.new
       Oktest.run_all(:out=>out)
-      expected = SIMPLE_OUTPUT_BazTest2 + "### OktestRunnerTest::BazTest3\n.\n"
+      expected = SIMPLE_OUTPUT_BazTest2 + \
+                 "### OktestRunnerTest::BazTest3: . (1 tests, 0 specs)\n"
       _assert_equal expected, out.string
     end
     ## :verbose option
     spec 'if :verbose option is specified then test method names are displayed' do
       out = StringIO.new
       Oktest.run_all(:out=>out, :verbose=>true)
-      expected = VERBOSE_OUTPUT_BazTest2 + "### OktestRunnerTest::BazTest3\n- test_xxx ... ok\n\n"
+      expected = VERBOSE_OUTPUT_BazTest2 + \
+                 "### OktestRunnerTest::BazTest3\n- test_xxx:  ok\n (1 tests, 0 specs)\n"
       _assert_equal expected, out.string
     end
     ## set '@_run_at_exit = true'
@@ -353,8 +352,8 @@ end
 END
     expected = <<'END'
 ### FooTest
-- test_001_dummy1 ... ok
-
+- test_001_dummy1:  ok
+ (1 tests, 0 specs)
 END
     expected2 = <<'END'
 Loaded suite _test_at_exit

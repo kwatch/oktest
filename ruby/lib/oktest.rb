@@ -297,7 +297,28 @@ module Oktest
     def target(desc); yield; end
 
     ## marker method to describe specification
-    def spec(desc); yield if block_given?; end
+    #def spec(desc); yield if block_given?; end
+    def spec(desc)
+      reporter = @_oktest_runner && @_oktest_runner.reporter
+      status = nil
+      begin
+        reporter.enter_spec(self, desc) if reporter
+        if block_given?
+          yield
+          status = :ok
+        else
+          status = :empty
+        end
+      rescue AssertionFailed => ex
+        status = :fail
+        raise ex
+      rescue => ex
+        status = :error
+        raise ex
+      ensure
+        reporter.exit_spec(self, status) if reporter
+      end
+    end
 
     ##
     ## intercept method call of object
@@ -404,6 +425,12 @@ module Oktest
     def print_error(obj, ex)
     end
 
+    def enter_spec(obj, desc)
+    end
+
+    def exit_spec(obj, status)
+    end
+
   end
 
 
@@ -412,6 +439,35 @@ module Oktest
     def initialize(out=nil)
       @out = out || $stdout
       @_flush = @out.respond_to?(:flush)
+    end
+
+    def before_all(klass)
+      @count_test = 0
+      @count_spec = 0
+    end
+
+    def before(obj)
+      @count_test += 1
+      @spec_status = nil
+    end
+
+    def after(obj)
+    end
+
+    def enter_spec(obj, desc)
+      @count_spec += 1
+    end
+
+    def exit_spec(obj, status)
+      @spec_status = status
+      case status
+      when :ok      ; write('.')
+      when :empty   ; write('_')
+      when :fail    ; write('f')
+      when :error   ; write('E')
+      else
+        raise "** internal error: status=#{status.inspect}"
+      end
     end
 
     private
@@ -454,28 +510,24 @@ module Oktest
   class SimpleReporter < BaseReporter
 
     def before_all(klass)
-      write("### %s\n" % klass.name)
+      super
+      write("### %s: " % klass.name)
       @buf = ""
     end
 
     def after_all(klass)
-      write("\n")
+      super
+      write(" (#{@count_test} tests, #{@count_spec} specs)\n")
       @out << @buf.to_s
       @buf = nil
     end
 
-    def before(obj)
-    end
-
-    def after(obj)
-    end
-
     def print_ok(obj)
-      write(".")
+      write(".") unless @spec_status
     end
 
     def print_failed(obj, ex)
-      write("f")
+      write("f") unless @spec_status
       @buf << "Failed: #{_test_ident(obj)}()\n"
       @buf << "    #{ex.message}\n"
       print_backtrace(ex, @buf)
@@ -484,7 +536,7 @@ module Oktest
     end
 
     def print_error(obj, ex)
-      write("E")
+      write("E") unless @spec_status
       @buf << "ERROR: #{_test_ident(obj)}()\n"
       @buf << "    #{ex.class.name}: #{ex.message}\n"
       print_backtrace(ex, @buf)
@@ -496,26 +548,26 @@ module Oktest
   class VerboseReporter < BaseReporter
 
     def before_all(klass)
+      super
       write("### %s\n" % klass.name)
     end
 
     def after_all(klass)
-      write("\n")
+      super
+      write(" (#{@count_test} tests, #{@count_spec} specs)\n")
     end
 
     def before(obj)
-      write("- #{_test_ident(obj)} ... ")
-    end
-
-    def after(obj)
+      super
+      write("- #{_test_ident(obj)}: ")
     end
 
     def print_ok(obj)
-      write("ok\n")
+      write(" ok\n")
     end
 
     def print_failed(obj, ex)
-      write("FAILED\n")
+      write(" FAILED\n")
       write("    #{ex.message}\n")
       print_backtrace(ex, @out)
       #assert ex.is_a?(AssertionFailed)
@@ -523,7 +575,7 @@ module Oktest
     end
 
     def print_error(obj, ex)
-      write("ERROR\n")
+      write(" ERROR\n")
       write("  #{ex.class.name}: #{ex.message}\n")
       print_backtrace(ex, @out)
     end
@@ -532,6 +584,7 @@ module Oktest
 
 
   REPORTER = SimpleReporter
+  #REPORTER = VerboseReporter
 
   def self.REPORTER=(reporter_class)
     remove_const(:REPORTER)
@@ -544,6 +597,7 @@ module Oktest
     def initialize(reporter=nil)
       @reporter = reporter || REPORTER.new
     end
+    attr_accessor :reporter
 
     def test_method_names_from(klass)
       test_method_names = klass.instance_methods(true).collect {|sym| sym.to_s }.grep(/\Atest/).sort()
@@ -592,6 +646,7 @@ module Oktest
         end
         obj.instance_variable_set('@_name', method_name.sub(/\Atest_?/, ''))
         obj.instance_variable_set('@_test_method', method_name)
+        obj.instance_variable_set('@_oktest_runner', self)
         ## invoke before() or setup()
         reporter.before(obj)
         flag_before ? obj.before() : flag_setup ? obj.setup() : nil

@@ -53,12 +53,12 @@ class OktestReporterTest < Test::Unit::TestCase
     @debug    = false
     @expected = \
 %q"### OktestReporterTest::ExampleTest
-- test_success ... ok
-- test_fail ... FAILED
+- test_success:  ok
+- test_fail:  FAILED
     2 == 3: failed.
     ./test/reporter_test.rb:23:in `test_fail'
       ok(1+1) == 3
-- test_fail_nested ... FAILED
+- test_fail_nested:  FAILED
     2 == 3: failed.
     ./test/reporter_test.rb:33:in `_bar'
       ok(actual) == expected
@@ -66,7 +66,7 @@ class OktestReporterTest < Test::Unit::TestCase
       _bar(*args)
     ./test/reporter_test.rb:26:in `test_fail_nested'
       _foo(1+1, 3)
-
+ (3 tests, 0 specs)
 "
     _test()
   end
@@ -76,8 +76,7 @@ class OktestReporterTest < Test::Unit::TestCase
     @testcase = ExampleTest
     @debug    = false
     @expected = \
-%q"### OktestReporterTest::ExampleTest
-.ff
+%q"### OktestReporterTest::ExampleTest: .ff (3 tests, 0 specs)
 Failed: test_fail()
     2 == 3: failed.
     ./test/reporter_test.rb:23:in `test_fail'
@@ -117,26 +116,24 @@ Failed: test_fail_nested()
     ## if Oktest.DIFF is false then diff is not displayed
     Oktest.DIFF = false
     @expected = <<'END'
-### OktestReporterTest::DiffTest
-ff
+### OktestReporterTest::DiffTest: ff (2 tests, 0 specs)
 Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
-    ./test/reporter_test.rb:104:in `test_long'
+    ./test/reporter_test.rb:103:in `test_long'
       ok(actual) == expected
 Failed: test_no_newline()
     "AAACCCDDDXXXYYYZZZ" == "AAABBBCCCXXXYYYZZZ": failed.
-    ./test/reporter_test.rb:109:in `test_no_newline'
+    ./test/reporter_test.rb:108:in `test_no_newline'
       ok(actual) == expected
 END
     _test()
     ## if Oktest.DIFF is true then diff is displayed
     Oktest.DIFF = true
     @expected = <<'END'
-### OktestReporterTest::DiffTest
-ff
+### OktestReporterTest::DiffTest: ff (2 tests, 0 specs)
 Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
-    ./test/reporter_test.rb:104:in `test_long'
+    ./test/reporter_test.rb:103:in `test_long'
       ok(actual) == expected
 --- expected
 +++ actual
@@ -147,7 +144,7 @@ Failed: test_long()
 +DDD
 Failed: test_no_newline()
     "AAACCCDDDXXXYYYZZZ" == "AAABBBCCCXXXYYYZZZ": failed.
-    ./test/reporter_test.rb:109:in `test_no_newline'
+    ./test/reporter_test.rb:108:in `test_no_newline'
       ok(actual) == expected
 END
     _test()
