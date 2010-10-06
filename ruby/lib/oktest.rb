@@ -608,6 +608,7 @@ module Oktest
         ensure
           ## invoke after() or teardown()
           flag_after ? obj.after() : flag_teardown ? obj.teardown() : nil
+          reporter.after(obj)
         end
       end
       ## invoke after_all()
