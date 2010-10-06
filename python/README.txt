@@ -337,6 +337,32 @@ spec(description)
 			              "integer division or modulo by zero")
 
 
+intercept(func)
+	Return new function or method in order to record arguments and return value. ::
+
+	    from oktest import intercept
+	    
+	    ## intercept function
+	    def f(x, y, z=0):
+	        return x + y + z
+	    f = intercept(f)
+	    f(10, 20, z=7)   #=> 37
+	    print f._args    #=> (10, 20)
+	    print f._kwargs  #=> {'z': 7}
+	    print f._return  #=> 37
+
+	    ## intercept instance method (or class method)
+	    class Hello(object):
+	        def hello(self, name='World'):
+		    return 'Hello %s!' % name
+	    obj = Hello()
+	    obj.hello = intercept(obj.hello)
+	    print obj.hello('Oktest')   #=> 'Hello Oktest!'
+	    print obj.hello._args       #=> ('Oktest',)
+	    print obj.hello._kwargs     #=> {}
+	    print obj.hello._return     #=> 'Hello Oktest!'
+
+
 Tips
 ----
 
