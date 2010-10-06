@@ -1075,6 +1075,45 @@ Hi world!
 """[1:]
 do_test_with(desc, script, expected)
 
+### intercept (mocking)
+desc = "intercept (mocking)"
+script = r"""
+from oktest import *
+def f(x, y, z=0):
+    return x + y + z
+def block(orig, *args, **kwargs):
+    v = orig(*args, **kwargs)
+    return 'v=%s' % v
+f = intercept(f, block)
+print(f(10, 20, z=7)) #=> 'v=37'
+print(f._args)    #=> (10, 20)
+print(f._kwargs)  #=> {'z': 7}
+print(f._return)  #=> 'v=37'
+print('---')
+class Hello(object):
+    def hello(self, name):
+        return 'Hello %s!' % name
+#
+obj = Hello()
+obj.hello = intercept(obj.hello, block)
+print(obj.hello('World'))  #=> v=Hello World!
+print(obj.hello._args)     #=> ('World',)
+print(obj.hello._kwargs)   #=> {}
+print(obj.hello._return)   #=> v=Hello World!
+"""[1:]
+expected = """
+v=37
+(10, 20)
+{'z': 7}
+v=37
+---
+v=Hello World!
+('World',)
+{}
+v=Hello World!
+"""[1:]
+do_test_with(desc, script, expected)
+
 
 ## flatten
 desc = "flatten()"

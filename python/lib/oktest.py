@@ -811,9 +811,9 @@ def using(klass):
     return Using(klass)
 
 
-def intercept(func):
+def intercept(func, block=None):
     """intercept function or method to record arguments and return value.
-       ex.
+       ex (stub).
            def f(x, y, z=0):
                return x + y + z
            f = intercept(f)
@@ -821,6 +821,20 @@ def intercept(func):
            print f._args    #=> (10, 20)
            print f._kwargs  #=> {'z': 7}
            print f._return  #=> 37
+
+       ex (mock).
+           class Hello(object):
+               def hello(self, name):
+                   return "Hello %s!" % name
+           obj = Hello()
+           def block(orig, *args, **kwargs):
+               v = orig(*args, **kwargs)
+               return '<<%s>>'
+           obj.hello = intercept(obj.hello, block)
+           obj.hello('World')  #=> '<<Hello World!>>'
+           obj.hello._args     #=> ('World',)
+           obj.hello._kwargs   #=> {}
+           obj.hello._return   #=> '<<Hello World!>>'
     """
     def _copy_attrs(func, newfunc):
         for k in ('func_name', '__name__', '__doc__'):
@@ -829,16 +843,26 @@ def intercept(func):
     if type(func) is types.FunctionType:      # function
         def newfunc(*args, **kwargs):         # no 'self'
             newfunc._args, newfunc._kwargs = args, kwargs
-            newfunc._return = ret = func(*args, **kwargs)
+            if newfunc._block:
+                ret = newfunc._block(func, *args, **kwargs)
+            else:
+                ret = func(*args, **kwargs)
+            newfunc._return = ret
             return ret
+        newfunc._block = block
         _copy_attrs(func, newfunc)
         return newfunc
     elif type(func) is types.MethodType:      # method (instance or class)
         def newfunc(self, *args, **kwargs):   # has 'self'
             newfunc._args, newfunc._kwargs = args, kwargs
             if _is_unbound(func): args = (self, ) + args    # call with 'self' if unbound method
-            newfunc._return = ret = func(*args, **kwargs)
+            if newfunc._block:
+                ret = newfunc._block(func, *args, **kwargs)
+            else:
+                ret = func(*args, **kwargs)
+            newfunc._return = ret
             return ret
+        newfunc._block = block
         _copy_attrs(func, newfunc)
         if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
         if python3:  return types.MethodType(newfunc, func.__self__)
