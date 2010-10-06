@@ -1004,9 +1004,9 @@ def f(x, y, z=0):
     return x + y + z
 f = intercept(f)
 f(10, 20, z=7)
-print f._args    #=> (10, 20)
-print f._kwargs  #=> {'z': 7}
-print f._return  #=> 37
+print(f._args)    #=> (10, 20)
+print(f._kwargs)  #=> {'z': 7}
+print(f._return)  #=> 37
 """[1:]
 expected = """
 (10, 20)
