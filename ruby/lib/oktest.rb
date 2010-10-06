@@ -299,6 +299,39 @@ module Oktest
     ## marker method to describe specification
     def spec(desc); yield if block_given?; end
 
+    ##
+    ## intercept method call of object
+    ##
+    ## stub example.
+    ##    class Hello
+    ##      def hello(name); return "Hello #{name}!"; end
+    ##    end
+    ##    obj = Hello.new
+    ##    intr = intercept(obj, :hello)
+    ##    intr.called  #=> false
+    ##    obj.hello('World')   #=> "Hello World!"
+    ##    intr.called  #=> true
+    ##    intr.args    #=> ["World"]
+    ##    intr.return  #=> "Hello World!"
+    ##
+    ## mock example.
+    ##    class Hello
+    ##      def hello(name); return "Hello #{name}!"; end
+    ##    end
+    ##    obj = Hello.new
+    ##    intr = intercept(obj, :hello) do |name|
+    ##      "Bonjor #{name}!"
+    ##    end
+    ##    intr.called  #=> false
+    ##    obj.hello('World')   #=> "Bonjor World!"
+    ##    intr.called  #=> true
+    ##    intr.args    #=> ["World"]
+    ##    intr.return  #=> "Bonjor World!"
+    ##
+    def intercept(object, method, &block)
+      return Oktest::Util::Interceptor.new(object, method, &block)
+    end
+
   end
 
 
@@ -614,6 +647,46 @@ module Oktest
   def self.run_at_exit=(flag)
     @_run_at_exit = flag
   end
+
+
+  module Util
+
+
+    class Interceptor
+
+      def initialize(object, method, &block)
+        @object, @method, @block = object, method, block
+        @called = false
+        intercept()
+      end
+
+      attr_accessor :object, :method, :block, :called, :args, :return
+
+      private
+
+      def intercept
+        Thread.current[:__interceptor] = self
+        class << @object
+          intr = Thread.current[:__interceptor]
+          Thread.current[:__interceptor] = nil
+          method = intr.method
+          alias_name = "__#{method}_#{rand().to_s[2..-1]}"
+          alias_method alias_name, method
+          define_method(method) do |*args|
+            intr.called = true
+            intr.args   = args
+            intr.return = intr.block ? intr.block.call(*args) \
+                                     : __send__(alias_name, *args)
+            intr.return
+          end
+        end
+        return self
+      end
+
+    end
+
+
+  end #Util
 
 
 end

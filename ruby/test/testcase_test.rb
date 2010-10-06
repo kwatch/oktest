@@ -215,4 +215,34 @@ class OktestTestCaseTest < Test::Unit::TestCase
   end
 
 
+  class Hello
+    def hello(name); return "Hello #{name}!"; end
+  end
+
+  def test_intercept
+    extend Oktest::TestCase
+    spec "return Interceptor object." do
+      obj = Hello.new
+      intr = intercept(obj, :hello)
+      ok_(intr.called) == false
+      ok_(obj.hello('World')) == "Hello World!"
+      ok_(intr.called) == true
+      ok_(intr.args)   == ["World"]
+      ok_(intr.return) == "Hello World!"
+    end
+    spec "can take block for mocking." do
+      obj = Hello.new
+      intr = intercept(obj, :hello) do |name|
+        "Bonjor #{name}!"
+      end
+      ok_(intr.called) == false
+      ok_(obj.hello('SOS')) == "Bonjor SOS!"
+      ok_(intr.called) == true
+      ok_(intr.args)   ==  ["SOS"]
+      ok_(intr.return) == "Bonjor SOS!"
+    end
+  end
+
+
+
 end
