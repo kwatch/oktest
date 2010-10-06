@@ -175,8 +175,11 @@ module Oktest
         def @actual.exception; @exception; end
         ex.class <= exception_class  or
           raise new_assertion_failed("#{exception_class.name} expected but #{ex.class.name} raised.", 2)
-        ! message || ex.message == message  or
-          raise new_assertion_failed("#{ex.message.inspect} == #{message.inspect}: failed.", 2)
+        if message
+          op = message.is_a?(Regexp) ? '=~' : '=='
+          ex.message.__send__(op, message)  or
+            raise new_assertion_failed("#{ex.message.inspect} #{op} #{message.inspect}: failed.", 2)
+        end
       end
       raise new_assertion_failed("#{exception_class.name} expected but not raised.", 2) if not_raised
       return ex

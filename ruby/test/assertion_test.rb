@@ -297,6 +297,12 @@ class OktestAssertionTest < Test::Unit::TestCase
         end
         assert_equal "\"undefined method `foo' for nil:NilClass\" == \"unknown method 'foo'\": failed.", ex.message
       end
+      case_when "error message is specified as Regexp" do
+        pr = proc { nil.foo }
+        assert_nothing_raised(Exception) do
+          ok(pr).raise?(NoMethodError, /^undefined method `\w+'/)
+        end
+      end
     end
     case_for "not_ok(proc).raise?" do
       case_when "nothing raised" do
