@@ -8,8 +8,9 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using', 'interceptor',
-           'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars')
+#__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using', 'interceptor',
+#           'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars')
+__all__ = ('ok', 'not_ok', 'run', 'spec',)
 
 import sys, os, re, types, traceback
 
@@ -662,10 +663,10 @@ if os.environ.get('OKTEST_REPORTER'):
         raise ValueError("%s: reporter class not found." % os.environ.get('OKTEST_REPORTER'))
 
 
-##
-## helpers
-##
 
+##
+## _Context
+##
 class _Context(object):
 
     def __enter__(self, *args):
@@ -682,336 +683,392 @@ class _Context(object):
             self.__exit__()
 
 
-class DummyFile(_Context):
 
-    def __init__(self, filename, content):
-        self.filename = filename
-        self.path     = os.path.abspath(filename)
-        self.content  = content
-
-    def __enter__(self, *args):
-        f = open(self.path, 'w')
-        try:
-            f.write(self.content)
-        finally:
-            f.close()
-        return self
-
-    def __exit__(self, *args):
-        os.unlink(self.path)
-
-
-class DummyDir(_Context):
-
-    def __init__(self, dirname):
-        self.dirname = dirname
-        self.path    = os.path.abspath(dirname)
-
-    def __enter__(self, *args):
-        os.mkdir(self.path)
-        return self
-
-    def __exit__(self, *args):
-        import shutil
-        shutil.rmtree(self.path)
-
-
-class DummyValues(_Context):
-
-    def __init__(self, dictionary, items_=None, **kwargs):
-        self.dict = dictionary
-        self.items = {}
-        if isinstance(items_, dict):
-            self.items.update(items_)
-        if kwargs:
-            self.items.update(kwargs)
-
-    def __enter__(self):
-        self.original = d = {}
-        for k in self.items:
-            if k in self.dict:
-                d[k] = self.dict[k]
-        self.dict.update(self.items)
-        return self
-
-    def __exit__(self, *args):
-        for k in self.items:
-            if k in self.original:
-                self.dict[k] = self.original[k]
-            else:
-                del self.dict[k]
-        self.__dict__.clear()
-
-
-class Chdir(_Context):
-
-    def __init__(self, dirname):
-        self.dirname = dirname
-        self.path    = os.path.abspath(dirname)
-        self.back_to = os.getcwd()
-
-    def __enter__(self, *args):
-        os.chdir(self.path)
-        return self
-
-    def __exit__(self, *args):
-        os.chdir(self.back_to)
-
-
+##
+## spec()
+##
 class Spec(_Context):
 
     def __init__(self, desc):
         self.desc = desc
 
 
-class Using(_Context):
-    """ex.
-         class MyTest(object):
-            pass
-         with oktest.Using(MyTest):
-            def test_1(self):
-              ok (1+1) == 2
-         if __name__ == '__main__':
-            oktest.run(MyTest)
-    """
-    def __init__(self, klass):
-        self.klass = klass
-
-    def __enter__(self):
-        self.locals = sys._getframe(1).f_locals
-        self.start_names = self.locals.keys()
-        if python3: self.start_names = list(self.start_names)
-        return self
-
-    def __exit__(self, *args):
-        curr_names = self.locals.keys()
-        diff_names = list(set(curr_names) - set(self.start_names))
-        for name in diff_names:
-            setattr(self.klass, name, self.locals[name])
-
-
-def dummy_file(filename, content):
-    return DummyFile(filename, content)
-
-def dummy_dir(dirname):
-    return DummyDir(dirname)
-
-def dummy_values(dictionary, items_=None, **kwargs):
-    return DummyValues(dictionary, items_, **kwargs)
-
-def dummy_attrs(object, items_=None, **kwargs):
-    return DummyValues(object.__dict__, items_, **kwargs)
-
-def dummy_environ_vars(**kwargs):
-    return DummyValues(os.environ, **kwargs)
-
-def chdir(path):
-    return Chdir(path)
-
 def spec(desc):
     return Spec(desc)
 
-def using(klass):
-    return Using(klass)
-
-
-def interceptor():
-    """intercept function or method to record arguments and return value.
-       ex (stub function).
-           def f(x):
-               return x*2
-           def g(x, y=0):
-               return f(x+1) + y
-           #
-           intr = interceptor()
-           f = intr.intercept(f)
-           g = intr.intercept(g)
-           #
-           print(g(3, y=5))       #=> 13
-           #
-           print(intr[0].method)  #=> g
-           print(intr[0].args)    #=> (3,)
-           print(intr[0].kwargs)  #=> {'y': 5}
-           print(intr[0].ret)     #=> 11
-           #
-           print(intr[1].method)  #=> f
-           print(intr[1].args)    #=> (4,)
-           print(intr[1].kwargs)  #=> {}
-           print(intr[1].ret)     #=> 8
-           #
-           print(repr(intr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
-           print(repr(intr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
-
-       ex (stub method).
-           class Foo(object):
-               def f1(self, x):
-                   return self.f2(x, 3) + 1
-               def f2(self, x, y):
-                   return x + y
-           #
-           intr = interceptor()
-           obj = Foo()
-           intr.intercept(obj, 'f1', 'f2')
-           #
-           print(obj.f1(5))        #=> 9
-           print(intr[0].method)   #=> f1
-           print(intr[0].args)     #=> (5,)
-           print(intr[0].kwargs)   #=> {}
-           print(intr[0].ret)      #=> 9
-           #
-           print(repr(intr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
-           print(repr(intr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
-
-       ex (mock function).
-           def f(x):
-               return x*2
-           def block(original_func, x):
-               #return original_func(x)
-               return 'x=%s' % repr(x)
-           intr = interceptor()
-           f = intr.intercept(f, block)
-           print(f(3))             #=> x=3
-           print(repr(intr[0]))    #=> f(args=(3,), kwargs={}, ret='x=3')
-
-       ex (mock method).
-           class Hello(object):
-               def hello(self, name):
-                   return 'Hello %s!' % name
-           #
-           obj = Hello()
-           intr = interceptor()
-           def block(original_func, name):
-               v = original_func(name)
-               return 'message: %s' % v
-           intr.intercept(obj, hello=block)   # or intr.intercept(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
-           #
-           print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
-           print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
-    """
-    return Interceptor()
-
-
-class Result(object):
-
-    def __init__(self, args=None, kwargs=None, ret=None):
-        self.args   = args
-        self.kwargs = kwargs
-        self.ret    = ret
-        self.method = None     # method name
-
-    def __repr__(self):
-        return '%s(args=%r, kwargs=%r, ret=%r)' % (self.method, self.args, self.kwargs, self.ret)
-
-
-class Interceptor(object):
-
-    def __init__(self):
-        self.results = []
-
-
-    def __getitem__(self, index):
-        return self.results[index]
-
-    def called(self):
-        return len(self.results) > 0
-
-    def _attr(name):
-        def f(self):
-            if len(self.results) == 0: return None
-            return getattr(self.results[0], name, None)
-        return f
-
-    method = property(_attr('method'))
-    args   = property(_attr('args'))
-    kwargs = property(_attr('kwargs'))
-    ret    = property(_attr('ret'))
-
-    def __len__(self):
-        return len(self.results)
-
-    def __iter__(self):
-        return self.results.__iter__()
-
-    def _copy_attrs(self, func, newfunc):
-        for k in ('func_name', '__name__', '__doc__'):
-            if hasattr(func, k):
-                setattr(newfunc, k, getattr(func, k))
-
-    def _wrap_func(self, func, block):
-        intr = self
-        def newfunc(*args, **kwargs):                # no 'self'
-            result = Result(args, kwargs, None)
-            result.method = _func_name(func)
-            intr.results.append(result)
-            if block:
-                ret = block(func, *args, **kwargs)
-            else:
-                ret = func(*args, **kwargs)
-            #newfunc._return = ret
-            result.ret = ret
-            return ret
-        self._copy_attrs(func, newfunc)
-        return newfunc
-
-    def _wrap_method(self, func, block):
-        intr = self
-        def newfunc(self, *args, **kwargs):          # has 'self'
-            result = Result(args, kwargs, None)
-            result.method = _func_name(func)
-            intr.results.append(result)
-            if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
-            if block:
-                ret = block(func, *args, **kwargs)
-            else:
-                ret = func(*args, **kwargs)
-            result.ret = ret
-            return ret
-        self._copy_attrs(func, newfunc)
-        if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
-        if python3:  return types.MethodType(newfunc, func.__self__)
-
-    def intercept_func(self, func, block):
-        newfunc = self._wrap_func(func, block)
-        return newfunc
-
-    def intercept_obj(self, obj, *args, **kwargs):
-        intr = Interceptor()
-        for method_name in args:
-            if method_name not in kwargs:
-                kwargs[method_name] = None
-        for method_name in kwargs:
-            method_obj = getattr(obj, method_name, None)
-            method_obj = self._wrap_method(method_obj, kwargs[method_name])
-            setattr(obj, method_name, method_obj)
-        return None
-
-    def intercept(self, target, *args, **kwargs):
-        if type(target) is types.FunctionType:       # function
-            func = target
-            block = args and args[0] or None
-            return self.intercept_func(func, block)
-        else:
-            obj = target
-            return self.intercept_obj(obj, *args, **kwargs)
 
 
 ##
-## undocumented
+## helpers
 ##
+def _dummy():
 
-def flatten(arr, type=(list, tuple)):
-    L = []
-    for x in arr:
-        if isinstance(x, type):
-            L.extend(flatten(x))
-        else:
-            L.append(x)
-    return L
+    __all__ = ('chdir', 'using')
 
-def rm_rf(*fnames):
-    for fname in flatten(fnames):
-        if os.path.isfile(fname):
-            os.unlink(fname)
-        elif os.path.isdir(fname):
-            from shutil import rmtree
-            rmtree(fname)
+
+    class Chdir(_Context):
+
+        def __init__(self, dirname):
+            self.dirname = dirname
+            self.path    = os.path.abspath(dirname)
+            self.back_to = os.getcwd()
+
+        def __enter__(self, *args):
+            os.chdir(self.path)
+            return self
+
+        def __exit__(self, *args):
+            os.chdir(self.back_to)
+
+
+    class Using(_Context):
+        """ex.
+             class MyTest(object):
+                pass
+             with oktest.Using(MyTest):
+                def test_1(self):
+                  ok (1+1) == 2
+             if __name__ == '__main__':
+                oktest.run(MyTest)
+        """
+        def __init__(self, klass):
+            self.klass = klass
+
+        def __enter__(self):
+            self.locals = sys._getframe(1).f_locals
+            self.start_names = self.locals.keys()
+            if python3: self.start_names = list(self.start_names)
+            return self
+
+        def __exit__(self, *args):
+            curr_names = self.locals.keys()
+            diff_names = list(set(curr_names) - set(self.start_names))
+            for name in diff_names:
+                setattr(self.klass, name, self.locals[name])
+
+
+    def chdir(path):
+        return Chdir(path)
+
+    def using(klass):
+        return Using(klass)
+
+
+    def flatten(arr, type=(list, tuple)):   ## undocumented
+        L = []
+        for x in arr:
+            if isinstance(x, type):
+                L.extend(flatten(x))
+            else:
+                L.append(x)
+        return L
+
+    def rm_rf(*fnames):                     ## undocumented
+        for fname in flatten(fnames):
+            if os.path.isfile(fname):
+                os.unlink(fname)
+            elif os.path.isdir(fname):
+                from shutil import rmtree
+                rmtree(fname)
+
+
+    return locals()
+
+
+helper = type(sys)('oktest.helper')
+sys.modules['oktest.helper'] = helper
+helper.__dict__.update(_dummy())
+del _dummy
+
+
+
+##
+## helper.dummy
+##
+def _dummy():
+
+    __all__ = ('dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars', )
+
+
+    class DummyFile(_Context):
+
+        def __init__(self, filename, content):
+            self.filename = filename
+            self.path     = os.path.abspath(filename)
+            self.content  = content
+
+        def __enter__(self, *args):
+            f = open(self.path, 'w')
+            try:
+                f.write(self.content)
+            finally:
+                f.close()
+            return self
+
+        def __exit__(self, *args):
+            os.unlink(self.path)
+
+
+    class DummyDir(_Context):
+
+        def __init__(self, dirname):
+            self.dirname = dirname
+            self.path    = os.path.abspath(dirname)
+
+        def __enter__(self, *args):
+            os.mkdir(self.path)
+            return self
+
+        def __exit__(self, *args):
+            import shutil
+            shutil.rmtree(self.path)
+
+
+    class DummyValues(_Context):
+
+        def __init__(self, dictionary, items_=None, **kwargs):
+            self.dict = dictionary
+            self.items = {}
+            if isinstance(items_, dict):
+                self.items.update(items_)
+            if kwargs:
+                self.items.update(kwargs)
+
+        def __enter__(self):
+            self.original = d = {}
+            for k in self.items:
+                if k in self.dict:
+                    d[k] = self.dict[k]
+            self.dict.update(self.items)
+            return self
+
+        def __exit__(self, *args):
+            for k in self.items:
+                if k in self.original:
+                    self.dict[k] = self.original[k]
+                else:
+                    del self.dict[k]
+            self.__dict__.clear()
+
+
+    def dummy_file(filename, content):
+        return DummyFile(filename, content)
+
+    def dummy_dir(dirname):
+        return DummyDir(dirname)
+
+    def dummy_values(dictionary, items_=None, **kwargs):
+        return DummyValues(dictionary, items_, **kwargs)
+
+    def dummy_attrs(object, items_=None, **kwargs):
+        return DummyValues(object.__dict__, items_, **kwargs)
+
+    def dummy_environ_vars(**kwargs):
+        return DummyValues(os.environ, **kwargs)
+
+
+    return locals()
+
+
+helper.dummy = type(sys)('oktest.helper.dummy')
+sys.modules['oktest.helper.dummy'] = helper.dummy
+helper.dummy.__dict__.update(_dummy())
+del _dummy
+
+
+
+##
+## helper.interceptor
+##
+def _dummy():
+
+    __all__ = ('interceptor', )
+
+
+    def interceptor():
+        """intercept function or method to record arguments and return value.
+           ex (stub function).
+               def f(x):
+                   return x*2
+               def g(x, y=0):
+                   return f(x+1) + y
+               #
+               intr = interceptor()
+               f = intr.intercept(f)
+               g = intr.intercept(g)
+               #
+               print(g(3, y=5))       #=> 13
+               #
+               print(intr[0].method)  #=> g
+               print(intr[0].args)    #=> (3,)
+               print(intr[0].kwargs)  #=> {'y': 5}
+               print(intr[0].ret)     #=> 11
+               #
+               print(intr[1].method)  #=> f
+               print(intr[1].args)    #=> (4,)
+               print(intr[1].kwargs)  #=> {}
+               print(intr[1].ret)     #=> 8
+               #
+               print(repr(intr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
+               print(repr(intr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
+
+           ex (stub method).
+               class Foo(object):
+                   def f1(self, x):
+                       return self.f2(x, 3) + 1
+                   def f2(self, x, y):
+                       return x + y
+               #
+               intr = interceptor()
+               obj = Foo()
+               intr.intercept(obj, 'f1', 'f2')
+               #
+               print(obj.f1(5))        #=> 9
+               print(intr[0].method)   #=> f1
+               print(intr[0].args)     #=> (5,)
+               print(intr[0].kwargs)   #=> {}
+               print(intr[0].ret)      #=> 9
+               #
+               print(repr(intr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
+               print(repr(intr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
+
+           ex (mock function).
+               def f(x):
+                   return x*2
+               def block(original_func, x):
+                   #return original_func(x)
+                   return 'x=%s' % repr(x)
+               intr = interceptor()
+               f = intr.intercept(f, block)
+               print(f(3))             #=> x=3
+               print(repr(intr[0]))    #=> f(args=(3,), kwargs={}, ret='x=3')
+
+           ex (mock method).
+               class Hello(object):
+                   def hello(self, name):
+                       return 'Hello %s!' % name
+               #
+               obj = Hello()
+               intr = interceptor()
+               def block(original_func, name):
+                   v = original_func(name)
+                   return 'message: %s' % v
+               intr.intercept(obj, hello=block)   # or intr.intercept(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
+               #
+               print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
+               print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
+        """
+        return Interceptor()
+
+
+    class Result(object):
+
+        def __init__(self, args=None, kwargs=None, ret=None):
+            self.args   = args
+            self.kwargs = kwargs
+            self.ret    = ret
+            self.method = None     # method name
+
+        def __repr__(self):
+            return '%s(args=%r, kwargs=%r, ret=%r)' % (self.method, self.args, self.kwargs, self.ret)
+
+
+    class Interceptor(object):
+
+        def __init__(self):
+            self.results = []
+
+
+        def __getitem__(self, index):
+            return self.results[index]
+
+        def called(self):
+            return len(self.results) > 0
+
+        def _attr(name):
+            def f(self):
+                if len(self.results) == 0: return None
+                return getattr(self.results[0], name, None)
+            return f
+
+        method = property(_attr('method'))
+        args   = property(_attr('args'))
+        kwargs = property(_attr('kwargs'))
+        ret    = property(_attr('ret'))
+
+        def __len__(self):
+            return len(self.results)
+
+        def __iter__(self):
+            return self.results.__iter__()
+
+        def _copy_attrs(self, func, newfunc):
+            for k in ('func_name', '__name__', '__doc__'):
+                if hasattr(func, k):
+                    setattr(newfunc, k, getattr(func, k))
+
+        def _wrap_func(self, func, block):
+            intr = self
+            def newfunc(*args, **kwargs):                # no 'self'
+                result = Result(args, kwargs, None)
+                result.method = _func_name(func)
+                intr.results.append(result)
+                if block:
+                    ret = block(func, *args, **kwargs)
+                else:
+                    ret = func(*args, **kwargs)
+                #newfunc._return = ret
+                result.ret = ret
+                return ret
+            self._copy_attrs(func, newfunc)
+            return newfunc
+
+        def _wrap_method(self, func, block):
+            intr = self
+            def newfunc(self, *args, **kwargs):          # has 'self'
+                result = Result(args, kwargs, None)
+                result.method = _func_name(func)
+                intr.results.append(result)
+                if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
+                if block:
+                    ret = block(func, *args, **kwargs)
+                else:
+                    ret = func(*args, **kwargs)
+                result.ret = ret
+                return ret
+            self._copy_attrs(func, newfunc)
+            if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
+            if python3:  return types.MethodType(newfunc, func.__self__)
+
+        def intercept_func(self, func, block):
+            newfunc = self._wrap_func(func, block)
+            return newfunc
+
+        def intercept_obj(self, obj, *args, **kwargs):
+            intr = Interceptor()
+            for method_name in args:
+                if method_name not in kwargs:
+                    kwargs[method_name] = None
+            for method_name in kwargs:
+                method_obj = getattr(obj, method_name, None)
+                method_obj = self._wrap_method(method_obj, kwargs[method_name])
+                setattr(obj, method_name, method_obj)
+            return None
+
+        def intercept(self, target, *args, **kwargs):
+            if type(target) is types.FunctionType:       # function
+                func = target
+                block = args and args[0] or None
+                return self.intercept_func(func, block)
+            else:
+                obj = target
+                return self.intercept_obj(obj, *args, **kwargs)
+
+
+    return locals()
+
+
+helper.interceptor = type(sys)('oktest.helper.interceptor')
+sys.modules['oktest.helper.interceptor'] = helper.interceptor
+helper.interceptor.__dict__.update(_dummy())
+del _dummy

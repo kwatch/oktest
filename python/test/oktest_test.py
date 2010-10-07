@@ -711,6 +711,7 @@ desc = "dummy_file (with with-statement)"
 script = r"""
 from __future__ import with_statement
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_file(self):
         with dummy_file('_dummy_.txt', 'hogehoge') as f:
@@ -728,6 +729,7 @@ if with_statement_supported:
 desc = "dummy_file (without with-statement)"
 script = r"""
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_file2(self):
         filename = '_dummy_.txt'
@@ -746,6 +748,7 @@ desc = "dummy_dir (with with-statement)"
 script = r"""
 from __future__ import with_statement
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_dir(self):
         with dummy_dir('_dummy_.d') as d:
@@ -762,6 +765,7 @@ if with_statement_supported:
 desc = "dummy_dir (without with-statement)"
 script = r"""
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_dir2(self):
         dirname = '_dummy_.d'
@@ -780,6 +784,7 @@ script = r"""
 from __future__ import with_statement
 import os
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_environ_vars(self):
         os.environ['AAAA'] = 'hoge'
@@ -803,6 +808,7 @@ desc = "dummy_environ_vars (without with-statement)"
 script = r"""
 import os
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_environ_vars2(self):
         os.environ['AAAA'] = 'hoge'
@@ -827,6 +833,7 @@ script = r"""
 from __future__ import with_statement
 import os
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_values(self):
         d = {'A': 10, 'B': 20, 'C': 30 }
@@ -844,6 +851,7 @@ desc = "dummy_values (without with-statement)"
 script = r"""
 import os
 from oktest import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_dummy_values2(self):
         d = {'A': 10, 'B': 20, 'C': 30 }
@@ -862,6 +870,7 @@ script = r"""
 from __future__ import with_statement
 import os
 from oktest import *
+from oktest.helper.dummy import *
 class Foo(object):
   def __init__(self, x, y):
     self.x = x
@@ -888,6 +897,7 @@ desc = "dummy_attrs (without with-statement)"
 script = r"""
 import os
 from oktest import *
+from oktest.helper.dummy import *
 class Foo(object):
   def __init__(self, x, y):
     self.x = x
@@ -915,6 +925,8 @@ script = r"""
 from __future__ import with_statement
 import os
 from oktest import *
+from oktest.helper import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_chdir(self):
         with dummy_dir('_dummy_.d'):
@@ -935,6 +947,8 @@ desc = "chdir (without with-statement)"
 script = r"""
 import os
 from oktest import *
+from oktest.helper import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_chdir2(self):
         def f():
@@ -956,6 +970,8 @@ desc = "spec (with with-statement)"
 script = r"""
 from __future__ import with_statement
 from oktest import *
+from oktest.helper import *
+from oktest.helper.dummy import *
 class FooTest(object):
     def test_spec1(self):
         with spec('1+1 is 2') as sp:
@@ -969,7 +985,7 @@ run(FooTest)
 expected = """
 * FooTest.test_spec1 ... [ok]
 * FooTest.test_spec2 ... [NG] 0 == -1 : failed.
-   _test_.py:11: ok (1-1) == -1
+   _test_.py:13: ok (1-1) == -1
 """[1:]
 if with_statement_supported:
     do_test_with(desc, script, expected)
@@ -979,6 +995,8 @@ desc = "using (with with-statement)"
 script = r"""
 from __future__ import with_statement
 from oktest import *
+from oktest.helper import *
+from oktest.helper.dummy import *
 class FooTest(object):
     pass
 with using(FooTest):
@@ -1000,6 +1018,7 @@ if with_statement_supported:
 desc = "intercept (function)"
 script = r"""
 from oktest import *
+from oktest.helper.interceptor import interceptor
 def f1(a, b):
     return f2(a + f3(b))
 def f2(a):
@@ -1026,6 +1045,7 @@ do_test_with(desc, script, expected)
 desc = "intercept (instance method)"
 script = r"""
 from oktest import *
+from oktest.helper.interceptor import interceptor
 class Dummy(object):
     def f1(self, x, y):
         return [self.f2(x, y=y),
@@ -1052,6 +1072,7 @@ do_test_with(desc, script, expected)
 desc = "intercept (class method)"
 script = r"""
 from oktest import *
+from oktest.helper.interceptor import interceptor
 class Dummy(object):
     @classmethod
     def f1(cls, x, y):
@@ -1081,6 +1102,7 @@ do_test_with(desc, script, expected)
 desc = "intercept (mocking)"
 script = r"""
 from oktest import *
+from oktest.helper.interceptor import interceptor
 def f(x, y, z=0):
     return x + y + z
 def block(orig, *args, **kwargs):
@@ -1120,7 +1142,8 @@ do_test_with(desc, script, expected)
 ## flatten
 desc = "flatten()"
 script = r"""
-from oktest import ok, run, flatten
+from oktest import ok, run
+from oktest.helper import flatten
 class FooTest(object):
     def test_flatten(self):
         ok (flatten([1, [2, 3, [4, 5, [[[6]]]], [7, 8]]])) == [1,2,3,4,5,6,7,8]
@@ -1135,7 +1158,8 @@ do_test_with(desc, script, expected)
 desc = "rm_rf()"
 script = r"""
 import os
-from oktest import ok, not_ok, run, flatten, rm_rf
+from oktest import ok, not_ok, run
+from oktest.helper import flatten, rm_rf
 class FooTest(object):
     def setup(self):
         os.mkdir('_rm_rf')
