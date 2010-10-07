@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using', 'intercept',
+__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using', 'interceptor',
            'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars')
 
 import sys, os, re, types, traceback
@@ -22,6 +22,8 @@ if python2:
         return isinstance(obj, (types.TypeType, types.ClassType))
     def _is_unbound(method):
         return not method.im_self
+    def _func_name(func):
+        return func.func_name
     def _func_firstlineno(func):
         func = getattr(func, 'im_func', func)
         return func.func_code.co_firstlineno
@@ -37,6 +39,8 @@ if python3:
         return isinstance(obj, (type, ))
     def _is_unbound(method):
         return not method.__self__
+    def _func_name(func):
+        return func.__name__
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
     def _read_file(fname, encoding='utf-8'):
@@ -811,63 +815,184 @@ def using(klass):
     return Using(klass)
 
 
-def intercept(func, block=None):
+def interceptor():
     """intercept function or method to record arguments and return value.
-       ex (stub).
-           def f(x, y, z=0):
-               return x + y + z
-           f = intercept(f)
-           f(10, 20, z=7)   #=> 37
-           print f._args    #=> (10, 20)
-           print f._kwargs  #=> {'z': 7}
-           print f._return  #=> 37
+       ex (stub function).
+           def f(x):
+               return x*2
+           def g(x, y=0):
+               return f(x+1) + y
+           #
+           intr = interceptor()
+           f = intr.intercept(f)
+           g = intr.intercept(g)
+           #
+           print(g(3, y=5))       #=> 13
+           #
+           print(intr[0].method)  #=> g
+           print(intr[0].args)    #=> (3,)
+           print(intr[0].kwargs)  #=> {'y': 5}
+           print(intr[0].ret)     #=> 11
+           #
+           print(intr[1].method)  #=> f
+           print(intr[1].args)    #=> (4,)
+           print(intr[1].kwargs)  #=> {}
+           print(intr[1].ret)     #=> 8
+           #
+           print(repr(intr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
+           print(repr(intr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
 
-       ex (mock).
+       ex (stub method).
+           class Foo(object):
+               def f1(self, x):
+                   return self.f2(x, 3) + 1
+               def f2(self, x, y):
+                   return x + y
+           #
+           intr = interceptor()
+           obj = Foo()
+           intr.intercept(obj, 'f1', 'f2')
+           #
+           print(obj.f1(5))        #=> 9
+           print(intr[0].method)   #=> f1
+           print(intr[0].args)     #=> (5,)
+           print(intr[0].kwargs)   #=> {}
+           print(intr[0].ret)      #=> 9
+           #
+           print(repr(intr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
+           print(repr(intr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
+
+       ex (mock function).
+           def f(x):
+               return x*2
+           def block(original_func, x):
+               #return original_func(x)
+               return 'x=%s' % repr(x)
+           intr = interceptor()
+           f = intr.intercept(f, block)
+           print(f(3))             #=> x=3
+           print(repr(intr[0]))    #=> f(args=(3,), kwargs={}, ret='x=3')
+
+       ex (mock method).
            class Hello(object):
                def hello(self, name):
-                   return "Hello %s!" % name
+                   return 'Hello %s!' % name
+           #
            obj = Hello()
-           def block(orig, *args, **kwargs):
-               v = orig(*args, **kwargs)
-               return '<<%s>>'
-           obj.hello = intercept(obj.hello, block)
-           obj.hello('World')  #=> '<<Hello World!>>'
-           obj.hello._args     #=> ('World',)
-           obj.hello._kwargs   #=> {}
-           obj.hello._return   #=> '<<Hello World!>>'
+           intr = interceptor()
+           def block(original_func, name):
+               v = original_func(name)
+               return 'message: %s' % v
+           intr.intercept(obj, hello=block)   # or intr.intercept(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
+           #
+           print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
+           print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
     """
-    def _copy_attrs(func, newfunc):
+    return Interceptor()
+
+
+class Result(object):
+
+    def __init__(self, args=None, kwargs=None, ret=None):
+        self.args   = args
+        self.kwargs = kwargs
+        self.ret    = ret
+        self.method = None     # method name
+
+    def __repr__(self):
+        return '%s(args=%r, kwargs=%r, ret=%r)' % (self.method, self.args, self.kwargs, self.ret)
+
+
+class Interceptor(object):
+
+    def __init__(self):
+        self.results = []
+
+
+    def __getitem__(self, index):
+        return self.results[index]
+
+    def called(self):
+        return len(self.results) > 0
+
+    def _attr(name):
+        def f(self):
+            if len(self.results) == 0: return None
+            return getattr(self.results[0], name, None)
+        return f
+
+    method = property(_attr('method'))
+    args   = property(_attr('args'))
+    kwargs = property(_attr('kwargs'))
+    ret    = property(_attr('ret'))
+
+    def __len__(self):
+        return len(self.results)
+
+    def __iter__(self):
+        return self.results.__iter__()
+
+    def _copy_attrs(self, func, newfunc):
         for k in ('func_name', '__name__', '__doc__'):
             if hasattr(func, k):
                 setattr(newfunc, k, getattr(func, k))
-    if type(func) is types.FunctionType:      # function
-        def newfunc(*args, **kwargs):         # no 'self'
-            newfunc._args, newfunc._kwargs = args, kwargs
-            if newfunc._block:
-                ret = newfunc._block(func, *args, **kwargs)
+
+    def _wrap_func(self, func, block):
+        intr = self
+        def newfunc(*args, **kwargs):                # no 'self'
+            result = Result(args, kwargs, None)
+            result.method = _func_name(func)
+            intr.results.append(result)
+            if block:
+                ret = block(func, *args, **kwargs)
             else:
                 ret = func(*args, **kwargs)
-            newfunc._return = ret
+            #newfunc._return = ret
+            result.ret = ret
             return ret
-        newfunc._block = block
-        _copy_attrs(func, newfunc)
+        self._copy_attrs(func, newfunc)
         return newfunc
-    elif type(func) is types.MethodType:      # method (instance or class)
-        def newfunc(self, *args, **kwargs):   # has 'self'
-            newfunc._args, newfunc._kwargs = args, kwargs
-            if _is_unbound(func): args = (self, ) + args    # call with 'self' if unbound method
-            if newfunc._block:
-                ret = newfunc._block(func, *args, **kwargs)
+
+    def _wrap_method(self, func, block):
+        intr = self
+        def newfunc(self, *args, **kwargs):          # has 'self'
+            result = Result(args, kwargs, None)
+            result.method = _func_name(func)
+            intr.results.append(result)
+            if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
+            if block:
+                ret = block(func, *args, **kwargs)
             else:
                 ret = func(*args, **kwargs)
-            newfunc._return = ret
+            result.ret = ret
             return ret
-        newfunc._block = block
-        _copy_attrs(func, newfunc)
+        self._copy_attrs(func, newfunc)
         if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
         if python3:  return types.MethodType(newfunc, func.__self__)
-    else:
-        raise TypeError("%r: intercept() supports only function or method." % (func, ))
+
+    def intercept_func(self, func, block):
+        newfunc = self._wrap_func(func, block)
+        return newfunc
+
+    def intercept_obj(self, obj, *args, **kwargs):
+        intr = Interceptor()
+        for method_name in args:
+            if method_name not in kwargs:
+                kwargs[method_name] = None
+        for method_name in kwargs:
+            method_obj = getattr(obj, method_name, None)
+            method_obj = self._wrap_method(method_obj, kwargs[method_name])
+            setattr(obj, method_name, method_obj)
+        return None
+
+    def intercept(self, target, *args, **kwargs):
+        if type(target) is types.FunctionType:       # function
+            func = target
+            block = args and args[0] or None
+            return self.intercept_func(func, block)
+        else:
+            obj = target
+            return self.intercept_obj(obj, *args, **kwargs)
 
 
 ##

@@ -1000,18 +1000,25 @@ if with_statement_supported:
 desc = "intercept (function)"
 script = r"""
 from oktest import *
-def f(x, y, z=0):
-    return x + y + z
-f = intercept(f)
-f(10, 20, z=7)
-print(f._args)    #=> (10, 20)
-print(f._kwargs)  #=> {'z': 7}
-print(f._return)  #=> 37
+def f1(a, b):
+    return f2(a + f3(b))
+def f2(a):
+    return a+2
+def f3(b):
+    return b*2
+intr = interceptor()
+f1 = intr.intercept(f1)
+f2 = intr.intercept(f2)
+f3 = intr.intercept(f3)
+print(f1(3, 5))
+for result in intr:
+    print(repr(result))
 """[1:]
 expected = """
-(10, 20)
-{'z': 7}
-37
+15
+f1(args=(3, 5), kwargs={}, ret=15)
+f3(args=(5,), kwargs={}, ret=10)
+f2(args=(13,), kwargs={}, ret=15)
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -1019,59 +1026,54 @@ do_test_with(desc, script, expected)
 desc = "intercept (instance method)"
 script = r"""
 from oktest import *
-class Hello(object):
-    def hello(self, name):
-        return 'Hello %s!' % name
-#
-obj = Hello()
-obj.hello = intercept(obj.hello)
-print(obj.hello('World'))  #=> Hello World!
-print(obj.hello._args)     #=> ('World',)
-print(obj.hello._kwargs)   #=> {}
-print(obj.hello._return)   #=> Hello World!
-print("--")
-Hello.hello = intercept(Hello.hello)
-obj2 = Hello()
-print(obj2.hello('WORLD'))  #=> Hello WORLD!
-print(obj2.hello._args)     #=> ('WORLD',)
-print(obj2.hello._kwargs)   #=> {}
-print(obj2.hello._return)   #=> Hello WORLD!
+class Dummy(object):
+    def f1(self, x, y):
+        return [self.f2(x, y=y),
+                self.f2(y, y=x)]
+    def f2(self, x=None, y=None):
+        return x-y
+obj = Dummy()
+intr = interceptor()
+intr.intercept(obj, 'f1', 'f2')
+ret = obj.f1(5, 3)
+print(ret)
+for result in intr:
+    print(repr(result))
 """[1:]
 expected = """
-Hello World!
-('World',)
-{}
-Hello World!
---
-Hello WORLD!
-('WORLD',)
-{}
-Hello WORLD!
+[2, -2]
+f1(args=(5, 3), kwargs={}, ret=[2, -2])
+f2(args=(5,), kwargs={'y': 3}, ret=2)
+f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
-if python3:
-    expected = expected.replace("('WORLD',)", "(<__main__.Hello object>, 'WORLD')")
 do_test_with(desc, script, expected)
 
 ### intercept (class method)
 desc = "intercept (class method)"
 script = r"""
 from oktest import *
-class Hello(object):
+class Dummy(object):
     @classmethod
-    def hello2(cls, name):
-        return 'Hi %s!' % name
-#
-Hello.hello2 = intercept(Hello.hello2)
-print(Hello.hello2('world'))  #=> Hi world!
-print(Hello.hello2._args)     #=> ('world',)
-print(Hello.hello2._kwargs)   #=> {}
-print(Hello.hello2._return)   #=> Hi world!
+    def f1(cls, x, y):
+        return [cls.__name__,
+                cls.f2(x, y=y),
+                cls.f2(y, y=x)]
+    @classmethod
+    def f2(cls, x=None, y=None):
+        return x-y
+obj = Dummy()
+intr = interceptor()
+intr.intercept(Dummy, 'f1', 'f2')
+ret = obj.f1(5, 3)
+print ret
+for result in intr:
+    print repr(result)
 """[1:]
 expected = """
-Hi world!
-('world',)
-{}
-Hi world!
+['Dummy', 2, -2]
+f1(args=(5, 3), kwargs={}, ret=['Dummy', 2, -2])
+f2(args=(5,), kwargs={'y': 3}, ret=2)
+f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -1084,22 +1086,22 @@ def f(x, y, z=0):
 def block(orig, *args, **kwargs):
     v = orig(*args, **kwargs)
     return 'v=%s' % v
-f = intercept(f, block)
-print(f(10, 20, z=7)) #=> 'v=37'
-print(f._args)    #=> (10, 20)
-print(f._kwargs)  #=> {'z': 7}
-print(f._return)  #=> 'v=37'
+intr = interceptor()
+f = intr.intercept(f, block)
+print(f(10, 20, z=7))  #=> 'v=37'
+print(intr[0].args)    #=> (10, 20)
+print(intr[0].kwargs)  #=> {'z': 7}
+print(intr[0].ret)     #=> 'v=37'
 print('---')
 class Hello(object):
     def hello(self, name):
         return 'Hello %s!' % name
-#
 obj = Hello()
-obj.hello = intercept(obj.hello, block)
+intr.intercept(obj, hello=block)
 print(obj.hello('World'))  #=> v=Hello World!
-print(obj.hello._args)     #=> ('World',)
-print(obj.hello._kwargs)   #=> {}
-print(obj.hello._return)   #=> v=Hello World!
+print(intr[1].args)     #=> ('World',)
+print(intr[1].kwargs)   #=> {}
+print(intr[1].ret)      #=> v=Hello World!
 """[1:]
 expected = """
 v=37
