@@ -217,6 +217,11 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
   class Hello
     def hello(name); return "Hello #{name}!"; end
+    def greeting(name, lang=nil)
+      if lang.nil? || lang == "en"
+        hello(name).sub(/Hello/, 'Hi')
+      end
+    end
   end
 
   def test_intercept
@@ -229,6 +234,10 @@ class OktestTestCaseTest < Test::Unit::TestCase
       ok_(intr.called) == true
       ok_(intr.args)   == ["World"]
       ok_(intr.return) == "Hello World!"
+      ok_(intr[0].method) == :hello
+      ok_(intr[0].args)   == ["World"]
+      ok_(intr[0].return) == "Hello World!"
+      ok_(intr.length)    == 1
     end
     spec "can take block for mocking." do
       obj = Hello.new
@@ -243,6 +252,47 @@ class OktestTestCaseTest < Test::Unit::TestCase
       ok_(intr.args)   ==  ["SOS"]
       ok_(intr.return) == "Bonjor SOS!"
       ok_(orig) == "Hello SOS!"
+      ok_(intr[0].method) == :hello
+      ok_(intr[0].args)   == ["SOS"]
+      ok_(intr[0].return) == "Bonjor SOS!"
+      ok_(intr.length) == 1
+    end
+    spec "can take several method names." do
+      obj = Hello.new
+      called_methods = []
+      intr = intercept(obj, :hello, :greeting)
+      ok_(intr.called) == false
+      ok_(obj.greeting('SOS', 'en')) == 'Hi SOS!'
+      ok_(intr.called) == true
+      ok_(intr[0].method) == :greeting
+      ok_(intr[0].args)   == ["SOS", "en"]
+      ok_(intr[0].return) == "Hi SOS!"
+      ok_(intr[1].method) == :hello
+      ok_(intr[1].args)   == ["SOS"]
+      ok_(intr[1].return) == "Hello SOS!"
+      ok_(intr.length)    == 2
+    end
+    spec "can take several method names and blocks." do
+      obj = Hello.new
+      called_methods = []
+      intr = intercept(obj,
+                       :hello => proc {|*args|
+                         called_methods << :hello
+                         obj.__intercepted_hello(*args) },
+                       :greeting => proc{|*args|
+                         called_methods << :greeting
+                         "<<" + obj.__intercepted_greeting(*args) + ">>" })
+      ok_(intr.called) == false
+      ok_(obj.greeting('SOS', nil)) == "<<Hi SOS!>>"
+      ok_(intr.called) == true
+      ok_(called_methods) == [:greeting, :hello]
+      ok_(intr[0].method) == :greeting
+      ok_(intr[0].args)   == ["SOS", nil]
+      ok_(intr[0].return) == "<<Hi SOS!>>"
+      ok_(intr[1].method) == :hello
+      ok_(intr[1].args)   == ["SOS"]
+      ok_(intr[1].return) == "Hello SOS!"
+      ok_(intr.length)    == 2
     end
   end
 
