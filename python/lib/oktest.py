@@ -8,8 +8,6 @@
 ### $License: MIT License $
 ###
 
-#__all__ = ('ok', 'not_ok', 'run', 'chdir', 'spec', 'using', 'interceptor',
-#           'dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars')
 __all__ = ('ok', 'not_ok', 'run', 'spec',)
 
 import sys, os, re, types, traceback
@@ -55,6 +53,16 @@ if python3:
 def _get_location(depth=0):
     frame = sys._getframe(depth+1)
     return (frame.f_code.co_filename, frame.f_lineno)
+
+def _new_module(name, local_vars, helper=None):
+    mod = type(sys)(name)
+    sys.modules[name] = mod
+    mod.__dict__.update(local_vars)
+    if helper and getattr(mod, '__all__', None):
+        for k in mod.__all__:
+            helper.__dict__[k] = mod.__dict__[k]
+        helper.__all__ += mod.__all__
+    return mod
 
 
 __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
@@ -775,15 +783,13 @@ def _dummy():
     return locals()
 
 
-helper = type(sys)('oktest.helper')
-sys.modules['oktest.helper'] = helper
-helper.__dict__.update(_dummy())
+helper = _new_module('oktest.helper', _dummy())
 del _dummy
 
 
 
 ##
-## helper.dummy
+## dummy
 ##
 def _dummy():
 
@@ -870,15 +876,13 @@ def _dummy():
     return locals()
 
 
-helper.dummy = type(sys)('oktest.helper.dummy')
-sys.modules['oktest.helper.dummy'] = helper.dummy
-helper.dummy.__dict__.update(_dummy())
+dummy = _new_module('oktest.dummy', _dummy(), helper)
 del _dummy
 
 
 
 ##
-## helper.interceptor
+## interceptor
 ##
 def _dummy():
 
@@ -1068,7 +1072,5 @@ def _dummy():
     return locals()
 
 
-helper.interceptor = type(sys)('oktest.helper.interceptor')
-sys.modules['oktest.helper.interceptor'] = helper.interceptor
-helper.interceptor.__dict__.update(_dummy())
+interceptor = _new_module('oktest.interceptor', _dummy(), helper)
 del _dummy
