@@ -15,6 +15,7 @@ import sys, os, re, types, traceback
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
 if python2:
+    from cStringIO import StringIO
     def _is_string(val):
         return isinstance(val, (str, unicode))
     def _is_class(obj):
@@ -32,6 +33,7 @@ if python2:
         f.close()
         return s
 if python3:
+    from io import StringIO
     def _is_string(val):
         return isinstance(val, (str, bytes))
     def _is_class(obj):
@@ -793,7 +795,7 @@ del _dummy
 ##
 def _dummy():
 
-    __all__ = ('dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars', )
+    __all__ = ('dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars', 'dummy_io')
 
 
     class DummyFile(_Context):
@@ -857,6 +859,26 @@ def _dummy():
             self.__dict__.clear()
 
 
+    class DummyIO(_Context):
+
+        def __init__(self, stdin_content=None):
+            self.stdin_content = stdin_content
+
+        def __enter__(self):
+            self.stdout, sys.stdout = sys.stdout, StringIO()
+            self.stderr, sys.stderr = sys.stderr, StringIO()
+            if self.stdin_content is not None:
+                self.stdin, sys.stdin  = sys.stdin, StringIO(self.stdin_content)
+            return self
+
+        def __exit__(self, *args):
+            sout, serr = sys.stdout.getvalue(), sys.stderr.getvalue()
+            sys.stdout, self.stdout = self.stdout, sys.stdout.getvalue()
+            sys.stderr, self.stderr = self.stderr, sys.stderr.getvalue()
+            if self.stdin_content is not None:
+                sys.stdin = self.stdin
+
+
     def dummy_file(filename, content):
         return DummyFile(filename, content)
 
@@ -871,6 +893,18 @@ def _dummy():
 
     def dummy_environ_vars(**kwargs):
         return DummyValues(os.environ, **kwargs)
+
+    def dummy_io(stdin_content=None, func=None, *args, **kwargs):
+        obj = dummy.DummyIO(stdin_content)
+        if func is None:
+            return obj    # for with-statement
+        obj.__enter__()
+        try:
+            func(*args, **kwargs)
+        finally:
+            obj.__exit__()
+        #return obj.stdout, obj.stderr
+        return obj
 
 
     return locals()

@@ -919,6 +919,62 @@ run(FooTest)
 expected = "* FooTest.test_dummy_attrs2 ... [ok]\n"
 do_test_with(desc, script, expected)
 
+### dummy_io (with with-statement)
+desc = "dummy_io (with with-statement)"
+script = r"""
+from __future__ import with_statement
+import sys, os
+from oktest import *
+from oktest.helper import *
+class FooTest(object):
+    def test_dummy_io(self):
+        sin, sout, serr = sys.stdin, sys.stdout, sys.stderr
+        with dummy_io("SOS") as d_io:
+            ok (sys.stdin)  != sin
+            ok (sys.stdout) != sout
+            ok (sys.stderr) != serr
+            ok (sys.stdin.read()) == "SOS"
+            sys.stdout.write("Haruhi")
+            sys.stderr.write("Sasaki")
+        ok (sys.stdin).is_(sin)
+        ok (sys.stdout).is_(sout)
+        ok (sys.stderr).is_(serr)
+        ok (d_io.stdout) == "Haruhi"
+        ok (d_io.stderr) == "Sasaki"
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_io ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
+### dummy_io (without with-statement)
+desc = "dummy_io (without with-statement)"
+script = r"""
+import sys, os
+from oktest import *
+from oktest.helper import *
+class FooTest(object):
+    def test_dummy_io(self):
+        sin, sout, serr = sys.stdin, sys.stdout, sys.stderr
+        def f(arg1, arg2):
+            ok (sys.stdin)  != sin
+            ok (sys.stdout) != sout
+            ok (sys.stderr) != serr
+            ok (sys.stdin.read()) == "SOS"
+            sys.stdout.write(arg1)
+            sys.stderr.write(arg2)
+        d_io = dummy_io("SOS", f, "Haruhi", "Sasaki")
+        ok (sys.stdin).is_(sin)
+        ok (sys.stdout).is_(sout)
+        ok (sys.stderr).is_(serr)
+        ok (d_io.stdout) == "Haruhi"
+        ok (d_io.stderr) == "Sasaki"
+run(FooTest)
+"""
+expected = "* FooTest.test_dummy_io ... [ok]\n"
+if with_statement_supported:
+    do_test_with(desc, script, expected)
+
 ### chdir (with with-statement)
 desc = "chdir (with with-statement)"
 script = r"""
