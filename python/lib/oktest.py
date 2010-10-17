@@ -920,7 +920,7 @@ del _dummy
 ##
 def _dummy():
 
-    __all__ = ('Interceptor', )
+    __all__ = ('Interceptor', 'DummyObject')
 
 
     class Result(object):
@@ -933,6 +933,46 @@ def _dummy():
 
         def __repr__(self):
             return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
+
+
+    class DummyObject(object):
+        """dummy object class which can be stub or mock object.
+           ex.
+              from oktest.helper import DummyObject
+              obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
+              obj.hi()           #=> 'Hi'
+              obj.hello("SOS")   #=> 'Hello SOS!'
+              obj._results[0].name    #=> 'hi'
+              obj._results[0].args    #=> ()
+              obj._results[0].kwargs  #=> {}
+              obj._results[0].ret     #=> None
+              obj._results[1].name    #=> 'hello'
+              obj._results[1].args    #=> ('SOS', )
+              obj._results[1].kwargs  #=> {}
+              obj._results[1].ret     #=> 'Hello SOS!'
+        """
+
+        def __init__(self, **kwargs):
+            self._results = self.__results = []
+            for name in kwargs:
+                setattr(self, name, self.__new_method(name, kwargs[name]))
+
+        def __new_method(self, name, val):
+            results = self.__results
+            if isinstance(val, types.FunctionType):
+                func = val
+                def f(self, *args, **kwargs):
+                    r = Result(name, args, kwargs, None)
+                    results.append(r)
+                    r.ret = func(self, *args, **kwargs)
+                    return r.ret
+            else:
+                def f(self, *args, **kwargs):
+                    r = Result(name, args, kwargs, val)
+                    results.append(r)
+                    return val
+            f.func_name = f.__name__ = name
+            return types.MethodType(f, self, self.__class__)
 
 
     class Interceptor(object):
