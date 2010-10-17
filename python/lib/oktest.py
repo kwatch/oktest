@@ -925,14 +925,14 @@ def _dummy():
 
     class Result(object):
 
-        def __init__(self, args=None, kwargs=None, ret=None):
+        def __init__(self, name=None, args=None, kwargs=None, ret=None):
+            self.name   = name     # method name
             self.args   = args
             self.kwargs = kwargs
             self.ret    = ret
-            self.method = None     # method name
 
         def __repr__(self):
-            return '%s(args=%r, kwargs=%r, ret=%r)' % (self.method, self.args, self.kwargs, self.ret)
+            return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
 
 
     class Interceptor(object):
@@ -949,12 +949,12 @@ def _dummy():
                #
                print(g(3, y=5))       #=> 13
                #
-               print(intr[0].method)  #=> g
+               print(intr[0].name)    #=> g
                print(intr[0].args)    #=> (3,)
                print(intr[0].kwargs)  #=> {'y': 5}
                print(intr[0].ret)     #=> 11
                #
-               print(intr[1].method)  #=> f
+               print(intr[1].name)    #=> f
                print(intr[1].args)    #=> (4,)
                print(intr[1].kwargs)  #=> {}
                print(intr[1].ret)     #=> 8
@@ -974,7 +974,7 @@ def _dummy():
                intr.intercept(obj, 'f1', 'f2')
                #
                print(obj.f1(5))        #=> 9
-               print(intr[0].method)   #=> f1
+               print(intr[0].name)    #=> f1
                print(intr[0].args)     #=> (5,)
                print(intr[0].kwargs)   #=> {}
                print(intr[0].ret)      #=> 9
@@ -1044,8 +1044,7 @@ def _dummy():
         def _wrap_func(self, func, block):
             intr = self
             def newfunc(*args, **kwargs):                # no 'self'
-                result = Result(args, kwargs, None)
-                result.method = _func_name(func)
+                result = Result(_func_name(func), args, kwargs, None)
                 intr.results.append(result)
                 if block:
                     ret = block(func, *args, **kwargs)
@@ -1060,8 +1059,7 @@ def _dummy():
         def _wrap_method(self, func, block):
             intr = self
             def newfunc(self, *args, **kwargs):          # has 'self'
-                result = Result(args, kwargs, None)
-                result.method = _func_name(func)
+                result = Result(_func_name(func), args, kwargs, None)
                 intr.results.append(result)
                 if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
                 if block:
