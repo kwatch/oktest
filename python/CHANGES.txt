@@ -5,6 +5,13 @@ CHANGES
 $Release: 0.5.0 $
 
 
+Release 0.6.0
+-------------
+
+* enhanced to add 'intercept()' helper. see readme for details.
+* change 'run()' to sort classes order by lineno in source file.
+
+
 Release 0.5.0
 -------------
 
