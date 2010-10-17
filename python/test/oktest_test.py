@@ -1066,18 +1066,18 @@ if with_statement_supported:
     do_test_with(desc, script, expected)
 
 
-### intercept (function)
-desc = "intercept (function)"
+### Interceptor (function)
+desc = "Interceptor (function)"
 script = r"""
 from oktest import *
-from oktest.helper import interceptor
+from oktest.helper import Interceptor
 def f1(a, b):
     return f2(a + f3(b))
 def f2(a):
     return a+2
 def f3(b):
     return b*2
-intr = interceptor()
+intr = Interceptor()
 f1 = intr.intercept(f1)
 f2 = intr.intercept(f2)
 f3 = intr.intercept(f3)
@@ -1093,11 +1093,11 @@ f2(args=(13,), kwargs={}, ret=15)
 """[1:]
 do_test_with(desc, script, expected)
 
-### intercept (instance method)
-desc = "intercept (instance method)"
+### Interceptor (instance method)
+desc = "Interceptor (instance method)"
 script = r"""
 from oktest import *
-from oktest.helper import interceptor
+from oktest.helper import Interceptor
 class Dummy(object):
     def f1(self, x, y):
         return [self.f2(x, y=y),
@@ -1105,7 +1105,7 @@ class Dummy(object):
     def f2(self, x=None, y=None):
         return x-y
 obj = Dummy()
-intr = interceptor()
+intr = Interceptor()
 intr.intercept(obj, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
@@ -1120,11 +1120,11 @@ f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
-### intercept (class method)
-desc = "intercept (class method)"
+### Interceptor (class method)
+desc = "Interceptor (class method)"
 script = r"""
 from oktest import *
-from oktest.helper import interceptor
+from oktest.helper import Interceptor
 class Dummy(object):
     @classmethod
     def f1(cls, x, y):
@@ -1135,7 +1135,7 @@ class Dummy(object):
     def f2(cls, x=None, y=None):
         return x-y
 obj = Dummy()
-intr = interceptor()
+intr = Interceptor()
 intr.intercept(Dummy, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
@@ -1150,17 +1150,17 @@ f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
-### intercept (mocking)
-desc = "intercept (mocking)"
+### Interceptor (mocking)
+desc = "Interceptor (mocking)"
 script = r"""
 from oktest import *
-from oktest.helper import interceptor
+from oktest.helper import Interceptor
 def f(x, y, z=0):
     return x + y + z
 def block(orig, *args, **kwargs):
     v = orig(*args, **kwargs)
     return 'v=%s' % v
-intr = interceptor()
+intr = Interceptor()
 f = intr.intercept(f, block)
 print(f(10, 20, z=7))  #=> 'v=37'
 print(intr[0].args)    #=> (10, 20)

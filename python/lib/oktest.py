@@ -920,10 +920,22 @@ del _dummy
 ##
 def _dummy():
 
-    __all__ = ('interceptor', )
+    __all__ = ('Interceptor', )
 
 
-    def interceptor():
+    class Result(object):
+
+        def __init__(self, args=None, kwargs=None, ret=None):
+            self.args   = args
+            self.kwargs = kwargs
+            self.ret    = ret
+            self.method = None     # method name
+
+        def __repr__(self):
+            return '%s(args=%r, kwargs=%r, ret=%r)' % (self.method, self.args, self.kwargs, self.ret)
+
+
+    class Interceptor(object):
         """intercept function or method to record arguments and return value.
            ex (stub function).
                def f(x):
@@ -931,7 +943,7 @@ def _dummy():
                def g(x, y=0):
                    return f(x+1) + y
                #
-               intr = interceptor()
+               intr = Interceptor()
                f = intr.intercept(f)
                g = intr.intercept(g)
                #
@@ -957,7 +969,7 @@ def _dummy():
                    def f2(self, x, y):
                        return x + y
                #
-               intr = interceptor()
+               intr = Interceptor()
                obj = Foo()
                intr.intercept(obj, 'f1', 'f2')
                #
@@ -976,7 +988,7 @@ def _dummy():
                def block(original_func, x):
                    #return original_func(x)
                    return 'x=%s' % repr(x)
-               intr = interceptor()
+               intr = Interceptor()
                f = intr.intercept(f, block)
                print(f(3))             #=> x=3
                print(repr(intr[0]))    #=> f(args=(3,), kwargs={}, ret='x=3')
@@ -987,7 +999,7 @@ def _dummy():
                        return 'Hello %s!' % name
                #
                obj = Hello()
-               intr = interceptor()
+               intr = Interceptor()
                def block(original_func, name):
                    v = original_func(name)
                    return 'message: %s' % v
@@ -996,22 +1008,6 @@ def _dummy():
                print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
                print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
         """
-        return Interceptor()
-
-
-    class Result(object):
-
-        def __init__(self, args=None, kwargs=None, ret=None):
-            self.args   = args
-            self.kwargs = kwargs
-            self.ret    = ret
-            self.method = None     # method name
-
-        def __repr__(self):
-            return '%s(args=%r, kwargs=%r, ret=%r)' % (self.method, self.args, self.kwargs, self.ret)
-
-
-    class Interceptor(object):
 
         def __init__(self):
             self.results = []
