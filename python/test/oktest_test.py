@@ -1216,6 +1216,34 @@ expected = """
 """[1:]
 do_test_with(desc, script, expected)
 
+### Interceptor.dummy()
+desc = "DummyObject"
+script = r"""
+import sys
+from oktest import *
+from oktest.helper import Interceptor
+class DummyObjectTest(object):
+    def test_dummy(self):
+        intr = Interceptor()
+        obj = intr.dummy(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
+        ok (obj._calls).is_(intr.calls)
+        ok (obj.hi()) == 'Hi'
+        ok (obj.hello("SOS")) == 'Hello SOS!'
+        ok (intr[0].name  ) == 'hi'
+        ok (intr[0].args  ) == ()
+        ok (intr[0].kwargs) == {}
+        ok (intr[0].ret   ) == 'Hi'
+        ok (intr[1].name  ) == 'hello'
+        ok (intr[1].args  ) == ('SOS', )
+        ok (intr[1].kwargs) == {}
+        ok (intr[1].ret   ) == 'Hello SOS!'
+run()
+"""[1:]
+expected = """
+* DummyObjectTest.test_dummy ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
 
 ## flatten
 desc = "flatten()"

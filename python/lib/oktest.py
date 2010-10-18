@@ -958,18 +958,18 @@ def _dummy():
                 setattr(self, name, self.__new_method(name, kwargs[name]))
 
         def __new_method(self, name, val):
-            calls = self.__calls
+            dummy_obj = self
             if isinstance(val, types.FunctionType):
                 func = val
                 def f(self, *args, **kwargs):
                     r = Call(name, args, kwargs, None)
-                    calls.append(r)
+                    dummy_obj.__calls.append(r)
                     r.ret = func(self, *args, **kwargs)
                     return r.ret
             else:
                 def f(self, *args, **kwargs):
                     r = Call(name, args, kwargs, val)
-                    calls.append(r)
+                    dummy_obj.__calls.append(r)
                     return val
             f.func_name = f.__name__ = name
             return types.MethodType(f, self, self.__class__)
@@ -1135,6 +1135,11 @@ def _dummy():
             else:
                 obj = target
                 return self.intercept_obj(obj, *args, **kwargs)
+
+        def dummy(self, **kwargs):
+            obj = DummyObject(**kwargs)
+            obj._calls = obj._DummyObject__calls = self.calls
+            return obj
 
 
     return locals()
