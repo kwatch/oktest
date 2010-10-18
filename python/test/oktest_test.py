@@ -1199,18 +1199,20 @@ from oktest.helper import DummyObject
 class DummyObjectTest(object):
     def test_dummy_object(self):
         obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
-        ok (obj.hi()) == 'hi'
+        ok (obj.hi()) == 'Hi'
         ok (obj.hello("SOS")) == 'Hello SOS!'
         ok (obj._results[0].name  ) == 'hi'
         ok (obj._results[0].args  ) == ()
         ok (obj._results[0].kwargs) == {}
-        ok (obj._results[0].ret   ) == None
+        ok (obj._results[0].ret   ) == 'Hi'
         ok (obj._results[1].name  ) == 'hello'
         ok (obj._results[1].args  ) == ('SOS', )
         ok (obj._results[1].kwargs) == {}
         ok (obj._results[1].ret   ) == 'Hello SOS!'
+run()
 """[1:]
 expected = """
+* DummyObjectTest.test_dummy_object ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
 
