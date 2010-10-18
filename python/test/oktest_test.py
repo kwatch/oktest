@@ -1201,14 +1201,14 @@ class DummyObjectTest(object):
         obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
         ok (obj.hi()) == 'Hi'
         ok (obj.hello("SOS")) == 'Hello SOS!'
-        ok (obj._results[0].name  ) == 'hi'
-        ok (obj._results[0].args  ) == ()
-        ok (obj._results[0].kwargs) == {}
-        ok (obj._results[0].ret   ) == 'Hi'
-        ok (obj._results[1].name  ) == 'hello'
-        ok (obj._results[1].args  ) == ('SOS', )
-        ok (obj._results[1].kwargs) == {}
-        ok (obj._results[1].ret   ) == 'Hello SOS!'
+        ok (obj._calls[0].name  ) == 'hi'
+        ok (obj._calls[0].args  ) == ()
+        ok (obj._calls[0].kwargs) == {}
+        ok (obj._calls[0].ret   ) == 'Hi'
+        ok (obj._calls[1].name  ) == 'hello'
+        ok (obj._calls[1].args  ) == ('SOS', )
+        ok (obj._calls[1].kwargs) == {}
+        ok (obj._calls[1].ret   ) == 'Hello SOS!'
 run()
 """[1:]
 expected = """

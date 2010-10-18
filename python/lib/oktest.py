@@ -923,7 +923,7 @@ def _dummy():
     __all__ = ('Interceptor', 'DummyObject')
 
 
-    class Result(object):
+    class Call(object):
 
         def __init__(self, name=None, args=None, kwargs=None, ret=None):
             self.name   = name     # method name
@@ -942,34 +942,34 @@ def _dummy():
               obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
               obj.hi()           #=> 'Hi'
               obj.hello("SOS")   #=> 'Hello SOS!'
-              obj._results[0].name    #=> 'hi'
-              obj._results[0].args    #=> ()
-              obj._results[0].kwargs  #=> {}
-              obj._results[0].ret     #=> None
-              obj._results[1].name    #=> 'hello'
-              obj._results[1].args    #=> ('SOS', )
-              obj._results[1].kwargs  #=> {}
-              obj._results[1].ret     #=> 'Hello SOS!'
+              obj._calls[0].name    #=> 'hi'
+              obj._calls[0].args    #=> ()
+              obj._calls[0].kwargs  #=> {}
+              obj._calls[0].ret     #=> 'Hi'
+              obj._calls[1].name    #=> 'hello'
+              obj._calls[1].args    #=> ('SOS', )
+              obj._calls[1].kwargs  #=> {}
+              obj._calls[1].ret     #=> 'Hello SOS!'
         """
 
         def __init__(self, **kwargs):
-            self._results = self.__results = []
+            self._calls = self.__calls = []
             for name in kwargs:
                 setattr(self, name, self.__new_method(name, kwargs[name]))
 
         def __new_method(self, name, val):
-            results = self.__results
+            calls = self.__calls
             if isinstance(val, types.FunctionType):
                 func = val
                 def f(self, *args, **kwargs):
-                    r = Result(name, args, kwargs, None)
-                    results.append(r)
+                    r = Call(name, args, kwargs, None)
+                    calls.append(r)
                     r.ret = func(self, *args, **kwargs)
                     return r.ret
             else:
                 def f(self, *args, **kwargs):
-                    r = Result(name, args, kwargs, val)
-                    results.append(r)
+                    r = Call(name, args, kwargs, val)
+                    calls.append(r)
                     return val
             f.func_name = f.__name__ = name
             return types.MethodType(f, self, self.__class__)
@@ -1050,19 +1050,19 @@ def _dummy():
         """
 
         def __init__(self):
-            self.results = []
+            self.calls = []
 
 
         def __getitem__(self, index):
-            return self.results[index]
+            return self.calls[index]
 
         def called(self):
-            return len(self.results) > 0
+            return len(self.calls) > 0
 
         def _attr(name):
             def f(self):
-                if len(self.results) == 0: return None
-                return getattr(self.results[0], name, None)
+                if len(self.calls) == 0: return None
+                return getattr(self.calls[0], name, None)
             return f
 
         method = property(_attr('method'))
@@ -1071,10 +1071,10 @@ def _dummy():
         ret    = property(_attr('ret'))
 
         def __len__(self):
-            return len(self.results)
+            return len(self.calls)
 
         def __iter__(self):
-            return self.results.__iter__()
+            return self.calls.__iter__()
 
         def _copy_attrs(self, func, newfunc):
             for k in ('func_name', '__name__', '__doc__'):
@@ -1084,14 +1084,14 @@ def _dummy():
         def _wrap_func(self, func, block):
             intr = self
             def newfunc(*args, **kwargs):                # no 'self'
-                result = Result(_func_name(func), args, kwargs, None)
-                intr.results.append(result)
+                call = Call(_func_name(func), args, kwargs, None)
+                intr.calls.append(call)
                 if block:
                     ret = block(func, *args, **kwargs)
                 else:
                     ret = func(*args, **kwargs)
                 #newfunc._return = ret
-                result.ret = ret
+                call.ret = ret
                 return ret
             self._copy_attrs(func, newfunc)
             return newfunc
@@ -1099,14 +1099,14 @@ def _dummy():
         def _wrap_method(self, func, block):
             intr = self
             def newfunc(self, *args, **kwargs):          # has 'self'
-                result = Result(_func_name(func), args, kwargs, None)
-                intr.results.append(result)
+                call = Call(_func_name(func), args, kwargs, None)
+                intr.calls.append(call)
                 if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
                 if block:
                     ret = block(func, *args, **kwargs)
                 else:
                     ret = func(*args, **kwargs)
-                result.ret = ret
+                call.ret = ret
                 return ret
             self._copy_attrs(func, newfunc)
             if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
