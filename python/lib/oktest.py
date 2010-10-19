@@ -1130,28 +1130,46 @@ def _dummy():
             if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
             if python3:  return types.MethodType(newfunc, func.__self__)
 
-        def trace_func(self, func, block):
+        def trace_func(self, func):
+            newfunc = self._wrap_func(func, None)
+            return newfunc
+
+        def intercept_func(self, func, block):
             newfunc = self._wrap_func(func, block)
             return newfunc
 
-        def trace_obj(self, obj, *args, **kwargs):
-            for method_name in args:
-                if method_name not in kwargs:
-                    kwargs[method_name] = None
-            for method_name in kwargs:
-                method_obj = getattr(obj, method_name, None)
-                method_obj = self._wrap_method(method_obj, kwargs[method_name])
-                setattr(obj, method_name, method_obj)
+        def trace_method(self, obj, *method_names):
+            for method_name in method_names:
+                if not hasattr(obj, method_name):
+                    raise ValueError("%s: no method found on %r." % (method_name, obj))
+                method_obj = getattr(obj, method_name)
+                setattr(obj, method_name, self._wrap_method(method_obj, None))
             return None
 
-        def trace(self, target, *args, **kwargs):
+        def intercept_method(self, obj, **kwargs):
+            for method_name in kwargs:
+                #if not hasattr(obj, method_name):
+                #    raise ValueError("%s: no method found on %r." % (method_name, obj))
+                method_obj = getattr(obj, method_name, None)
+                setattr(obj, method_name, self._wrap_method(method_obj, kwargs[method_name]))
+            return None
+
+        def trace(self, target, *args):
+            if type(target) is types.FunctionType:       # function
+                func = target
+                return self.trace_func(func)
+            else:
+                obj = target
+                return self.trace_method(obj, *args)
+
+        def intercept(self, target, *args, **kwargs):
             if type(target) is types.FunctionType:       # function
                 func = target
                 block = args and args[0] or None
-                return self.trace_func(func, block)
+                return self.intercept_func(func, block)
             else:
                 obj = target
-                return self.trace_obj(obj, *args, **kwargs)
+                return self.intercept_method(obj, **kwargs)
 
         def dummy_obj(self, **kwargs):
             obj = DummyObject(**kwargs)

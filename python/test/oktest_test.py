@@ -1078,8 +1078,8 @@ def f2(a):
 def f3(b):
     return b*2
 tr = Tracer()
-f1 = tr.trace(f1)
-f2 = tr.trace(f2)
+f1 = tr.trace_func(f1)
+f2 = tr.trace_func(f2)
 f3 = tr.trace(f3)
 print(f1(3, 5))
 for result in tr:
@@ -1106,7 +1106,7 @@ class Dummy(object):
         return x-y
 obj = Dummy()
 tr = Tracer()
-tr.trace(obj, 'f1', 'f2')
+tr.trace_method(obj, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
 for result in tr:
@@ -1136,7 +1136,7 @@ class Dummy(object):
         return x-y
 obj = Dummy()
 tr = Tracer()
-tr.trace(Dummy, 'f1', 'f2')
+tr.trace_method(Dummy, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
 for result in tr:
@@ -1150,8 +1150,8 @@ f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
-### Tracer (mocking)
-desc = "Tracer (mocking)"
+### Tracer (intercept)
+desc = "Tracer (intercept_func)"
 script = r"""
 from oktest import *
 from oktest.helper import Tracer
@@ -1161,7 +1161,7 @@ def block(orig, *args, **kwargs):
     v = orig(*args, **kwargs)
     return 'v=%s' % v
 tr = Tracer()
-f = tr.trace(f, block)
+f = tr.intercept_func(f, block)
 print(f(10, 20, z=7))  #=> 'v=37'
 print(tr[0].args)    #=> (10, 20)
 print(tr[0].kwargs)  #=> {'z': 7}
@@ -1171,7 +1171,7 @@ class Hello(object):
     def hello(self, name):
         return 'Hello %s!' % name
 obj = Hello()
-tr.trace(obj, hello=block)
+tr.intercept_method(obj, hello=block)
 print(obj.hello('World'))  #=> v=Hello World!
 print(tr[1].args)     #=> ('World',)
 print(tr[1].kwargs)   #=> {}
