@@ -916,11 +916,11 @@ del _dummy
 
 
 ##
-## interceptor
+## Tracer
 ##
 def _dummy():
 
-    __all__ = ('Interceptor', 'DummyObject')
+    __all__ = ('Tracer', 'DummyObject')
 
 
     class Call(object):
@@ -975,83 +975,101 @@ def _dummy():
             return types.MethodType(f, self, self.__class__)
 
 
-    class Interceptor(object):
-        """intercept function or method to record arguments and return value.
-           ex (stub function).
+    class Tracer(object):
+        """trace function or method call to record arguments and return value.
+
+           ex (dummy objects)
+              tr = Tracer()
+              ## create dummy object
+              obj1 = tr.dummy(hi="Hi!")
+              obj2 = tr.dummy(hello=lambda self, x: "Hello %s!" % x)
+              ## call dummy method
+              obj2.hello("SOS")  #=> 'Hello SOS!'
+              obj1.hi()          #=> 'Hi!'
+              ## check result
+              tr[0].name     #=> 'hello'
+              tr[0].args     #=> ('SOS', )
+              tr[0].kwargs   #=> {}
+              tr[0].ret      #=> 'Hello SOS!'
+              tr[1].name     #=> 'hi'
+              tr[1].args     #=> ()
+              tr[1].kwargs   #=> {}
+              tr[1].ret      #=> 'Hi!'
+
+           ex (trace function).
                def f(x):
                    return x*2
                def g(x, y=0):
                    return f(x+1) + y
                #
-               intr = Interceptor()
-               f = intr.intercept(f)
-               g = intr.intercept(g)
+               tr = Tracer()
+               f = tr.trace(f)
+               g = tr.trace(g)
                #
                print(g(3, y=5))       #=> 13
                #
-               print(intr[0].name)    #=> g
-               print(intr[0].args)    #=> (3,)
-               print(intr[0].kwargs)  #=> {'y': 5}
-               print(intr[0].ret)     #=> 11
+               print(tr[0].name)    #=> g
+               print(tr[0].args)    #=> (3,)
+               print(tr[0].kwargs)  #=> {'y': 5}
+               print(tr[0].ret)     #=> 11
                #
-               print(intr[1].name)    #=> f
-               print(intr[1].args)    #=> (4,)
-               print(intr[1].kwargs)  #=> {}
-               print(intr[1].ret)     #=> 8
+               print(tr[1].name)    #=> f
+               print(tr[1].args)    #=> (4,)
+               print(tr[1].kwargs)  #=> {}
+               print(tr[1].ret)     #=> 8
                #
-               print(repr(intr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
-               print(repr(intr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
+               print(repr(tr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
+               print(repr(tr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
 
-           ex (stub method).
+           ex (trace method).
                class Foo(object):
                    def f1(self, x):
                        return self.f2(x, 3) + 1
                    def f2(self, x, y):
                        return x + y
                #
-               intr = Interceptor()
+               tr = Tracer()
                obj = Foo()
-               intr.intercept(obj, 'f1', 'f2')
+               tr.trace(obj, 'f1', 'f2')
                #
-               print(obj.f1(5))        #=> 9
-               print(intr[0].name)    #=> f1
-               print(intr[0].args)     #=> (5,)
-               print(intr[0].kwargs)   #=> {}
-               print(intr[0].ret)      #=> 9
+               print(obj.f1(5))      #=> 9
+               print(tr[0].name)     #=> f1
+               print(tr[0].args)     #=> (5,)
+               print(tr[0].kwargs)   #=> {}
+               print(tr[0].ret)      #=> 9
                #
-               print(repr(intr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
-               print(repr(intr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
+               print(repr(tr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
+               print(repr(tr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
 
-           ex (mock function).
+           ex (dummy function).
                def f(x):
                    return x*2
                def block(original_func, x):
                    #return original_func(x)
                    return 'x=%s' % repr(x)
-               intr = Interceptor()
-               f = intr.intercept(f, block)
+               tr = Tracer()
+               f = tr.trace(f, block)
                print(f(3))             #=> x=3
-               print(repr(intr[0]))    #=> f(args=(3,), kwargs={}, ret='x=3')
+               print(repr(tr[0]))      #=> f(args=(3,), kwargs={}, ret='x=3')
 
-           ex (mock method).
+           ex (dummy method).
                class Hello(object):
                    def hello(self, name):
                        return 'Hello %s!' % name
                #
                obj = Hello()
-               intr = Interceptor()
+               tr = Tracer()
                def block(original_func, name):
                    v = original_func(name)
                    return 'message: %s' % v
-               intr.intercept(obj, hello=block)   # or intr.intercept(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
+               tr.trace(obj, hello=block)   # or tr.trace(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
                #
                print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
-               print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
+               print(repr(tr[0]))           #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
         """
 
         def __init__(self):
             self.calls = []
-
 
         def __getitem__(self, index):
             return self.calls[index]
@@ -1065,7 +1083,7 @@ def _dummy():
                 return getattr(self.calls[0], name, None)
             return f
 
-        method = property(_attr('method'))
+        name   = property(_attr('name'))
         args   = property(_attr('args'))
         kwargs = property(_attr('kwargs'))
         ret    = property(_attr('ret'))
@@ -1112,12 +1130,11 @@ def _dummy():
             if python2:  return types.MethodType(newfunc, func.im_self, func.im_class)
             if python3:  return types.MethodType(newfunc, func.__self__)
 
-        def intercept_func(self, func, block):
+        def trace_func(self, func, block):
             newfunc = self._wrap_func(func, block)
             return newfunc
 
-        def intercept_obj(self, obj, *args, **kwargs):
-            intr = Interceptor()
+        def trace_obj(self, obj, *args, **kwargs):
             for method_name in args:
                 if method_name not in kwargs:
                     kwargs[method_name] = None
@@ -1127,16 +1144,16 @@ def _dummy():
                 setattr(obj, method_name, method_obj)
             return None
 
-        def intercept(self, target, *args, **kwargs):
+        def trace(self, target, *args, **kwargs):
             if type(target) is types.FunctionType:       # function
                 func = target
                 block = args and args[0] or None
-                return self.intercept_func(func, block)
+                return self.trace_func(func, block)
             else:
                 obj = target
-                return self.intercept_obj(obj, *args, **kwargs)
+                return self.trace_obj(obj, *args, **kwargs)
 
-        def dummy(self, **kwargs):
+        def dummy_obj(self, **kwargs):
             obj = DummyObject(**kwargs)
             obj._calls = obj._DummyObject__calls = self.calls
             return obj
@@ -1145,5 +1162,5 @@ def _dummy():
     return locals()
 
 
-interceptor = _new_module('oktest.interceptor', _dummy(), helper)
+tracer = _new_module('oktest.tracer', _dummy(), helper)
 del _dummy

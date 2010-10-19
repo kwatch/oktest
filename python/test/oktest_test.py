@@ -1066,23 +1066,23 @@ if with_statement_supported:
     do_test_with(desc, script, expected)
 
 
-### Interceptor (function)
-desc = "Interceptor (function)"
+### Tracer (function)
+desc = "Tracer (function)"
 script = r"""
 from oktest import *
-from oktest.helper import Interceptor
+from oktest.helper import Tracer
 def f1(a, b):
     return f2(a + f3(b))
 def f2(a):
     return a+2
 def f3(b):
     return b*2
-intr = Interceptor()
-f1 = intr.intercept(f1)
-f2 = intr.intercept(f2)
-f3 = intr.intercept(f3)
+tr = Tracer()
+f1 = tr.trace(f1)
+f2 = tr.trace(f2)
+f3 = tr.trace(f3)
 print(f1(3, 5))
-for result in intr:
+for result in tr:
     print(repr(result))
 """[1:]
 expected = """
@@ -1093,11 +1093,11 @@ f2(args=(13,), kwargs={}, ret=15)
 """[1:]
 do_test_with(desc, script, expected)
 
-### Interceptor (instance method)
-desc = "Interceptor (instance method)"
+### Tracer (instance method)
+desc = "Tracer (instance method)"
 script = r"""
 from oktest import *
-from oktest.helper import Interceptor
+from oktest.helper import Tracer
 class Dummy(object):
     def f1(self, x, y):
         return [self.f2(x, y=y),
@@ -1105,11 +1105,11 @@ class Dummy(object):
     def f2(self, x=None, y=None):
         return x-y
 obj = Dummy()
-intr = Interceptor()
-intr.intercept(obj, 'f1', 'f2')
+tr = Tracer()
+tr.trace(obj, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
-for result in intr:
+for result in tr:
     print(repr(result))
 """[1:]
 expected = """
@@ -1120,11 +1120,11 @@ f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
-### Interceptor (class method)
-desc = "Interceptor (class method)"
+### Tracer (class method)
+desc = "Tracer (class method)"
 script = r"""
 from oktest import *
-from oktest.helper import Interceptor
+from oktest.helper import Tracer
 class Dummy(object):
     @classmethod
     def f1(cls, x, y):
@@ -1135,11 +1135,11 @@ class Dummy(object):
     def f2(cls, x=None, y=None):
         return x-y
 obj = Dummy()
-intr = Interceptor()
-intr.intercept(Dummy, 'f1', 'f2')
+tr = Tracer()
+tr.trace(Dummy, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
-for result in intr:
+for result in tr:
     print(repr(result))
 """[1:]
 expected = """
@@ -1150,32 +1150,32 @@ f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
-### Interceptor (mocking)
-desc = "Interceptor (mocking)"
+### Tracer (mocking)
+desc = "Tracer (mocking)"
 script = r"""
 from oktest import *
-from oktest.helper import Interceptor
+from oktest.helper import Tracer
 def f(x, y, z=0):
     return x + y + z
 def block(orig, *args, **kwargs):
     v = orig(*args, **kwargs)
     return 'v=%s' % v
-intr = Interceptor()
-f = intr.intercept(f, block)
+tr = Tracer()
+f = tr.trace(f, block)
 print(f(10, 20, z=7))  #=> 'v=37'
-print(intr[0].args)    #=> (10, 20)
-print(intr[0].kwargs)  #=> {'z': 7}
-print(intr[0].ret)     #=> 'v=37'
+print(tr[0].args)    #=> (10, 20)
+print(tr[0].kwargs)  #=> {'z': 7}
+print(tr[0].ret)     #=> 'v=37'
 print('---')
 class Hello(object):
     def hello(self, name):
         return 'Hello %s!' % name
 obj = Hello()
-intr.intercept(obj, hello=block)
+tr.trace(obj, hello=block)
 print(obj.hello('World'))  #=> v=Hello World!
-print(intr[1].args)     #=> ('World',)
-print(intr[1].kwargs)   #=> {}
-print(intr[1].ret)      #=> v=Hello World!
+print(tr[1].args)     #=> ('World',)
+print(tr[1].kwargs)   #=> {}
+print(tr[1].ret)      #=> v=Hello World!
 """[1:]
 expected = """
 v=37
@@ -1216,30 +1216,30 @@ expected = """
 """[1:]
 do_test_with(desc, script, expected)
 
-### Interceptor.dummy()
+### Tracer.dummy_obj()
 desc = "DummyObject"
 script = r"""
 import sys
 from oktest import *
-from oktest.helper import Interceptor
+from oktest.helper import Tracer
 class DummyObjectTest(object):
     def test_dummy(self):
-        intr = Interceptor()
+        tr = Tracer()
         ## create dummy object
-        obj1 = intr.dummy(hi="Hi!")
-        obj2 = intr.dummy(hello=lambda self, x: "Hello %s!" % x)
+        obj1 = tr.dummy_obj(hi="Hi!")
+        obj2 = tr.dummy_obj(hello=lambda self, x: "Hello %s!" % x)
         ## call dummy method
         ok (obj2.hello("SOS")) == 'Hello SOS!'
         ok (obj1.hi())         == 'Hi!'
         ## check result
-        ok (intr[0].name  ) == 'hello'
-        ok (intr[0].args  ) == ('SOS', )
-        ok (intr[0].kwargs) == {}
-        ok (intr[0].ret   ) == 'Hello SOS!'
-        ok (intr[1].name  ) == 'hi'
-        ok (intr[1].args  ) == ()
-        ok (intr[1].kwargs) == {}
-        ok (intr[1].ret   ) == 'Hi!'
+        ok (tr[0].name  ) == 'hello'
+        ok (tr[0].args  ) == ('SOS', )
+        ok (tr[0].kwargs) == {}
+        ok (tr[0].ret   ) == 'Hello SOS!'
+        ok (tr[1].name  ) == 'hi'
+        ok (tr[1].args  ) == ()
+        ok (tr[1].kwargs) == {}
+        ok (tr[1].ret   ) == 'Hi!'
 run()
 """[1:]
 expected = """
