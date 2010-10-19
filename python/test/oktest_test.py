@@ -48,10 +48,14 @@ def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[\d]s')):
         else:
             echo("FAILED.\n")
             if (isinstance(output, str) and isinstance(expected, str)):
-                lf = (not output or output[-1] != "\n") and "\n" or ""
-                echo("output: %s%s" % (output, lf))
-                lf = (not expected or expected[-1] != "\n") and "\n" or ""
-                echo("expected: %s%s" % (expected, lf))
+                import difflib
+                for x in difflib.unified_diff(expected.splitlines(True), output.splitlines(True), 'expected', 'actual', n=2):
+                    echo(x)
+                    #echo(repr(x) + "\n")
+                #lf = (not output or output[-1] != "\n") and "\n" or ""
+                #echo("output: %s%s" % (output, lf))
+                #lf = (not expected or expected[-1] != "\n") and "\n" or ""
+                #echo("expected: %s%s" % (expected, lf))
             else:
                 echo('%s != %s' % (repr(output), repr(expected)))
     finally:
