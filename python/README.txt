@@ -98,10 +98,10 @@ test_example.py::
     ## invoke tests
     if __name__ == '__main__':
         run(Example1Test, Example2Test)
-	## or
-	#run(r'.*Test$')  # specify class names by regular expression
-	## or
-	#run()            # same as run(r'.*Test(Case)$')
+        ## or
+        #run(r'.*Test$')  # specify class names by regular expression
+        ## or
+        #run()            # same as run(r'.*Test(Case)$')
 
 
 NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
@@ -252,33 +252,50 @@ If you set 'oktest.DIFF' to False, unified diff is not displayed.
 Notice that this feature is only available with oktest.run() and not available with unittest module.
 
 
-Interceptor
-===========
+DummyObject and Interceptor
+===========================
 
-Oktest provides interceptor which is similar to stub or mock object.
-Basic idea of interceptor is to record arguments and return value of function/method call.
+Oktest provides DummyObject class which can be stub or mock object.
+::
+
+    from oktest.helper import DummyObject
+    obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
+    obj.hi()           #=> 'Hi'
+    obj.hello("SOS")   #=> 'Hello SOS!'
+    obj._calls[0].name    #=> 'hi'
+    obj._calls[0].args    #=> ()
+    obj._calls[0].kwargs  #=> {}
+    obj._calls[0].ret     #=> 'Hi'
+    obj._calls[1].name    #=> 'hello'
+    obj._calls[1].args    #=> ('SOS', )
+    obj._calls[1].kwargs  #=> {}
+    obj._calls[1].ret     #=> 'Hello SOS!'
+    repr(obj._calls[0])   #=> hi(args=(), kwargs={}, ret='Hi')
+    repr(obj._calls[1])   #=> hello(args=('SOS',), kwargs={}, ret='Hello SOS!')
+
+Oktest also provides Interceptor class which steal function or method call.
 
 Example of stub function::
 
-        from oktest.helper.interceptor import interceptor
+        from oktest.helper import Interceptor
 	#
 	def f(x):
 	    return x*2
 	def g(x, y=0):
 	    return f(x+1) + y
 	#
-	intr = interceptor()
+	intr = Interceptor()
 	f = intr.intercept(f)
 	g = intr.intercept(g)
 	#
 	print(g(3, y=5))       #=> 13
 	#
-	print(intr[0].method)  #=> g
+	print(intr[0].name)    #=> g
 	print(intr[0].args)    #=> (3,)
 	print(intr[0].kwargs)  #=> {'y': 5}
 	print(intr[0].ret)     #=> 11
 	#
-	print(intr[1].method)  #=> f
+	print(intr[1].name)    #=> f
 	print(intr[1].args)    #=> (4,)
 	print(intr[1].kwargs)  #=> {}
 	print(intr[1].ret)     #=> 8
@@ -288,7 +305,7 @@ Example of stub function::
 
 Example of stub method::
 
-        from oktest.helper.interceptor import interceptor
+        from oktest.helper import Interceptor
 	#
 	class Foo(object):
 	    def f1(self, x):
@@ -296,12 +313,12 @@ Example of stub method::
 	    def f2(self, x, y):
 	        return x + y
 	#
-	intr = interceptor()
+	intr = Interceptor()
 	obj = Foo()
 	intr.intercept(obj, 'f1', 'f2')
 	#
 	print(obj.f1(5))        #=> 9
-	print(intr[0].method)   #=> f1
+	print(intr[0].name)     #=> f1
 	print(intr[0].args)     #=> (5,)
 	print(intr[0].kwargs)   #=> {}
 	print(intr[0].ret)      #=> 9
@@ -311,7 +328,7 @@ Example of stub method::
 
 Example of mock function::
 
-        from oktest.helper.interceptor import interceptor
+        from oktest.helper import interceptor
 	#
 	def f(x):
 	    return x*2
@@ -341,6 +358,29 @@ Example of mock method::
 	#
 	print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
 	print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
+
+
+It is able to combinate Interceptor with DummyObject.
+This is very useful to trace method calls of several objects.
+::
+
+    from oktest.helper import Interceptor
+    intr = interceptor()
+    ## create dummy object
+    obj1 = intr.dummy(hi="Hi!")
+    obj2 = intr.dummy(hello=lambda self, x: "Hello %s!" % x)
+    ## call dummy method
+    obj2.hello("SOS")  #=> 'Hello SOS!'
+    obj1.hi()          #=> 'Hi!'
+    ## check result
+    intr[0].name     #=> 'hello'
+    intr[0].args     #=> ('SOS', )
+    intr[0].kwargs   #=> {}
+    intr[0].ret      #=> 'Hello SOS!'
+    intr[1].name     #=> 'hi'
+    intr[1].args     #=> ()
+    intr[1].kwargs   #=> {}
+    intr[1].ret      #=> 'Hi!'
 
 
 
