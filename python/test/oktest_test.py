@@ -154,6 +154,8 @@ test_3() called.
 after() called.
 after_all() called.
 """[1:]
+if python2 and sys.version_info[1] <= 4:
+    expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
 do_test_with(desc, script, expected)
 
 ###
@@ -193,6 +195,8 @@ test_3() called.
   - _test_.py:16:  int('abc')
 tearDown() called.
 """[1:]
+if python2 and sys.version_info[1] <= 4:
+    expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
 do_test_with(desc, script, expected)
 
 
@@ -1473,6 +1477,8 @@ ERROR: FooTest#test_error()
   File "_test_.py", line 11, in test_error
     ok (int('aaa')) == 0
 """[1:]
+if python2 and sys.version_info[1] <= 4:
+    expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')
 os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
 do_test_with(desc, script, expected)
 del os.environ['OKTEST_REPORTER']
