@@ -920,7 +920,7 @@ del _dummy
 ##
 def _dummy():
 
-    __all__ = ('Tracer', 'DummyObject')
+    __all__ = ('Tracer', 'FakeObject')
 
 
     class Call(object):
@@ -935,11 +935,11 @@ def _dummy():
             return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
 
 
-    class DummyObject(object):
+    class FakeObject(object):
         """dummy object class which can be stub or mock object.
            ex.
-              from oktest.helper import DummyObject
-              obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
+              from oktest.helper import FakeObject
+              obj = FakeObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
               obj.hi()           #=> 'Hi'
               obj.hello("SOS")   #=> 'Hello SOS!'
               obj._calls[0].name    #=> 'hi'
@@ -958,18 +958,18 @@ def _dummy():
                 setattr(self, name, self.__new_method(name, kwargs[name]))
 
         def __new_method(self, name, val):
-            dummy_obj = self
+            fake_obj = self
             if isinstance(val, types.FunctionType):
                 func = val
                 def f(self, *args, **kwargs):
                     r = Call(name, args, kwargs, None)
-                    dummy_obj.__calls.append(r)
+                    fake_obj.__calls.append(r)
                     r.ret = func(self, *args, **kwargs)
                     return r.ret
             else:
                 def f(self, *args, **kwargs):
                     r = Call(name, args, kwargs, val)
-                    dummy_obj.__calls.append(r)
+                    fake_obj.__calls.append(r)
                     return val
             f.func_name = f.__name__ = name
             return types.MethodType(f, self, self.__class__)
@@ -1171,9 +1171,9 @@ def _dummy():
                 obj = target
                 return self.fake_method(obj, **kwargs)
 
-        def dummy_obj(self, **kwargs):
-            obj = DummyObject(**kwargs)
-            obj._calls = obj._DummyObject__calls = self.calls
+        def fake_obj(self, **kwargs):
+            obj = FakeObject(**kwargs)
+            obj._calls = obj._FakeObject__calls = self.calls
             return obj
 
 

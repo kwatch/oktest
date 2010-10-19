@@ -1191,14 +1191,14 @@ v=Hello World!
 do_test_with(desc, script, expected)
 
 
-### DummyObject
-desc = "DummyObject"
+### FakeObject
+desc = "FakeObject"
 script = r"""
 from oktest import *
-from oktest.helper import DummyObject
-class DummyObjectTest(object):
-    def test_dummy_object(self):
-        obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
+from oktest.helper import FakeObject
+class FakeObjectTest(object):
+    def test_fake_object(self):
+        obj = FakeObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
         ok (obj.hi()) == 'Hi'
         ok (obj.hello("SOS")) == 'Hello SOS!'
         ok (obj._calls[0].name  ) == 'hi'
@@ -1212,22 +1212,22 @@ class DummyObjectTest(object):
 run()
 """[1:]
 expected = """
-* DummyObjectTest.test_dummy_object ... [ok]
+* FakeObjectTest.test_fake_object ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
 
-### Tracer.dummy_obj()
-desc = "DummyObject"
+### Tracer.fake_obj()
+desc = "FakeObject"
 script = r"""
 import sys
 from oktest import *
 from oktest.helper import Tracer
-class DummyObjectTest(object):
+class FakeObjectTest(object):
     def test_dummy(self):
         tr = Tracer()
         ## create dummy object
-        obj1 = tr.dummy_obj(hi="Hi!")
-        obj2 = tr.dummy_obj(hello=lambda self, x: "Hello %s!" % x)
+        obj1 = tr.fake_obj(hi="Hi!")
+        obj2 = tr.fake_obj(hello=lambda self, x: "Hello %s!" % x)
         ## call dummy method
         ok (obj2.hello("SOS")) == 'Hello SOS!'
         ok (obj1.hi())         == 'Hi!'
@@ -1243,7 +1243,7 @@ class DummyObjectTest(object):
 run()
 """[1:]
 expected = """
-* DummyObjectTest.test_dummy ... [ok]
+* FakeObjectTest.test_dummy ... [ok]
 """[1:]
 do_test_with(desc, script, expected)
 
