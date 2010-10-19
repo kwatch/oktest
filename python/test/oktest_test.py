@@ -1225,18 +1225,21 @@ from oktest.helper import Interceptor
 class DummyObjectTest(object):
     def test_dummy(self):
         intr = Interceptor()
-        obj = intr.dummy(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
-        ok (obj._calls).is_(intr.calls)
-        ok (obj.hi()) == 'Hi'
-        ok (obj.hello("SOS")) == 'Hello SOS!'
-        ok (intr[0].name  ) == 'hi'
-        ok (intr[0].args  ) == ()
+        ## create dummy object
+        obj1 = intr.dummy(hi="Hi!")
+        obj2 = intr.dummy(hello=lambda self, x: "Hello %s!" % x)
+        ## call dummy method
+        ok (obj2.hello("SOS")) == 'Hello SOS!'
+        ok (obj1.hi())         == 'Hi!'
+        ## check result
+        ok (intr[0].name  ) == 'hello'
+        ok (intr[0].args  ) == ('SOS', )
         ok (intr[0].kwargs) == {}
-        ok (intr[0].ret   ) == 'Hi'
-        ok (intr[1].name  ) == 'hello'
-        ok (intr[1].args  ) == ('SOS', )
+        ok (intr[0].ret   ) == 'Hello SOS!'
+        ok (intr[1].name  ) == 'hi'
+        ok (intr[1].args  ) == ()
         ok (intr[1].kwargs) == {}
-        ok (intr[1].ret   ) == 'Hello SOS!'
+        ok (intr[1].ret   ) == 'Hi!'
 run()
 """[1:]
 expected = """
