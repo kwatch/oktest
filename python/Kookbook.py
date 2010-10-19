@@ -34,19 +34,33 @@ def task_test(c):
 
 @recipe
 def task_test_all(c):
-    "do test with python 2.5, 2.6, 2.7, 3.0, 3.1"
+    "do test with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2a2"
     versions = [
+        ('2.4', '/opt/local/bin/python2.4'),
         ('2.5', '/opt/local/bin/python2.5'),
         ('2.6', '/opt/local/bin/python2.6'),
         ('2.7', '/opt/local/bin/python2.7'),
         ('3.0', '/usr/local/python/3.0.1/bin/python'),
         ('3.1', '/usr/local/python/3.1/bin/python'),
+        ('3.2', '/usr/local/python/3.2a2/bin/python'),
     ]
     for ver, bin in versions:
         print("#")
         print("# python " + ver)
         print("#")
-        system(c%"PYTHON=$(bin) $(bin) test/oktest_test.py")
+        fpath = "test/oktest_test.py"
+        try:
+            if ver == '2.4':
+                mv(fpath, fpath+'.bkup')
+                cp(fpath+'.bkup', fpath)
+                s = open(fpath+'.bkup').read()
+                line = 'from __future__ import with_statement'
+                open(fpath, 'w').write(s.replace(line, '#' + line))
+            system(c%"PYTHON=$(bin) $(bin) test/oktest_test.py")
+            break
+        finally:
+            if ver == '2.4':
+                mv(fpath+'.bkup', fpath)
 
 @recipe
 def task_edit(c):
