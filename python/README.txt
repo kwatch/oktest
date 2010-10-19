@@ -23,7 +23,7 @@ Oktest is a new-style testing library for Python.
 
 You can use ok() instead of 'assertXxx()' in unittest.
 
-Oktest requires Python 2.4 or later. Oktest is ready for Python 3.
+Oktest requires Python 2.4 or later (3.x is supported).
 
 NOTICE!! Oktest is a young project and specification may change in the future.
 
@@ -101,7 +101,7 @@ test_example.py::
         ## or
         #run(r'.*Test$')  # specify class names by regular expression
         ## or
-        #run()            # same as run(r'.*Test(Case)$')
+        #run()            # same as run(r'.*Test(Case)?$')
 
 
 NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
@@ -252,135 +252,112 @@ If you set 'oktest.DIFF' to False, unified diff is not displayed.
 Notice that this feature is only available with oktest.run() and not available with unittest module.
 
 
-DummyObject and Interceptor
-===========================
+Tracer
+======
 
-Oktest provides DummyObject class which can be stub or mock object.
+Oktest provides Tracer class which steal function or method call and record both arguments and return value.
+
+Example to trace function::
+
+    def hello(x):
+        return "Hello %s!" % x
+    #
+    from oktest.helper import Tracer
+    tr = Tracer()              # create Tracer object
+    hello = tr.trace(hello)    # trace target function
+    #
+    hello("John")              # call target function
+    print(tr[0].name)     #=> 'hello'
+    print(tr[0].args)     #=> ('John',)
+    print(tr[0].kwargs)   #=> {}
+    print(tr[0].ret)      #=> 'Hello John!'
+    print(repr(tr[0]))    #=> hello(args=('John',), kwargs={}, ret='Hello John!')
+
+Example to trace method::
+
+    class Hello(object):
+        def hello(self, x):
+            return "Hello %s!" % x
+    obj = Hello()              # target object to trace
+    #
+    from oktest.helper import Tracer
+    tr = Tracer()              # create tracer object
+    tr.trace(obj, 'hello')     # trace method
+    #
+    obj.hello('John')          # call target method
+    print(tr[0].name)     #=> 'hello'
+    print(tr[0].args)     #=> ('John',)
+    print(tr[0].kwargs)   #=> {}
+    print(tr[0].ret)      #=> 'Hello John!'
+    print(repr(tr[0]))    #=> hello(args=('John',), kwargs={}, ret='Hello John!')
+
+If you want to trace several methods, specify them into tr.trace().
 ::
 
-    from oktest.helper import DummyObject
-    obj = DummyObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
-    obj.hi()           #=> 'Hi'
-    obj.hello("SOS")   #=> 'Hello SOS!'
-    obj._calls[0].name    #=> 'hi'
-    obj._calls[0].args    #=> ()
-    obj._calls[0].kwargs  #=> {}
-    obj._calls[0].ret     #=> 'Hi'
-    obj._calls[1].name    #=> 'hello'
-    obj._calls[1].args    #=> ('SOS', )
-    obj._calls[1].kwargs  #=> {}
-    obj._calls[1].ret     #=> 'Hello SOS!'
-    repr(obj._calls[0])   #=> hi(args=(), kwargs={}, ret='Hi')
-    repr(obj._calls[1])   #=> hello(args=('SOS',), kwargs={}, ret='Hello SOS!')
+    tr.trace(obj, 'method1', 'method2', 'method3')
 
-Oktest also provides Interceptor class which steal function or method call.
-
-Example of stub function::
-
-        from oktest.helper import Interceptor
-	#
-	def f(x):
-	    return x*2
-	def g(x, y=0):
-	    return f(x+1) + y
-	#
-	intr = Interceptor()
-	f = intr.intercept(f)
-	g = intr.intercept(g)
-	#
-	print(g(3, y=5))       #=> 13
-	#
-	print(intr[0].name)    #=> g
-	print(intr[0].args)    #=> (3,)
-	print(intr[0].kwargs)  #=> {'y': 5}
-	print(intr[0].ret)     #=> 11
-	#
-	print(intr[1].name)    #=> f
-	print(intr[1].args)    #=> (4,)
-	print(intr[1].kwargs)  #=> {}
-	print(intr[1].ret)     #=> 8
-	#
-	print(repr(intr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
-	print(repr(intr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
-
-Example of stub method::
-
-        from oktest.helper import Interceptor
-	#
-	class Foo(object):
-	    def f1(self, x):
-	        return self.f2(x, 3) + 1
-	    def f2(self, x, y):
-	        return x + y
-	#
-	intr = Interceptor()
-	obj = Foo()
-	intr.intercept(obj, 'f1', 'f2')
-	#
-	print(obj.f1(5))        #=> 9
-	print(intr[0].name)     #=> f1
-	print(intr[0].args)     #=> (5,)
-	print(intr[0].kwargs)   #=> {}
-	print(intr[0].ret)      #=> 9
-	#
-	print(repr(intr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
-	print(repr(intr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
-
-Example of mock function::
-
-        from oktest.helper import interceptor
-	#
-	def f(x):
-	    return x*2
-	def block(original_func, x):
-	    #return original_func(x)
-	    return 'x=%s' % repr(x)
-	#
-	intr = interceptor()
-	f = intr.intercept(f, block)
-	print(f(3))             #=> x=3
-	print(repr(intr[0]))    #=> f(args=(3,), kwargs={}, ret='x=3')
-
-Example of mock method::
-
-        from oktest.helper.interceptor import interceptor
-	#
-	class Hello(object):
-	    def hello(self, name):
-	        return 'Hello %s!' % name
-	#
-	obj = Hello()
-	intr = interceptor()
-	def block(original_func, name):
-	    v = original_func(name)
-	    return 'message: %s' % v
-	intr.intercept(obj, hello=block)   # or intr.intercept(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
-	#
-	print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
-	print(repr(intr[0]))         #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
-
-
-It is able to combinate Interceptor with DummyObject.
-This is very useful to trace method calls of several objects.
+It is possible to trace several function or method calls.
 ::
 
-    from oktest.helper import Interceptor
-    intr = interceptor()
-    ## create dummy object
-    obj1 = intr.dummy(hi="Hi!")
-    obj2 = intr.dummy(hello=lambda self, x: "Hello %s!" % x)
-    ## call dummy method
-    obj2.hello("SOS")  #=> 'Hello SOS!'
-    obj1.hi()          #=> 'Hi!'
+    def greeting(name):
+        return "Hi %s!" % name
+    class Hello(object):
+        def hello(self, x):
+            return greeting(x) + ' How are you?'
+    obj = Hello()
+    #
+    import oktest
+    from oktest.helper import Tracer
+    tr = Tracer()
+    greeting = tr.trace(greeting)  # trace function
+    tr.trace(obj, 'hello')         # trace method
+    #
+    obj.hello('John')
+    print(repr(tr[0]))  #=> hello(args=('John',), kwargs={}, ret='Hi John! How are you?')
+    print(repr(tr[1]))  #=> greeting(args=('John',), kwargs={}, ret='Hi John!')
+
+Tracer allows you to fake function or method calls.
+::
+
+    def f1(x):
+        return x+1
+    class Example(object):
+        def f2(self, x):
+            return x+2
+    obj = Example()
+    ## create trace object
+    from oktest.helper import Tracer
+    tr = Tracer()
+    ## fake f1 function
+    def fake_f1(original_func, *args):
+        v = original_func(*args)
+        return v+10
+    f1 = tr.fake_func(f1, fake_f1)
+    ## fake f2 method
+    def fake_f2(self, x):
+        return x+20
+    tr.fake_method(obj, f2=fake_f2)
+    ## call target function and method
+    print(f1(1))         #=> 12
+    print(obj.f2(2))     #=> 22
+    ## traced data
+    print(repr(tr[0]))   #=> f1(args=(1,), kwargs={}, ret=12)
+    print(repr(tr[1]))   #=> f2(args=(2,), kwargs={}, ret=22)
+
+Tracer can generate FakeObject which can be stub or mock object.
+::
+
+    from oktest.helper import Tracer
+    tr = Tracer()
+    ## create fake object
+    obj1 = tr.fake_obj(f1=lambda self, x: x+1)  # method_name=function
+    obj2 = tr.fake_obj(hello="Hello!")          # or method_name=return_value
+    ## call fake method
+    print(obj2.hello("John"))  #=> 'Hello!'
+    print(obj1.f1(10))         #=> 11
     ## check result
-    intr[0].name     #=> 'hello'
-    intr[0].args     #=> ('SOS', )
-    intr[0].kwargs   #=> {}
-    intr[0].ret      #=> 'Hello SOS!'
-    intr[1].name     #=> 'hi'
-    intr[1].args     #=> ()
-    intr[1].kwargs   #=> {}
-    intr[1].ret      #=> 'Hi!'
+    print(repr(tr[0]))  #=> hello(args=('John',), kwargs={}, ret='Hello!')
+    print(repr(tr[1]))  #=> f1(args=(10,), kwargs={}, ret=11)
 
 
 
@@ -400,18 +377,8 @@ run(\*classes)
 	    oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
 	    oktest.run()                  # same as oktest.run('.*Test(Case)$')
 
-chdir(dirname)
-	Change current directory to dirname temporarily. ::
-
-            import os
-	    cwd = os.getcwd()                         # current working directory
-	    with oktest.chdir("/var/tmp"):
-	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
-		# do something
-	    assert os.getcwd() == cwd                 # back to the original place
-
 spec(description)
-	Represents spec description. This is just marker function, but very useful for readability.
+	Represents spec description. This is just a marker function, but very useful for readability.
 	**It is strongly recommended to use spec() helper for readability of tests.** ::
 
 	    class NumericTest(object):
@@ -424,15 +391,21 @@ spec(description)
 			              "integer division or modulo by zero")
 
 
-``oktest.helper.interceptor`` module
+``oktest.helper`` module
 ------------------------------------
 
-intercepter()
-	Return new Interceptor object. See the previous section for details.
+chdir(dirname)
+	Change current directory to dirname temporarily. ::
 
+            import os
+	    cwd = os.getcwd()                         # current working directory
+	    with oktest.chdir("/var/tmp"):
+	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
+		# do something
+	    assert os.getcwd() == cwd                 # back to the original place
 
-``oktest.helper.dummy`` module
-------------------------------
+Tracer()
+	Return new Tracer object. See the previous section for details.
 
 dummy_file(filename, content)
 	Create dummy file with specified content. ::
