@@ -972,7 +972,8 @@ def _dummy():
                     fake_obj.__calls.append(r)
                     return val
             f.func_name = f.__name__ = name
-            return types.MethodType(f, self, self.__class__)
+            if python2: return types.MethodType(f, self, self.__class__)
+            if python3: return types.MethodType(f, self)
 
 
     class Tracer(object):
