@@ -1134,7 +1134,7 @@ def _dummy():
             newfunc = self._wrap_func(func, None)
             return newfunc
 
-        def intercept_func(self, func, block):
+        def fake_func(self, func, block):
             newfunc = self._wrap_func(func, block)
             return newfunc
 
@@ -1146,7 +1146,7 @@ def _dummy():
                 setattr(obj, method_name, self._wrap_method(method_obj, None))
             return None
 
-        def intercept_method(self, obj, **kwargs):
+        def fake_method(self, obj, **kwargs):
             for method_name in kwargs:
                 #if not hasattr(obj, method_name):
                 #    raise ValueError("%s: no method found on %r." % (method_name, obj))
@@ -1162,14 +1162,14 @@ def _dummy():
                 obj = target
                 return self.trace_method(obj, *args)
 
-        def intercept(self, target, *args, **kwargs):
+        def fake(self, target, *args, **kwargs):
             if type(target) is types.FunctionType:       # function
                 func = target
                 block = args and args[0] or None
-                return self.intercept_func(func, block)
+                return self.fake_func(func, block)
             else:
                 obj = target
-                return self.intercept_method(obj, **kwargs)
+                return self.fake_method(obj, **kwargs)
 
         def dummy_obj(self, **kwargs):
             obj = DummyObject(**kwargs)

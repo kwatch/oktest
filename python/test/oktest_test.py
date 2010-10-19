@@ -1150,8 +1150,8 @@ f2(args=(3,), kwargs={'y': 5}, ret=-2)
 """[1:]
 do_test_with(desc, script, expected)
 
-### Tracer (intercept)
-desc = "Tracer (intercept_func)"
+### Tracer (fake)
+desc = "Tracer (fake_func)"
 script = r"""
 from oktest import *
 from oktest.helper import Tracer
@@ -1161,7 +1161,7 @@ def block(orig, *args, **kwargs):
     v = orig(*args, **kwargs)
     return 'v=%s' % v
 tr = Tracer()
-f = tr.intercept_func(f, block)
+f = tr.fake_func(f, block)
 print(f(10, 20, z=7))  #=> 'v=37'
 print(tr[0].args)    #=> (10, 20)
 print(tr[0].kwargs)  #=> {'z': 7}
@@ -1171,7 +1171,7 @@ class Hello(object):
     def hello(self, name):
         return 'Hello %s!' % name
 obj = Hello()
-tr.intercept_method(obj, hello=block)
+tr.fake_method(obj, hello=block)
 print(obj.hello('World'))  #=> v=Hello World!
 print(tr[1].args)     #=> ('World',)
 print(tr[1].kwargs)   #=> {}
