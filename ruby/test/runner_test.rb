@@ -53,18 +53,18 @@ class OktestRunnerTest < Test::Unit::TestCase
     def teardown ;  @@counts[:teardown] += 1 ;  end
 
     def test_foo
-      ok(@@counts[:before_all]) == 1
-      ok(@@counts[:after_all]) == 0
+      ok_(@@counts[:before_all]) == 1
+      ok_(@@counts[:after_all]) == 0
     end
 
     def test_bar
-      ok(@@counts[:before_all]) == 1
-      ok(@@counts[:after_all]) == 0
+      ok_(@@counts[:before_all]) == 1
+      ok_(@@counts[:after_all]) == 0
     end
 
     def test_baz
-      ok(@@counts[:before_all]) == 1
-      ok(@@counts[:after_all]) == 0
+      ok_(@@counts[:before_all]) == 1
+      ok_(@@counts[:after_all]) == 0
     end
 
   end
@@ -84,15 +84,15 @@ class OktestRunnerTest < Test::Unit::TestCase
     def after_all  ; @@counts[:_after_all_]  += 1 ;  end
 
     def test_foo
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
 
     def test_bar
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
 
     def test_baz
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
 
   end
@@ -146,23 +146,23 @@ END
 
   module BarTest1
     def test_xxx
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
     def test_aaa
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
   end
 
   class BarTest2
     include Oktest::TestCase
     def test_foo
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
     def test_bar
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
     test "baz" do
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
     include BarTest1
   end
@@ -230,15 +230,15 @@ END
 
   class BazTest2
     include Oktest::TestCase
-    def test_foo; ok(1+1) == 2; end
-    def test_bar; ok(1+1) == 3; end
+    def test_foo; ok_(1+1) == 2; end
+    def test_bar; ok_(1+1) == 3; end
   end
   SIMPLE_OUTPUT_BazTest2 = <<'END'
 ### OktestRunnerTest::BazTest2: .f (2 tests, 0 specs)
 Failed: test_bar()
     2 == 3: failed.
     ./test/runner_test.rb:234:in `test_bar'
-      def test_bar; ok(1+1) == 3; end
+      def test_bar; ok_(1+1) == 3; end
 END
   VERBOSE_OUTPUT_BazTest2 = <<'END'
 ### OktestRunnerTest::BazTest2
@@ -246,7 +246,7 @@ END
 - test_bar:  FAILED
     2 == 3: failed.
     ./test/runner_test.rb:234:in `test_bar'
-      def test_bar; ok(1+1) == 3; end
+      def test_bar; ok_(1+1) == 3; end
  (2 tests, 0 specs)
 END
 
@@ -283,7 +283,7 @@ END
 
   class BazTest3
     include Oktest::TestCase
-    def test_xxx; ok(2*2) == 4; end
+    def test_xxx; ok_(2*2) == 4; end
   end
 
   def test_oktest_run_all
@@ -327,7 +327,7 @@ Oktest.REPORTER = Oktest::VerboseReporter
 class FooTest
   include Oktest::TestCase
   test 'dummy1' do
-    ok(1+1) == 2
+    ok_(1+1) == 2
   end
 end
 END
@@ -340,13 +340,13 @@ Oktest.REPORTER = Oktest::VerboseReporter
 class FooTest
   include Oktest::TestCase
   test 'dummy1' do
-    ok(1+1) == 2
+    ok_(1+1) == 2
   end
 end
 
 class BarTest < Test::Unit::TestCase
   test 'dummy2' do
-    ok(1+1) == 2
+    ok_(1+1) == 2
   end
 end
 END

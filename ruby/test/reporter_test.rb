@@ -17,10 +17,10 @@ class OktestReporterTest < Test::Unit::TestCase
   class ExampleTest
     include Oktest::TestCase
     def test_success
-      ok(1+1) == 2
+      ok_(1+1) == 2
     end
     def test_fail
-      ok(1+1) == 3
+      ok_(1+1) == 3
     end
     def test_fail_nested
       _foo(1+1, 3)
@@ -30,7 +30,7 @@ class OktestReporterTest < Test::Unit::TestCase
       _bar(*args)
     end
     def _bar(actual, expected)
-      ok(actual) == expected
+      ok_(actual) == expected
     end
   end
 
@@ -57,11 +57,11 @@ class OktestReporterTest < Test::Unit::TestCase
 - test_fail:  FAILED
     2 == 3: failed.
     ./test/reporter_test.rb:23:in `test_fail'
-      ok(1+1) == 3
+      ok_(1+1) == 3
 - test_fail_nested:  FAILED
     2 == 3: failed.
     ./test/reporter_test.rb:33:in `_bar'
-      ok(actual) == expected
+      ok_(actual) == expected
     ./test/reporter_test.rb:30:in `_foo'
       _bar(*args)
     ./test/reporter_test.rb:26:in `test_fail_nested'
@@ -80,11 +80,11 @@ class OktestReporterTest < Test::Unit::TestCase
 Failed: test_fail()
     2 == 3: failed.
     ./test/reporter_test.rb:23:in `test_fail'
-      ok(1+1) == 3
+      ok_(1+1) == 3
 Failed: test_fail_nested()
     2 == 3: failed.
     ./test/reporter_test.rb:33:in `_bar'
-      ok(actual) == expected
+      ok_(actual) == expected
     ./test/reporter_test.rb:30:in `_foo'
       _bar(*args)
     ./test/reporter_test.rb:26:in `test_fail_nested'
@@ -100,12 +100,12 @@ Failed: test_fail_nested()
     def test_long    # diff should be dipslayed
       expected = "AAA\nBBB\nCCC\n"
       actual   = "AAA\nCCC\nDDD\n"
-      ok(actual) == expected
+      ok_(actual) == expected
     end
     def test_no_newline    # diff should not be displayed because both actual and expected doesn't contain newline character
       expected = "AAABBBCCCXXXYYYZZZ"
       actual   = "AAACCCDDDXXXYYYZZZ"
-      ok(actual) == expected
+      ok_(actual) == expected
     end
   end
 
@@ -120,11 +120,11 @@ Failed: test_fail_nested()
 Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
     ./test/reporter_test.rb:103:in `test_long'
-      ok(actual) == expected
+      ok_(actual) == expected
 Failed: test_no_newline()
     "AAACCCDDDXXXYYYZZZ" == "AAABBBCCCXXXYYYZZZ": failed.
     ./test/reporter_test.rb:108:in `test_no_newline'
-      ok(actual) == expected
+      ok_(actual) == expected
 END
     _test()
     ## if Oktest.DIFF is true then diff is displayed
@@ -134,7 +134,7 @@ END
 Failed: test_long()
     "AAA\nCCC\nDDD\n" == "AAA\nBBB\nCCC\n": failed.
     ./test/reporter_test.rb:103:in `test_long'
-      ok(actual) == expected
+      ok_(actual) == expected
 --- expected
 +++ actual
 @@ -1,3 +1,3 @@
@@ -145,7 +145,7 @@ Failed: test_long()
 Failed: test_no_newline()
     "AAACCCDDDXXXYYYZZZ" == "AAABBBCCCXXXYYYZZZ": failed.
     ./test/reporter_test.rb:108:in `test_no_newline'
-      ok(actual) == expected
+      ok_(actual) == expected
 END
     _test()
     ##
