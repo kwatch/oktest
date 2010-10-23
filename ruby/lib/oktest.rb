@@ -359,6 +359,10 @@ module Oktest
       return Oktest::Util::Interceptor.new(object, *method, &block)
     end
 
+    def tracer(*args)
+      return Oktest::Util::Tracer.new(*args)
+    end
+
   end
 
 
@@ -720,6 +724,121 @@ module Oktest
 
 
   module Util
+
+
+    class Call
+
+      def initialize(name, args, ret)
+        @name, @args, @ret = name, args, ret
+      end
+
+      attr_accessor :name, :args, :ret
+
+      def to_a
+        return [@name, @args, @ret]
+      end
+
+    end
+
+
+    class FakeObject
+
+      def initialize(*args)
+        if (hash = args[-1]).is_a?(Hash)
+          hash.each do |k, v|
+            v.is_a?(Proc) ? add_response(k, &v) : add_response(k, v)
+          end
+        end
+        @_calls = []
+      end
+
+      attr_reader :_calls
+
+      def add_response(name, return_value=nil, &block)
+        #if block
+          (class << self; self; end).class_eval do
+            define_method name do |*args|
+              @_calls << (call = Call.new(name, args, return_value))
+              call.ret = block.call(*args) if block
+              call.ret
+            end
+          end
+        #else
+        #  (class << self; self; end).class_eval do
+        #    define_method name do |*args, &blk|
+        #      @calls << (call = Call.new(name, args, return_value))
+        #      call.ret
+        #    end
+        #  end
+        #end
+      end
+
+    end
+
+
+    class Tracer
+
+      def initialize
+        @calls = []
+      end
+
+      attr_reader :calls
+
+      def [](index)
+        @calls[index]
+      end
+
+      def length
+        @calls.length
+      end
+
+      alias size length
+
+      def trace_method(obj, *method_names)
+        #tracer = self
+        #method_names.each do |method_name|
+        #  (class << obj; self; end).class_eval do
+        #    alias_method "__orig_#{method_name}", method_name
+        #    define_method method_name do |*args|
+        #      tracer.calls << (call = Call.new(method_name, args, nil))
+        #      call.ret = obj.__send__("__orig_#{method_name}", *args)
+        #      call.ret
+        #    end
+        #  end
+        #end
+        obj.instance_variable_set("@__calls", @calls)
+        method_names.each do |method_name|
+          (class << obj; self; end).class_eval <<-"END"
+              alias_method :__orig_#{method_name}, :#{method_name}
+              def #{method_name}(*args, &blk)
+                @__calls << (call = Call.new(:#{method_name}, args, nil))
+                call.ret = self.__orig_#{method_name}(*args, &blk)
+                call.ret
+              end
+          END
+        end
+        nil
+      end
+
+      def fake_method(obj, method_name, return_value=nil, &block)
+        tracer = self
+        (class << obj; self; end).class_eval do
+          define_method method_name do |*args|
+            tracer.calls << (call = Call.new(method_name, args, return_value))
+            call.ret = block.call(*args) if block
+            call.ret
+          end
+        end
+        nil
+      end
+
+      def fake_object(*args)
+        fake_obj = FakeObject.new(*args)
+        fake_obj.instance_variable_set('@_calls', @calls)
+        return fake_obj
+      end
+
+    end
 
 
     Intercepted = Struct.new(:method, :args, :return)
