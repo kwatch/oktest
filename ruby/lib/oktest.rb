@@ -471,6 +471,7 @@ module Oktest
       when :empty   ; write('_')
       when :fail    ; write('f')
       when :error   ; write('E')
+      when nil      ; write('?')
       else
         raise "** internal error: status=#{status.inspect}"
       end
