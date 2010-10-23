@@ -373,6 +373,12 @@ module Oktest
       end
     end
 
+    def method_undefined(method)
+      super
+      dict = @_test_method_names_dict
+      dict.delete(method.to_s) if dict
+    end
+
     def test(desc, &block)
       @_test_count ||= 0
       @_test_count += 1
