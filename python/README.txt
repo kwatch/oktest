@@ -272,6 +272,8 @@ Example to trace function::
     print(tr[0].kwargs)   #=> {}
     print(tr[0].ret)      #=> 'Hello John!'
     print(repr(tr[0]))    #=> hello(args=('John',), kwargs={}, ret='Hello John!')
+    print(list(tr[0]))    #=> ['hello', ('John',), {}, 'Hello John!']
+    print(tr[0] == ['hello', ('John',), {}, 'Hello John!'])   #=> True
 
 Example to trace method::
 
@@ -289,7 +291,7 @@ Example to trace method::
     print(tr[0].args)     #=> ('John',)
     print(tr[0].kwargs)   #=> {}
     print(tr[0].ret)      #=> 'Hello John!'
-    print(repr(tr[0]))    #=> hello(args=('John',), kwargs={}, ret='Hello John!')
+    print(list(tr[0]))    #=> ['hello', ('John',), {}, 'Hello John!']
 
 If you want to trace several methods, specify them into tr.trace().
 ::
@@ -313,8 +315,8 @@ It is possible to trace several function or method calls.
     tr.trace(obj, 'hello')         # trace method
     #
     obj.hello('John')
-    print(repr(tr[0]))  #=> hello(args=('John',), kwargs={}, ret='Hi John! How are you?')
-    print(repr(tr[1]))  #=> greeting(args=('John',), kwargs={}, ret='Hi John!')
+    print(list(tr[0]))  #=> ['hello', ('John',), {}, 'Hi John! How are you?']
+    print(repr(tr[1]))  #=> ['greeting', ('John',), {}, 'Hi John!']
 
 Tracer allows you to fake function or method calls.
 ::
@@ -338,11 +340,11 @@ Tracer allows you to fake function or method calls.
         return x+20
     tr.fake_method(obj, f2=fake_f2)
     ## call target function and method
-    print(f1(1))         #=> 12
-    print(obj.f2(2))     #=> 22
+    print(f1(1))          #=> 12
+    print(obj.f2(2))      #=> 22
     ## traced data
-    print(repr(tr[0]))   #=> f1(args=(1,), kwargs={}, ret=12)
-    print(repr(tr[1]))   #=> f2(args=(2,), kwargs={}, ret=22)
+    print(list(tr[0]))    #=> ['f1', (1,), {}, 12]
+    print(list(tr[1]))    #=> ['f2', (2,), {}, 22]
 
 Tracer can generate FakeObject which can be stub or mock object.
 ::
@@ -356,8 +358,8 @@ Tracer can generate FakeObject which can be stub or mock object.
     print(obj2.hello("John"))  #=> 'Hello!'
     print(obj1.f1(10))         #=> 11
     ## check result
-    print(repr(tr[0]))  #=> hello(args=('John',), kwargs={}, ret='Hello!')
-    print(repr(tr[1]))  #=> f1(args=(10,), kwargs={}, ret=11)
+    print(list(tr[0]))         #=> ['hello', ('John',), {}, 'Hello!']
+    print(list(tr[1]))         #=> ['f1', (10,), {}, 11]
 
 
 
