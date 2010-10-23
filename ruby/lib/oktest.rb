@@ -326,39 +326,6 @@ module Oktest
       end
     end
 
-    ##
-    ## intercept method call of object
-    ##
-    ## stub example.
-    ##    class Hello
-    ##      def hello(name); return "Hello #{name}!"; end
-    ##    end
-    ##    obj = Hello.new
-    ##    intr = intercept(obj, :hello)
-    ##    intr.called  #=> false
-    ##    obj.hello('World')   #=> "Hello World!"
-    ##    intr.called  #=> true
-    ##    intr.args    #=> ["World"]
-    ##    intr.return  #=> "Hello World!"
-    ##
-    ## mock example.
-    ##    class Hello
-    ##      def hello(name); return "Hello #{name}!"; end
-    ##    end
-    ##    obj = Hello.new
-    ##    intr = intercept(obj, :hello) do |name|
-    ##      "Bonjor #{name}!"   # or `obj.__intercepted_hello(name)'
-    ##    end
-    ##    intr.called  #=> false
-    ##    obj.hello('World')   #=> "Bonjor World!"
-    ##    intr.called  #=> true
-    ##    intr.args    #=> ["World"]
-    ##    intr.return  #=> "Bonjor World!"
-    ##
-    def intercept(object, *method, &block)
-      return Oktest::Util::Interceptor.new(object, *method, &block)
-    end
-
     def tracer(*args)
       return Oktest::Util::Tracer.new(*args)
     end
@@ -836,77 +803,6 @@ module Oktest
         fake_obj = FakeObject.new(*args)
         fake_obj.instance_variable_set('@_calls', @calls)
         return fake_obj
-      end
-
-    end
-
-
-    Intercepted = Struct.new(:method, :args, :return)
-    Intercepted.class_eval { undef_method :length }
-
-
-    class Interceptor
-
-      def initialize(object, *methods, &block)
-        blocks = {}
-        methods.each do |x|
-          #x.is_a?(Hash) ? blocks.update(x) : (blocks[x] = block)
-          x.is_a?(Hash) ? x.each {|k, v| blocks[k.to_s.intern] = v } \
-                        : (blocks[x.to_s.intern] = block)
-        end
-        @object, @blocks = object, blocks
-        @intercepted = []
-        intercept()
-      end
-
-      attr_accessor :object, :blocks
-
-      def [](index)
-        @intercepted[index]
-      end
-
-      def add(intercepted)
-        intercepted.is_a?(Intercepted)  or
-          raise TypeError.new("%s: 'Intercepted' object expected.")
-        @intercepted << intercepted
-        self
-      end
-
-      def length
-        @intercepted.length
-      end
-
-      alias size length
-
-      def called
-        ! @intercepted.empty?
-      end
-
-      def args
-        @intercepted.empty? ? nil : @intercepted.first.args
-      end
-
-      def return
-        @intercepted.empty? ? nil : @intercepted.first.return
-      end
-
-      private
-
-      def intercept
-        intr = self
-        (class << @object; self; end).class_eval do
-          intr.blocks.each do |method, block|
-            alias_name = "__intercepted_#{method}"
-            alias_method alias_name, method
-            define_method(method) do |*args|
-              intr.add(intercepted = Intercepted.new(method, args, nil))
-              blk = intr.blocks[method]
-              ret = blk ? blk.call(*args) : __send__(alias_name, *args)
-              (intercepted.return = ret)
-            end
-          end
-        end
-        return self
       end
 
     end
