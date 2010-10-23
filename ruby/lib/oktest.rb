@@ -365,6 +365,7 @@ module Oktest
   module ClassMethodHelper
 
     def method_added(name)
+      super
       dict = (@_test_method_names_dict ||= {})
       name = name.to_s
       if name =~ /\Atest_?/
