@@ -934,6 +934,23 @@ def _dummy():
         def __repr__(self):
             return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
 
+        def __iter__(self):
+            yield self.name
+            yield self.args
+            yield self.kwargs
+            yield self.ret
+
+        def __eq__(self, other):
+            if isinstance(other, list):
+                return list(self) == other
+            elif isinstance(other, tuple):
+                return tuple(self) == other
+            elif isinstance(other, self.__class__):
+                return self.name == other.name and self.args == other.args \
+                    and self.kwargs == other.kwargs and self.ret == other.ret
+            else:
+                return False
+
 
     class FakeObject(object):
         """dummy object class which can be stub or mock object.

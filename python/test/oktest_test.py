@@ -1090,8 +1090,8 @@ f1 = tr.trace_func(f1)
 f2 = tr.trace_func(f2)
 f3 = tr.trace(f3)
 print(f1(3, 5))
-for result in tr:
-    print(repr(result))
+for call in tr:
+    print(repr(call))
 """[1:]
 expected = """
 15
@@ -1248,6 +1248,11 @@ class FakeObjectTest(object):
         ok (tr[1].args  ) == ()
         ok (tr[1].kwargs) == {}
         ok (tr[1].ret   ) == 'Hi!'
+        ## __iter__() and __eq__()
+        ok (list(tr[0]))  == ['hello', ('SOS',), {}, 'Hello SOS!']
+        ok (tr[0])        == ['hello', ('SOS',), {}, 'Hello SOS!']
+        ok (tuple(tr[1])) == ('hi', (), {}, 'Hi!')
+        ok (tr[1])        == ('hi', (), {}, 'Hi!')
 run()
 """[1:]
 expected = """
