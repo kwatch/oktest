@@ -996,25 +996,28 @@ def _dummy():
     class Tracer(object):
         """trace function or method call to record arguments and return value.
 
-           ex (dummy objects)
+           ex. dummy objects
+              from oktes.helper import Tracer
               tr = Tracer()
-              ## create dummy object
-              obj1 = tr.dummy(hi="Hi!")
-              obj2 = tr.dummy(hello=lambda self, x: "Hello %s!" % x)
-              ## call dummy method
+              ## create fake object
+              obj1 = tr.fake_obj(hi="Hi!")
+              obj2 = tr.fake_obj(hello=lambda self, x: "Hello %s!" % x)
+              ## call fake method
               obj2.hello("SOS")  #=> 'Hello SOS!'
               obj1.hi()          #=> 'Hi!'
-              ## check result
+              ## check trace
               tr[0].name     #=> 'hello'
-              tr[0].args     #=> ('SOS', )
+              tr[0].args     #=> ('SOS',)
               tr[0].kwargs   #=> {}
               tr[0].ret      #=> 'Hello SOS!'
+              list(tr[0])    #=> ['hello', ('SOS',), {}, 'Hello SOS!']
               tr[1].name     #=> 'hi'
               tr[1].args     #=> ()
               tr[1].kwargs   #=> {}
               tr[1].ret      #=> 'Hi!'
+              list(tr[1])    #=> ['hello', ('SOS',), {}, 'Hello SOS!']
 
-           ex (trace function).
+           ex. trace function
                def f(x):
                    return x*2
                def g(x, y=0):
@@ -1024,22 +1027,22 @@ def _dummy():
                f = tr.trace(f)
                g = tr.trace(g)
                #
-               print(g(3, y=5))       #=> 13
+               g(3, y=5)       #=> 13
                #
-               print(tr[0].name)    #=> g
-               print(tr[0].args)    #=> (3,)
-               print(tr[0].kwargs)  #=> {'y': 5}
-               print(tr[0].ret)     #=> 11
+               tr[0].name    #=> g
+               tr[0].args    #=> (3,)
+               tr[0].kwargs  #=> {'y': 5}
+               tr[0].ret     #=> 11
                #
-               print(tr[1].name)    #=> f
-               print(tr[1].args)    #=> (4,)
-               print(tr[1].kwargs)  #=> {}
-               print(tr[1].ret)     #=> 8
+               tr[1].name    #=> f
+               tr[1].args    #=> (4,)
+               tr[1].kwargs  #=> {}
+               tr[1].ret     #=> 8
                #
-               print(repr(tr[0]))   #=> g(args=(3,), kwargs={'y': 5}, ret=13)
-               print(repr(tr[1]))   #=> f(args=(4,), kwargs={}, ret=8)
+               list(tr[0])   #=> ['g', (3,), {'y': 5}, 13]
+               list(tr[1])   #=> ['f', (4,), {}, 8]
 
-           ex (trace method).
+           ex. trace method
                class Foo(object):
                    def f1(self, x):
                        return self.f2(x, 3) + 1
@@ -1050,16 +1053,16 @@ def _dummy():
                obj = Foo()
                tr.trace(obj, 'f1', 'f2')
                #
-               print(obj.f1(5))      #=> 9
-               print(tr[0].name)     #=> f1
-               print(tr[0].args)     #=> (5,)
-               print(tr[0].kwargs)   #=> {}
-               print(tr[0].ret)      #=> 9
+               obj.f1(5)      #=> 9
+               tr[0].name     #=> f1
+               tr[0].args     #=> (5,)
+               tr[0].kwargs   #=> {}
+               tr[0].ret      #=> 9
                #
-               print(repr(tr[0]))    #=> f1(args=(5,), kwargs={}, ret=9)
-               print(repr(tr[1]))    #=> f2(args=(5, 3), kwargs={}, ret=8)
+               list(tr[0])    #=> ['f1', (5,), {}, 9]
+               list(tr[1])    #=> ['f2', (5, 3), {}, 8]
 
-           ex (dummy function).
+           ex. dummy function
                def f(x):
                    return x*2
                def block(original_func, x):
@@ -1067,10 +1070,10 @@ def _dummy():
                    return 'x=%s' % repr(x)
                tr = Tracer()
                f = tr.trace(f, block)
-               print(f(3))             #=> x=3
-               print(repr(tr[0]))      #=> f(args=(3,), kwargs={}, ret='x=3')
+               f(3)             #=> x=3
+               list(tr[0])      #=> ['f', (3,), {}, 'x=3']
 
-           ex (dummy method).
+           ex. dummy method
                class Hello(object):
                    def hello(self, name):
                        return 'Hello %s!' % name
@@ -1082,8 +1085,8 @@ def _dummy():
                    return 'message: %s' % v
                tr.trace(obj, hello=block)   # or tr.trace(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
                #
-               print(obj.hello('Haruhi'))   #=> message: Hello Haruhi!
-               print(repr(tr[0]))           #=> hello(args=('Haruhi',), kwargs={}, ret='message: Hello Haruhi!')
+               obj.hello('Haruhi')   #=> message: Hello Haruhi!
+               list(tr[0])           #=> ['hello', ('Haruhi',), {}, 'message: Hello Haruhi!']
         """
 
         def __init__(self):
