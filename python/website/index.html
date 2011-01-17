@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
 <title>Oktest - a new style testing library -</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
@@ -11,7 +11,7 @@
 <div class="document" id="readme">
 <h1 class="title">Oktest - a new style testing library -</h1>
 
-<p>$Release: 0.5.0 $</p>
+<p>$Release: 0.6.0 $</p>
 <div class="section" id="overview">
 
 <h2>Overview</h2>
@@ -28,7 +28,7 @@ ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
 not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
 </pre>
 <p>You can use ok() instead of 'assertXxx()' in unittest.</p>
-<p>Oktest requires Python 2.4 or later. Oktest is ready for Python 3.</p>
+<p>Oktest requires Python 2.4 or later (3.x is supported).</p>
 <p>NOTICE!! Oktest is a young project and specification may change in the future.</p>
 </div>
 <div class="section" id="download">
@@ -39,10 +39,10 @@ not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
 <pre class="literal-block">
 ## if you have installed easy_install:
 $ sudo easy_install Oktest
-## or download Oktest-0.5.0.tar.gz and install it
-$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.5.0.tar.gz
-$ tar xzf Oktest-0.5.0.tar.gz
-$ cd Oktest-0.5.0/
+## or download Oktest-0.6.0.tar.gz and install it
+$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.6.0.tar.gz
+$ tar xzf Oktest-0.6.0.tar.gz
+$ cd Oktest-0.6.0/
 $ sudo python setup.py install
 </pre>
 </div>
@@ -103,10 +103,72 @@ if __name__ == '__main__':
     ## or
     #run(r'.*Test$')  # specify class names by regular expression
     ## or
-    #run()            # same as run(r'.*Test(Case)$')
+    #run()            # same as run(r'.*Test(Case)?$')
 </pre>
 <p>NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
 See the example at the bottom of this document.</p>
+</div>
+<div class="section" id="assertion-reference">
+
+<h2>Assertion Reference</h2>
+<dl class="docutils">
+<dt>ok (x) == y</dt>
+<dd>Raise AssertionError unless x == y.</dd>
+<dt>ok (x) != y</dt>
+<dd>Raise AssertionError unless x != y.</dd>
+<dt>ok (x) &gt; y</dt>
+<dd>Raise AssertionError unless x &gt; y.</dd>
+<dt>ok (x) &gt;= y</dt>
+<dd>Raise AssertionError unless x &gt;= y.</dd>
+<dt>ok (x) &lt; y</dt>
+<dd>Raise AssertionError unless x &lt; y.</dd>
+<dt>ok (x) &lt;= y</dt>
+<dd>Raise AssertionError unless x &lt;= y.</dd>
+<dt>ok (x).in_delta(y, delta)</dt>
+<dd>Raise AssertionError unless y-delta &lt; x &lt; y+delta.</dd>
+<dt>ok (x).in_(y)</dt>
+<dd>Raise AssertionError unless x in y.</dd>
+<dt>ok (x).contains(y)</dt>
+<dd>Raise AssertionError unless y in x. This is opposite of in_().</dd>
+<dt>ok (x).is_(y)</dt>
+<dd>Raise AssertionError unless x is y.</dd>
+<dt>ok (x).is_not(y)</dt>
+<dd>Raise AssertionError if x is y.</dd>
+<dt>ok (x).is_a(y)</dt>
+<dd>Raise AssertionError unless isinstance(x, y).</dd>
+<dt>ok (x).hasattr(y)</dt>
+<dd>Raise AssertionError unless hasattr(x, y).</dd>
+<dt>ok (x).matches(y)</dt>
+<dd>If y is a string, raise AssertionError unless re.search(y, x).
+If y is a re.pattern object, raise AssertionError unless y.search(x).</dd>
+<dt>ok (path).is_file()</dt>
+<dd>Raise AssertionError unless os.path.isfile(path).</dd>
+<dt>ok (path).is_dir()</dt>
+<dd>Raise AssertionError unless os.path.isdir(path).</dd>
+<dt>ok (path).exists()</dt>
+<dd>Raise AssertionError unless os.path.exists(path).</dd>
+<dt>ok (func).raises(error_class[, errmsg=None])</dt>
+<dd><p class="first">Raise AssertionError unless func() raises error_class.
+It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.</p>
+<pre class="last literal-block">
+obj = &quot;foobar&quot;
+def f():
+    obj.name
+ok (f).raises(AttributeError, &quot;'str' object has no attribute 'name'&quot;)
+ok (f.exception.message) == &quot;'str' object has no attribute 'name'&quot;
+</pre>
+</dd>
+<dt>not_ok (x)</dt>
+<dd><p class="first">Opposite of ok(x). For example, 'not_ok (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
+<pre class="last literal-block">
+fname = 'file.txt'
+open(fname, 'w').write('foo')
+ok (fname).is_file()            # file exists
+os.unlink(fname)
+not_ok (fname).is_file()        # file doesn't exist
+</pre>
+</dd>
+</dl>
 </div>
 <div class="section" id="unified-diff">
 
@@ -174,71 +236,121 @@ Failed: FooTest#test1()
 <p>If you set 'oktest.DIFF' to False, unified diff is not displayed.</p>
 <p>Notice that this feature is only available with oktest.run() and not available with unittest module.</p>
 </div>
-<div class="section" id="assertion-reference">
+<div class="section" id="tracer">
 
-<h2>Assertion Reference</h2>
-<dl class="docutils">
-<dt>ok (x) == y</dt>
-<dd>Raise AssertionError unless x == y.</dd>
-<dt>ok (x) != y</dt>
-<dd>Raise AssertionError unless x != y.</dd>
-<dt>ok (x) &gt; y</dt>
-<dd>Raise AssertionError unless x &gt; y.</dd>
-<dt>ok (x) &gt;= y</dt>
-<dd>Raise AssertionError unless x &gt;= y.</dd>
-<dt>ok (x) &lt; y</dt>
-<dd>Raise AssertionError unless x &lt; y.</dd>
-<dt>ok (x) &lt;= y</dt>
-<dd>Raise AssertionError unless x &lt;= y.</dd>
-<dt>ok (x).in_delta(y, delta)</dt>
-<dd>Raise AssertionError unless y-delta &lt; x &lt; y+delta.</dd>
-<dt>ok (x).in_(y)</dt>
-<dd>Raise AssertionError unless x in y.</dd>
-<dt>ok (x).contains(y)</dt>
-<dd>Raise AssertionError unless y in x. This is opposite of in_().</dd>
-<dt>ok (x).is_(y)</dt>
-<dd>Raise AssertionError unless x is y.</dd>
-<dt>ok (x).is_not(y)</dt>
-<dd>Raise AssertionError if x is y.</dd>
-<dt>ok (x).is_a(y)</dt>
-<dd>Raise AssertionError unless isinstance(x, y).</dd>
-<dt>ok (x).hasattr(y)</dt>
-<dd>Raise AssertionError unless hasattr(x, y).</dd>
-<dt>ok (x).matches(y)</dt>
-<dd>If y is a string, raise AssertionError unless re.search(y, x).
-If y is a re.pattern object, raise AssertionError unless y.search(x).</dd>
-<dt>ok (path).is_file()</dt>
-<dd>Raise AssertionError unless os.path.isfile(path).</dd>
-<dt>ok (path).is_dir()</dt>
-<dd>Raise AssertionError unless os.path.isdir(path).</dd>
-<dt>ok (path).exists()</dt>
-<dd>Raise AssertionError unless os.path.exists(path).</dd>
-<dt>ok (func).raises(error_class[, errmsg=None])</dt>
-<dd><p class="first">Raise AssertionError unless func() raises error_class.
-It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.</p>
-<pre class="last literal-block">
-obj = &quot;foobar&quot;
-def f():
-    obj.name
-ok (f).raises(AttributeError, &quot;'str' object has no attribute 'name'&quot;)
-ok (f.exception.message) == &quot;'str' object has no attribute 'name'&quot;
+<h2>Tracer</h2>
+<p>Oktest provides Tracer class which provides:</p>
+<ul class="simple">
+<li>Mock feature: trace function or method call, and record both arguments and return-value.</li>
+<li>Stub feature: fake function, method, or object</li>
+</ul>
+<p>Example to trace function:</p>
+<pre class="literal-block">
+def hello(x):
+    return &quot;Hello %s!&quot; % x
+## how to trace function call
+from oktest.helper import Tracer
+tr = Tracer()              # create Tracer object
+hello = tr.trace(hello)    # trace target function
+hello(&quot;John&quot;)              # call target function
+## show result
+print(tr[0].name)     #=&gt; 'hello'
+print(tr[0].args)     #=&gt; ('John',)
+print(tr[0].kwargs)   #=&gt; {}
+print(tr[0].ret)      #=&gt; 'Hello John!'
+print(repr(tr[0]))    #=&gt; hello(args=('John',), kwargs={}, ret='Hello John!')
+print(list(tr[0]))    #=&gt; ['hello', ('John',), {}, 'Hello John!']
+print(tr[0] == ['hello', ('John',), {}, 'Hello John!'])   #=&gt; True
 </pre>
-</dd>
-<dt>not_ok (x)</dt>
-<dd><p class="first">Opposite of ok(x). For example, 'not_ok (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
-<pre class="last literal-block">
-fname = 'file.txt'
-open(fname, 'w').write('foo')
-ok (fname).is_file()            # file exists
-os.unlink(fname)
-not_ok (fname).is_file()        # file doesn't exist
+<p>Example to trace method:</p>
+<pre class="literal-block">
+class Hello(object):
+    def hello(self, x):
+        return &quot;Hello %s!&quot; % x
+obj = Hello()              # target object to trace
+## how to trace method call
+from oktest.helper import Tracer
+tr = Tracer()              # create tracer object
+tr.trace(obj, 'hello')     # trace method
+obj.hello('John')          # call target method
+## show result
+print(tr[0].name)     #=&gt; 'hello'
+print(tr[0].args)     #=&gt; ('John',)
+print(tr[0].kwargs)   #=&gt; {}
+print(tr[0].ret)      #=&gt; 'Hello John!'
+print(list(tr[0]))    #=&gt; ['hello', ('John',), {}, 'Hello John!']
 </pre>
-</dd>
-</dl>
+<p>If you want to trace several methods, specify them into tr.trace().</p>
+<pre class="literal-block">
+tr.trace(obj, 'method1', 'method2', 'method3')
+</pre>
+<p>It is possible to trace several function or method calls.</p>
+<pre class="literal-block">
+def greeting(name):
+    return &quot;Hi %s!&quot; % name
+class Hello(object):
+    def hello(self, x):
+        return greeting(x) + ' How are you?'
+obj = Hello()
+## trace both function and method
+import oktest
+from oktest.helper import Tracer
+tr = Tracer()
+greeting = tr.trace(greeting)  # trace function
+tr.trace(obj, 'hello')         # trace method
+obj.hello('John')
+## show result
+print(list(tr[0]))  #=&gt; ['hello', ('John',), {}, 'Hi John! How are you?']
+print(repr(tr[1]))  #=&gt; ['greeting', ('John',), {}, 'Hi John!']
+</pre>
+<p>Example to fake function or method calls:</p>
+<pre class="literal-block">
+def f1(x):
+    return x+1
+class Example(object):
+    def f2(self, x):
+        return x+2
+obj = Example()
+## create trace object
+from oktest.helper import Tracer
+tr = Tracer()
+## fake f1 function
+def fake_f1(original_func, *args):
+    v = original_func(*args)
+    return v+10
+f1 = tr.fake_func(f1, fake_f1)
+## fake f2 method
+def fake_f2(self, x):
+    return x+20
+tr.fake_method(obj, f2=fake_f2)
+## call target function and method
+print(f1(1))          #=&gt; 12
+print(obj.f2(2))      #=&gt; 22
+## traced data
+print(list(tr[0]))    #=&gt; ['f1', (1,), {}, 12]
+print(list(tr[1]))    #=&gt; ['f2', (2,), {}, 22]
+</pre>
+<p>Example to fake an object:</p>
+<pre class="literal-block">
+from oktest.helper import Tracer
+tr = Tracer()
+## create fake object
+obj1 = tr.fake_obj(f1=lambda self, x: x+1)  # method_name=function
+obj2 = tr.fake_obj(hello=&quot;Hello!&quot;)          # or method_name=return_value
+## call fake method
+print(obj2.hello(&quot;John&quot;))  #=&gt; 'Hello!'
+print(obj1.f1(10))         #=&gt; 11
+## check result
+print(list(tr[0]))         #=&gt; ['hello', ('John',), {}, 'Hello!']
+print(list(tr[1]))         #=&gt; ['f1', (10,), {}, 11]
+</pre>
 </div>
 <div class="section" id="helpers-reference">
 
 <h2>Helpers Reference</h2>
+<div class="section" id="oktest-module">
+
+<h3><tt class="docutils literal">oktest</tt> module</h3>
 <dl class="docutils">
 <dt>run(*classes)</dt>
 <dd><p class="first">Invokes tests of each class.
@@ -250,6 +362,39 @@ oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
 oktest.run()                  # same as oktest.run('.*Test(Case)$')
 </pre>
 </dd>
+<dt>spec(description)</dt>
+<dd><p class="first">Represents spec description. This is just a marker function, but very useful for readability.
+<strong>It is strongly recommended to use spec() helper for readability of tests.</strong></p>
+<pre class="last literal-block">
+class NumericTest(object):
+    def test_integer(self):
+        with spec(&quot;1+1 should be equal to 2.&quot;):
+            ok (1+1) == 2
+        with spec(&quot;1/0 should be error.&quot;):
+            def f(): 1/0
+            ok (f).raises(ZeroDivisionError,
+                          &quot;integer division or modulo by zero&quot;)
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="oktest-helper-module">
+
+<h3><tt class="docutils literal">oktest.helper</tt> module</h3>
+<dl class="docutils">
+<dt>chdir(dirname)</dt>
+<dd><p class="first">Change current directory to dirname temporarily.</p>
+<pre class="last literal-block">
+import os
+cwd = os.getcwd()                         # current working directory
+with oktest.chdir(&quot;/var/tmp&quot;):
+    assert os.getcwd() == &quot;/var/tmp&quot;      # current directory is changed!
+    # do something
+assert os.getcwd() == cwd                 # back to the original place
+</pre>
+</dd>
+<dt>Tracer()</dt>
+<dd>Return new Tracer object. See the previous section for details.</dd>
 <dt>dummy_file(filename, content)</dt>
 <dd><p class="first">Create dummy file with specified content.</p>
 <pre class="last literal-block">
@@ -303,32 +448,8 @@ assert obj.y == 20
 assert not hasattr(obj, 'z')
 </pre>
 </dd>
-<dt>chdir(dirname)</dt>
-<dd><p class="first">Change current directory to dirname temporarily.</p>
-<pre class="last literal-block">
-import os
-cwd = os.getcwd()                         # current working directory
-with oktest.chdir(&quot;/var/tmp&quot;):
-    assert os.getcwd() == &quot;/var/tmp&quot;      # current directory is changed!
-    # do something
-assert os.getcwd() == cwd                 # back to the original place
-</pre>
-</dd>
-<dt>spec(description)</dt>
-<dd><p class="first">Represents spec description. This is just marker function, but very useful for readability.
-<strong>It is strongly recommended to use spec() helper for readability of tests.</strong></p>
-<pre class="last literal-block">
-class NumericTest(object):
-    def test_integer(self):
-        with spec(&quot;1+1 should be equal to 2.&quot;):
-            ok (1+1) == 2
-        with spec(&quot;1/0 should be error.&quot;):
-            def f(): 1/0
-            ok (f).raises(ZeroDivisionError,
-                          &quot;integer division or modulo by zero&quot;)
-</pre>
-</dd>
 </dl>
+</div>
 </div>
 <div class="section" id="tips">
 
@@ -375,7 +496,7 @@ $ TEST='ex[0-9]' python test/foobar_test.py
 <div class="section" id="copyright">
 
 <h2>Copyright</h2>
-<p>$Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $</p>
+<p>$Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $</p>
 </div>
 </div>
 </body>
