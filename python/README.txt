@@ -25,6 +25,8 @@ You can use ok() instead of 'assertXxx()' in unittest.
 
 Oktest requires Python 2.4 or later (3.x is supported).
 
+See CHANGES.txt for changes.
+
 NOTICE!! Oktest is a young project and specification may change in the future.
 
 
