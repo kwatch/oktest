@@ -702,6 +702,21 @@ class Spec(_Context):
     def __init__(self, desc):
         self.desc = desc
 
+    def __iter__(self):
+        self.__enter__()
+        #try:
+        #    yield self  # (Python2.4) SyntaxError: 'yield' not allowed in a 'try' block with a 'finally' clause
+        #finally:
+        #    self.__exit__(sys.exc_info())
+        ex = None
+        try:
+            yield self
+        except:
+            ex = None
+        self.__exit__(sys.exc_info())
+        if ex:
+            raise ex
+
 
 def spec(desc):
     return Spec(desc)

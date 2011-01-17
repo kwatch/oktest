@@ -1051,6 +1051,30 @@ expected = """
 if with_statement_supported:
     do_test_with(desc, script, expected)
 
+### spec (with for-statement)
+desc = "spec (with for-statement)"
+script = r"""
+from __future__ import with_statement
+from oktest import *
+from oktest.helper import *
+class FooTest(object):
+    def test_spec1(self):
+        for sp in spec('1+1 is 2'):
+            ok (1+1) == 2
+        ok (sp.desc) == '1+1 is 2'
+    def test_spec2(self):
+        for _ in spec('1-1 is 0'):
+            ok (1-1) == -1
+            None.foobar   # raise NameError
+run(FooTest)
+"""
+expected = """
+* FooTest.test_spec1 ... [ok]
+* FooTest.test_spec2 ... [NG] 0 == -1 : failed.
+   _test_.py:12: ok (1-1) == -1
+"""[1:]
+do_test_with(desc, script, expected)
+
 ### using (with with-statement)
 desc = "using (with with-statement)"
 script = r"""
