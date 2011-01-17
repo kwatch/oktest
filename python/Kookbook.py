@@ -21,7 +21,7 @@ from kook.utils import read_file, write_file
 
 release   = prop('release', '0.5.0')
 package   = prop('package', 'Oktest')
-copyright = prop('copyright', "copyright(c) 2010 kuwata-lab.com all rights reserved")
+copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
 #kook_default_product = 'test'
 

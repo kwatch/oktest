@@ -501,4 +501,4 @@ $License: MIT License $
 Copyright
 =========
 
-$Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
+$Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
