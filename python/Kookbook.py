@@ -158,6 +158,7 @@ def file_website_index_html(c):
         s = s.replace('$Release:[^%]*?$', '$Release: %s $' % release)
         s = s.replace('$'+'Release'+'$', release)
         s = s.replace('README', 'Oktest - a new style testing library -')
+        s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
         #s = re.sub(r'^<h(\d)>(.*?)</h\d>', r, s)
         pat = re.compile(r'^<h(\d)>(.*?)</h\d>', re.M)
         def r(m):
@@ -167,10 +168,21 @@ def file_website_index_html(c):
         s = re.sub(pat, r, s)
         return s
     edit(c.product, by=f)
-    with chdir("website"):
-        system("zip -r ../Oktest.zip index.html style.css")
 
 @recipe
-@ingreds('website/index.html')
+@product('website/CHANGES.txt')
+@ingreds('CHANGES.txt')
+def file_CHANGES_txt(c):
+    cp(c.ingred, c.product)
+
+@recipe
+@product('Oktest.zip')
+@ingreds('website/index.html', 'website/CHANGES.txt')
+def file_Oktest_zip(c):
+    with chdir("website"):
+        system("zip -r ../Oktest.zip index.html style.css CHANGES.txt")
+
+@recipe
+@ingreds('Oktest.zip')
 def task_website(c):
     pass
