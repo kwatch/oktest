@@ -57,7 +57,6 @@ def task_test_all(c):
                 line = 'from __future__ import with_statement'
                 open(fpath, 'w').write(s.replace(line, '#' + line))
             system(c%"PYTHON=$(bin) $(bin) test/oktest_test.py")
-            break
         finally:
             if ver == '2.4':
                 mv(fpath+'.bkup', fpath)
