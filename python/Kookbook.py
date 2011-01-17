@@ -71,7 +71,6 @@ def task_edit(c):
         return s
     filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
-    filenames.append('README.wiki')
     edit(filenames, by=replacer)
 
 
