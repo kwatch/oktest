@@ -255,18 +255,21 @@ Notice that this feature is only available with oktest.run() and not available w
 Tracer
 ======
 
-Oktest provides Tracer class which steal function or method call and record both arguments and return value.
+Oktest provides Tracer class which provides:
+
+* Mock feature: trace function or method call, and record both arguments and return-value.
+* Stub feature: fake function, method, or object
 
 Example to trace function::
 
     def hello(x):
         return "Hello %s!" % x
-    #
+    ## how to trace function call
     from oktest.helper import Tracer
     tr = Tracer()              # create Tracer object
     hello = tr.trace(hello)    # trace target function
-    #
     hello("John")              # call target function
+    ## show result
     print(tr[0].name)     #=> 'hello'
     print(tr[0].args)     #=> ('John',)
     print(tr[0].kwargs)   #=> {}
@@ -281,12 +284,12 @@ Example to trace method::
         def hello(self, x):
             return "Hello %s!" % x
     obj = Hello()              # target object to trace
-    #
+    ## how to trace method call
     from oktest.helper import Tracer
     tr = Tracer()              # create tracer object
     tr.trace(obj, 'hello')     # trace method
-    #
     obj.hello('John')          # call target method
+    ## show result
     print(tr[0].name)     #=> 'hello'
     print(tr[0].args)     #=> ('John',)
     print(tr[0].kwargs)   #=> {}
@@ -307,19 +310,18 @@ It is possible to trace several function or method calls.
         def hello(self, x):
             return greeting(x) + ' How are you?'
     obj = Hello()
-    #
+    ## trace both function and method
     import oktest
     from oktest.helper import Tracer
     tr = Tracer()
     greeting = tr.trace(greeting)  # trace function
     tr.trace(obj, 'hello')         # trace method
-    #
     obj.hello('John')
+    ## show result
     print(list(tr[0]))  #=> ['hello', ('John',), {}, 'Hi John! How are you?']
     print(repr(tr[1]))  #=> ['greeting', ('John',), {}, 'Hi John!']
 
-Tracer allows you to fake function or method calls.
-::
+Example to fake function or method calls::
 
     def f1(x):
         return x+1
@@ -346,8 +348,7 @@ Tracer allows you to fake function or method calls.
     print(list(tr[0]))    #=> ['f1', (1,), {}, 12]
     print(list(tr[1]))    #=> ['f2', (2,), {}, 22]
 
-Tracer can generate FakeObject which can be stub or mock object.
-::
+Example to fake an object::
 
     from oktest.helper import Tracer
     tr = Tracer()
