@@ -690,7 +690,7 @@ class _Context(object):
         try:
             func(*args)
         finally:
-            self.__exit__()
+            self.__exit__(sys.exc_info())
 
 
 
