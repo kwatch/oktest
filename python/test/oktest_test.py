@@ -1340,8 +1340,8 @@ Ya!
 do_test_with(desc, script, expected)
 
 
-### FakeObject
-desc = "FakeObject"
+### FakeObject class
+desc = "FakeObject class"
 script = r"""
 from oktest import *
 from oktest.helper import FakeObject
@@ -1366,7 +1366,7 @@ expected = """
 do_test_with(desc, script, expected)
 
 ### Tracer.fake_obj()
-desc = "FakeObject"
+desc = "Tracer.fake_obj()"
 script = r"""
 import sys
 from oktest import *
@@ -1390,10 +1390,10 @@ class FakeObjectTest(object):
         ok (tr[1].kwargs) == {}
         ok (tr[1].ret   ) == 'Hi!'
         ## __iter__() and __eq__()
-        ok (list(tr[0]))  == ['hello', ('SOS',), {}, 'Hello SOS!']
-        ok (tr[0])        == ['hello', ('SOS',), {}, 'Hello SOS!']
-        ok (tuple(tr[1])) == ('hi', (), {}, 'Hi!')
-        ok (tr[1])        == ('hi', (), {}, 'Hi!')
+        ok (list(tr[0]))  == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
+        ok (tr[0])        == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
+        ok (tuple(tr[1])) == (obj1, 'hi', (), {}, 'Hi!')
+        ok (tr[1])        == (obj1, 'hi', (), {}, 'Hi!')
 run()
 """[1:]
 expected = """
