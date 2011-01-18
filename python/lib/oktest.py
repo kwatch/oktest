@@ -1216,14 +1216,16 @@ def _dummy():
                 def _block(*args, **kwargs):
                     return ret_val
                 return _block
-            def _dummy_method(obj):
+            def _dummy_method(obj, name):
                 fn = lambda *args, **kwargs: None
+                fn.__name__ = name
+                if python2: fn.func_name = name
                 if python2: return types.MethodType(fn, obj, type(obj))
                 if python3: return types.MethodType(fn, obj)
             for method_name in kwargs:
                 method_obj = getattr(obj, method_name, None)
                 if method_obj is None:
-                    method_obj = _dummy_method(obj)
+                    method_obj = _dummy_method(obj, method_name)
                 block = kwargs[method_name]
                 if not isinstance(block, types.FunctionType):
                     block = _new_block(block)
