@@ -1216,14 +1216,14 @@ def _dummy():
                 def _block(*args, **kwargs):
                     return ret_val
                 return _block
+            def _dummy_method(obj):
+                fn = lambda *args, **kwargs: None
+                if python2: return types.MethodType(fn, obj, type(obj))
+                if python3: return types.MethodType(fn, obj)
             for method_name in kwargs:
-                #if not hasattr(obj, method_name):
-                #    raise ValueError("%s: no method found on %r." % (method_name, obj))
                 method_obj = getattr(obj, method_name, None)
                 if method_obj is None:
-                    fn = lambda *args, **kwargs: None
-                    if python2: method_obj = types.MethodType(fn, obj, type(obj))
-                    if python3: method_obj = types.MethodType(fn, obj)
+                    method_obj = _dummy_method(obj)
                 block = kwargs[method_name]
                 if not isinstance(block, types.FunctionType):
                     block = _new_block(block)
