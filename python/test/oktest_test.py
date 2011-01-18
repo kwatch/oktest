@@ -1115,13 +1115,37 @@ f2 = tr.trace_func(f2)
 f3 = tr.trace(f3)
 print(f1(3, 5))
 for call in tr:
+    print("---")
     print(repr(call))
+    print(repr(call.receiver))
+    print(repr(call.name))
+    print(repr(call.args))
+    print(repr(call.kwargs))
+    print(repr(call.ret))
 """[1:]
 expected = """
 15
+---
 f1(3, 5): 15
+None
+'f1'
+(3, 5)
+{}
+15
+---
 f3(5): 10
+None
+'f3'
+(5,)
+{}
+10
+---
 f2(13): 15
+None
+'f2'
+(13,)
+{}
+15
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -1142,13 +1166,37 @@ tr.trace_method(obj, 'f1', 'f2')
 ret = obj.f1(5, 3)
 print(ret)
 for call in tr:
+    print('---')
     print(repr(call))
+    print(call.receiver is obj)
+    print(repr(call.name))
+    print(repr(call.args))
+    print(repr(call.kwargs))
+    print(repr(call.ret))
 """[1:]
 expected = """
 [2, -2]
+---
 f1(5, 3): [2, -2]
+True
+'f1'
+(5, 3)
+{}
+[2, -2]
+---
 f2(5, y=3): 2
+True
+'f2'
+(5,)
+{'y': 3}
+2
+---
 f2(3, y=5): -2
+True
+'f2'
+(3,)
+{'y': 5}
+-2
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -1166,19 +1214,42 @@ class Dummy(object):
     @classmethod
     def f2(cls, x=None, y=None):
         return x-y
-obj = Dummy()
 tr = Tracer()
 tr.trace_method(Dummy, 'f1', 'f2')
-ret = obj.f1(5, 3)
+ret = Dummy.f1(5, 3)
 print(ret)
 for call in tr:
+    print("---")
     print(repr(call))
+    print(call.receiver is Dummy)
+    print(repr(call.name))
+    print(repr(call.args))
+    print(repr(call.kwargs))
+    print(repr(call.ret))
 """[1:]
 expected = """
 ['Dummy', 2, -2]
+---
 f1(5, 3): ['Dummy', 2, -2]
+True
+'f1'
+(5, 3)
+{}
+['Dummy', 2, -2]
+---
 f2(5, y=3): 2
+True
+'f2'
+(5,)
+{'y': 3}
+2
+---
 f2(3, y=5): -2
+True
+'f2'
+(3,)
+{'y': 5}
+-2
 """[1:]
 do_test_with(desc, script, expected)
 
@@ -1195,6 +1266,8 @@ def block(orig, *args, **kwargs):
 tr = Tracer()
 f = tr.fake_func(f, block)
 print(f(10, 20, z=7))  #=> 'v=37'
+print(repr(tr[0]))   #=> f(10, 20, z=7): 'v=37'
+print(tr[0].receiver is None)  #=> True
 print(tr[0].name)    #=> f
 print(tr[0].args)    #=> (10, 20)
 print(tr[0].kwargs)  #=> {'z': 7}
@@ -1209,6 +1282,7 @@ obj = Hello()
 tr.fake_method(obj, hello=block, hi="Hi!", ya="Ya!")
 print(obj.hello('World'))  #=> v=Hello World!
 print(repr(tr[1]))    #=> hello('World'): 'v=Hello World!'
+print(tr[1].receiver is obj)  #=> True
 print(tr[1].name)     #=> hello
 print(tr[1].args)     #=> ('World',)
 print(tr[1].kwargs)   #=> {}
@@ -1216,6 +1290,7 @@ print(tr[1].ret)      #=> v=Hello World!
 print('---')
 print(obj.hi('SOS'))  #=> Hi!
 print(repr(tr[2]))    #=> hi('SOS'): 'Hi!'
+print(tr[2].receiver is obj)  #=> True
 print(tr[2].name)     #=> hi
 print(tr[2].args)     #=> ('SOS',)
 print(tr[2].kwargs)   #=> {}
@@ -1223,6 +1298,7 @@ print(tr[2].ret)      #=> Hi!
 print('---')
 print(obj.ya('SOS'))  #=> Ya!
 print(repr(tr[3]))    #=> ya('SOS'): 'Ya!'
+print(tr[3].receiver is obj)  #=> True
 print(tr[3].name)     #=> ya
 print(tr[3].args)     #=> ('SOS',)
 print(tr[3].kwargs)   #=> {}
@@ -1230,6 +1306,8 @@ print(tr[3].ret)      #=> Ya!
 """[1:]
 expected = """
 v=37
+f(10, 20, z=7): 'v=37'
+True
 f
 (10, 20)
 {'z': 7}
@@ -1237,6 +1315,7 @@ v=37
 ---
 v=Hello World!
 hello('World'): 'v=Hello World!'
+True
 hello
 ('World',)
 {}
@@ -1244,6 +1323,7 @@ v=Hello World!
 ---
 Hi!
 hi('SOS'): 'Hi!'
+True
 hi
 ('SOS',)
 {}
@@ -1251,6 +1331,7 @@ Hi!
 ---
 Ya!
 ya('SOS'): 'Ya!'
+True
 ya
 ('SOS',)
 {}

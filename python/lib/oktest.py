@@ -940,7 +940,8 @@ def _dummy():
 
     class Call(object):
 
-        def __init__(self, name=None, args=None, kwargs=None, ret=None):
+        def __init__(self, receiver=None, name=None, args=None, kwargs=None, ret=None):
+            self.receiver = receiver
             self.name   = name     # method name
             self.args   = args
             self.kwargs = kwargs
@@ -961,6 +962,7 @@ def _dummy():
             return "".join(buf)
 
         def __iter__(self):
+            #yield self.receiver
             yield self.name
             yield self.args
             yield self.kwargs
@@ -1005,13 +1007,13 @@ def _dummy():
             if isinstance(val, types.FunctionType):
                 func = val
                 def f(self, *args, **kwargs):
-                    r = Call(name, args, kwargs, None)
+                    r = Call(fake_obj, name, args, kwargs, None)
                     fake_obj.__calls.append(r)
                     r.ret = func(self, *args, **kwargs)
                     return r.ret
             else:
                 def f(self, *args, **kwargs):
-                    r = Call(name, args, kwargs, val)
+                    r = Call(fake_obj, name, args, kwargs, val)
                     fake_obj.__calls.append(r)
                     return val
             f.func_name = f.__name__ = name
@@ -1177,7 +1179,7 @@ def _dummy():
         def _wrap_func(self, func, block):
             tr = self
             def newfunc(*args, **kwargs):                # no 'self'
-                call = Call(_func_name(func), args, kwargs, None)
+                call = Call(None, _func_name(func), args, kwargs, None)
                 tr.calls.append(call)
                 if block:
                     ret = block(func, *args, **kwargs)
