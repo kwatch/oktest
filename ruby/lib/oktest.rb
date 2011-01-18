@@ -779,7 +779,8 @@ module Oktest
               alias_method :__orig_#{method_name}, :#{method_name}
               def #{method_name}(*args, &blk)
                 @__calls << (call = Call.new(:#{method_name}, args, nil))
-                call.ret = self.__orig_#{method_name}(*args, &blk)
+                #call.ret = self.__orig_#{method_name}(*args, &blk)
+                call.ret = self.__send__(:__orig_#{method_name}, *args, &blk)
                 call.ret
               end
           END
