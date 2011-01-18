@@ -27,14 +27,15 @@ license   = "MIT License"
 
 python = prop('python', 'python')
 
-
 @recipe
-def task_test(c):
-    system(c%"$(python) test/oktest_test.py")
+@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2a2")
+def task_test(c, *args, **kwargs):
+    if kwargs.get('a', None):
+        _do_for_all_version(c, "PYTHON=$(bin) $(bin) test/oktest_test.py")
+    else:
+        system(c%"$(python) test/oktest_test.py")
 
-@recipe
-def task_test_all(c):
-    "do test with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2a2"
+def _do_for_all_version(c, command):
     versions = [
         ('2.4', '/opt/local/bin/python2.4'),
         ('2.5', '/opt/local/bin/python2.5'),
@@ -56,7 +57,7 @@ def task_test_all(c):
                 s = open(fpath+'.bkup').read()
                 line = 'from __future__ import with_statement'
                 open(fpath, 'w').write(s.replace(line, '#' + line))
-            system(c%"PYTHON=$(bin) $(bin) test/oktest_test.py")
+            system(c%command)
         finally:
             if ver == '2.4':
                 mv(fpath+'.bkup', fpath)
