@@ -1011,97 +1011,125 @@ def _dummy():
     class Tracer(object):
         """trace function or method call to record arguments and return value.
 
-           ex. dummy objects
-              from oktes.helper import Tracer
-              tr = Tracer()
-              ## create fake object
-              obj1 = tr.fake_obj(hi="Hi!")
-              obj2 = tr.fake_obj(hello=lambda self, x: "Hello %s!" % x)
-              ## call fake method
-              obj2.hello("SOS")  #=> 'Hello SOS!'
-              obj1.hi()          #=> 'Hi!'
-              ## check trace
-              tr[0].name     #=> 'hello'
-              tr[0].args     #=> ('SOS',)
-              tr[0].kwargs   #=> {}
-              tr[0].ret      #=> 'Hello SOS!'
-              list(tr[0])    #=> ['hello', ('SOS',), {}, 'Hello SOS!']
-              tr[1].name     #=> 'hi'
-              tr[1].args     #=> ()
-              tr[1].kwargs   #=> {}
-              tr[1].ret      #=> 'Hi!'
-              list(tr[1])    #=> ['hello', ('SOS',), {}, 'Hello SOS!']
+           ex. dummy object
+               ## create fake objects
+               from oktest.tracer import Tracer
+               tr = Tracer()
+               foo = tr.fake_obj(m1=100, m2=200)
+               bar = tr.fake_obj(m3=lambda self, x: x+1)
+               ## call fake methods
+               ok (bar.m3(0))     == 1
+               ok (foo.m2(1,2,3)) == 200
+               ok (foo.m1(x=123)) == 100
+               ## check results
+               ok (tr[0].name)   == 'm3'
+               ok (tr[0].args)   == (0,)
+               ok (tr[0].kwargs) == {}
+               ok (tr[0].ret)    == 1
+               ok (list(tr[0]))  == ['m3', (0,), {}, 1]
+               #
+               ok (tr[1].name)   == 'm2'
+               ok (tr[1].args)   == (1, 2, 3)
+               ok (tr[1].kwargs) == {}
+               ok (tr[1].ret)    == 200
+               ok (list(tr[1]))  == ['m2', (1, 2, 3), {}, 200]
+               #
+               ok (tr[2].name)   == 'm1'
+               ok (tr[2].args)   == ()
+               ok (tr[2].kwargs) == {'x': 123}
+               ok (tr[2].ret)    == 100
+               ok (list(tr[2]))  == ['m1', (), {'x': 123}, 100]
 
-           ex. trace function
+           ex. trace functions
                def f(x):
-                   return x*2
-               def g(x, y=0):
-                   return f(x+1) + y
-               #
+                   return x+1
+               def g(y):
+                   return f(y+1) + 1
+               ## trace functions
+               from oktest.tracer import Tracer
                tr = Tracer()
-               f = tr.trace(f)
-               g = tr.trace(g)
+               f = tr.trace_func(f)
+               g = tr.trace_func(g)
+               ## call functions
+               ok (g(0))         == 3
+               ## check results
+               ok (tr[0].name)   == 'g'
+               ok (tr[0].args)   == (0,)
+               ok (tr[0].kwargs) == {}
+               ok (tr[0].ret)    == 3
+               ok (list(tr[0]))  == ['g', (0,), {}, 3]
                #
-               g(3, y=5)       #=> 13
-               #
-               tr[0].name    #=> g
-               tr[0].args    #=> (3,)
-               tr[0].kwargs  #=> {'y': 5}
-               tr[0].ret     #=> 11
-               #
-               tr[1].name    #=> f
-               tr[1].args    #=> (4,)
-               tr[1].kwargs  #=> {}
-               tr[1].ret     #=> 8
-               #
-               list(tr[0])   #=> ['g', (3,), {'y': 5}, 13]
-               list(tr[1])   #=> ['f', (4,), {}, 8]
+               ok (tr[1].name)   == 'f'
+               ok (tr[1].args)   == (1,)
+               ok (tr[1].kwargs) == {}
+               ok (tr[1].ret)    == 2
+               ok (list(tr[1]))  == ['f', (1,), {}, 2]
 
-           ex. trace method
+           ex. trace methods
                class Foo(object):
-                   def f1(self, x):
-                       return self.f2(x, 3) + 1
-                   def f2(self, x, y):
-                       return x + y
-               #
-               tr = Tracer()
+                   def m1(self, x):
+                       return x + 1
+                   def m2(self, y):
+                       return y + 1
                obj = Foo()
-               tr.trace(obj, 'f1', 'f2')
+               ## trace methods
+               from oktest.tracer import Tracer
+               tr = Tracer()
+               def dummy(original_func, *args, **kwargs):
+                   #return original_func(*args, **kwargs)
+                   return 100
+               tr.fake_method(obj, m1=dummy, m2=200)
+               ## call methods
+               ok (obj.m1(1))    == 100
+               ok (obj.m2(2))    == 200
+               ## check results
+               ok (tr[0].name)   == 'm1'
+               ok (tr[0].args)   == (1,)
+               ok (tr[0].kwargs) == {}
+               ok (tr[0].ret)    == 100
+               ok (list(tr[0]))  == ['m1', (1,), {}, 100]
                #
-               obj.f1(5)      #=> 9
-               tr[0].name     #=> f1
-               tr[0].args     #=> (5,)
-               tr[0].kwargs   #=> {}
-               tr[0].ret      #=> 9
-               #
-               list(tr[0])    #=> ['f1', (5,), {}, 9]
-               list(tr[1])    #=> ['f2', (5, 3), {}, 8]
+               ok (tr[1].name)   == 'm2'
+               ok (tr[1].args)   == (2,)
+               ok (tr[1].kwargs) == {}
+               ok (tr[1].ret)    == 200
+               ok (list(tr[1]))  == ['m2', (2,), {}, 200]
 
            ex. dummy function
                def f(x):
                    return x*2
-               def block(original_func, x):
+               ## fake a function
+               def dummy(original_func, x):
                    #return original_func(x)
                    return 'x=%s' % repr(x)
+               from oktest.tracer import Tracer
                tr = Tracer()
-               f = tr.trace(f, block)
-               f(3)             #=> x=3
-               list(tr[0])      #=> ['f', (3,), {}, 'x=3']
+               f = tr.fake_func(f, dummy)
+               ## call function
+               f(3)             #=> 'x=3'
+               ## check result
+               ok (list(tr[0])) == ['f', (3,), {}, 'x=3']
 
            ex. dummy method
-               class Hello(object):
-                   def hello(self, name):
-                       return 'Hello %s!' % name
-               #
-               obj = Hello()
+               class Foo(object):
+                   def m1(self, x):
+                       return x + 1
+                   def m2(self, y):
+                       return y + 1
+               obj = Foo()
+               ## fake methods
+               from oktest.tracer import Tracer
                tr = Tracer()
-               def block(original_func, name):
-                   v = original_func(name)
-                   return 'message: %s' % v
-               tr.trace(obj, hello=block)   # or tr.trace(obj, 'meth1', 'meth2', meth3=lambda, meth4=lambda)
-               #
-               obj.hello('Haruhi')   #=> message: Hello Haruhi!
-               list(tr[0])           #=> ['hello', ('Haruhi',), {}, 'message: Hello Haruhi!']
+               def dummy(original_func, *args, **kwargs):
+                   #return original_func(*args, **kwargs)
+                   return 100
+               tr.fake_method(obj, m1=dummy, m2=200)
+               ## call method
+               ok (obj.m1(1))    == 100
+               ok (obj.m2(2))    == 200
+               ## check result
+               ok (list(tr[0]))  == ['m1', (1,), {}, 100]
+               ok (list(tr[1]))  == ['m2', (2,), {}, 200]
         """
 
         def __init__(self):
