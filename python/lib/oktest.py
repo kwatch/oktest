@@ -1150,7 +1150,8 @@ def _dummy():
             self._copy_attrs(func, newfunc)
             return newfunc
 
-        def _wrap_method(self, func, block):
+        def _wrap_method(self, method_obj, block):
+            func = method_obj
             intr = self
             def newfunc(self, *args, **kwargs):          # has 'self'
                 call = Call(_func_name(func), args, kwargs, None)
