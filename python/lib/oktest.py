@@ -947,7 +947,18 @@ def _dummy():
             self.ret    = ret
 
         def __repr__(self):
-            return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
+            #return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
+            buf = []; a = buf.append
+            a("%s(" % self.name)
+            for arg in self.args:
+                a(repr(arg))
+                a(", ")
+            for k in self.kwargs:
+                a("%s=%s" % (k, repr(self.kwargs[k])))
+                a(", ")
+            if buf[-1] == ", ":  buf.pop()
+            a("): %s" % repr(self.ret))
+            return "".join(buf)
 
         def __iter__(self):
             yield self.name
@@ -1182,7 +1193,7 @@ def _dummy():
             func = method_obj
             tr = self
             def newfunc(self, *args, **kwargs):          # has 'self'
-                call = Call(_func_name(func), args, kwargs, None)
+                call = Call(self, _func_name(func), args, kwargs, None)
                 tr.calls.append(call)
                 if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
                 if block:
