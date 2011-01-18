@@ -260,14 +260,14 @@ Tracer
 Oktest provides Tracer class which provides:
 
 * Mock feature: trace function or method call, and record both arguments and return-value.
-* Stub feature: fake function, method, or object
+* Stub feature: fake function, method, or object.
 
 Example to trace function::
 
     def hello(x):
         return "Hello %s!" % x
     ## how to trace function call
-    from oktest.helper import Tracer
+    from oktest.tracer import Tracer
     tr = Tracer()              # create Tracer object
     hello = tr.trace(hello)    # trace target function
     hello("John")              # call target function
@@ -287,7 +287,7 @@ Example to trace method::
             return "Hello %s!" % x
     obj = Hello()              # target object to trace
     ## how to trace method call
-    from oktest.helper import Tracer
+    from oktest.tracer import Tracer
     tr = Tracer()              # create tracer object
     tr.trace(obj, 'hello')     # trace method
     obj.hello('John')          # call target method
@@ -314,7 +314,7 @@ It is possible to trace several function or method calls.
     obj = Hello()
     ## trace both function and method
     import oktest
-    from oktest.helper import Tracer
+    from oktest.tracer import Tracer
     tr = Tracer()
     greeting = tr.trace(greeting)  # trace function
     tr.trace(obj, 'hello')         # trace method
@@ -332,7 +332,7 @@ Example to fake function or method calls::
             return x+2
     obj = Example()
     ## create trace object
-    from oktest.helper import Tracer
+    from oktest.tracer import Tracer
     tr = Tracer()
     ## fake f1 function
     def fake_f1(original_func, *args):
@@ -352,7 +352,7 @@ Example to fake function or method calls::
 
 Example to fake an object::
 
-    from oktest.helper import Tracer
+    from oktest.tracer import Tracer
     tr = Tracer()
     ## create fake object
     obj1 = tr.fake_obj(f1=lambda self, x: x+1)  # method_name=function

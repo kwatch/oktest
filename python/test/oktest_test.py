@@ -1102,7 +1102,7 @@ if with_statement_supported:
 desc = "Tracer (function)"
 script = r"""
 from oktest import *
-from oktest.helper import Tracer
+from oktest.tracer import Tracer
 def f1(a, b):
     return f2(a + f3(b))
 def f2(a):
@@ -1129,7 +1129,7 @@ do_test_with(desc, script, expected)
 desc = "Tracer (instance method)"
 script = r"""
 from oktest import *
-from oktest.helper import Tracer
+from oktest.tracer import Tracer
 class Dummy(object):
     def f1(self, x, y):
         return [self.f2(x, y=y),
@@ -1156,7 +1156,7 @@ do_test_with(desc, script, expected)
 desc = "Tracer (class method)"
 script = r"""
 from oktest import *
-from oktest.helper import Tracer
+from oktest.tracer import Tracer
 class Dummy(object):
     @classmethod
     def f1(cls, x, y):
@@ -1186,7 +1186,7 @@ do_test_with(desc, script, expected)
 desc = "Tracer (fake_func)"
 script = r"""
 from oktest import *
-from oktest.helper import Tracer
+from oktest.tracer import Tracer
 def f(x, y, z=0):
     return x + y + z
 def block(orig, *args, **kwargs):
@@ -1265,7 +1265,7 @@ desc = "FakeObject"
 script = r"""
 import sys
 from oktest import *
-from oktest.helper import Tracer
+from oktest.tracer import Tracer
 class FakeObjectTest(object):
     def test_dummy(self):
         tr = Tracer()
