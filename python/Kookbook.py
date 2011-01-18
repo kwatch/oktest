@@ -63,6 +63,37 @@ def _do_for_all_version(c, command):
                 mv(fpath+'.bkup', fpath)
 
 @recipe
+@ingreds('test/doc_test.py')
+@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2a2")
+def task_doc_test(c, *args, **kwargs):
+    """invoke 'test/doc_test.py'"""
+    if kwargs.get('a', None):
+        _do_for_all_version(c, '$(python) ' + c.ingred)
+    else:
+        system(c%'python $(ingred)')
+
+@recipe
+@product('test/doc_test.py')
+@ingreds('lib/oktest.py')
+def file_document_test(c):
+    import oktest
+    doc = oktest.tracer.Tracer.__doc__
+    s = '\n\n' + re.split(r'\n\s*\n', doc, 1)[1]
+    def fn(m):
+        return '\n\nif "' + m.group(1) + '":\n'
+        #meth_name = 'test_' + re.sub(r'[^\w]', '_', m.group(1))
+        #return '\n\n    def test_%s(self):\n' % meth_name
+    body = re.sub(r'\n\s*?ex\. ?(.*?)\n', fn, s)
+    #
+    f = open(c.product, 'w')
+    w = f.write
+    w("import re\n")
+    w("from oktest import ok\n")
+    w("\n")
+    w(body)
+    f.close()
+
+@recipe
 def task_edit(c):
     """update $Release$, $Copyrigh$, and $License$ in files"""
     def replacer(s):
