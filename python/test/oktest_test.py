@@ -1390,10 +1390,10 @@ class FakeObjectTest(object):
         ok (tr[1].kwargs) == {}
         ok (tr[1].ret   ) == 'Hi!'
         ## __iter__() and __eq__()
-        ok (list(tr[0]))  == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
-        ok (tr[0])        == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
-        ok (tuple(tr[1])) == (obj1, 'hi', (), {}, 'Hi!')
-        ok (tr[1])        == (obj1, 'hi', (), {}, 'Hi!')
+        ok (tr[0].list())  == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
+        ok (tr[0])         == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
+        ok (tr[1].tuple()) == (obj1, 'hi', (), {}, 'Hi!')
+        ok (tr[1])         == (obj1, 'hi', (), {}, 'Hi!')
 run()
 """[1:]
 expected = """

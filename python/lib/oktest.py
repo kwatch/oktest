@@ -968,6 +968,12 @@ def _dummy():
             yield self.kwargs
             yield self.ret
 
+        def list(self):
+            return list(self)
+
+        def tuple(self):
+            return tuple(self)
+
         def __eq__(self, other):
             if isinstance(other, list):
                 return list(self) == other
