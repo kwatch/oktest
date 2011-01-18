@@ -1164,10 +1164,10 @@ def _dummy():
                     setattr(newfunc, k, getattr(func, k))
 
         def _wrap_func(self, func, block):
-            intr = self
+            tr = self
             def newfunc(*args, **kwargs):                # no 'self'
                 call = Call(_func_name(func), args, kwargs, None)
-                intr.calls.append(call)
+                tr.calls.append(call)
                 if block:
                     ret = block(func, *args, **kwargs)
                 else:
@@ -1180,10 +1180,10 @@ def _dummy():
 
         def _wrap_method(self, method_obj, block):
             func = method_obj
-            intr = self
+            tr = self
             def newfunc(self, *args, **kwargs):          # has 'self'
                 call = Call(_func_name(func), args, kwargs, None)
-                intr.calls.append(call)
+                tr.calls.append(call)
                 if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
                 if block:
                     ret = block(func, *args, **kwargs)
@@ -1205,9 +1205,9 @@ def _dummy():
 
         def trace_method(self, obj, *method_names):
             for method_name in method_names:
-                if not hasattr(obj, method_name):
+                method_obj = getattr(obj, method_name, None)
+                if method_obj is None:
                     raise ValueError("%s: no method found on %r." % (method_name, obj))
-                method_obj = getattr(obj, method_name)
                 setattr(obj, method_name, self._wrap_method(method_obj, None))
             return None
 
