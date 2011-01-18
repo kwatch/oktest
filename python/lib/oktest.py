@@ -1184,11 +1184,18 @@ def _dummy():
             return None
 
         def fake_method(self, obj, **kwargs):
+            def _new_block(ret_val):
+                def _block(*args, **kwargs):
+                    return ret_val
+                return _block
             for method_name in kwargs:
                 #if not hasattr(obj, method_name):
                 #    raise ValueError("%s: no method found on %r." % (method_name, obj))
                 method_obj = getattr(obj, method_name, None)
-                setattr(obj, method_name, self._wrap_method(method_obj, kwargs[method_name]))
+                block = kwargs[method_name]
+                if not isinstance(block, types.FunctionType):
+                    block = _new_block(block)
+                setattr(obj, method_name, self._wrap_method(method_obj, block))
             return None
 
         def trace(self, target, *args):

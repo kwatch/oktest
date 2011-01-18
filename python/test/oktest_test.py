@@ -1202,12 +1202,19 @@ print('---')
 class Hello(object):
     def hello(self, name):
         return 'Hello %s!' % name
+    def hi(self):
+        pass
 obj = Hello()
-tr.fake_method(obj, hello=block)
+tr.fake_method(obj, hello=block, hi="Hi!")
 print(obj.hello('World'))  #=> v=Hello World!
 print(tr[1].args)     #=> ('World',)
 print(tr[1].kwargs)   #=> {}
 print(tr[1].ret)      #=> v=Hello World!
+print('---')
+print(obj.hi('SOS'))  #=> Hi!
+print(tr[2].args)     #=> ('SOS',)
+print(tr[2].kwargs)   #=> {}
+print(tr[2].ret)      #=> Hi!
 """[1:]
 expected = """
 v=37
@@ -1219,6 +1226,11 @@ v=Hello World!
 ('World',)
 {}
 v=Hello World!
+---
+Hi!
+('SOS',)
+{}
+Hi!
 """[1:]
 do_test_with(desc, script, expected)
 
