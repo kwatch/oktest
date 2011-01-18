@@ -985,6 +985,9 @@ def _dummy():
             else:
                 return False
 
+        def __ne__(self, other):
+            return not self.__eq__(other)
+
 
     class FakeObject(object):
         """dummy object class which can be stub or mock object.
