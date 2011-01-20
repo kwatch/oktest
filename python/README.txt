@@ -39,10 +39,10 @@ Installation::
 
     ## if you have installed easy_install:
     $ sudo easy_install Oktest
-    ## or download Oktest-$Release$.tar.gz and install it
-    $ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-$Release$.tar.gz
-    $ tar xzf Oktest-$Release$.tar.gz
-    $ cd Oktest-$Release$/
+    ## or download Oktest-0.6.0.tar.gz and install it
+    $ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.6.0.tar.gz
+    $ tar xzf Oktest-0.6.0.tar.gz
+    $ cd Oktest-0.6.0/
     $ sudo python setup.py install
 
 
@@ -257,13 +257,14 @@ Notice that this feature is only available with oktest.run() and not available w
 Tracer
 ======
 
-Oktest provides Tracer class which can:
+Oktest provides ``Tracer`` class which can be stub or mock object.
+``Tracer`` class can:
 
 * Create fake object.
 * Trace method or function call.
 * Fake method, or function.
 
-In any case, Tracer object records both arguments and return-value of method or function calls.
+In any case, ``Tracer`` object records both arguments and return-value of method or function calls.
 
 Example to create fake object::
 

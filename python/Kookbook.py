@@ -100,6 +100,7 @@ def task_edit(c):
         s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
         s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
         s = re.sub(r'\$License:[^%]*?\$',    '$License: %s $'   % license,   s)
+        s = re.sub(r'%s-\d+\.\d+\.\d+' % package, '%s-%s' % (package, release), s)
         return s
     filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
