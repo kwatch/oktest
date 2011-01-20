@@ -8,8 +8,10 @@ $Release: 0.6.0 $
 Release 0.6.0
 -------------
 
-* enhanced to add 'Tracer' and 'FakeObject' class. see README for details.
+* enhanced to add 'oktest.tracer.Tracer' class. see README for details.
 * change 'run()' to sort classes order by lineno in source file.
+* change default argument of 'run()' from '.*Test(Case)$' to
+  '.*(Test|TestCase|_TC)$'.
 
 
 Release 0.5.0
