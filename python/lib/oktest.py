@@ -428,7 +428,7 @@ class TestRunner(object):
 TEST_RUNNER = TestRunner
 
 
-TARGET_PATTERN = '.*Test(Case)?$'
+TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
 
 def run(*targets):
     if len(targets) == 0:
