@@ -1344,7 +1344,7 @@ do_test_with(desc, script, expected)
 desc = "FakeObject class"
 script = r"""
 from oktest import *
-from oktest.helper import FakeObject
+from oktest.tracer import FakeObject
 class FakeObjectTest(object):
     def test_fake_object(self):
         obj = FakeObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
