@@ -160,7 +160,7 @@ class AssertionObject(object):
         diff = None
         if isinstance(msg, tuple):
             msg, diff = msg
-        if self._bool == False:
+        if self._bool is False:
             msg = 'not ' + msg
         if postfix:
             msg += postfix
