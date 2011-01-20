@@ -103,7 +103,7 @@ test_example.py::
         ## or
         #run(r'.*Test$')  # specify class names by regular expression
         ## or
-        #run()            # same as run(r'.*Test(Case)?$')
+        #run()            # same as run(r'.*(Test|TestCase|_TC)$')
 
 
 NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
@@ -392,20 +392,23 @@ run(\*classes)
 	    import oktest
 	    oktest.run(FooTest, BarTest)  # invokes FooTest and BarTest
 	    oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
-	    oktest.run()                  # same as oktest.run('.*Test(Case)$')
+	    oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 
 spec(description)
 	Represents spec description. This is just a marker function, but very useful for readability.
-	**It is strongly recommended to use spec() helper for readability of tests.** ::
+	**It is recommended to use spec() helper for readability of tests.** ::
 
 	    class NumericTest(object):
 	        def test_integer(self):
-		    with spec("1+1 should be equal to 2."):
-		        ok (1+1) == 2
-		    with spec("1/0 should be error."):
-		        def f(): 1/0
-			ok (f).raises(ZeroDivisionError,
-			              "integer division or modulo by zero")
+	            with spec("1+1 should be equal to 2."):
+	                ok (1+1) == 2
+	            with spec("1/0 should be error."):
+	                def f(): 1/0
+	                ok (f).raises(ZeroDivisionError,
+	                              "integer division or modulo by zero")
+	            ## tips: 'for' statement is available instead of 'with' for Python 2.4
+	            for _ in spec("1+1 should be equal to 2."):
+	                ok (1+1) == 2
 
 
 ``oktest.helper`` module
@@ -414,11 +417,11 @@ spec(description)
 chdir(dirname)
 	Change current directory to dirname temporarily. ::
 
-            import os
+	    import os
 	    cwd = os.getcwd()                         # current working directory
 	    with oktest.chdir("/var/tmp"):
 	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
-		# do something
+	        # do something
 	    assert os.getcwd() == cwd                 # back to the original place
 
 Tracer()
