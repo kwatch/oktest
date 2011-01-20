@@ -958,7 +958,7 @@ def _dummy():
                 a("%s=%s" % (k, repr(self.kwargs[k])))
                 a(", ")
             if buf[-1] == ", ":  buf.pop()
-            a("): %s" % repr(self.ret))
+            a(") #=> %s" % repr(self.ret))
             return "".join(buf)
 
         def __iter__(self):

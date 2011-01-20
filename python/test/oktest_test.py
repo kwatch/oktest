@@ -1126,21 +1126,21 @@ for call in tr:
 expected = """
 15
 ---
-f1(3, 5): 15
+f1(3, 5) #=> 15
 None
 'f1'
 (3, 5)
 {}
 15
 ---
-f3(5): 10
+f3(5) #=> 10
 None
 'f3'
 (5,)
 {}
 10
 ---
-f2(13): 15
+f2(13) #=> 15
 None
 'f2'
 (13,)
@@ -1177,21 +1177,21 @@ for call in tr:
 expected = """
 [2, -2]
 ---
-f1(5, 3): [2, -2]
+f1(5, 3) #=> [2, -2]
 True
 'f1'
 (5, 3)
 {}
 [2, -2]
 ---
-f2(5, y=3): 2
+f2(5, y=3) #=> 2
 True
 'f2'
 (5,)
 {'y': 3}
 2
 ---
-f2(3, y=5): -2
+f2(3, y=5) #=> -2
 True
 'f2'
 (3,)
@@ -1230,21 +1230,21 @@ for call in tr:
 expected = """
 ['Dummy', 2, -2]
 ---
-f1(5, 3): ['Dummy', 2, -2]
+f1(5, 3) #=> ['Dummy', 2, -2]
 True
 'f1'
 (5, 3)
 {}
 ['Dummy', 2, -2]
 ---
-f2(5, y=3): 2
+f2(5, y=3) #=> 2
 True
 'f2'
 (5,)
 {'y': 3}
 2
 ---
-f2(3, y=5): -2
+f2(3, y=5) #=> -2
 True
 'f2'
 (3,)
@@ -1266,7 +1266,7 @@ def block(orig, *args, **kwargs):
 tr = Tracer()
 f = tr.fake_func(f, block)
 print(f(10, 20, z=7))  #=> 'v=37'
-print(repr(tr[0]))   #=> f(10, 20, z=7): 'v=37'
+print(repr(tr[0]))   #=> f(10, 20, z=7) #=> 'v=37'
 print(tr[0].receiver is None)  #=> True
 print(tr[0].name)    #=> f
 print(tr[0].args)    #=> (10, 20)
@@ -1281,7 +1281,7 @@ class Hello(object):
 obj = Hello()
 tr.fake_method(obj, hello=block, hi="Hi!", ya="Ya!")
 print(obj.hello('World'))  #=> v=Hello World!
-print(repr(tr[1]))    #=> hello('World'): 'v=Hello World!'
+print(repr(tr[1]))    #=> hello('World') #=> 'v=Hello World!'
 print(tr[1].receiver is obj)  #=> True
 print(tr[1].name)     #=> hello
 print(tr[1].args)     #=> ('World',)
@@ -1289,7 +1289,7 @@ print(tr[1].kwargs)   #=> {}
 print(tr[1].ret)      #=> v=Hello World!
 print('---')
 print(obj.hi('SOS'))  #=> Hi!
-print(repr(tr[2]))    #=> hi('SOS'): 'Hi!'
+print(repr(tr[2]))    #=> hi('SOS') #=> 'Hi!'
 print(tr[2].receiver is obj)  #=> True
 print(tr[2].name)     #=> hi
 print(tr[2].args)     #=> ('SOS',)
@@ -1297,7 +1297,7 @@ print(tr[2].kwargs)   #=> {}
 print(tr[2].ret)      #=> Hi!
 print('---')
 print(obj.ya('SOS'))  #=> Ya!
-print(repr(tr[3]))    #=> ya('SOS'): 'Ya!'
+print(repr(tr[3]))    #=> ya('SOS') #=> 'Ya!'
 print(tr[3].receiver is obj)  #=> True
 print(tr[3].name)     #=> ya
 print(tr[3].args)     #=> ('SOS',)
@@ -1306,7 +1306,7 @@ print(tr[3].ret)      #=> Ya!
 """[1:]
 expected = """
 v=37
-f(10, 20, z=7): 'v=37'
+f(10, 20, z=7) #=> 'v=37'
 True
 f
 (10, 20)
@@ -1314,7 +1314,7 @@ f
 v=37
 ---
 v=Hello World!
-hello('World'): 'v=Hello World!'
+hello('World') #=> 'v=Hello World!'
 True
 hello
 ('World',)
@@ -1322,7 +1322,7 @@ hello
 v=Hello World!
 ---
 Hi!
-hi('SOS'): 'Hi!'
+hi('SOS') #=> 'Hi!'
 True
 hi
 ('SOS',)
@@ -1330,7 +1330,7 @@ hi
 Hi!
 ---
 Ya!
-ya('SOS'): 'Ya!'
+ya('SOS') #=> 'Ya!'
 True
 ya
 ('SOS',)
