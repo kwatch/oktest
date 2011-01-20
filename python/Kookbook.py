@@ -74,23 +74,23 @@ def task_doc_test(c, *args, **kwargs):
 
 @recipe
 @product('test/doc_test.py')
-@ingreds('lib/oktest.py')
-def file_document_test(c):
-    import oktest
-    doc = oktest.tracer.Tracer.__doc__
-    s = '\n\n' + re.split(r'\n\s*\n', doc, 1)[1]
-    def fn(m):
-        return '\n\nif "' + m.group(1) + '":\n'
-        #meth_name = 'test_' + re.sub(r'[^\w]', '_', m.group(1))
-        #return '\n\n    def test_%s(self):\n' % meth_name
-    body = re.sub(r'\n\s*?ex\. ?(.*?)\n', fn, s)
+@ingreds('README.txt')
+def file_doc_test_py(c):
+    cont = open(c.ingred).read()
+    pat = r'\n(Tracer\n=+\n.*?)\nHelpers Reference'
+    m = re.compile(pat, re.S).search(cont)
+    s = m.group(1)
+    s = re.compile(r'^(\S)', re.M).sub(r'#\1', s)
     #
     f = open(c.product, 'w')
-    w = f.write
-    w("import re\n")
-    w("from oktest import ok\n")
-    w("\n")
-    w(body)
+    f.write(
+        "import re\n"
+        "from oktest import ok\n"
+        "\n"
+        "if True:\n"
+        "\n"
+    )
+    f.write(s)
     f.close()
 
 @recipe
