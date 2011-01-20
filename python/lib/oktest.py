@@ -1041,20 +1041,6 @@ def _dummy():
         def __getitem__(self, index):
             return self.calls[index]
 
-        def called(self):
-            return len(self.calls) > 0
-
-        def _attr(name):
-            def f(self):
-                if len(self.calls) == 0: return None
-                return getattr(self.calls[0], name, None)
-            return f
-
-        name   = property(_attr('name'))
-        args   = property(_attr('args'))
-        kwargs = property(_attr('kwargs'))
-        ret    = property(_attr('ret'))
-
         def __len__(self):
             return len(self.calls)
 
