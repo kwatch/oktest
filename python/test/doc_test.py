@@ -6,13 +6,14 @@ if True:
 #Tracer
 #======
 
-#Oktest provides Tracer class which can:
+#Oktest provides ``Tracer`` class which can be stub or mock object.
+#``Tracer`` class can:
 
 #* Create fake object.
 #* Trace method or function call.
 #* Fake method, or function.
 
-#In any case, Tracer object records both arguments and return-value of method or function calls.
+#In any case, ``Tracer`` object records both arguments and return-value of method or function calls.
 
 #Example to create fake object::
 
