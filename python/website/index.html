@@ -104,7 +104,7 @@ if __name__ == '__main__':
     ## or
     #run(r'.*Test$')  # specify class names by regular expression
     ## or
-    #run()            # same as run(r'.*Test(Case)?$')
+    #run()            # same as run(r'.*(Test|TestCase|_TC)$')
 </pre>
 <p>NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
 See the example at the bottom of this document.</p>
@@ -240,110 +240,124 @@ Failed: FooTest#test1()
 <div class="section" id="tracer">
 
 <h2>Tracer</h2>
-<p>Oktest provides Tracer class which provides:</p>
+<p>Oktest provides Tracer class which can:</p>
 <ul class="simple">
-<li>Mock feature: trace function or method call, and record both arguments and return-value.</li>
-<li>Stub feature: fake function, method, or object</li>
+<li>Create fake object.</li>
+<li>Trace method or function call.</li>
+<li>Fake method, or function.</li>
 </ul>
-<p>Example to trace function:</p>
+<p>In any case, Tracer object records both arguments and return-value of method or function calls.</p>
+<p>Example to create fake object:</p>
 <pre class="literal-block">
-def hello(x):
-    return &quot;Hello %s!&quot; % x
-## how to trace function call
-from oktest.helper import Tracer
-tr = Tracer()              # create Tracer object
-hello = tr.trace(hello)    # trace target function
-hello(&quot;John&quot;)              # call target function
-## show result
-print(tr[0].name)     #=&gt; 'hello'
-print(tr[0].args)     #=&gt; ('John',)
-print(tr[0].kwargs)   #=&gt; {}
-print(tr[0].ret)      #=&gt; 'Hello John!'
-print(repr(tr[0]))    #=&gt; hello(args=('John',), kwargs={}, ret='Hello John!')
-print(list(tr[0]))    #=&gt; ['hello', ('John',), {}, 'Hello John!']
-print(tr[0] == ['hello', ('John',), {}, 'Hello John!'])   #=&gt; True
-</pre>
-<p>Example to trace method:</p>
-<pre class="literal-block">
-class Hello(object):
-    def hello(self, x):
-        return &quot;Hello %s!&quot; % x
-obj = Hello()              # target object to trace
-## how to trace method call
-from oktest.helper import Tracer
-tr = Tracer()              # create tracer object
-tr.trace(obj, 'hello')     # trace method
-obj.hello('John')          # call target method
-## show result
-print(tr[0].name)     #=&gt; 'hello'
-print(tr[0].args)     #=&gt; ('John',)
-print(tr[0].kwargs)   #=&gt; {}
-print(tr[0].ret)      #=&gt; 'Hello John!'
-print(list(tr[0]))    #=&gt; ['hello', ('John',), {}, 'Hello John!']
-</pre>
-<p>If you want to trace several methods, specify them into tr.trace().</p>
-<pre class="literal-block">
-tr.trace(obj, 'method1', 'method2', 'method3')
-</pre>
-<p>It is possible to trace several function or method calls.</p>
-<pre class="literal-block">
-def greeting(name):
-    return &quot;Hi %s!&quot; % name
-class Hello(object):
-    def hello(self, x):
-        return greeting(x) + ' How are you?'
-obj = Hello()
-## trace both function and method
-import oktest
-from oktest.helper import Tracer
+## create fake objects
+from oktest.tracer import Tracer
 tr = Tracer()
-greeting = tr.trace(greeting)  # trace function
-tr.trace(obj, 'hello')         # trace method
-obj.hello('John')
-## show result
-print(list(tr[0]))  #=&gt; ['hello', ('John',), {}, 'Hi John! How are you?']
-print(repr(tr[1]))  #=&gt; ['greeting', ('John',), {}, 'Hi John!']
+foo = tr.fake_obj(m1=100, m2=200)
+bar = tr.fake_obj(m3=lambda self, x: x+1)
+## call fake methods
+ok (bar.m3(0))     == 1
+ok (foo.m2(1,2,3)) == 200
+ok (foo.m1(x=123)) == 100
+## check results
+ok (repr(tr[0]))   == 'm3(0) #=&gt; 1'
+ok (repr(tr[1]))   == 'm2(1, 2, 3) #=&gt; 200'
+ok (repr(tr[2]))   == 'm1(x=123) #=&gt; 100'
 </pre>
-<p>Example to fake function or method calls:</p>
+<p>There are several ways to check results:</p>
 <pre class="literal-block">
-def f1(x):
+from oktest.tracer import Tracer
+tr = Tracer()
+obj = tr.fake_obj(meth=9)
+ok (obj.meth(1, 2, x=3)) == 9
+## check results
+ok (repr(tr[0]))  == 'meth(1, 2, x=3) #=&gt; 9'
+## or
+ok (tr[0].list()) == [obj, 'meth', (1, 2), {'x': 3}, 9]
+## or
+ok (tr[0])        == [obj, 'meth', (1, 2), {'x': 3}, 9]
+## or
+ok (tr[0].receiver).is_(obj)
+ok (tr[0].name)   == 'meth'
+ok (tr[0].args)   == (1, 2)
+ok (tr[0].kwargs) == {'x': 3}
+ok (tr[0].ret)    == 9
+</pre>
+<p>Example to trace method call:</p>
+<pre class="literal-block">
+class Foo(object):
+    def m1(self, x):
+        return x + 1
+    def m2(self, y):
+        return y + 1
+obj = Foo()
+## trace methods
+from oktest.tracer import Tracer
+tr = Tracer()
+def dummy(original_func, *args, **kwargs):
+    #return original_func(*args, **kwargs)
+    return 100
+tr.fake_method(obj, m1=dummy, m2=200)
+## call methods
+ok (obj.m1(1)) == 100
+ok (obj.m2(2)) == 200
+## check results
+ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
+ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+</pre>
+<p>Example to trace function call:</p>
+<pre class="literal-block">
+def f(x):
     return x+1
-class Example(object):
-    def f2(self, x):
-        return x+2
-obj = Example()
-## create trace object
-from oktest.helper import Tracer
+def g(y):
+    return f(y+1) + 1
+## trace functions
+from oktest.tracer import Tracer
 tr = Tracer()
-## fake f1 function
-def fake_f1(original_func, *args):
-    v = original_func(*args)
-    return v+10
-f1 = tr.fake_func(f1, fake_f1)
-## fake f2 method
-def fake_f2(self, x):
-    return x+20
-tr.fake_method(obj, f2=fake_f2)
-## call target function and method
-print(f1(1))          #=&gt; 12
-print(obj.f2(2))      #=&gt; 22
-## traced data
-print(list(tr[0]))    #=&gt; ['f1', (1,), {}, 12]
-print(list(tr[1]))    #=&gt; ['f2', (2,), {}, 22]
+f = tr.trace_func(f)
+g = tr.trace_func(g)
+## call functions
+ok (g(0)) == 3
+## check results
+ok (tr[0]) == [None, 'g', (0,), {}, 3]
+ok (tr[1]) == [None, 'f', (1,), {}, 2]
 </pre>
-<p>Example to fake an object:</p>
+<p>Example to fake method call:</p>
 <pre class="literal-block">
-from oktest.helper import Tracer
+class Foo(object):
+    def m1(self, x):
+        return x + 1
+    def m2(self, y):
+        return y + 1
+obj = Foo()
+## fake methods
+from oktest.tracer import Tracer
 tr = Tracer()
-## create fake object
-obj1 = tr.fake_obj(f1=lambda self, x: x+1)  # method_name=function
-obj2 = tr.fake_obj(hello=&quot;Hello!&quot;)          # or method_name=return_value
-## call fake method
-print(obj2.hello(&quot;John&quot;))  #=&gt; 'Hello!'
-print(obj1.f1(10))         #=&gt; 11
-## check result
-print(list(tr[0]))         #=&gt; ['hello', ('John',), {}, 'Hello!']
-print(list(tr[1]))         #=&gt; ['f1', (10,), {}, 11]
+def dummy(original_func, *args, **kwargs):
+    #return original_func(*args, **kwargs)
+    return 100
+tr.fake_method(obj, m1=dummy, m2=200)
+## call method
+ok (obj.m1(1)) == 100
+ok (obj.m2(2)) == 200
+## check results
+ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
+ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+</pre>
+<p>Example to fake function call:</p>
+<pre class="literal-block">
+def f(x):
+    return x*2
+## fake a function
+def dummy(original_func, x):
+    #return original_func(x)
+    return 'x=%s' % repr(x)
+from oktest.tracer import Tracer
+tr = Tracer()
+f = tr.fake_func(f, dummy)
+## call function
+ok (f(3))  == 'x=3'
+## check results
+ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 </pre>
 </div>
 <div class="section" id="helpers-reference">
@@ -360,12 +374,12 @@ Argument can be regular expression string.</p>
 import oktest
 oktest.run(FooTest, BarTest)  # invokes FooTest and BarTest
 oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
-oktest.run()                  # same as oktest.run('.*Test(Case)$')
+oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 </pre>
 </dd>
 <dt>spec(description)</dt>
 <dd><p class="first">Represents spec description. This is just a marker function, but very useful for readability.
-<strong>It is strongly recommended to use spec() helper for readability of tests.</strong></p>
+<strong>It is recommended to use spec() helper for readability of tests.</strong></p>
 <pre class="last literal-block">
 class NumericTest(object):
     def test_integer(self):
@@ -375,6 +389,9 @@ class NumericTest(object):
             def f(): 1/0
             ok (f).raises(ZeroDivisionError,
                           &quot;integer division or modulo by zero&quot;)
+        ## tips: 'for' statement is available instead of 'with' for Python 2.4
+        for _ in spec(&quot;1+1 should be equal to 2.&quot;):
+            ok (1+1) == 2
 </pre>
 </dd>
 </dl>
