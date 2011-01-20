@@ -935,7 +935,7 @@ del _dummy
 ##
 def _dummy():
 
-    __all__ = ('Tracer', 'FakeObject')
+    __all__ = ('Tracer', )
 
 
     class Call(object):
@@ -990,21 +990,6 @@ def _dummy():
 
 
     class FakeObject(object):
-        """dummy object class which can be stub or mock object.
-           ex.
-              from oktest.helper import FakeObject
-              obj = FakeObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
-              obj.hi()           #=> 'Hi'
-              obj.hello("SOS")   #=> 'Hello SOS!'
-              obj._calls[0].name    #=> 'hi'
-              obj._calls[0].args    #=> ()
-              obj._calls[0].kwargs  #=> {}
-              obj._calls[0].ret     #=> 'Hi'
-              obj._calls[1].name    #=> 'hello'
-              obj._calls[1].args    #=> ('SOS', )
-              obj._calls[1].kwargs  #=> {}
-              obj._calls[1].ret     #=> 'Hello SOS!'
-        """
 
         def __init__(self, **kwargs):
             self._calls = self.__calls = []
