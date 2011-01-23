@@ -5,4 +5,5 @@ MIT-LICENSE
 README.txt
 setup.py
 lib/oktest.py
+test/doc_test.py
 test/oktest_test.py

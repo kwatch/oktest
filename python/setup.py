@@ -16,7 +16,7 @@ else:
 
 
 name     = 'Oktest'
-version  = '0.5.0'
+version  = '0.6.0'
 author   = 'makoto kuwata'
 email    = 'kwa@kuwata-lab.com'
 maintainer = author
