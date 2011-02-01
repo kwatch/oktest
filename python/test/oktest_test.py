@@ -1328,6 +1328,33 @@ True
 """[1:]
 do_test_with(desc, script, expected)
 
+### Tracer (repr style)
+desc = "Tracer (repr style)"
+script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+class Dummy(object):
+    def f1(self, *args, **kwargs):
+        return 1
+    def __repr__(self):
+        return '#<Dummy>'
+tr = Tracer()
+obj = Dummy()
+tr.trace_method(obj, 'f1')
+obj.f1(10,20,x=30)
+print(repr(tr[0]))
+tr[0] == []
+print(repr(tr[0]))
+tr[0] == ()
+print(repr(tr[0]))
+"""[1:]
+expected = """
+f1(10, 20, x=30) #=> 1
+[#<Dummy>, 'f1', (10, 20), {'x': 30}, 1]
+(#<Dummy>, 'f1', (10, 20), {'x': 30}, 1)
+"""[1:]
+do_test_with(desc, script, expected)
+
 ### Tracer (fake)
 desc = "Tracer (fake_func)"
 script = r"""

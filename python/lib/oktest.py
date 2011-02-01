@@ -947,6 +947,8 @@ def _dummy():
 
     class Call(object):
 
+        __repr_style = None
+
         def __init__(self, receiver=None, name=None, args=None, kwargs=None, ret=None):
             self.receiver = receiver
             self.name   = name     # method name
@@ -956,6 +958,10 @@ def _dummy():
 
         def __repr__(self):
             #return '%s(args=%r, kwargs=%r, ret=%r)' % (self.name, self.args, self.kwargs, self.ret)
+            if self.__repr_style == 'list':
+                return repr(self.list())
+            if self.__repr_style == 'tuple':
+                return repr(self.tuple())
             buf = []; a = buf.append
             a("%s(" % self.name)
             for arg in self.args:
@@ -983,8 +989,10 @@ def _dummy():
 
         def __eq__(self, other):
             if isinstance(other, list):
+                self.__repr_style = 'list'
                 return list(self) == other
             elif isinstance(other, tuple):
+                self.__repr_style = 'tuple'
                 return tuple(self) == other
             elif isinstance(other, self.__class__):
                 return self.name == other.name and self.args == other.args \
