@@ -313,7 +313,7 @@ class AssertionObject(object):
         return self._raise_or_not(exception_class, errmsg, self._bool)
 
     @assertion_op
-    def not_raise(self, exception_class=Exception):  # DEPRECATED
+    def not_raise(self, exception_class=Exception):
         return self._raise_or_not(exception_class, None, not self._bool)
 
     def _raise_or_not(self, exception_class, errmsg, flag_raise):
