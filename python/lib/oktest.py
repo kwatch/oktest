@@ -79,6 +79,8 @@ __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
 #        self.diff = diff
 #
 
+ASSERTION_ERROR = AssertionError
+
 
 def ex2msg(ex):
     #return ex.message   # deprecated since Python 2.6
@@ -168,7 +170,7 @@ class AssertionObject(object):
 
     def _assertion_error(self, msg, file, line, diff):
         #return TestFailed(msg, file=file, line=line, diff=diff)
-        ex = AssertionError(msg)
+        ex = ASSERTION_ERROR(msg)
         ex.file = file;  ex.line = line;  ex.diff = diff
         ex._raised_by_oktest = True
         return ex
@@ -423,7 +425,7 @@ class TestRunner(object):
                     func(obj)
                     self.reporter.print_ok(obj)
                 #except TestFailed, ex:
-                except AssertionError:
+                except ASSERTION_ERROR:
                     ex = sys.exc_info()[1]
                     if not hasattr(ex, '_raised_by_oktest'):
                         raise
