@@ -170,6 +170,7 @@ class AssertionObject(object):
         #return TestFailed(msg, file=file, line=line, diff=diff)
         ex = AssertionError(msg)
         ex.file = file;  ex.line = line;  ex.diff = diff
+        ex._raised_by_oktest = True
         return ex
 
     @assertion_op
@@ -406,6 +407,8 @@ class TestRunner(object):
                 #except TestFailed, ex:
                 except AssertionError:
                     ex = sys.exc_info()[1]
+                    if not hasattr(ex, '_raised_by_oktest'):
+                        raise
                     count += 1
                     reporter.print_failed(obj, ex)
                 except Exception:
