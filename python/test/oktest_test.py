@@ -523,6 +523,32 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 ###
+desc = "op 'raises' (skip AssertionError)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_skip_assert(self):
+        def f():
+            assert 1 == 2
+            raise ValueError('errmsg1')
+        ok (f).raises(ValueError)
+try:
+    run(FooTest)
+except AssertionError:
+    import sys
+    ex = sys.exc_info()[1]
+    print("")
+    print("ex.__class__.__name__=%r" % ex.__class__.__name__)
+    print("str(ex)=%r" % str(ex))
+"""[1:]
+expected = r"""
+* FooTest.test_skip_assert ... 
+ex.__class__.__name__='AssertionError'
+str(ex)=''
+"""[1:]
+do_test_with(desc, script, expected)
+
+###
 desc = "op 'not raise'"
 script = r"""
 from oktest import *
@@ -554,6 +580,31 @@ expected = r"""
    _test_.py:18: ok (f).not_raise(ValueError)
 """[1:]
 do_test_with(desc, script, expected)
+
+###
+desc = "op 'not raise' (skip AssertionError)"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_skip_assert(self):
+        def f(): assert 1 == 0
+        ok (f).not_raise(Exception)              # Exception
+try:
+    run(FooTest)
+except AssertionError:
+    import sys
+    ex = sys.exc_info()[1]
+    print("")
+    print("ex.__class__.__name__=%r" % ex.__class__.__name__)
+    print("str(ex)=%r" % str(ex))
+"""[1:]
+expected = r"""
+* FooTest.test_skip_assert ... 
+ex.__class__.__name__='AssertionError'
+str(ex)=''
+"""[1:]
+do_test_with(desc, script, expected)
+
 
 ###
 desc = "op 'is_file', 'is_dir'"
@@ -683,6 +734,30 @@ expected = r"""
 * FooTest.test_1 ... [ok]
 * BarTestCase.test_2 ... [ok]
 * BazTestCase.test_3 ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+### run (skip AssertionError)
+desc = "run (skip AssertionError)"
+script = r"""
+from oktest import *
+class FooTestCase(object):
+    def test_1(self):
+        assert 1 != 1
+        ok (1+1) == 2
+try:
+    run()
+except Exception:
+    import sys
+    ex = sys.exc_info()[1]
+    print("")
+    print("ex.__class__.__name__=%r" % ex.__class__.__name__)
+    print("str(ex)=%r" % str(ex))
+"""
+expected = r"""
+* FooTestCase.test_1 ... 
+ex.__class__.__name__='AssertionError'
+str(ex)=''
 """[1:]
 do_test_with(desc, script, expected)
 
