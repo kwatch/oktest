@@ -317,32 +317,27 @@ class AssertionObject(object):
         return self._raise_or_not(exception_class, None, not self._bool)
 
     def _raise_or_not(self, exception_class, errmsg, flag_raise):
-        if flag_raise:
-            try:
-                self.value()
-            except:
-                ex = sys.exc_info()[1]
-                if isinstance(ex, AssertionError) and not hasattr(ex, '_raised_by_oktest'):
-                    raise
-                self.value.exception = ex
+        ex = None
+        try:
+            self.value()
+        except:
+            ex = sys.exc_info()[1]
+            if isinstance(ex, AssertionError) and not hasattr(ex, '_raised_by_oktest'):
+                raise
+            self.value.exception = ex
+            if flag_raise:
                 if not isinstance(ex, exception_class):
                     self._failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
                     #raise
-                if errmsg is None or str(ex) == errmsg:  # don't use ex2msg(ex)!
-                    return
-                #self._failed("expected %r but got %r" % (errmsg, str(ex)))
-                self._failed("%r == %r" % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
-            self._failed('%s should be raised' % exception_class.__name__, depth=3)
-        else:
-            try:
-                self.value()
-            except:
-                ex = sys.exc_info()[1]
-                if isinstance(ex, AssertionError) and not hasattr(ex, '_raised_by_oktest'):
-                    raise
-                self.value.exception = ex
+                if errmsg is not None and str(ex) != errmsg:   # don't use ex2msg(ex)!
+                    #self._failed("expected %r but got %r" % (errmsg, str(ex)))
+                    self._failed("%r == %r" % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
+            else:
                 if isinstance(ex, exception_class):
                     self._failed('%s should not be raised' % exception_class.__name__, depth=3)
+        else:
+            if flag_raise and ex is None:
+                self._failed('%s should be raised' % exception_class.__name__, depth=3)
 
 
 ASSERTION_OBJECT = AssertionObject
