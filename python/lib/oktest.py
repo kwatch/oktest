@@ -366,69 +366,81 @@ class TestRunner(object):
         if reporter is None:  reporter = REPORTER()
         self.reporter = reporter
 
-    def run(self):
-        klass = self.klass
-        reporter = self.reporter
-        ## gather test methods
-        tuples = []   # pairs of method name and function
-        for k in dir(klass):
-            v = getattr(klass, k)
+    def _test_name(self, name):
+        return re.sub(r'^test_?', '', name)
+
+    def _gather_test_methods(self):
+        pairs = []   # pairs of method name and function
+        for k in dir(self.klass):
+            v = getattr(self.klass, k)
             if k.startswith('test') and hasattr(v, '__call__'):
-                tuples.append((k, v))
+                pairs.append((k, v))
         ## filer by $TEST environment variable
         pattern = os.environ.get('TEST')
-        def _test_name(name):
-            return re.sub(r'^test_?', '', name)
         if pattern:
             regexp = re.compile(pattern)
-            tuples = [ t for t in tuples if regexp.search(_test_name(t[0])) ]
+            pairs = [ t for t in pairs if regexp.search(self._test_name(t[0])) ]
         ## sort by linenumber
-        tuples.sort(key=lambda t: _func_firstlineno(t[1]))
-        ## invoke before_all()
-        reporter.before_all(klass)
+        pairs.sort(key=lambda t: _func_firstlineno(t[1]))
+        return pairs
+
+    def _new_testcase_object(self, method_name, func):
+        try:
+            obj = self.klass()
+        except ValueError:     # unittest.TestCase raises ValueError
+            obj = self.klass(method_name)
+        obj.__name__ = self._test_name(method_name)
+        obj._testMethodName = method_name    # unittest.TestCase compatible
+        obj._testMethodDoc = func.__doc__    # unittest.TestCase compatible
+        return obj
+
+    def _invoke_before_all(self, klass):
+        self.reporter.before_all(klass)
         if hasattr(klass, 'before_all'):
             klass.before_all()
-        ## invoke test methods
+
+    def _invoke_before(self, obj):
+        self.reporter.before(obj)
+        if   hasattr(obj, 'before'):       obj.before()
+        elif hasattr(obj, 'before_each'):  obj.before_each()  # for backward compatibility
+        elif hasattr(obj, 'setUp'):        obj.setUp()
+
+    def _invoke_after(self, obj):
+        if   hasattr(obj, 'after'):       obj.after()
+        elif hasattr(obj, 'after_each'):  obj.after_each()  # for backward compatibility
+        elif hasattr(obj, 'tearDown'):    obj.tearDown()
+        self.reporter.after(obj)
+
+    def _invoke_after_all(self, klass):
+        if hasattr(klass, 'after_all'):
+            klass.after_all()
+        self.reporter.after_all(klass)
+
+    def run(self):
+        test_methods = self._gather_test_methods()
+        self._invoke_before_all(self.klass)
         count = 0
-        for method_name, func in tuples:
-            ## create instance object for each test
-            try:
-                obj = klass()
-            except ValueError:     # unittest.TestCase raises ValueError
-                obj = klass(method_name)
-            obj.__name__ = _test_name(method_name)
-            obj._testMethodName = method_name    # unittest.TestCase compatible
-            obj._testMethodDoc = func.__doc__    # unittest.TestCase compatible
-            ## invoke before() or setUp()
-            reporter.before(obj)
-            if   hasattr(obj, 'before'):       obj.before()
-            elif hasattr(obj, 'before_each'):  obj.before_each()  # for backward compatibility
-            elif hasattr(obj, 'setUp'):        obj.setUp()
+        for method_name, func in test_methods:
+            obj = self._new_testcase_object(method_name, func)
+            self._invoke_before(obj)
             try:
                 try:
                     func(obj)
-                    reporter.print_ok(obj)
+                    self.reporter.print_ok(obj)
                 #except TestFailed, ex:
                 except AssertionError:
                     ex = sys.exc_info()[1]
                     if not hasattr(ex, '_raised_by_oktest'):
                         raise
                     count += 1
-                    reporter.print_failed(obj, ex)
+                    self.reporter.print_failed(obj, ex)
                 except Exception:
                     ex = sys.exc_info()[1]
                     count += 1
-                    reporter.print_error(obj, ex)
+                    self.reporter.print_error(obj, ex)
             finally:
-                ## invoke after() or tearDown()
-                if   hasattr(obj, 'after'):       obj.after()
-                elif hasattr(obj, 'after_each'):  obj.after_each()  # for backward compatibility
-                elif hasattr(obj, 'tearDown'):    obj.tearDown()
-                reporter.after(obj)
-        ## invoke after_all()
-        if hasattr(klass, 'after_all'):
-            klass.after_all()
-        reporter.after_all(klass)
+                self._invoke_after(obj)
+        self._invoke_after_all(self.klass)
         return count
 
 
