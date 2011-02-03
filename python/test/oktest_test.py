@@ -1094,7 +1094,7 @@ class FooTest(object):
                 ok (os.path.basename(os.getcwd())) == '_dummy_.d'
                 ok (os.getcwd()) != pwd
                 ok (os.getcwd()) == os.path.join(pwd, '_dummy_.d')
-            chdir('_dummy_.d')(g)
+            chdir('_dummy_.d', g)
             ok (os.getcwd()) == pwd
         dummy_dir('_dummy_.d')(f)
 run(FooTest)

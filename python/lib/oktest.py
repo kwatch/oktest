@@ -790,8 +790,9 @@ def _dummy():
                 setattr(self.klass, name, self.locals[name])
 
 
-    def chdir(path):
-        return Chdir(path)
+    def chdir(path, func=None):
+        cd = Chdir(path)
+        return func is not None and cd(func) or cd
 
     def using(klass):
         return Using(klass)
