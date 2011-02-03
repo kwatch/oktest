@@ -180,138 +180,166 @@ def _f():
 
     @assertion
     def __eq__(self, other):
-        if (self.target == other) == self.expected:  return True
-        self.failed(_msg(self.target, '==', other))
+        boolean = self.target == other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, '==', other))
 
     @assertion
     def __ne__(self, other):
-        if (self.target != other) == self.expected:  return True
-        self.failed(_msg(self.target, '!=', other))
+        boolean = self.target != other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, '!=', other))
 
     @assertion
     def __gt__(self, other):
-        if (self.target > other) == self.expected:  return True
-        self.failed(_msg(self.target, '>', other))
+        boolean = self.target > other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, '>', other))
 
     @assertion
     def __ge__(self, other):
-        if (self.target >= other) == self.expected:  return True
-        self.failed(_msg(self.target, '>=', other))
+        boolean = self.target >= other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, '>=', other))
 
     @assertion
     def __lt__(self, other):
-        if (self.target < other) == self.expected:  return True
-        self.failed(_msg(self.target, '<', other))
+        boolean = self.target < other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, '<', other))
 
     @assertion
     def __le__(self, other):
-        if (self.target <= other) == self.expected:  return True
-        self.failed(_msg(self.target, '<=', other))
+        boolean = self.target <= other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, '<=', other))
 
     @assertion
     def in_delta(self, other, delta):
-        if (self.target <= other - delta) == self.expected:
+        boolean = self.target > other - delta
+        if boolean != self.expected:
             self.failed(_msg(self.target, '>', other - delta))
-        if (self.target >= other + delta) == self.expected:
+        boolean = self.target < other + delta
+        if boolean != self.expected:
             self.failed(_msg(self.target, '<', other + delta))
-        return True
 
 #    @assertion
 #    def __contains__(self, other):
-#        if (self.target in other) == self.expected:  return True
-#        self.failed(_msg(self.target, 'in', other))
+#        boolean = self.target in other
+#        if boolean !== self.expected:
+#            self.failed(_msg(self.target, 'in', other))
+
     @assertion
     def in_(self, other):
-        if (self.target in other) == self.expected:  return True
-        self.failed(_msg(self.target, 'in', other))
+        boolean = self.target in other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, 'in', other))
 
     @assertion
     def not_in(self, other):  # DEPRECATED
-        if (self.target not in other) == self.expected:  return True
-        self.failed(_msg(self.target, 'not in', other))
+        boolean = self.target not in other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, 'not in', other))
 
     @assertion
     def contains(self, other):
-        if (other in self.target) == self.expected:  return True
-        self.failed(_msg(other, 'in', self.target))
+        boolean = other in self.target
+        if boolean != self.expected:
+            self.failed(_msg(other, 'in', self.target))
 
     @assertion
     def not_contain(self, other):  # DEPRECATED
-        if (other in self.target) == self.expected:  return True
-        self.failed(_msg(other, 'not in', self.target))
+        boolean = other in self.target
+        if boolean != self.expected:
+            self.failed(_msg(other, 'not in', self.target))
 
     @assertion
     def is_(self, other):
-        if (self.target is other) == self.expected:  return True
-        self.failed(_msg(self.target, 'is', other))
+        boolean = self.target is other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, 'is', other))
 
     @assertion
     def is_not(self, other):
-        if (self.target is not other) == self.expected:  return True
-        self.failed(_msg(self.target, 'is not', other))
+        boolean = self.target is not other
+        if boolean != self.expected:
+            self.failed(_msg(self.target, 'is not', other))
 
     @assertion
     def is_a(self, other):
-        if (isinstance(self.target, other)) == self.expected:  return True
-        self.failed("isinstance(%r, %s) : failed." % (self.target, other.__name__))
+        boolean = isinstance(self.target, other)
+        if boolean != self.expected:
+            self.failed("isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
     def is_not_a(self, other):  # DEPRECATED
-        if (not isinstance(self.target, other)) == self.expected:  return True
-        self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
+        boolean = not isinstance(self.target, other)
+        if boolean != self.expected:
+            self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
     def has_attr(self, name):
-        if hasattr(self.target, name) == self.expected:  return True
-        self.failed("hasattr(%r, %r) : failed." % (self.target, name))
+        boolean = hasattr(self.target, name)
+        if boolean != self.expected:
+            self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
     @assertion
     def matches(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
-            if bool(pattern.search(self.target)) == self.expected:  return True
-            self.failed("re.search(%r, %r) : failed." % (pattern.pattern, self.target))
+            boolean = bool(pattern.search(self.target))
+            if boolean != self.expected:
+                self.failed("re.search(%r, %r) : failed." % (pattern.pattern, self.target))
         else:
-            if bool(re.search(pattern, self.target)) == self.expected:  return True
-            self.failed("re.search(%r, %r) : failed." % (pattern, self.target))
+            boolean = bool(re.search(pattern, self.target))
+            if boolean != self.expected:
+                self.failed("re.search(%r, %r) : failed." % (pattern, self.target))
 
     @assertion
     def not_match(self, pattern):  # DEPRECATED
         if isinstance(pattern, type(re.compile('x'))):
-            if (not pattern.search(self.target)) == self.expected:  return True
-            self.failed("not re.search(%r, %r) : failed." % (pattern.pattern, self.target))
+            boolean = not pattern.search(self.target)
+            if boolean != self.expected:
+                self.failed("not re.search(%r, %r) : failed." % (pattern.pattern, self.target))
         else:
-            if (not re.search(pattern, self.target)) == self.expected:  return True
-            self.failed("not re.search(%r, %r) : failed." % (pattern, self.target))
+            boolean = not re.search(pattern, self.target)
+            if boolean != self.expected:
+                self.failed("not re.search(%r, %r) : failed." % (pattern, self.target))
 
     @assertion
     def is_file(self):
-        if (os.path.isfile(self.target)) == self.expected:  return True
-        self.failed('os.path.isfile(%r) : failed.' % self.target)
+        boolean = os.path.isfile(self.target)
+        if boolean != self.expected:
+            self.failed('os.path.isfile(%r) : failed.' % self.target)
 
     @assertion
     def is_not_file(self):  # DEPRECATED
-        if (not os.path.isfile(self.target)) == self.expected:  return True
-        self.failed('not os.path.isfile(%r) : failed.' % self.target)
+        boolean = not os.path.isfile(self.target)
+        if boolean != self.expected:
+            self.failed('not os.path.isfile(%r) : failed.' % self.target)
 
     @assertion
     def is_dir(self):
-        if (os.path.isdir(self.target)) == self.expected:  return True
-        self.failed('os.path.isdir(%r) : failed.' % self.target)
+        boolean = os.path.isdir(self.target)
+        if boolean != self.expected:
+            self.failed('os.path.isdir(%r) : failed.' % self.target)
 
     @assertion
     def is_not_dir(self):  # DEPRECATED
-        if (not os.path.isdir(self.target)) == self.expected:  return True
-        self.failed('not os.path.isdir(%r) : failed.' % self.target)
+        boolean = not os.path.isdir(self.target)
+        if boolean != self.expected:
+            self.failed('not os.path.isdir(%r) : failed.' % self.target)
 
     @assertion
     def exists(self):
-        if (os.path.exists(self.target)) == self.expected:  return True
-        self.failed('os.path.exists(%r) : failed.' % self.target)
+        boolean = os.path.exists(self.target)
+        if boolean != self.expected:
+            self.failed('os.path.exists(%r) : failed.' % self.target)
 
     @assertion
     def not_exist(self):  # DEPRECATED
-        if (not os.path.exists(self.target)) == self.expected:  return True
-        self.failed('not os.path.exists(%r) : failed.' % self.target)
+        boolean = not os.path.exists(self.target)
+        if boolean != self.expected:
+            self.failed('not os.path.exists(%r) : failed.' % self.target)
 
     @assertion
     def raises(self, exception_class, errmsg=None):
