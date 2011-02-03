@@ -261,7 +261,7 @@ def _f():
         self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
-    def hasattr_(self, name):
+    def has_attr(self, name):
         if hasattr(self.target, name) == self.expected:  return True
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
@@ -345,7 +345,7 @@ def _f():
                 self.failed('%s should be raised : failed.' % exception_class.__name__, depth=3)
 
     AssertionObject._raise_or_not = _raise_or_not
-    AssertionObject.hasattr = hasattr_
+    AssertionObject.hasattr = has_attr    # for backward compatibility
 
 _f()
 del _f
