@@ -124,6 +124,16 @@ def _diff(target, other):
 
 
 def assertion(func):
+    """decorator to declare assertion function.
+       ex.
+         @oktest.assertion
+         def startswith(self, arg):
+           boolean = self.target.startswith(arg)
+           if boolean != self.expected:
+             self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+         #
+         ok ("Sasaki").startswith("Sas")
+    """
     def deco(self, *args):
         self._tested = True
         return func(self, *args)
