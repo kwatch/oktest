@@ -5,6 +5,43 @@ CHANGES
 $Release: 0.6.0 $
 
 
+Release 0.7.0
+-------------
+
+* enhanced to allow users to define custom assertion functions. ::
+
+    import oktest
+    from oktest import ok
+    #
+    @oktest.assertion
+    def startswith(self, arg):
+      boolean = self.target.startswith(arg)
+      if boolean != self.expected:
+        self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+    #
+    ok ("Sasaki").startswith("Sas")
+
+* rename 'ok().hasattr()' to 'ok().has_attr()'.
+  (but old name is also available for backward compatibility.)
+
+* change 'chdir()' to take a function as 2nd argument. ::
+
+    def f():
+      ... do_something ...
+    chdir('build', f)
+
+    # The above is same as:
+    with chdir('build'):
+      ... do_something ...
+
+* fix 'oktest.tracer.Call#__repr__()' to change output according to
+  whether '==' is called or not. This is aimed to make output of
+  'ok(tr[0]) == [...]' to be more readable.
+
+* change 'Runner#run()' to skip AssertionError if it is raised by
+  'assert ....' and not 'ok() == ...'.
+
+
 Release 0.6.0
 -------------
 
