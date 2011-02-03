@@ -131,6 +131,7 @@ def assertion(func):
         deco.func_name = func.func_name
     deco.__name__ = func.__name__
     deco.__doc__ = func.__doc__
+    setattr(AssertionObject, func.__name__, deco)
     return deco
 
 
@@ -173,6 +174,9 @@ class AssertionObject(object):
         ex.file = file;  ex.line = line;  ex.diff = diff
         ex._raised_by_oktest = True
         return ex
+
+
+def _f():
 
     @assertion
     def __eq__(self, other):
@@ -257,7 +261,7 @@ class AssertionObject(object):
         self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
-    def hasattr(self, name):
+    def hasattr_(self, name):
         if hasattr(self.target, name) == self.expected:  return True
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
@@ -339,6 +343,12 @@ class AssertionObject(object):
         else:
             if flag_raise and ex is None:
                 self.failed('%s should be raised : failed.' % exception_class.__name__, depth=3)
+
+    AssertionObject._raise_or_not = _raise_or_not
+    AssertionObject.hasattr = hasattr_
+
+_f()
+del _f
 
 
 ASSERTION_OBJECT = AssertionObject

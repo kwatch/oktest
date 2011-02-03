@@ -675,6 +675,40 @@ expected = r"""
 do_test_with(desc, script, expected)
 
 
+###
+desc = "assertion()"
+script = r"""
+import oktest
+from oktest import *
+
+@oktest.assertion
+def startswith(self, arg):
+  boolean = self.target.startswith(arg)
+  if boolean != self.expected:
+    self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+
+import os
+class FooTest(object):
+  def test_original_assertion1(self):
+    ok ("foobar").startswith("foob")
+    not_ok ("foobar").startswith("a")
+  def test_original_assertion2(self):
+    ok ("foobar").startswith("afoo")
+  def test_original_assertion3(self):
+    not_ok ("foobar").startswith("foo")
+
+run(FooTest)
+"""[1:]
+expected = r"""
+* FooTest.test_original_assertion1 ... [ok]
+* FooTest.test_original_assertion2 ... [NG] 'foobar'.startswith('afoo') : failed.
+   _test_.py:16: ok ("foobar").startswith("afoo")
+* FooTest.test_original_assertion3 ... [NG] not 'foobar'.startswith('foo') : failed.
+   _test_.py:18: not_ok ("foobar").startswith("foo")
+"""[1:]
+do_test_with(desc, script, expected)
+
+
 
 ### run (with class objects)
 desc = "run (with class objects)"
