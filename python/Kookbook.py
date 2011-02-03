@@ -28,7 +28,7 @@ license   = "MIT License"
 python = prop('python', 'python')
 
 @recipe
-@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2a2")
+@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
 def task_test(c, *args, **kwargs):
     if kwargs.get('a', None):
         _do_for_all_version(c, "PYTHON=$(bin) $(bin) test/oktest_test.py")
@@ -43,7 +43,7 @@ def _do_for_all_version(c, command):
         ('2.7', '/opt/local/bin/python2.7'),
         ('3.0', '/usr/local/python/3.0.1/bin/python'),
         ('3.1', '/usr/local/python/3.1/bin/python'),
-        ('3.2', '/usr/local/python/3.2a2/bin/python'),
+        ('3.2', '/usr/local/python/3.2rc1/bin/python'),
     ]
     for ver, bin in versions:
         print("#")
@@ -64,7 +64,7 @@ def _do_for_all_version(c, command):
 
 @recipe
 @ingreds('test/doc_test.py')
-@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2a2")
+@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
 def task_doc_test(c, *args, **kwargs):
     """invoke 'test/doc_test.py'"""
     if kwargs.get('a', None):
