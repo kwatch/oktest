@@ -123,7 +123,7 @@ def _diff(target, other):
     return ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
 
 
-def assertion_op(func):
+def assertion(func):
     def deco(self, *args):
         self._tested = True
         return func(self, *args)
@@ -174,37 +174,37 @@ class AssertionObject(object):
         ex._raised_by_oktest = True
         return ex
 
-    @assertion_op
+    @assertion
     def __eq__(self, other):
         if (self.target == other) == self.expected:  return True
         self.failed(_msg(self.target, '==', other))
 
-    @assertion_op
+    @assertion
     def __ne__(self, other):
         if (self.target != other) == self.expected:  return True
         self.failed(_msg(self.target, '!=', other))
 
-    @assertion_op
+    @assertion
     def __gt__(self, other):
         if (self.target > other) == self.expected:  return True
         self.failed(_msg(self.target, '>', other))
 
-    @assertion_op
+    @assertion
     def __ge__(self, other):
         if (self.target >= other) == self.expected:  return True
         self.failed(_msg(self.target, '>=', other))
 
-    @assertion_op
+    @assertion
     def __lt__(self, other):
         if (self.target < other) == self.expected:  return True
         self.failed(_msg(self.target, '<', other))
 
-    @assertion_op
+    @assertion
     def __le__(self, other):
         if (self.target <= other) == self.expected:  return True
         self.failed(_msg(self.target, '<=', other))
 
-    @assertion_op
+    @assertion
     def in_delta(self, other, delta):
         if (self.target <= other - delta) == self.expected:
             self.failed(_msg(self.target, '>', other - delta))
@@ -212,56 +212,56 @@ class AssertionObject(object):
             self.failed(_msg(self.target, '<', other + delta))
         return True
 
-#    @assertion_op
+#    @assertion
 #    def __contains__(self, other):
 #        if (self.target in other) == self.expected:  return True
 #        self.failed(_msg(self.target, 'in', other))
-    @assertion_op
+    @assertion
     def in_(self, other):
         if (self.target in other) == self.expected:  return True
         self.failed(_msg(self.target, 'in', other))
 
-    @assertion_op
+    @assertion
     def not_in(self, other):  # DEPRECATED
         if (self.target not in other) == self.expected:  return True
         self.failed(_msg(self.target, 'not in', other))
 
-    @assertion_op
+    @assertion
     def contains(self, other):
         if (other in self.target) == self.expected:  return True
         self.failed(_msg(other, 'in', self.target))
 
-    @assertion_op
+    @assertion
     def not_contain(self, other):  # DEPRECATED
         if (other in self.target) == self.expected:  return True
         self.failed(_msg(other, 'not in', self.target))
 
-    @assertion_op
+    @assertion
     def is_(self, other):
         if (self.target is other) == self.expected:  return True
         self.failed(_msg(self.target, 'is', other))
 
-    @assertion_op
+    @assertion
     def is_not(self, other):
         if (self.target is not other) == self.expected:  return True
         self.failed(_msg(self.target, 'is not', other))
 
-    @assertion_op
+    @assertion
     def is_a(self, other):
         if (isinstance(self.target, other)) == self.expected:  return True
         self.failed("isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
-    @assertion_op
+    @assertion
     def is_not_a(self, other):  # DEPRECATED
         if (not isinstance(self.target, other)) == self.expected:  return True
         self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
-    @assertion_op
+    @assertion
     def hasattr(self, name):
         if hasattr(self.target, name) == self.expected:  return True
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
-    @assertion_op
+    @assertion
     def matches(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
             if bool(pattern.search(self.target)) == self.expected:  return True
@@ -270,7 +270,7 @@ class AssertionObject(object):
             if bool(re.search(pattern, self.target)) == self.expected:  return True
             self.failed("re.search(%r, %r) : failed." % (pattern, self.target))
 
-    @assertion_op
+    @assertion
     def not_match(self, pattern):  # DEPRECATED
         if isinstance(pattern, type(re.compile('x'))):
             if (not pattern.search(self.target)) == self.expected:  return True
@@ -279,41 +279,41 @@ class AssertionObject(object):
             if (not re.search(pattern, self.target)) == self.expected:  return True
             self.failed("not re.search(%r, %r) : failed." % (pattern, self.target))
 
-    @assertion_op
+    @assertion
     def is_file(self):
         if (os.path.isfile(self.target)) == self.expected:  return True
         self.failed('os.path.isfile(%r) : failed.' % self.target)
 
-    @assertion_op
+    @assertion
     def is_not_file(self):  # DEPRECATED
         if (not os.path.isfile(self.target)) == self.expected:  return True
         self.failed('not os.path.isfile(%r) : failed.' % self.target)
 
-    @assertion_op
+    @assertion
     def is_dir(self):
         if (os.path.isdir(self.target)) == self.expected:  return True
         self.failed('os.path.isdir(%r) : failed.' % self.target)
 
-    @assertion_op
+    @assertion
     def is_not_dir(self):  # DEPRECATED
         if (not os.path.isdir(self.target)) == self.expected:  return True
         self.failed('not os.path.isdir(%r) : failed.' % self.target)
 
-    @assertion_op
+    @assertion
     def exists(self):
         if (os.path.exists(self.target)) == self.expected:  return True
         self.failed('os.path.exists(%r) : failed.' % self.target)
 
-    @assertion_op
+    @assertion
     def not_exist(self):  # DEPRECATED
         if (not os.path.exists(self.target)) == self.expected:  return True
         self.failed('not os.path.exists(%r) : failed.' % self.target)
 
-    @assertion_op
+    @assertion
     def raises(self, exception_class, errmsg=None):
         return self._raise_or_not(exception_class, errmsg, self.expected)
 
-    @assertion_op
+    @assertion
     def not_raise(self, exception_class=Exception):
         return self._raise_or_not(exception_class, None, not self.expected)
 
