@@ -23,7 +23,7 @@ release   = prop('release', '0.6.0')
 package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
-#kook_default_product = 'test'
+kook_default_product = 'test'
 
 python = prop('python', 'python')
 
