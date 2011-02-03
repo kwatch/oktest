@@ -755,7 +755,7 @@ class _Context(object):
         try:
             func(*args)
         finally:
-            self.__exit__(sys.exc_info())
+            self.__exit__(*sys.exc_info())
 
 
 
@@ -772,13 +772,13 @@ class Spec(_Context):
         #try:
         #    yield self  # (Python2.4) SyntaxError: 'yield' not allowed in a 'try' block with a 'finally' clause
         #finally:
-        #    self.__exit__(sys.exc_info())
+        #    self.__exit__(*sys.exc_info())
         ex = None
         try:
             yield self
         except:
             ex = None
-        self.__exit__(sys.exc_info())
+        self.__exit__(*sys.exc_info())
         if ex:
             raise ex
 
@@ -983,7 +983,7 @@ def _dummy():
         try:
             func(*args, **kwargs)
         finally:
-            obj.__exit__()
+            obj.__exit__(*sys.exc_info())
         #return obj.stdout, obj.stderr
         return obj
 
