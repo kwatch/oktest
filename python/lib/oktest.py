@@ -94,6 +94,7 @@ def _msg(target, op, other=None):
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
     elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
     else:                     msg = '%r %s %r' % (target, op, other)
+    msg += " : failed."
     if op == '==' and target != other and _is_string(target) and _is_string(other):
         if DIFF:
             if python2 or isinstance(target, str) and isinstance(other, str):
@@ -157,15 +158,13 @@ class AssertionObject(object):
     #    self.expected = not self.expected
     #    return self
 
-    def failed(self, msg, postfix=' : failed.', depth=2):
+    def failed(self, msg, depth=2):
         file, line = _get_location(depth + 1)
         diff = None
         if isinstance(msg, tuple):
             msg, diff = msg
         if self.expected is False:
             msg = 'not ' + msg
-        if postfix:
-            msg += postfix
         raise self._assertion_error(msg, file, line, diff)
 
     def _assertion_error(self, msg, file, line, diff):
@@ -250,65 +249,65 @@ class AssertionObject(object):
     @assertion_op
     def is_a(self, other):
         if (isinstance(self.value, other)) == self.expected:  return True
-        self.failed("isinstance(%r, %s)" % (self.value, other.__name__))
+        self.failed("isinstance(%r, %s) : failed." % (self.value, other.__name__))
 
     @assertion_op
     def is_not_a(self, other):  # DEPRECATED
         if (not isinstance(self.value, other)) == self.expected:  return True
-        self.failed("not isinstance(%r, %s)" % (self.value, other.__name__))
+        self.failed("not isinstance(%r, %s) : failed." % (self.value, other.__name__))
 
     @assertion_op
     def hasattr(self, name):
         if hasattr(self.value, name) == self.expected:  return True
-        self.failed("hasattr(%r, %r)" % (self.value, name))
+        self.failed("hasattr(%r, %r) : failed." % (self.value, name))
 
     @assertion_op
     def matches(self, pattern):
         if isinstance(pattern, type(re.compile('x'))):
             if bool(pattern.search(self.value)) == self.expected:  return True
-            self.failed("re.search(%r, %r)" % (pattern.pattern, self.value))
+            self.failed("re.search(%r, %r) : failed." % (pattern.pattern, self.value))
         else:
             if bool(re.search(pattern, self.value)) == self.expected:  return True
-            self.failed("re.search(%r, %r)" % (pattern, self.value))
+            self.failed("re.search(%r, %r) : failed." % (pattern, self.value))
 
     @assertion_op
     def not_match(self, pattern):  # DEPRECATED
         if isinstance(pattern, type(re.compile('x'))):
             if (not pattern.search(self.value)) == self.expected:  return True
-            self.failed("not re.search(%r, %r)" % (pattern.pattern, self.value))
+            self.failed("not re.search(%r, %r) : failed." % (pattern.pattern, self.value))
         else:
             if (not re.search(pattern, self.value)) == self.expected:  return True
-            self.failed("not re.search(%r, %r)" % (pattern, self.value))
+            self.failed("not re.search(%r, %r) : failed." % (pattern, self.value))
 
     @assertion_op
     def is_file(self):
         if (os.path.isfile(self.value)) == self.expected:  return True
-        self.failed('os.path.isfile(%r)' % self.value)
+        self.failed('os.path.isfile(%r) : failed.' % self.value)
 
     @assertion_op
     def is_not_file(self):  # DEPRECATED
         if (not os.path.isfile(self.value)) == self.expected:  return True
-        self.failed('not os.path.isfile(%r)' % self.value)
+        self.failed('not os.path.isfile(%r) : failed.' % self.value)
 
     @assertion_op
     def is_dir(self):
         if (os.path.isdir(self.value)) == self.expected:  return True
-        self.failed('os.path.isdir(%r)' % self.value)
+        self.failed('os.path.isdir(%r) : failed.' % self.value)
 
     @assertion_op
     def is_not_dir(self):  # DEPRECATED
         if (not os.path.isdir(self.value)) == self.expected:  return True
-        self.failed('not os.path.isdir(%r)' % self.value)
+        self.failed('not os.path.isdir(%r) : failed.' % self.value)
 
     @assertion_op
     def exists(self):
         if (os.path.exists(self.value)) == self.expected:  return True
-        self.failed('os.path.exists(%r)' % self.value)
+        self.failed('os.path.exists(%r) : failed.' % self.value)
 
     @assertion_op
     def not_exist(self):  # DEPRECATED
         if (not os.path.exists(self.value)) == self.expected:  return True
-        self.failed('not os.path.exists(%r)' % self.value)
+        self.failed('not os.path.exists(%r) : failed.' % self.value)
 
     @assertion_op
     def raises(self, exception_class, errmsg=None):
@@ -329,17 +328,17 @@ class AssertionObject(object):
             self.value.exception = ex
             if flag_raise:
                 if not isinstance(ex, exception_class):
-                    self.failed('%s%r is kind of %s' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
+                    self.failed('%s%r is kind of %s : failed.' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
                     #raise
                 if errmsg is not None and str(ex) != errmsg:   # don't use ex2msg(ex)!
                     #self.failed("expected %r but got %r" % (errmsg, str(ex)))
-                    self.failed("%r == %r" % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
+                    self.failed("%r == %r : failed." % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
             else:
                 if isinstance(ex, exception_class):
-                    self.failed('%s should not be raised' % exception_class.__name__, depth=3)
+                    self.failed('%s should not be raised : failed.' % exception_class.__name__, depth=3)
         else:
             if flag_raise and ex is None:
-                self.failed('%s should be raised' % exception_class.__name__, depth=3)
+                self.failed('%s should be raised : failed.' % exception_class.__name__, depth=3)
 
 
 ASSERTION_OBJECT = AssertionObject
