@@ -948,16 +948,14 @@ def _dummy():
         def __enter__(self):
             self.stdout, sys.stdout = sys.stdout, StringIO()
             self.stderr, sys.stderr = sys.stderr, StringIO()
-            if self.stdin_content is not None:
-                self.stdin, sys.stdin  = sys.stdin, StringIO(self.stdin_content)
+            self.stdin,  sys.stdin  = sys.stdin,  StringIO(self.stdin_content or "")
             return self
 
         def __exit__(self, *args):
             sout, serr = sys.stdout.getvalue(), sys.stderr.getvalue()
             sys.stdout, self.stdout = self.stdout, sys.stdout.getvalue()
             sys.stderr, self.stderr = self.stderr, sys.stderr.getvalue()
-            if self.stdin_content is not None:
-                sys.stdin = self.stdin
+            sys.stdin,  self.stdin  = self.stdin,  self.stdin_content
 
 
     def dummy_file(filename, content):
@@ -975,7 +973,7 @@ def _dummy():
     def dummy_environ_vars(**kwargs):
         return DummyValues(os.environ, **kwargs)
 
-    def dummy_io(stdin_content=None, func=None, *args, **kwargs):
+    def dummy_io(stdin_content="", func=None, *args, **kwargs):
         obj = dummy.DummyIO(stdin_content)
         if func is None:
             return obj    # for with-statement
