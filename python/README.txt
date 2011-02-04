@@ -392,7 +392,7 @@ run(\*classes)
 
 	    import oktest
 	    oktest.run(FooTest, BarTest)  # invokes FooTest and BarTest
-	    oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
+	    oktest.run(r'.*Test$')        # invokes FooTest, BarTest, and so on
 	    oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 
 spec(description)
@@ -413,27 +413,25 @@ spec(description)
 
 
 ``oktest.helper`` module
-------------------------------------
+------------------------
 
 chdir(dirname)
 	Change current directory to dirname temporarily. ::
 
 	    import os
 	    cwd = os.getcwd()                         # current working directory
-	    with oktest.chdir("/var/tmp"):
+	    with chdir("/var/tmp"):
 	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
 	        # do something
 	    assert os.getcwd() == cwd                 # back to the original place
-
-Tracer()
-	Return new Tracer object. See the previous section for details.
 
 dummy_file(filename, content)
 	Create dummy file with specified content. ::
 
 	    import os
+	    from oktest.helper import dummy_file
 	    assert not os.path.exists("A.txt")        # file doesn't exist
-	    with oktest.dummy_file("A.txt", "aaa"):
+	    with dummy_file("A.txt", "aaa"):
 	        assert os.path.isfile("A.txt")        # file is created!
 	        # do something
 	    assert not os.path.exists("A.txt")        # file is removed
@@ -442,8 +440,9 @@ dummy_dir(dirname)
 	Create dummy directory. ::
 
 	    import os
+	    from oktest.helper import dummy_dir
 	    assert not os.path.exists("tmpdir")       # directory doesn't exist
-	    with oktest.dummy_dir("tmpdir"):
+	    with dummy_dir("tmpdir"):
 	        assert os.path.isdir("tmpdir")        # directory is created!
 		# do something
 	    assert not os.path.exists("tmpdir")       # directory is removed
@@ -451,8 +450,9 @@ dummy_dir(dirname)
 dummy_values(dictionary, items_=None, \*\*kwargs):
 	Change dictionary's values temporarily. ::
 
+	    from oktest.helper import dummy_values
 	    d = {'A':10, 'B':20}
-	    with oktest.dummy_values(d, A=1000, X=2000):
+	    with dummy_values(d, A=1000, X=2000):
 	        assert d['A'] == 1000                 # dictionary values are changed!
 		assert d['B'] == 20
 		assert d['X'] == 2000
@@ -463,12 +463,13 @@ dummy_attrs(object, items_=None, \*\*kwargs):
 	Change object's attributes temporarily.
 	This is same as dummy_values(object.__dict__, \*\*kwargs). ::
 
+	    from oktest.helper import dummy_attrs
 	    class Hello(object):
 	        pass
 	    obj = Hello()
 	    obj.x = 10
 	    obj.y = 20
-	    with oktest.dummy_attrs(obj, x=90, z=100):
+	    with dummy_attrs(obj, x=90, z=100):
 	        assert obj.x == 90                    # attributes are changed!
 		assert obj.y == 20
 		assert obj.z == 100 
