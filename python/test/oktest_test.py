@@ -747,6 +747,26 @@ expected = r"""
 """[1:]
 do_test_with(desc, script, expected, re.compile(r'.*oktest\.py:\d+\:.*\n'))
 
+###
+desc = "Should_not"
+script = r"""
+from oktest import *
+
+class FooTest(object):
+  def test_should_not1(self):
+    ok ("foobar").should_not.startswith("aaa")
+  def test_should_not2(self):
+    ok ("foobar").should_not.startswith("foo")
+
+run(FooTest)
+"""[1:]
+expected = r"""
+* FooTest.test_should_not1 ... [ok]
+* FooTest.test_should_not2 ... [NG] not 'foobar'.startswith('foo') : failed.
+   /Users/kwatch/src/oktest/python/lib/oktest.py:505: func(obj)
+"""[1:]
+do_test_with(desc, script, expected, re.compile(r'.*oktest\.py:\d+\:.*\n'))
+
 
 ### run (with class objects)
 desc = "run (with class objects)"

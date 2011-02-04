@@ -187,7 +187,11 @@ class AssertionObject(object):
 
     @property
     def should(self):
-        return Should(self)
+        return Should(self, self.expected)
+
+    @property
+    def should_not(self):
+        return Should(self, not self.expected)
 
 
 def _f():
@@ -409,8 +413,11 @@ def not_ok(target):
 
 class Should(object):
 
-    def __init__(self, assertion_object):
+    def __init__(self, assertion_object, expected=None):
         self.assertion_object = assertion_object
+        if expected is None:
+            expected = assertion_object.expected
+        self.expected = expected
 
     def __getattr__(self, key):
         ass = self.assertion_object
@@ -428,10 +435,12 @@ class Should(object):
                 msg = "%r.%s(): expected to return True or False but it returned %r." \
                       % (ass.target, val.__name__, ret)
                 raise ValueError(msg)
-            if ret != ass.expected:
+            if ret != self.expected:
                 buf = [ repr(arg) for arg in args ]
                 buf.extend([ "%s=%r" % (k, kwargs[k]) for k in kwargs ])
                 msg = "%r.%s(%s) : failed." % (ass.target, val.__name__, ", ".join(buf))
+                if self.expected is False:
+                    msg = "not " + msg
                 ass.failed(msg)
         return f
 
