@@ -186,11 +186,21 @@ class AssertionObject(object):
         return ex
 
     @property
-    def should(self):
+    def should(self):           # UNDOCUMENTED
+        """(experimental) allows user to call True/False method as assertion.
+           ex.
+             ok ("SOS").should.startswith("S")   # same as ok ("SOS".startswith("S")) == True
+             ok ("123").should.isdigit()         # same as ok ("123".isdigit()) == True
+        """
         return Should(self, self.expected)
 
     @property
-    def should_not(self):
+    def should_not(self):       # UNDOCUMENTED
+        """(experimental) allows user to call True/False method as assertion.
+           ex.
+             ok ("SOS").should_not.startswith("X")   # same as ok ("SOS".startswith("X")) == False
+             ok ("123").should_not.isalpha()         # same as ok ("123".isalpha()) == False
+        """
         return Should(self, not self.expected)
 
 
