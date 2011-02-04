@@ -687,7 +687,6 @@ def startswith(self, arg):
   if boolean != self.expected:
     self.failed("%r.startswith(%r) : failed." % (self.target, arg))
 
-import os
 class FooTest(object):
   def test_original_assertion1(self):
     ok ("foobar").startswith("foob")
@@ -702,12 +701,51 @@ run(FooTest)
 expected = r"""
 * FooTest.test_original_assertion1 ... [ok]
 * FooTest.test_original_assertion2 ... [NG] 'foobar'.startswith('afoo') : failed.
-   _test_.py:16: ok ("foobar").startswith("afoo")
+   _test_.py:15: ok ("foobar").startswith("afoo")
 * FooTest.test_original_assertion3 ... [NG] not 'foobar'.startswith('foo') : failed.
-   _test_.py:18: not_ok ("foobar").startswith("foo")
+   _test_.py:17: not_ok ("foobar").startswith("foo")
 """[1:]
 do_test_with(desc, script, expected)
 
+
+###
+desc = "Should"
+script = r"""
+from oktest import *
+
+class FooTest(object):
+  def test_should1(self):
+    ok ("foobar").should.startswith("foob")
+  def test_should2(self):
+    ok ("foobar").should.startswith("aaa")
+  def test_should3(self):
+    ok ("foobar").should.start_with("foob")   # AttributeError
+  def test_should4(self):
+    ok (Bar('sasaki')).should.name()          # ValueError: not a callable
+  def test_should5(self):
+    ok ("Sasaki").should.upper()              # ValueError: expected to return True or False
+
+class Bar(object):
+  def __init__(self, name):
+    self.name = name
+
+run(FooTest)
+"""[1:]
+expected = r"""
+* FooTest.test_should1 ... [ok]
+* FooTest.test_should2 ... [NG] 'foobar'.startswith('aaa') : failed.
+   /Users/kwatch/src/oktest/python/lib/oktest.py:505: func(obj)
+* FooTest.test_should3 ... [ERROR] AttributeError: 'str' object has no attribute 'start_with'
+  - _test_.py:9:  ok ("foobar").should.start_with("foob")   # AttributeError
+  - /Users/kwatch/src/oktest/python/lib/oktest.py:419:  val = getattr(ass.target, key)
+* FooTest.test_should4 ... [ERROR] ValueError: Bar.name: not a callable.
+  - _test_.py:11:  ok (Bar('sasaki')).should.name()          # ValueError: not a callable
+  - /Users/kwatch/src/oktest/python/lib/oktest.py:422:  raise ValueError(msg)
+* FooTest.test_should5 ... [ERROR] ValueError: 'Sasaki'.upper(): expected to return True or False but it returned 'SASAKI'.
+  - _test_.py:13:  ok ("Sasaki").should.upper()              # ValueError: expected to return True or False
+  - /Users/kwatch/src/oktest/python/lib/oktest.py:430:  raise ValueError(msg)
+"""[1:]
+do_test_with(desc, script, expected, re.compile(r'.*oktest\.py:\d+\:.*\n'))
 
 
 ### run (with class objects)

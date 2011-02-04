@@ -185,6 +185,10 @@ class AssertionObject(object):
         ex._raised_by_oktest = True
         return ex
 
+    @property
+    def should(self):
+        return Should(self)
+
 
 def _f():
 
@@ -401,6 +405,35 @@ def not_ok(target):
     obj = ASSERTION_OBJECT(target, False)
     obj._location = _get_location(1)
     return obj
+
+
+class Should(object):
+
+    def __init__(self, assertion_object):
+        self.assertion_object = assertion_object
+
+    def __getattr__(self, key):
+        ass = self.assertion_object
+        tested = ass._tested
+        ass._tested = True
+        val = getattr(ass.target, key)
+        if not hasattr(val, '__call__'):
+            msg = "%s.%s: not a callable." % (type(ass.target).__name__, key)
+            raise ValueError(msg)
+        ass._tested = tested
+        def f(*args, **kwargs):
+            ass._tested = True
+            ret = val(*args, **kwargs)
+            if ret not in (True, False):
+                msg = "%r.%s(): expected to return True or False but it returned %r." \
+                      % (ass.target, val.__name__, ret)
+                raise ValueError(msg)
+            if ret != ass.expected:
+                buf = [ repr(arg) for arg in args ]
+                buf.extend([ "%s=%r" % (k, kwargs[k]) for k in kwargs ])
+                msg = "%r.%s(%s) : failed." % (ass.target, val.__name__, ", ".join(buf))
+                ass.failed(msg)
+        return f
 
 
 class TestRunner(object):
