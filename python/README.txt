@@ -49,10 +49,26 @@ Installation::
 Example
 =======
 
-test_example.py::
+The following is a short example.
 
     from oktest import ok, not_ok, run
+
+    class Example1Test(object):
+
+        def test_add(self):
+	    ok (1+1) == 1
+
+        def test_sub(self):
+	    ok (1-1) == 0
+
+    if __name__ == '__main__':
+        run()
+
+
+The following is a long example.
+
     import sys, os
+    from oktest import ok, not_ok, run
 
     ## no need to extend TestCase class
     class Example1Test(object):
@@ -78,7 +94,7 @@ test_example.py::
 
         ## test methods
         def test_valtype(self):
-            ok (type(self.val)) == list
+            ok (self.val).is_a(list)
 
         def test_length(self):
             ok (len(self.val)) == 3
@@ -92,7 +108,7 @@ test_example.py::
             self.val = ['aaa', 'bbb', 'ccc']
 
         def test_valtype(self):
-            ok (type(self.val)) == list
+            ok (self.val).is_a(list)
 
         def test_length(self):
             ok (len(self.val)) == 3
@@ -149,7 +165,7 @@ ok (x).is_not(y)
 ok (x).is_a(y)
 	Raise AssertionError unless isinstance(x, y).
 
-ok (x).hasattr(y)
+ok (x).has_attr(y)
 	Raise AssertionError unless hasattr(x, y).
 
 ok (x).matches(y)
@@ -183,6 +199,9 @@ not_ok (x)
 	    ok (fname).is_file()            # file exists
 	    os.unlink(fname)
 	    not_ok (fname).is_file()        # file doesn't exist
+
+Oktest allows you to define custom assertion functions.
+See Tips section.
 
 
 Unified Diff
@@ -415,7 +434,7 @@ spec(description)
 ``oktest.helper`` module
 ------------------------
 
-chdir(dirname)
+chdir(dirname, func=None)
 	Change current directory to dirname temporarily. ::
 
 	    import os
@@ -424,6 +443,11 @@ chdir(dirname)
 	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
 	        # do something
 	    assert os.getcwd() == cwd                 # back to the original place
+	    ## or
+	    def f():
+	        assert os.getcwd() == "/var/tmp"
+		# do something
+            chdir("/var/tmp", f)
 
 dummy_file(filename, content)
 	Create dummy file with specified content. ::
@@ -478,9 +502,32 @@ dummy_attrs(object, items_=None, \*\*kwargs):
 	    assert obj.y == 20
 	    assert not hasattr(obj, 'z')
 
+dummy_io(stdin_content=None, func=None):
+	Set dummy I/O to sys.stdout, sys.stderr, and sys.stdin. ::
+
+	    with dummy_io("SOS") as io:
+	        assert sys.stdin.read() == "SOS"
+		print("Haruhi")
+	    assert io.stdout == "Haruhi\n"
+	    assert io.stderr == ""
+
 
 Tips
 ====
+
+* You can define your own custom assertion function. ::
+
+    ## define custom assertion function
+    import oktest
+    @oktest.assertion
+    def startswith(self, arg):
+      boolean = self.target.startswith(arg)
+      if boolean != self.expected:
+        self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+
+    ## how to use
+    from oktest import ok
+    ok ("Sasaki").startswith("Sas")
 
 * If you call ok() or not_ok() but forget to do assertion, oktest warns it. ::
 
