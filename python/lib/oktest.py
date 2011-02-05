@@ -97,7 +97,10 @@ def _msg(target, op, other=None):
     msg += " : failed."
     if op == '==' and target != other and _is_string(target) and _is_string(other):
         if DIFF:
-            if python2 or isinstance(target, str) and isinstance(other, str):
+            #if python2 or isinstance(target, str) and isinstance(other, str):
+            is_a = isinstance
+            if (            is_a(target, str)     and is_a(other, str)    )  or \
+               (python2 and is_a(target, unicode) and is_a(other, unicode)):
                 diff = _diff(target, other)
                 return (msg, diff)
     return msg
