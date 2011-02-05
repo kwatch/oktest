@@ -15,8 +15,9 @@ Release 0.7.0
     #
     @oktest.assertion
     def startswith(self, arg):
-      boolean = self.target.startswith(arg)
-      if boolean != self.expected:
+        boolean = self.target.startswith(arg)
+        if boolean == self.expected:
+            return True
         self.failed("%r.startswith(%r) : failed." % (self.target, arg))
     #
     ok ("Sasaki").startswith("Sas")

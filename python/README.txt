@@ -521,8 +521,9 @@ Tips
     import oktest
     @oktest.assertion
     def startswith(self, arg):
-      boolean = self.target.startswith(arg)
-      if boolean != self.expected:
+        boolean = self.target.startswith(arg)
+        if boolean == self.expected:
+            return True
         self.failed("%r.startswith(%r) : failed." % (self.target, arg))
 
     ## how to use
@@ -535,9 +536,9 @@ Tips
     from oktest import ok, not_ok
     
     class FooTest(object):
-       def test_1(self):
-         #ok (1+1) == 2
-         ok (1+1)         # missing assertion
+        def test_1(self):
+            #ok (1+1) == 2
+            ok (1+1)         # missing assertion
 
     oktest.run()   #=> warning: ok() is called but not tested.
 
