@@ -50,10 +50,25 @@ $ sudo python setup.py install
 <div class="section" id="example">
 
 <h2>Example</h2>
-<p>test_example.py:</p>
+<p>The following is a short example.</p>
 <pre class="literal-block">
 from oktest import ok, not_ok, run
+
+class Example1Test(object):
+
+    def test_add(self):
+        ok (1+1) == 1
+
+    def test_sub(self):
+        ok (1-1) == 0
+
+if __name__ == '__main__':
+    run()
+</pre>
+<p>The following is a long example.</p>
+<pre class="literal-block">
 import sys, os
+from oktest import ok, not_ok, run
 
 ## no need to extend TestCase class
 class Example1Test(object):
@@ -79,7 +94,7 @@ class Example1Test(object):
 
     ## test methods
     def test_valtype(self):
-        ok (type(self.val)) == list
+        ok (self.val).is_a(list)
 
     def test_length(self):
         ok (len(self.val)) == 3
@@ -93,7 +108,7 @@ class Example2Test(unittest.TestCase):
         self.val = ['aaa', 'bbb', 'ccc']
 
     def test_valtype(self):
-        ok (type(self.val)) == list
+        ok (self.val).is_a(list)
 
     def test_length(self):
         ok (len(self.val)) == 3
@@ -137,7 +152,7 @@ See the example at the bottom of this document.</p>
 <dd>Raise AssertionError if x is y.</dd>
 <dt>ok (x).is_a(y)</dt>
 <dd>Raise AssertionError unless isinstance(x, y).</dd>
-<dt>ok (x).hasattr(y)</dt>
+<dt>ok (x).has_attr(y)</dt>
 <dd>Raise AssertionError unless hasattr(x, y).</dd>
 <dt>ok (x).matches(y)</dt>
 <dd>If y is a string, raise AssertionError unless re.search(y, x).
@@ -170,6 +185,8 @@ not_ok (fname).is_file()        # file doesn't exist
 </pre>
 </dd>
 </dl>
+<p>Oktest allows you to define custom assertion functions.
+See Tips section.</p>
 </div>
 <div class="section" id="unified-diff">
 
@@ -374,7 +391,7 @@ Argument can be regular expression string.</p>
 <pre class="last literal-block">
 import oktest
 oktest.run(FooTest, BarTest)  # invokes FooTest and BarTest
-oktest.run('.*Test$')         # invokes FooTest, BarTest, and so on
+oktest.run(r'.*Test$')        # invokes FooTest, BarTest, and so on
 oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 </pre>
 </dd>
@@ -401,25 +418,29 @@ class NumericTest(object):
 
 <h3><tt class="docutils literal">oktest.helper</tt> module</h3>
 <dl class="docutils">
-<dt>chdir(dirname)</dt>
+<dt>chdir(dirname, func=None)</dt>
 <dd><p class="first">Change current directory to dirname temporarily.</p>
 <pre class="last literal-block">
 import os
 cwd = os.getcwd()                         # current working directory
-with oktest.chdir(&quot;/var/tmp&quot;):
+with chdir(&quot;/var/tmp&quot;):
     assert os.getcwd() == &quot;/var/tmp&quot;      # current directory is changed!
     # do something
 assert os.getcwd() == cwd                 # back to the original place
+## or
+def f():
+    assert os.getcwd() == &quot;/var/tmp&quot;
+    # do something
+chdir(&quot;/var/tmp&quot;, f)
 </pre>
 </dd>
-<dt>Tracer()</dt>
-<dd>Return new Tracer object. See the previous section for details.</dd>
 <dt>dummy_file(filename, content)</dt>
 <dd><p class="first">Create dummy file with specified content.</p>
 <pre class="last literal-block">
 import os
+from oktest.helper import dummy_file
 assert not os.path.exists(&quot;A.txt&quot;)        # file doesn't exist
-with oktest.dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;):
+with dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;):
     assert os.path.isfile(&quot;A.txt&quot;)        # file is created!
     # do something
 assert not os.path.exists(&quot;A.txt&quot;)        # file is removed
@@ -429,8 +450,9 @@ assert not os.path.exists(&quot;A.txt&quot;)        # file is removed
 <dd><p class="first">Create dummy directory.</p>
 <pre class="last literal-block">
 import os
+from oktest.helper import dummy_dir
 assert not os.path.exists(&quot;tmpdir&quot;)       # directory doesn't exist
-with oktest.dummy_dir(&quot;tmpdir&quot;):
+with dummy_dir(&quot;tmpdir&quot;):
     assert os.path.isdir(&quot;tmpdir&quot;)        # directory is created!
     # do something
 assert not os.path.exists(&quot;tmpdir&quot;)       # directory is removed
@@ -439,8 +461,9 @@ assert not os.path.exists(&quot;tmpdir&quot;)       # directory is removed
 <dt>dummy_values(dictionary, items_=None, **kwargs):</dt>
 <dd><p class="first">Change dictionary's values temporarily.</p>
 <pre class="last literal-block">
+from oktest.helper import dummy_values
 d = {'A':10, 'B':20}
-with oktest.dummy_values(d, A=1000, X=2000):
+with dummy_values(d, A=1000, X=2000):
     assert d['A'] == 1000                 # dictionary values are changed!
     assert d['B'] == 20
     assert d['X'] == 2000
@@ -452,12 +475,13 @@ assert d == {'A':10, 'B':20}              # values are backed
 <dd><p class="first">Change object's attributes temporarily.
 This is same as dummy_values(object.__dict__, **kwargs).</p>
 <pre class="last literal-block">
+from oktest.helper import dummy_attrs
 class Hello(object):
     pass
 obj = Hello()
 obj.x = 10
 obj.y = 20
-with oktest.dummy_attrs(obj, x=90, z=100):
+with dummy_attrs(obj, x=90, z=100):
     assert obj.x == 90                    # attributes are changed!
     assert obj.y == 20
     assert obj.z == 100
@@ -467,6 +491,16 @@ assert obj.y == 20
 assert not hasattr(obj, 'z')
 </pre>
 </dd>
+<dt>dummy_io(stdin_content=None, func=None):</dt>
+<dd><p class="first">Set dummy I/O to sys.stdout, sys.stderr, and sys.stdin.</p>
+<pre class="last literal-block">
+with dummy_io(&quot;SOS&quot;) as io:
+    assert sys.stdin.read() == &quot;SOS&quot;
+    print(&quot;Haruhi&quot;)
+assert io.stdout == &quot;Haruhi\n&quot;
+assert io.stderr == &quot;&quot;
+</pre>
+</dd>
 </dl>
 </div>
 </div>
@@ -474,15 +508,31 @@ assert not hasattr(obj, 'z')
 
 <h2>Tips</h2>
 <ul>
+<li><p class="first">You can define your own custom assertion function.</p>
+<pre class="literal-block">
+## define custom assertion function
+import oktest
+&#64;oktest.assertion
+def startswith(self, arg):
+    boolean = self.target.startswith(arg)
+    if boolean == self.expected:
+        return True
+    self.failed(&quot;%r.startswith(%r) : failed.&quot; % (self.target, arg))
+
+## how to use
+from oktest import ok
+ok (&quot;Sasaki&quot;).startswith(&quot;Sas&quot;)
+</pre>
+</li>
 <li><p class="first">If you call ok() or not_ok() but forget to do assertion, oktest warns it.</p>
 <pre class="literal-block">
 import oktest
 from oktest import ok, not_ok
 
 class FooTest(object):
-   def test_1(self):
-     #ok (1+1) == 2
-     ok (1+1)         # missing assertion
+    def test_1(self):
+        #ok (1+1) == 2
+        ok (1+1)         # missing assertion
 
 oktest.run()   #=&gt; warning: ok() is called but not tested.
 </pre>
