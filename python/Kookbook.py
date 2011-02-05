@@ -213,6 +213,7 @@ def file_CHANGES_txt(c):
 @product('Oktest.zip')
 @ingreds('website/index.html', 'website/CHANGES.txt')
 def file_Oktest_zip(c):
+    """create Oktest.zip"""
     with chdir("website"):
         system("zip -r ../Oktest.zip index.html style.css CHANGES.txt")
 
