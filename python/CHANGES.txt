@@ -35,6 +35,14 @@ Release 0.7.0
     with chdir('build'):
       ... do_something ...
 
+* add document of 'oktest.helper.dummy_io()'. ::
+
+    with dummy_io("SOS") as io:
+        assert sys.stdin.read() == "SOS"
+        print("Haruhi")
+    assert io.stdout == "Haruhi\n"
+    assert io.stderr == ""
+
 * fix 'oktest.tracer.Call#__repr__()' to change output according to
   whether '==' is called or not. This is aimed to make output of
   'ok(tr[0]) == [...]' to be more readable.
