@@ -49,7 +49,7 @@ Installation::
 Example
 =======
 
-The following is a short example.
+The following is a short example. ::
 
     from oktest import ok, not_ok, run
 
@@ -65,7 +65,7 @@ The following is a short example.
         run()
 
 
-The following is a long example.
+The following is a long example. ::
 
     import sys, os
     from oktest import ok, not_ok, run
