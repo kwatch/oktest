@@ -685,10 +685,20 @@ class SimpleReporter(BaseReporter):
         OUT.write("f"); OUT.flush()
         self._write("Failed: %s()\n" % self._test_ident(obj))
         self._write("  %s\n" % ex2msg(ex))
-        file, line, func, text = self._get_location(ex)
-        if file:
-            #self._write("   %s:%s:  %s\n" % (file, line, text))
-            self._write_tb(file, line, func, text)
+        #file, line, func, text = self._get_location(ex)
+        #if file:
+        #    #self._write("   %s:%s:  %s\n" % (file, line, text))
+        #    self._write_tb(file, line, func, text)
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
+                break
+        self._write_tb(filename, linenum, funcname, linetext)
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
+                break
+            self._write_tb(filename, linenum, funcname, linetext)
         if getattr(ex, 'diff', None):
             self._write(ex.diff)
 
@@ -728,9 +738,19 @@ class OldStyleReporter(BaseReporter):
 
     def print_failed(self, obj, ex):
         OUT.write("[NG] %s\n" % ex2msg(ex))
-        file, line, func, text = self._get_location(ex)
-        if file:
-            OUT.write("   %s:%s: %s\n" % (file, line, text))
+        #file, line, func, text = self._get_location(ex)
+        #if file:
+        #    OUT.write("   %s:%s: %s\n" % (file, line, text))
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
+                break
+        OUT.write("   %s:%s: %s\n" % (filename, linenum, linetext))
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
+                break
+            OUT.write("   %s:%s: %s\n" % (filename, linenum, linetext))
         if getattr(ex, 'diff', None):
             OUT.write(ex.diff)
 
@@ -766,9 +786,20 @@ class TapStyleReporter(BaseReporter):
     def print_failed(self, obj, ex):
         OUT.write("not ok # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s\n" % ex2msg(ex))
-        file, line, func, text = self._get_location(ex)
-        if file:
-            OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
+        #file, line, func, text = self._get_location(ex)
+        #if file:
+        #    OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
+                break
+        OUT.write("   #  %s:%s:  %s\n" % (filename, linenum, linetext))
+        self._write_tb(filename, linenum, funcname, linetext)
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
+                break
+            OUT.write("   #  %s:%s:  %s\n" % (filename, linenum, linetext))
         if getattr(ex, 'diff', None):
             OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
 
