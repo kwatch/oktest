@@ -654,13 +654,22 @@ class BaseReporter(Reporter):
     def _write(self, str):
         OUT.write(str)
 
-    def _write_tb(self, filename, linenum, funcname, linetext):
-        if funcname:
-            self._write('  File "%s", line %s, in %s\n' % (filename, linenum, funcname))
-        else:
-            self._write('  File "%s", line %s\n' % (filename, linenum))
-        if linetext:
-            self._write('    %s\n' % linetext)
+    def _print_tb(self, filename, linenum, funcname, linetext):
+        raise NotImplementedError("%s._print_tb(): not implemented yet." % self.__class__.__name__)
+
+    def _print_traceback(self, all=False):
+        tb = traceback.extract_tb(sys.exc_info()[2])
+        iter = tb.__iter__()
+        for filename, linenum, funcname, linetext in iter:
+            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
+                break
+        self._print_tb(filename, linenum, funcname, linetext)
+        for filename, linenum, funcname, linetext in iter:
+            if not all:
+                if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
+                    break
+            self._print_tb(filename, linenum, funcname, linetext)
+        tb = iter = None
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -681,6 +690,14 @@ class SimpleReporter(BaseReporter):
     def _write(self, str):
         self.buf.append(str)
 
+    def _print_tb(self, filename, linenum, funcname, linetext):
+        if funcname:
+            self._write('  File "%s", line %s, in %s\n' % (filename, linenum, funcname))
+        else:
+            self._write('  File "%s", line %s\n' % (filename, linenum))
+        if linetext:
+            self._write('    %s\n' % linetext)
+
     def print_failed(self, obj, ex):
         OUT.write("f"); OUT.flush()
         self._write("Failed: %s()\n" % self._test_ident(obj))
@@ -689,16 +706,7 @@ class SimpleReporter(BaseReporter):
         #if file:
         #    #self._write("   %s:%s:  %s\n" % (file, line, text))
         #    self._write_tb(file, line, func, text)
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iter = tb.__iter__()
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
-                break
-        self._write_tb(filename, linenum, funcname, linetext)
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
-                break
-            self._write_tb(filename, linenum, funcname, linetext)
+        self._print_traceback(False)
         if getattr(ex, 'diff', None):
             self._write(ex.diff)
 
@@ -707,15 +715,7 @@ class SimpleReporter(BaseReporter):
         self._write("ERROR: %s()\n" % self._test_ident(obj))
         self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         #traceback.print_exc(file=sys.stdout)
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iter = tb.__iter__()
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
-                break
-        self._write_tb(filename, linenum, funcname, linetext)
-        for filename, linenum, funcname, linetext in iter:
-            self._write_tb(filename, linenum, funcname, linetext)
-        tb = iter = None
+        self._print_traceback(True)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -736,36 +736,27 @@ class OldStyleReporter(BaseReporter):
     def print_ok(self, obj):
         OUT.write("[ok]\n")
 
+    _print_tb_format = "   %s:%s: %s\n"
+    #_print_tb_format = "  - %s:%s:  %s\n"
+
+    def _print_tb(self, filename, linenum, funcname, linetext):
+        OUT.write(self._print_tb_format % (filename, linenum, linetext))
+
     def print_failed(self, obj, ex):
         OUT.write("[NG] %s\n" % ex2msg(ex))
         #file, line, func, text = self._get_location(ex)
         #if file:
         #    OUT.write("   %s:%s: %s\n" % (file, line, text))
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iter = tb.__iter__()
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
-                break
-        OUT.write("   %s:%s: %s\n" % (filename, linenum, linetext))
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
-                break
-            OUT.write("   %s:%s: %s\n" % (filename, linenum, linetext))
+        self._print_tb_format = "   %s:%s: %s\n"
+        self._print_traceback(False)
         if getattr(ex, 'diff', None):
             OUT.write(ex.diff)
 
     def print_error(self, obj, ex):
         OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         #traceback.print_exc(file=sys.stdout)
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iter = tb.__iter__()
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
-                break
-        OUT.write(    "  - %s:%s:  %s\n" % (filename, linenum, linetext))
-        for filename, linenum, funcname, linetext in iter:
-            OUT.write("  - %s:%s:  %s\n" % (filename, linenum, linetext))
-        tb = iter = None
+        self._print_tb_format = "  - %s:%s:  %s\n"
+        self._print_traceback(True)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -783,23 +774,16 @@ class TapStyleReporter(BaseReporter):
     def print_ok(self, obj):
         OUT.write("ok     # %s\n" % self._test_ident(obj))
 
+    def _print_tb(self, filename, linenum, funcname, linetext):
+        OUT.write("   #  %s:%s:  %s\n" % (filename, linenum, linetext))
+
     def print_failed(self, obj, ex):
         OUT.write("not ok # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s\n" % ex2msg(ex))
         #file, line, func, text = self._get_location(ex)
         #if file:
         #    OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iter = tb.__iter__()
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) not in ('oktest.py', 'oktest.pyc'):
-                break
-        OUT.write("   #  %s:%s:  %s\n" % (filename, linenum, linetext))
-        self._write_tb(filename, linenum, funcname, linetext)
-        for filename, linenum, funcname, linetext in iter:
-            if os.path.basename(filename) in ('oktest.py', 'oktest.pyc'):
-                break
-            OUT.write("   #  %s:%s:  %s\n" % (filename, linenum, linetext))
+        self._print_traceback(False)
         if getattr(ex, 'diff', None):
             OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
 
@@ -807,15 +791,7 @@ class TapStyleReporter(BaseReporter):
         OUT.write("ERROR  # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         #traceback.print_exc(file=sys.stdout)
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iter = tb.__iter__()
-        for file, line, func, text in iter:
-            if os.path.basename(file) not in ('oktest.py', 'oktest.pyc'):
-                break
-        OUT.write(    "   #  %s:%s:  %s" % (file, line, text))
-        for filename, linenum, funcname, linetext in iter:
-            OUT.write("   #  %s:%s:  %s" % (file, line, text))
-        tb = iter = None
+        self._print_traceback(True)
 
 
 REPORTER = SimpleReporter
