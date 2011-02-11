@@ -811,7 +811,7 @@ class _Context(object):
     def __call__(self, func, *args):
         self.__enter__()
         try:
-            func(*args)
+            return func(*args)
         finally:
             self.__exit__(*sys.exc_info())
 
