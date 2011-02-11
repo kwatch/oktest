@@ -734,16 +734,16 @@ run(FooTest)
 expected = r"""
 * FooTest.test_should1 ... [ok]
 * FooTest.test_should2 ... [NG] 'foobar'.startswith('aaa') : failed.
-   /Users/kwatch/src/oktest/python/lib/oktest.py:505: func(obj)
+   _test_.py:7: ok ("foobar").should.startswith("aaa")
 * FooTest.test_should3 ... [ERROR] AttributeError: 'str' object has no attribute 'start_with'
   - _test_.py:9:  ok ("foobar").should.start_with("foob")   # AttributeError
-  - /Users/kwatch/src/oktest/python/lib/oktest.py:419:  val = getattr(ass.target, key)
+  - /Users/kwatch/src/oktest/python/lib/oktest.py:442:  val = getattr(ass.target, key)
 * FooTest.test_should4 ... [ERROR] ValueError: Bar.name: not a callable.
   - _test_.py:11:  ok (Bar('sasaki')).should.name()          # ValueError: not a callable
-  - /Users/kwatch/src/oktest/python/lib/oktest.py:422:  raise ValueError(msg)
+  - /Users/kwatch/src/oktest/python/lib/oktest.py:445:  raise ValueError(msg)
 * FooTest.test_should5 ... [ERROR] ValueError: 'Sasaki'.upper(): expected to return True or False but it returned 'SASAKI'.
   - _test_.py:13:  ok ("Sasaki").should.upper()              # ValueError: expected to return True or False
-  - /Users/kwatch/src/oktest/python/lib/oktest.py:430:  raise ValueError(msg)
+  - /Users/kwatch/src/oktest/python/lib/oktest.py:453:  raise ValueError(msg)
 """[1:]
 do_test_with(desc, script, expected, re.compile(r'.*oktest\.py:\d+\:.*\n'))
 
@@ -763,7 +763,7 @@ run(FooTest)
 expected = r"""
 * FooTest.test_should_not1 ... [ok]
 * FooTest.test_should_not2 ... [NG] not 'foobar'.startswith('foo') : failed.
-   /Users/kwatch/src/oktest/python/lib/oktest.py:505: func(obj)
+   _test_.py:7: ok ("foobar").should_not.startswith("foo")
 """[1:]
 do_test_with(desc, script, expected, re.compile(r'.*oktest\.py:\d+\:.*\n'))
 
