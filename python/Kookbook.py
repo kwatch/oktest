@@ -128,7 +128,6 @@ def task_register(c):
 @spices('-a: create egg files for 2.4-2.7')
 def task_package(c, *args, **kwargs):
     """create package"""
-    ## remove files
     pattern = c%"dist/$(package)-$(release)*"
     if glob(pattern):
         rm_rf(pattern)
@@ -147,18 +146,12 @@ def task_package(c, *args, **kwargs):
     system(c%'$(python) setup.py sdist')
     #system(c%'$(python) setup.py sdist --keep-temp')
     with chdir('dist') as d:
-        #pkgs = kook.util.glob2(c%"$(package)-$(release).tar.gz");
-        #pkg = pkgs[0]
         pkg = c%"$(package)-$(release).tar.gz"
-        echo(c%"pkg=$(pkg)")
+        #echo(c%"pkg=$(pkg)")
         #tar_xzf(pkg)
         system(c%"tar xzf $(pkg)")
-        dir = re.sub(r'\.tar\.gz$', '', pkg)
-        #echo("*** debug: pkg=%s, dir=%s" % (pkg, dir))
+        dir = pkg.replace('.tar.gz', '')
         edit(c%"$(dir)/**/*", by=repl)
-        #with chdir(dir):
-        #    system(c%"$(python) setup.py egg_info --egg-base .")
-        #    rm("*.pyc")
         mv(pkg, c%"$(pkg).bkup")
         #tar_czf(c%"$(dir).tar.gz", dir)
         system(c%"tar -cf $(dir).tar $(dir)")
