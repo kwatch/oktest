@@ -124,6 +124,7 @@ def task_register(c):
 
 
 @recipe
+@ingreds('edit')
 @spices('-a: create egg files for 2.4-2.7')
 def task_package(c, *args, **kwargs):
     """create package"""
@@ -142,8 +143,6 @@ def task_package(c, *args, **kwargs):
         (r'\$License:[^%]*?\$',   '$License: %s $'   % license),
         (r'X\.X\.X',   release),
     )
-    cp('setup.py.txt', 'setup.py')
-    edit('setup.py', by=repl)
     ## setup
     system(c%'$(python) setup.py sdist')
     #system(c%'$(python) setup.py sdist --keep-temp')
