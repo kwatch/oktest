@@ -814,6 +814,11 @@ class _RunnableContext(_Context):
         finally:
             self.__exit__(*sys.exc_info())
 
+    def deco(self, func):
+        def f(*args, **kwargs):
+            return self.run(func, *args, **kwargs)
+        return f
+
     __call__ = run    # for backward compatibility
 
 
