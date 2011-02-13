@@ -15,8 +15,8 @@ else:
     from distutils.core import setup
 
 
-name     = 'Oktest'
-version  = '0.7.0'
+name     = 'Oktest'    ## $Package: Oktest $
+version  = '0.7.0'     ## $Release: 0.7.0 $
 author   = 'makoto kuwata'
 email    = 'kwa@kuwata-lab.com'
 maintainer = author
@@ -47,7 +47,7 @@ detail   = (
             "\n"
             ".. _README: http://packages.python.org/Oktest\n"
            )
-license  = 'MIT License'
+license  = 'MIT License'     ## $License: MIT License $
 platforms = 'any'
 #download = 'http://downloads.sourceforge.net/oktest/Oktest-%s.tar.gz' % version
 download = 'http://pypi.python.org/packages/source/O/Oktest/Oktest-%s.tar.gz' % version

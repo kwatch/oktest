@@ -98,6 +98,7 @@ def file_doc_test_py(c):
 def task_edit(c):
     """update $Release$, $Copyrigh$, and $License$ in files"""
     def replacer(s):
+        s = re.sub(r'\$Package:[^%]*?\$',    '$Package: %s $'   % package,   s)
         s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
         s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
         s = re.sub(r'\$License:[^%]*?\$',    '$License: %s $'   % license,   s)
@@ -106,6 +107,14 @@ def task_edit(c):
     filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
     edit(filenames, by=replacer)
+    #
+    def replacer(s):
+        pat = r"^([ \t]*\w+\s*=\s*)'.*?'(\s*##\s*\$(?:Package|Release|License): (.*?) \$)"
+        return re.compile(pat, re.M).sub(r"\1'\3'\2", s)
+        #s = re.compile(r"^(version\s*=\s*)'.*?'", re.M).sub(r"\1'%s'" % release, s)
+        #s = re.compile(r"^(license\s*=\s*)'.*?'", re.M).sub(r"\1'%s'" % license, s)
+        #return s
+    edit('setup.py', by=replacer)
 
 
 @recipe
