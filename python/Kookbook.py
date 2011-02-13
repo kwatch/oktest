@@ -174,6 +174,24 @@ def task_package(c, *args, **kwargs):
         #        rm_rf("build", "dist")
 
 
+python_commands = [
+    '/opt/local/bin/python2.7',
+    '/opt/local/bin/python2.6',
+    '/opt/local/bin/python2.5',
+    '/opt/local/bin/python2.4',
+]
+
+
+@recipe
+def task_upload(c):
+    """upload packages"""
+    dir = "c%dist/$(package)-$(release)"
+    with chdir(dir):
+        system(c%"$(python) setup.py sdist upload")
+        for cmd in python_commands:
+            system(c%"$(cmd) setup.py bdist_egg upload")
+
+
 @recipe
 def task_clean(c):
     rm_rf('**/*.pyc', 'dist', c%'$(package).zip')
