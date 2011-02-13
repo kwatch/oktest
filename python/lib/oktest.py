@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'run', 'spec',)
+__all__ = ('ok', 'not_ok', 'NG', 'run', 'spec',)
 
 import sys, os, re, types, traceback
 

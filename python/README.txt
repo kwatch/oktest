@@ -168,9 +168,10 @@ ok (x).is_a(y)
 ok (x).has_attr(y)
 	Raise AssertionError unless hasattr(x, y).
 
-ok (x).matches(y)
+ok (x).matches(y[, flag=None])
 	If y is a string, raise AssertionError unless re.search(y, x).
 	If y is a re.pattern object, raise AssertionError unless y.search(x).
+	You can pass flag such as ``re.M | re.S``.
 
 ok (path).is_file()
 	Raise AssertionError unless os.path.isfile(path).
@@ -191,14 +192,18 @@ ok (func).raises(error_class[, errmsg=None])
 	    ok (f).raises(AttributeError, "'str' object has no attribute 'name'")
 	    ok (f.exception.message) == "'str' object has no attribute 'name'"
 
-not_ok (x)
-	Opposite of ok(x). For example, 'not_ok ("foo").matches(r"[0-9]+")' is True. ::
+NG (x)
+	Opposite of ok(x). For example, 'NG ("foo").matches(r"[0-9]+")' is True. ::
 
 	    fname = 'file.txt'
 	    open(fname, 'w').write('foo')
 	    ok (fname).is_file()            # file exists
 	    os.unlink(fname)
-	    not_ok (fname).is_file()        # file doesn't exist
+	    NG (fname).is_file()        # file doesn't exist
+
+not_ok (x)
+	Same as NG(x).
+
 
 Oktest allows you to define custom assertion functions.
 See Tips section.
@@ -529,6 +534,11 @@ Tips
     ## how to use
     from oktest import ok
     ok ("Sasaki").startswith("Sas")
+
+* It is possible to chain assertion methods.
+
+    ## chain assertion methods
+    ok ("sos".upper()).is_a(str).matches(r'^[A-Z]+$') == "SOS"
 
 * If you call ok() or not_ok() but forget to do assertion, oktest warns it. ::
 
