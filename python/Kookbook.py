@@ -125,7 +125,7 @@ def task_register(c):
 
 @recipe
 @ingreds('edit')
-@spices('-a: create egg files for 2.4-2.7')
+#@spices('-a: create egg files for 2.4-2.7')
 def task_package(c, *args, **kwargs):
     """create package"""
     pattern = c%"dist/$(package)-$(release)*"
@@ -157,21 +157,21 @@ def task_package(c, *args, **kwargs):
         system(c%"tar -cf $(dir).tar $(dir)")
         system(c%"gzip -f9 $(dir).tar")
         ## create *.egg file
-        opt_a = kwargs.get('a')
-        with chdir(dir):
-            if opt_a:
-                pythons = [
-                    '/opt/local/bin/python2.7',
-                    '/opt/local/bin/python2.6',
-                    '/opt/local/bin/python2.5',
-                    '/opt/local/bin/python2.4',
-                ]
-            else:
-                pythons = [ python ]
-            for py in pythons:
-                system(c%'$(py) setup.py bdist_egg')
-                mv("dist/*.egg", "..")
-                rm_rf("build", "dist")
+        #opt_a = kwargs.get('a')
+        #with chdir(dir):
+        #    if opt_a:
+        #        pythons = [
+        #            '/opt/local/bin/python2.7',
+        #            '/opt/local/bin/python2.6',
+        #            '/opt/local/bin/python2.5',
+        #            '/opt/local/bin/python2.4',
+        #        ]
+        #    else:
+        #        pythons = [ python ]
+        #    for py in pythons:
+        #        system(c%'$(py) setup.py bdist_egg')
+        #        mv("dist/*.egg", "..")
+        #        rm_rf("build", "dist")
 
 
 @recipe
