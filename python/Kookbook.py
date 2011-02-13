@@ -131,8 +131,7 @@ def task_package(c):
 @ingreds('edit')
 def task_sdist(c, *args, **kwargs):
     """create package"""
-    rm_rf(c%"dist/$(package)-$(release)*")
-    ## setup
+    #rm_rf(c%"dist/$(package)-$(release)*")
     system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
     #with chdir('dist') as d:
     #    targz = c%"$(package)-$(release).tar.gz"
@@ -142,7 +141,8 @@ def task_sdist(c, *args, **kwargs):
     #    edit(c%"$(dir)/**/*", by=replacer)
     #    mv(targz, c%"$(targz).old")
     #    #tar_czf(c%"$(dir).tar.gz", dir)
-    #    system(c%"tar czf $(dir).tar.gz $(dir)")
+    #    system(c%"tar -cf $(dir).tar $(dir)")
+    #    system(c%"gzip -f9 $(dir).tar")
 
 
 @recipe
@@ -158,6 +158,17 @@ python_commands = [
     '/opt/local/bin/python2.5',
     '/opt/local/bin/python2.4',
 ]
+
+
+@recipe
+@ingreds('sdist')
+def task_eggs(c):
+    """create *.egg files"""
+    #dir = "c%dist/$(package)-$(release)"
+    #with chdir(dir):
+    if True:
+        for cmd in python_commands:
+            system(c%"$(cmd) setup.py bdist_egg")
 
 
 @recipe
