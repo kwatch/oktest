@@ -888,16 +888,17 @@ def _dummy():
             self.klass = klass
 
         def __enter__(self):
-            self.locals = sys._getframe(1).f_locals
-            self.start_names = self.locals.keys()
-            if python3: self.start_names = list(self.start_names)
+            localvars = sys._getframe(1).f_locals
+            self._start_names = localvars.keys()
+            if python3: self._start_names = list(self._start_names)
             return self
 
         def __exit__(self, *args):
-            curr_names = self.locals.keys()
-            diff_names = list(set(curr_names) - set(self.start_names))
+            localvars  = sys._getframe(1).f_locals
+            curr_names = localvars.keys()
+            diff_names = list(set(curr_names) - set(self._start_names))
             for name in diff_names:
-                setattr(self.klass, name, self.locals[name])
+                setattr(self.klass, name, localvars[name])
 
 
     def chdir(path, func=None):
