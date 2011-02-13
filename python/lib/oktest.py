@@ -421,6 +421,11 @@ def ok(target):
     obj._location = _get_location(1)
     return obj
 
+def NG(target):
+    obj = ASSERTION_OBJECT(target, False)
+    obj._location = _get_location(1)
+    return obj
+
 def not_ok(target):
     obj = ASSERTION_OBJECT(target, False)
     obj._location = _get_location(1)
