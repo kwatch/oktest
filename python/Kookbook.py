@@ -27,26 +27,21 @@ kook_default_product = 'test'
 
 python = prop('python', 'python')
 
-@recipe
-@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
-def task_test(c, *args, **kwargs):
-    if kwargs.get('a', None):
-        _do_for_all_version(c, "PYTHON=$(bin) $(bin) test/oktest_test.py")
-    else:
-        system(c%"$(python) test/oktest_test.py")
 
-def _do_for_all_version(c, command):
-    versions = [
-        ('2.4', '/opt/local/bin/python2.4'),
-        ('2.5', '/opt/local/bin/python2.5'),
-        ('2.6', '/opt/local/bin/python2.6'),
-        #('2.7', '/opt/local/bin/python2.7'),
-        ('2.7', '/usr/local/python/2.7.1/bin/python'),
-        ('3.0', '/usr/local/python/3.0.1/bin/python'),
-        ('3.1', '/usr/local/python/3.1/bin/python'),
-        ('3.2', '/usr/local/python/3.2rc1/bin/python'),
-    ]
-    for ver, bin in versions:
+python_versions = [
+    ('2.4', '/opt/local/bin/python2.4'),
+    ('2.5', '/opt/local/bin/python2.5'),
+    ('2.6', '/opt/local/bin/python2.6'),
+    #('2.7', '/opt/local/bin/python2.7'),
+    ('2.7', '/usr/local/python/2.7.1/bin/python'),
+    ('3.0', '/usr/local/python/3.0.1/bin/python'),
+    ('3.1', '/usr/local/python/3.1/bin/python'),
+    ('3.2', '/usr/local/python/3.2rc1/bin/python'),
+]
+
+
+def _all_versions():
+    for ver, bin in python_versions:
         print("#")
         print("# python " + ver)
         print("#")
@@ -58,20 +53,33 @@ def _do_for_all_version(c, command):
                 s = open(fpath+'.bkup').read()
                 line = 'from __future__ import with_statement'
                 open(fpath, 'w').write(s.replace(line, '#' + line))
-            system(c%command)
+            yield ver, bin
         finally:
             if ver == '2.4':
                 mv(fpath+'.bkup', fpath)
+
+
+def _do_test(c, kwargs, command):
+    if kwargs.get('a', None):
+        for ver, bin in _all_versions():
+            system(c%command)
+    else:
+        system(c%command)
+
+
+@recipe
+@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
+def task_test(c, *args, **kwargs):
+    _do_test(c, kwargs, "PYTHON=$(bin) $(bin) test/oktest_test.py")
+
 
 @recipe
 @ingreds('test/doc_test.py')
 @spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
 def task_doc_test(c, *args, **kwargs):
     """invoke 'test/doc_test.py'"""
-    if kwargs.get('a', None):
-        _do_for_all_version(c, '$(python) ' + c.ingred)
-    else:
-        system(c%'python $(ingred)')
+    _do_test(c, kwargs, "$(bin) $(ingred)")
+
 
 @recipe
 @product('test/doc_test.py')
