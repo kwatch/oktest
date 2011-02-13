@@ -804,13 +804,17 @@ class _Context(object):
     def __exit__(self, *args):
         return None
 
-    def __call__(self, func, *args):
+
+class _RunnableContext(_Context):
+
+    def run(self, func, *args, **kwargs):
         self.__enter__()
         try:
-            return func(*args)
+            return func(*args, **kwargs)
         finally:
             self.__exit__(*sys.exc_info())
 
+    __call__ = run    # for backward compatibility
 
 
 ##
@@ -850,7 +854,7 @@ def _dummy():
     __all__ = ('chdir', 'using')
 
 
-    class Chdir(_Context):
+    class Chdir(_RunnableContext):
 
         def __init__(self, dirname):
             self.dirname = dirname
@@ -893,7 +897,7 @@ def _dummy():
 
     def chdir(path, func=None):
         cd = Chdir(path)
-        return func is not None and cd(func) or cd
+        return func is not None and cd.run(func) or cd
 
     def using(klass):
         return Using(klass)
@@ -933,7 +937,7 @@ def _dummy():
     __all__ = ('dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars', 'dummy_io')
 
 
-    class DummyFile(_Context):
+    class DummyFile(_RunnableContext):
 
         def __init__(self, filename, content):
             self.filename = filename
@@ -952,7 +956,7 @@ def _dummy():
             os.unlink(self.path)
 
 
-    class DummyDir(_Context):
+    class DummyDir(_RunnableContext):
 
         def __init__(self, dirname):
             self.dirname = dirname
@@ -967,7 +971,7 @@ def _dummy():
             shutil.rmtree(self.path)
 
 
-    class DummyValues(_Context):
+    class DummyValues(_RunnableContext):
 
         def __init__(self, dictionary, items_=None, **kwargs):
             self.dict = dictionary
@@ -994,7 +998,7 @@ def _dummy():
             self.__dict__.clear()
 
 
-    class DummyIO(_Context):
+    class DummyIO(_RunnableContext):
 
         def __init__(self, stdin_content=None):
             self.stdin_content = stdin_content

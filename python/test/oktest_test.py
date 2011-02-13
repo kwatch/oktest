@@ -924,10 +924,13 @@ from oktest.helper import *
 class FooTest(object):
     def test_dummy_file2(self):
         filename = '_dummy_.txt'
+        called = [False]
         def f():
+            called[0] = True
             ok (filename).is_file()
             ok (open(filename).read()) == 'hogehoge'
-        dummy_file(filename, 'hogehoge')(f)
+        dummy_file(filename, 'hogehoge').run(f)
+        ok (called[0]) == True
         ok (filename).not_exist()
 run(FooTest)
 """
@@ -960,9 +963,12 @@ from oktest.helper import *
 class FooTest(object):
     def test_dummy_dir2(self):
         dirname = '_dummy_.d'
+        called = [False]
         def f():
+            called[0] = True
             ok (dirname).is_dir()
-        dummy_dir(dirname)(f)
+        dummy_dir(dirname).run(f)
+        ok (called[0]) == True
         ok (dirname).not_exist()
 run(FooTest)
 """
@@ -1004,11 +1010,14 @@ class FooTest(object):
     def test_dummy_environ_vars2(self):
         os.environ['AAAA'] = 'hoge'
         os.environ['CCCC'] = ''
+        called = [False]
         def f():
+            called[0] = True
             ok (os.environ['AAAA']) == 'aaa'
             ok (os.environ['BBBB']) == 'bbb'
             ok (os.environ['CCCC']) == 'ccc'
-        dummy_environ_vars(AAAA='aaa', BBBB='bbb', CCCC='ccc')(f)
+        dummy_environ_vars(AAAA='aaa', BBBB='bbb', CCCC='ccc').run(f)
+        ok (called[0]) == True
         ok (os.environ.get('AAAA')) == 'hoge'
         ok ('BBBB' not in os.environ) == True
         ok ('CCCC' in os.environ) == True
@@ -1046,9 +1055,12 @@ from oktest.helper import *
 class FooTest(object):
     def test_dummy_values2(self):
         d = {'A': 10, 'B': 20, 'C': 30 }
+        called = [False]
         def f():
+            called[0] = True
             ok (d) == {'A': 100, 'B': 200, 'C': 30, 999: 0}
-        dummy_values(d, {999: 0}, A=100, B=200)(f)
+        dummy_values(d, {999: 0}, A=100, B=200).run(f)
+        ok (called[0]) == True
         ok (d) == {'A': 10, 'B': 20, 'C': 30 }
 run(FooTest)
 """
@@ -1096,11 +1108,14 @@ class Foo(object):
 class FooTest(object):
     def test_dummy_attrs2(self):
         obj = Foo(10, 20)
+        called = [False]
         def f():
+          called[0] = True
           ok (obj.x) == 100
           ok (obj.y) == 20
           ok (obj.z) == 300
-        dummy_attrs(obj, x=100, z=300)(f)
+        dummy_attrs(obj, x=100, z=300).run(f)
+        ok (called[0]) == True
         #
         ok (obj.x) == 10
         ok (obj.y) == 20
@@ -1147,14 +1162,18 @@ from oktest.helper import *
 class FooTest(object):
     def test_dummy_io(self):
         sin, sout, serr = sys.stdin, sys.stdout, sys.stderr
+        called = [False]
         def f(arg1, arg2):
+            called[0] = True
             ok (sys.stdin)  != sin
             ok (sys.stdout) != sout
             ok (sys.stderr) != serr
             ok (sys.stdin.read()) == "SOS"
             sys.stdout.write(arg1)
             sys.stderr.write(arg2)
-        d_io = dummy_io("SOS", f, "Haruhi", "Sasaki")
+        d_io = dummy_io("SOS")
+        d_io.run(f, "Haruhi", "Sasaki")
+        ok (called[0]) == True
         ok (sys.stdin).is_(sin)
         ok (sys.stdout).is_(sout)
         ok (sys.stderr).is_(serr)
@@ -1198,11 +1217,14 @@ class FooTest(object):
     def test_chdir2(self):
         def f():
             pwd = os.getcwd()
+            called = [False]
             def g():
+                called[0] = True
                 ok (os.path.basename(os.getcwd())) == '_dummy_.d'
                 ok (os.getcwd()) != pwd
                 ok (os.getcwd()) == os.path.join(pwd, '_dummy_.d')
             chdir('_dummy_.d', g)
+            ok (called[0]) == True
             ok (os.getcwd()) == pwd
         dummy_dir('_dummy_.d')(f)
 run(FooTest)
