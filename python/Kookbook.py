@@ -94,84 +94,56 @@ def file_doc_test_py(c):
     f.write(s)
     f.close()
 
+
+def replacer(s):
+    #s = re.sub(r'\$Package\$',   package,   s)
+    #s = re.sub(r'\$Release\$',   release,   s)
+    #s = re.sub(r'\$Copyright\$', copyright, s)
+    #s = re.sub(r'\$License\$',   license,   s)
+    s = re.sub(r'\$Package:[^%]*?\$',    '$Package: %s $'   % package,   s)
+    s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
+    s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
+    s = re.sub(r'\$License:[^%]*?\$',    '$License: %s $'   % license,   s)
+    s = re.sub(r'%s-\d+\.\d+\.\d+' % package, '%s-%s' % (package, release), s)
+    return s
+
+
 @recipe
 def task_edit(c):
     """update $Release$, $Copyrigh$, and $License$ in files"""
-    def replacer(s):
-        s = re.sub(r'\$Package:[^%]*?\$',    '$Package: %s $'   % package,   s)
-        s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
-        s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
-        s = re.sub(r'\$License:[^%]*?\$',    '$License: %s $'   % license,   s)
-        s = re.sub(r'%s-\d+\.\d+\.\d+' % package, '%s-%s' % (package, release), s)
-        return s
     filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
     edit(filenames, by=replacer)
     #
-    def replacer(s):
+    def repl(s):
         pat = r"^([ \t]*\w+\s*=\s*)'.*?'(\s*##\s*\$(?:Package|Release|License): (.*?) \$)"
         return re.compile(pat, re.M).sub(r"\1'\3'\2", s)
-        #s = re.compile(r"^(version\s*=\s*)'.*?'", re.M).sub(r"\1'%s'" % release, s)
-        #s = re.compile(r"^(license\s*=\s*)'.*?'", re.M).sub(r"\1'%s'" % license, s)
-        #return s
-    edit('setup.py', by=replacer)
-
-
-@recipe
-def task_register(c):
-    """regsiter information into PyPI"""
-    system("python setup.py register")
+    edit('setup.py', by=repl)
 
 
 @recipe
 @ingreds('edit')
-#@spices('-a: create egg files for 2.4-2.7')
 def task_package(c, *args, **kwargs):
     """create package"""
-    pattern = c%"dist/$(package)-$(release)*"
-    if glob(pattern):
-        rm_rf(pattern)
-    ## edit files
-    repl = (
-        (r'\$Release\$',   release),
-        (r'\$Copyright\$', copyright),
-        (r'\$License\$',   license),
-        (r'\$Package\$',   package),
-        (r'\$Release:[^%]*?\$',   '$Release: %s $'   % release),
-        (r'\$Copyright:[^%]*?\$', '$Copyright: %s $' % copyright),
-        (r'\$License:[^%]*?\$',   '$License: %s $'   % license),
-        (r'X\.X\.X',   release),
-    )
+    rm_rf(c%"dist/$(package)-$(release)*")
     ## setup
-    system(c%'$(python) setup.py sdist')
-    #system(c%'$(python) setup.py sdist --keep-temp')
+    system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
     with chdir('dist') as d:
-        pkg = c%"$(package)-$(release).tar.gz"
-        #echo(c%"pkg=$(pkg)")
-        #tar_xzf(pkg)
-        system(c%"tar xzf $(pkg)")
-        dir = pkg.replace('.tar.gz', '')
-        edit(c%"$(dir)/**/*", by=repl)
-        mv(pkg, c%"$(pkg).bkup")
+        targz = c%"$(package)-$(release).tar.gz"
+        #tar_xzf(targz)
+        system(c%"tar xzf $(targz)")
+        dir = targz.replace('.tar.gz', '')
+        edit(c%"$(dir)/**/*", by=replacer)
+        mv(targz, c%"$(targz).old")
         #tar_czf(c%"$(dir).tar.gz", dir)
-        system(c%"tar -cf $(dir).tar $(dir)")
-        system(c%"gzip -f9 $(dir).tar")
-        ## create *.egg file
-        #opt_a = kwargs.get('a')
-        #with chdir(dir):
-        #    if opt_a:
-        #        pythons = [
-        #            '/opt/local/bin/python2.7',
-        #            '/opt/local/bin/python2.6',
-        #            '/opt/local/bin/python2.5',
-        #            '/opt/local/bin/python2.4',
-        #        ]
-        #    else:
-        #        pythons = [ python ]
-        #    for py in pythons:
-        #        system(c%'$(py) setup.py bdist_egg')
-        #        mv("dist/*.egg", "..")
-        #        rm_rf("build", "dist")
+        system(c%"tar czf $(dir).tar.gz $(dir)")
+
+
+@recipe
+@ingreds('edit')
+def task_register(c):
+    """regsiter information into PyPI"""
+    system(c%"$(python) setup.py register")
 
 
 python_commands = [
@@ -183,6 +155,7 @@ python_commands = [
 
 
 @recipe
+@ingreds('edit')
 def task_upload(c):
     """upload packages"""
     dir = "c%dist/$(package)-$(release)"
