@@ -639,6 +639,22 @@ expected = r"""
 """[1:]
 do_test_with(desc, script, expected)
 
+
+###
+desc = "chained method"
+script = r"""
+from oktest import *
+class FooTest(object):
+    def test_chained1(self):
+        ok ("Sasaki".upper()).is_a(str).matches(r'^[A-Z]+$') == "SASAKI"
+run()
+"""[1:]
+expected = r"""
+* FooTest.test_chained1 ... [ok]
+"""[1:]
+do_test_with(desc, script, expected)
+
+
 ###
 desc = "op 'not_ok'"
 script = r"""
