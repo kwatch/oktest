@@ -169,6 +169,7 @@ def task_eggs(c):
     if True:
         for cmd in python_commands:
             system(c%"$(cmd) setup.py bdist_egg")
+        rm_rf('lib/$(package).egg-info')
 
 
 @recipe
@@ -181,6 +182,7 @@ def task_upload(c):
         system(c%"$(python) setup.py sdist upload")
         for cmd in python_commands:
             system(c%"$(cmd) setup.py bdist_egg upload")
+        rm_rf('lib/$(package).egg-info')
 
 
 @recipe
