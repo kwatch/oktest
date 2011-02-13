@@ -122,21 +122,27 @@ def task_edit(c):
 
 
 @recipe
+@ingreds('sdist', 'eggs')
+def task_package(c):
+    pass
+
+
+@recipe
 @ingreds('edit')
-def task_package(c, *args, **kwargs):
+def task_sdist(c, *args, **kwargs):
     """create package"""
     rm_rf(c%"dist/$(package)-$(release)*")
     ## setup
     system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
-    with chdir('dist') as d:
-        targz = c%"$(package)-$(release).tar.gz"
-        #tar_xzf(targz)
-        system(c%"tar xzf $(targz)")
-        dir = targz.replace('.tar.gz', '')
-        edit(c%"$(dir)/**/*", by=replacer)
-        mv(targz, c%"$(targz).old")
-        #tar_czf(c%"$(dir).tar.gz", dir)
-        system(c%"tar czf $(dir).tar.gz $(dir)")
+    #with chdir('dist') as d:
+    #    targz = c%"$(package)-$(release).tar.gz"
+    #    #tar_xzf(targz)
+    #    system(c%"tar xzf $(targz)")
+    #    dir = targz.replace('.tar.gz', '')
+    #    edit(c%"$(dir)/**/*", by=replacer)
+    #    mv(targz, c%"$(targz).old")
+    #    #tar_czf(c%"$(dir).tar.gz", dir)
+    #    system(c%"tar czf $(dir).tar.gz $(dir)")
 
 
 @recipe
