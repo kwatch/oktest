@@ -2,7 +2,7 @@
 
 ###
 ### $Release: $
-### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 
@@ -28,7 +28,7 @@ kook_default_product = 'test'
 python = prop('python', 'python')
 
 
-python_versions = [
+python_binaries = [
     ('2.4', '/opt/local/bin/python2.4'),
     ('2.5', '/opt/local/bin/python2.5'),
     ('2.6', '/opt/local/bin/python2.6'),
@@ -41,7 +41,7 @@ python_versions = [
 
 
 def _all_versions():
-    for ver, bin in python_versions:
+    for ver, bin in python_binaries:
         print("#")
         print("# python " + ver)
         print("#")
@@ -64,18 +64,19 @@ def _do_test(c, kwargs, command):
         for ver, bin in _all_versions():
             system(c%command)
     else:
+        bin = python
         system(c%command)
 
 
 @recipe
-@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
+@spices("-a: do with python from 2.4, to 3.2")
 def task_test(c, *args, **kwargs):
     _do_test(c, kwargs, "PYTHON=$(bin) $(bin) test/oktest_test.py")
 
 
 @recipe
 @ingreds('test/doc_test.py')
-@spices("-a: do with python 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2rc1")
+@spices("-a: do with python from 2.4, to 3.2")
 def task_doc_test(c, *args, **kwargs):
     """invoke 'test/doc_test.py'"""
     _do_test(c, kwargs, "$(bin) $(ingred)")
@@ -132,13 +133,14 @@ def task_edit(c):
 @recipe
 @ingreds('sdist', 'eggs')
 def task_package(c):
+    """create package"""
     pass
 
 
 @recipe
 @ingreds('edit')
 def task_sdist(c, *args, **kwargs):
-    """create package"""
+    """create dist/Oktest-X.X.X.tar.gz"""
     #rm_rf(c%"dist/$(package)-$(release)*")
     system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
     #with chdir('dist') as d:
@@ -153,49 +155,38 @@ def task_sdist(c, *args, **kwargs):
     #    system(c%"gzip -f9 $(dir).tar")
 
 
+def _do_setup_py(c, command):
+    for ver, bin in python_binaries:
+        if ver.startswith('2'):
+            system(c%command)
+    rm_rf(c%'lib/$(package).egg-info')
+
+
+@recipe
+@ingreds('edit')
+def task_eggs(c):
+    """create dist/*.egg files"""
+    _do_setup_py(c, "$(bin) setup.py bdist_egg")
+
+
 @recipe
 @ingreds('edit')
 def task_register(c):
-    """regsiter information into PyPI"""
+    """register information into PyPI"""
     system(c%"$(python) setup.py register")
-
-
-python_commands = [
-    '/opt/local/bin/python2.7',
-    '/opt/local/bin/python2.6',
-    '/opt/local/bin/python2.5',
-    '/opt/local/bin/python2.4',
-]
-
-
-@recipe
-@ingreds('sdist')
-def task_eggs(c):
-    """create *.egg files"""
-    #dir = "c%dist/$(package)-$(release)"
-    #with chdir(dir):
-    if True:
-        for cmd in python_commands:
-            system(c%"$(cmd) setup.py bdist_egg")
-        rm_rf('lib/$(package).egg-info')
 
 
 @recipe
 @ingreds('edit')
 def task_upload(c):
     """upload packages"""
-    #dir = "c%dist/$(package)-$(release)"
-    #with chdir(dir):
-    if True:
-        system(c%"$(python) setup.py sdist upload")
-        for cmd in python_commands:
-            system(c%"$(cmd) setup.py bdist_egg upload")
-        rm_rf('lib/$(package).egg-info')
+    system(c%"$(python) setup.py sdist upload")
+    _do_setup_py(c, "$(bin) setup.py bdist_egg upload")
 
 
 @recipe
 def task_clean(c):
-    rm_rf('**/*.pyc', 'dist', c%'$(package).zip')
+    rm_rf('**/*.pyc', 'dist', 'build', 'lib/*.egg-info', c%'$(package).zip')
 
 
 @recipe
@@ -209,8 +200,6 @@ def file_website_index_html(c):
     opts = '--stylesheet-path=style.css --link-stylesheet --strip-class=field --strip-class=field-name --strip-class=field-body'
     system(c%'rst2html.py $(opts) $(ingred) > $(product)')
     def f(s):
-        s = s.replace('$Release:[^%]*?$', '$Release: %s $' % release)
-        s = s.replace('$'+'Release'+'$', release)
         s = s.replace('README', 'Oktest - a new style testing library -')
         s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
         #s = re.sub(r'^<h(\d)>(.*?)</h\d>', r, s)
