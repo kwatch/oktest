@@ -164,8 +164,9 @@ python_commands = [
 @ingreds('edit')
 def task_upload(c):
     """upload packages"""
-    dir = "c%dist/$(package)-$(release)"
-    with chdir(dir):
+    #dir = "c%dist/$(package)-$(release)"
+    #with chdir(dir):
+    if True:
         system(c%"$(python) setup.py sdist upload")
         for cmd in python_commands:
             system(c%"$(cmd) setup.py bdist_egg upload")
