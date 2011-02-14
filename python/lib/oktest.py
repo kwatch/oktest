@@ -638,8 +638,8 @@ class BaseReporter(Reporter):
     def _write(self, str):
         OUT.write(str)
 
-    def _print_tb(self, filename, linenum, funcname, linetext):
-        raise NotImplementedError("%s._print_tb(): not implemented yet." % self.__class__.__name__)
+    def _print_traceback_entry(self, file, line, func, text):
+        raise NotImplementedError("%s._print_traceback_entry(): not implemented yet." % self.__class__.__name__)
 
     def _print_traceback(self, tb=None, all=False):
         basename = os.path.basename
@@ -648,12 +648,12 @@ class BaseReporter(Reporter):
         for file, line, func, text in iterator:
             if basename(file) not in ('oktest.py', 'oktest.pyc'):
                 break
-        self._print_tb(file, line, func, text)
+        self._print_traceback_entry(file, line, func, text)
         for file, line, func, text in iterator:
             if not all:
                 if basename(file) in ('oktest.py', 'oktest.pyc'):
                     break
-            self._print_tb(file, line, func, text)
+            self._print_traceback_entry(file, line, func, text)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -674,7 +674,7 @@ class SimpleReporter(BaseReporter):
     def _write(self, str):
         self.buf.append(str)
 
-    def _print_tb(self, file, line, func, text):
+    def _print_traceback_entry(self, file, line, func, text):
         if func:  self._write('  File "%s", line %s, in %s\n' % (file, line, func))
         else:     self._write('  File "%s", line %s\n'        % (file, line))
         if text:  self._write('    %s\n' % text)
@@ -712,22 +712,22 @@ class OldStyleReporter(BaseReporter):
     def print_ok(self, obj):
         OUT.write("[ok]\n")
 
-    _print_tb_format = "   %s:%s: %s\n"
-    #_print_tb_format = "  - %s:%s:  %s\n"
+    _traceback_entry_format = "   %s:%s: %s\n"
+    #_traceback_entry_format = "  - %s:%s:  %s\n"
 
-    def _print_tb(self, file, line, func, text):
-        OUT.write(self._print_tb_format % (file, line, text))
+    def _print_traceback_entry(self, file, line, func, text):
+        OUT.write(self._traceback_entry_format % (file, line, text))
 
     def print_failed(self, obj, ex):
         OUT.write("[NG] %s\n" % ex2msg(ex))
-        self._print_tb_format = "   %s:%s: %s\n"
+        self._traceback_entry_format = "   %s:%s: %s\n"
         self._print_traceback(all=False)
         if getattr(ex, 'diff', None):
             OUT.write(ex.diff)
 
     def print_error(self, obj, ex):
         OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_tb_format = "  - %s:%s:  %s\n"
+        self._traceback_entry_format = "  - %s:%s:  %s\n"
         self._print_traceback(all=True)
 
 
@@ -746,7 +746,7 @@ class TapStyleReporter(BaseReporter):
     def print_ok(self, obj):
         OUT.write("ok     # %s\n" % self._test_ident(obj))
 
-    def _print_tb(self, file, line, func, text):
+    def _print_traceback_entry(self, file, line, func, text):
         OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
 
     def print_failed(self, obj, ex):
