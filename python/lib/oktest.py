@@ -845,6 +845,10 @@ class Spec(_Context):
         if ex:
             raise ex
 
+    def __nonzero__(self):
+        filter = os.environ.get('SPEC')
+        return not filter or (filter in self.desc)
+
 
 def spec(desc):
     return Spec(desc)
