@@ -641,10 +641,10 @@ class BaseReporter(Reporter):
     def _print_tb(self, filename, linenum, funcname, linetext):
         raise NotImplementedError("%s._print_tb(): not implemented yet." % self.__class__.__name__)
 
-    def _print_traceback(self, all=False):
+    def _print_traceback(self, tb=None, all=False):
         basename = os.path.basename
-        tb = traceback.extract_tb(sys.exc_info()[2])
-        iterator = iter(tb)
+        entries = traceback.extract_tb(tb or sys.exc_info()[2])
+        iterator = iter(entries)
         for file, line, func, text in iterator:
             if basename(file) not in ('oktest.py', 'oktest.pyc'):
                 break
@@ -683,7 +683,7 @@ class SimpleReporter(BaseReporter):
         OUT.write("f"); OUT.flush()
         self._write("Failed: %s()\n" % self._test_ident(obj))
         self._write("  %s\n" % ex2msg(ex))
-        self._print_traceback(False)
+        self._print_traceback(all=False)
         if getattr(ex, 'diff', None):
             self._write(ex.diff)
 
@@ -691,7 +691,7 @@ class SimpleReporter(BaseReporter):
         OUT.write("E"); OUT.flush()
         self._write("ERROR: %s()\n" % self._test_ident(obj))
         self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_traceback(True)
+        self._print_traceback(all=True)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -721,14 +721,14 @@ class OldStyleReporter(BaseReporter):
     def print_failed(self, obj, ex):
         OUT.write("[NG] %s\n" % ex2msg(ex))
         self._print_tb_format = "   %s:%s: %s\n"
-        self._print_traceback(False)
+        self._print_traceback(all=False)
         if getattr(ex, 'diff', None):
             OUT.write(ex.diff)
 
     def print_error(self, obj, ex):
         OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         self._print_tb_format = "  - %s:%s:  %s\n"
-        self._print_traceback(True)
+        self._print_traceback(all=True)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -752,14 +752,14 @@ class TapStyleReporter(BaseReporter):
     def print_failed(self, obj, ex):
         OUT.write("not ok # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s\n" % ex2msg(ex))
-        self._print_traceback(False)
+        self._print_traceback(all=False)
         if getattr(ex, 'diff', None):
             OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
 
     def print_error(self, obj, ex):
         OUT.write("ERROR  # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_traceback(True)
+        self._print_traceback(all=True)
 
 
 REPORTER = SimpleReporter
