@@ -536,15 +536,15 @@ class TestRunner(object):
                     self.reporter.print_ok(obj)
                 #except TestFailed, ex:
                 except ASSERTION_ERROR:
-                    ex = sys.exc_info()[1]
+                    _, ex, tb = sys.exc_info()
                     if not hasattr(ex, '_raised_by_oktest'):
                         raise
                     count += 1
-                    self.reporter.print_failed(obj, ex)
+                    self.reporter.print_failed(obj, ex, tb)
                 except Exception:
-                    ex = sys.exc_info()[1]
+                    _, ex, tb = sys.exc_info()
                     count += 1
-                    self.reporter.print_error(obj, ex)
+                    self.reporter.print_error(obj, ex, tb)
             finally:
                 self._invoke_after(obj)
         self._invoke_after_all(self.klass)
