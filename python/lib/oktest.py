@@ -824,9 +824,12 @@ class Spec(_Context):
         if ex:
             raise ex
 
-    def __nonzero__(self):
+    def __nonzero__(self):  # not work on Python 3?
         filter = os.environ.get('SPEC')
         return not filter or (filter in self.desc)
+
+    def __len__(self):      # for Python 3
+        return self.__nonzero__() and 1 or 0
 
 
 def spec(desc):

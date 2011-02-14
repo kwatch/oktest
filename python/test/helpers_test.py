@@ -121,6 +121,23 @@ class Spec_TC(object):
             finally:
                 os.environ.pop('SPEC')
 
+    def test___len__(self):
+        obj = oktest.Spec('SOS')
+        #
+        with spec("returns 1 when $SPEC is not set."):
+            ok (len(obj)) == 1
+        #
+        with spec("returns 0 when $SPEC not matched to SPEC."):
+            try:
+                os.environ['SPEC'] = 'SOS'
+                ok (len(obj)) == 1
+                os.environ['SPEC'] = 'SOS!'
+                ok (len(obj)) == 0
+                os.environ['SPEC'] = 'OS'
+                ok (len(obj)) == 1
+            finally:
+                os.environ.pop('SPEC')
+
 
 class GLOBAL_TC(object):
 
