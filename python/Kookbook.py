@@ -40,8 +40,10 @@ python_binaries = [
 ]
 
 
-def _all_versions():
+def _all_versions(skip=()):
     for ver, bin in python_binaries:
+        if skip and ver in skip:
+            continue
         print("#")
         print("# python " + ver)
         print("#")
@@ -59,9 +61,9 @@ def _all_versions():
                 mv(fpath+'.bkup', fpath)
 
 
-def _do_test(c, kwargs, command):
+def _do_test(c, kwargs, command, **kws):
     if kwargs.get('a', None):
-        for ver, bin in _all_versions():
+        for ver, bin in _all_versions(**kws):
             system(c%command)
     else:
         bin = python
@@ -69,9 +71,26 @@ def _do_test(c, kwargs, command):
 
 
 @recipe
+#@ingreds("oktest", "helpers_test", "doc_test")
 @spices("-a: do with python from 2.4, to 3.2")
 def task_test(c, *args, **kwargs):
+    task_oktest(c, *args, **kwargs)
+    task_helpers_test(c, *args, **kwargs)
+    task_doc_test(c, *args, **kwargs)
+
+
+@recipe
+@spices("-a: do with python from 2.4, to 3.2")
+def task_oktest(c, *args, **kwargs):
+    """invoke 'test/oktest_test.py'"""
     _do_test(c, kwargs, "PYTHON=$(bin) $(bin) test/oktest_test.py")
+
+
+@recipe
+@spices("-a: do with python from 2.5, to 3.2")
+def task_helpers_test(c, *args, **kwargs):
+    """invoke 'test/helpers_test.py'"""
+    _do_test(c, kwargs, "PYTHON=$(bin) $(bin) test/helpers_test.py", skip=('2.4'))
 
 
 @recipe
