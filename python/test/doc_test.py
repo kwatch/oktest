@@ -20,12 +20,12 @@ if True:
     ## create fake objects
     from oktest.tracer import Tracer
     tr = Tracer()
-    foo = tr.fake_obj(m1=100, m2=200)
-    bar = tr.fake_obj(m3=lambda self, x: x+1)
+    foo = tr.fake_obj(m1=100, m2=200)   # method name and return-value
+    bar = tr.fake_obj(m3=lambda self, x: x+1)  # method name and body
     ## call fake methods
     ok (bar.m3(0))     == 1
-    ok (foo.m2(1,2,3)) == 200
-    ok (foo.m1(x=123)) == 100
+    ok (foo.m2(1,2,3)) == 200    # any argument can be passed
+    ok (foo.m1(x=123)) == 100    # any argument can be passed
     ## check results
     ok (repr(tr[0]))   == 'm3(0) #=> 1'
     ok (repr(tr[1]))   == 'm2(1, 2, 3) #=> 200'
