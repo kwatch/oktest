@@ -102,10 +102,25 @@ def task_helpers_test(c, *args, **kwargs):
     """invoke 'test/helpers_test.py'"""
     fpath = 'test/helpers_test.py'
     for ver, bin in _do_test(c, kwargs):
-        if ver == '2.4':
-            continue
         _print_version(ver)
-        system(c%"$(bin) $(fpath)")
+        cmd = c%"$(bin) $(fpath)"
+        if ver == '2.4':
+            def repl(s):
+                s = re.sub(r'(from __future__ import .*)', r'#\1', s)
+                s = re.sub(r'with spec\(', r'if spec(', s)
+                rexp = re.compile(r'^([ \t]*#\+\n)(.*?)^([ \t]*#\-\n)', re.M | re.S)
+                def modify(m):
+                    commented = re.compile(r'^', re.M).sub(r'#', m.group(2))
+                    return '#' + m.group(1) + commented + m.group(3)
+                s = rexp.sub(modify, s)
+                return s
+            @_with_backup(fpath)
+            def f():
+                edit(fpath, by=repl)
+                system(cmd)
+            f()
+        else:
+            system(cmd)
 
 
 @recipe

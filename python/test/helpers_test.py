@@ -31,6 +31,7 @@ class _RunnableContext_TC(object):
     def test_run(self):
         ctx = oktest._RunnableContext()
         ret = None
+        #
         with spec("calls __enter__() and __exit__() to emurate with-statement."):
             called = []
             def enter(*args):
@@ -48,6 +49,7 @@ class _RunnableContext_TC(object):
             ok (called[0]) == ('enter', ())
             ok (called[1]) == ('func', ('a',), {'b': 1})
             ok (called[2]) == ('exit', (None, None, None))
+        #
         with spec("returns value which func returned."):
             ok (ret) == 123
 
@@ -161,12 +163,13 @@ class helper_TC(object):
             os.mkdir(tmpdir)
             cwd = os.getcwd()
             tmpdir_path = os.path.abspath(tmpdir)
-            #
+            #+
             with spec("change directory temporarily when used with with-stmt."):
                 with oktest.helper.chdir(tmpdir):
                     ok (os.getcwd()) != cwd
                     ok (os.getcwd()) == tmpdir_path
                 ok (os.getcwd()) == cwd
+            #-
             #
             with spec("change directory temporarily when run() called with function."):
                 def f():
@@ -180,6 +183,7 @@ class helper_TC(object):
             os.rmdir(tmpdir)
 
     def test_using(self):
+        #+
         with spec("takes a class object and adds local vars to it when used with with-stmt."):
             with oktest.helper.using(DummyClass) as obj:
                 def test_1(self):
@@ -188,6 +192,8 @@ class helper_TC(object):
                     ok (1-1) == 0
             ok (DummyClass).has_attr('test_1')
             ok (DummyClass).has_attr('test_2')
+        #-
+        pass
 
     def test_flatten(self):
         with spec("flatten nested list or tuple."):
@@ -220,13 +226,14 @@ class dummy_TC(object):
 
     def test_dummy_file(self):
         fname, content = '_test.sos.txt', 'SOS'
-        #
+        #+
         with spec("creates a dummy file temporarily when used with with-stmt."):
             with dummy_file(fname, content):
                 ok (fname).is_file()
                 f = open(fname); s = f.read(); f.close()
                 ok (s) == content
             NG (fname).is_file()
+        #-
         #
         with spec("creates a dummy file temporarily when run() called with a function."):
             called = []
@@ -243,11 +250,12 @@ class dummy_TC(object):
 
     def test_dummy_dir(self):
         dname = '_test.sos.dir'
-        #
+        #+
         with spec("creates a dummy directory temporarily when used with with-stmt."):
             with dummy_dir(dname):
                 ok (dname).is_dir()
             NG (dname).is_dir()
+        #-
         #
         with spec("creates a dummy directory temporarily when run() called with a function."):
             called = []
@@ -262,12 +270,13 @@ class dummy_TC(object):
 
     def test_dummy_values(self):
         d = {'Haruhi': 'Suzumiya'}
-        #
+        #+
         with spec("changes dictionary value temporarily when used with with-stmt."):
             with dummy_values(d, Yuki='Nagato'):
                 ok (d.get('Yuki', None)) == 'Nagato'
             ok ('Haruhi' in d) == True
             ok ('Yuki' in d) == False
+        #-
         #
         with spec("changes dictionary value temporarily when run() called with function."):
             called = []
@@ -280,12 +289,13 @@ class dummy_TC(object):
 
     def test_dummy_attrs(self):
         obj = DummyClass()
-        #
+        #+
         with spec("changes attributes temporarily when used with with-stmt."):
             with dummy_attrs(obj, SOS=[123]):
                 ok (obj).has_attr('SOS')
                 ok (obj.SOS) == [123]
             NG (obj).has_attr('SOS')
+        #-
         #
         with spec("changes attributes temporarily when run() called with function."):
             called = []
@@ -300,12 +310,14 @@ class dummy_TC(object):
             ok (ret) == 999
 
     def test_dummy_environ_vars(self):
+        #+
         with spec("changes environment variables temporarily when used with with-stmt."):
             ok ('SOS' in os.environ) == False
             with dummy_environ_vars(SOS='!!!'):
                 ok ('SOS' in os.environ) == True
                 ok (os.environ['SOS']) == '!!!'
             ok ('SOS' in os.environ) == False
+        #-
         #
         with spec("changes environment variables temporarily when run() called with function."):
             called = []
@@ -323,7 +335,7 @@ class dummy_TC(object):
         sin = sys.stdin
         sout = sys.stdout
         serr = sys.stderr
-        #
+        #+
         with spec("changes stdio temporarily when used with with-stmt."):
             with dummy_io("foobar") as d_io:
                 NG (sys.stdin).is_(sin)
@@ -338,6 +350,7 @@ class dummy_TC(object):
             ok (sys.stderr).is_(serr)
             ok (d_io.stdout) == "Haruhi\nSasaki\n"
             ok (d_io.stderr) == "Kyon"
+        #-
         #
         with spec("changes stdio temporarily when run() called with function."):
             called = []
