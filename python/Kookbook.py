@@ -42,17 +42,29 @@ python_binaries = [
 
 def _print_version(ver):
     if ver:
-        print("#")
+        print("# ============================================================")
         print("# python " + ver)
-        print("#")
+        print("# ============================================================")
 
-
-def _do_test(c, kwargs, callback):
+def _do_test(c, kwargs):
     if kwargs.get('a', None):
         for ver, bin in python_binaries:
-            callback(ver, bin)
+            yield ver, bin
     else:
-        callback(None, python)
+        yield None, python
+
+def _with_backup(filepath):
+    def deco(func):
+        def new_func(*args, **kwargs):
+            try:
+                bkup = filepath + '.bkup'
+                mv(filepath, bkup)
+                cp(bkup, filepath)
+                return func(*args, **kwargs)
+            finally:
+                mv(bkup, filepath)
+        return new_func
+    return deco
 
 
 @recipe
@@ -68,37 +80,32 @@ def task_test(c, *args, **kwargs):
 @spices("-a: do with python from 2.4, to 3.2")
 def task_oktest(c, *args, **kwargs):
     """invoke 'test/oktest_test.py'"""
-    def callback(ver, bin):
-        fpath = "test/oktest_test.py"
-        def body(): system("PYTHON=%s %s %s" % (bin, bin, fpath))
+    fpath = "test/oktest_test.py"
+    for ver, bin in _do_test(c, kwargs):
+        cmd = c%("PYTHON=$(bin) $(bin) " + fpath)
         _print_version(ver)
         if ver == '2.4':
-            try:
-                bkup = fpath + '.bkup'
-                mv(fpath, bkup)
-                cp(bkup, fpath)
+            @_with_backup(fpath)
+            def f():
                 line = 'from __future__ import with_statement'
                 s = read_file(fpath).replace(line, '#' + line)
                 write_file(fpath, s)
-                body()
-            finally:
-                mv(fpath+'.bkup', fpath)
+                system(cmd)
+            f()
         else:
-            body()
-    _do_test(c, kwargs, callback)
+            system(cmd)
 
 
 @recipe
 @spices("-a: do with python from 2.5, to 3.2")
 def task_helpers_test(c, *args, **kwargs):
     """invoke 'test/helpers_test.py'"""
-    def callback(ver, bin):
-        fpath = 'test/helpers_test.py'
+    fpath = 'test/helpers_test.py'
+    for ver, bin in _do_test(c, kwargs):
         if ver == '2.4':
-            return
+            continue
         _print_version(ver)
         system(c%"$(bin) $(fpath)")
-    _do_test(c, kwargs, callback)
 
 
 @recipe
@@ -106,11 +113,10 @@ def task_helpers_test(c, *args, **kwargs):
 @spices("-a: do with python from 2.4, to 3.2")
 def task_doc_test(c, *args, **kwargs):
     """invoke 'test/doc_test.py'"""
-    def callback(ver, bin):
-        fpath = "test/doc_test.py"
+    fpath = "test/doc_test.py"
+    for ver, bin in _do_test(c, kwargs):
         _print_version(ver)
         system(c%"$(bin) $(fpath)")
-    _do_test(c, kwargs, callback)
 
 
 @recipe
