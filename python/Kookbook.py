@@ -69,15 +69,16 @@ def _with_backup(filepath):
 
 @recipe
 #@ingreds("oktest", "helpers_test", "doc_test")
-@spices("-a: do with python from 2.4, to 3.2")
+@spices("-a: do with python from 2.4 to 3.2")
 def task_test(c, *args, **kwargs):
     task_oktest(c, *args, **kwargs)
     task_helpers_test(c, *args, **kwargs)
+    task_tracer_test(c, *args, **kwargs)
     task_doc_test(c, *args, **kwargs)
 
 
 @recipe
-@spices("-a: do with python from 2.4, to 3.2")
+@spices("-a: do with python from 2.4 to 3.2")
 def task_oktest(c, *args, **kwargs):
     """invoke 'test/oktest_test.py'"""
     fpath = "test/oktest_test.py"
@@ -97,26 +98,38 @@ def task_oktest(c, *args, **kwargs):
 
 
 @recipe
-@spices("-a: do with python from 2.5, to 3.2")
+@spices("-a: do with python from 2.4 to 3.2")
 def task_helpers_test(c, *args, **kwargs):
     """invoke 'test/helpers_test.py'"""
     fpath = 'test/helpers_test.py'
+    _invoke_test(c, kwargs, fpath)
+
+
+@recipe
+@spices("-a: do with python from 2.4 to 3.2")
+def task_tracer_test(c, *args, **kwargs):
+    """invoke 'test/tracer_test.py'"""
+    fpath = 'test/tracer_test.py'
+    _invoke_test(c, kwargs, fpath)
+
+
+def _invoke_test(c, kwargs, fpath):
+    def replacer_for_py24(s):
+        s = re.sub(r'(from __future__ import .*)', r'#\1', s)
+        s = re.sub(r'with spec\(', r'if spec(', s)
+        rexp = re.compile(r'^([ \t]*#\+\n)(.*?)^([ \t]*#\-\n)', re.M | re.S)
+        def modify(m):
+            commented = re.compile(r'^', re.M).sub(r'#', m.group(2))
+            return '#' + m.group(1) + commented + m.group(3)
+        s = rexp.sub(modify, s)
+        return s
     for ver, bin in _do_test(c, kwargs):
         _print_version(ver)
         cmd = c%"$(bin) $(fpath)"
         if ver == '2.4':
-            def repl(s):
-                s = re.sub(r'(from __future__ import .*)', r'#\1', s)
-                s = re.sub(r'with spec\(', r'if spec(', s)
-                rexp = re.compile(r'^([ \t]*#\+\n)(.*?)^([ \t]*#\-\n)', re.M | re.S)
-                def modify(m):
-                    commented = re.compile(r'^', re.M).sub(r'#', m.group(2))
-                    return '#' + m.group(1) + commented + m.group(3)
-                s = rexp.sub(modify, s)
-                return s
             @_with_backup(fpath)
             def f():
-                edit(fpath, by=repl)
+                edit(fpath, by=replacer_for_py24)
                 system(cmd)
             f()
         else:
@@ -125,7 +138,7 @@ def task_helpers_test(c, *args, **kwargs):
 
 @recipe
 @ingreds('test/doc_test.py')
-@spices("-a: do with python from 2.4, to 3.2")
+@spices("-a: do with python from 2.4 to 3.2")
 def task_doc_test(c, *args, **kwargs):
     """invoke 'test/doc_test.py'"""
     fpath = "test/doc_test.py"
