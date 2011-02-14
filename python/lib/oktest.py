@@ -635,27 +635,6 @@ class BaseReporter(Reporter):
     def _test_ident(self, obj):
         return '%s#%s' % (self.klass.__name__, obj._testMethodName)
 
-    def _get_line_text(self, file, line):
-        if not hasattr(self, '_lines'):
-            self._lines = {}
-        if file not in self._lines:
-            if not os.path.isfile(file): return None
-            s = _read_file(file)
-            self._lines[file] = s.splitlines(True)
-        return self._lines[file][line-1]
-
-    def _get_location(self, ex):
-        if hasattr(ex, 'file') and hasattr(ex, 'line'):
-            text = self._get_line_text(ex.file, ex.line)
-            if text: text = text.strip()
-            return (ex.file, ex.line, None, text)
-        else:
-            tb = traceback.extract_tb(sys.exc_info()[2])
-            for file, line, func, text in tb:
-                if os.path.basename(file) not in ('oktest.py', 'oktest.pyc'):
-                    return (file, line, func, text)
-            return (None, None, None, None)
-
     def _write(self, str):
         OUT.write(str)
 
