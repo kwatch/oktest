@@ -19,7 +19,7 @@ import sys, os, re
 from glob import glob
 from kook.utils import read_file, write_file
 
-release   = prop('release', '0.7.0')
+release   = prop('release', '0.8.0')
 package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
@@ -181,6 +181,7 @@ def task_edit(c):
     """update $Release$, $Copyrigh$, and $License$ in files"""
     filenames = read_file('MANIFEST').splitlines()
     filenames.remove('Kookbook.py')
+    filenames.append('website/index.html')
     edit(filenames, by=replacer)
     #
     def repl(s):
