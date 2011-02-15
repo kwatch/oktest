@@ -23,9 +23,9 @@ ok (s) == 'foo'            # same as assertEqual(s, 'foo')
 ok (s) != 'foo'            # same as assertNotEqual(s, 'foo')
 ok (f).raises(ValueError)  # same as assertRaises(ValueError, f)
 ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))
-not_ok (u'foo').is_a(int)  # same as assert_(not isinstance(u'foo', int))
+NG (u'foo').is_a(int)      # same as assert_(not isinstance(u'foo', int))
 ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
-not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
+NG ('A.txt').is_dir()      # same as assert_(not os.path.isdir('A.txt'))
 </pre>
 <p>You can use ok() instead of 'assertXxx()' in unittest.</p>
 <p>Oktest requires Python 2.4 or later (3.x is supported).</p>
@@ -52,7 +52,7 @@ $ sudo python setup.py install
 <h2>Example</h2>
 <p>The following is a short example.</p>
 <pre class="literal-block">
-from oktest import ok, not_ok, run
+from oktest import ok, NG, run
 
 class Example1Test(object):
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 <p>The following is a long example.</p>
 <pre class="literal-block">
 import sys, os
-from oktest import ok, not_ok, run
+from oktest import ok, NG, run
 
 ## no need to extend TestCase class
 class Example1Test(object):
@@ -154,9 +154,10 @@ See the example at the bottom of this document.</p>
 <dd>Raise AssertionError unless isinstance(x, y).</dd>
 <dt>ok (x).has_attr(y)</dt>
 <dd>Raise AssertionError unless hasattr(x, y).</dd>
-<dt>ok (x).matches(y)</dt>
+<dt>ok (x).matches(y[, flag=None])</dt>
 <dd>If y is a string, raise AssertionError unless re.search(y, x).
-If y is a re.pattern object, raise AssertionError unless y.search(x).</dd>
+If y is a re.pattern object, raise AssertionError unless y.search(x).
+You can pass flag such as <tt class="docutils literal">re.M | re.S</tt>.</dd>
 <dt>ok (path).is_file()</dt>
 <dd>Raise AssertionError unless os.path.isfile(path).</dd>
 <dt>ok (path).is_dir()</dt>
@@ -174,16 +175,18 @@ ok (f).raises(AttributeError, &quot;'str' object has no attribute 'name'&quot;)
 ok (f.exception.message) == &quot;'str' object has no attribute 'name'&quot;
 </pre>
 </dd>
-<dt>not_ok (x)</dt>
-<dd><p class="first">Opposite of ok(x). For example, 'not_ok (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
+<dt>NG (x)</dt>
+<dd><p class="first">Opposite of ok(x). For example, 'NG (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
 <pre class="last literal-block">
 fname = 'file.txt'
 open(fname, 'w').write('foo')
 ok (fname).is_file()            # file exists
 os.unlink(fname)
-not_ok (fname).is_file()        # file doesn't exist
+NG (fname).is_file()        # file doesn't exist
 </pre>
 </dd>
+<dt>not_ok (x)</dt>
+<dd>Same as NG(x).</dd>
 </dl>
 <p>Oktest allows you to define custom assertion functions.
 See Tips section.</p>
@@ -418,7 +421,7 @@ class NumericTest(object):
 
 <h3><tt class="docutils literal">oktest.helper</tt> module</h3>
 <dl class="docutils">
-<dt>chdir(dirname, func=None)</dt>
+<dt>chdir(dirname)</dt>
 <dd><p class="first">Change current directory to dirname temporarily.</p>
 <pre class="last literal-block">
 import os
@@ -428,12 +431,20 @@ with chdir(&quot;/var/tmp&quot;):
     # do something
 assert os.getcwd() == cwd                 # back to the original place
 ## or
-def f():
+def fn():
     assert os.getcwd() == &quot;/var/tmp&quot;
     # do something
-chdir(&quot;/var/tmp&quot;, f)
+chdir(&quot;/var/tmp&quot;).run(fn)
 </pre>
 </dd>
+<dt>rm_rf(filename, dirname, ...)</dt>
+<dd>Remove file or directory recursively.</dd>
+</dl>
+</div>
+<div class="section" id="oktest-dummy-module">
+
+<h3><tt class="docutils literal">oktest.dummy</tt> module</h3>
+<dl class="docutils">
 <dt>dummy_file(filename, content)</dt>
 <dd><p class="first">Create dummy file with specified content.</p>
 <pre class="last literal-block">
@@ -444,6 +455,10 @@ with dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;):
     assert os.path.isfile(&quot;A.txt&quot;)        # file is created!
     # do something
 assert not os.path.exists(&quot;A.txt&quot;)        # file is removed
+## or
+def fn():
+    assert os.path.isfile(&quot;A.txt&quot;)
+dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;).run(fn)
 </pre>
 </dd>
 <dt>dummy_dir(dirname)</dt>
@@ -456,6 +471,10 @@ with dummy_dir(&quot;tmpdir&quot;):
     assert os.path.isdir(&quot;tmpdir&quot;)        # directory is created!
     # do something
 assert not os.path.exists(&quot;tmpdir&quot;)       # directory is removed
+## or
+def fn():
+    assert os.path.isdir(&quot;tmpdir&quot;)
+dummy_dir(&quot;tmpdir&quot;).run(fn)
 </pre>
 </dd>
 <dt>dummy_values(dictionary, items_=None, **kwargs):</dt>
@@ -469,6 +488,10 @@ with dummy_values(d, A=1000, X=2000):
     assert d['X'] == 2000
     # do something
 assert d == {'A':10, 'B':20}              # values are backed
+## or
+def fn():
+    assert d['A'] == 1000
+dummy_values(d, A=1000, X=2000).run(fn)
 </pre>
 </dd>
 <dt>dummy_attrs(object, items_=None, **kwargs):</dt>
@@ -489,18 +512,37 @@ with dummy_attrs(obj, x=90, z=100):
 assert obj.x == 10                        # attributes are backed
 assert obj.y == 20
 assert not hasattr(obj, 'z')
+## or
+def fn():
+    assert obj.x == 90
+dummy_attrs(obj, x=90, z=100).run(fn)
 </pre>
 </dd>
 <dt>dummy_io(stdin_content=None, func=None):</dt>
 <dd><p class="first">Set dummy I/O to sys.stdout, sys.stderr, and sys.stdin.</p>
 <pre class="last literal-block">
-with dummy_io(&quot;SOS&quot;) as io:
+with dummy_io(&quot;SOS&quot;) as d_io:
     assert sys.stdin.read() == &quot;SOS&quot;
     print(&quot;Haruhi&quot;)
-assert io.stdout == &quot;Haruhi\n&quot;
-assert io.stderr == &quot;&quot;
+assert d_io.stdout == &quot;Haruhi\n&quot;
+assert d_io.stderr == &quot;&quot;
+## or
+def fn():
+    assert sys.stdin.read() == &quot;SOS&quot;
+    print(&quot;Haruhi&quot;)
+d_io = dummy_io(&quot;SOS&quot;)
+d_io.run(fn)
+assert d_io.stdout == &quot;Haruhi\n&quot;
 </pre>
 </dd>
+</dl>
+</div>
+<div class="section" id="oktest-tracer-module">
+
+<h3><tt class="docutils literal">oktest.tracer</tt> module</h3>
+<dl class="docutils">
+<dt>tracer():</dt>
+<dd>Return tracer object. See the above section for details.</dd>
 </dl>
 </div>
 </div>
@@ -522,6 +564,12 @@ def startswith(self, arg):
 ## how to use
 from oktest import ok
 ok (&quot;Sasaki&quot;).startswith(&quot;Sas&quot;)
+</pre>
+</li>
+<li><p class="first">It is possible to chain assertion methods.</p>
+<pre class="literal-block">
+## chain assertion methods
+ok (&quot;sos&quot;.upper()).is_a(str).matches(r'^[A-Z]+$')
 </pre>
 </li>
 <li><p class="first">If you call ok() or not_ok() but forget to do assertion, oktest warns it.</p>
