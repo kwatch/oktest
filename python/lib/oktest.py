@@ -840,7 +840,7 @@ def spec(desc):
 ##
 def _dummy():
 
-    __all__ = ('chdir', 'using')
+    __all__ = ('chdir', 'using', 'rm_rf')
 
 
     class Chdir(_RunnableContext):
@@ -902,7 +902,7 @@ def _dummy():
                 L.append(x)
         return L
 
-    def rm_rf(*fnames):                     ## undocumented
+    def rm_rf(*fnames):
         for fname in flatten(fnames):
             if os.path.isfile(fname):
                 os.unlink(fname)
