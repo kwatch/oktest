@@ -15,7 +15,7 @@
 
 from __future__ import with_statement
 
-import os, re
+import sys, os, re
 from glob import glob
 from kook.utils import read_file, write_file
 
@@ -40,19 +40,6 @@ python_binaries = [
 ]
 
 
-def _print_version(ver):
-    if ver:
-        print("# ============================================================")
-        print("# python " + ver)
-        print("# ============================================================")
-
-def _do_test(c, kwargs):
-    if kwargs.get('a', None):
-        for ver, bin in python_binaries:
-            yield ver, bin
-    else:
-        yield None, python
-
 def _with_backup(filepath):
     def deco(func):
         def new_func(*args, **kwargs):
@@ -72,59 +59,62 @@ TEST_NAMES = ('oktest', 'helpers', 'tracer', 'doc')
 
 @recipe
 @ingreds('test/doc_test.py')
-@spices("-a: do with python from 2.4 to 3.2")
+@spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
 def task_test(c, *args, **kwargs):
-    """arg is 'doctest', 'helpers', 'tracer', or 'doc'"""
-    #task_oktest(c, *args, **kwargs)
-    #task_helpers_test(c, *args, **kwargs)
-    #task_tracer_test(c, *args, **kwargs)
-    #task_doc_test(c, *args, **kwargs)
-    if not args: args = TEST_NAMES
-    for arg in args:
-        _run_test(c, arg, **kwargs)
-
-
-def _run_test(c, arg, **kwargs):
-    if   arg == 'oktest':   fn = _run_oktest_test
-    elif arg == 'helpers':  fn = _run_helpers_test
-    elif arg == 'tracer':   fn = _run_tracer_test
-    elif arg == 'doc':      fn = _run_doc_test
+    """test 'doctest', 'helpers', 'tracer', or 'doc'"""
+    flag_all = bool(kwargs.get('a'))
+    if flag_all:
+        pairs = python_binaries
     else:
-        raise ValueError("%r: unknown test name." % arg)
-    fn(c, **kwargs)
+        ver = '%s.%s' % (sys.version_info[0:2])
+        bin = 'python' # or sys.executable
+        pairs = [ (ver, bin) ]
+    test_names = args or TEST_NAMES
+    gvars = globals()
+    funcs = []
+    for tname in test_names:
+        func = gvars.get("_run_%s_test" % tname)
+        if not func:
+            raise ValueError("%r: unknown test name." % tname)
+        funcs.append(func)
+    for ver, bin in pairs:
+        if flag_all:
+            print("# ============================================================")
+            print("# python " + ver)
+            print("# ============================================================")
+        for func in funcs:
+            func(c, ver, bin)
 
 
-def _run_oktest_test(c, *args, **kwargs):
+def _run_oktest_test(c, ver, bin):
     """invoke 'test/oktest_test.py'"""
     fpath = "test/oktest_test.py"
-    for ver, bin in _do_test(c, kwargs):
-        cmd = c%("PYTHON=$(bin) $(bin) " + fpath)
-        _print_version(ver)
-        if ver == '2.4':
-            @_with_backup(fpath)
-            def f():
-                line = 'from __future__ import with_statement'
-                s = read_file(fpath).replace(line, '#' + line)
-                write_file(fpath, s)
-                system(cmd)
-            f()
-        else:
+    cmd = c%("PYTHON=$(bin) $(bin) " + fpath)
+    if ver == '2.4':
+        @_with_backup(fpath)
+        def f():
+            line = 'from __future__ import with_statement'
+            s = read_file(fpath).replace(line, '#' + line)
+            write_file(fpath, s)
             system(cmd)
+        f()
+    else:
+        system(cmd)
 
 
-def _run_helpers_test(c, *args, **kwargs):
+def _run_helpers_test(c, ver, bin):
     """invoke 'test/helpers_test.py'"""
     fpath = 'test/helpers_test.py'
-    _invoke_test(c, kwargs, fpath)
+    _invoke_test(c, ver, bin, fpath)
 
 
-def _run_tracer_test(c, *args, **kwargs):
+def _run_tracer_test(c, ver, bin):
     """invoke 'test/tracer_test.py'"""
     fpath = 'test/tracer_test.py'
-    _invoke_test(c, kwargs, fpath)
+    _invoke_test(c, ver, bin, fpath)
 
 
-def _invoke_test(c, kwargs, fpath):
+def _invoke_test(c, ver, bin, fpath):
     def replacer_for_py24(s):
         s = re.sub(r'(from __future__ import .*)', r'#\1', s)
         s = re.sub(r'with spec\(', r'if spec(', s)
@@ -134,25 +124,21 @@ def _invoke_test(c, kwargs, fpath):
             return '#' + m.group(1) + commented + m.group(3)
         s = rexp.sub(modify, s)
         return s
-    for ver, bin in _do_test(c, kwargs):
-        _print_version(ver)
-        cmd = c%"$(bin) $(fpath)"
-        if ver == '2.4':
-            @_with_backup(fpath)
-            def f():
-                edit(fpath, by=replacer_for_py24)
-                system(cmd)
-            f()
-        else:
+    cmd = c%"$(bin) $(fpath)"
+    if ver == '2.4':
+        @_with_backup(fpath)
+        def f():
+            edit(fpath, by=replacer_for_py24)
             system(cmd)
+        f()
+    else:
+        system(cmd)
 
 
-def _run_doc_test(c, *args, **kwargs):
+def _run_doc_test(c, ver, bin):
     """invoke 'test/doc_test.py'"""
     fpath = "test/doc_test.py"
-    for ver, bin in _do_test(c, kwargs):
-        _print_version(ver)
-        system(c%"$(bin) $(fpath)")
+    system(c%"$(bin) $(fpath)")
 
 
 @recipe
