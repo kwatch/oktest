@@ -67,14 +67,29 @@ def _with_backup(filepath):
     return deco
 
 
+TEST_NAMES = ('oktest', 'helpers', 'tracer', 'doc')
+
+
 @recipe
-#@ingreds("oktest", "helpers_test", "doc_test")
 @spices("-a: do with python from 2.4 to 3.2")
 def task_test(c, *args, **kwargs):
-    task_oktest(c, *args, **kwargs)
-    task_helpers_test(c, *args, **kwargs)
-    task_tracer_test(c, *args, **kwargs)
-    task_doc_test(c, *args, **kwargs)
+    #task_oktest(c, *args, **kwargs)
+    #task_helpers_test(c, *args, **kwargs)
+    #task_tracer_test(c, *args, **kwargs)
+    #task_doc_test(c, *args, **kwargs)
+    if not args: args = TEST_NAMES
+    for arg in args:
+        _run_test(c, arg, **kwargs)
+
+
+def _run_test(c, arg, **kwargs):
+    if   arg == 'oktest':   fn = task_oktest
+    elif arg == 'helpers':  fn = task_helpers_test
+    elif arg == 'tracer':   fn = task_tracer_test
+    elif arg == 'doc':      fn = task_doc_test
+    else:
+        raise ValueError("%r: unknown test name." % arg)
+    fn(c, **kwargs)
 
 
 @recipe
