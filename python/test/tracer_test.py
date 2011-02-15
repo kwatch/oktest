@@ -1,6 +1,6 @@
 ###
-### $Release: $
-### $Copyright: copyright(c) 2011 kuwata-lab.com all rights reserved $
+### $Release: 0.8.0 $
+### $Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 from __future__ import with_statement
