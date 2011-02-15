@@ -202,7 +202,7 @@ def task_package(c):
 def task_sdist(c, *args, **kwargs):
     """create dist/Oktest-X.X.X.tar.gz"""
     #rm_rf(c%"dist/$(package)-$(release)*")
-    system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
+    system(c%'$(python) setup.py sdist --force-manifest')   # or setup.py sdist --keep-temp
     #with chdir('dist') as d:
     #    targz = c%"$(package)-$(release).tar.gz"
     #    #tar_xzf(targz)
