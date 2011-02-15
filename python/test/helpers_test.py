@@ -106,7 +106,7 @@ class Spec_TC(object):
             ok (called[1]) == ('yield', obj)
             ok (called[2]) == ('exit', (None, None, None))
 
-    def test___nonzero__(self):
+    def test___bool__(self):
         obj = oktest.Spec('SOS')
         #
         with spec("returns True when $SPEC is not set."):
@@ -120,23 +120,6 @@ class Spec_TC(object):
                 ok (bool(obj)) == False
                 os.environ['SPEC'] = 'OS'
                 ok (bool(obj)) == True
-            finally:
-                os.environ.pop('SPEC')
-
-    def test___len__(self):
-        obj = oktest.Spec('SOS')
-        #
-        with spec("returns 1 when $SPEC is not set."):
-            ok (len(obj)) == 1
-        #
-        with spec("returns 0 when $SPEC not matched to SPEC."):
-            try:
-                os.environ['SPEC'] = 'SOS'
-                ok (len(obj)) == 1
-                os.environ['SPEC'] = 'SOS!'
-                ok (len(obj)) == 0
-                os.environ['SPEC'] = 'OS'
-                ok (len(obj)) == 1
             finally:
                 os.environ.pop('SPEC')
 
