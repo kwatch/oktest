@@ -202,7 +202,7 @@ def task_package(c):
 def task_sdist(c, *args, **kwargs):
     """create dist/Oktest-X.X.X.tar.gz"""
     #rm_rf(c%"dist/$(package)-$(release)*")
-    system(c%'$(python) setup.py sdist --force-manifest')   # or setup.py sdist --keep-temp
+    system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
     #with chdir('dist') as d:
     #    targz = c%"$(package)-$(release).tar.gz"
     #    #tar_xzf(targz)
@@ -271,11 +271,19 @@ def file_website_index_html(c):
         return s
     edit(c.product, by=f)
 
+
+@recipe
+def task_manifest(c):
+    """update MANIFEST file"""
+    system(c%'$(python) setup.py sdist --force-manifest')
+
+
 @recipe
 @product('website/CHANGES.txt')
 @ingreds('CHANGES.txt')
 def file_CHANGES_txt(c):
     cp(c.ingred, c.product)
+
 
 @recipe
 @product('Oktest.zip')
@@ -284,6 +292,7 @@ def file_Oktest_zip(c):
     """create Oktest.zip"""
     with chdir("website"):
         system("zip -r ../Oktest.zip index.html style.css CHANGES.txt")
+
 
 @recipe
 @ingreds('Oktest.zip')
