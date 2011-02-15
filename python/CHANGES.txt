@@ -5,6 +5,69 @@ CHANGES
 $Release: 0.7.0 $
 
 
+Release 0.8.0
+-------------
+
+* add ``NG()`` which is same as not_ok().
+
+* enhanced to proive egg files for Python 3.
+
+* enhanced to support assertion method chaining. ::
+
+    ok ("sos".upper()).is_a(str).matches(r'^[A-Z]+$') == "SOS"
+
+* ``ok().matches()`` can take flag parameter which is passed to re.compile().
+
+    ok ("\nSOS\n").matches(r'^[A-Z]+$', re.M)
+    ## same as:
+    #ok("\nSOS\n").matches(r.compile(r'^[A-Z]$', re.M))
+
+* enhance helper methods to be available without with-statement.
+  (this is necessary for Python 2.4 which is default version on CentOS.)
+
+    from oktest.helper import chdir
+    
+    def fn():
+      ok (os.getcwd()) == "/tmp"
+    chdir("/tmp").run(fn)
+    ## this is same as:
+    #with chdir("/tmp"):
+    #  ok (os.getcwd()) == "/tmp"
+
+    from oktest.dummy import dummy_file
+
+    def fn():
+      ok ("A.txt").is_file()
+      ok (open("A.txt").read()) == "SOS"
+    dummy_file("A.txt", "SOS").run(fun)
+    ## this is same as:
+    #with dummy_file("A.txt", "SOS"):
+    #  ok (open("A.txt").read()) == "SOS"
+
+* ``spec()`` now checks environment variable $SPEC.
+  This is useful to filter test cases.
+
+    ## test script
+    from oktest import oktest, run
+    class StrTest(object):
+      def test_upper(self):
+        if spec("returns upper case string"):
+          ok ("sos".upper()) == "SOS"
+        if spec("doesn't change non-alphabetics"):
+          ok ("sos123<>".upper()) == "SOS123<>"
+    if __name__ == "__main__":
+      run()
+  
+    ## terminal
+    $ SPEC="returns upper case string" python test1.py
+
+* fix ``oktest.run()`` to print correct traceback if ok() is called from
+  nested function.
+
+* fix content of README.txt.
+
+
+
 Release 0.7.0
 -------------
 
