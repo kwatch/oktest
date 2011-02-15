@@ -648,14 +648,9 @@ class BaseReporter(Reporter):
         entries = traceback.extract_tb(tb or sys.exc_info()[2])
         is_oktest_py = self._is_oktest_py
         i, n = 0, len(entries)
-        while i < n:
-            if not is_oktest_py(entries[i][0]):
-                break
+        while i < n and is_oktest_py(entries[i][0]):
             i += 1
-        while i < n:
-            if not all:
-                if is_oktest_py(entries[i][0]):
-                    break
+        while i < n and (all or not is_oktest_py(entries[i][0])):
             self._print_traceback_entry(*entries[i])
             i += 1
 
