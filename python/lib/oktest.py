@@ -641,17 +641,20 @@ class BaseReporter(Reporter):
     def _print_traceback_entry(self, file, line, func, text):
         raise NotImplementedError("%s._print_traceback_entry(): not implemented yet." % self.__class__.__name__)
 
+    def _is_oktest_py(self, fpath,  _fnames=set(['oktest.py', 'oktest.pyc', 'oktest.pyo'])):
+        return os.path.basename(fpath) in _fnames
+
     def _print_traceback(self, tb=None, all=False):
-        basename = os.path.basename
         entries = traceback.extract_tb(tb or sys.exc_info()[2])
         iterator = iter(entries)
+        is_oktest_py = self._is_oktest_py
         for file, line, func, text in iterator:
-            if basename(file) not in ('oktest.py', 'oktest.pyc'):
+            if not is_oktest_py(file):
                 break
         self._print_traceback_entry(file, line, func, text)
         for file, line, func, text in iterator:
             if not all:
-                if basename(file) in ('oktest.py', 'oktest.pyc'):
+                if is_oktest_py(file):
                     break
             self._print_traceback_entry(file, line, func, text)
 
