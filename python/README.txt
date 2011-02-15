@@ -17,9 +17,9 @@ Oktest is a new-style testing library for Python.
     ok (s) != 'foo'            # same as assertNotEqual(s, 'foo')
     ok (f).raises(ValueError)  # same as assertRaises(ValueError, f)
     ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))
-    not_ok (u'foo').is_a(int)  # same as assert_(not isinstance(u'foo', int))
+    NG (u'foo').is_a(int)      # same as assert_(not isinstance(u'foo', int))
     ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
-    not_ok ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
+    NG ('A.txt').is_dir()      # same as assert_(not os.path.isdir('A.txt'))
 
 You can use ok() instead of 'assertXxx()' in unittest.
 
@@ -51,7 +51,7 @@ Example
 
 The following is a short example. ::
 
-    from oktest import ok, not_ok, run
+    from oktest import ok, NG, run
 
     class Example1Test(object):
 
@@ -68,7 +68,7 @@ The following is a short example. ::
 The following is a long example. ::
 
     import sys, os
-    from oktest import ok, not_ok, run
+    from oktest import ok, NG, run
 
     ## no need to extend TestCase class
     class Example1Test(object):
@@ -439,7 +439,7 @@ spec(description)
 ``oktest.helper`` module
 ------------------------
 
-chdir(dirname, func=None)
+chdir(dirname)
 	Change current directory to dirname temporarily. ::
 
 	    import os
@@ -449,10 +449,17 @@ chdir(dirname, func=None)
 	        # do something
 	    assert os.getcwd() == cwd                 # back to the original place
 	    ## or
-	    def f():
+	    def fn():
 	        assert os.getcwd() == "/var/tmp"
 		# do something
-            chdir("/var/tmp", f)
+            chdir("/var/tmp").run(fn)
+
+rm_rf(filename, dirname, ...)
+	Remove file or directory recursively.
+
+
+``oktest.dummy`` module
+------------------------
 
 dummy_file(filename, content)
 	Create dummy file with specified content. ::
@@ -464,6 +471,10 @@ dummy_file(filename, content)
 	        assert os.path.isfile("A.txt")        # file is created!
 	        # do something
 	    assert not os.path.exists("A.txt")        # file is removed
+	    ## or
+	    def fn():
+	        assert os.path.isfile("A.txt")
+	    dummy_file("A.txt", "aaa").run(fn)
 
 dummy_dir(dirname)
 	Create dummy directory. ::
@@ -473,8 +484,12 @@ dummy_dir(dirname)
 	    assert not os.path.exists("tmpdir")       # directory doesn't exist
 	    with dummy_dir("tmpdir"):
 	        assert os.path.isdir("tmpdir")        # directory is created!
-		# do something
+	        # do something
 	    assert not os.path.exists("tmpdir")       # directory is removed
+	    ## or
+	    def fn():
+	        assert os.path.isdir("tmpdir")
+            dummy_dir("tmpdir").run(fn)
 
 dummy_values(dictionary, items_=None, \*\*kwargs):
 	Change dictionary's values temporarily. ::
@@ -483,10 +498,14 @@ dummy_values(dictionary, items_=None, \*\*kwargs):
 	    d = {'A':10, 'B':20}
 	    with dummy_values(d, A=1000, X=2000):
 	        assert d['A'] == 1000                 # dictionary values are changed!
-		assert d['B'] == 20
-		assert d['X'] == 2000
-		# do something
+	        assert d['B'] == 20
+	        assert d['X'] == 2000
+	        # do something
 	    assert d == {'A':10, 'B':20}              # values are backed
+	    ## or
+	    def fn():
+	        assert d['A'] == 1000
+	    dummy_values(d, A=1000, X=2000).run(fn)
 
 dummy_attrs(object, items_=None, \*\*kwargs):
 	Change object's attributes temporarily.
@@ -500,21 +519,39 @@ dummy_attrs(object, items_=None, \*\*kwargs):
 	    obj.y = 20
 	    with dummy_attrs(obj, x=90, z=100):
 	        assert obj.x == 90                    # attributes are changed!
-		assert obj.y == 20
-		assert obj.z == 100 
+	        assert obj.y == 20
+	        assert obj.z == 100
 	        # do something
 	    assert obj.x == 10                        # attributes are backed
 	    assert obj.y == 20
 	    assert not hasattr(obj, 'z')
+	    ## or
+	    def fn():
+	        assert obj.x == 90
+	    dummy_attrs(obj, x=90, z=100).run(fn)
 
 dummy_io(stdin_content=None, func=None):
 	Set dummy I/O to sys.stdout, sys.stderr, and sys.stdin. ::
 
-	    with dummy_io("SOS") as io:
+	    with dummy_io("SOS") as d_io:
 	        assert sys.stdin.read() == "SOS"
-		print("Haruhi")
-	    assert io.stdout == "Haruhi\n"
-	    assert io.stderr == ""
+	        print("Haruhi")
+	    assert d_io.stdout == "Haruhi\n"
+	    assert d_io.stderr == ""
+	    ## or
+	    def fn():
+	        assert sys.stdin.read() == "SOS"
+	        print("Haruhi")
+	    d_io = dummy_io("SOS")
+	    d_io.run(fn)
+	    assert d_io.stdout == "Haruhi\n"
+
+
+``oktest.tracer`` module
+------------------------
+
+tracer():
+	Return tracer object. See the above section for details.
 
 
 Tips
@@ -535,10 +572,10 @@ Tips
     from oktest import ok
     ok ("Sasaki").startswith("Sas")
 
-* It is possible to chain assertion methods.
+* It is possible to chain assertion methods. ::
 
     ## chain assertion methods
-    ok ("sos".upper()).is_a(str).matches(r'^[A-Z]+$') == "SOS"
+    ok ("sos".upper()).is_a(str).matches(r'^[A-Z]+$')
 
 * If you call ok() or not_ok() but forget to do assertion, oktest warns it. ::
 
