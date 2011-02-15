@@ -646,17 +646,18 @@ class BaseReporter(Reporter):
 
     def _print_traceback(self, tb=None, all=False):
         entries = traceback.extract_tb(tb or sys.exc_info()[2])
-        iterator = iter(entries)
         is_oktest_py = self._is_oktest_py
-        for file, line, func, text in iterator:
-            if not is_oktest_py(file):
+        i, n = 0, len(entries)
+        while i < n:
+            if not is_oktest_py(entries[i][0]):
                 break
-        self._print_traceback_entry(file, line, func, text)
-        for file, line, func, text in iterator:
+            i += 1
+        while i < n:
             if not all:
-                if is_oktest_py(file):
+                if is_oktest_py(entries[i][0]):
                     break
-            self._print_traceback_entry(file, line, func, text)
+            self._print_traceback_entry(*entries[i])
+            i += 1
 
 
 ## NOTICE! reporter spec will be changed frequently
