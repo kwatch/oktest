@@ -1285,7 +1285,7 @@ desc = "using (with with-statement)"
 script = r"""
 from __future__ import with_statement
 from oktest import *
-from oktest.helper import *
+from oktest.helper import using
 class FooTest(object):
     pass
 with using(FooTest):

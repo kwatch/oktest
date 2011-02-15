@@ -840,7 +840,7 @@ def spec(desc):
 ##
 def _dummy():
 
-    __all__ = ('chdir', 'using', 'rm_rf')
+    __all__ = ('chdir', 'rm_rf')
 
 
     class Chdir(_RunnableContext):
@@ -889,7 +889,7 @@ def _dummy():
         cd = Chdir(path)
         return func is not None and cd.run(func) or cd
 
-    def using(klass):
+    def using(klass):                       ## undocumented
         return Using(klass)
 
 
