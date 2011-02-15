@@ -71,8 +71,10 @@ TEST_NAMES = ('oktest', 'helpers', 'tracer', 'doc')
 
 
 @recipe
+@ingreds('test/doc_test.py')
 @spices("-a: do with python from 2.4 to 3.2")
 def task_test(c, *args, **kwargs):
+    """arg is 'doctest', 'helpers', 'tracer', or 'doc'"""
     #task_oktest(c, *args, **kwargs)
     #task_helpers_test(c, *args, **kwargs)
     #task_tracer_test(c, *args, **kwargs)
@@ -83,18 +85,16 @@ def task_test(c, *args, **kwargs):
 
 
 def _run_test(c, arg, **kwargs):
-    if   arg == 'oktest':   fn = task_oktest
-    elif arg == 'helpers':  fn = task_helpers_test
-    elif arg == 'tracer':   fn = task_tracer_test
-    elif arg == 'doc':      fn = task_doc_test
+    if   arg == 'oktest':   fn = _run_oktest_test
+    elif arg == 'helpers':  fn = _run_helpers_test
+    elif arg == 'tracer':   fn = _run_tracer_test
+    elif arg == 'doc':      fn = _run_doc_test
     else:
         raise ValueError("%r: unknown test name." % arg)
     fn(c, **kwargs)
 
 
-@recipe
-@spices("-a: do with python from 2.4 to 3.2")
-def task_oktest(c, *args, **kwargs):
+def _run_oktest_test(c, *args, **kwargs):
     """invoke 'test/oktest_test.py'"""
     fpath = "test/oktest_test.py"
     for ver, bin in _do_test(c, kwargs):
@@ -112,17 +112,13 @@ def task_oktest(c, *args, **kwargs):
             system(cmd)
 
 
-@recipe
-@spices("-a: do with python from 2.4 to 3.2")
-def task_helpers_test(c, *args, **kwargs):
+def _run_helpers_test(c, *args, **kwargs):
     """invoke 'test/helpers_test.py'"""
     fpath = 'test/helpers_test.py'
     _invoke_test(c, kwargs, fpath)
 
 
-@recipe
-@spices("-a: do with python from 2.4 to 3.2")
-def task_tracer_test(c, *args, **kwargs):
+def _run_tracer_test(c, *args, **kwargs):
     """invoke 'test/tracer_test.py'"""
     fpath = 'test/tracer_test.py'
     _invoke_test(c, kwargs, fpath)
@@ -151,10 +147,7 @@ def _invoke_test(c, kwargs, fpath):
             system(cmd)
 
 
-@recipe
-@ingreds('test/doc_test.py')
-@spices("-a: do with python from 2.4 to 3.2")
-def task_doc_test(c, *args, **kwargs):
+def _run_doc_test(c, *args, **kwargs):
     """invoke 'test/doc_test.py'"""
     fpath = "test/doc_test.py"
     for ver, bin in _do_test(c, kwargs):
