@@ -216,9 +216,8 @@ def task_sdist(c, *args, **kwargs):
 
 def _do_setup_py(c, command):
     for ver, bin in python_binaries:
-        if ver.startswith('2'):
-            system(c%command)
-    rm_rf(c%'lib/$(package).egg-info')
+        system(c%command)
+        rm_rf(c%'lib/$(package).egg-info')
 
 
 @recipe
