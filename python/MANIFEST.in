@@ -1,4 +1,4 @@
-include README.txt MIT-LICENSE MANIFEST CHANGES.txt setup.py ez_setup.py
+include README.txt MIT-LICENSE MANIFEST CHANGES.txt setup.py
 include lib/oktest.py
 include test/*.py
 include Kookbook.py
