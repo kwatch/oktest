@@ -644,9 +644,29 @@ class BaseReporter(Reporter):
     def _is_oktest_py(self, fpath,  _fnames=set(['oktest.py', 'oktest.pyc', 'oktest.pyo'])):
         return os.path.basename(fpath) in _fnames
 
+    def _print_stacktrace(self, stacktrace, file, func):
+        is_oktest_py = self._is_oktest_py
+        i = len(stacktrace) - 1
+        while i >= 0 and not (stacktrace[i][0] == file and stacktrace[i][2] == func):
+            i -= 1
+        bottom = i
+        while i >= 0 and not is_oktest_py(stacktrace[i][0]):
+            i -= 1
+        top = i + 1
+        for t in stacktrace[top:bottom]:
+            self._print_traceback_entry(*t)
+
     def _print_traceback(self, tb=None, stacktrace=None, all=False):
         entries = traceback.extract_tb(tb or sys.exc_info()[2])
         is_oktest_py = self._is_oktest_py
+        if stacktrace:
+            file, line, func, text = entries[0]
+            self._print_stacktrace(stacktrace, file, func)
+            i, n = 0, len(entries)
+            while i < n and not is_oktest_py(entries[i][0]):
+                self._print_traceback_entry(*entries[i])
+                i += 1
+            return
         i, n = 0, len(entries)
         while i < n and is_oktest_py(entries[i][0]):
             i += 1
