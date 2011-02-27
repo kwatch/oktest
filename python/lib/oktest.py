@@ -620,10 +620,10 @@ class Reporter(object):
     def print_ok(self, obj):
         pass
 
-    def print_failed(self, obj, ex, tb=None):
+    def print_failed(self, obj, ex, tb=None, stacktrace=None):
         pass
 
-    def print_error(self, obj, ex, tb=None):
+    def print_error(self, obj, ex, tb=None, stacktrace=None):
         pass
 
 
@@ -644,7 +644,7 @@ class BaseReporter(Reporter):
     def _is_oktest_py(self, fpath,  _fnames=set(['oktest.py', 'oktest.pyc', 'oktest.pyo'])):
         return os.path.basename(fpath) in _fnames
 
-    def _print_traceback(self, tb=None, all=False):
+    def _print_traceback(self, tb=None, stacktrace=None, all=False):
         entries = traceback.extract_tb(tb or sys.exc_info()[2])
         is_oktest_py = self._is_oktest_py
         i, n = 0, len(entries)
@@ -678,19 +678,19 @@ class SimpleReporter(BaseReporter):
         else:     self._write('  File "%s", line %s\n'        % (file, line))
         if text:  self._write('    %s\n' % text)
 
-    def print_failed(self, obj, ex, tb=None):
+    def print_failed(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("f"); OUT.flush()
         self._write("Failed: %s()\n" % self._test_ident(obj))
         self._write("  %s\n" % ex2msg(ex))
-        self._print_traceback(tb, all=False)
+        self._print_traceback(tb, stacktrace, all=False)
         if getattr(ex, 'diff', None):
             self._write(ex.diff)
 
-    def print_error(self, obj, ex, tb=None):
+    def print_error(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("E"); OUT.flush()
         self._write("ERROR: %s()\n" % self._test_ident(obj))
         self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_traceback(tb, all=True)
+        self._print_traceback(tb, stacktrace, all=True)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -717,17 +717,17 @@ class OldStyleReporter(BaseReporter):
     def _print_traceback_entry(self, file, line, func, text):
         OUT.write(self._traceback_entry_format % (file, line, text))
 
-    def print_failed(self, obj, ex, tb=None):
+    def print_failed(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("[NG] %s\n" % ex2msg(ex))
         self._traceback_entry_format = "   %s:%s: %s\n"
-        self._print_traceback(tb, all=False)
+        self._print_traceback(tb, stacktrace, all=False)
         if getattr(ex, 'diff', None):
             OUT.write(ex.diff)
 
-    def print_error(self, obj, ex, tb=None):
+    def print_error(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         self._traceback_entry_format = "  - %s:%s:  %s\n"
-        self._print_traceback(tb, all=True)
+        self._print_traceback(tb, stacktrace, all=True)
 
 
 ## NOTICE! reporter spec will be changed frequently
@@ -748,17 +748,17 @@ class TapStyleReporter(BaseReporter):
     def _print_traceback_entry(self, file, line, func, text):
         OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
 
-    def print_failed(self, obj, ex, tb=None):
+    def print_failed(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("not ok # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s\n" % ex2msg(ex))
-        self._print_traceback(tb, all=False)
+        self._print_traceback(tb, stacktrace, all=False)
         if getattr(ex, 'diff', None):
             OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
 
-    def print_error(self, obj, ex, tb=None):
+    def print_error(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("ERROR  # %s\n" % self._test_ident(obj))
         OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_traceback(tb, all=True)
+        self._print_traceback(tb, stacktrace, all=True)
 
 
 REPORTER = SimpleReporter
