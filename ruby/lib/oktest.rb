@@ -257,17 +257,17 @@ module Oktest
 
     def capture_io(stdin_str=nil)
       require 'stringio' unless defined?(StringIO)
-      stdout, stderr = $stdout, $stderr
-      $stdout, $stderr = StringIO.new, StringIO.new
-      stdin, $stdin = $stdin, StringIO.new(stdin_str) if stdin_str
+      stdout, $stdout = $stdout, StringIO.new
+      stderr, $stderr = $stderr, StringIO.new
+      stdin,  $stdin  = $stdin,  StringIO.new(stdin_str) if stdin_str
       begin
         yield
-        ret = [$stdout.string, $stderr.string]
+        return [$stdout.string, $stderr.string]
       ensure
-        $stdout, $stderr = stdout, stderr
-        $stdin = stdin if stdin_str
+        $stdout = stdout
+        $stderr = stderr
+        $stdin  = stdin if stdin_str
       end
-      return ret
     end
 
     def dummy_file(pairs)
