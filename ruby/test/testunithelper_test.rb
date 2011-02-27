@@ -23,41 +23,41 @@ class TestUnitHelperTest < Test::Unit::TestCase
   def _setup_FugarTest0
     FugarTest0.class_eval do
       def test_ok
-        ## ok() is available
+        ## ok_() is available
         assert_equal 2, 1+1
-        ok(1+1) == 2
+        ok_(1+1) == 2
       end
       def test_not_ok
-        ## not_ok() is available
+        ## not_ok_() is available
         assert_equal 2, 1+1
-        not_ok(1+1) == 3
+        not_ok_(1+1) == 3
       end
       def test_file?
-        ok(__FILE__).file?
-        not_ok('notexist').file?
-        assert_raise(Oktest::AssertionFailed) { ok('notexist').file? }
-        assert_raise(Oktest::AssertionFailed) { not_ok(__FILE__).file? }
+        ok_(__FILE__).file?
+        not_ok_('notexist').file?
+        assert_raise(Oktest::AssertionFailed) { ok_('notexist').file? }
+        assert_raise(Oktest::AssertionFailed) { not_ok_(__FILE__).file? }
       end
       def test_raise?
         pr = proc { nil.foo }
-        ok(pr).raise?(NoMethodError, "undefined method `foo' for nil:NilClass")
+        ok_(pr).raise?(NoMethodError, "undefined method `foo' for nil:NilClass")
       end
       ## self.test() is available
       test "3*3 should be 9" do
-        ok(3*3) == 9
+        ok_(3*3) == 9
       end
       ##
       def test_fail1a
         assert 3 == 1+1
       end
       def test_fail1b
-        ok(1+1) == 3
+        ok_(1+1) == 3
       end
       def test_fail2a
         assert_equal "AAA\nBBB\nCCC\n", "AAA\nCCC\nDDD\n"
       end
       def test_fail2b
-        ok("AAA\nCCC\nDDD\n") == "AAA\nBBB\nCCC\n"
+        ok_("AAA\nCCC\nDDD\n") == "AAA\nBBB\nCCC\n"
       end
     end
   end

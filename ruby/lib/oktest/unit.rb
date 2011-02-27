@@ -61,13 +61,21 @@ module Oktest
     module TestCase
       include Oktest::Helper
 
-      def ok(actual=nil)
-        actual = yield if block_given?       # experimental
+      def ok
+        actual = yield
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, false)
       end
 
-      def not_ok(actual=nil)
-        actual = yield if block_given?       # experimental
+      def ok_(actual)
+        return Oktest::TestUnitHelper::AssertionObject.new(self, actual, false)
+      end
+
+      def not_ok
+        actual = yield
+        return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
+      end
+
+      def not_ok_(actual)
         return Oktest::TestUnitHelper::AssertionObject.new(self, actual, true)
       end
 
