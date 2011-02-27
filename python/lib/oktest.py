@@ -33,6 +33,7 @@ if python2:
         f.close()
         return s
 if python3:
+    xrange = range
     from io import StringIO
     def _is_string(val):
         return isinstance(val, (str, bytes))
@@ -498,7 +499,9 @@ class TestRunner(object):
             obj = self.klass(method_name)
         obj.__name__ = self._test_name(method_name)
         obj._testMethodName = method_name    # unittest.TestCase compatible
-        obj._testMethodDoc = func.__doc__    # unittest.TestCase compatible
+        obj._testMethodDoc  = func.__doc__   # unittest.TestCase compatible
+        obj._run_by_oktest  = True
+        obj._oktest_specs   = []
         return obj
 
     def _invoke_before_all(self, klass):
@@ -822,8 +825,43 @@ class _RunnableContext(_Context):
 ##
 class Spec(_Context):
 
+    _exception  = None
+    _traceback  = None
+    _stacktrace = None
+
     def __init__(self, desc):
         self.desc = desc
+        self._testcase = None
+
+    def __enter__(self):
+        self._testcase = tc = self._find_testcase_object()
+        if getattr(tc, '_run_by_oktest', None):
+            getattr(tc, '_oktest_specs').append(self)
+        return self
+
+    def _find_testcase_object(self):
+        max_depth = 10
+        for i in xrange(2, max_depth):
+            try:
+                frame = sys._getframe(i)   # raises ValueError when too deep
+            except ValueError:
+                break
+            method = frame.f_code.co_name
+            if method.startswith("test"):
+                arg_name = frame.f_code.co_varnames[0]
+                testcase = frame.f_locals.get(arg_name, None)
+                if hasattr(testcase, "_testMethodName"):
+                    return testcase
+        return None
+
+    def __exit__(self, *args):
+        ex = args[1]
+        tc = self._testcase
+        if ex and hasattr(ex, '_raised_by_oktest') and hasattr(tc, '_run_by_oktest'):
+            self._exception  = ex
+            self._traceback  = args[2]
+            self._stacktrace = traceback.extract_stack()
+            return True
 
     def __iter__(self):
         self.__enter__()
