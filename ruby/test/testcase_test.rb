@@ -113,13 +113,13 @@ class OktestTestCaseTest < Test::Unit::TestCase
 
 
   ##
-  ## capture_io()
+  ## dummy_io()
   ##
 
-  def test_capture_io
+  def test_dummy_io
     extend Oktest::TestCase
     spec "captures $stdout and $stderr" do
-      sout, serr = capture_io() do
+      sout, serr = dummy_io() do
         $stdout.write("Suzumiya")
         $stderr.write("Haruhi")
       end
@@ -127,7 +127,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
       assert_equal "Haruhi", serr
     end
     spec "takes string as $stdin" do
-      sout, serr = capture_io("Haruhi Suzumiya") do
+      sout, serr = dummy_io("Haruhi Suzumiya") do
         input = $stdin.read()
         $stdout.write("input=#{input.inspect}")
       end
@@ -135,7 +135,7 @@ class OktestTestCaseTest < Test::Unit::TestCase
     end
     spec "restore $stdin, $stdout, and $stderr after block yielded" do
       stdin, stdout, stderr = $stdin, $stdout, $stderr
-      sout, serr = capture_io("sos") do
+      sout, serr = dummy_io("sos") do
         assert_not_same stdin,  $stdin
         assert_not_same stdout, $stdout
         assert_not_same stderr, $stderr

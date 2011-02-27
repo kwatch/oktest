@@ -255,7 +255,7 @@ module Oktest
       return Oktest::AssertionObject.new(self, actual, true)
     end
 
-    def capture_io(stdin_str=nil)
+    def dummy_io(stdin_str=nil)
       require 'stringio' unless defined?(StringIO)
       stdout, $stdout = $stdout, StringIO.new
       stderr, $stderr = $stderr, StringIO.new
@@ -269,6 +269,7 @@ module Oktest
         $stdin  = stdin if stdin_str
       end
     end
+    alias capture_io dummy_io    # for backward compatibility
 
     def dummy_file(pairs)
       fnames = []
