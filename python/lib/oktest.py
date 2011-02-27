@@ -536,7 +536,6 @@ class TestRunner(object):
             try:
                 try:
                     func(obj)
-                    self.reporter.print_ok(obj)
                 #except TestFailed, ex:
                 except ASSERTION_ERROR:
                     _, ex, tb = sys.exc_info()
@@ -548,6 +547,17 @@ class TestRunner(object):
                     _, ex, tb = sys.exc_info()
                     count += 1
                     self.reporter.print_error(obj, ex, tb)
+                else:
+                    specs = getattr(obj, '_oktest_specs', None)
+                    failed = False
+                    if specs:
+                        for spec in specs:
+                            if spec._exception:
+                                failed = True
+                                count += 1
+                                self.reporter.print_failed(obj, spec._exception, spec._traceback, spec._stacktrace)
+                    if not failed:
+                        self.reporter.print_ok(obj)
             finally:
                 self._invoke_after(obj)
         self._invoke_after_all(self.klass)
