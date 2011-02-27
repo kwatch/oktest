@@ -659,17 +659,14 @@ class BaseReporter(Reporter):
     def _print_traceback(self, tb=None, stacktrace=None, all=False):
         entries = traceback.extract_tb(tb or sys.exc_info()[2])
         is_oktest_py = self._is_oktest_py
+        i, n = 0, len(entries)
         if stacktrace:
+            assert all == False
             file, line, func, text = entries[0]
             self._print_stacktrace(stacktrace, file, func)
-            i, n = 0, len(entries)
-            while i < n and not is_oktest_py(entries[i][0]):
-                self._print_traceback_entry(*entries[i])
+        else:
+            while i < n and is_oktest_py(entries[i][0]):
                 i += 1
-            return
-        i, n = 0, len(entries)
-        while i < n and is_oktest_py(entries[i][0]):
-            i += 1
         while i < n and (all or not is_oktest_py(entries[i][0])):
             self._print_traceback_entry(*entries[i])
             i += 1
