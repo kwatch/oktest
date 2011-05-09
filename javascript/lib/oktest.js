@@ -9,10 +9,14 @@
 
 "use strict";
 
-var oktest = {
-	VERSION:  '0.0.0',
-	encoding: 'utf-8'
-};
+var oktest = {};
+
+if (typeof(exports) === "object") {  // for node.js
+	oktest = exports;
+}
+
+oktest.VERSION = '0.0.0';
+oktest.encoding = 'utf-8';
 
 
 ///
@@ -694,12 +698,3 @@ oktest.run_all = function() {
 		target.accept(runner);
 	}
 };
-
-
-if (oktest._engine.nodejs) {
-	if (typeof(exports) == 'object') {
-		(function() {
-			for (var p in oktest) exports[p] = oktest[p];
-		})();
-	}
-}
