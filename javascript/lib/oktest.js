@@ -332,21 +332,21 @@ oktest.AssertionObject = oktest.util.classdef(
 			this._done = true;
 			var bool = typeof(this._left) == type;
 			if (bool == this._bool) return;
-			throw this._failed(right, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
+			throw this._failed(type, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
 		};
 
-		def.is_a = function(type) {
+		def.is_a = function(klass) {
 			this._done = true;
-			var bool = this._left instanceof type;
+			var bool = this._left instanceof klass;
 			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "instanceof", type));
+			throw this._failed(klass, this._msg(this._left, "instanceof", klass));
 		};
 
 		def.matches = function(pattern) {
 			this._done = true;
 			var bool = this._left.match(pattern);
 			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, ".match", pattern));
+			throw this._failed(right, this._msg(this._left, ".matches", pattern));
 		};
 
 		def.in_object = function(obj) {
