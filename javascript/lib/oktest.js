@@ -342,7 +342,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(right, this._msg(this._left, "instanceof", type));
 		};
 
-		def.match = function(pattern) {
+		def.matches = function(pattern) {
 			this._done = true;
 			var bool = this._left.match(pattern);
 			if (bool == this._bool) return;
