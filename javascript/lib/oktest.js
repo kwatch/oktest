@@ -328,22 +328,18 @@ oktest.AssertionObject = oktest.util.classdef(
 				throw this._failed(right, this._msg(this._left, "<", right + delta));
 		};
 
+		def.is_typeof = function(type) {
+			this._done = true;
+			var bool = typeof(this._left) == type;
+			if (bool == this._bool) return;
+			throw this._failed(right, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
+		};
+
 		def.is_a = function(type) {
 			this._done = true;
-			var bool;
-			if (typeof(type) == 'string') {
-				bool = typeof(this._left) == type;
-				if (bool == this._bool) return;
-				throw this._failed(right, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
-			}
-			else if (typeof(type) == 'function') {
-				bool = this._left instanceof type;
-				if (bool == this._bool) return;
-				throw this._failed(right, this._msg(this._left, "instanceof", type));
-			}
-			else {
-				throw "*** Type error: is_a() expects type name or class object but got " + oktest.util.inspect() + ".";
-			}
+			var bool = this._left instanceof type;
+			if (bool == this._bool) return;
+			throw this._failed(right, this._msg(this._left, "instanceof", type));
 		};
 
 		def.match = function(pattern) {
