@@ -53,7 +53,7 @@ oktest.util = {
 			}
 			else {
 				for (var p in value) {
-					buf.push(p + ':' + oktest.util.inspect(value[p]))
+					buf.push(p + ':' + oktest.util.inspect(value[p]));
 				}
 				return "{" + buf.join(", ") + "}";
 			}
@@ -84,7 +84,7 @@ oktest.util = {
 	writeFile: function(filename) { },
 
 	readLineInFile: function(filename, linenum) {
-		var content = oktest.util.readFile(filename)
+		var content = oktest.util.readFile(filename);
 		//return content.split(/^/m)[linenum-1];   // fails sometimes in nodejs (maybe V8 bug)
 		return content.split(/\r?\n/)[linenum-1];
 	},
