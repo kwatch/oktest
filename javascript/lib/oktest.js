@@ -242,7 +242,7 @@ oktest.AssertionObject = oktest.util.classdef(
 
 		def._OKTEST_FAILED = null,
 
-		def._get_location = function(stack) {
+		def._getLocation = function(stack) {
 			if (! stack) stack = this._stack;
 			var line = stack.split(/^/m)[2];
 			if (! line) return [null, null];
@@ -566,7 +566,7 @@ oktest.TargetObject = oktest.util.classdef(
 	function(def) {
 
 		def.accept = function(visitor) {
-			return visitor.visit_target(this);
+			return visitor.visitTarget(this);
 		};
 
 		def.spec = function(desc, body) {
@@ -612,7 +612,7 @@ oktest.SpecObject = oktest.util.classdef(
 	function(def) {
 
 		def.accept = function(visitor) {
-			return visitor.visit_spec(this);
+			return visitor.visitSpec(this);
 		};
 
 		def.after = null;
@@ -643,17 +643,17 @@ oktest.Runner = oktest.util.classdef(
 			acceptor.accept(this);
 		};
 
-		def.visit_target = function(target) {
+		def.visitTarget = function(target) {
 			oktest.print(target._indent + "* " + target.name);
 			var specs = target.specs;
 			for (var spec, i = -1; spec = specs[++i]; ) spec.accept(this);
 			var r = target.results;
 			var total = r.success + r.failed + r.error + r.skipped;
-			if (total > 0) this._report_target_result(total, target);
+			if (total > 0) this._reportTargetResult(total, target);
 			//oktest.print('');
 		};
 
-		def._report_target_result = function(total, target) {
+		def._reportTargetResult = function(total, target) {
 			for (var spec, i = -1; spec = target.specs[++i]; ) {
 				if (spec._thrown) {
 				}
@@ -664,7 +664,7 @@ oktest.Runner = oktest.util.classdef(
 			oktest.print(target._indent + '  (' + str + ')');
 		};
 
-		def.visit_spec = function(spec) {
+		def.visitSpec = function(spec) {
 			//oktest.print(spec.target._indent + "  - " + spec.desc);
 			var status = '';
 			var msg = null;
@@ -680,7 +680,7 @@ oktest.Runner = oktest.util.classdef(
 					spec.target.results.failed++;
 					spec.status = 'f';
 					status = 'Failed';
-					msg = [ex._message].concat(this._get_failed_msg(ex));
+					msg = [ex._message].concat(this._getFailedMsg(ex));
 				}
 				else if (oktest.is_skipped(ex)) {  // oktest.SkipException
 					spec.target.results.skipped++;
@@ -697,14 +697,14 @@ oktest.Runner = oktest.util.classdef(
 			}
 			finally {
 				var indent = spec.target._indent + "  ";
-				this._report_spec_result(spec, indent, status, msg);
-				this._check_specs_done(spec, indent, status);
+				this._reportSpecResult(spec, indent, status, msg);
+				this._checkSpecsDone(spec, indent, status);
 				if (spec.after) spec.after();
 			}
 		};
 
-		def._get_failed_msg = function(ass_obj) {
-			var arr = ass_obj._get_location();
+		def._getFailedMsg = function(ass_obj) {
+			var arr = ass_obj._getLocation();
 			var filepath = arr[0], linenum = arr[1];
 			if (! filepath) return [];
 			var line = oktest.util.readLineInFile(filepath, linenum);
@@ -717,7 +717,7 @@ oktest.Runner = oktest.util.classdef(
 			return arr;
 		};
 
-		def._report_spec_result = function(spec, indent, status, msg) {
+		def._reportSpecResult = function(spec, indent, status, msg) {
 			oktest.print(indent + "- [" + status + "] "+ spec.desc);
 			if (msg !== null) {
 				for (var s, i = -1; s = msg[++i]; ) {
@@ -726,11 +726,11 @@ oktest.Runner = oktest.util.classdef(
 			}
 		};
 
-		def._check_specs_done = function(spec, indent, status) {
+		def._checkSpecsDone = function(spec, indent, status) {
 			var ass_objs = oktest.AssertionObject._instances;
 			for (var ass_obj, i = -1; ass_obj = ass_objs[++i]; ) {
 				if (! ass_obj._done && status != 'ERROR') {
-					var s = ass_obj._get_location().join(':');
+					var s = ass_obj._getLocation().join(':');
 					oktest.print(indent + "  # Warning: " + ass_obj._func_name
 					      + "() is called but not tested yet. (" + s + ")");
 				}
