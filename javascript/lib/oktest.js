@@ -320,10 +320,10 @@ oktest.AssertionObject = oktest.util.classdef(
 		def.in_delta = function(right, delta) {
 			this._done = true;
 			var bool;
-			bool = this._left <= right - delta;
+			bool = this._left > right - delta;
 			if (bool != this._bool)
 				throw this._failed(right, this._msg(this._left, ">", right - delta));
-			bool = this._left >= right + delta;
+			bool = this._left < right + delta;
 			if (bool != this._bool)
 				throw this._failed(right, this._msg(this._left, "<", right + delta));
 		};
