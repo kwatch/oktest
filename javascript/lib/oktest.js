@@ -484,30 +484,30 @@ oktest.SkipException = oktest.util.classdef(
 
 oktest.ok = function(left) {
 	return new oktest.AssertionObject(left, true, 'ok', new Error().stack);
-}
+};
 
 oktest.NG = function(left) {
 	return new oktest.AssertionObject(left, false, 'NG', new Error().stack);
-}
+};
 
 oktest.pre_cond = function(left) {
 	/// same as ok() but it represents precodition rather than specification.
 	return new oktest.AssertionObject(left, true, 'pre_cond', new Error().stack);
-}
+};
 
 oktest.skip_when = function(condition, reason) {
 	if (condition) {
 		throw new oktest.SkipException(reason);
 	}
-}
+};
 
 oktest.is_failed = function(ex) {
 	return '_OKTEST_FAILED' in ex;
-}
+};
 
 oktest.is_skipped = function(ex) {
 	return '_OKTEST_SKIPPED' in ex;
-}
+};
 
 
 ///
