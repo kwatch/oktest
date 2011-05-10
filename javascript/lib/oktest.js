@@ -724,7 +724,7 @@ oktest.Runner = oktest.util.classdef(
 );
 
 
-oktest.run_all = function() {
+oktest.runAll = function() {
 	var runner = new oktest.Runner();
 	var targets = oktest.TargetObject._all;
 	for (var target, i = -1; target = targets[++i]; ) {
