@@ -336,7 +336,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(right, this._msg(this._left, ">=", right));
 		};
 
-		def.in_delta = function(right, delta) {
+		def.inDelta = function(right, delta) {
 			this._done = true;
 			var bool;
 			bool = this._left > right - delta;
@@ -347,14 +347,14 @@ oktest.AssertionObject = oktest.util.classdef(
 				throw this._failed(right, this._msg(this._left, "<", right + delta));
 		};
 
-		def.is_typeof = function(type) {
+		def.isTypeof = function(type) {
 			this._done = true;
 			var bool = typeof(this._left) == type;
 			if (bool == this._bool) return;
 			throw this._failed(type, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
 		};
 
-		def.is_a = function(klass) {
+		def.isa = function(klass) {
 			this._done = true;
 			var bool = this._left instanceof klass;
 			if (bool == this._bool) return;
@@ -368,7 +368,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(pattern, this._msg(this._left, ".match", pattern));
 		};
 
-		def.array_eq = function(right) {
+		def.arrayEq = function(right) {
 			this._done = true;
 			var errmsg = null;
 			if (! (this._left instanceof Array)) {
@@ -378,7 +378,7 @@ oktest.AssertionObject = oktest.util.classdef(
 				errmsg = "Array is expected but got "+this._left+".";
 			}
 			else if (this._left.length !== right.length) {
-				errmsg = this._msg(this._left, ".array_eq", right);
+				errmsg = this._msg(this._left, ".arrayEq", right);
 			}
 			else {
 				for (var i = 0, n = this._left.length; i < n; i++) {
@@ -393,18 +393,18 @@ oktest.AssertionObject = oktest.util.classdef(
 				if (errmsg) throw this._failed(right, errmsg);
 			}
 			else {
-				if (! errmsg) throw this._failed(right, this._msg(this._left, ".array_eq", right));
+				if (! errmsg) throw this._failed(right, this._msg(this._left, ".arrayEq", right));
 			}
 		};
 
-		def.in_object = function(obj) {
+		def.inObject = function(obj) {
 			this._done = true;
 			var bool = this._left in obj;
 			if (bool == this._bool) return;
 			throw this._failed(obj, this._msg(this._left, "in", obj));
 		};
 
-		def.in_array = function(arr) {
+		def.inArray = function(arr) {
 			this._done = true;
 			var bool = false;
 			for (var i = 0, n = arr.length; i < n; i++) {
@@ -417,14 +417,14 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(arr, this._msg(this._left, "exists in", arr));
 		};
 
-		def.has_key = function(key) {
+		def.hasKey = function(key) {
 			this._done = true;
 			var bool = key in this._left;
 			if (bool == this._bool) return;
 			throw this._failed(key, this._msg(key, "in", this._left));
 		};
 
-		def.has_item = function(item) {
+		def.hasItem = function(item) {
 			this._done = true;
 			var bool = false;
 			for (var i = 0, n = this._left.length; i < n; i++) {
@@ -469,10 +469,10 @@ oktest.AssertionObject = oktest.util.classdef(
 			}
 		};
 
-		def.throws_nothing = function(exception) {
+		def.throwsNothing = function(exception) {
 			this._done = true;
 			if (! this._bool)
-				throw "** ERROR: throws_nothing() is not available with NG().";
+				throw "** ERROR: throwsNothing() is not available with NG().";
 			if (typeof(this._left) != 'function')
 				throw "** ERROR: throws() is available with function object.";
 			try {
@@ -517,22 +517,22 @@ oktest.NG = function(left) {
 	return new oktest.AssertionObject(left, false, 'NG', new Error().stack);
 };
 
-oktest.pre_cond = function(left) {
+oktest.preCond = function(left) {
 	/// same as ok() but it represents precodition rather than specification.
 	return new oktest.AssertionObject(left, true, 'pre_cond', new Error().stack);
 };
 
-oktest.skip_when = function(condition, reason) {
+oktest.skipWhen = function(condition, reason) {
 	if (condition) {
 		throw new oktest.SkipException(reason);
 	}
 };
 
-oktest.is_failed = function(ex) {
+oktest.isFailed = function(ex) {
 	return '_OKTEST_FAILED' in ex;
 };
 
-oktest.is_skipped = function(ex) {
+oktest.isSkipped = function(ex) {
 	return '_OKTEST_SKIPPED' in ex;
 };
 
@@ -676,13 +676,13 @@ oktest.Runner = oktest.util.classdef(
 			}
 			catch (ex) {
 				spec._thrown = ex;
-				if (oktest.is_failed(ex)) {        // oktest.AssertionObject object
+				if (oktest.isFailed(ex)) {        // oktest.AssertionObject object
 					spec.target.results.failed++;
 					spec.status = 'f';
 					status = 'Failed';
 					msg = [ex._message].concat(this._getFailedMsg(ex));
 				}
-				else if (oktest.is_skipped(ex)) {  // oktest.SkipException
+				else if (oktest.isSkipped(ex)) {  // oktest.SkipException
 					spec.target.results.skipped++;
 					spec.status = 's';
 					status = 'Skipped';
