@@ -272,6 +272,13 @@ oktest.AssertionObject = oktest.util.classdef(
 			}
 		};
 
+		def._cmp = function _cmp(op, right, compare) {
+			this._done = true;
+			var bool = compare(this._left, right);
+			if (bool == this._bool) return;
+			throw this._failed(right, this._msg(this._left, op, right));
+		};
+
 		def.eq = function eq(right) {
 			this._done = true;
 			var bool = this._left == right;
