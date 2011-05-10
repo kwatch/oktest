@@ -279,14 +279,14 @@ oktest.AssertionObject = oktest.util.classdef(
 			this._done = true;
 			var bool = this._left === right;
 			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "!=", right));
+			throw this._failed(right, this._msg(this._left, "===", right));
 		};
 
 		def.isnt = function(right) {
 			this._done = true;
 			var bool = this._left !== right;
 			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "!=", right));
+			throw this._failed(right, this._msg(this._left, "!==", right));
 		};
 
 		def.lt = function(right) {
@@ -346,7 +346,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			this._done = true;
 			var bool = !! this._left.match(pattern);
 			if (bool == this._bool) return;
-			throw this._failed(pattern, this._msg(this._left, ".matches", pattern));
+			throw this._failed(pattern, this._msg(this._left, ".match", pattern));
 		};
 
 		def.array_eq = function(right) {
@@ -395,7 +395,7 @@ oktest.AssertionObject = oktest.util.classdef(
 				}
 			}
 			if (bool == this._bool) return;
-			throw this._failed(arr, this._msg(this._left, "found in", arr));
+			throw this._failed(arr, this._msg(this._left, "exists in", arr));
 		};
 
 		def.has_key = function(key) {
