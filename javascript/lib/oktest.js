@@ -349,6 +349,35 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(right, this._msg(this._left, ".matches", pattern));
 		};
 
+		def.array_eq = function(right) {
+			this._done = true;
+			var errmsg = null;
+			if (! (this._left instanceof Array)) {
+				errmsg = "Array is expected but got "+this._left+".";
+			}
+			else if (! (right instanceof Array)) {
+				errmsg = "Array is expected but got "+this._left+".";
+			}
+			else if (this._left.length !== right.length) {
+				errmsg = this._msg(this._left, ".array_eq", right);
+			}
+			else {
+				for (var i = 0, n = this._left.length; i < n; i++) {
+					if (this._left[i] !== right[i]) {
+						errmsg = "[at index " + i + "] " + this._msg(this._left[i], "===", right[i]);
+						break;
+					}
+				}
+
+			}
+			if (this._bool) {
+				if (errmsg) throw this._failed(right, errmsg);
+			}
+			else {
+				if (! errmsg) throw this._failed(right, this._msg(this._left, ".array_eq", right));
+			}
+		};
+
 		def.in_object = function(obj) {
 			this._done = true;
 			var bool = this._left in obj;
