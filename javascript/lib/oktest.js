@@ -25,17 +25,17 @@ oktest.encoding = 'utf-8';
 
 oktest.util = {
 
-	classdef: function(constructor, method_def, static_def) {
+	classdef: function classdef(constructor, method_def, static_def) {
 		if (static_def) static_def(constructor);
 		if (method_def) method_def(constructor.prototype);
 		return constructor;
 	},
 
-	quote: function(str) {
+	quote: function quote(str) {
 		return "'" + str.replace(/\\/, '\\\\').replace(/\n/, '\\\\n\\').replace(/'/, "\\\\'") + "'";  //'
 	},
 
-	inspect: function(value) {
+	inspect: function inspect(value) {
 		var t = typeof(value);
 		if (t == "string")    return oktest.util.quote(value);
 		if (t == "number")    return value.toString();
@@ -61,11 +61,11 @@ oktest.util = {
 		throw "unreachable: typeof(value)="+typeof(value)+", value="+value;
 	},
 
-	strip: function(str) {
+	strip: function strip(str) {
 		return str.replace(/^\s+/, '').replace(/\s+$/, '');
 	},
 
-	flatten: function(arr) {
+	flatten: function flatten(arr) {
 		var arr2 = [];
 		for (var i = 0, n = arr.length; i < n; i++) {
 			var item = arr[i];
@@ -79,17 +79,17 @@ oktest.util = {
 		return arr2;
 	},
 
-	readFile: function(filename) { },
+	readFile: function readFile(filename) { },
 
-	writeFile: function(filename) { },
+	writeFile: function writeFile(filename) { },
 
-	readLineInFile: function(filename, linenum) {
+	readLineInFile: function readLineInFile(filename, linenum) {
 		var content = oktest.util.readFile(filename);
 		//return content.split(/^/m)[linenum-1];   // fails sometimes in nodejs (maybe V8 bug)
 		return content.split(/\r?\n/)[linenum-1];
 	},
 
-	unifiedDiff: function(text1, texdt2) {
+	unifiedDiff: function unifiedDiff(text1, texdt2) {
 	}
 
 };
@@ -108,13 +108,13 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
 		var util = require("util");
 		oktest.util.inspect = util.inspect;
 		var fs = require("fs");
-		oktest.util.readFile = function(filename) {
+		oktest.util.readFile = function readFile(filename) {
 			return fs.readFileSync(filename, oktest.encoding);
 		};
-		oktest.util.writeFile = function(filename, content) {
+		oktest.util.writeFile = function writeFile(filename, content) {
 			return fs.writeFileSync(filename, content, oktest.encoding);
 		};
-		oktest.util.system = function(command) {
+		oktest.util.system = function system(command) {
 			var sout, serr, ex;
 			var called = false;
 			var callback = function (error, stdout, stderr) {
@@ -130,7 +130,7 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
 			//}
 			return [ex, sout, serr];
 		};
-		oktest.util.diff_u = function(content1, content2) {
+		oktest.util.diff_u = function diff_u(content1, content2) {
 			var fname1 = '__expected__', fname2 = '__actual__';
 			oktest.util.writeFile(fname1, content1);
 			oktest.util.writeFile(fname2, content2);
@@ -138,7 +138,7 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
 			console.log('*** debug: result='); console.log(result);
 			return result[1];
 		};
-		oktest.util.unifiedDiff = function(text1, text2) {
+		oktest.util.unifiedDiff = function unifiedDiff(text1, text2) {
 			//var diff_match_patch = require('./diff_match_patch.js');
 			var diff_match_patch = require('diff_match_patch');
 			var dmp = new diff_match_patch.diff_match_patch();
@@ -166,7 +166,7 @@ else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
 	oktest._engine.rhino = true;
 	oktest._args = arguments;
 	oktest.print = print;
-	oktest.util.readFile = function(filename) {
+	oktest.util.readFile = function readFile(filename) {
 		var reader = new java.io.BufferedReader(new java.io.FileReader(filename));
 		//var buf = Array(512);
 		//reader.read(buf, 0, 512); // Cannot convert org.mozilla.javascript.NativeArray@3c6a22 to char[]
@@ -177,7 +177,7 @@ else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
 		buf.push("");
 		return buf.join("\n");
 	};
-	oktest.util.readLineInFile = function(filename, linenum) {
+	oktest.util.readLineInFile = function readLineInFile(filename, linenum) {
 		var line;
 		var reader = new java.io.BufferedReader(new java.io.FileReader(filename));
 		try {
@@ -192,7 +192,7 @@ else if (typeof(print) == 'function') {  // SpiderMonkey
 	oktest._engine.spidermoneky = true;
 	oktest._args = arguments;
 	oktest.print = print;
-	oktest.util.readFile = function(filename) {
+	oktest.util.readFile = function readFile(filename) {
 		var f = File(filename);
 		f.open('text,read');
 		var max = 4096, buf = [], i = 0, s;
@@ -214,7 +214,7 @@ else {
 /// assertion error class
 ///
 
-oktest.AssertionError = function(message) {
+oktest.AssertionError = function AssertionError(message) {
 	Error.call(this, message);
 	this.message = message;
 };
@@ -228,7 +228,7 @@ oktest.AssertionError.prototype = new Error();
 oktest.AssertionObject = oktest.util.classdef(
 
 	/// constructor
-	function(left, bool, func_name, stack) {
+	function AssertionObject(left, bool, func_name, stack) {
 		this._left  = left;
 		this._bool  = bool;
 		this._func_name = func_name;
@@ -242,7 +242,7 @@ oktest.AssertionObject = oktest.util.classdef(
 
 		def._OKTEST_FAILED = null,
 
-		def._getLocation = function(stack) {
+		def._getLocation = function _getLocation(stack) {
 			if (! stack) stack = this._stack;
 			var line = stack.split(/^/m)[2];
 			if (! line) return [null, null];
@@ -251,7 +251,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			return [m[1], m[2]-0]; // filepath, linenum
 		};
 
-		def._failed = function(right, message) {
+		def._failed = function _failed(right, message) {
 			this._right = right;
 			this._message  = this._bool ? message : "NOT " + message;
 			//return this;
@@ -265,7 +265,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			return ex;
 		};
 
-		def._msg = function(left, op, right) {
+		def._msg = function _msg(left, op, right) {
 			var inspect = oktest.util.inspect;
 			if (op[0] === '.') {
 				return inspect(left) + op + "(" + inspect(right) + ") : failed.";
@@ -275,7 +275,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			}
 		};
 
-		def.eq = function(right) {
+		def.eq = function eq(right) {
 			this._done = true;
 			var bool = this._left == right;
 			if (bool == this._bool) return;
@@ -287,56 +287,56 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw ex;
 		};
 
-		def.ne = function(right) {
+		def.ne = function ne(right) {
 			this._done = true;
 			var bool = this._left != right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, "!=", right));
 		};
 
-		def.is = function(right) {
+		def.is = function is(right) {
 			this._done = true;
 			var bool = this._left === right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, "===", right));
 		};
 
-		def.isnt = function(right) {
+		def.isnt = function isnt(right) {
 			this._done = true;
 			var bool = this._left !== right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, "!==", right));
 		};
 
-		def.lt = function(right) {
+		def.lt = function lt(right) {
 			this._done = true;
 			var bool = this._left < right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, "<", right));
 		};
 
-		def.gt = function(right) {
+		def.gt = function gt(right) {
 			this._done = true;
 			var bool = this._left > right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, ">", right));
 		};
 
-		def.le = function(right) {
+		def.le = function le(right) {
 			this._done = true;
 			var bool = this._left <= right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, "<=", right));
 		};
 
-		def.ge = function(right) {
+		def.ge = function ge(right) {
 			this._done = true;
 			var bool = this._left >= right;
 			if (bool == this._bool) return;
 			throw this._failed(right, this._msg(this._left, ">=", right));
 		};
 
-		def.inDelta = function(right, delta) {
+		def.inDelta = function inDelta(right, delta) {
 			this._done = true;
 			var bool;
 			bool = this._left > right - delta;
@@ -347,28 +347,28 @@ oktest.AssertionObject = oktest.util.classdef(
 				throw this._failed(right, this._msg(this._left, "<", right + delta));
 		};
 
-		def.isTypeof = function(type) {
+		def.isTypeof = function isTypeof(type) {
 			this._done = true;
 			var bool = typeof(this._left) == type;
 			if (bool == this._bool) return;
 			throw this._failed(type, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
 		};
 
-		def.isa = function(klass) {
+		def.isa = function isa(klass) {
 			this._done = true;
 			var bool = this._left instanceof klass;
 			if (bool == this._bool) return;
 			throw this._failed(klass, this._msg(this._left, "instanceof", klass));
 		};
 
-		def.matches = function(pattern) {
+		def.matches = function matches(pattern) {
 			this._done = true;
 			var bool = !! this._left.match(pattern);
 			if (bool == this._bool) return;
 			throw this._failed(pattern, this._msg(this._left, ".match", pattern));
 		};
 
-		def.arrayEq = function(right) {
+		def.arrayEq = function arrayEq(right) {
 			this._done = true;
 			var errmsg = null;
 			if (! (this._left instanceof Array)) {
@@ -397,14 +397,14 @@ oktest.AssertionObject = oktest.util.classdef(
 			}
 		};
 
-		def.inObject = function(obj) {
+		def.inObject = function inObject(obj) {
 			this._done = true;
 			var bool = this._left in obj;
 			if (bool == this._bool) return;
 			throw this._failed(obj, this._msg(this._left, "in", obj));
 		};
 
-		def.inArray = function(arr) {
+		def.inArray = function inArray(arr) {
 			this._done = true;
 			var bool = false;
 			for (var i = 0, n = arr.length; i < n; i++) {
@@ -417,14 +417,14 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(arr, this._msg(this._left, "exists in", arr));
 		};
 
-		def.hasKey = function(key) {
+		def.hasKey = function hasKey(key) {
 			this._done = true;
 			var bool = key in this._left;
 			if (bool == this._bool) return;
 			throw this._failed(key, this._msg(key, "in", this._left));
 		};
 
-		def.hasItem = function(item) {
+		def.hasItem = function hasItem(item) {
 			this._done = true;
 			var bool = false;
 			for (var i = 0, n = this._left.length; i < n; i++) {
@@ -437,7 +437,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(item, this._msg(this._left, "has item", item));
 		};
 
-		def.throws = function(exception_class, error_msg) {
+		def.throws = function throws(exception_class, error_msg) {
 			this._done = true;
 			if (! this._bool)
 				throw "** ERROR: throws() is not available with NG().";
@@ -469,7 +469,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			}
 		};
 
-		def.throwsNothing = function(exception) {
+		def.throwsNothing = function throwsNothing(exception) {
 			this._done = true;
 			if (! this._bool)
 				throw "** ERROR: throwsNothing() is not available with NG().";
@@ -497,7 +497,7 @@ oktest.AssertionObject = oktest.util.classdef(
 oktest.SkipException = oktest.util.classdef(
 
 	/// constructor
-	function(reason) {
+	function SkipException(reason) {
 		this.reason = reason;
 	},
 
@@ -509,30 +509,30 @@ oktest.SkipException = oktest.util.classdef(
 );
 
 
-oktest.ok = function(left) {
+oktest.ok = function ok(left) {
 	return new oktest.AssertionObject(left, true, 'ok', new Error().stack);
 };
 
-oktest.NG = function(left) {
+oktest.NG = function NG(left) {
 	return new oktest.AssertionObject(left, false, 'NG', new Error().stack);
 };
 
-oktest.preCond = function(left) {
+oktest.preCond = function preCond(left) {
 	/// same as ok() but it represents precodition rather than specification.
 	return new oktest.AssertionObject(left, true, 'pre_cond', new Error().stack);
 };
 
-oktest.skipWhen = function(condition, reason) {
+oktest.skipWhen = function skipWhen(condition, reason) {
 	if (condition) {
 		throw new oktest.SkipException(reason);
 	}
 };
 
-oktest.isFailed = function(ex) {
+oktest.isFailed = function isFailed(ex) {
 	return '_OKTEST_FAILED' in ex;
 };
 
-oktest.isSkipped = function(ex) {
+oktest.isSkipped = function isSkipped(ex) {
 	return '_OKTEST_SKIPPED' in ex;
 };
 
@@ -544,7 +544,7 @@ oktest.isSkipped = function(ex) {
 oktest.TargetObject = oktest.util.classdef(
 
 	/// constructor
-	function(name, defun) {
+	function TargetObject(name, defun) {
 		this.name = name;
 		this.specs = [];
 		this.results = {success: 0, failed: 0, error: 0, skipped: 0};
@@ -565,11 +565,11 @@ oktest.TargetObject = oktest.util.classdef(
 	/// instance methods
 	function(def) {
 
-		def.accept = function(visitor) {
+		def.accept = function accept(visitor) {
 			return visitor.visitTarget(this);
 		};
 
-		def.spec = function(desc, body) {
+		def.spec = function spec(desc, body) {
 			var target_obj = this;
 			var spec_obj = new oktest.SpecObject(target_obj, desc, body);
 			this.specs.push(spec_obj);
@@ -589,7 +589,7 @@ oktest.TargetObject = oktest.util.classdef(
 );
 
 
-oktest.target = function(name, defun) {
+oktest.target = function target(name, defun) {
 	return new oktest.TargetObject(name, defun);
 };
 
@@ -601,7 +601,7 @@ oktest.target = function(name, defun) {
 oktest.SpecObject = oktest.util.classdef(
 
 	/// constructor
-	function(target_obj, desc, body) {
+	function SpecObject(target_obj, desc, body) {
 		this.target = target_obj;
 		this.desc = desc;
 		this.body = body;
@@ -611,13 +611,13 @@ oktest.SpecObject = oktest.util.classdef(
 	/// instance methods
 	function(def) {
 
-		def.accept = function(visitor) {
+		def.accept = function accept(visitor) {
 			return visitor.visitSpec(this);
 		};
 
 		def.after = null;
 
-		def.echo = function(message) {
+		def.echo = function echo(message) {
 			oktest.print(this.target._indent + "    " + message);
 		};
 
@@ -633,17 +633,17 @@ oktest.SpecObject = oktest.util.classdef(
 oktest.Runner = oktest.util.classdef(
 
 	/// constructor
-	function() {
+	function Runner() {
 	},
 
 	/// instance methods
 	function(def) {
 
-		def.visit = function(acceptor) {
+		def.visit = function vist(acceptor) {
 			acceptor.accept(this);
 		};
 
-		def.visitTarget = function(target) {
+		def.visitTarget = function visitTarget(target) {
 			oktest.print(target._indent + "* " + target.name);
 			var specs = target.specs;
 			for (var spec, i = -1; spec = specs[++i]; ) spec.accept(this);
@@ -653,7 +653,7 @@ oktest.Runner = oktest.util.classdef(
 			//oktest.print('');
 		};
 
-		def._reportTargetResult = function(total, target) {
+		def._reportTargetResult = function _reportTargetResult(total, target) {
 			for (var spec, i = -1; spec = target.specs[++i]; ) {
 				if (spec._thrown) {
 				}
@@ -664,7 +664,7 @@ oktest.Runner = oktest.util.classdef(
 			oktest.print(target._indent + '  (' + str + ')');
 		};
 
-		def.visitSpec = function(spec) {
+		def.visitSpec = function visitSpec(spec) {
 			//oktest.print(spec.target._indent + "  - " + spec.desc);
 			var status = '';
 			var msg = null;
@@ -703,7 +703,7 @@ oktest.Runner = oktest.util.classdef(
 			}
 		};
 
-		def._getFailedMsg = function(ass_obj) {
+		def._getFailedMsg = function _getFailedMsg(ass_obj) {
 			var arr = ass_obj._getLocation();
 			var filepath = arr[0], linenum = arr[1];
 			if (! filepath) return [];
@@ -717,7 +717,7 @@ oktest.Runner = oktest.util.classdef(
 			return arr;
 		};
 
-		def._reportSpecResult = function(spec, indent, status, msg) {
+		def._reportSpecResult = function _reportSpecResult(spec, indent, status, msg) {
 			oktest.print(indent + "- [" + status + "] "+ spec.desc);
 			if (msg !== null) {
 				for (var s, i = -1; s = msg[++i]; ) {
@@ -726,7 +726,7 @@ oktest.Runner = oktest.util.classdef(
 			}
 		};
 
-		def._checkSpecsDone = function(spec, indent, status) {
+		def._checkSpecsDone = function _checkSpecsDone(spec, indent, status) {
 			var ass_objs = oktest.AssertionObject._instances;
 			for (var ass_obj, i = -1; ass_obj = ass_objs[++i]; ) {
 				if (! ass_obj._done && status != 'ERROR') {
@@ -743,7 +743,7 @@ oktest.Runner = oktest.util.classdef(
 );
 
 
-oktest.runAll = function() {
+oktest.runAll = function runAll() {
 	var runner = new oktest.Runner();
 	var targets = oktest.TargetObject._all;
 	for (var target, i = -1; target = targets[++i]; ) {
