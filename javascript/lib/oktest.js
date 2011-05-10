@@ -437,32 +437,35 @@ oktest.AssertionObject = oktest.util.classdef(
 		def.throws = function throws(exception_class, error_msg) {
 			this._done = true;
 			if (! this._bool)
-				throw "** ERROR: throws() is not available with NG().";
+				throw new Error("throws() is not available with NG().");
 			if (typeof(this._left) != 'function')
-				throw "** ERROR: throws() is available only with function object.";
+				throw new Error("throws() is available only with function object.");
+			var errcls = exception_class;
+			if (typeof(errcls) !== "function")
+				throw new TypeError(ins(errcls) + ": Error class (or String class) expected.");
+			var inspect = oktest.util.inspect;
 			var thrown = false;
 			try {
 				this._left();
 			}
 			catch (ex) {
 				thrown = true;
-				var ins = oktest.util.inspect;
-				if (exception_class) {
-					if (! (ex instanceof exception_class)) {
-						throw this._failed(exception_class, ins(exception_class) + " should be thrown : failed, got " + ins(ex) + ".");
-					}
+				this._left.exception = ex;
+				var flag_ok = errcls == String ? typeof(ex) === "string" : ex instanceof errcls;
+				if (! flag_ok) {
+					var got = (typeof(ex) == "object" && ex instanceof Error) ? ex.name + ' object' : inspect(ex);
+					throw this._failed(errcls, errcls.name + " should be thrown : failed, got " + got + ".");
 				}
 				if (error_msg) {
-					if (error_msg !== ex.message) {
-						throw this._failed(error_msg, ins(error_msg) + " == " + ins(ex.message));
+					var actual = typeof(ex) === "string" ? ex : (ex instanceof Error ? ex.message : ex);
+					if (error_msg !== actual) {
+						throw this._failed(error_msg, inspect(error_msg) + " == " + inspect(actual) + " : failed.");
 					}
 				}
-				this._left.exception = ex;
 			}
 			if (! thrown) {
-				var expected = exception_class || error_msg;
-				var msg = (expected ? oktest.util.inspect(expected) : 'exception') + " should be thrown : failed.";
-				throw this._failed(expected, msg);
+				var expected = errcls == String && error_msg ? inspect(error_msg) : errcls.name;
+				throw this._failed(expected, expected + " should be thrown : failed.");
 			}
 		};
 
