@@ -408,8 +408,8 @@ oktest.AssertionObject = oktest.util.classdef(
 		def.has_item = function(item) {
 			this._done = true;
 			var bool = false;
-			for (var k in item) {
-				if (item[k] === this._left) {
+			for (var i = 0, n = this._left.length; i < n; i++) {
+				if (this._left[i] === item) {
 					bool = true;
 					break;
 				}
