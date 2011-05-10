@@ -529,7 +529,7 @@ oktest.skipWhen = function skipWhen(condition, reason) {
 };
 
 oktest.isFailed = function isFailed(ex) {
-	return '_OKTEST_FAILED' in ex;
+	return ex instanceof oktest.AssertionError;
 };
 
 oktest.isSkipped = function isSkipped(ex) {
@@ -703,16 +703,16 @@ oktest.Runner = oktest.util.classdef(
 			}
 		};
 
-		def._getFailedMsg = function _getFailedMsg(ass_obj) {
-			var arr = ass_obj._getLocation();
+		def._getFailedMsg = function _getFailedMsg(ass_ex) {
+			var arr = oktest.AssertionObject.prototype._getLocation.call(ass_ex, ass_ex._stack);
 			var filepath = arr[0], linenum = arr[1];
 			if (! filepath) return [];
 			var line = oktest.util.readLineInFile(filepath, linenum);
 			arr = ["(File " + filepath + ", line " + linenum + ")",
 			       "    " + oktest.util.strip(line)];
-			if (ass_obj._diff) {
-				console.log('*** debug: diff='+ass_obj._diff);
-				arr = arr.concat(ass_obj._diff.split(/\r?\n/));
+			if (ass_ex._diff) {
+				console.log('*** debug: diff='+ass_ex._diff);
+				arr = arr.concat(ass_ex._diff.split(/\r?\n/));
 			}
 			return arr;
 		};
