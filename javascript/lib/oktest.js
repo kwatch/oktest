@@ -418,22 +418,28 @@ oktest.AssertionObject = oktest.util.classdef(
 			throw this._failed(item, this._msg(this._left, "has item", item));
 		};
 
-		def.throws = function(exception) {
+		def.throws = function(exception_class, error_msg) {
 			this._done = true;
 			if (! this._bool)
 				throw "** ERROR: throws() is not available with NG().";
 			if (typeof(this._left) != 'function')
-				throw "** ERROR: throws() is available with function object.";
+				throw "** ERROR: throws() is available only with function object.";
 			var thrown = false;
 			try {
 				this._left();
 			}
 			catch (ex) {
 				thrown = true;
-				if (exception && ex !== exception) {
-					var ins = oktest.util.inspect;
-					var msg1 = ins(exception) + " should be thrown : failed, got " + ins(ex) + ".";
-					throw this._failed(exception, msg1);
+				var ins = oktest.util.inspect;
+				if (exception_class) {
+					if (! (ex instanceof exception_class)) {
+						throw this._failed(ins(exception_cass) + " should be thrown : failed, got " + ins(ex) + ".");
+					}
+				}
+				if (error_msg) {
+					if (error_msg !== ex.toString()) {
+						throw this._failed(ins(error_msg) + " should be thrown : failed, got " + ins(ex.toString()) + ".");
+					}
 				}
 				this._left.exception = ex;
 			}
