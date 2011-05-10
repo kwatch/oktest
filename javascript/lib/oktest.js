@@ -280,75 +280,57 @@ oktest.AssertionObject = oktest.util.classdef(
 		};
 
 		def.eq = function eq(right) {
-			this._done = true;
-			var bool = this._left == right;
-			if (bool == this._bool) return;
-			//throw this._failed(right, this._msg(this._left, "==", right));
-			var ex = this._failed(right, this._msg(this._left, "==", right));
-			if (typeof(right) == 'string') {
-				ex._diff = oktest.util.unifiedDiff(right, this._left);
+			//this._done = true;
+			//var bool = this._left == right;
+			//if (bool == this._bool) return;
+			//var ex = this._failed(right, this._msg(this._left, "==", right));
+			//if (typeof(right) == 'string') {
+			//	ex._diff = oktest.util.unifiedDiff(right, this._left);
+			//}
+			//throw ex;
+			var ex;
+			try {
+				return this._cmp("==", right, function(l, r) { return l == r; });
 			}
-			throw ex;
+			catch (ex) {
+				if (ex instanceof oktest.AssertionError) {
+					ex._diff = oktest.util.unifiedDiff(right, this._left);
+				}
+				throw ex;
+			}
 		};
 
 		def.ne = function ne(right) {
-			this._done = true;
-			var bool = this._left != right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "!=", right));
+			return this._cmp("!=", right, function(l, r) { return l != r; });
 		};
 
 		def.is = function is(right) {
-			this._done = true;
-			var bool = this._left === right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "===", right));
+			return this._cmp("===", right, function(l, r) { return l === r; });
 		};
 
 		def.isnt = function isnt(right) {
-			this._done = true;
-			var bool = this._left !== right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "!==", right));
+			return this._cmp("!==", right, function(l, r) { return l !== r; });
 		};
 
 		def.lt = function lt(right) {
-			this._done = true;
-			var bool = this._left < right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "<", right));
+			return this._cmp("<", right, function(l, r) { return l < r; });
 		};
 
 		def.gt = function gt(right) {
-			this._done = true;
-			var bool = this._left > right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, ">", right));
+			return this._cmp(">", right, function(l, r) { return l > r; });
 		};
 
 		def.le = function le(right) {
-			this._done = true;
-			var bool = this._left <= right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, "<=", right));
+			return this._cmp("<=", right, function(l, r) { return l <= r; });
 		};
 
 		def.ge = function ge(right) {
-			this._done = true;
-			var bool = this._left >= right;
-			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, ">=", right));
+			return this._cmp(">=", right, function(l, r) { return l >= r; });
 		};
 
 		def.inDelta = function inDelta(right, delta) {
-			this._done = true;
-			var bool;
-			bool = this._left > right - delta;
-			if (bool != this._bool)
-				throw this._failed(right, this._msg(this._left, ">", right - delta));
-			bool = this._left < right + delta;
-			if (bool != this._bool)
-				throw this._failed(right, this._msg(this._left, "<", right + delta));
+			this._cmp(">", right - delta, function(l, r) { return l > r; });
+			this._cmp("<", right + delta, function(l, r) { return l < r; });
 		};
 
 		def.isTypeof = function isTypeof(type) {
@@ -359,17 +341,11 @@ oktest.AssertionObject = oktest.util.classdef(
 		};
 
 		def.isa = function isa(klass) {
-			this._done = true;
-			var bool = this._left instanceof klass;
-			if (bool == this._bool) return;
-			throw this._failed(klass, this._msg(this._left, "instanceof", klass));
+			return this._cmp("instanceof", klass, function(l, r) { return l instanceof r; });
 		};
 
 		def.matches = function matches(pattern) {
-			this._done = true;
-			var bool = !! this._left.match(pattern);
-			if (bool == this._bool) return;
-			throw this._failed(pattern, this._msg(this._left, ".match", pattern));
+			return this._cmp(".match", pattern, function(l, r) { return !! l.match(r); });
 		};
 
 		def.arrayEq = function arrayEq(right) {
@@ -402,23 +378,16 @@ oktest.AssertionObject = oktest.util.classdef(
 		};
 
 		def.inObject = function inObject(obj) {
-			this._done = true;
-			var bool = this._left in obj;
-			if (bool == this._bool) return;
-			throw this._failed(obj, this._msg(this._left, "in", obj));
+			return this._cmp("in", obj, function(l, r) { return l in r; });
 		};
 
 		def.inArray = function inArray(arr) {
-			this._done = true;
-			var bool = false;
-			for (var i = 0, n = arr.length; i < n; i++) {
-				if (arr[i] === this._left) {
-					bool = true;
-					break;
-				}
+			function fn(item, arr) {
+				for (var i = 0, n = arr.length; i < n; i++)
+					if (arr[i] === item) return true;
+				return false;
 			}
-			if (bool == this._bool) return;
-			throw this._failed(arr, this._msg(this._left, "exists in", arr));
+			return this._cmp("exists in", arr, fn);
 		};
 
 		def.hasKey = function hasKey(key) {
@@ -429,16 +398,12 @@ oktest.AssertionObject = oktest.util.classdef(
 		};
 
 		def.hasItem = function hasItem(item) {
-			this._done = true;
-			var bool = false;
-			for (var i = 0, n = this._left.length; i < n; i++) {
-				if (this._left[i] === item) {
-					bool = true;
-					break;
-				}
+			function fn(arr, item) {
+				for (var i = 0, n = arr.length; i < n; i++)
+					if (arr[i] === item) return true;
+				return false;
 			}
-			if (bool == this._bool) return;
-			throw this._failed(item, this._msg(this._left, "has item", item));
+			return this._cmp("has item", item, fn);
 		};
 
 		def.throws = function throws(exception_class, error_msg) {
