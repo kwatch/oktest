@@ -533,7 +533,7 @@ oktest.isFailed = function isFailed(ex) {
 };
 
 oktest.isSkipped = function isSkipped(ex) {
-	return '_OKTEST_SKIPPED' in ex;
+	return ex instanceof oktest.SkipException;
 };
 
 
@@ -676,7 +676,7 @@ oktest.Runner = oktest.util.classdef(
 			}
 			catch (ex) {
 				spec._thrown = ex;
-				if (oktest.isFailed(ex)) {        // oktest.AssertionObject object
+				if (oktest.isFailed(ex)) {        // oktest.AssertionError object
 					spec.target.results.failed++;
 					spec.status = 'f';
 					status = 'Failed';
