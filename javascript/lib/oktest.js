@@ -228,6 +228,7 @@ oktest.AssertionError = function AssertionError(message) {
 };
 //oktest.AssertionError.prototype = new Error();   // not work in node.js 0.4.7
 oktest.AssertionError.prototype = {};
+oktest.AssertionError.prototype.name = 'AssertionError';
 
 
 ///
