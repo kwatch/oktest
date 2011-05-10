@@ -653,7 +653,7 @@ oktest.Runner = oktest.util.classdef(
 					spec.target.results.failed++;
 					spec.status = 'f';
 					status = 'Failed';
-					msg = [ex._message].concat(this._getFailedMsg(ex));
+					msg = [ex.message].concat(this._getFailedMsg(ex));
 				}
 				else if (oktest.isSkipped(ex)) {  // oktest.SkipException
 					spec.target.results.skipped++;
