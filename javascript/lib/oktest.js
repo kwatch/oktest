@@ -346,7 +346,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			this._done = true;
 			var bool = this._left.match(pattern);
 			if (bool == this._bool) return;
-			throw this._failed(right, this._msg(this._left, ".matches", pattern));
+			throw this._failed(pattern, this._msg(this._left, ".matches", pattern));
 		};
 
 		def.array_eq = function(right) {
