@@ -89,6 +89,14 @@ oktest.util = {
 		return content.split(/\r?\n/)[linenum-1];
 	},
 
+	_getLocationFromStack: function _getLocationFromStack(stack) {
+		var line = stack.split(/^/m)[2];
+		if (! line) return [null, null];
+		var m = line.match(/\((.*):(\d+):(\d+)\)/) || line.match(/@(.*):(\d+)$/m);
+		if (! m) return [null, null];
+		return [m[1], m[2]-0]; // filepath, linenum
+	},
+
 	unifiedDiff: function unifiedDiff(text1, texdt2) {
 	}
 
@@ -239,15 +247,6 @@ oktest.AssertionObject = oktest.util.classdef(
 
 	/// instance methods
 	function(def) {
-
-		def._getLocation = function _getLocation(stack) {
-			if (! stack) stack = this._stack;
-			var line = stack.split(/^/m)[2];
-			if (! line) return [null, null];
-			var m = line.match(/\((.*):(\d+):(\d+)\)/) || line.match(/@(.*):(\d+)$/m);
-			if (! m) return [null, null];
-			return [m[1], m[2]-0]; // filepath, linenum
-		};
 
 		def._failed = function _failed(right, message) {
 			this._right = right;
@@ -701,7 +700,7 @@ oktest.Runner = oktest.util.classdef(
 		};
 
 		def._getFailedMsg = function _getFailedMsg(ass_ex) {
-			var arr = oktest.AssertionObject.prototype._getLocation.call(ass_ex, ass_ex._stack);
+			var arr = oktest.util._getLocationFromStack(ass_ex._stack);
 			var filepath = arr[0], linenum = arr[1];
 			if (! filepath) return [];
 			var line = oktest.util.readLineInFile(filepath, linenum);
@@ -727,7 +726,7 @@ oktest.Runner = oktest.util.classdef(
 			var ass_objs = oktest.AssertionObject._instances;
 			for (var ass_obj, i = -1; ass_obj = ass_objs[++i]; ) {
 				if (! ass_obj._done && status != 'ERROR') {
-					var s = ass_obj._getLocation().join(':');
+					var s = oktest.util._getLocationFromStack(ass_obj._stack).join(':');
 					oktest.print(indent + "  # Warning: " + ass_obj._func_name
 					      + "() is called but not tested yet. (" + s + ")");
 				}
