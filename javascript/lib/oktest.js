@@ -240,8 +240,6 @@ oktest.AssertionObject = oktest.util.classdef(
 	/// instance methods
 	function(def) {
 
-		def._OKTEST_FAILED = null,
-
 		def._getLocation = function _getLocation(stack) {
 			if (! stack) stack = this._stack;
 			var line = stack.split(/^/m)[2];
@@ -503,7 +501,6 @@ oktest.SkipException = oktest.util.classdef(
 
 	/// instance methods
 	function(def) {
-		def._OKITEST_SKIPPED = true;
 	}
 
 );
