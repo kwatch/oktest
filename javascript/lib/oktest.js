@@ -211,6 +211,17 @@ else {
 
 
 ///
+/// assertion error class
+///
+
+oktest.AssertionError = function(message) {
+	Error.call(this, message);
+	this.message = message;
+};
+oktest.AssertionError.prototype = new Error();
+
+
+///
 /// assertion object class and functions
 ///
 
@@ -243,7 +254,15 @@ oktest.AssertionObject = oktest.util.classdef(
 		def._failed = function(right, message) {
 			this._right = right;
 			this._message  = this._bool ? message : "NOT " + message;
-			return this;
+			//return this;
+			var ex = new oktest.AssertionError(this._message);
+			ex._left  = this._left;
+			ex._left  = this._right;
+			ex._bool  = this._bool;
+			ex._func_name = this._func_name;
+			ex._stack = this._stack;
+			ex._done  = this._done;
+			return ex;
 		};
 
 		def._msg = function(left, op, right) {
