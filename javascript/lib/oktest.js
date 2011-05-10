@@ -450,6 +450,7 @@ oktest.AssertionObject = oktest.util.classdef(
 		};
 
 		def.throws_nothing = function(exception) {
+			this._done = true;
 			if (! this._bool)
 				throw "** ERROR: throws_nothing() is not available with NG().";
 			if (typeof(this._left) != 'function')
