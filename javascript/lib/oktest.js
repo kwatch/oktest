@@ -452,12 +452,12 @@ oktest.AssertionObject = oktest.util.classdef(
 				var ins = oktest.util.inspect;
 				if (exception_class) {
 					if (! (ex instanceof exception_class)) {
-						throw this._failed(ins(exception_cass) + " should be thrown : failed, got " + ins(ex) + ".");
+						throw this._failed(exception_class, ins(exception_class) + " should be thrown : failed, got " + ins(ex) + ".");
 					}
 				}
 				if (error_msg) {
-					if (error_msg !== ex.toString()) {
-						throw this._failed(ins(error_msg) + " should be thrown : failed, got " + ins(ex.toString()) + ".");
+					if (error_msg !== ex.message) {
+						throw this._failed(error_msg, ins(error_msg) + " == " + ins(ex.message));
 					}
 				}
 				this._left.exception = ex;
