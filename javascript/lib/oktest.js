@@ -665,7 +665,7 @@ oktest.NG = function NG(left) {
  */
 oktest.preCond = function preCond(left) {
   /// same as ok() but it represents precodition rather than specification.
-  return new oktest.AssertionObject(left, true, 'pre_cond', new Error().stack);
+  return new oktest.AssertionObject(left, true, 'preCond', new Error().stack);
 };
 
 /**
