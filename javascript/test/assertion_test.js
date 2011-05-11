@@ -140,19 +140,19 @@ ok (["haruhi", "mikuru", "yuki"]).hasItem("yuki");
 should_be_error(function() { ok (["kyon", "itsuki"]).hasItem("john"); },
 				"[ 'kyon', 'itsuki' ] has item 'john' : failed.");
 
-/// throws()
+/// throws_()
 var fn1;
 fn1 = function() { null.property; };
-ok (fn1).throws(Error);
+ok (fn1).throws_(Error);
 ok (fn1.exception instanceof Error).is(true);
 fn1 = function() { throw "ERROR"; };
-ok (fn1).throws(String, "ERROR");
+ok (fn1).throws_(String, "ERROR");
 ok (fn1.exception).eq("ERROR");
 fn1 = function() { return; };
-should_be_error(function() { ok (fn1).throws(Error); },
+should_be_error(function() { ok (fn1).throws_(Error); },
 			   "Error should be thrown : failed.");
 fn1 = function() { throw new Error("ERROR"); };
-should_be_error(function() { ok (fn1).throws(TypeError, "ERROR"); },
+should_be_error(function() { ok (fn1).throws_(TypeError, "ERROR"); },
                 "TypeError should be thrown : failed, got Error object.");
 
 /// throwsNothing()

@@ -408,7 +408,7 @@ oktest.AssertionObject = oktest.util.classdef(
 			return this._cmp("has item", item, fn);
 		};
 
-		def.throws = function throws(exception_class, error_msg) {
+		def.throws_ = function throws_(exception_class, error_msg) {
 			this._done = true;
 			if (! this._bool)
 				throw new Error("throws() is not available with NG().");
