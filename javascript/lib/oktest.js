@@ -52,16 +52,16 @@ oktest.util = {
       if (value === null) return "null";
       var buf = [];
       if (value.constructor === Array) {  /// or Array.prototype
-	for (var i = 0, n = value.length; i < n; i++) {
-	  buf.push(oktest.util.inspect(value[i]));
-	}
-	return "[" + buf.join(", ") + "]";
+        for (var i = 0, n = value.length; i < n; i++) {
+          buf.push(oktest.util.inspect(value[i]));
+        }
+        return "[" + buf.join(", ") + "]";
       }
       else {
-	for (var p in value) {
-	  buf.push(p + ':' + oktest.util.inspect(value[p]));
-	}
-	return "{" + buf.join(", ") + "}";
+        for (var p in value) {
+          buf.push(p + ':' + oktest.util.inspect(value[p]));
+        }
+        return "{" + buf.join(", ") + "}";
       }
     }
     throw "unreachable: typeof(value)="+typeof(value)+", value="+value;
@@ -76,10 +76,10 @@ oktest.util = {
     for (var i = 0, n = arr.length; i < n; i++) {
       var item = arr[i];
       if (item instanceof Array) {
-	arr2 = arr2.concat(oktest.util.flatten(item));
+        arr2 = arr2.concat(oktest.util.flatten(item));
       }
       else {
-	arr2.push(item);
+        arr2.push(item);
       }
     }
     return arr2;
@@ -132,15 +132,15 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
       var sout, serr, ex;
       var called = false;
       var callback = function (error, stdout, stderr) {
-	sout = stdout;
-	serr = stderr;
-	ex   = error;
-	called = true;
+        sout = stdout;
+        serr = stderr;
+        ex   = error;
+        called = true;
       };
       var child = require('child_process').exec(command, callback);
       //var x = 0;
       //while (! called) {
-      //	x++;
+      //  x++;
       //}
       return [ex, sout, serr];
     };
@@ -163,13 +163,13 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
       //dmp.diff_cleanupSemantic(diffs);
       var sb = '';
       for (var i = -1, n = diffs.length; ++i < n; ) {
-	var pair = diffs[i];
-	var cmp  = pair[0];
-	var text = pair[1];
-	var sign = cmp > 0 ? '+' : cmp < 0 ? '-' : ' ';
-	var s = text.replace(/^/mg, sign);
-	if (text.match(/\n$/)) s = s.substring(0, s.length - 1);
-	sb += s;
+        var pair = diffs[i];
+        var cmp  = pair[0];
+        var text = pair[1];
+        var sign = cmp > 0 ? '+' : cmp < 0 ? '-' : ' ';
+        var s = text.replace(/^/mg, sign);
+        if (text.match(/\n$/)) s = s.substring(0, s.length - 1);
+        sb += s;
       }
       return sb;
     };
@@ -196,7 +196,7 @@ else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
     var reader = new java.io.BufferedReader(new java.io.FileReader(filename));
     try {
       for (var i = 1; (line = reader.readLine()) != null; i++) {
-	if (i == linenum) break;
+        if (i == linenum) break;
       }
     } finally { reader.close(); }
     return line;
@@ -212,8 +212,8 @@ else if (typeof(print) == 'function') {  // SpiderMonkey
     var max = 4096, buf = [], i = 0, s;
     try {
       while ((s = f.read(max)) != undefined) {  /// readfile() will exit if EOF. Why?
-	buf[i++] = s;
-	if (s.length < max) break;
+        buf[i++] = s;
+        if (s.length < max) break;
       }
     } finally { f.close(); }
     return buf.join('');
@@ -295,10 +295,10 @@ oktest.AssertionObject = oktest.util.classdef(
     def._msg = function _msg(left, op, right) {
       var inspect = oktest.util.inspect;
       if (op[0] === '.') {
-	return inspect(left) + op + "(" + inspect(right) + ") : failed.";
+        return inspect(left) + op + "(" + inspect(right) + ") : failed.";
       }
       else {
-	return inspect(left) + " " + op + " " + inspect(right) + " : failed.";
+        return inspect(left) + " " + op + " " + inspect(right) + " : failed.";
       }
     };
     
@@ -325,18 +325,18 @@ oktest.AssertionObject = oktest.util.classdef(
       //if (bool == this._bool) return;
       //var ex = this._failed(right, this._msg(this._left, "==", right));
       //if (typeof(right) == 'string') {
-      //	ex._diff = oktest.util.unifiedDiff(right, this._left);
+      //  ex._diff = oktest.util.unifiedDiff(right, this._left);
       //}
       //throw ex;
       var ex;
       try {
-	return this._cmp("==", right, function(l, r) { return l == r; });
+        return this._cmp("==", right, function(l, r) { return l == r; });
       }
       catch (ex) {
-	if (ex instanceof oktest.AssertionError) {
-	  ex._diff = oktest.util.unifiedDiff(right, this._left);
-	}
-	throw ex;
+        if (ex instanceof oktest.AssertionError) {
+          ex._diff = oktest.util.unifiedDiff(right, this._left);
+        }
+        throw ex;
       }
     };
     
@@ -455,27 +455,27 @@ oktest.AssertionObject = oktest.util.classdef(
       this._done = true;
       var errmsg = null;
       if (! (this._left instanceof Array)) {
-	errmsg = "Array is expected but got "+this._left+".";
+        errmsg = "Array is expected but got "+this._left+".";
       }
       else if (! (right instanceof Array)) {
-	errmsg = "Array is expected but got "+this._left+".";
+        errmsg = "Array is expected but got "+this._left+".";
       }
       else if (this._left.length !== right.length) {
-	errmsg = this._msg(this._left, ".arrayEq", right);
+        errmsg = this._msg(this._left, ".arrayEq", right);
       }
       else {
-	for (var i = 0, n = this._left.length; i < n; i++) {
-	  if (this._left[i] !== right[i]) {
-	    errmsg = "[at index " + i + "] " + this._msg(this._left[i], "===", right[i]);
-	    break;
-	  }
-	}
+        for (var i = 0, n = this._left.length; i < n; i++) {
+          if (this._left[i] !== right[i]) {
+            errmsg = "[at index " + i + "] " + this._msg(this._left[i], "===", right[i]);
+            break;
+          }
+        }
       }
       if (this._bool) {
-	if (errmsg) throw this._failed(right, errmsg);
+        if (errmsg) throw this._failed(right, errmsg);
       }
       else {
-	if (! errmsg) throw this._failed(right, this._msg(this._left, ".arrayEq", right));
+        if (! errmsg) throw this._failed(right, this._msg(this._left, ".arrayEq", right));
       }
     };
     
@@ -498,9 +498,9 @@ oktest.AssertionObject = oktest.util.classdef(
      */
     def.inArray = function inArray(arr) {
       function fn(item, arr) {
-	for (var i = 0, n = arr.length; i < n; i++)
-	  if (arr[i] === item) return true;
-	return false;
+        for (var i = 0, n = arr.length; i < n; i++)
+          if (arr[i] === item) return true;
+        return false;
       }
       return this._cmp("exists in", arr, fn);
     };
@@ -527,9 +527,9 @@ oktest.AssertionObject = oktest.util.classdef(
      */
     def.hasItem = function hasItem(item) {
       function fn(arr, item) {
-	for (var i = 0, n = arr.length; i < n; i++)
-	  if (arr[i] === item) return true;
-	return false;
+        for (var i = 0, n = arr.length; i < n; i++)
+          if (arr[i] === item) return true;
+        return false;
       }
       return this._cmp("has item", item, fn);
     };
@@ -548,35 +548,35 @@ oktest.AssertionObject = oktest.util.classdef(
     def.throws_ = function throws_(exception_class, error_msg) {
       this._done = true;
       if (! this._bool)
-	throw new Error("throws() is not available with NG().");
+        throw new Error("throws() is not available with NG().");
       if (typeof(this._left) != 'function')
-	throw new Error("throws() is available only with function object.");
+        throw new Error("throws() is available only with function object.");
       var errcls = exception_class;
       var inspect = oktest.util.inspect;
       if (typeof(errcls) !== "function")
-	throw new TypeError(inspect(errcls) + ": Error class (or String class) expected.");
+        throw new TypeError(inspect(errcls) + ": Error class (or String class) expected.");
       var thrown = false;
       try {
-	this._left();
+        this._left();
       }
       catch (ex) {
-	thrown = true;
-	this._left.exception = ex;
-	var flag_ok = errcls == String ? typeof(ex) === "string" : ex instanceof errcls;
-	if (! flag_ok) {
-	  var got = (typeof(ex) == "object" && ex instanceof Error) ? ex.name + ' object' : inspect(ex);
-	  throw this._failed(errcls, errcls.name + " should be thrown : failed, got " + got + ".");
-	}
-	if (error_msg) {
-	  var actual = typeof(ex) === "string" ? ex : (ex instanceof Error ? ex.message : ex);
-	  if (error_msg !== actual) {
-	    throw this._failed(error_msg, inspect(error_msg) + " == " + inspect(actual) + " : failed.");
-	  }
-	}
+        thrown = true;
+        this._left.exception = ex;
+        var flag_ok = errcls == String ? typeof(ex) === "string" : ex instanceof errcls;
+        if (! flag_ok) {
+          var got = (typeof(ex) == "object" && ex instanceof Error) ? ex.name + ' object' : inspect(ex);
+          throw this._failed(errcls, errcls.name + " should be thrown : failed, got " + got + ".");
+        }
+        if (error_msg) {
+          var actual = typeof(ex) === "string" ? ex : (ex instanceof Error ? ex.message : ex);
+          if (error_msg !== actual) {
+            throw this._failed(error_msg, inspect(error_msg) + " == " + inspect(actual) + " : failed.");
+          }
+        }
       }
       if (! thrown) {
-	var expected = errcls == String && error_msg ? inspect(error_msg) : errcls.name;
-	throw this._failed(expected, expected + " should be thrown : failed.");
+        var expected = errcls == String && error_msg ? inspect(error_msg) : errcls.name;
+        throw this._failed(expected, expected + " should be thrown : failed.");
       }
     };
 
@@ -592,15 +592,15 @@ oktest.AssertionObject = oktest.util.classdef(
     def.throwsNothing = function throwsNothing(exception) {
       this._done = true;
       if (! this._bool)
-	throw "** ERROR: throwsNothing() is not available with NG().";
+        throw "** ERROR: throwsNothing() is not available with NG().";
       if (typeof(this._left) != 'function')
-	throw "** ERROR: throws() is available with function object.";
+        throw "** ERROR: throws() is available with function object.";
       try {
-	this._left();
+        this._left();
       }
       catch (ex) {
-	var msg = "Nothing should be thrown : failed, got " + oktest.util.inspect(ex) + ".";
-	throw this._failed(exception, msg);
+        var msg = "Nothing should be thrown : failed, got " + oktest.util.inspect(ex) + ".";
+        throw this._failed(exception, msg);
       }
     };
     
@@ -865,12 +865,12 @@ oktest.Runner = oktest.util.classdef(
     
     def._reportTargetResult = function _reportTargetResult(total, target) {
       for (var spec, i = -1; spec = target.specs[++i]; ) {
-	if (spec._thrown) {
-	}
+        if (spec._thrown) {
+        }
       }
       var r = target.results;
       var str = 'total:' + total + ', success:' + r.success + ', failed:'
-	      + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
+              + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
       oktest.print(target._indent + '  (' + str + ')');
     };
     
@@ -884,37 +884,37 @@ oktest.Runner = oktest.util.classdef(
       var status = '';
       var msg = null;
       try {
-	spec.body(spec);
-	spec.target.results.success++;
-	spec.status = '.';
-	status = 'ok';
+        spec.body(spec);
+        spec.target.results.success++;
+        spec.status = '.';
+        status = 'ok';
       }
       catch (ex) {
-	spec._thrown = ex;
-	if (oktest.isFailed(ex)) {        // oktest.AssertionError object
-	  spec.target.results.failed++;
-	  spec.status = 'f';
-	  status = 'Failed';
-	  msg = [ex.message].concat(this._getFailedMsg(ex));
-	}
-	else if (oktest.isSkipped(ex)) {  // oktest.SkipException
-	  spec.target.results.skipped++;
-	  spec.status = 's';
-	  status = 'Skipped';
-	  msg = ["reason: " + ex.reason];
-	}
-	else {
-	  spec.target.results.errored++;
-	  spec.status = 'E';
-	  status = 'ERROR';
-	  throw ex;
-	}
+        spec._thrown = ex;
+        if (oktest.isFailed(ex)) {        // oktest.AssertionError object
+          spec.target.results.failed++;
+          spec.status = 'f';
+          status = 'Failed';
+          msg = [ex.message].concat(this._getFailedMsg(ex));
+        }
+        else if (oktest.isSkipped(ex)) {  // oktest.SkipException
+          spec.target.results.skipped++;
+          spec.status = 's';
+          status = 'Skipped';
+          msg = ["reason: " + ex.reason];
+        }
+        else {
+          spec.target.results.errored++;
+          spec.status = 'E';
+          status = 'ERROR';
+          throw ex;
+        }
       }
       finally {
-	var indent = spec.target._indent + "  ";
-	this._reportSpecResult(spec, indent, status, msg);
-	this._checkSpecsDone(spec, indent, status);
-	if (spec.after) spec.after();
+        var indent = spec.target._indent + "  ";
+        this._reportSpecResult(spec, indent, status, msg);
+        this._checkSpecsDone(spec, indent, status);
+        if (spec.after) spec.after();
       }
     };
     
@@ -924,10 +924,10 @@ oktest.Runner = oktest.util.classdef(
       if (! filepath) return [];
       var line = oktest.util.readLineInFile(filepath, linenum);
       arr = ["(File " + filepath + ", line " + linenum + ")",
-	     "    " + oktest.util.strip(line)];
+             "    " + oktest.util.strip(line)];
       if (ass_ex._diff) {
-	console.log('*** debug: diff='+ass_ex._diff);
-	arr = arr.concat(ass_ex._diff.split(/\r?\n/));
+        console.log('*** debug: diff='+ass_ex._diff);
+        arr = arr.concat(ass_ex._diff.split(/\r?\n/));
       }
       return arr;
     };
@@ -935,20 +935,20 @@ oktest.Runner = oktest.util.classdef(
     def._reportSpecResult = function _reportSpecResult(spec, indent, status, msg) {
       oktest.print(indent + "- [" + status + "] "+ spec.desc);
       if (msg !== null) {
-	for (var s, i = -1; s = msg[++i]; ) {
-	  oktest.print(indent + "  " + s);
-	}
+        for (var s, i = -1; s = msg[++i]; ) {
+          oktest.print(indent + "  " + s);
+        }
       }
     };
     
     def._checkSpecsDone = function _checkSpecsDone(spec, indent, status) {
       var ass_objs = oktest.AssertionObject._instances;
       for (var ass_obj, i = -1; ass_obj = ass_objs[++i]; ) {
-	if (! ass_obj._done && status != 'ERROR') {
-	  var s = oktest.util._getLocationFromStack(ass_obj._stack).join(':');
-	  oktest.print(indent + "  # Warning: " + ass_obj._func_name
-		       + "() is called but not tested yet. (" + s + ")");
-	}
+        if (! ass_obj._done && status != 'ERROR') {
+          var s = oktest.util._getLocationFromStack(ass_obj._stack).join(':');
+          oktest.print(indent + "  # Warning: " + ass_obj._func_name
+                       + "() is called but not tested yet. (" + s + ")");
+        }
       }
       oktest.AssertionObject._instances = [];
     };
