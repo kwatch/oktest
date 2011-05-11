@@ -128,30 +128,30 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
     oktest.util.writeFile = function writeFile(filename, content) {
       return fs.writeFileSync(filename, content, oktest.encoding);
     };
-    oktest.util.system = function system(command) {
-      var sout, serr, ex;
-      var called = false;
-      var callback = function (error, stdout, stderr) {
-        sout = stdout;
-        serr = stderr;
-        ex   = error;
-        called = true;
-      };
-      var child = require('child_process').exec(command, callback);
-      //var x = 0;
-      //while (! called) {
-      //  x++;
-      //}
-      return [ex, sout, serr];
-    };
-    oktest.util.diff_u = function diff_u(content1, content2) {
-      var fname1 = '__expected__', fname2 = '__actual__';
-      oktest.util.writeFile(fname1, content1);
-      oktest.util.writeFile(fname2, content2);
-      var result = oktest.util.system("diff -u " + fname1 + " " + fname2);
-      console.log('*** debug: result='); console.log(result);
-      return result[1];
-    };
+    //oktest.util.system = function system(command) {
+    //  var sout, serr, ex;
+    //  var called = false;
+    //  var callback = function (error, stdout, stderr) {
+    //    sout = stdout;
+    //    serr = stderr;
+    //    ex   = error;
+    //    called = true;
+    //  };
+    //  var child = require('child_process').exec(command, callback);
+    //  //var x = 0;
+    //  //while (! called) {
+    //  //  x++;
+    //  //}
+    //  return [ex, sout, serr];
+    //};
+    //oktest.util.diff_u = function diff_u(content1, content2) {
+    //  var fname1 = '__expected__', fname2 = '__actual__';
+    //  oktest.util.writeFile(fname1, content1);
+    //  oktest.util.writeFile(fname2, content2);
+    //  var result = oktest.util.system("diff -u " + fname1 + " " + fname2);
+    //  console.log('*** debug: result='); console.log(result);
+    //  return result[1];
+    //};
     oktest.util.unifiedDiff = function unifiedDiff(text1, text2) {
       //var diff_match_patch = require('./diff_match_patch.js');
       var diff_match_patch = require('diff_match_patch');
