@@ -188,8 +188,8 @@ else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
     try {
       while ((line = reader.readLine()) != null) lines.push(line);
     } finally { reader.close(); }
-    buf.push("");
-    return buf.join("\n");
+    lines.push("");
+    return lines.join("\n");
   };
   oktest.util.readLineInFile = function readLineInFile(filename, linenum) {
     var line;
