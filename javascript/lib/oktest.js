@@ -962,7 +962,6 @@ oktest.Runner = oktest.util.classdef(
       arr = ["(File " + filepath + ", line " + linenum + ")",
              "    " + oktest.util.strip(line)];
       if (ass_ex._diff) {
-        console.log('*** debug: diff='+ass_ex._diff);
         arr = arr.concat(ass_ex._diff.split(/\r?\n/));
       }
       return arr;
