@@ -884,19 +884,16 @@ oktest.Runner = oktest.util.classdef(
     def.afterTarget = function afterTarget(target) {
       var r = target.results;
       var total = r.success + r.failed + r.error + r.skipped;
-      if (total > 0) this._reportTargetResult(total, target);
-      //oktest.print('');
-    };
-
-    def._reportTargetResult = function _reportTargetResult(total, target) {
-      for (var spec, i = -1; spec = target.specs[++i]; ) {
-        if (spec._thrown) {
+      if (total > 0) {
+        for (var spec, i = -1; spec = target.specs[++i]; ) {
+          if (spec._thrown) {
+          }
         }
+        var str = 'total:' + total + ', success:' + r.success + ', failed:'
+                + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
+        oktest.print(target._indent + '  (' + str + ')');
       }
-      var r = target.results;
-      var str = 'total:' + total + ', success:' + r.success + ', failed:'
-              + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
-      oktest.print(target._indent + '  (' + str + ')');
+      //oktest.print('');
     };
 
     /**
@@ -945,7 +942,12 @@ oktest.Runner = oktest.util.classdef(
     def.afterSpec = function afterSpec(spec) {
       var status = this._words[spec.status];
       var indent = spec.target._indent + "  ";
-      this._reportSpecResult(spec, indent, status, spec.msg);
+      oktest.print(indent + "- [" + status + "] "+ spec.desc);
+      if (spec.msg !== null) {
+        for (var s, i = -1; s = spec.msg[++i]; ) {
+          oktest.print(indent + "  " + s);
+        }
+      }
       this._checkSpecsDone(spec, indent, status);
       if (spec.after) spec.after();
     };
@@ -962,15 +964,6 @@ oktest.Runner = oktest.util.classdef(
         arr = arr.concat(ass_ex._diff.split(/\r?\n/));
       }
       return arr;
-    };
-
-    def._reportSpecResult = function _reportSpecResult(spec, indent, status, msg) {
-      oktest.print(indent + "- [" + status + "] "+ spec.desc);
-      if (msg !== null) {
-        for (var s, i = -1; s = msg[++i]; ) {
-          oktest.print(indent + "  " + s);
-        }
-      }
     };
 
     def._checkSpecsDone = function _checkSpecsDone(spec, indent, status) {
