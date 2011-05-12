@@ -36,11 +36,11 @@ oktest.util = {
     if (method_def) method_def(constructor.prototype);
     return constructor;
   },
-  
+
   quote: function quote(str) {
     return "'" + str.replace(/\\/, '\\\\').replace(/\n/, '\\\\n\\').replace(/'/, "\\\\'") + "'";  //'
   },
-  
+
   inspect: function inspect(value) {
     var t = typeof(value);
     if (t == "string")    return oktest.util.quote(value);
@@ -66,11 +66,11 @@ oktest.util = {
     }
     throw "unreachable: typeof(value)="+typeof(value)+", value="+value;
   },
-  
+
   strip: function strip(str) {
     return str.replace(/^\s+/, '').replace(/\s+$/, '');
   },
-  
+
   flatten: function flatten(arr) {
     var arr2 = [];
     for (var i = 0, n = arr.length; i < n; i++) {
@@ -84,17 +84,17 @@ oktest.util = {
     }
     return arr2;
   },
-  
+
   readFile: function readFile(filename) { },
-  
+
   writeFile: function writeFile(filename) { },
-  
+
   readLineInFile: function readLineInFile(filename, linenum) {
     var content = oktest.util.readFile(filename);
     //return content.split(/^/m)[linenum-1];   // fails sometimes in nodejs (maybe V8 bug)
     return content.split(/\r?\n/)[linenum-1];
   },
-  
+
   _getLocationFromStack: function _getLocationFromStack(stack) {
     var line = stack.split(/^/m)[2];
     if (! line) return [null, null];
@@ -102,10 +102,10 @@ oktest.util = {
     if (! m) return [null, null];
     return [m[1], m[2]-0]; // filepath, linenum
   },
-  
+
   unifiedDiff: function unifiedDiff(text1, texdt2) {
   }
-  
+
 };
 
 
@@ -173,7 +173,7 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
       }
       return sb;
     };
-    
+
   })();
 }
 else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
@@ -241,7 +241,7 @@ oktest.AssertionError.prototype.name = 'AssertionError';
 
 
 oktest.AssertionObject = oktest.util.classdef(
-  
+
   /**
    * Assertion object class which has a lot of assertion methods such as .eq() or .is().
    * Don't generate this object directly. Use ok() or NG() instead.
@@ -261,7 +261,7 @@ oktest.AssertionObject = oktest.util.classdef(
     this._done  = false;
     oktest.AssertionObject._instances.push(this);
   },
-  
+
   /// instance methods
   function(def) {
 
@@ -301,7 +301,7 @@ oktest.AssertionObject = oktest.util.classdef(
         return inspect(left) + " " + op + " " + inspect(right) + " : failed.";
       }
     };
-    
+
     /**
      * Helper method of operator-like assertion methods.
      *
@@ -313,7 +313,7 @@ oktest.AssertionObject = oktest.util.classdef(
       if (bool == this._bool) return;
       throw this._failed(right, this._msg(this._left, op, right));
     };
-    
+
     /**
      * Assertion method equivarent to '==' operator.
      *
@@ -339,7 +339,7 @@ oktest.AssertionObject = oktest.util.classdef(
         throw ex;
       }
     };
-    
+
     /**
      * Assertion method equivarent to '!=' operator.
      *
@@ -348,7 +348,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.ne = function ne(right) {
       return this._cmp("!=", right, function(l, r) { return l != r; });
     };
-    
+
     /**
      * Assertion method equivarent to '==' operator.
      *
@@ -357,7 +357,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.is = function is(right) {
       return this._cmp("===", right, function(l, r) { return l === r; });
     };
-    
+
     /**
      * Assertion method equivarent to '!==' operator.
      *
@@ -366,7 +366,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.isnt = function isnt(right) {
       return this._cmp("!==", right, function(l, r) { return l !== r; });
     };
-    
+
     /**
      * Assertion method equivarent to '<' operator.
      *
@@ -375,7 +375,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.lt = function lt(right) {
       return this._cmp("<", right, function(l, r) { return l < r; });
     };
-    
+
     /**
      * Assertion method equivarent to '>' operator.
      *
@@ -384,7 +384,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.gt = function gt(right) {
       return this._cmp(">", right, function(l, r) { return l > r; });
     };
-    
+
     /**
      * Assertion method equivarent to '<=' operator.
      *
@@ -393,7 +393,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.le = function le(right) {
       return this._cmp("<=", right, function(l, r) { return l <= r; });
     };
-    
+
     /**
      * Assertion method equivarent to '>=' operator.
      *
@@ -402,7 +402,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.ge = function ge(right) {
       return this._cmp(">=", right, function(l, r) { return l >= r; });
     };
-    
+
     /**
      * Assertion method similar to '==' operator but takes delta.
      * For example, 'ok(v).inDelta(1, 0.01)' is same as 'ok(v).gt(0.99) && ok(v).lt(1.01)'.
@@ -413,7 +413,7 @@ oktest.AssertionObject = oktest.util.classdef(
       this._cmp(">", right - delta, function(l, r) { return l > r; });
       this._cmp("<", right + delta, function(l, r) { return l < r; });
     };
-    
+
     /**
      * Assertion method equivarent to 'typeof' operator.
      * For example, 'ok(v).isTypeof("string")' is same as 'typeof(v) == "string"'.
@@ -426,7 +426,7 @@ oktest.AssertionObject = oktest.util.classdef(
       if (bool == this._bool) return;
       throw this._failed(type, "typeof(" + oktest.util.inspect(this._left) + ") == '" + type + "' : failed.");
     };
-    
+
     /**
      * Assertion method equivarent to 'instanceof' operator.
      * For example, 'ok(v).isa(MyClass)' is same as 'v instanceof MyClass'.
@@ -436,7 +436,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.isa = function isa(klass) {
       return this._cmp("instanceof", klass, function(l, r) { return l instanceof r; });
     };
-    
+
     /**
      * Assertion method equivarent to 'str.match(pattern)'.
      *
@@ -445,7 +445,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.matches = function matches(pattern) {
       return this._cmp(".match", pattern, function(l, r) { return !! l.match(r); });
     };
-    
+
     /**
      * Assertion method equivarent to [array] == [array], compareing each elements by '===' operator.
      *
@@ -478,7 +478,7 @@ oktest.AssertionObject = oktest.util.classdef(
         if (! errmsg) throw this._failed(right, this._msg(this._left, ".arrayEq", right));
       }
     };
-    
+
     /**
      * Assertion method equivarent to 'in' operator.
      * For example, 'ok(key).inObject(obj)' is same as 'key in obj'.
@@ -489,7 +489,7 @@ oktest.AssertionObject = oktest.util.classdef(
     def.inObject = function inObject(obj) {
       return this._cmp("in", obj, function(l, r) { return l in r; });
     };
-    
+
     /**
      * Assertion method to check that value is in an array or not.
      * Notice that 'ok(item).inArray(arr)' equals to 'ok(arr).hasItem(item)'.
@@ -518,7 +518,7 @@ oktest.AssertionObject = oktest.util.classdef(
       if (bool == this._bool) return;
       throw this._failed(key, this._msg(key, "in", this._left));
     };
-    
+
     /**
      * Assertion method to check whether item is in an array.
      * Notice that 'ok(arr).hasItem(item)' equals to 'ok(item).inArray(arr)'.
@@ -533,7 +533,7 @@ oktest.AssertionObject = oktest.util.classdef(
       }
       return this._cmp("has item", item, fn);
     };
-    
+
     /**
      * Assertion method to check whether exception is thrown or not.
      * For example, 'ok(func).throws_(TypeError, "number expected.")'
@@ -603,19 +603,19 @@ oktest.AssertionObject = oktest.util.classdef(
         throw this._failed(exception, msg);
       }
     };
-    
+
   },
-  
+
   /// class methods
   function(cls) {
     cls._instances = [];
   }
-  
+
 );
 
 
 oktest.SkipException = oktest.util.classdef(
-  
+
   /**
    * Exception class to skip some tests. Thrown by skipWhen().
    *
@@ -625,11 +625,11 @@ oktest.SkipException = oktest.util.classdef(
   function SkipException(reason) {
     this.reason = reason;
   },
-  
+
   /// instance methods
   function(def) {
   }
-  
+
 );
 
 
@@ -725,7 +725,7 @@ oktest.TargetObject = oktest.util.classdef(
     defun(this);
     stack.pop();
   },
-  
+
   /// instance methods
   function(def) {
 
@@ -737,7 +737,7 @@ oktest.TargetObject = oktest.util.classdef(
     def.accept = function accept(visitor) {
       return visitor.visitTarget(this);
     };
-    
+
     /**
      * Factory method to generate SpecObject.
      *
@@ -752,17 +752,17 @@ oktest.TargetObject = oktest.util.classdef(
       this.specs.push(spec_obj);
       return spec_obj;
     };
-    
+
     def.should = def.spec;  // alias
-    
+
   },
-  
+
   /// class methods
   function(cls) {
     cls._all = [];
     cls._stack = [];
   }
-  
+
 );
 
 
@@ -780,7 +780,7 @@ oktest.target = function target(name, defun) {
 
 
 oktest.SpecObject = oktest.util.classdef(
-  
+
   /**
    * Specification object which contains assertions.
    *
@@ -796,10 +796,10 @@ oktest.SpecObject = oktest.util.classdef(
     this.body = body;
     this.status = null;
   },
-  
+
   /// instance methods
   function(def) {
-    
+
     /**
      * Accept method for Visitor pattern.
      *
@@ -808,9 +808,9 @@ oktest.SpecObject = oktest.util.classdef(
     def.accept = function accept(visitor) {
       return visitor.visitSpec(this);
     };
-    
+
     def.after = null;
-    
+
     /**
      * Display a message.
      *
@@ -819,14 +819,14 @@ oktest.SpecObject = oktest.util.classdef(
     def.echo = function echo(message) {
       oktest.print(this.target._indent + "    " + message);
     };
-    
+
   }
-  
+
 );
 
 
 oktest.Runner = oktest.util.classdef(
-  
+
   /**
    * Runs target objects and specification objects.
    *
@@ -835,7 +835,7 @@ oktest.Runner = oktest.util.classdef(
    */
   function Runner() {
   },
-  
+
   /// instance methods
   function(def) {
 
@@ -847,7 +847,7 @@ oktest.Runner = oktest.util.classdef(
     def.visit = function vist(acceptor) {
       acceptor.accept(this);
     };
-    
+
     /**
      * Visitor method for Visitor pattern.
      *
@@ -862,7 +862,7 @@ oktest.Runner = oktest.util.classdef(
       if (total > 0) this._reportTargetResult(total, target);
       //oktest.print('');
     };
-    
+
     def._reportTargetResult = function _reportTargetResult(total, target) {
       for (var spec, i = -1; spec = target.specs[++i]; ) {
         if (spec._thrown) {
@@ -873,7 +873,7 @@ oktest.Runner = oktest.util.classdef(
               + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
       oktest.print(target._indent + '  (' + str + ')');
     };
-    
+
     /**
      * Callback method for Visitor pattern.
      *
@@ -917,7 +917,7 @@ oktest.Runner = oktest.util.classdef(
         if (spec.after) spec.after();
       }
     };
-    
+
     def._getFailedMsg = function _getFailedMsg(ass_ex) {
       var arr = oktest.util._getLocationFromStack(ass_ex._stack);
       var filepath = arr[0], linenum = arr[1];
@@ -931,7 +931,7 @@ oktest.Runner = oktest.util.classdef(
       }
       return arr;
     };
-    
+
     def._reportSpecResult = function _reportSpecResult(spec, indent, status, msg) {
       oktest.print(indent + "- [" + status + "] "+ spec.desc);
       if (msg !== null) {
@@ -940,7 +940,7 @@ oktest.Runner = oktest.util.classdef(
         }
       }
     };
-    
+
     def._checkSpecsDone = function _checkSpecsDone(spec, indent, status) {
       var ass_objs = oktest.AssertionObject._instances;
       for (var ass_obj, i = -1; ass_obj = ass_objs[++i]; ) {
@@ -952,9 +952,9 @@ oktest.Runner = oktest.util.classdef(
       }
       oktest.AssertionObject._instances = [];
     };
-    
+
   }
-  
+
 );
 
 
