@@ -1068,6 +1068,51 @@ oktest.VerboseReporter = oktest.util.classdef(
 );
 
 
+oktest.QuietReporter = oktest.util.classdef(
+
+  function QuietReporter() {
+    oktest.Reporter.call(this);
+    this._specs = [];
+  },
+
+  new oktest.Reporter(),
+
+  function(def) {
+
+    def.afterAll = function afterAll() {
+      oktest.print("");
+      for (var i = 0, n = this._specs.length; i < n; i++) {
+        var spec = this._specs[i];
+        var status = this._words[spec.status];
+        var t_names = [];
+        var target = spec.target;
+        while (target) {
+          t_names.push(target.name);
+          target = target.parent;
+        }
+        t_names.reverse();
+        oktest.print("");
+        oktest.print("* " + t_names.join(" >> "));
+        oktest.print("  - [" + status + "] " + spec.desc);
+        for (var s, j = -1; s = spec.msg[++j]; ) {
+          oktest.print("    " + s);
+        }
+      }
+    };
+
+    def.afterSpec = function afterSpec(spec) {
+      //oktest.print(spec.status);
+      require('system').stdout.write(spec.status);
+      if (spec.msg != null) {
+        this._specs.push(spec);
+      }
+    };
+
+  }
+
+);
+
+
 /**
  * Runs all assertions in specifications.
  *
