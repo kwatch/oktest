@@ -936,8 +936,7 @@ oktest.Runner = oktest.util.classdef(
       //oktest.print(spec.target._indent + "  - " + spec.desc);
     };
 
-    def._words = {f: "Failed", s: "Skipped", E: "ERROR"};
-    def._words['.'] = "ok";
+    def._words = {'.': "ok", f: "Failed", s: "Skipped", E: "ERROR"};
 
     def.afterSpec = function afterSpec(spec) {
       var status = this._words[spec.status];
