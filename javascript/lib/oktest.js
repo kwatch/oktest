@@ -964,10 +964,22 @@ oktest.Runner = oktest.util.classdef(
       oktest.AssertionObject._instances = [];
     };
 
+    def.beforeTarget = function beforeTarget(target) {
+    };
+
+    def.afterTarget = function afterTarget(target) {
+    };
+
     def.runAll = function runAll(targets) {
       for (var i = 0, n = targets.length; i < n; i++) {
         var target = targets[i];
-        target.accept(this);
+        this.beforeTarget(target);
+        try {
+          target.accept(this);
+        }
+        finally {
+          this.afterTarget(target);
+        }
       }
     };
 
