@@ -1119,7 +1119,10 @@ oktest.QuietReporter = oktest.util.classdef(
  * @public
  */
 oktest.runAll = function runAll() {
-  var runner = new oktest.Runner();
+  var envstr = require('system').env.OKTEST;
+  var reporter = envstr == "-q" ? new oktest.QuietReporter() :
+                                  new oktest.VerboseReporter();
+  var runner = new oktest.Runner(reporter);
   var targets = oktest.TargetObject._all;
   runner.runAll(targets);
 };
