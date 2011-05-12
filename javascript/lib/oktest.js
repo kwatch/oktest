@@ -31,7 +31,8 @@ oktest.encoding = 'utf-8';
  */
 oktest.util = {
 
-  classdef: function classdef(constructor, method_def, static_def) {
+  classdef: function classdef(constructor, prototype, method_def, static_def) {
+    if (prototype) constructor.prototype = prototype;
     if (static_def) static_def(constructor);
     if (method_def) method_def(constructor.prototype);
     return constructor;
@@ -261,6 +262,8 @@ oktest.AssertionObject = oktest.util.classdef(
     this._done  = false;
     oktest.AssertionObject._instances.push(this);
   },
+
+  null,
 
   /// instance methods
   function(def) {
@@ -626,6 +629,8 @@ oktest.SkipException = oktest.util.classdef(
     this.reason = reason;
   },
 
+  null,
+
   /// instance methods
   function(def) {
   }
@@ -726,6 +731,8 @@ oktest.TargetObject = oktest.util.classdef(
     stack.pop();
   },
 
+  null,
+
   /// instance methods
   function(def) {
 
@@ -797,6 +804,8 @@ oktest.SpecObject = oktest.util.classdef(
     this.status = null;
   },
 
+  null,
+
   /// instance methods
   function(def) {
 
@@ -835,6 +844,8 @@ oktest.Runner = oktest.util.classdef(
    */
   function Runner() {
   },
+
+  null,
 
   /// instance methods
   function(def) {
