@@ -842,7 +842,8 @@ oktest.Runner = oktest.util.classdef(
    * @constructor
    * @private
    */
-  function Runner() {
+  function Runner(reporter) {
+    this.reporter = reporter || new oktest.VerboseReporter();
   },
 
   null,
@@ -855,7 +856,7 @@ oktest.Runner = oktest.util.classdef(
      *
      * @private
      */
-    def.visit = function vist(acceptor) {
+    def.visit = function visit(acceptor) {
       acceptor.accept(this);
     };
 
@@ -878,22 +879,11 @@ oktest.Runner = oktest.util.classdef(
     };
 
     def.beforeTarget = function beforeTarget(target) {
-      oktest.print(target._indent + "* " + target.name);
+      this.reporter.beforeTarget(target);
     };
 
     def.afterTarget = function afterTarget(target) {
-      var r = target.results;
-      var total = r.success + r.failed + r.error + r.skipped;
-      if (total > 0) {
-        for (var spec, i = -1; spec = target.specs[++i]; ) {
-          if (spec._thrown) {
-          }
-        }
-        var str = 'total:' + total + ', success:' + r.success + ', failed:'
-                + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
-        oktest.print(target._indent + '  (' + str + ')');
-      }
-      //oktest.print('');
+      this.reporter.afterTarget(target);
     };
 
     /**
@@ -933,21 +923,12 @@ oktest.Runner = oktest.util.classdef(
     };
 
     def.beforeSpec = function beforeSpec(spec) {
-      //oktest.print(spec.target._indent + "  - " + spec.desc);
+      this.reporter.beforeSpec(spec);
     };
 
-    def._words = {'.': "ok", f: "Failed", s: "Skipped", E: "ERROR"};
-
     def.afterSpec = function afterSpec(spec) {
-      var status = this._words[spec.status];
-      var indent = spec.target._indent + "  ";
-      oktest.print(indent + "- [" + status + "] "+ spec.desc);
-      if (spec.msg !== null) {
-        for (var s, i = -1; s = spec.msg[++i]; ) {
-          oktest.print(indent + "  " + s);
-        }
-      }
-      this._checkSpecsDone(spec, indent, status);
+      this.reporter.afterSpec(spec);
+      this._checkSpecsDone(spec, "    ");
       if (spec.after) spec.after();
     };
 
@@ -965,10 +946,11 @@ oktest.Runner = oktest.util.classdef(
       return arr;
     };
 
-    def._checkSpecsDone = function _checkSpecsDone(spec, indent, status) {
+    def._checkSpecsDone = function _checkSpecsDone(spec, indent) {
+      if (indent == null) indent = "    ";
       var ass_objs = oktest.AssertionObject._instances;
       for (var ass_obj, i = -1; ass_obj = ass_objs[++i]; ) {
-        if (! ass_obj._done && status != 'ERROR') {
+        if (! ass_obj._done && spec.status != 'E') {
           var s = oktest.util._getLocationFromStack(ass_obj._stack).join(':');
           oktest.print(indent + "  # Warning: " + ass_obj._func_name
                        + "() is called but not tested yet. (" + s + ")");
@@ -978,9 +960,11 @@ oktest.Runner = oktest.util.classdef(
     };
 
     def.beforeAll = function beforeAll() {
+      this.reporter.beforeAll();
     };
 
     def.afterAll = function afterAll() {
+      this.reporter.afterAll();
     };
 
     def.runAll = function runAll(targets) {
@@ -999,6 +983,83 @@ oktest.Runner = oktest.util.classdef(
       }
       finally {
         this.afterAll();
+      }
+    };
+
+  }
+
+);
+
+
+oktest.Reporter = oktest.util.classdef(
+
+  function Reporter() {
+  },
+
+  null,
+
+  function(def) {
+
+    def.beforeAll = function beforeAll() {};
+
+    def.afterAll = function afterAll() {};
+
+    def.beforeTarget = function beforeTarget(target) {};
+
+    def.afterTarget = function afterTarget(target) {};
+
+    def.beforeSpec = function beforeSpec(spec) {};
+
+    def.afterSpec = function afterSpec(spec) {};
+
+    def._words = {'.': "ok", f: "Failed", s: "Skipped", E: "ERROR"};
+
+  }
+
+);
+
+
+oktest.VerboseReporter = oktest.util.classdef(
+
+  function VerboseReporter() {
+    oktest.Reporter.call(this);
+  },
+
+  new oktest.Reporter(),
+
+  function(def) {
+
+    def.beforeTarget = function beforeTarget(target) {
+      oktest.print(target._indent + "* " + target.name);
+    };
+
+    def.afterTarget = function afterTarget(target) {
+      var r = target.results;
+      var total = r.success + r.failed + r.error + r.skipped;
+      if (total > 0) {
+        for (var spec, i = -1; spec = target.specs[++i]; ) {
+          if (spec._thrown) {
+          }
+        }
+        var str = 'total:' + total + ', success:' + r.success + ', failed:'
+                + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
+        oktest.print(target._indent + '  (' + str + ')');
+      }
+      //oktest.print('');
+    };
+
+    def.beforeSpec = function beforeSpec(spec) {
+      //oktest.print(spec.target._indent + "  - " + spec.desc);
+    };
+
+    def.afterSpec = function afterSpec(spec) {
+      var status = this._words[spec.status];
+      var indent = spec.target._indent + "  ";
+      oktest.print(indent + "- [" + status + "] "+ spec.desc);
+      if (spec.msg !== null) {
+        for (var s, i = -1; s = spec.msg[++i]; ) {
+          oktest.print(indent + "  " + s);
+        }
       }
     };
 
