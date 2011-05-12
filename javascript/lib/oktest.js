@@ -104,7 +104,9 @@ oktest.util = {
     return [m[1], m[2]-0]; // filepath, linenum
   },
 
-  getenv: function getenv() { },
+  echo: function echo(arg) { },
+
+  getenv: function getenv(name) { },
 
   unifiedDiff: function unifiedDiff(text1, texdt2) {
   }
@@ -130,6 +132,9 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
     };
     oktest.util.writeFile = function writeFile(filename, content) {
       return fs.writeFileSync(filename, content, oktest.encoding);
+    };
+    oktest.util.echo = function echo(arg) {
+      system.stdout.write(arg);
     };
     oktest.util.getenv = function getenv(name) {
       return system.env[name];
@@ -207,6 +212,9 @@ else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
     } finally { reader.close(); }
     return line;
   };
+  oktest.util.echo = function echo(arg) {
+    java.lang.System.out.print(arg);
+  };
   oktest.util.getenv = function getenv(name) {
     return java.lang.System.getenv(name);
   };
@@ -226,6 +234,9 @@ else if (typeof(print) == 'function') {  // SpiderMonkey
       }
     } finally { f.close(); }
     return buf.join('');
+  };
+  oktest.util.echo = function echo(arg) {
+    print(arg);
   };
   oktest.util.getenv = function getenv(name) {
     return environment[name];
@@ -1113,7 +1124,7 @@ oktest.QuietReporter = oktest.util.classdef(
 
     def.afterSpec = function afterSpec(spec) {
       //oktest.print(spec.status);
-      require('system').stdout.write(spec.status);
+      oktest.util.echo(spec.status);
       if (spec.msg != null) {
         this._specs.push(spec);
       }
