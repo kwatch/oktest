@@ -905,48 +905,49 @@ oktest.Runner = oktest.util.classdef(
      * @private
      */
     def.visitSpec = function visitSpec(spec) {
-      //oktest.print(spec.target._indent + "  - " + spec.desc);
       var status = '';
       var msg = null;
       try {
         spec.body(spec);
         spec.target.results.success++;
         spec.status = '.';
-        status = 'ok';
       }
       catch (ex) {
         spec._thrown = ex;
         if (oktest.isFailed(ex)) {        // oktest.AssertionError object
           spec.target.results.failed++;
           spec.status = 'f';
-          status = 'Failed';
           msg = [ex.message].concat(this._getFailedMsg(ex));
         }
         else if (oktest.isSkipped(ex)) {  // oktest.SkipException
           spec.target.results.skipped++;
           spec.status = 's';
-          status = 'Skipped';
           msg = ["reason: " + ex.reason];
         }
         else {
           spec.target.results.errored++;
           spec.status = 'E';
-          status = 'ERROR';
           throw ex;
         }
       }
       finally {
-        var indent = spec.target._indent + "  ";
-        this._reportSpecResult(spec, indent, status, msg);
-        this._checkSpecsDone(spec, indent, status);
-        if (spec.after) spec.after();
+        spec.msg = msg;
       }
     };
 
     def.beforeSpec = function beforeSpec(spec) {
+      //oktest.print(spec.target._indent + "  - " + spec.desc);
     };
 
+    def._words = {f: "Failed", s: "Skipped", E: "ERROR"};
+    def._words['.'] = "ok";
+
     def.afterSpec = function afterSpec(spec) {
+      var status = this._words[spec.status];
+      var indent = spec.target._indent + "  ";
+      this._reportSpecResult(spec, indent, status, spec.msg);
+      this._checkSpecsDone(spec, indent, status);
+      if (spec.after) spec.after();
     };
 
     def._getFailedMsg = function _getFailedMsg(ass_ex) {
