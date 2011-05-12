@@ -639,7 +639,7 @@ oktest.AssertionObject = oktest.util.classdef(
 );
 
 
-oktest.SkipException = oktest.util.classdef(
+oktest.AssertionSkipped = oktest.util.classdef(
 
   /**
    * Exception class to skip some tests. Thrown by skipWhen().
@@ -647,7 +647,7 @@ oktest.SkipException = oktest.util.classdef(
    * @protected
    * @param {string} reason Description why these tests are skipped?
    */
-  function SkipException(reason) {
+  function AssertionSkipped(reason) {
     this.reason = reason;
   },
 
@@ -696,16 +696,16 @@ oktest.preCond = function preCond(left) {
 };
 
 /**
- * Skip assertions (by throwing SkipException) when condition is true.
+ * Skip assertions (by throwing AssertionSkipped) when condition is true.
  *
  * @public
- * @param {bool} condition Throws SkipException if condition argument is true.
+ * @param {bool} condition Throws AssertionSkipped if condition argument is true.
  * @param {string} reason Description why the following assertions are skipped?
- * @throw oktest.SkipException when condition is true
+ * @throw oktest.AssertionSkipped when condition is true
  */
 oktest.skipWhen = function skipWhen(condition, reason) {
   if (condition) {
-    throw new oktest.SkipException(reason);
+    throw new oktest.AssertionSkipped(reason);
   }
 };
 
@@ -722,7 +722,7 @@ oktest.isFailed = function isFailed(ex) {
  * @return True if exception is thrown by skipWhen().
  */
 oktest.isSkipped = function isSkipped(ex) {
-  return ex instanceof oktest.SkipException;
+  return ex instanceof oktest.AssertionSkipped;
 };
 
 
@@ -928,7 +928,7 @@ oktest.Runner = oktest.util.classdef(
           spec.status = 'f';
           msg = [ex.message].concat(this._getFailedMsg(ex));
         }
-        else if (oktest.isSkipped(ex)) {  // oktest.SkipException
+        else if (oktest.isSkipped(ex)) {  // oktest.AssertionSkipped
           spec.target.results.skipped++;
           spec.status = 's';
           msg = ["reason: " + ex.reason];
