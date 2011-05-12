@@ -16,8 +16,8 @@ function should_be_error(func, errmsg) {
 	catch (ex) {
 		thrown = ex;
 		//if (! (ex instanceof oktest.AssertionObject)) {
-		if (! (ex instanceof oktest.AssertionError)) {
-			throw "oktest.AssertionError expected but got " + require('util').inspect(ex);
+		if (! (ex instanceof oktest.AssertionFailed)) {
+			throw "oktest.AssertionFailed expected but got " + require('util').inspect(ex);
 		}
 		if (errmsg && errmsg !== ex.message) {
 			throw inspect(errmsg) + " is expected but got "+ inspect(ex.message);

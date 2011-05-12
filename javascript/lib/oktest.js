@@ -254,13 +254,13 @@ else {
  * @constructor
  * @param {string} message A string message to be displayed.
  */
-oktest.AssertionError = function AssertionError(message) {
+oktest.AssertionFailed = function AssertionFailed(message) {
   Error.call(this, message);
   this.message = message;
 };
-//oktest.AssertionError.prototype = new Error();   // not work in node.js 0.4.7
-oktest.AssertionError.prototype = {};
-oktest.AssertionError.prototype.name = 'AssertionError';
+//oktest.AssertionFailed.prototype = new Error();   // not work in node.js 0.4.7
+oktest.AssertionFailed.prototype = {};
+oktest.AssertionFailed.prototype.name = 'AssertionFailed';
 
 
 oktest.AssertionObject = oktest.util.classdef(
@@ -291,18 +291,18 @@ oktest.AssertionObject = oktest.util.classdef(
   function(def) {
 
     /**
-     * Factory method to return AssertionError object with bulding message.
+     * Factory method to return AssertionFailed object with bulding message.
      *
      * @private
      * @param {any} right Any value to be passed to assertion method.
      * @param {string} message Message string containing the reason why assertion is failed.
-     * @return {AssertionError} Assertion error object.
+     * @return {AssertionFailed} Assertion error object.
      */
     def._failed = function _failed(right, message) {
       this._right = right;
       this._message  = this._bool ? message : "NOT " + message;
       //return this;
-      var ex = new oktest.AssertionError(this._message);
+      var ex = new oktest.AssertionFailed(this._message);
       ex._left  = this._left;
       ex._left  = this._right;
       ex._bool  = this._bool;
@@ -358,7 +358,7 @@ oktest.AssertionObject = oktest.util.classdef(
         return this._cmp("==", right, function(l, r) { return l == r; });
       }
       catch (ex) {
-        if (ex instanceof oktest.AssertionError) {
+        if (ex instanceof oktest.AssertionFailed) {
           ex._diff = oktest.util.unifiedDiff(right, this._left);
         }
         throw ex;
@@ -714,7 +714,7 @@ oktest.skipWhen = function skipWhen(condition, reason) {
  * @return True if exception is thrown when assertion is failed.
  */
 oktest.isFailed = function isFailed(ex) {
-  return ex instanceof oktest.AssertionError;
+  return ex instanceof oktest.AssertionFailed;
 };
 
 /**
@@ -923,7 +923,7 @@ oktest.Runner = oktest.util.classdef(
       }
       catch (ex) {
         spec._thrown = ex;
-        if (oktest.isFailed(ex)) {        // oktest.AssertionError object
+        if (oktest.isFailed(ex)) {        // oktest.AssertionFailed object
           spec.target.results.failed++;
           spec.status = 'f';
           msg = [ex.message].concat(this._getFailedMsg(ex));
