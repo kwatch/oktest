@@ -865,9 +865,15 @@ oktest.Runner = oktest.util.classdef(
      * @private
      */
     def.visitTarget = function visitTarget(target) {
-      oktest.print(target._indent + "* " + target.name);
       var specs = target.specs;
       for (var spec, i = -1; spec = specs[++i]; ) spec.accept(this);
+    };
+
+    def.beforeTarget = function beforeTarget(target) {
+      oktest.print(target._indent + "* " + target.name);
+    };
+
+    def.afterTarget = function afterTarget(target) {
       var r = target.results;
       var total = r.success + r.failed + r.error + r.skipped;
       if (total > 0) this._reportTargetResult(total, target);
@@ -962,12 +968,6 @@ oktest.Runner = oktest.util.classdef(
         }
       }
       oktest.AssertionObject._instances = [];
-    };
-
-    def.beforeTarget = function beforeTarget(target) {
-    };
-
-    def.afterTarget = function afterTarget(target) {
     };
 
     def.runAll = function runAll(targets) {
