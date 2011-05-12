@@ -709,22 +709,6 @@ oktest.skipWhen = function skipWhen(condition, reason) {
   }
 };
 
-/**
- * @private
- * @return True if exception is thrown when assertion is failed.
- */
-oktest.isFailed = function isFailed(ex) {
-  return ex instanceof oktest.AssertionFailed;
-};
-
-/**
- * @private
- * @return True if exception is thrown by skipWhen().
- */
-oktest.isSkipped = function isSkipped(ex) {
-  return ex instanceof oktest.AssertionSkipped;
-};
-
 
 oktest.TargetObject = oktest.util.classdef(
 
@@ -923,12 +907,12 @@ oktest.Runner = oktest.util.classdef(
       }
       catch (ex) {
         spec._thrown = ex;
-        if (oktest.isFailed(ex)) {        // oktest.AssertionFailed object
+        if (ex instanceof oktest.AssertionFailed) {
           spec.target.results.failed++;
           spec.status = 'f';
           msg = [ex.message].concat(this._getFailedMsg(ex));
         }
-        else if (oktest.isSkipped(ex)) {  // oktest.AssertionSkipped
+        else if (ex instanceof oktest.AssertionSkipped) {
           spec.target.results.skipped++;
           spec.status = 's';
           msg = ["reason: " + ex.reason];
