@@ -648,16 +648,18 @@ oktest.AssertionSkipped = oktest.util.classdef(
    * @param {string} message Description why these tests are skipped?
    */
   function AssertionSkipped(message) {
+    Error.call(this, message);
     this.message = message;
   },
 
-  null,
+  new Error(),
 
   /// instance methods
   function(def) {
   }
 
 );
+oktest.AssertionSkipped.prototype.name = 'AssertionSkipped';
 
 
 /**
