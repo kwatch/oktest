@@ -645,10 +645,10 @@ oktest.AssertionSkipped = oktest.util.classdef(
    * Exception class to skip some tests. Thrown by skipWhen().
    *
    * @protected
-   * @param {string} reason Description why these tests are skipped?
+   * @param {string} message Description why these tests are skipped?
    */
-  function AssertionSkipped(reason) {
-    this.reason = reason;
+  function AssertionSkipped(message) {
+    this.message = message;
   },
 
   null,
@@ -915,7 +915,7 @@ oktest.Runner = oktest.util.classdef(
         else if (ex instanceof oktest.AssertionSkipped) {
           spec.target.results.skipped++;
           spec.status = 's';
-          msg = ["reason: " + ex.reason];
+          msg = ["reason: " + ex.message];
         }
         else {
           spec.target.results.errored++;
