@@ -866,7 +866,15 @@ oktest.Runner = oktest.util.classdef(
      */
     def.visitTarget = function visitTarget(target) {
       var specs = target.specs;
-      for (var spec, i = -1; spec = specs[++i]; ) spec.accept(this);
+      for (var spec, i = -1; spec = specs[++i]; ) {
+        this.beforeSpec(spec);
+        try {
+          spec.accept(this);
+        }
+        finally {
+          this.afterSpec(spec);
+        }
+      }
     };
 
     def.beforeTarget = function beforeTarget(target) {
@@ -933,6 +941,12 @@ oktest.Runner = oktest.util.classdef(
         this._checkSpecsDone(spec, indent, status);
         if (spec.after) spec.after();
       }
+    };
+
+    def.beforeSpec = function beforeSpec(spec) {
+    };
+
+    def.afterSpec = function afterSpec(spec) {
     };
 
     def._getFailedMsg = function _getFailedMsg(ass_ex) {
