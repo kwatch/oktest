@@ -104,6 +104,8 @@ oktest.util = {
     return [m[1], m[2]-0]; // filepath, linenum
   },
 
+  getenv: function getenv() { },
+
   unifiedDiff: function unifiedDiff(text1, texdt2) {
   }
 
@@ -128,6 +130,9 @@ if (typeof(require) == 'function' && typeof(require.resolve) == 'function') { //
     };
     oktest.util.writeFile = function writeFile(filename, content) {
       return fs.writeFileSync(filename, content, oktest.encoding);
+    };
+    oktest.util.getenv = function getenv(name) {
+      return system.env[name];
     };
     //oktest.util.system = function system(command) {
     //  var sout, serr, ex;
@@ -202,6 +207,9 @@ else if (typeof(java) == 'object' && typeof(Packages) == 'function') { // Rhino
     } finally { reader.close(); }
     return line;
   };
+  oktest.util.getenv = function getenv(name) {
+    return java.lang.System.getenv(name);
+  };
 }
 else if (typeof(print) == 'function') {  // SpiderMonkey
   oktest._engine.spidermoneky = true;
@@ -218,6 +226,9 @@ else if (typeof(print) == 'function') {  // SpiderMonkey
       }
     } finally { f.close(); }
     return buf.join('');
+  };
+  oktest.util.getenv = function getenv(name) {
+    return environment[name];
   };
 }
 else {
@@ -1119,7 +1130,7 @@ oktest.QuietReporter = oktest.util.classdef(
  * @public
  */
 oktest.runAll = function runAll() {
-  var envstr = require('system').env.OKTEST;
+  var envstr = oktest.util.getenv('OKTEST');
   var reporter = envstr == "-q" ? new oktest.QuietReporter() :
                                   new oktest.VerboseReporter();
   var runner = new oktest.Runner(reporter);
