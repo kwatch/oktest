@@ -711,6 +711,17 @@ oktest.skipWhen = function skipWhen(condition, reason) {
   }
 };
 
+/**
+ * Same as skipWhen(true, "TODO: not implemented yet.").
+ *
+ * @public
+ * @param {string} message Optional description text.
+ * @throw oktest.AssertionSkipped
+ */
+oktest.TODO = function TODO(message) {
+  throw new oktest.AssertionSkipped(message || "TODO: not implemented yet.");
+};
+
 
 oktest.TargetObject = oktest.util.classdef(
 
