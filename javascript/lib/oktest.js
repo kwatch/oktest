@@ -1106,6 +1106,7 @@ oktest.QuietReporter = oktest.util.classdef(
                    ", error: " + c.error + ", skipped: " + c.skipped + ")");
       for (var i = 0, n = this._specs.length; i < n; i++) {
         var spec = this._specs[i];
+        if (spec.status === 's') continue;  // skipped
         var status = this._words[spec.status];
         var t_names = [];
         var target = spec.target;
