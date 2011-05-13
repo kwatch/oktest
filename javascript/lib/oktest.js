@@ -1091,6 +1091,7 @@ oktest.QuietReporter = oktest.util.classdef(
   function QuietReporter() {
     oktest.Reporter.call(this);
     this._specs = [];
+    this._count = {target: 0, spec: 0, success: 0, failed: 0, error: 0, skipped: 0};
   },
 
   new oktest.Reporter(),
@@ -1099,6 +1100,10 @@ oktest.QuietReporter = oktest.util.classdef(
 
     def.afterAll = function afterAll() {
       oktest.print("");
+      var c = this._count;
+      oktest.print("(target: " + c.target + ", spec: " + c.spec +
+                   ", success: " + c.success + ", failed: " + c.failed +
+                   ", error: " + c.error + ", skipped: " + c.skipped + ")");
       for (var i = 0, n = this._specs.length; i < n; i++) {
         var spec = this._specs[i];
         var status = this._words[spec.status];
@@ -1118,7 +1123,16 @@ oktest.QuietReporter = oktest.util.classdef(
       }
     };
 
+    def.afterTarget = function afterTarget(target) {
+      this._count.target++;
+      this._count.success += target.results.success;
+      this._count.failed  += target.results.failed;
+      this._count.error   += target.results.error;
+      this._count.skipped += target.results.skipped;
+    };
+
     def.afterSpec = function afterSpec(spec) {
+      this._count.spec++;
       //oktest.print(spec.status);
       oktest.util.echo(spec.status);
       if (spec.msg != null) {
