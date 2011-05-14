@@ -359,7 +359,7 @@ oktest.AssertionObject = oktest.util.classdef(
       }
       catch (ex) {
         if (ex instanceof oktest.AssertionFailed && typeof(right) === "string") {
-          ex._diff = oktest.util.unifiedDiff(right, this._left);
+          ex._diff = oktest.util.unifiedDiff(right, '' + this._left);
         }
         throw ex;
       }
