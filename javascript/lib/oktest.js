@@ -735,8 +735,8 @@ oktest.TargetObject = oktest.util.classdef(
   function TargetObject(name, defun) {
     this.name = name;
     this.specs = [];
-    this.results = {success: 0, failed: 0, error: 0, skipped: 0};
-    this.status = null;   // '.':success, 'f':failed, 'E':error, 's':skipped
+    this.results = {passed: 0, failed: 0, error: 0, skipped: 0};
+    this.status = null;   // '.':passed, 'f':failed, 'E':error, 's':skipped
     oktest.TargetObject._all.push(this);
     var stack = oktest.TargetObject._stack;
     this.parent = stack[stack.length - 1];
@@ -915,7 +915,7 @@ oktest.Runner = oktest.util.classdef(
       var msg = null;
       try {
         spec.body(spec);
-        spec.target.results.success++;
+        spec.target.results.passed++;
         spec.status = '.';
       }
       catch (ex) {
@@ -1053,13 +1053,13 @@ oktest.VerboseReporter = oktest.util.classdef(
 
     def.afterTarget = function afterTarget(target) {
       var r = target.results;
-      var total = r.success + r.failed + r.error + r.skipped;
+      var total = r.passed + r.failed + r.error + r.skipped;
       if (total > 0) {
         for (var spec, i = -1; spec = target.specs[++i]; ) {
           if (spec._thrown) {
           }
         }
-        var str = 'total:' + total + ', success:' + r.success + ', failed:'
+        var str = 'total:' + total + ', passed:' + r.passed + ', failed:'
                 + r.failed + ', error:' + r.error + ', skipped:' + r.skipped;
         oktest.print(target._indent + '  (' + str + ')');
       }
@@ -1091,7 +1091,7 @@ oktest.QuietReporter = oktest.util.classdef(
   function QuietReporter() {
     oktest.Reporter.call(this);
     this._specs = [];
-    this._count = {target: 0, spec: 0, success: 0, failed: 0, error: 0, skipped: 0};
+    this._count = {target: 0, spec: 0, passed: 0, failed: 0, error: 0, skipped: 0};
   },
 
   new oktest.Reporter(),
@@ -1102,7 +1102,7 @@ oktest.QuietReporter = oktest.util.classdef(
       oktest.print("");
       var c = this._count;
       oktest.print("(target: " + c.target + ", spec: " + c.spec +
-                   ", success: " + c.success + ", failed: " + c.failed +
+                   ", passed: " + c.passed + ", failed: " + c.failed +
                    ", error: " + c.error + ", skipped: " + c.skipped + ")");
       for (var i = 0, n = this._specs.length; i < n; i++) {
         var spec = this._specs[i];
@@ -1126,7 +1126,7 @@ oktest.QuietReporter = oktest.util.classdef(
 
     def.afterTarget = function afterTarget(target) {
       this._count.target++;
-      this._count.success += target.results.success;
+      this._count.passed  += target.results.passed;
       this._count.failed  += target.results.failed;
       this._count.error   += target.results.error;
       this._count.skipped += target.results.skipped;
