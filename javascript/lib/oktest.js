@@ -787,7 +787,8 @@ oktest.TargetObject = oktest.util.classdef(
       var target_obj = this;
       var spec_obj = new oktest.SpecObject(target_obj, desc, body);
       this.specs.push(spec_obj);
-      return spec_obj;
+      //return spec_obj;
+      return target_obj;
     };
 
     def.should = def.spec;  // alias
