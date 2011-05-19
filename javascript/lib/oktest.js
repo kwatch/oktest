@@ -832,6 +832,7 @@ oktest.SpecObject = oktest.util.classdef(
     this.desc = desc;
     this.body = body;
     this.status = null;
+    this._fixture_names = oktest.util.argumentNames(body);
   },
 
   null,
@@ -886,6 +887,9 @@ oktest.SpecObject = oktest.util.classdef(
   }
 
 );
+
+
+oktest.fixtures = {};
 
 
 oktest.Runner = oktest.util.classdef(
@@ -949,7 +953,8 @@ oktest.Runner = oktest.util.classdef(
       var status = '';
       var msg = null;
       try {
-        spec.body(spec);
+        var fixture_values = spec.getFixtures(spec._fixture_names);
+        spec.body.apply(spec, fixture_values);
         spec.target.results.passed++;
         spec.status = '.';
       }
