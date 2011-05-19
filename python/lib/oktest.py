@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'NG', 'run', 'spec',)
+__all__ = ('ok', 'not_ok', 'NG', 'run', 'spec', 'test')
 
 import sys, os, re, types, traceback
 
@@ -898,6 +898,40 @@ class Spec(_Context):
 def spec(desc):
     return Spec(desc)
 
+
+##
+## test() decorator
+##
+
+def test(desc):
+    localvars = sys._getframe(1).f_locals
+    #name = 'test_' + re.sub(r'[^\w]', '_', text)
+    n = localvars.get('__n', 0) + 1
+    localvars['__n'] = n
+    newname = 'test_%04d_' % n + re.sub(r'[^\w]', '_', text)
+    def deco(func):
+        if python3:
+            argnames = func.__code__.co_varnames
+        else:
+            argnames = func.func_code.co_varnames
+        argnames = argnames[1:]   # except 'self'
+        if argnames:
+            orig_func = func
+            def newfunc(self):
+                argvalues = []
+                for argname in argnames:
+                    key = 'fixture_' + argname
+                    fixturefunc = getattr(self, key, None) or globals().get(key)
+                    if not fixturefunc:
+                        raise NameError("%s(): not found." % key)
+                    argvalues.append(fixturefunc(newfunc))
+                return orig_func(self, *argvalues)
+            func = newfunc
+        localvars[newname] = func
+        func.__name__ = newname
+        func.__doc__ = text
+        return func
+    return deco
 
 
 ##
