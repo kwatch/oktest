@@ -883,12 +883,31 @@ oktest.SpecObject = oktest.util.classdef(
       return values;
     };
 
+    /**
+     * Break fixtures.
+     *
+     * @protected
+     */
+    def.breakFixtures = function breakFixtures(names, values) {
+      var spec = this;
+      var breakers = oktest.breakers;
+      for (var i = 0, n = names.length; i < n; i++) {
+        var key = names[i];
+        var k = 'breaker_' + key;
+        var t = spec.target;
+        while (t && !t[k]) t = t.parent;
+        var func = t ? t[k] : breakers[key] ? breakers[key] : null;
+        if (func) func.call(spec, values[i], key);
+      }
+    };
+
   }
 
 );
 
 
 oktest.fixtures = {};
+oktest.breakers = {};
 
 
 oktest.Runner = oktest.util.classdef(
@@ -951,8 +970,9 @@ oktest.Runner = oktest.util.classdef(
     def.visitSpec = function visitSpec(spec) {
       var status = '';
       var msg = null;
+      var fixture_values = null;
       try {
-        var fixture_values = spec.getFixtures(spec._fixture_names);
+        fixture_values = spec.getFixtures(spec._fixture_names);
         spec.body.apply(spec, fixture_values);
         spec.target.results.passed++;
         spec.status = '.';
@@ -977,6 +997,7 @@ oktest.Runner = oktest.util.classdef(
       }
       finally {
         spec.msg = msg;
+        spec.breakFixtures(spec._fixture_names, fixture_values);
       }
     };
 
