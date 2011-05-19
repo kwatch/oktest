@@ -877,7 +877,8 @@ oktest.SpecObject = oktest.util.classdef(
         //if (typeof(global) === "object" && ! t && global[k]) t = global;
         var func = t ? t[k] : fixtures[key] ? fixtures[key] : null;
         if (! func) throw new ReferenceError("Neither " + k + "() nor oktest.fixtures." + key + " not found.");
-        values.push(func(spec));
+        //values.push(func(key, spec));
+        values.push(func.call(spec, key));
       }
       return values;
     };
