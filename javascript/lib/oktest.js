@@ -86,6 +86,17 @@ oktest.util = {
     return arr2;
   },
 
+  argumentNames: function argumentNames(func) {
+    var m = func.toString().match(/function\s+\w*?\((.*?)\)/);
+    var arr = m[1].split(',');
+    var argnames = [];
+    for (var i = 0, n = arr.length; i < n; i++) {
+      var arg = arr[i].replace(/^\s+/, '').replace(/\s+$/, '');
+      if (arg) argnames.push(arg);
+    }
+    return argnames;
+  },
+
   readFile: function readFile(filename) { },
 
   writeFile: function writeFile(filename) { },
