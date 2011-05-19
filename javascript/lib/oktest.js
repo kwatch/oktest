@@ -757,7 +757,7 @@ oktest.TargetObject = oktest.util.classdef(
     this.depth = depth;
     this._indent = (new Array(depth+1)).join("  ");
     stack.push(this);
-    defun(this);
+    defun.call(this, this);
     stack.pop();
   },
 
