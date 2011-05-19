@@ -861,22 +861,20 @@ oktest.SpecObject = oktest.util.classdef(
     };
 
     /**
-     * Parse function and return argument names.
+     * Return fixture values.
      *
      * @protected
      */
     def.getFixtures = function getFixtures(names) {
       var spec = this;
       var values = [];
+      var fixtures = oktest.fixtures;
       for (var i = 0, n = names.length; i < n; i++) {
         var key = names[i];
-        var val = null;
         var k = 'fixture_' + key;
-        var t = spec.target;
-        while (t && !t[k]) t = t.parent;
+        for (var t = spec.target; t && !t[k]; t = t.parent) ;
         //if (typeof(module) === "object" && ! t && module[k]) t = module;
         //if (typeof(global) === "object" && ! t && global[k]) t = global;
-        var fixtures = oktest.fixtures;
         var func = t ? t[k] : fixtures[key] ? fixtures[key] : null;
         if (! func) throw new ReferenceError("Neither " + k + "() nor oktest.fixtures." + key + " not found.");
         values.push(func(spec));
