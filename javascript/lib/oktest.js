@@ -870,15 +870,15 @@ oktest.SpecObject = oktest.util.classdef(
       var values = [];
       var fixtures = oktest.fixtures;
       for (var i = 0, n = names.length; i < n; i++) {
-        var key = names[i];
-        var k = 'fixture_' + key;
+        var name = names[i];
+        var k = 'supply_' + name;
         for (var t = spec.target; t && !t[k]; t = t.parent) ;
         //if (typeof(module) === "object" && ! t && module[k]) t = module;
         //if (typeof(global) === "object" && ! t && global[k]) t = global;
-        var func = t ? t[k] : fixtures[key] ? fixtures[key] : null;
-        if (! func) throw new ReferenceError("Neither " + k + "() nor oktest.fixtures." + key + " not found.");
+        var func = t ? t[k] : fixtures[k] ? fixtures[k] : null;
+        if (! func) throw new ReferenceError("Neither " + k + "() nor oktest.fixtures." + k + " not found.");
         //values.push(func(key, spec));
-        values.push(func.call(spec, key));
+        values.push(func.call(spec, name));
       }
       return values;
     };
@@ -888,16 +888,16 @@ oktest.SpecObject = oktest.util.classdef(
      *
      * @protected
      */
-    def.breakFixtures = function breakFixtures(names, values) {
+    def.releaseFixtures = function releaseFixtures(names, values) {
       var spec = this;
-      var breakers = oktest.breakers;
+      var fixtures = oktest.fixtures;
       for (var i = 0, n = names.length; i < n; i++) {
-        var key = names[i];
-        var k = 'breaker_' + key;
+        var name = names[i];
+        var k = 'release_' + name;
         var t = spec.target;
         while (t && !t[k]) t = t.parent;
-        var func = t ? t[k] : breakers[key] ? breakers[key] : null;
-        if (func) func.call(spec, values[i], key);
+        var func = t ? t[k] : fixtures[k] ? fixtures[k] : null;
+        if (func) func.call(spec, values[i], name);
       }
     };
 
@@ -907,7 +907,6 @@ oktest.SpecObject = oktest.util.classdef(
 
 
 oktest.fixtures = {};
-oktest.breakers = {};
 
 
 oktest.Runner = oktest.util.classdef(
@@ -997,7 +996,7 @@ oktest.Runner = oktest.util.classdef(
       }
       finally {
         spec.msg = msg;
-        spec.breakFixtures(spec._fixture_names, fixture_values);
+        spec.releaseFixtures(spec._fixture_names, fixture_values);
       }
     };
 
