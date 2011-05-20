@@ -14,16 +14,16 @@ from oktest import test
 with_stmt_available = sys.version_info >= (2, 5,)
 
 
-def fixture_g1():
+def supply_g1():
     return {"key": "G1"}
 
-def fixture_g2(name):
+def supply_g2(name):
     return {"key": "G2", "name": name}
 
-def fixture_g3(name, testfunc):
+def supply_g3(name, testfunc):
     return {"key": "G2", "name": name, "testfunc": testfunc}
 
-def fixture_g4():
+def supply_g4():
     return {"key": "G4"}
 
 _releasers_are_called = {}
@@ -60,16 +60,16 @@ class TestDeco_TC(unittest.TestCase):
     ## test fixtures
     ##
 
-    def fixture_item1(self):
+    def supply_item1(self):
         return {"key": "ITEM1"}
 
-    def fixture_item2(self, name):
+    def supply_item2(self, name):
         return {"key": "ITEM2", "name": name}
 
-    def fixture_item3(self, name, testfunc):
+    def supply_item3(self, name, testfunc):
         return {"key": "ITEM2", "name": name, "testfunc": testfunc}
 
-    def fixture_item4(self):
+    def supply_item4(self):
         return {"key": "ITEM4"}
 
     def release_item1(self):

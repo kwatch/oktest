@@ -906,7 +906,7 @@ def spec(desc):
 class FixtureManager(object):
 
     def supply(self, name, testobj, testfunc, globalvars):
-        key = 'fixture_' + name
+        key = 'supply_' + name
         fn = getattr(testobj, key, None) or globalvars.get(key)
         if not fn:
             raise NameError("%s(): not found." % key)
