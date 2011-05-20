@@ -59,13 +59,13 @@ class TestDeco_TC(unittest.TestCase):
     @test("description text is used as a part of test method name")
     def t(self):
         desc = "description text is used as a part of test method name"
-        desc = re.sub(r'[^\w]', '_', desc)
+        #desc = re.sub(r'[^\w]', '_', desc)
         d = self.__class__.__dict__
         lst = [ k for k in d if k.find(desc) > 0 ]
         assert len(lst) == 1
         name = lst[0]
         assert hasattr(d[name], '__call__')
-        assert re.match(r'^test_\d\d\d_' + desc, name)
+        assert re.match(r'^test_\d\d\d: ' + desc, name)
 
     @test("test methods are indexed")
     def t(self):
@@ -73,7 +73,7 @@ class TestDeco_TC(unittest.TestCase):
         names = [ k for k in d if k.startswith('test_') ]
         nums = []
         for name in names:
-            m = re.search(r'^test_(\d+)_', name)
+            m = re.search(r'^test_(\d+): ', name)
             assert m
             nums.append(m.group(1))
         f = open(__file__)

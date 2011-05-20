@@ -939,7 +939,8 @@ def test(description_text, **options):
     globalvars = frame.f_globals
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
-    newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', description_text)
+    #newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', description_text)
+    newname = 'test_%03d: ' % n + description_text
     def deco(orig_func):
         argnames = func_argnames(orig_func)
         fixture_names = argnames[1:]   # except 'self'
