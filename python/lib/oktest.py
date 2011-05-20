@@ -903,13 +903,9 @@ def spec(desc):
 ## test() decorator
 ##
 
-class TestDecorator(object):
+class FixtureSupplier(object):
 
-    def supply_fixtures(self, names, obj, testfunc, globalvars):
-        meth = self.supply_fixture
-        return [ meth(name, obj, testfunc, globalvars) for name in names ]
-
-    def supply_fixture(self, name, obj, testfunc, globalvars):
+    def supply(self, name, obj, testfunc, globalvars):
         key = 'fixture_' + name
         fn = getattr(obj, key, None) or globalvars.get(key)
         if not fn:
@@ -919,11 +915,7 @@ class TestDecorator(object):
         if n == 1: return fn(name)
         return fn(name, testfunc)
 
-    def release_fixtures(self, names, values, obj, testfunc, globalvars):
-        for name, value in zip(names, values):
-            self.release_fixture(name, value, obj, testfunc, globalvars)
-
-    def release_fixture(self, name, value, obj, testfunc, globalvars):
+    def release(self, name, value, obj, testfunc, globalvars):
         key = 'release_' + name
         fn = getattr(obj, key, None) or globalvars.get(key)
         if not fn:
@@ -933,6 +925,20 @@ class TestDecorator(object):
         if n == 1: return fn(name)
         if n == 2: return fn(name, value)
         return fn(name, value, testfunc)
+
+
+class TestDecorator(object):
+
+    fixture_supplier = FixtureSupplier()
+
+    def supply_fixtures(self, names, obj, testfunc, globalvars):
+        meth = self.fixture_supplier.supply
+        return [ meth(name, obj, testfunc, globalvars) for name in names ]
+
+    def release_fixtures(self, names, values, obj, testfunc, globalvars):
+        meth = self.fixture_supplier.release
+        for name, value in zip(names, values):
+            meth(name, value, obj, testfunc, globalvars)
 
     def __call__(self, text):
         frame = sys._getframe(1)
