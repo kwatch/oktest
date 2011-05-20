@@ -900,14 +900,14 @@ def spec(desc):
 
 
 ##
-## test() decorator
+## fixture manager
 ##
 
 class FixtureManager(object):
 
-    def supply(self, name, obj, testfunc, globalvars):
+    def supply(self, name, testobj, testfunc, globalvars):
         key = 'fixture_' + name
-        fn = getattr(obj, key, None) or globalvars.get(key)
+        fn = getattr(testobj, key, None) or globalvars.get(key)
         if not fn:
             raise NameError("%s(): not found." % key)
         n = len(func_argnames(fn))
@@ -915,9 +915,9 @@ class FixtureManager(object):
         if n == 1: return fn(name)
         return fn(name, testfunc)
 
-    def release(self, name, value, obj, testfunc, globalvars):
+    def release(self, name, value, testobj, testfunc, globalvars):
         key = 'release_' + name
-        fn = getattr(obj, key, None) or globalvars.get(key)
+        fn = getattr(testobj, key, None) or globalvars.get(key)
         if not fn:
             return
         n = len(func_argnames(fn))
@@ -926,46 +926,40 @@ class FixtureManager(object):
         if n == 2: return fn(name, value)
         return fn(name, value, testfunc)
 
+fixture_manager = FixtureManager()
 
-class TestDecorator(object):
 
-    fixture_manager = FixtureManager()
+##
+## @test() decorator
+##
 
-    def supply_fixtures(self, names, obj, testfunc, globalvars):
-        meth = self.fixture_manager.supply
-        return [ meth(name, obj, testfunc, globalvars) for name in names ]
-
-    def release_fixtures(self, names, values, obj, testfunc, globalvars):
-        meth = self.fixture_manager.release
-        for name, value in zip(names, values):
-            meth(name, value, obj, testfunc, globalvars)
-
-    def __call__(self, text):
-        frame = sys._getframe(1)
-        localvars = frame.f_locals
-        globalvars = frame.f_globals
-        n = localvars.get('__n', 0) + 1
-        localvars['__n'] = n
-        newname = 'test_%04d_' % n + re.sub(r'[^\w]', '_', text)
-        def deco(func):
-            argnames = func_argnames(func)
-            fixture_names = argnames[1:]   # except 'self'
-            if fixture_names:
-                orig_func = func
-                def newfunc(self_):
-                    fixtures = self.supply_fixtures(fixture_names, self_, newfunc, globalvars)
-                    try:
-                        return orig_func(self_, *fixtures)
-                    finally:
-                        self.release_fixtures(fixture_names, fixtures, self_, newfunc, globalvars)
-                func = newfunc
-            localvars[newname] = func
-            func.__name__ = newname
-            func.__doc__ = text
-            return func
-        return deco
-
-test = TestDecorator()
+def test(text):
+    frame = sys._getframe(1)
+    localvars  = frame.f_locals
+    globalvars = frame.f_globals
+    n = localvars.get('__n', 0) + 1
+    localvars['__n'] = n
+    newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', text)
+    def deco(func):
+        argnames = func_argnames(func)
+        fixture_names = argnames[1:]   # except 'self'
+        if fixture_names:
+            orig_func = func
+            def newfunc(self):
+                meth = fixture_manager.supply
+                fixtures = [ meth(name, self, newfunc, globalvars) for name in fixture_names ]
+                try:
+                    return orig_func(self, *fixtures)
+                finally:
+                    meth = fixture_manager.release
+                    for name, value in zip(fixture_names, fixtures):
+                        meth(name, value, self, newfunc, globalvars)
+            func = newfunc
+        localvars[newname] = func
+        func.__name__ = newname
+        func.__doc__ = text
+        return func
+    return deco
 
 
 if python3:
