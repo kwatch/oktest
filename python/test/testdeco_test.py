@@ -105,6 +105,19 @@ class TestDeco_TC(unittest.TestCase):
         pass         # nothing should be raised
 
 
+    ##
+    ## options test
+    ##
+
+    @test("set options to test object", name="Haruhi", team="SOS")
+    def t(self):
+        assert self._options == {"name": "Haruhi", "team": "SOS"}
+
+    @test("set options even when fixtures are supplied", name="Sasaki", team="Tengai")
+    def t(self, item1, g1):
+        assert self._options == {"name": "Sasaki", "team": "Tengai"}
+
+
 if __name__ == '__main__':
     #unittest.main()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeco_TC)

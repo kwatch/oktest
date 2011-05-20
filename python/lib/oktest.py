@@ -933,32 +933,37 @@ fixture_manager = FixtureManager()
 ## @test() decorator
 ##
 
-def test(text):
+def test(description_text, **options):
     frame = sys._getframe(1)
     localvars  = frame.f_locals
     globalvars = frame.f_globals
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
-    newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', text)
-    def deco(func):
-        argnames = func_argnames(func)
+    newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', description_text)
+    def deco(orig_func):
+        argnames = func_argnames(orig_func)
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
-            orig_func = func
             def newfunc(self):
+                self._options = options
                 meth = fixture_manager.supply
-                fixtures = [ meth(name, self, newfunc, globalvars) for name in fixture_names ]
+                fixtures = [ meth(name, self, newfunc, globalvars)
+                                 for name in fixture_names ]
                 try:
                     return orig_func(self, *fixtures)
                 finally:
                     meth = fixture_manager.release
                     for name, value in zip(fixture_names, fixtures):
                         meth(name, value, self, newfunc, globalvars)
-            func = newfunc
-        localvars[newname] = func
-        func.__name__ = newname
-        func.__doc__ = text
-        return func
+        else:
+            def newfunc(self):
+                self._options = options
+                return orig_func(self)
+        localvars[newname] = newfunc
+        newfunc.__name__ = newname
+        newfunc.__doc__  = description_text
+        newfunc._options = options
+        return newfunc
     return deco
 
 
