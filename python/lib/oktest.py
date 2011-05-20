@@ -903,35 +903,77 @@ def spec(desc):
 ## test() decorator
 ##
 
-def test(desc):
-    localvars = sys._getframe(1).f_locals
-    #name = 'test_' + re.sub(r'[^\w]', '_', text)
-    n = localvars.get('__n', 0) + 1
-    localvars['__n'] = n
-    newname = 'test_%04d_' % n + re.sub(r'[^\w]', '_', text)
-    def deco(func):
-        if python3:
-            argnames = func.__code__.co_varnames
+class TestDecorator(object):
+
+    def supply_fixtures(self, names, obj, testfunc, globalvars):
+        meth = self.supply_fixture
+        return [ meth(name, obj, testfunc, globalvars) for name in names ]
+
+    def supply_fixture(self, name, obj, testfunc, globalvars):
+        key = 'fixture_' + name
+        fn = getattr(obj, key, None) or globalvars.get(key)
+        if not fn:
+            raise NameError("%s(): not found." % key)
+        n = len(func_argnames(fn))
+        if n == 0: return fn()
+        if n == 1: return fn(name)
+        return fn(name, testfunc)
+
+    def release_fixtures(self, names, values, obj, testfunc, globalvars):
+        for name, value in zip(names, values):
+            self.release_fixture(name, value, obj, testfunc, globalvars)
+
+    def release_fixture(self, name, value, obj, testfunc, globalvars):
+        key = 'release_' + name
+        fn = getattr(obj, key, None) or globalvars.get(key)
+        if not fn:
+            return
+        n = len(func_argnames(fn))
+        if n == 0: return fn()
+        if n == 1: return fn(name)
+        if n == 2: return fn(name, value)
+        return fn(name, value, testfunc)
+
+    def __call__(self, text):
+        frame = sys._getframe(1)
+        localvars = frame.f_locals
+        globalvars = frame.f_globals
+        n = localvars.get('__n', 0) + 1
+        localvars['__n'] = n
+        newname = 'test_%04d_' % n + re.sub(r'[^\w]', '_', text)
+        def deco(func):
+            argnames = func_argnames(func)
+            fixture_names = argnames[1:]   # except 'self'
+            if fixture_names:
+                orig_func = func
+                def newfunc(self_):
+                    fixtures = self.supply_fixtures(fixture_names, self_, newfunc, globalvars)
+                    try:
+                        return orig_func(self_, *fixtures)
+                    finally:
+                        self.release_fixtures(fixture_names, fixtures, self_, newfunc, globalvars)
+                func = newfunc
+            localvars[newname] = func
+            func.__name__ = newname
+            func.__doc__ = text
+            return func
+        return deco
+
+test = TestDecorator()
+
+
+if python3:
+    def func_argnames(func):
+        if hasattr(func, '__func__'):
+            return func.__func__.__code__.co_varnames[1:]
         else:
-            argnames = func.func_code.co_varnames
-        argnames = argnames[1:]   # except 'self'
-        if argnames:
-            orig_func = func
-            def newfunc(self):
-                argvalues = []
-                for argname in argnames:
-                    key = 'fixture_' + argname
-                    fixturefunc = getattr(self, key, None) or globals().get(key)
-                    if not fixturefunc:
-                        raise NameError("%s(): not found." % key)
-                    argvalues.append(fixturefunc(newfunc))
-                return orig_func(self, *argvalues)
-            func = newfunc
-        localvars[newname] = func
-        func.__name__ = newname
-        func.__doc__ = text
-        return func
-    return deco
+            return func.__code__.co_varnames
+else:
+    def func_argnames(func):
+        if hasattr(func, 'im_func'):
+            return func.im_func.func_code.co_varnames[1:]
+        else:
+            return func.func_code.co_varnames
 
 
 ##
