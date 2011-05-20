@@ -56,6 +56,35 @@ class TestDeco_TC(unittest.TestCase):
         expected = 2
         assert 1 + 1 == expected
 
+    @test("description text is used as a part of test method name")
+    def t(self):
+        desc = "description text is used as a part of test method name"
+        desc = re.sub(r'[^\w]', '_', desc)
+        d = self.__class__.__dict__
+        lst = [ k for k in d if k.find(desc) > 0 ]
+        assert len(lst) == 1
+        name = lst[0]
+        assert hasattr(d[name], '__call__')
+        assert re.match(r'^test_\d\d\d_' + desc, name)
+
+    @test("test methods are indexed")
+    def t(self):
+        d = self.__class__.__dict__
+        names = [ k for k in d if k.startswith('test_') ]
+        nums = []
+        for name in names:
+            m = re.search(r'^test_(\d+)_', name)
+            assert m
+            nums.append(m.group(1))
+        f = open(__file__)
+        s = f.read()
+        f.close()
+        n = len(list(re.finditer(r'\n    @test\(', s)))
+        assert len(nums) == n
+        nums.sort()
+        expected = [ "%003d" % n for n in range(1, n+1) ]
+        assert nums == expected
+
 
     ##
     ## test fixtures
