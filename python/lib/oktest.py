@@ -903,7 +903,7 @@ def spec(desc):
 ## test() decorator
 ##
 
-class FixtureSupplier(object):
+class FixtureManager(object):
 
     def supply(self, name, obj, testfunc, globalvars):
         key = 'fixture_' + name
@@ -929,14 +929,14 @@ class FixtureSupplier(object):
 
 class TestDecorator(object):
 
-    fixture_supplier = FixtureSupplier()
+    fixture_manager = FixtureManager()
 
     def supply_fixtures(self, names, obj, testfunc, globalvars):
-        meth = self.fixture_supplier.supply
+        meth = self.fixture_manager.supply
         return [ meth(name, obj, testfunc, globalvars) for name in names ]
 
     def release_fixtures(self, names, values, obj, testfunc, globalvars):
-        meth = self.fixture_supplier.release
+        meth = self.fixture_manager.release
         for name, value in zip(names, values):
             meth(name, value, obj, testfunc, globalvars)
 
