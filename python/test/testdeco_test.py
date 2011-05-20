@@ -3,15 +3,12 @@
 ### $Copyright: copyright(c) 2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
-from __future__ import with_statement
 
 import sys, os, re
 import unittest
 
 import oktest
 from oktest import test
-
-with_stmt_available = sys.version_info >= (2, 5,)
 
 
 def supply_g1():
