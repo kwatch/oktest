@@ -43,6 +43,23 @@ def release_g3(name):
 
 class TestDeco_TC(unittest.TestCase):
 
+    ##
+    ## test basic feature
+    ##
+
+    @test("demo: 2 - 1 should be 1")
+    def t(self):
+        assert 2 - 1 == 1
+
+    @test("demo: 1 + 1 should be 2")
+    def t(self):
+        assert 1 + 1 == 2
+
+
+    ##
+    ## test fixtures
+    ##
+
     def fixture_item1(self):
         return {"key": "ITEM1"}
 
@@ -76,14 +93,6 @@ class TestDeco_TC(unittest.TestCase):
             assert _releasers_are_called["g2"] == ("g2", {"key": "G2", "name": "g2"})
             assert _releasers_are_called["g3"] == ("g3",)
 
-    @test("demo: 2 - 1 should be 1")
-    def t(self):
-        assert 2 - 1 == 1
-
-    @test("demo: 1 + 1 should be 2")
-    def t(self):
-        assert 1 + 1 == 2
-
     @test("fixtures should be set")
     def t(self, item1, g1):
         assert item1 == {"key": "ITEM1"}
@@ -106,7 +115,7 @@ class TestDeco_TC(unittest.TestCase):
 
 
     ##
-    ## options test
+    ## test options
     ##
 
     @test("set options to test object", name="Haruhi", team="SOS")
