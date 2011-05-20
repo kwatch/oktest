@@ -53,7 +53,8 @@ class TestDeco_TC(unittest.TestCase):
 
     @test("demo: 1 + 1 should be 2")
     def t(self):
-        assert 1 + 1 == 2
+        expected = 2
+        assert 1 + 1 == expected
 
 
     ##

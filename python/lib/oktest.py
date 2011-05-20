@@ -969,16 +969,22 @@ def test(description_text, **options):
 
 if python3:
     def func_argnames(func):
-        if hasattr(func, '__func__'):
-            return func.__func__.__code__.co_varnames[1:]
+        if isinstance(func, types.MethodType):
+            codeobj = func.__func__.__code__
+            index = 1
         else:
-            return func.__code__.co_varnames
+            codeobj = func.__code__
+            index = 0
+        return codeobj.co_varnames[index:codeobj.co_argcount]
 else:
     def func_argnames(func):
-        if hasattr(func, 'im_func'):
-            return func.im_func.func_code.co_varnames[1:]
+        if isinstance(func, types.MethodType):
+            codeobj = func.im_func.func_code
+            index = 1
         else:
-            return func.func_code.co_varnames
+            codeobj = func.func_code
+            index = 0
+        return codeobj.co_varnames[index:codeobj.co_argcount]
 
 
 ##
