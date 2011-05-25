@@ -860,7 +860,7 @@ class Spec(_Context):
             if method.startswith("test"):
                 arg_name = frame.f_code.co_varnames[0]
                 testcase = frame.f_locals.get(arg_name, None)
-                if hasattr(testcase, "_testMethodName"):
+                if hasattr(testcase, "_testMethodName") or hasattr(testcase, "_TestCase__testMethodName"):
                     return testcase
         return None
 
