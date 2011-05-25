@@ -13,6 +13,13 @@ from oktest import ok, run, spec, Spec
 
 with_stmt_available = sys.version_info >= (2, 5,)
 
+python3 = sys.version_info[0] == 3
+
+def replace_with_stmt(content):
+    content = content.replace('with spec', '#with spec')
+    content = content.replace('from __future__', '#from __future__')
+    return content
+
 
 class Spec_TC(unittest.TestCase):
 
@@ -53,15 +60,18 @@ class Spec_TC(unittest.TestCase):
         obj = Spec("SOS")
         self._run_by_oktest = True
         self._oktest_specs = []
+        ret = arr = None
         try:
             obj.__enter__()
             ok (1+1) == 0
         except:
-            ret = obj.__exit__(*sys.exc_info())
-        ex = sys.exc_info()[1]
+            arr = sys.exc_info()
+            ret = obj.__exit__(*arr)
+        ex = sys.exc_info()[1]   # exception object in Python2, None in Python3
         assert ret == True
-        assert obj._exception == sys.exc_info()[1]
-        assert obj._traceback == sys.exc_info()[2]
+        assert isinstance(arr, tuple)
+        assert obj._exception == arr[1]
+        assert obj._traceback == arr[2]
         assert obj._stacktrace
         assert isinstance(obj._stacktrace, list)
 
@@ -69,6 +79,39 @@ class Spec_TC(unittest.TestCase):
         obj = spec("SOS")
         assert isinstance(obj, Spec)
         assert obj.desc == "SOS"
+
+
+try:
+    import subprocess
+
+    def _system(command):
+        try:
+            from subprocess import Popen, PIPE
+            pipe = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE,
+                         close_fds=True, universal_newlines=True)
+            stdin, stdout, stderr = pipe.stdin, pipe.stdout, pipe.stderr
+            stdin.close()
+            sout = stdout.read()
+            serr = stderr.read()
+            return sout, serr
+        finally:
+            stdout.close()
+            stderr.close()
+
+except ImportError:
+
+    import popen2
+
+    def _system(command):
+        stdin, stdout, stderr = popen2.popen3(command)
+        try:
+            stdin.close()
+            sout = stdout.read()
+            serr = stderr.read()
+            return sout, serr
+        finally:
+            stdout.close()
+            stderr.close()
 
 
 class Spec_TestScenario_TC(unittest.TestCase):
@@ -79,10 +122,7 @@ class Spec_TestScenario_TC(unittest.TestCase):
         f.close()
         command = "%s %s" % (sys.executable, file_name)
         try:
-            stdin, stdout, stderr = os.popen3(command)
-            stdin.close()
-            sout = stdout.read(); stdout.close()
-            serr = stderr.read(); stderr.close()
+            sout, serr = _system(command)
             return sout, serr
         finally:
             if os.path.exists(file_name):
@@ -104,8 +144,7 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-### FooTest
-ff
+### FooTest: ff
 Failed: FooTest#test_1()
   2 == 1 : failed.
   File "__test_scenario1.py", line 8, in test_1
@@ -116,8 +155,7 @@ Failed: FooTest#test_1()
     ok (1-1) == 1
 """[1:]
         expected2 = r"""
-### FooTest
-f
+### FooTest: f
 Failed: FooTest#test_1()
   2 == 1 : failed.
   File "__test_scenario1.py", line 8, in test_1
@@ -131,7 +169,7 @@ Failed: FooTest#test_1()
             assert serr == ""
         ## without with-stmt
         if True:
-            input2 = input.replace('with spec', '#with spec')
+            input2 = replace_with_stmt(input)
             sout, serr = self._run_oktest(fname, input2)
             assert sout == expected2
             assert serr == ""
@@ -164,8 +202,7 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-### FooTest
-ff
+### FooTest: ff
 Failed: FooTest#test1()
   2 == 0 : failed.
   File "__test_scenario2.py", line 13, in test1
@@ -184,8 +221,7 @@ Failed: FooTest#test1()
     ok ("KYON").starts_with("ky")
 """[1:]
         expected2 = r"""
-### FooTest
-f
+### FooTest: f
 Failed: FooTest#test1()
   2 == 0 : failed.
   File "__test_scenario2.py", line 13, in test1
@@ -203,7 +239,7 @@ Failed: FooTest#test1()
             assert serr == ""
         ## without with-statement
         if True:
-            input2 = input.replace('with spec', '#with spec')
+            input2 = replace_with_stmt(input)
             sout, serr = self._run_oktest(fname, input2)
             assert sout == expected2
             assert serr == ""
@@ -230,8 +266,7 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-### FooTest
-E
+### FooTest: E
 ERROR: FooTest#test1()
   AttributeError: 'NoneType' object has no attribute 'unknownattribute'
   File "__test_scenario3.py", line 7, in test1
@@ -250,8 +285,8 @@ ERROR: FooTest#test1()
             assert serr == ""
         ## without with-statement
         if True:
-            input2 = input.replace('with spec', '#with spec') \
-                          .replace('ok (1+1) == 0', '#ok (1+1) == 0')
+            input2 = replace_with_stmt(input)
+            input2 = input2.replace('ok (1+1) == 0', '#ok (1+1) == 0')
             sout, serr = self._run_oktest(fname, input2)
             assert sout == expected2
             assert serr == ""
