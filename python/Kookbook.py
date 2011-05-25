@@ -54,7 +54,7 @@ def _with_backup(filepath):
     return deco
 
 
-TEST_NAMES = ('oktest', 'helpers', 'tracer', 'doc')
+TEST_NAMES = ('oktest', 'helpers', 'tracer', 'spec', 'testdeco', 'doc')
 
 
 @recipe
@@ -111,6 +111,18 @@ def _run_helpers_test(c, ver, bin):
 def _run_tracer_test(c, ver, bin):
     """invoke 'test/tracer_test.py'"""
     fpath = 'test/tracer_test.py'
+    _invoke_test(c, ver, bin, fpath)
+
+
+def _run_spec_test(c, ver, bin):
+    """invoke 'test/spec_test.py'"""
+    fpath = 'test/spec_test.py'
+    _invoke_test(c, ver, bin, fpath)
+
+
+def _run_testdeco_test(c, ver, bin):
+    """invoke 'test/testdeco_test.py'"""
+    fpath = 'test/testdeco_test.py'
     _invoke_test(c, ver, bin, fpath)
 
 
