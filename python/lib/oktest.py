@@ -690,7 +690,7 @@ class SimpleReporter(BaseReporter):
 
     def before_all(self, klass):
         self.klass = klass
-        OUT.write("### %s\n" % klass.__name__)
+        OUT.write("### %s: " % klass.__name__)
         self.buf = []
 
     def after_all(self, klass):

@@ -1850,8 +1850,7 @@ class FooTest(object):
 run(FooTest)
 """[1:]
 expected = r"""
-### FooTest
-.fEf
+### FooTest: .fEf
 Failed: FooTest#test_failed()
   2 == 3 : failed.
   File "_test_.py", line 9, in test_failed
@@ -1893,8 +1892,7 @@ class FooTest(object):
 run(FooTest)
 """[1:]
 expected = r"""
-### FooTest
-.*** warning: oktest: ok() is called but not tested. (file '_test_.py', line 9)
+### FooTest: .*** warning: oktest: ok() is called but not tested. (file '_test_.py', line 9)
 .*** warning: oktest: not_ok() is called but not tested. (file '_test_.py', line 11)
 .
 """[1:]
