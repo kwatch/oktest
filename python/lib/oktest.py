@@ -557,7 +557,7 @@ class TestRunner(object):
                                 count += 1
                                 self.reporter.print_failed(obj, spec._exception, spec._traceback, spec._stacktrace)
                     if not failed:
-                        self.reporter.print_ok(obj)
+                        self.reporter.print_passed(obj)
             finally:
                 self._invoke_after(obj)
         self._invoke_after_all(self.klass)
@@ -630,7 +630,7 @@ class Reporter(object):
     def after(self, obj):
         pass
 
-    def print_ok(self, obj):
+    def print_passed(self, obj):
         pass
 
     def print_failed(self, obj, ex, tb=None, stacktrace=None):
@@ -697,7 +697,7 @@ class SimpleReporter(BaseReporter):
         OUT.write("\n")
         OUT.write("".join(self.buf))
 
-    def print_ok(self, obj):
+    def print_passed(self, obj):
         OUT.write("."); OUT.flush()
 
     def _write(self, str):
@@ -738,7 +738,7 @@ class OldStyleReporter(BaseReporter):
     def before(self, obj):
         OUT.write("* %s ... " % self._test_ident(obj))
 
-    def print_ok(self, obj):
+    def print_passed(self, obj):
         OUT.write("[ok]\n")
 
     _traceback_entry_format = "   %s:%s: %s\n"
@@ -772,7 +772,7 @@ class TapStyleReporter(BaseReporter):
     def after_all(self, klass):
         OUT.write("\n")
 
-    def print_ok(self, obj):
+    def print_passed(self, obj):
         OUT.write("ok     # %s\n" % self._test_ident(obj))
 
     def _print_traceback_entry(self, file, line, func, text):
