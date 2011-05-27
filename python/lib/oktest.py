@@ -91,16 +91,22 @@ def ex2msg(ex):
     return str(ex) or '(no error message)'
 
 
-def _msg(target, op, other=None):
+def _diff_p(target, op, other):
     if op == '==' and target != other and _is_string(target) and _is_string(other):
         if DIFF:
             #if python2 or isinstance(target, str) and isinstance(other, str):
             is_a = isinstance
             if (            is_a(target, str)     and is_a(other, str)    )  or \
                (python2 and is_a(target, unicode) and is_a(other, unicode)):
-                diff = _diff(target, other)
-                msg = "%s == %s : failed." % (repr(target), repr(other))
-                return (msg, diff)
+                return True
+    return False
+
+
+def _msg(target, op, other=None):
+    if _diff_p(target, op, other):
+        diff = _diff(target, other)
+        msg = "%s == %s : failed." % (repr(target), repr(other))
+        return (msg, diff)
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
     elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
     else:                     msg = '%r %s %r' % (target, op, other)
