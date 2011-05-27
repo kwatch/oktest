@@ -92,13 +92,16 @@ def ex2msg(ex):
 
 
 def _diff_p(target, op, other):
-    if op == '==' and target != other and _is_string(target) and _is_string(other):
-        if DIFF:
-            #if python2 or isinstance(target, str) and isinstance(other, str):
-            is_a = isinstance
-            if (            is_a(target, str)     and is_a(other, str)    )  or \
-               (python2 and is_a(target, unicode) and is_a(other, unicode)):
-                return True
+    if op != '==':             return False
+    if target == other:        return False
+    #if not _is_string(target): return False
+    #if not _is_string(other):  return False
+    if not DIFF:               return False
+    is_a = isinstance
+    if is_a(target, str) and is_a(other, str):
+        return True
+    if python2 and is_a(target, unicode) and is_a(other, unicode):
+        return True
     return False
 
 
