@@ -105,10 +105,17 @@ def _diff_p(target, op, other):
     return False
 
 
+def _truncated_repr(obj, max=80+15):
+    s = repr(obj)
+    if len(s) > max:
+        return s[:max - 15] + ' [truncated]...'
+    return s
+
+
 def _msg(target, op, other=None):
     if _diff_p(target, op, other):
         diff = _diff(target, other)
-        msg = "%s == %s : failed." % (repr(target), repr(other))
+        msg = "%s == %s : failed." % (_truncated_repr(target), _truncated_repr(other))
         return (msg, diff)
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
     elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
