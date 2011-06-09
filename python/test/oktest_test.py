@@ -574,9 +574,9 @@ run('FooTest', 'BarTest')
 expected = r"""
 * FooTest.test_not_raises1 ... [ok]
 * FooTest.test_not_raises2 ... [ok]
-* BarTest.test_not_raises1 ... [NG] Exception should not be raised : failed.
+* BarTest.test_not_raises1 ... [NG] Exception should not be raised : failed, got ValueError('errmsg1',).
    _test_.py:15: ok (f).not_raise(Exception)
-* BarTest.test_not_raises2 ... [NG] ValueError should not be raised : failed.
+* BarTest.test_not_raises2 ... [NG] ValueError should not be raised : failed, got ValueError('errmsg1',).
    _test_.py:18: ok (f).not_raise(ValueError)
 """[1:]
 do_test_with(desc, script, expected)

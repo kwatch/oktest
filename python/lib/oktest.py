@@ -418,7 +418,7 @@ def _f():
                     self.failed("%r == %r : failed." % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
             else:
                 if isinstance(ex, exception_class):
-                    self.failed('%s should not be raised : failed.' % exception_class.__name__, depth=3)
+                    self.failed('%s should not be raised : failed, got %r.' % (exception_class.__name__, ex), depth=3)
         else:
             if flag_raise and ex is None:
                 self.failed('%s should be raised : failed.' % exception_class.__name__, depth=3)
