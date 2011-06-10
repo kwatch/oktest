@@ -15,17 +15,18 @@ if python3:
     from io import StringIO
     with_statement_supported = True
 
-for path in ['lib', '../lib']:
-    if os.path.isdir(path):
-        sys.path.append(path)
-        os.environ['PYTHONPATH'] = path
-        break
+#for path in ['lib', '../lib']:
+#    if os.path.isdir(path):
+#        sys.path.append(path)
+#        os.environ['PYTHONPATH'] = path
+#        break
 os.environ['OKTEST_REPORTER'] = 'OldStyleReporter'
 
 import oktest
 
 echo = sys.stdout.write
 python_command = os.environ.get('PYTHON', 'python')
+python24 = sys.version_info[0:2] == (2, 4)
 
 def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[\d]s')):
     filename = '_test_.py'
@@ -39,6 +40,8 @@ def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[\d]s')):
         #output_err = serr.read();  serr.close()
         if isinstance(output, str):
             output = re.sub(r' at 0x[0-9a-f]{6,9}', '', output)
+        if python24:
+            expected = expected.replace("failed, got ValueError('errmsg1',)", "failed, got <exceptions.ValueError instance>")
         if output == expected:
             echo("done.\n")
         elif _pat.sub('', output) == _pat.sub('', expected):
