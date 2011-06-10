@@ -14,25 +14,13 @@ from oktest import test
 def provide_g1():
     return {"key": "G1"}
 
-def provide_g2(name):
-    return {"key": "G2", "name": name}
-
-def provide_g3(name, testfunc):
-    return {"key": "G2", "name": name, "testfunc": testfunc}
-
 def provide_g4():
     return {"key": "G4"}
 
 _releasers_are_called = {}
 
 def release_g1(value):
-    _releasers_are_called["g1"] = True
-
-def release_g2(value):
-    _releasers_are_called["g2"] = value
-
-def release_g3(value):
-    _releasers_are_called["g3"] = ("g3",)
+    _releasers_are_called["g1"] = value
 
 #def release_g4():
 #    pass
@@ -90,48 +78,27 @@ class TestDeco_TC(unittest.TestCase):
     def provide_item1(self):
         return {"key": "ITEM1"}
 
-    def provide_item2(self, name):
-        return {"key": "ITEM2", "name": name}
-
-    def provide_item3(self, name, testfunc):
-        return {"key": "ITEM2", "name": name, "testfunc": testfunc}
-
     def provide_item4(self):
         return {"key": "ITEM4"}
 
     def release_item1(self, value):
-        self._release_item1_called = True
-
-    def release_item2(self, value):
-        self._release_item2_called = value
-
-    def release_item3(self, value):
-        self._release_item3_called = ("item3",)
+        self._release_item1_called = value
 
     #def release_item4(self):
     #    pass
 
     def tearDown(self):
         if getattr(self, '_check_releasers_called', None):
-            assert self._release_item1_called == True
-            assert self._release_item2_called == {"key": "ITEM2", "name": "item2"}
-            assert self._release_item3_called == ("item3",)
-            assert _releasers_are_called["g1"] == True
-            assert _releasers_are_called["g2"] == {"key": "G2", "name": "g2"}
-            assert _releasers_are_called["g3"] == ("g3",)
+            assert self._release_item1_called == {"key": "ITEM1"}
+            assert _releasers_are_called["g1"] == {"key": "G1"}
 
     @test("fixtures should be set")
     def t(self, item1, g1):
         assert item1 == {"key": "ITEM1"}
         assert g1    == {"key": "G1"}
 
-    @test("arguments of fixture supplier function can be variable")
-    def t(self, item2, g2):
-        assert item2 == {"key": "ITEM2", "name": "item2"}
-        assert g2    == {"key": "G2", "name": "g2"}
-
     @test("releaser function is called if defined")
-    def t(self, item1, item2, item3, g1, g2, g3):
+    def t(self, item1, item4, g1):
         _releasers_are_called.clear()
         assert len(_releasers_are_called) == 0
         self._check_releasers_called = True    # enable assertions in tearDown()

@@ -922,15 +922,12 @@ def spec(desc):
 
 class FixtureManager(object):
 
-    def provide(self, name, testobj, testfunc, globalvars):
+    def provide(self, name, testobj, globalvars):
         key = 'provide_' + name
         fn = getattr(testobj, key, None) or globalvars.get(key)
         if not fn:
             raise NameError("%s(): not found." % key)
-        n = len(func_argnames(fn))
-        if n == 0: return fn()
-        if n == 1: return fn(name)
-        return fn(name, testfunc)
+        return fn()
 
     def release(self, name, value, testobj, testfunc, globalvars):
         key = 'release_' + name
@@ -961,7 +958,7 @@ def test(description_text, **options):
             def newfunc(self):
                 self._options = options
                 meth = fixture_manager.provide
-                fixtures = [ meth(name, self, newfunc, globalvars)
+                fixtures = [ meth(name, self, globalvars)
                                  for name in fixture_names ]
                 try:
                     return orig_func(self, *fixtures)
