@@ -937,11 +937,7 @@ class FixtureManager(object):
         fn = getattr(testobj, key, None) or globalvars.get(key)
         if not fn:
             return
-        n = len(func_argnames(fn))
-        if n == 0: return fn()
-        if n == 1: return fn(name)
-        if n == 2: return fn(name, value)
-        return fn(name, value, testfunc)
+        return fn(value)
 
 fixture_manager = FixtureManager()
 

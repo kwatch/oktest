@@ -25,14 +25,14 @@ def provide_g4():
 
 _releasers_are_called = {}
 
-def release_g1():
+def release_g1(value):
     _releasers_are_called["g1"] = True
 
-def release_g2(name, value):
-    _releasers_are_called["g2"] = (name, value)
+def release_g2(value):
+    _releasers_are_called["g2"] = value
 
-def release_g3(name):
-    _releasers_are_called["g3"] = (name,)
+def release_g3(value):
+    _releasers_are_called["g3"] = ("g3",)
 
 #def release_g4():
 #    pass
@@ -99,14 +99,14 @@ class TestDeco_TC(unittest.TestCase):
     def provide_item4(self):
         return {"key": "ITEM4"}
 
-    def release_item1(self):
+    def release_item1(self, value):
         self._release_item1_called = True
 
-    def release_item2(self, name, value):
-        self._release_item2_called = (name, value)
+    def release_item2(self, value):
+        self._release_item2_called = value
 
-    def release_item3(self, name):
-        self._release_item3_called = (name,)
+    def release_item3(self, value):
+        self._release_item3_called = ("item3",)
 
     #def release_item4(self):
     #    pass
@@ -114,10 +114,10 @@ class TestDeco_TC(unittest.TestCase):
     def tearDown(self):
         if getattr(self, '_check_releasers_called', None):
             assert self._release_item1_called == True
-            assert self._release_item2_called == ("item2", {"key": "ITEM2", "name": "item2"})
+            assert self._release_item2_called == {"key": "ITEM2", "name": "item2"}
             assert self._release_item3_called == ("item3",)
             assert _releasers_are_called["g1"] == True
-            assert _releasers_are_called["g2"] == ("g2", {"key": "G2", "name": "g2"})
+            assert _releasers_are_called["g2"] == {"key": "G2", "name": "g2"}
             assert _releasers_are_called["g3"] == ("g3",)
 
     @test("fixtures should be set")
