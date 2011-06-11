@@ -922,21 +922,91 @@ def spec(desc):
 
 class FixtureManager(object):
 
-    def provide(self, name, testobj, globalvars):
-        key = 'provide_' + name
-        fn = getattr(testobj, key, None) or globalvars.get(key)
-        if not fn:
-            raise NameError("%s(): not found." % key)
-        return fn()
+    parent = None
 
-    def release(self, name, value, testobj, testfunc, globalvars):
-        key = 'release_' + name
-        fn = getattr(testobj, key, None) or globalvars.get(key)
-        if not fn:
-            return
-        return fn(value)
+    def invoke(self, func, testcase, fixture_names, globalvars):
+        """invoke function with fixtures."""
+        releasers = {"self": None}
+        solved    = {"self": testcase}
+        in_progress = []
+        #
+        def _solve(name):
+            if name not in solved:
+                provider, releaser = self.find(name, testcase, globalvars)
+                solved[name] = _call(name, provider)
+                releasers[name] = releaser
+            return solved[name]
+        #
+        def _call(name, provider):
+            argnames = func_argnames(provider)
+            if not argnames:
+                return provider()
+            in_progress.append(name)
+            args = []
+            for aname in argnames:
+                if aname in solved:
+                    avalue = solved[aname]
+                elif aname not in in_progress:
+                    avalue = _solve(aname)
+                else:
+                    raise self._looped_dependency_error(aname, in_progress, testcase)
+                args.append(avalue)
+            in_progress.remove(name)
+            return provider(*args)
+        #
+        fixtures = [ _solve(name) for name in fixture_names ]
+        assert not in_progress
+        #
+        try:
+            self = testcase
+            return func(self, *fixtures)
+        #
+        finally:
+            for name in solved:
+                releaser = releasers[name]
+                if releaser:
+                    releaser(solved[name])
+
+    def find(self, name, testcase, globalvars):
+        """return provide_xxx() and release_xxx() functions."""
+        provider_name = 'provide_' + name
+        releaser_name = 'release_' + name
+        meth = getattr(testcase, provider_name, None)
+        if meth:
+            provider = meth
+            if python2:
+                if hasattr(meth, 'im_func'):  provider = meth.im_func
+            elif python3:
+                if hasattr(meth, '__func__'): provider = meth.__func__
+            releaser = getattr(testcase, releaser_name, None)
+            return (provider, releaser)
+        elif provider_name in globalvars:
+            provider = globalvars[provider_name]
+            if not isinstance(provider, types.FunctionType):
+                raise TypeError("%s: expected function but got %s." % (provider_name, type(provider)))
+            releaser = globalvars.get(releaser_name)
+            return (provider, releaser)
+        elif self.parent:
+            return self.parent.find(name, testcase, globalvars)
+        else:
+            raise NameError("%s: no such fixture provider for '%s'." % (provider_name, name))
+
+    def _looped_dependency_error(self, aname, in_progress, testcase):
+        names = in_progress + [aname]
+        pos   = names.index(aname)
+        loop  = '=>'.join(names[pos:])
+        if pos > 0:
+            loop = '->'.join(names[0:pos]) + '->' + loop
+        classname = testcase.__class__.__name__
+        testdesc  = testcase._description
+        return LoopedDependencyError("fixture dependency is looped: %s (class: %s, test: '%s')" % (loop, classname, testdesc))
+
 
 fixture_manager = FixtureManager()
+
+
+class LoopedDependencyError(ValueError):
+    pass
 
 
 ##
@@ -957,23 +1027,16 @@ def test(description_text, **options):
         if fixture_names:
             def newfunc(self):
                 self._options = options
-                meth = fixture_manager.provide
-                fixtures = [ meth(name, self, globalvars)
-                                 for name in fixture_names ]
-                try:
-                    return orig_func(self, *fixtures)
-                finally:
-                    meth = fixture_manager.release
-                    for name, value in zip(fixture_names, fixtures):
-                        meth(name, value, self, newfunc, globalvars)
+                self._description = description_text
+                return fixture_manager.invoke(orig_func, self, fixture_names, globalvars)
         else:
             def newfunc(self):
                 self._options = options
+                self._description = description_text
                 return orig_func(self)
         localvars[newname] = newfunc
         newfunc.__name__ = newname
         newfunc.__doc__  = description_text
-        newfunc._options = options
         return newfunc
     return deco
 

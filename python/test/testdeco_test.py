@@ -61,10 +61,10 @@ class TestDeco_TC(unittest.TestCase):
             m = re.search(r'^test_(\d+): ', name)
             assert m
             nums.append(m.group(1))
-        f = open(__file__)
-        s = f.read()
-        f.close()
-        n = len(list(re.finditer(r'\n    @test\(', s)))
+        f = open(__file__); s = f.read(); f.close()
+        m = re.compile(r'^class TestDeco.*?^(class|if) ', re.M | re.S).search(s)
+        n = len(list(re.finditer(r'\n    @test\(', m.group(0))))
+        self.assertEqual(n, len(nums))
         assert len(nums) == n
         nums.sort()
         expected = [ "%003d" % n for n in range(1, n+1) ]
@@ -88,24 +88,89 @@ class TestDeco_TC(unittest.TestCase):
     #    pass
 
     def tearDown(self):
+        #
         if getattr(self, '_check_releasers_called', None):
-            assert self._release_item1_called == {"key": "ITEM1"}
-            assert _releasers_are_called["g1"] == {"key": "G1"}
+            self._test_releasers_called()
+        #
+        if getattr(self, '_check_release_d_called', None):
+            self._test_release_d_called()
 
     @test("fixtures should be set")
     def t(self, item1, g1):
         assert item1 == {"key": "ITEM1"}
         assert g1    == {"key": "G1"}
 
-    @test("releaser function is called if defined")
+    @test("releaser functions are called if defined")
     def t(self, item1, item4, g1):
         _releasers_are_called.clear()
         assert len(_releasers_are_called) == 0
         self._check_releasers_called = True    # enable assertions in tearDown()
 
+    def _test_releasers_called(self):
+        assert hasattr(self, '_release_item1_called')
+        assert self._release_item1_called == {"key": "ITEM1"}
+        assert _releasers_are_called["g1"] == {"key": "G1"}
+
     @test("releaser function is not called if not defined")
     def t(self, item4, g4):
         pass         # nothing should be raised
+
+
+    def provide_foo():
+        return "<FOO>"
+
+    @test("provider function can invoke without self.")
+    def t(self, foo):
+        self.assertEqual("<FOO>", foo)
+
+
+    ##
+    ## test fixture dependencies
+    ##
+
+    def provide_x(self, y1, z1):  return y1 + z1 + ["X"]
+    def provide_y1(self, y2):     return y2 + ["Y1"]
+    def provide_y2(self):         return ["Y2"]
+    def provide_z1(self, z2):     return z2 + ["Z1"]
+    def provide_z2(self):         return ["Z2"]
+    def release_z1(self, val):    self._release_z1_called = val
+
+    @test("dependencies between fixtures are solved")
+    def t(self, x):
+        self.assertEqual(["Y2", "Y1", "Z2", "Z1", "X"], x)
+
+    @test("releaser function of depended fixtures are invoked.")
+    def t(self, x):
+        self._check_release_z1_called = True
+
+    def _test_release_z1_called(self):
+        assert hasattr(self, '_release_z1_called')
+        assert self._release_z1_called == ["E", "D"]
+
+
+    def provide_a(b):    return b + ["A"]
+    def provide_b(c, e): return c + ["B"]
+    def provide_c(d):    return d + ["C"]
+    def provide_d():     return ["D"]
+    def provide_e(f, g): return f + ["E"]
+    def provide_f(h):    return h + ["F"]
+    def provide_g(b):    return b + ["G"]   # looped
+    def provide_h():     return ["F"]
+
+    @test("detects loop in fixture dependencies.")
+    def t(self):
+
+        @test("desc1")
+        def fn(self, a):
+            pass
+        try:
+            fn(self)
+        except oktest.LoopedDependencyError:
+            ex = sys.exc_info()[1]
+            expected = "fixture dependency is looped: a->b=>e=>g=>b (class: TestDeco_TC, test: 'desc1')"
+            self.assertEqual(expected, str(ex))
+        else:
+            assert False, "LoopedDependencyError expected but not raised."
 
 
     ##
@@ -119,6 +184,10 @@ class TestDeco_TC(unittest.TestCase):
     @test("set options even when fixtures are supplied", name="Sasaki", team="Tengai")
     def t(self, item1, g1):
         assert self._options == {"name": "Sasaki", "team": "Tengai"}
+
+    def provide_item1(self):
+        return {"key": "ITEM1"}
+
 
 
 if __name__ == '__main__':
