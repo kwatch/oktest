@@ -917,25 +917,25 @@ def spec(desc):
 
 
 ##
-## fixture manager
+## fixture resolver
 ##
 
-class FixtureManager(object):
+class FixtureResolver(object):
 
     parent = None
 
     def invoke(self, func, testcase, fixture_names, globalvars):
         """invoke function with fixtures."""
         releasers = {"self": None}
-        solved    = {"self": testcase}
+        resolved  = {"self": testcase}
         in_progress = []
         #
-        def _solve(name):
-            if name not in solved:
+        def _resolve(name):
+            if name not in resolved:
                 provider, releaser = self.find(name, testcase, globalvars)
-                solved[name] = _call(name, provider)
+                resolved[name] = _call(name, provider)
                 releasers[name] = releaser
-            return solved[name]
+            return resolved[name]
         #
         def _call(name, provider):
             argnames = func_argnames(provider)
@@ -944,17 +944,17 @@ class FixtureManager(object):
             in_progress.append(name)
             args = []
             for aname in argnames:
-                if aname in solved:
-                    avalue = solved[aname]
+                if aname in resolved:
+                    avalue = resolved[aname]
                 elif aname not in in_progress:
-                    avalue = _solve(aname)
+                    avalue = _resolve(aname)
                 else:
                     raise self._looped_dependency_error(aname, in_progress, testcase)
                 args.append(avalue)
             in_progress.remove(name)
             return provider(*args)
         #
-        fixtures = [ _solve(name) for name in fixture_names ]
+        fixtures = [ _resolve(name) for name in fixture_names ]
         assert not in_progress
         #
         try:
@@ -962,10 +962,10 @@ class FixtureManager(object):
             return func(self, *fixtures)
         #
         finally:
-            for name in solved:
+            for name in resolved:
                 releaser = releasers[name]
                 if releaser:
-                    releaser(solved[name])
+                    releaser(resolved[name])
 
     def find(self, name, testcase, globalvars):
         """return provide_xxx() and release_xxx() functions."""
@@ -1002,7 +1002,7 @@ class FixtureManager(object):
         return LoopedDependencyError("fixture dependency is looped: %s (class: %s, test: '%s')" % (loop, classname, testdesc))
 
 
-fixture_manager = FixtureManager()
+fixture_resolver = FixtureResolver()
 
 
 class LoopedDependencyError(ValueError):
@@ -1028,7 +1028,7 @@ def test(description_text, **options):
             def newfunc(self):
                 self._options = options
                 self._description = description_text
-                return fixture_manager.invoke(orig_func, self, fixture_names, globalvars)
+                return fixture_resolver.invoke(orig_func, self, fixture_names, globalvars)
         else:
             def newfunc(self):
                 self._options = options
