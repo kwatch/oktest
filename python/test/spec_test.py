@@ -145,21 +145,30 @@ oktest.run()
 """[1:]
         expected1 = r"""
 ### FooTest: ff
+======================================================================
 Failed: FooTest#test_1()
-  2 == 1 : failed.
+----------------------------------------------------------------------
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
+AssertionError: 2 == 1 : failed.
+
+======================================================================
 Failed: FooTest#test_1()
-  0 == 1 : failed.
+----------------------------------------------------------------------
   File "__test_scenario1.py", line 10, in test_1
     ok (1-1) == 1
+AssertionError: 0 == 1 : failed.
+
 """[1:]
         expected2 = r"""
 ### FooTest: f
+======================================================================
 Failed: FooTest#test_1()
-  2 == 1 : failed.
+----------------------------------------------------------------------
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
+AssertionError: 2 == 1 : failed.
+
 """[1:]
         fname = "__test_scenario1.py"
         ## with with-stmt
@@ -203,33 +212,42 @@ oktest.run()
 """[1:]
         expected1 = r"""
 ### FooTest: ff
+======================================================================
 Failed: FooTest#test1()
-  2 == 0 : failed.
+----------------------------------------------------------------------
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 18, in _m3
     ok (1+1) == 0
+AssertionError: 2 == 0 : failed.
+
+======================================================================
 Failed: FooTest#test1()
-  'KYON'.startswith('ky') : failed.
+----------------------------------------------------------------------
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 21, in _m3
     ok ("KYON").starts_with("ky")
+AssertionError: 'KYON'.startswith('ky') : failed.
+
 """[1:]
         expected2 = r"""
 ### FooTest: f
+======================================================================
 Failed: FooTest#test1()
-  2 == 0 : failed.
+----------------------------------------------------------------------
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 18, in _m3
     ok (1+1) == 0
+AssertionError: 2 == 0 : failed.
+
 """[1:]
         fname = "__test_scenario2.py"
         ## with with-statement
@@ -267,14 +285,17 @@ oktest.run()
 """[1:]
         expected1 = r"""
 ### FooTest: E
+======================================================================
 ERROR: FooTest#test1()
-  AttributeError: 'NoneType' object has no attribute 'unknownattribute'
+----------------------------------------------------------------------
   File "__test_scenario3.py", line 7, in test1
     self._m2()
   File "__test_scenario3.py", line 9, in _m2
     self._m3()
   File "__test_scenario3.py", line 15, in _m3
     None.unknownattribute
+AttributeError: 'NoneType' object has no attribute 'unknownattribute'
+
 """[1:]
         expected2 = expected1
         fname = "__test_scenario3.py"

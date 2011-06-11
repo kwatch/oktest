@@ -1854,22 +1854,31 @@ run(FooTest)
 """[1:]
 expected = r"""
 ### FooTest: .fEf
+======================================================================
 Failed: FooTest#test_failed()
-  2 == 3 : failed.
+----------------------------------------------------------------------
   File "_test_.py", line 9, in test_failed
     ok (1+1) == 3
+AssertionError: 2 == 3 : failed.
+
+======================================================================
 ERROR: FooTest#test_error()
-  ValueError: invalid literal for int() with base 10: 'aaa'
+----------------------------------------------------------------------
   File "_test_.py", line 11, in test_error
     ok (int('aaa')) == 0
+ValueError: invalid literal for int() with base 10: 'aaa'
+
+======================================================================
 Failed: FooTest#test_nested()
-  2 == 0 : failed.
+----------------------------------------------------------------------
   File "_test_.py", line 13, in test_nested
     self._test1()
   File "_test_.py", line 15, in _test1
     self._test2()
   File "_test_.py", line 17, in _test2
     ok (1+1) == 0
+AssertionError: 2 == 0 : failed.
+
 """[1:]
 if python2 and sys.version_info[1] <= 4:
     expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')

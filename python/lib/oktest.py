@@ -720,6 +720,15 @@ class SimpleReporter(BaseReporter):
     def _write(self, str):
         self.buf.append(str)
 
+    def _top_separator(self):
+        self._write("======================================================================\n")
+
+    def _middle_separator(self):
+        self._write("----------------------------------------------------------------------\n")
+
+    def _bottom_separator(self):
+        self._write("\n")
+
     def _print_traceback_entry(self, file, line, func, text):
         if func:  self._write('  File "%s", line %s, in %s\n' % (file, line, func))
         else:     self._write('  File "%s", line %s\n'        % (file, line))
@@ -727,17 +736,25 @@ class SimpleReporter(BaseReporter):
 
     def print_failed(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("f"); OUT.flush()
+        self._top_separator()
         self._write("Failed: %s()\n" % self._test_ident(obj))
-        self._write("  %s\n" % ex2msg(ex))
+        self._middle_separator()
+        #self._write("  %s\n" % ex2msg(ex))
         self._print_traceback(tb, stacktrace, all=False)
+        self._write("%s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         if getattr(ex, 'diff', None):
             self._write(ex.diff)
+        self._bottom_separator()
 
     def print_error(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("E"); OUT.flush()
+        self._top_separator()
         self._write("ERROR: %s()\n" % self._test_ident(obj))
-        self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
+        self._middle_separator()
+        #self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
         self._print_traceback(tb, stacktrace, all=True)
+        self._write("%s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
+        self._bottom_separator()
 
 
 ## NOTICE! reporter spec will be changed frequently
