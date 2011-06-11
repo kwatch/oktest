@@ -201,8 +201,8 @@ class AssertionObject(object):
 
     def _assertion_error(self, msg, file, line, diff):
         #return TestFailed(msg, file=file, line=line, diff=diff)
-        ex = ASSERTION_ERROR(msg)
-        ex.file = file;  ex.line = line;  ex.diff = diff
+        ex = ASSERTION_ERROR(diff and msg + "\n" + diff or msg)
+        ex.file = file;  ex.line = line;  ex.diff = diff;  ex.errmsg = msg
         ex._raised_by_oktest = True
         return ex
 
@@ -742,8 +742,8 @@ class SimpleReporter(BaseReporter):
         #self._write("  %s\n" % ex2msg(ex))
         self._print_traceback(tb, stacktrace, all=False)
         self._write("%s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        if getattr(ex, 'diff', None):
-            self._write(ex.diff)
+        #if getattr(ex, 'diff', None):
+        #    self._write(ex.diff)
         self._bottom_separator()
 
     def print_error(self, obj, ex, tb=None, stacktrace=None):
@@ -782,11 +782,16 @@ class OldStyleReporter(BaseReporter):
         OUT.write(self._traceback_entry_format % (file, line, text))
 
     def print_failed(self, obj, ex, tb=None, stacktrace=None):
-        OUT.write("[NG] %s\n" % ex2msg(ex))
+        raised_by_oktest = hasattr(ex, '_raised_by_oktest')
+        if raised_by_oktest:
+            OUT.write("[NG] %s\n" % ex.errmsg)
+        else:
+            OUT.write("[NG] %s\n" % ex2msg(ex))
         self._traceback_entry_format = "   %s:%s: %s\n"
         self._print_traceback(tb, stacktrace, all=False)
-        if getattr(ex, 'diff', None):
-            OUT.write(ex.diff)
+        if raised_by_oktest:
+            if getattr(ex, 'diff', None):
+                OUT.write(ex.diff)
 
     def print_error(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
@@ -814,10 +819,14 @@ class TapStyleReporter(BaseReporter):
 
     def print_failed(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("not ok # %s\n" % self._test_ident(obj))
-        OUT.write("   #  %s\n" % ex2msg(ex))
-        self._print_traceback(tb, stacktrace, all=False)
-        if getattr(ex, 'diff', None):
-            OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
+        if hasattr(ex, '_raised_by_oktest'):
+            OUT.write("   #  %s\n" % ex.errmsg)
+            self._print_traceback(tb, stacktrace, all=False)
+            if getattr(ex, 'diff', None):
+                OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
+        else:
+            OUT.write("   #  %s\n" % ex2msg(ex))
+            self._print_traceback(tb, stacktrace, all=False)
 
     def print_error(self, obj, ex, tb=None, stacktrace=None):
         OUT.write("ERROR  # %s\n" % self._test_ident(obj))
