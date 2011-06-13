@@ -30,13 +30,15 @@ python = prop('python', 'python')
 
 python_binaries = [
     ('2.4', '/opt/local/bin/python2.4'),
-    ('2.5', '/opt/local/bin/python2.5'),
-    ('2.6', '/opt/local/bin/python2.6'),
+    #('2.5', '/opt/local/bin/python2.5'),
+    #('2.6', '/opt/local/bin/python2.6'),
     #('2.7', '/opt/local/bin/python2.7'),
-    ('2.7', '/usr/local/python/2.7.1/bin/python'),
-    ('3.0', '/usr/local/python/3.0.1/bin/python'),
-    ('3.1', '/usr/local/python/3.1/bin/python'),
-    ('3.2', '/usr/local/python/3.2rc1/bin/python'),
+    ('2.5', '/opt/lang/python/2.5.5/bin/python'),
+    ('2.6', '/opt/lang/python/2.6.7/bin/python'),
+    ('2.7', '/opt/lang/python/2.7.2/bin/python'),
+    ('3.0', '/opt/lang/python/3.0.1/bin/python'),
+    ('3.1', '/opt/lang/python/3.1.4/bin/python'),
+    ('3.2', '/opt/lang/python/3.2.0/bin/python'),
 ]
 
 
@@ -54,7 +56,11 @@ def _with_backup(filepath):
     return deco
 
 
-TEST_NAMES = ('oktest', 'helpers', 'tracer', 'spec', 'testdeco', 'doc')
+TEST_NAMES = ('oktest', 'helpers', 'tracer', 'spec', 'testdeco',
+              'doc', 'assertions')
+test_names = [ os.path.basename(x).replace('_test.py', '')
+                   for x in glob("test/*_test.py") ]
+assert set(TEST_NAMES) == set(test_names)
 
 
 @recipe
@@ -85,6 +91,13 @@ def task_test(c, *args, **kwargs):
         for func in funcs:
             func(c, ver, bin)
 
+for tname in TEST_NAMES:
+    exec(r'''
+def _run_%s_test(c, ver, bin):
+    fpath = 'test/%s_test.py'
+    _invoke_test(c, ver, bin, fpath)
+''' % (tname, tname))
+
 
 def _run_oktest_test(c, ver, bin):
     """invoke 'test/oktest_test.py'"""
@@ -100,30 +113,6 @@ def _run_oktest_test(c, ver, bin):
         f()
     else:
         system(cmd)
-
-
-def _run_helpers_test(c, ver, bin):
-    """invoke 'test/helpers_test.py'"""
-    fpath = 'test/helpers_test.py'
-    _invoke_test(c, ver, bin, fpath)
-
-
-def _run_tracer_test(c, ver, bin):
-    """invoke 'test/tracer_test.py'"""
-    fpath = 'test/tracer_test.py'
-    _invoke_test(c, ver, bin, fpath)
-
-
-def _run_spec_test(c, ver, bin):
-    """invoke 'test/spec_test.py'"""
-    fpath = 'test/spec_test.py'
-    _invoke_test(c, ver, bin, fpath)
-
-
-def _run_testdeco_test(c, ver, bin):
-    """invoke 'test/testdeco_test.py'"""
-    fpath = 'test/testdeco_test.py'
-    _invoke_test(c, ver, bin, fpath)
 
 
 def _invoke_test(c, ver, bin, fpath):
@@ -257,7 +246,7 @@ def task_upload(c):
 
 @recipe
 def task_clean(c):
-    rm_rf('**/*.pyc', 'dist', 'build', 'lib/*.egg-info', c%'$(package).zip')
+    rm_rf('**/*.pyc', '**/__pycache__', 'dist', 'build', 'lib/*.egg-info', c%'$(package).zip')
 
 
 @recipe
