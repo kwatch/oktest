@@ -286,7 +286,7 @@ def _f():
         self.failed(_msg(self.target, 'in', other))
 
     @assertion
-    def not_in(self, other):  # DEPRECATED
+    def not_in(self, other):
         boolean = self.target not in other
         if boolean == self.boolean:  return self
         self.failed(_msg(self.target, 'not in', other))
@@ -322,7 +322,7 @@ def _f():
         self.failed("isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
-    def is_not_a(self, other):  # DEPRECATED
+    def is_not_a(self, other):
         boolean = not isinstance(self.target, other)
         if boolean == self.boolean:  return self
         self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
