@@ -57,16 +57,27 @@ class RunnerTestHelper(object):
             expected = expected.replace("failed, got ValueError('errmsg1',)", "failed, got <exceptions.ValueError instance>")
         if output == expected:
             self.assertEqual(expected, output)
-        elif _pat.sub('', output) == _pat.sub('', expected):
-            self.assertEqual(_pat.sub('', expected), _pat.sub('', output))
-        elif output == expected.replace('--- expected ', '--- expected').replace('+++ actual ', '+++ actual'):   # for Python 3.x
-            self.assertEqual(expected.replace('--- expected ', '--- expected').replace('+++ actual ', '+++ actual'), output)
         else:
-            self.assertEqual(expected, output)
-            if (isinstance(output, str) and isinstance(expected, str)):
-                import difflib
-                for x in difflib.unified_diff(expected.splitlines(True), output.splitlines(True), 'expected', 'actual', n=2):
-                    echo(x)
+            output   = re.sub(r'0\.00[\d]s', '0.000s', output)
+            expected = expected.replace('--- expected ', '--- expected')
+            expected = expected.replace('+++ actual ', '+++ actual')
+            output   = output  .replace('--- expected ', '--- expected')
+            output   = output  .replace('+++ actual ', '+++ actual')
+            expected = expected.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
+            output   = output  .replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
+            #ver = sys.version_info[0:3]
+            #if (2,7,2) <= ver < (3,2,0):
+            #    expected = expected.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
+            #oktest.DIFF = repr
+            #ok (output) == expected
+            try:
+                self.assertEqual(expected, output)
+            except AssertionError:
+                if (isinstance(output, str) and isinstance(expected, str)):
+                    import difflib
+                    for x in difflib.unified_diff(expected.splitlines(True), output.splitlines(True), 'expected', 'actual', n=2):
+                        echo(x)
+                raise
 
 
 
