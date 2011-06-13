@@ -67,7 +67,7 @@ assert set(TEST_NAMES) == set(test_names)
 @spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
 def task_unittest(c, *args, **kwargs):
     #optstr = " -m oktest"
-    optstr = " -m oktest -x oktest_test.py"
+    optstr = " -m oktest -x oktest_test.py test"
     if kwargs.get('a'):
         for ver, execpath in python_binaries:
             system(execpath + optstr)

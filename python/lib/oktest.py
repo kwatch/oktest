@@ -1587,7 +1587,7 @@ def _dummy():
             #parser = cmdopt.Parser()
             #parser.opt("-h").name("help")                         .desc("show help")
             #parser.opt("-v").name("version")                      .desc("version of oktest.py")
-            #parser.opt("-s").name("testdir").arg("DIR[,DIR2,..]") .desc("test directory (default 'test' or 'tests')")
+            ##parser.opt("-s").name("testdir").arg("DIR[,DIR2,..]") .desc("test directory (default 'test' or 'tests')")
             #parser.opt("-p").name("pattern").arg("PAT[,PAT2,..]") .desc("test script pattern (default '*_test.py,test_*.py')")
             #parser.opt("-x").name("exclude").arg("PAT[,PAT2,..]") .desc("exclue file pattern")
             #parser.opt("-D").name("debug")                        .desc("debug mode")
@@ -1596,7 +1596,7 @@ def _dummy():
             parser = optparse.OptionParser(conflict_handler="resolve")
             parser.add_option("-h", "--help",       action="store_true",     help="show help")
             parser.add_option("-v", "--version",    action="store_true",     help="verion of oktest.py")
-            parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
+            #parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
@@ -1654,12 +1654,14 @@ def _dummy():
 
         def _help_message(self, parser):
             buf = []; add = buf.append
-            add("Usage: python -m oktest [options]\n")
+            add("Usage: python -m oktest [options] target\n")
             #add(parser.help_message(20))
             add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
             add("Example:\n")
-            add("   ## run test scripts in 'tests' dir except foo_*.py\n")
-            add("   $ python -m oktest -s tests -X 'foo_*.py'\n")
+            add("   ## run test scripts except foo_*.py\n")
+            add("   $ python -m oktest -X 'foo_*.py' test/*_test.py\n")
+            add("   ## run test scripts in 'tests' dir with pattern '*_test.py'\n")
+            add("   $ python -m oktest -p '*_test.py' tests\n")
             return "".join(buf)
 
         def _version_info(self):
@@ -1672,17 +1674,13 @@ def _dummy():
         def _find_files(self, testdir, pattern):
             _trace = self._trace
             isdir = os.path.isdir
-            testdir = testdir or [ x for x in ("test", "tests", ".") if isdir(x) ][0]
-            pattern = pattern or "*_test.py,test_*.py"
+            assert isdir(testdir)
             filepaths = []
-            for tdir in testdir.split(","):
-                if not isdir(tdir):
-                    raise ValueError("%s: not a directory" % (tdir,))
-                for pat in pattern.split(","):
-                    files = rglob(tdir, pat)
-                    if files:
-                        filepaths.extend(files)
-                        _trace("testdir: %r, pattern: %r, files: " % (tdir, pat), files)
+            for pat in pattern.split(","):
+                files = rglob(testdir, pat)
+                if files:
+                    filepaths.extend(files)
+                    _trace("testdir: %r, pattern: %r, files: " % (testdir, pat), files)
             return filepaths
 
         def _exclude_files(self, filepaths, pattern):
@@ -1692,7 +1690,7 @@ def _dummy():
             original = filepaths[:]
             for pat in pattern.split(","):
                 filepaths = [ fpath for fpath in filepaths
-                              if not fnmatch.fnmatch(basename(fpath), pat) ]
+                                  if not fnmatch.fnmatch(basename(fpath), pat) ]
             _trace("excluded: %r" % (list(set(original) - set(filepaths)), ))
             return filepaths
 
@@ -1709,13 +1707,23 @@ def _dummy():
             _trace("python: " + sys.version.split()[0])
             _trace("oktest: " + __version__)
             _trace("opts: %r" % (opts,))
+            _trace("args: %r" % (args,))
             if opts.help:
                 print(self._help_message(parser))
                 return
             if opts.version:
                 print(self._version_info())
                 return
-            filepaths = self._find_files(opts.testdir, opts.pattern)
+            filepaths = []
+            pattern = opts.pattern or '*_test.py,test_*.py'
+            for arg in args:
+                if os.path.isfile(arg):
+                    filepaths.append(arg)
+                elif os.path.isdir(arg):
+                    files = self._find_files(arg, pattern)
+                    filepaths.extend(files)
+                else:
+                    raise ValueError("%s: file or directory expected." % (arg,))
             if opts.exclude:
                 filepaths = self._exclude_files(filepaths, opts.exclude)
             modules = self._load_modules(filepaths)
