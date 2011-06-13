@@ -138,7 +138,7 @@ class TestDeco_TC(unittest.TestCase):
 
     @test("if delegate fixture resolver is set then use it.")
     def t(self):
-        oktest.fixture_injector.delegate = DummyFixtureManager()
+        oktest.fixture_manager = DummyFixtureManager()
         try:
             called = []
             @test("T1")
@@ -153,7 +153,7 @@ class TestDeco_TC(unittest.TestCase):
             # is delegate.resolve() called?
             self.assertEqual({"foo": "[FOO]"}, DummyFixtureManager._values)
         finally:
-            oktest.fixture_injector.delegate = None
+            oktest.fixture_manager = None
 
 
     ##

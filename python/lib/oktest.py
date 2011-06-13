@@ -954,10 +954,10 @@ class FixtureManager(object):
     def release(self, name, value):
         pass
 
+fixture_manager = FixtureManager()
+
 
 class FixtureInjector(object):
-
-    delegate = FixtureManager()
 
     def invoke(self, func, testcase, fixture_names, globalvars):
         """invoke function with fixtures."""
@@ -973,8 +973,7 @@ class FixtureInjector(object):
                     resolved[name] = _call(name, provider)
                     releasers[name] = releaser
                 else:
-                    val = self.delegate.provide(name)  # may raise ValueError when missing
-                    resolved[name] = val
+                    resolved[name] = fixture_manager.provide(name)
             return resolved[name]
         #
         def _call(name, provider):
@@ -1007,7 +1006,7 @@ class FixtureInjector(object):
                     if releaser:
                         releaser(resolved[name])
                 else:
-                    self.delegate.release(name, resolved[name])
+                    fixture_manager.release(name, resolved[name])
 
     def find(self, name, testcase, globalvars):
         """return provide_xxx() and release_xxx() functions."""
