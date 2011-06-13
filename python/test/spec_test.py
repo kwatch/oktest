@@ -3,7 +3,7 @@
 ### $Copyright: copyright(c) 2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
-from __future__ import with_statement
+#from __future__ import with_statement
 
 import sys, os, re
 import unittest

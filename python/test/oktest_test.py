@@ -3,7 +3,7 @@
 ### $Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
-from __future__ import with_statement
+#from __future__ import with_statement
 
 import sys, os, re
 python2 = sys.version_info[0] == 2
@@ -1909,3 +1909,6 @@ def do_test_with(desc, script, expected,  _pat=re.compile(r'0\.00[\d]s')):
 #|.
 #|"""[1:]
 #|do_test_with(desc, script, expected)
+
+
+del os.environ['OKTEST_REPORTER']
