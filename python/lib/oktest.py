@@ -943,12 +943,21 @@ def spec(desc):
 
 
 ##
-## fixture resolver
+## fixture manager and resolver
 ##
+
+class FixtureManager(object):
+
+    def provide(self, name):
+        raise ValueError("Fixture provider for '%s' not found." % (name,))
+
+    def release(self, name, value):
+        pass
+
 
 class FixtureResolver(object):
 
-    delegate = None
+    delegate = FixtureManager()
 
     def invoke(self, func, testcase, fixture_names, globalvars):
         """invoke function with fixtures."""
@@ -963,11 +972,9 @@ class FixtureResolver(object):
                     provider, releaser = pair
                     resolved[name] = _call(name, provider)
                     releasers[name] = releaser
-                elif self.delegate:
-                    val = self.delegate.provide(name)
-                    resolved[name] = val
                 else:
-                    raise NameError("Fixture provider for '%s' not found." % (name,))
+                    val = self.delegate.provide(name)  # may raise ValueError when missing
+                    resolved[name] = val
             return resolved[name]
         #
         def _call(name, provider):
