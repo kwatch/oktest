@@ -6,6 +6,7 @@
 from __future__ import with_statement
 
 import sys, os, re
+import unittest
 import oktest
 from oktest import ok, NG, run, spec
 from oktest.helper import *
@@ -13,9 +14,9 @@ from oktest.helper import flatten, rm_rf
 from oktest.dummy import *
 
 
-class _Context_TC(object):
+class _Context_TC(unittest.TestCase):
 
-    def before(self):
+    def setUp(self):
         self.ctx = oktest._Context()
 
     def test___enter__(self):
@@ -27,7 +28,7 @@ class _Context_TC(object):
             ok (self.ctx.__exit__()) == None
 
 
-class _RunnableContext_TC(object):
+class _RunnableContext_TC(unittest.TestCase):
 
     def test_run(self):
         ctx = oktest._RunnableContext()
@@ -80,7 +81,7 @@ class _RunnableContext_TC(object):
             ok (ret) == 999
 
 
-class Spec_TC(object):
+class Spec_TC(unittest.TestCase):
 
     def test___init__(self):
         with spec("takes description."):
@@ -125,7 +126,7 @@ class Spec_TC(object):
                 os.environ.pop('SPEC')
 
 
-class GLOBAL_TC(object):
+class GLOBAL_TC(unittest.TestCase):
 
     def test_spec(self):
         obj = oktest.spec('Haruhi')
@@ -139,7 +140,7 @@ class DummyClass(object):
     pass
 
 
-class helper_TC(object):
+class helper_TC(unittest.TestCase):
 
     def test_chdir(self):
         try:
@@ -206,9 +207,9 @@ class helper_TC(object):
             pass
 
 
-class helper_rm_rf_TC(object):
+class helper_rm_rf_TC(unittest.TestCase):
 
-    def before(self):
+    def setUp(self):
         os.mkdir('_rm_rf')
         os.mkdir('_rm_rf/A')
         os.mkdir('_rm_rf/B')
@@ -217,7 +218,7 @@ class helper_rm_rf_TC(object):
         f = open('_rm_rf/Y.txt', 'w'); f.write('yyy'); f.close()
         assert os.path.isfile('_rm_rf/B/C/X.txt')
         assert os.path.isfile('_rm_rf/Y.txt')
-    def after(setup):
+    def tearDown(setup):
         import shutil
         if os.path.isdir('_rm_rf'):
             shutil.rmtree('_rm_rf')
@@ -241,7 +242,7 @@ class helper_rm_rf_TC(object):
 
 from oktest.dummy import *
 
-class dummy_TC(object):
+class dummy_TC(unittest.TestCase):
 
     def test_dummy_file(self):
         fname, content = '_test.sos.txt', 'SOS'
@@ -479,4 +480,5 @@ class dummy_TC(object):
 
 
 if __name__ == '__main__':
-    oktest.run()
+    #oktest.run()
+    unittest.main()
