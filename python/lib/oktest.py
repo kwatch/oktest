@@ -1275,6 +1275,10 @@ def _dummy():
             self.returned = self.run(func, *args, **kwargs)
             return self
 
+        def __iter__(self):
+            yield self.stdout
+            yield self.stderr
+
 
     def dummy_file(filename, content):
         return DummyFile(filename, content)

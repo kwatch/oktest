@@ -437,6 +437,9 @@ class dummy_TC(object):
             ok (sys.stderr).is_(serr)
             ok (d_io.stdout) == "MikuruYuki\n"
             ok (d_io.stderr) == "Itsuki"
+            sout, serr = d_io
+            ok (sout) == "MikuruYuki\n"
+            ok (serr) == "Itsuki"
 
 
 if __name__ == '__main__':
