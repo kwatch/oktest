@@ -67,6 +67,25 @@ def _new_module(name, local_vars, helper=None):
         helper.__all__ += mod.__all__
     return mod
 
+if python3:
+    def func_argnames(func):
+        if isinstance(func, types.MethodType):
+            codeobj = func.__func__.__code__
+            index = 1
+        else:
+            codeobj = func.__code__
+            index = 0
+        return codeobj.co_varnames[index:codeobj.co_argcount]
+else:
+    def func_argnames(func):
+        if isinstance(func, types.MethodType):
+            codeobj = func.im_func.func_code
+            index = 1
+        else:
+            codeobj = func.func_code
+            index = 0
+        return codeobj.co_varnames[index:codeobj.co_argcount]
+
 
 __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
 
@@ -943,6 +962,38 @@ def spec(desc):
 
 
 ##
+## @test() decorator
+##
+
+def test(description_text, **options):
+    frame = sys._getframe(1)
+    localvars  = frame.f_locals
+    globalvars = frame.f_globals
+    n = localvars.get('__n', 0) + 1
+    localvars['__n'] = n
+    #newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', description_text)
+    newname = 'test_%03d: ' % n + description_text
+    def deco(orig_func):
+        argnames = func_argnames(orig_func)
+        fixture_names = argnames[1:]   # except 'self'
+        if fixture_names:
+            def newfunc(self):
+                self._options = options
+                self._description = description_text
+                return fixture_injector.invoke(orig_func, self, fixture_names, globalvars)
+        else:
+            def newfunc(self):
+                self._options = options
+                self._description = description_text
+                return orig_func(self)
+        localvars[newname] = newfunc
+        newfunc.__name__ = newname
+        newfunc.__doc__  = description_text
+        return newfunc
+    return deco
+
+
+##
 ## fixture manager and injector
 ##
 
@@ -1047,58 +1098,6 @@ fixture_injector = FixtureInjector()
 
 class LoopedDependencyError(ValueError):
     pass
-
-
-##
-## @test() decorator
-##
-
-def test(description_text, **options):
-    frame = sys._getframe(1)
-    localvars  = frame.f_locals
-    globalvars = frame.f_globals
-    n = localvars.get('__n', 0) + 1
-    localvars['__n'] = n
-    #newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', description_text)
-    newname = 'test_%03d: ' % n + description_text
-    def deco(orig_func):
-        argnames = func_argnames(orig_func)
-        fixture_names = argnames[1:]   # except 'self'
-        if fixture_names:
-            def newfunc(self):
-                self._options = options
-                self._description = description_text
-                return fixture_injector.invoke(orig_func, self, fixture_names, globalvars)
-        else:
-            def newfunc(self):
-                self._options = options
-                self._description = description_text
-                return orig_func(self)
-        localvars[newname] = newfunc
-        newfunc.__name__ = newname
-        newfunc.__doc__  = description_text
-        return newfunc
-    return deco
-
-
-if python3:
-    def func_argnames(func):
-        if isinstance(func, types.MethodType):
-            codeobj = func.__func__.__code__
-            index = 1
-        else:
-            codeobj = func.__code__
-            index = 0
-        return codeobj.co_varnames[index:codeobj.co_argcount]
-else:
-    def func_argnames(func):
-        if isinstance(func, types.MethodType):
-            codeobj = func.im_func.func_code
-            index = 1
-        else:
-            codeobj = func.func_code
-            index = 0
-        return codeobj.co_varnames[index:codeobj.co_argcount]
 
 
 ##
