@@ -9,6 +9,7 @@ import sys, os, re
 import oktest
 from oktest import ok, NG, run, spec
 from oktest.helper import *
+from oktest.helper import flatten, rm_rf
 from oktest.dummy import *
 
 
@@ -182,6 +183,8 @@ class helper_TC(object):
         with spec("flatten nested list or tuple."):
             ret = oktest.helper.flatten([[1, (2, (3, 4)), 5]])
             ok (ret) == [1, 2, 3, 4, 5]
+            ret = flatten([1, [2, 3, [4, 5, [[[6]]]], [7, 8]]])
+            ok (ret) == [1, 2, 3, 4, 5, 6, 7, 8]
 
     def test_rm_rf(self):
         try:
@@ -201,6 +204,39 @@ class helper_TC(object):
                 ok ('_test_bar9').not_exist()
         finally:
             pass
+
+
+class helper_rm_rf_TC(object):
+
+    def before(self):
+        os.mkdir('_rm_rf')
+        os.mkdir('_rm_rf/A')
+        os.mkdir('_rm_rf/B')
+        os.mkdir('_rm_rf/B/C')
+        f = open('_rm_rf/B/C/X.txt', 'w'); f.write('xxx'); f.close()
+        f = open('_rm_rf/Y.txt', 'w'); f.write('yyy'); f.close()
+        assert os.path.isfile('_rm_rf/B/C/X.txt')
+        assert os.path.isfile('_rm_rf/Y.txt')
+    def after(setup):
+        import shutil
+        if os.path.isdir('_rm_rf'):
+            shutil.rmtree('_rm_rf')
+    def test_remove_files_recursively(self):
+        args = ['_rm_rf/A', '_rm_rf/B', '_rm_rf/Y.txt']
+        rm_rf(*args)
+        for arg in flatten(args):
+            ok (os.path.exists(arg)) == False
+    def test_flatten_args(self):
+        args = ['_rm_rf/A', ['_rm_rf/B', '_rm_rf/Y.txt']]
+        rm_rf(args)
+        for arg in flatten(args):
+            ok (os.path.exists(arg)) == False
+    def test_ignore_unexist_files(self):
+        args = ['_rm_rf/A', '_rm_rf/K', '_rm_rf/Z.txt']
+        def f():
+            rm_rf(*args)
+        NG (f).raises(Exception)
+
 
 
 from oktest.dummy import *
