@@ -39,6 +39,20 @@ def be_error(error_class, message):
     return deco
 
 
+def run_script(script):
+    output = None
+    try:
+        fname = "_test_.py"
+        f = open(fname, "w"); f.write(script); f.close()
+        io = os.popen("%s %s" % (sys.executable, fname))
+        try:
+            output = io.read()
+        finally:
+            io.close()
+    finally:
+        os.unlink(fname)
+    return output
+
 
 class Assertions_TC(unittest.TestCase):
 
@@ -351,6 +365,68 @@ class Assertions_TC(unittest.TestCase):
         finally:
             oktest.DIFF = bkup
 
+
+    def test_unittest_compatibility(self):
+        ## unittest compatibility
+        desc = "unittest compatibility"
+        script = r"""
+from oktest import *
+import sys
+sys.stderr = sys.stdout
+import unittest
+class FooTest(unittest.TestCase):
+  def test1(self):
+    ok (1+1) == 2
+  def test2(self):
+    ok (1+1) == 3
+unittest.main()
+"""[1:]
+        expected = r"""
+.F
+======================================================================
+FAIL: test2 (__main__.FooTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "_test_.py", line 9, in test2
+    ok (1+1) == 3
+AssertionError: 2 == 3 : failed.
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+FAILED (failures=1)
+"""[1:]
+        #do_test_with(desc, script, expected)
+        output = run_script(script)
+        output = re.sub(r'tests in 0\.(\d\d\d)s', 'tests in 0.000s', output)
+        self.assertEqual(expected, output)
+
+
+    def test_checking_testd_or_not(self):
+        ## checking tested or not
+        desc = "checking tested or not"
+        script = r"""
+from oktest import *
+import sys
+sys.stderr = sys.stdout
+import unittest
+class FooTest(object):
+  def test_1(self):
+    ok (1+1) == 2
+  def test_2(self):
+    ok (1+1)
+  def test_3(self):
+    not_ok (1+1)
+run()
+"""[1:]
+        expected = r"""
+### FooTest: .*** warning: oktest: ok() is called but not tested. (file '_test_.py', line 9)
+.*** warning: oktest: not_ok() is called but not tested. (file '_test_.py', line 11)
+.
+"""[1:]
+        #do_test_with(desc, script, expected)
+        output = run_script(script)
+        self.assertEqual(expected, output)
 
 
 if __name__ == '__main__':
