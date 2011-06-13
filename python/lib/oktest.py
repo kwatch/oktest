@@ -1010,15 +1010,15 @@ fixture_manager = FixtureManager()
 
 class FixtureInjector(object):
 
-    def invoke(self, func, testcase, fixture_names, globalvars):
+    def invoke(self, func, testcase, fixture_names, *opts):
         """invoke function with fixtures."""
-        releasers = {"self": None}
-        resolved  = {"self": testcase}
+        releasers = {"self": None}       # {"fixture_name": releaser_func()}
+        resolved  = {"self": testcase}   # {"fixture_name": fixture_value}
         in_progress = []
         #
         def _resolve(name):
             if name not in resolved:
-                pair = self.find(name, testcase, globalvars)
+                pair = self.find(name, testcase, *opts)
                 if pair:
                     provider, releaser = pair
                     resolved[name] = _call(name, provider)
@@ -1026,23 +1026,18 @@ class FixtureInjector(object):
                 else:
                     resolved[name] = fixture_manager.provide(name)
             return resolved[name]
-        #
         def _call(name, provider):
             argnames = func_argnames(provider)
             if not argnames:
                 return provider()
             in_progress.append(name)
-            args = []
-            for aname in argnames:
-                if aname in resolved:
-                    avalue = resolved[aname]
-                elif aname not in in_progress:
-                    avalue = _resolve(aname)
-                else:
-                    raise self._looped_dependency_error(aname, in_progress, testcase)
-                args.append(avalue)
+            args = [ _get_arg(aname) for aname in argnames ]
             in_progress.remove(name)
             return provider(*args)
+        def _get_arg(aname):
+            if aname in resolved:        return resolved[aname]
+            if aname not in in_progress: return _resolve(aname)
+            raise self._looped_dependency_error(aname, in_progress, testcase)
         #
         fixtures = [ _resolve(name) for name in fixture_names ]
         assert not in_progress
@@ -1051,16 +1046,20 @@ class FixtureInjector(object):
             return func(testcase, *fixtures)
         #
         finally:
-            for name in resolved:
-                if name in releasers:
-                    releaser = releasers[name]
-                    if releaser:
-                        releaser(resolved[name])
-                else:
-                    fixture_manager.release(name, resolved[name])
+            self._release_fixtures(resolved, releasers)
 
-    def find(self, name, testcase, globalvars):
+    def _release_fixtures(self, resolved, releasers):
+        for name in resolved:
+            if name in releasers:
+                releaser = releasers[name]
+                if releaser:
+                    releaser(resolved[name])
+            else:
+                fixture_manager.release(name, resolved[name])
+
+    def find(self, name, testcase, *opts):
         """return provide_xxx() and release_xxx() functions."""
+        globalvars = opts[0]
         provider_name = 'provide_' + name
         releaser_name = 'release_' + name
         meth = getattr(testcase, provider_name, None)
