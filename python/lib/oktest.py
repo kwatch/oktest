@@ -513,10 +513,19 @@ class Should(object):
 
 class TestRunner(object):
 
-    def __init__(self, klass, reporter=None):
+    _filter_test = _filter_key = _filter_val = None
+
+    def __init__(self, klass, reporter=None, filter=None):
         self.klass = klass
         if reporter is None:  reporter = REPORTER()
         self.reporter = reporter
+        self.filter = filter
+        filter = filter and filter.copy() or {}
+        if filter:
+            self._filter_test = filter.pop('test', None)
+        if filter:
+            self._filter_key  = list(filter.keys())[0]
+            self._filter_val  = filter.pop(self._filter_key)
 
     def _test_name(self, name):
         return re.sub(r'^test_?', '', name)
@@ -527,7 +536,18 @@ class TestRunner(object):
             v = getattr(self.klass, k)
             if k.startswith('test') and hasattr(v, '__call__'):
                 pairs.append((k, v))
-        ## filer by $TEST environment variable
+        ## filter by test name or user-defined options
+        pattern, key, val = self._filter_test, self._filter_key, self._filter_val
+        if pattern or key:
+            #pairs = [ t for t in pairs
+            #              if _filtered(self.klass, t[1], t[0], pattern, key, val) ]
+            arr = []
+            for t in pairs:
+                ret = _filtered(self.klass, t[1], t[0], pattern, key, val)
+                if ret:
+                    arr.append(t)
+            pairs = arr
+        ## filter by $TEST environment variable
         pattern = os.environ.get('TEST')
         if pattern:
             regexp = re.compile(pattern)
@@ -608,17 +628,30 @@ class TestRunner(object):
         return count
 
 
+def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|_\d\d\d: )?')):
+    from fnmatch import fnmatch
+    if pattern:
+        if not fnmatch(_rexp.sub('', tname), pattern):
+            return False   # skip testcase
+    if key:
+        if not meth: meth = getattr(klass, tname)
+        d = getattr(meth, '_options', None)
+        if not (d and isinstance(d, dict) and fnmatch(str(d.get(key)), val)):
+            return False   # skip testcase
+    return True   # invoke testcase
+
+
 TEST_RUNNER = TestRunner
 
 
 TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
 
-def run(*targets):
+def run(*targets, **filter):
     if len(targets) == 0:
         targets = (TARGET_PATTERN, )
     count = 0
     for klass in _target_classes(targets):
-        runner = TEST_RUNNER(klass, REPORTER())
+        runner = TEST_RUNNER(klass, REPORTER(), filter)
         count += runner.run()
     return count
 
@@ -997,6 +1030,7 @@ def test(description_text, **options):
         localvars[newname] = newfunc
         newfunc.__name__ = newname
         newfunc.__doc__  = description_text
+        newfunc._options = options
         return newfunc
     return deco
 
@@ -1600,19 +1634,24 @@ def _dummy():
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
+            parser.add_option("-f", dest="filter",  metavar="FILTER",        help="filter (class=xxx/test=xxx/useroption=xxx)")
             return parser
 
-        def _load_modules(self, filepaths):
+        def _load_modules(self, filepaths, pattern=None):
+            from fnmatch import fnmatch
             modules = []
             for fpath in filepaths:
                 mod_name = os.path.basename(fpath).replace('.py', '')
+                if pattern and not fnmatch(mod_name, pattern):
+                    continue
                 mod = load_module(mod_name, fpath)
                 modules.append(mod)
             self._trace("modules: ", modules)
             return modules
 
-        def _load_classes(self, modules):
+        def _load_classes(self, modules, pattern=None):
             import unittest
+            from fnmatch import fnmatch
             unittest_testcases = []    # classes
             oktest_testcases   = []    # classes
             for mod in modules:
@@ -1621,26 +1660,46 @@ def _dummy():
                     v = getattr(mod, k)
                     if not isinstance(v, type): continue
                     klass = v
+                    if pattern and not fnmatch(klass.__name__, pattern):
+                        continue
                     if issubclass(klass, unittest.TestCase):
                         unittest_testcases.append(klass)
                     elif re.search(TARGET_PATTERN, klass.__name__):
                         oktest_testcases.append(klass)
             return unittest_testcases, oktest_testcases
 
-        def _run_unittest(self, klasses):
+        def _run_unittest(self, klasses, pattern=None, filters=None):
+            self._trace("test_pattern: %r" % (pattern,))
             self._trace("unittest_testcases: ", klasses)
             import unittest
+            from fnmatch import fnmatch
             loader = unittest.TestLoader()
             the_suite = unittest.TestSuite()
+            rexp = re.compile(r'^test(_|_\d\d\d: )?')
+            if filters:
+                key = list(filters.keys())[0]
+                val = filters[key]
+            else:
+                key = val = None
             for klass in klasses:
-                suite = loader.loadTestsFromTestCase(klass)
+                if pattern or filters:
+                    testnames = loader.getTestCaseNames(klass)
+                    testcases = [ klass(tname) for tname in testnames
+                                      if _filtered(klass, None, tname, pattern, key, val) ]
+                    suite = loader.suiteClass(testcases)
+                else:
+                    suite = loader.loadTestsFromTestCase(klass)
                 the_suite.addTest(suite)
             runner = unittest.TextTestRunner()
             runner.run(the_suite)
 
-        def _run_oktest(self, klasses):
+        def _run_oktest(self, klasses, pattern=None, filters=None):
+            self._trace("test_pattern: %r" % (pattern,))
             self._trace("oktest_testcases: ", klasses)
-            oktest.run(*klasses)
+            if filters is None: filters = {}
+            if pattern: filters['test'] = pattern
+            import oktest
+            oktest.run(*klasses, **filters)
 
         def _trace(self, msg, items=None):
             write = sys.stderr.write
@@ -1654,14 +1713,21 @@ def _dummy():
 
         def _help_message(self, parser):
             buf = []; add = buf.append
-            add("Usage: python -m oktest [options] target\n")
+            add("Usage: python -m oktest [options] file_or_directory...\n")
             #add(parser.help_message(20))
             add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
             add("Example:\n")
             add("   ## run test scripts except foo_*.py\n")
-            add("   $ python -m oktest -X 'foo_*.py' test/*_test.py\n")
+            add("   $ python -m oktest -x 'foo_*.py' tests/*_test.py\n")
             add("   ## run test scripts in 'tests' dir with pattern '*_test.py'\n")
             add("   $ python -m oktest -p '*_test.py' tests\n")
+            add("   ## filter by class name\n")
+            add("   $ python -m oktest -f class='ClassName*' tests\n")
+            add("   ## filter by test method name\n")
+            add("   $ python -m oktest -f test='*keyword*' tests\n")
+            add("   $ python -m oktest -f '*keyword*' tests     # 'test=' is omittable\n")
+            add("   ## filter by user-defined option added by @test decorator\n")
+            add("   $ python -m oktest -f tag='*value*' tests\n")
             return "".join(buf)
 
         def _version_info(self):
@@ -1671,7 +1737,19 @@ def _dummy():
             add("")
             return "\n".join(buf)
 
-        def _find_files(self, testdir, pattern):
+        def _get_files(self, args, pattern):
+            filepaths = []
+            for arg in args:
+                if os.path.isfile(arg):
+                    filepaths.append(arg)
+                elif os.path.isdir(arg):
+                    files = self._find_files_recursively(arg, pattern)
+                    filepaths.extend(files)
+                else:
+                    raise ValueError("%s: file or directory expected." % (arg,))
+            return filepaths
+
+        def _find_files_recursively(self, testdir, pattern):
             _trace = self._trace
             isdir = os.path.isdir
             assert isdir(testdir)
@@ -1684,15 +1762,24 @@ def _dummy():
             return filepaths
 
         def _exclude_files(self, filepaths, pattern):
-            import fnmatch
+            from fnmatch import fnmatch
             _trace = self._trace
             basename = os.path.basename
             original = filepaths[:]
             for pat in pattern.split(","):
                 filepaths = [ fpath for fpath in filepaths
-                                  if not fnmatch.fnmatch(basename(fpath), pat) ]
+                                  if not fnmatch(basename(fpath), pat) ]
             _trace("excluded: %r" % (list(set(original) - set(filepaths)), ))
             return filepaths
+
+        def _get_filters(self, opts_filter):
+            filters = {}
+            if opts_filter:
+                pair = opts_filter.split('=', 2)
+                if len(pair) != 2:
+                    pair = ('test', pair[0])
+                filters[pair[0]] = pair[1]
+            return filters
 
         def run(self, args=None):
             if args is None: args = sys.argv[1:]
@@ -1714,25 +1801,19 @@ def _dummy():
             if opts.version:
                 print(self._version_info())
                 return
-            filepaths = []
             pattern = opts.pattern or '*_test.py,test_*.py'
-            for arg in args:
-                if os.path.isfile(arg):
-                    filepaths.append(arg)
-                elif os.path.isdir(arg):
-                    files = self._find_files(arg, pattern)
-                    filepaths.extend(files)
-                else:
-                    raise ValueError("%s: file or directory expected." % (arg,))
+            filepaths = self._get_files(args, pattern)
             if opts.exclude:
                 filepaths = self._exclude_files(filepaths, opts.exclude)
-            modules = self._load_modules(filepaths)
-            pair = self._load_classes(modules)
+            filters = self._get_filters(opts.filter)
+            fval = lambda key, filters=filters: filters.pop(key, None)
+            modules = self._load_modules(filepaths, fval('module'))
+            pair = self._load_classes(modules, fval('class'))
             unittest_testcases, oktest_testcases = pair
             if unittest_testcases:
-                self._run_unittest(unittest_testcases)
+                self._run_unittest(unittest_testcases, fval('test'), filters)
             if oktest_testcases:
-                self._run_oktest(oktest_testcases)
+                self._run_oktest(oktest_testcases, fval('test'), filters)
 
         @classmethod
         def main(cls, sys_argv=None):
