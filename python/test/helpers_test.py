@@ -230,6 +230,20 @@ class dummy_TC(object):
             NG (fname).is_file()
             ok (called[0]) == ('func', fname)
             ok (ret) == 999
+        #
+        with spec("available as decorator."):
+            called = []
+            @dummy_file(fname, content)
+            def func():
+                called.append(('func', fname))
+                ok (fname).is_file()
+                f = open(fname); s = f.read(); f.close()
+                ok (s) == content
+                return 999
+            ret = func
+            NG (fname).is_file()
+            ok (called[0]) == ('func', fname)
+            ok (ret) == 999
 
     def test_dummy_dir(self):
         dname = '_test.sos.dir'
@@ -250,6 +264,18 @@ class dummy_TC(object):
             NG (dname).is_dir()
             ok (called[0]) == ('func', dname)
             ok (ret) == 888
+        #
+        with spec("available as decorator."):
+            called = []
+            @dummy_dir(dname)
+            def func():
+                called.append(('func', dname))
+                ok (dname).is_dir()
+                return 888
+            ret = func
+            NG (dname).is_dir()
+            ok (called[0]) == ('func', dname)
+            ok (ret) == 888
 
     def test_dummy_values(self):
         d = {'Haruhi': 'Suzumiya'}
@@ -267,6 +293,15 @@ class dummy_TC(object):
                 called.append(True)
                 ok (d.get('Mikuru', None)) == 'Asahina'
             dummy_values(d, Mikuru='Asahina').run(func)
+            ok (called) == [True]
+            ok (d) == {'Haruhi': 'Suzumiya'}
+        #
+        with spec("available as decorator."):
+            called = []
+            @dummy_values(d, Mikuru='Asahina')
+            def func():
+                called.append(True)
+                ok (d.get('Mikuru', None)) == 'Asahina'
             ok (called) == [True]
             ok (d) == {'Haruhi': 'Suzumiya'}
 
@@ -291,6 +326,19 @@ class dummy_TC(object):
             ok (called) == [True]
             NG (obj).has_attr('SOS')
             ok (ret) == 999
+        #
+        with spec("available as decorator."):
+            called = []
+            @dummy_attrs(obj, SOS=[123])
+            def func():
+                called.append(True)
+                ok (obj).has_attr('SOS')
+                ok (obj.SOS) == [123]
+                return 999
+            ret = func
+            ok (called) == [True]
+            NG (obj).has_attr('SOS')
+            ok (ret) == 999
 
     def test_dummy_environ_vars(self):
         #+
@@ -310,6 +358,19 @@ class dummy_TC(object):
                 ok (os.environ['SOS']) == '???'
                 return 111
             ret = dummy_environ_vars(SOS='???').run(func)
+            ok (called) == [True]
+            ok ('SOS' in os.environ) == False
+            ok (ret) == 111
+        #
+        with spec("available as decorator."):
+            called = []
+            @dummy_environ_vars(SOS='???')
+            def func():
+                called.append(True)
+                ok ('SOS' in os.environ) == True
+                ok (os.environ['SOS']) == '???'
+                return 111
+            ret = func
             ok (called) == [True]
             ok ('SOS' in os.environ) == False
             ok (ret) == 111
@@ -356,6 +417,26 @@ class dummy_TC(object):
             ok (d_io.stdout) == "MikuruYuki\n"
             ok (d_io.stderr) == "Itsuki"
             ok (ret) == 777
+        #
+        with spec("available as decorator."):
+            called = []
+            @dummy_io("SOS")
+            def func():
+                called.append(True)
+                NG (sys.stdin).is_(sin)
+                NG (sys.stdout).is_(sout)
+                NG (sys.stderr).is_(serr)
+                ok (sys.stdin.read()) == "SOS"
+                sys.stdout.write("Mikuru")
+                print("Yuki")
+                sys.stderr.write("Itsuki")
+            d_io = func
+            ok (called) == [True]
+            ok (sys.stdin).is_(sin)
+            ok (sys.stdout).is_(sout)
+            ok (sys.stderr).is_(serr)
+            ok (d_io.stdout) == "MikuruYuki\n"
+            ok (d_io.stderr) == "Itsuki"
 
 
 if __name__ == '__main__':

@@ -1271,6 +1271,10 @@ def _dummy():
             sys.stderr, self.stderr = self.stderr, sys.stderr.getvalue()
             sys.stdin,  self.stdin  = self.stdin,  self.stdin_content
 
+        def __call__(self, func, *args, **kwargs):
+            self.returned = self.run(func, *args, **kwargs)
+            return self
+
 
     def dummy_file(filename, content):
         return DummyFile(filename, content)
