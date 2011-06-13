@@ -124,8 +124,8 @@ class TestDeco_TC(unittest.TestCase):
         self.assertEqual("<FOO>", foo)
 
 
-    global DummyFixtureResolver
-    class DummyFixtureResolver(object):
+    global DummyFixtureManager
+    class DummyFixtureManager(object):
         _values = {
             "foo": "[FOO]",
             "bar": "[BAR]",
@@ -138,22 +138,22 @@ class TestDeco_TC(unittest.TestCase):
 
     @test("if delegate fixture resolver is set then use it.")
     def t(self):
-        oktest.fixture_resolver.delegate = DummyFixtureResolver()
+        oktest.fixture_injector.delegate = DummyFixtureManager()
         try:
             called = []
             @test("T1")
             def f(self, foo, bar, baz):
                 called.append(True)
                 assert (foo) == "<FOO>"  # by provide_foo()
-                assert (bar) == "[BAR]"  # by DummyFixtureResolver
-                assert (baz) == "[BAZ]"  # by DummyFixtureResolver
+                assert (bar) == "[BAR]"  # by DummyFixtureManager
+                assert (baz) == "[BAZ]"  # by DummyFixtureManager
             f(self)
             assert (called) == [True]
             self.assertEqual([True], called)
             # is delegate.resolve() called?
-            self.assertEqual({"foo": "[FOO]"}, DummyFixtureResolver._values)
+            self.assertEqual({"foo": "[FOO]"}, DummyFixtureManager._values)
         finally:
-            oktest.fixture_resolver.delegate = None
+            oktest.fixture_injector.delegate = None
 
 
     ##

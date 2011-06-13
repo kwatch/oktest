@@ -943,7 +943,7 @@ def spec(desc):
 
 
 ##
-## fixture manager and resolver
+## fixture manager and injector
 ##
 
 class FixtureManager(object):
@@ -955,7 +955,7 @@ class FixtureManager(object):
         pass
 
 
-class FixtureResolver(object):
+class FixtureInjector(object):
 
     delegate = FixtureManager()
 
@@ -1043,7 +1043,7 @@ class FixtureResolver(object):
         return LoopedDependencyError("fixture dependency is looped: %s (class: %s, test: '%s')" % (loop, classname, testdesc))
 
 
-fixture_resolver = FixtureResolver()
+fixture_injector = FixtureInjector()
 
 
 class LoopedDependencyError(ValueError):
@@ -1069,7 +1069,7 @@ def test(description_text, **options):
             def newfunc(self):
                 self._options = options
                 self._description = description_text
-                return fixture_resolver.invoke(orig_func, self, fixture_names, globalvars)
+                return fixture_injector.invoke(orig_func, self, fixture_names, globalvars)
         else:
             def newfunc(self):
                 self._options = options
