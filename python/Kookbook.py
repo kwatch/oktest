@@ -64,6 +64,18 @@ assert set(TEST_NAMES) == set(test_names)
 
 
 @recipe
+@spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
+def task_unittest(c, *args, **kwargs):
+    #optstr = " -m oktest"
+    optstr = " -m oktest -x oktest_test.py"
+    if kwargs.get('a'):
+        for ver, execpath in python_binaries:
+            system(execpath + optstr)
+    else:
+        system(sys.executable + optstr)
+
+
+@recipe
 @ingreds('test/doc_test.py')
 @spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
 def task_test(c, *args, **kwargs):
