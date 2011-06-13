@@ -13,6 +13,11 @@ from oktest import ok, NG, run, spec
 from oktest.helper import *
 from oktest.tracer import Tracer, Call, FakeObject
 
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 class Call_TC(unittest.TestCase):
 
@@ -245,6 +250,356 @@ class Tracer_TC(unittest.TestCase):
         with spec("traces method calls into trace object."):
             ok (tr[0]) == [obj, "a", (), {}, "Hello"]
             ok (tr[1]) == [obj, "b", (10, 20), {}, 30]
+
+
+
+
+class Tracer_UseCase(unittest.TestCase):    # moved from oktest_test.py
+
+    def do_test_with(self, desc, script, expected):
+        sys_stdout = sys.stdout
+        sys.stdout = StringIO()
+        try:
+            gvars = {}
+            exec(script, gvars, gvars)
+            output = sys.stdout.getvalue()
+            self.assertEqual(expected, output)
+        finally:
+            sys.stdout = sys_stdout
+
+    def test_trace_function(self):
+        ### Tracer (function)
+        desc = "Tracer (function)"
+        script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+def f1(a, b):
+    return f2(a + f3(b))
+def f2(a):
+    return a+2
+def f3(b):
+    return b*2
+tr = Tracer()
+f1 = tr.trace_func(f1)
+f2 = tr.trace_func(f2)
+f3 = tr.trace(f3)
+print(f1(3, 5))
+for call in tr:
+    print("---")
+    print(repr(call))
+    print(repr(call.receiver))
+    print(repr(call.name))
+    print(repr(call.args))
+    print(repr(call.kwargs))
+    print(repr(call.ret))
+"""[1:]
+        expected = """
+15
+---
+f1(3, 5) #=> 15
+None
+'f1'
+(3, 5)
+{}
+15
+---
+f3(5) #=> 10
+None
+'f3'
+(5,)
+{}
+10
+---
+f2(13) #=> 15
+None
+'f2'
+(13,)
+{}
+15
+"""[1:]
+        self.do_test_with(desc, script, expected)
+
+
+    def test_trace_instance_method(self):
+        ### Tracer (instance method)
+        desc = "Tracer (instance method)"
+        script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+class Dummy(object):
+    def f1(self, x, y):
+        return [self.f2(x, y=y),
+                self.f2(y, y=x)]
+    def f2(self, x=None, y=None):
+        return x-y
+obj = Dummy()
+tr = Tracer()
+tr.trace_method(obj, 'f1', 'f2')
+ret = obj.f1(5, 3)
+print(ret)
+for call in tr:
+    print('---')
+    print(repr(call))
+    print(call.receiver is obj)
+    print(repr(call.name))
+    print(repr(call.args))
+    print(repr(call.kwargs))
+    print(repr(call.ret))
+"""[1:]
+        expected = """
+[2, -2]
+---
+f1(5, 3) #=> [2, -2]
+True
+'f1'
+(5, 3)
+{}
+[2, -2]
+---
+f2(5, y=3) #=> 2
+True
+'f2'
+(5,)
+{'y': 3}
+2
+---
+f2(3, y=5) #=> -2
+True
+'f2'
+(3,)
+{'y': 5}
+-2
+"""[1:]
+        self.do_test_with(desc, script, expected)
+
+
+    def test_trace_class_method(self):
+        ### Tracer (class method)
+        desc = "Tracer (class method)"
+        script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+class Dummy(object):
+    @classmethod
+    def f1(cls, x, y):
+        return [cls.__name__,
+                cls.f2(x, y=y),
+                cls.f2(y, y=x)]
+    @classmethod
+    def f2(cls, x=None, y=None):
+        return x-y
+tr = Tracer()
+tr.trace_method(Dummy, 'f1', 'f2')
+ret = Dummy.f1(5, 3)
+print(ret)
+for call in tr:
+    print("---")
+    print(repr(call))
+    print(call.receiver is Dummy)
+    print(repr(call.name))
+    print(repr(call.args))
+    print(repr(call.kwargs))
+    print(repr(call.ret))
+"""[1:]
+        expected = """
+['Dummy', 2, -2]
+---
+f1(5, 3) #=> ['Dummy', 2, -2]
+True
+'f1'
+(5, 3)
+{}
+['Dummy', 2, -2]
+---
+f2(5, y=3) #=> 2
+True
+'f2'
+(5,)
+{'y': 3}
+2
+---
+f2(3, y=5) #=> -2
+True
+'f2'
+(3,)
+{'y': 5}
+-2
+"""[1:]
+        self.do_test_with(desc, script, expected)
+
+
+    def test_trace_in_repr_style(self):
+        ### Tracer (repr style)
+        desc = "Tracer (repr style)"
+        script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+class Dummy(object):
+    def f1(self, *args, **kwargs):
+        return 1
+    def __repr__(self):
+        return '#<Dummy>'
+tr = Tracer()
+obj = Dummy()
+tr.trace_method(obj, 'f1')
+obj.f1(10,20,x=30)
+print(repr(tr[0]))
+tr[0] == []
+print(repr(tr[0]))
+tr[0] == ()
+print(repr(tr[0]))
+"""[1:]
+        expected = """
+f1(10, 20, x=30) #=> 1
+[#<Dummy>, 'f1', (10, 20), {'x': 30}, 1]
+(#<Dummy>, 'f1', (10, 20), {'x': 30}, 1)
+"""[1:]
+        self.do_test_with(desc, script, expected)
+
+
+    def test_fake(self):
+        ### Tracer (fake)
+        desc = "Tracer (fake_func)"
+        script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+def f(x, y, z=0):
+    return x + y + z
+def block(orig, *args, **kwargs):
+    v = orig(*args, **kwargs)
+    return 'v=%s' % v
+tr = Tracer()
+f = tr.fake_func(f, block)
+print(f(10, 20, z=7))  #=> 'v=37'
+print(repr(tr[0]))   #=> f(10, 20, z=7) #=> 'v=37'
+print(tr[0].receiver is None)  #=> True
+print(tr[0].name)    #=> f
+print(tr[0].args)    #=> (10, 20)
+print(tr[0].kwargs)  #=> {'z': 7}
+print(tr[0].ret)     #=> 'v=37'
+print('---')
+class Hello(object):
+    def hello(self, name):
+        return 'Hello %s!' % name
+    def hi(self):
+        pass
+obj = Hello()
+tr.fake_method(obj, hello=block, hi="Hi!", ya="Ya!")
+print(obj.hello('World'))  #=> v=Hello World!
+print(repr(tr[1]))    #=> hello('World') #=> 'v=Hello World!'
+print(tr[1].receiver is obj)  #=> True
+print(tr[1].name)     #=> hello
+print(tr[1].args)     #=> ('World',)
+print(tr[1].kwargs)   #=> {}
+print(tr[1].ret)      #=> v=Hello World!
+print('---')
+print(obj.hi('SOS'))  #=> Hi!
+print(repr(tr[2]))    #=> hi('SOS') #=> 'Hi!'
+print(tr[2].receiver is obj)  #=> True
+print(tr[2].name)     #=> hi
+print(tr[2].args)     #=> ('SOS',)
+print(tr[2].kwargs)   #=> {}
+print(tr[2].ret)      #=> Hi!
+print('---')
+print(obj.ya('SOS'))  #=> Ya!
+print(repr(tr[3]))    #=> ya('SOS') #=> 'Ya!'
+print(tr[3].receiver is obj)  #=> True
+print(tr[3].name)     #=> ya
+print(tr[3].args)     #=> ('SOS',)
+print(tr[3].kwargs)   #=> {}
+print(tr[3].ret)      #=> Ya!
+"""[1:]
+        expected = """
+v=37
+f(10, 20, z=7) #=> 'v=37'
+True
+f
+(10, 20)
+{'z': 7}
+v=37
+---
+v=Hello World!
+hello('World') #=> 'v=Hello World!'
+True
+hello
+('World',)
+{}
+v=Hello World!
+---
+Hi!
+hi('SOS') #=> 'Hi!'
+True
+hi
+('SOS',)
+{}
+Hi!
+---
+Ya!
+ya('SOS') #=> 'Ya!'
+True
+ya
+('SOS',)
+{}
+Ya!
+"""[1:]
+        self.do_test_with(desc, script, expected)
+
+
+    def test_FakeObject(self):
+        ### FakeObject class
+        desc = "FakeObject class"
+        script = r"""
+from oktest import ok
+from oktest.tracer import FakeObject
+obj = FakeObject(hi="Hi", hello=lambda self, x: "Hello %s!" % x)
+ok (obj.hi()) == 'Hi'
+ok (obj.hello("SOS")) == 'Hello SOS!'
+ok (obj._calls[0].name  ) == 'hi'
+ok (obj._calls[0].args  ) == ()
+ok (obj._calls[0].kwargs) == {}
+ok (obj._calls[0].ret   ) == 'Hi'
+ok (obj._calls[1].name  ) == 'hello'
+ok (obj._calls[1].args  ) == ('SOS', )
+ok (obj._calls[1].kwargs) == {}
+ok (obj._calls[1].ret   ) == 'Hello SOS!'
+print("OK")
+"""[1:]
+        expected = "OK\n"
+        self.do_test_with(desc, script, expected)
+
+
+    def test_fake_obj(self):
+        ### Tracer.fake_obj()
+        desc = "Tracer.fake_obj()"
+        script = r"""
+from oktest import *
+from oktest.tracer import Tracer
+tr = Tracer()
+## create dummy object
+obj1 = tr.fake_obj(hi="Hi!")
+obj2 = tr.fake_obj(hello=lambda self, x: "Hello %s!" % x)
+## call dummy method
+ok (obj2.hello("SOS")) == 'Hello SOS!'
+ok (obj1.hi())         == 'Hi!'
+## check result
+ok (tr[0].name  ) == 'hello'
+ok (tr[0].args  ) == ('SOS', )
+ok (tr[0].kwargs) == {}
+ok (tr[0].ret   ) == 'Hello SOS!'
+ok (tr[1].name  ) == 'hi'
+ok (tr[1].args  ) == ()
+ok (tr[1].kwargs) == {}
+ok (tr[1].ret   ) == 'Hi!'
+## __iter__() and __eq__()
+ok (tr[0].list())  == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
+ok (tr[0])         == [obj2, 'hello', ('SOS',), {}, 'Hello SOS!']
+ok (tr[1].tuple()) == (obj1, 'hi', (), {}, 'Hi!')
+ok (tr[1])         == (obj1, 'hi', (), {}, 'Hi!')
+print("OK")
+"""[1:]
+        expected = "OK\n"
+        self.do_test_with(desc, script, expected)
+
 
 
 if __name__ == '__main__':
