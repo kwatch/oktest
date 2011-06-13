@@ -192,7 +192,7 @@ from oktest import ok, spec
 @oktest.assertion
 def starts_with(self, arg):
   boolean = self.target.startswith(arg)
-  if boolean != self.expected:
+  if boolean != self.boolean:
     self.failed("%r.startswith(%r) : failed." % (self.target, arg))
 
 class FooTest(object):

@@ -150,7 +150,7 @@ def assertion(func):
          @oktest.assertion
          def startswith(self, arg):
            boolean = self.target.startswith(arg)
-           if boolean != self.expected:
+           if boolean != self.boolean:
              self.failed("%r.startswith(%r) : failed." % (self.target, arg))
          #
          ok ("Sasaki").startswith("Sas")
@@ -172,22 +172,22 @@ def assertion(func):
 
 class AssertionObject(object):
 
-    def __init__(self, target, expected=True):
+    def __init__(self, target, boolean=True):
         self.target = target
-        self.expected = expected
+        self.boolean = boolean
         self._tested = False
         self._location = None
 
     def __del__(self):
         if self._tested is False:
-            msg = "%s() is called but not tested." % (self.expected and 'ok' or 'not_ok')
+            msg = "%s() is called but not tested." % (self.boolean and 'ok' or 'not_ok')
             if self._location:
                 msg += " (file '%s', line %s)" % self._location
             #import warnings; warnings.warn(msg)
             sys.stderr.write("*** warning: oktest: %s\n" % msg)
 
     #def not_(self):
-    #    self.expected = not self.expected
+    #    self.boolean = not self.boolean
     #    return self
 
     def failed(self, msg, depth=2):
@@ -195,7 +195,7 @@ class AssertionObject(object):
         diff = None
         if isinstance(msg, tuple):
             msg, diff = msg
-        if self.expected is False:
+        if self.boolean is False:
             msg = 'not ' + msg
         raise self._assertion_error(msg, file, line, diff)
 
@@ -213,7 +213,7 @@ class AssertionObject(object):
              ok ("SOS").should.startswith("S")   # same as ok ("SOS".startswith("S")) == True
              ok ("123").should.isdigit()         # same as ok ("123".isdigit()) == True
         """
-        return Should(self, self.expected)
+        return Should(self, self.boolean)
 
     @property
     def should_not(self):       # UNDOCUMENTED
@@ -222,7 +222,7 @@ class AssertionObject(object):
              ok ("SOS").should_not.startswith("X")   # same as ok ("SOS".startswith("X")) == False
              ok ("123").should_not.isalpha()         # same as ok ("123".isalpha()) == False
         """
-        return Should(self, not self.expected)
+        return Should(self, not self.boolean)
 
 
 def _f():
@@ -230,175 +230,175 @@ def _f():
     @assertion
     def __eq__(self, other):
         boolean = self.target == other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, '==', other))
 
     @assertion
     def __ne__(self, other):
         boolean = self.target != other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, '!=', other))
 
     @assertion
     def __gt__(self, other):
         boolean = self.target > other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, '>', other))
 
     @assertion
     def __ge__(self, other):
         boolean = self.target >= other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, '>=', other))
 
     @assertion
     def __lt__(self, other):
         boolean = self.target < other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, '<', other))
 
     @assertion
     def __le__(self, other):
         boolean = self.target <= other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, '<=', other))
 
     @assertion
     def in_delta(self, other, delta):
         boolean = self.target > other - delta
-        if boolean != self.expected:
+        if boolean != self.boolean:
             self.failed(_msg(self.target, '>', other - delta))
         boolean = self.target < other + delta
-        if boolean != self.expected:
+        if boolean != self.boolean:
             self.failed(_msg(self.target, '<', other + delta))
         return self
 
 #    @assertion
 #    def __contains__(self, other):
 #        boolean = self.target in other
-#        if boolean == self.expected:  return self
+#        if boolean == self.boolean:  return self
 #        self.failed(_msg(self.target, 'in', other))
 
     @assertion
     def in_(self, other):
         boolean = self.target in other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, 'in', other))
 
     @assertion
     def not_in(self, other):  # DEPRECATED
         boolean = self.target not in other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, 'not in', other))
 
     @assertion
     def contains(self, other):
         boolean = other in self.target
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(other, 'in', self.target))
 
     @assertion
     def not_contain(self, other):  # DEPRECATED
         boolean = other in self.target
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(other, 'not in', self.target))
 
     @assertion
     def is_(self, other):
         boolean = self.target is other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, 'is', other))
 
     @assertion
     def is_not(self, other):
         boolean = self.target is not other
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed(_msg(self.target, 'is not', other))
 
     @assertion
     def is_a(self, other):
         boolean = isinstance(self.target, other)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed("isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
     def is_not_a(self, other):  # DEPRECATED
         boolean = not isinstance(self.target, other)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed("not isinstance(%r, %s) : failed." % (self.target, other.__name__))
 
     @assertion
     def has_attr(self, name):
         boolean = hasattr(self.target, name)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
     @assertion
     def matches(self, pattern, flags=0):
         if isinstance(pattern, type(re.compile('x'))):
             boolean = bool(pattern.search(self.target))
-            if boolean == self.expected:  return self
+            if boolean == self.boolean:  return self
             self.failed("re.search(%r, %r) : failed." % (pattern.pattern, self.target))
         else:
             rexp = re.compile(pattern, flags)
             boolean = bool(rexp.search(self.target))
-            if boolean == self.expected:  return self
+            if boolean == self.boolean:  return self
             self.failed("re.search(%r, %r) : failed." % (pattern, self.target))
 
     @assertion
     def not_match(self, pattern):  # DEPRECATED
         if isinstance(pattern, type(re.compile('x'))):
             boolean = not pattern.search(self.target)
-            if boolean == self.expected:  return self
+            if boolean == self.boolean:  return self
             self.failed("not re.search(%r, %r) : failed." % (pattern.pattern, self.target))
         else:
             boolean = not re.search(pattern, self.target)
-            if boolean == self.expected:  return self
+            if boolean == self.boolean:  return self
             self.failed("not re.search(%r, %r) : failed." % (pattern, self.target))
 
     @assertion
     def is_file(self):
         boolean = os.path.isfile(self.target)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed('os.path.isfile(%r) : failed.' % self.target)
 
     @assertion
     def is_not_file(self):  # DEPRECATED
         boolean = not os.path.isfile(self.target)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed('not os.path.isfile(%r) : failed.' % self.target)
 
     @assertion
     def is_dir(self):
         boolean = os.path.isdir(self.target)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed('os.path.isdir(%r) : failed.' % self.target)
 
     @assertion
     def is_not_dir(self):  # DEPRECATED
         boolean = not os.path.isdir(self.target)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed('not os.path.isdir(%r) : failed.' % self.target)
 
     @assertion
     def exists(self):
         boolean = os.path.exists(self.target)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed('os.path.exists(%r) : failed.' % self.target)
 
     @assertion
     def not_exist(self):  # DEPRECATED
         boolean = not os.path.exists(self.target)
-        if boolean == self.expected:  return self
+        if boolean == self.boolean:  return self
         self.failed('not os.path.exists(%r) : failed.' % self.target)
 
     @assertion
     def raises(self, exception_class, errmsg=None):
-        return self._raise_or_not(exception_class, errmsg, self.expected)
+        return self._raise_or_not(exception_class, errmsg, self.boolean)
 
     @assertion
     def not_raise(self, exception_class=Exception):
-        return self._raise_or_not(exception_class, None, not self.expected)
+        return self._raise_or_not(exception_class, None, not self.boolean)
 
     def _raise_or_not(self, exception_class, errmsg, flag_raise):
         ex = None
@@ -452,11 +452,11 @@ def not_ok(target):
 
 class Should(object):
 
-    def __init__(self, assertion_object, expected=None):
+    def __init__(self, assertion_object, boolean=None):
         self.assertion_object = assertion_object
-        if expected is None:
-            expected = assertion_object.expected
-        self.expected = expected
+        if boolean is None:
+            boolean = assertion_object.boolean
+        self.boolean = boolean
 
     def __getattr__(self, key):
         ass = self.assertion_object
@@ -474,11 +474,11 @@ class Should(object):
                 msg = "%r.%s(): expected to return True or False but it returned %r." \
                       % (ass.target, val.__name__, ret)
                 raise ValueError(msg)
-            if ret != self.expected:
+            if ret != self.boolean:
                 buf = [ repr(arg) for arg in args ]
                 buf.extend([ "%s=%r" % (k, kwargs[k]) for k in kwargs ])
                 msg = "%r.%s(%s) : failed." % (ass.target, val.__name__, ", ".join(buf))
-                if self.expected is False:
+                if self.boolean is False:
                     msg = "not " + msg
                 ass.failed(msg)
         return f
