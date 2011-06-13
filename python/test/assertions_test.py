@@ -175,6 +175,8 @@ class Assertions_TC(unittest.TestCase):
         ok (f).raises(ValueError)              # ValueError
         def f(): raise ValueError('errmsg1')
         ok (f).raises(ValueError, 'errmsg1')   # ValueError + errmsg
+        def f(): raise ValueError('ERROR123')
+        ok (f).raises(ValueError, re.compile(r'^[A-Z]+\d+$'))   # ValueError + rexp
         def f(): raise ValueError('errmsg1')
         ok (f).raises(Exception, 'errmsg1')    # Exception + errmsg
         def f(): raise ValueError('errmsg1')
@@ -195,6 +197,11 @@ class Assertions_TC(unittest.TestCase):
         def fn():
             def f(): raise ValueError('errmsg1')
             ok (f).raises(ValueError, 'errmsg2')
+        @be_fail("error message 'ERROR' is not matched to pattern.")
+        def fn():
+            def f(): raise ValueError('ERROR')
+            ok (f).raises(ValueError, re.compile(r'^[A-Z]+\d+$'))
+
 
     def test_raises2(self):     # pass through AssertionError
         def f():

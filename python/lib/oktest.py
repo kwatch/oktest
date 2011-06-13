@@ -432,9 +432,15 @@ def _f():
                 if not isinstance(ex, exception_class):
                     self.failed('%s%r is kind of %s : failed.' % (ex.__class__.__name__, ex.args, exception_class.__name__), depth=3)
                     #raise
-                if errmsg is not None and str(ex) != errmsg:   # don't use ex2msg(ex)!
-                    #self.failed("expected %r but got %r" % (errmsg, str(ex)))
-                    self.failed("%r == %r : failed." % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
+                if errmsg is None:
+                    pass
+                elif isinstance(errmsg, _rexp_type):
+                    if not errmsg.search(str(ex)):
+                        self.failed("error message %r is not matched to pattern." % str(ex), depth=3)   # don't use ex2msg(ex)!
+                else:
+                    if str(ex) != errmsg:   # don't use ex2msg(ex)!
+                        #self.failed("expected %r but got %r" % (errmsg, str(ex)))
+                        self.failed("%r == %r : failed." % (str(ex), errmsg), depth=3)   # don't use ex2msg(ex)!
             else:
                 if isinstance(ex, exception_class):
                     self.failed('%s should not be raised : failed, got %r.' % (exception_class.__name__, ex), depth=3)
@@ -449,6 +455,7 @@ def _f():
 _f()
 del _f
 
+_rexp_type = type(re.compile('x'))
 
 ASSERTION_OBJECT = AssertionObject
 
