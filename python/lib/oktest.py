@@ -628,7 +628,7 @@ class TestRunner(object):
         return count
 
 
-def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|_\d\d\d: )?')):
+def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|_\d\d\d(_|: ))?')):
     from fnmatch import fnmatch
     if pattern:
         if not fnmatch(_rexp.sub('', tname), pattern):
@@ -1012,9 +1012,14 @@ def test(description_text, **options):
     globalvars = frame.f_globals
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
-    #newname = 'test_%03d_' % n + re.sub(r'[^\w]', '_', description_text)
-    newname = 'test_%03d: ' % n + description_text
     def deco(orig_func):
+        orig_name = orig_func.__name__
+        if orig_name.startswith('test_'):
+            newname = 'test_%03d_' % n + orig_name[5:]
+        elif orig_name.startswith('test'):
+            newname = 'test_%03d_' % n + orig_name[4:]
+        else:
+            newname = 'test_%03d: ' % n + description_text
         argnames = func_argnames(orig_func)
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
@@ -1675,7 +1680,7 @@ def _dummy():
             from fnmatch import fnmatch
             loader = unittest.TestLoader()
             the_suite = unittest.TestSuite()
-            rexp = re.compile(r'^test(_|_\d\d\d: )?')
+            rexp = re.compile(r'^test(_|_\d\d\d(_|: ))?')
             if filters:
                 key = list(filters.keys())[0]
                 val = filters[key]
