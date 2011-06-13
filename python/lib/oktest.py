@@ -9,6 +9,7 @@
 ###
 
 __all__ = ('ok', 'not_ok', 'NG', 'run', 'spec', 'test')
+__version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback
 
@@ -1533,3 +1534,220 @@ def _dummy():
 
 tracer = _new_module('oktest.tracer', _dummy(), helper)
 del _dummy
+
+
+
+##
+## main
+##
+
+def load_module(mod_name, filepath, content=None):
+    mod = type(os)(mod_name)
+    mod.__dict__["__name__"] = mod_name
+    mod.__dict__["__file__"] = filepath
+    #mod.__dict__["__file__"] = os.path.abspath(filepath)
+    if content is None:
+        content = _read_file(filepath)
+    if filepath:
+        code = compile(content, filepath, "exec")
+        exec(code, mod.__dict__, mod.__dict__)
+    else:
+        exec(content, mod.__dict__, mod.__dict__)
+    return mod
+
+def rglob(dirpath, pattern, _entries=None):
+    import fnmatch
+    if _entries is None: _entries = []
+    isdir, join = os.path.isdir, os.path.join
+    add = _entries.append
+    if isdir(dirpath):
+        items = os.listdir(dirpath)
+        for item in fnmatch.filter(items, pattern):
+            path = join(dirpath, item)
+            add(path)
+        for item in items:
+            path = join(dirpath, item)
+            if isdir(path) and not item.startswith('.'):
+                rglob(path, pattern, _entries)
+    return _entries
+
+
+def _dummy():
+
+
+    class MainApp(object):
+
+        debug = False
+
+        def __init__(self, command=None):
+            self.command = command
+
+        def _new_cmdopt_parser(self):
+            #import cmdopt
+            #parser = cmdopt.Parser()
+            #parser.opt("-h").name("help")                         .desc("show help")
+            #parser.opt("-v").name("version")                      .desc("version of oktest.py")
+            #parser.opt("-s").name("testdir").arg("DIR[,DIR2,..]") .desc("test directory (default 'test' or 'tests')")
+            #parser.opt("-p").name("pattern").arg("PAT[,PAT2,..]") .desc("test script pattern (default '*_test.py,test_*.py')")
+            #parser.opt("-x").name("exclude").arg("PAT[,PAT2,..]") .desc("exclue file pattern")
+            #parser.opt("-D").name("debug")                        .desc("debug mode")
+            #return parser
+            import optparse
+            parser = optparse.OptionParser(conflict_handler="resolve")
+            parser.add_option("-h", "--help",       action="store_true",     help="show help")
+            parser.add_option("-v", "--version",    action="store_true",     help="verion of oktest.py")
+            parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
+            parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
+            parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
+            parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
+            return parser
+
+        def _load_modules(self, filepaths):
+            modules = []
+            for fpath in filepaths:
+                mod_name = os.path.basename(fpath).replace('.py', '')
+                mod = load_module(mod_name, fpath)
+                modules.append(mod)
+            self._trace("modules: ", modules)
+            return modules
+
+        def _load_classes(self, modules):
+            import unittest
+            unittest_testcases = []    # classes
+            oktest_testcases   = []    # classes
+            for mod in modules:
+                for k in dir(mod):
+                    if k.startswith('_'): continue
+                    v = getattr(mod, k)
+                    if not isinstance(v, type): continue
+                    klass = v
+                    if issubclass(klass, unittest.TestCase):
+                        unittest_testcases.append(klass)
+                    elif re.search(TARGET_PATTERN, klass.__name__):
+                        oktest_testcases.append(klass)
+            return unittest_testcases, oktest_testcases
+
+        def _run_unittest(self, klasses):
+            self._trace("unittest_testcases: ", klasses)
+            import unittest
+            loader = unittest.TestLoader()
+            the_suite = unittest.TestSuite()
+            for klass in klasses:
+                suite = loader.loadTestsFromTestCase(klass)
+                the_suite.addTest(suite)
+            runner = unittest.TextTestRunner()
+            runner.run(the_suite)
+
+        def _run_oktest(self, klasses):
+            self._trace("oktest_testcases: ", klasses)
+            oktest.run(*klasses)
+
+        def _trace(self, msg, items=None):
+            write = sys.stderr.write
+            if items is None:
+                write("** DEBUG: %s\n" % msg)
+            else:
+                write("** DEBUG: %s[\n" % msg)
+                for item in items:
+                    write("**   %r,\n" % (item,))
+                write("** ]\n")
+
+        def _help_message(self, parser):
+            buf = []; add = buf.append
+            add("Usage: python -m oktest [options]\n")
+            #add(parser.help_message(20))
+            add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
+            add("Example:\n")
+            add("   ## run test scripts in 'tests' dir except foo_*.py\n")
+            add("   $ python -m oktest -s tests -X 'foo_*.py'\n")
+            return "".join(buf)
+
+        def _version_info(self):
+            buf = []; add = buf.append
+            add("oktest: " + __version__)
+            add("python: " + sys.version.split("\n")[0])
+            add("")
+            return "\n".join(buf)
+
+        def _find_files(self, testdir, pattern):
+            _trace = self._trace
+            isdir = os.path.isdir
+            testdir = testdir or [ x for x in ("test", "tests", ".") if isdir(x) ][0]
+            pattern = pattern or "*_test.py,test_*.py"
+            filepaths = []
+            for tdir in testdir.split(","):
+                if not isdir(tdir):
+                    raise ValueError("%s: not a directory" % (tdir,))
+                for pat in pattern.split(","):
+                    files = rglob(tdir, pat)
+                    if files:
+                        filepaths.extend(files)
+                        _trace("testdir: %r, pattern: %r, files: " % (tdir, pat), files)
+            return filepaths
+
+        def _exclude_files(self, filepaths, pattern):
+            import fnmatch
+            _trace = self._trace
+            basename = os.path.basename
+            original = filepaths[:]
+            for pat in pattern.split(","):
+                filepaths = [ fpath for fpath in filepaths
+                              if not fnmatch.fnmatch(basename(fpath), pat) ]
+            _trace("excluded: %r" % (list(set(original) - set(filepaths)), ))
+            return filepaths
+
+        def run(self, args=None):
+            if args is None: args = sys.argv[1:]
+            parser = self._new_cmdopt_parser()
+            #opts = parser.parse(args)
+            opts, args = parser.parse_args()
+            if opts.debug:
+                self.debug = True
+                _trace = self._trace
+            else:
+                _trace = self._trace = lambda msg, items=None: None
+            _trace("python: " + sys.version.split()[0])
+            _trace("oktest: " + __version__)
+            _trace("opts: %r" % (opts,))
+            if opts.help:
+                print(self._help_message(parser))
+                return
+            if opts.version:
+                print(self._version_info())
+                return
+            filepaths = self._find_files(opts.testdir, opts.pattern)
+            if opts.exclude:
+                filepaths = self._exclude_files(filepaths, opts.exclude)
+            modules = self._load_modules(filepaths)
+            pair = self._load_classes(modules)
+            unittest_testcases, oktest_testcases = pair
+            if unittest_testcases:
+                self._run_unittest(unittest_testcases)
+            if oktest_testcases:
+                self._run_oktest(oktest_testcases)
+
+        @classmethod
+        def main(cls, sys_argv=None):
+            #import cmdopt
+            if sys_argv is None: sys_argv = sys.argv
+            #app = cls(sys_argv[0])
+            #try:
+            #    app.run(sys_argv[1:])
+            #    sys.exit(0)
+            #except cmdopt.ParseError:
+            #    ex = sys.exc_info()[1]
+            #    sys.stderr.write("%s" % (ex, ))
+            #    sys.exit(1)
+            app = cls(sys_argv[0])
+            app.run()
+            sys.exit(0)
+
+    return locals()
+
+
+main = _new_module('oktest.main', _dummy(), helper)
+del _dummy
+
+
+if __name__ == '__main__':
+    main.MainApp.main()
