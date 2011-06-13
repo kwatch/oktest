@@ -8,7 +8,7 @@ import sys, os, re
 import unittest
 
 import oktest
-from oktest import ok, not_ok, NG
+from oktest import ok, not_ok, NG, NOT
 
 
 def be_fail(message):
@@ -60,19 +60,25 @@ class Assertions_TC(unittest.TestCase):
     def test_eq(self):
         ok (1+1) == 2
         NG (1+1) == 1
+        NOT (1+1) == 1
         @be_fail("2 == 1 : failed.")
         def fn(): ok (1+1) == 1
         @be_fail("not 2 == 2 : failed.")
         def fn(): NG (1+1) == 2
+        @be_fail("not 2 == 2 : failed.")
+        def fn(): NOT (1+1) == 2
 
 
     def test_ne(self):
         ok (1+1) != 1
         NG (1+1) != 2
+        NOT (1+1) != 2
         @be_fail("2 != 2 : failed.")
         def fn(): ok (1+1) != 2
         @be_fail("not 2 != 1 : failed.")
         def fn(): NG (1+1) != 1
+        @be_fail("not 2 != 1 : failed.")
+        def fn(): NOT (1+1) != 1
 
 
     def test_lt(self):

@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'not_ok', 'NG', 'run', 'spec', 'test')
+__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test')
 __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback
@@ -471,7 +471,12 @@ def NG(target):
     obj._location = _get_location(1)
     return obj
 
-def not_ok(target):
+def not_ok(target):  # for backward compatibility
+    obj = ASSERTION_OBJECT(target, False)
+    obj._location = _get_location(1)
+    return obj
+
+def NOT(target):     # experimental. prefer to NG()?
     obj = ASSERTION_OBJECT(target, False)
     obj._location = _get_location(1)
     return obj
