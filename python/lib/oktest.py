@@ -948,7 +948,7 @@ def spec(desc):
 
 class FixtureResolver(object):
 
-    parent = None
+    delegate = None
 
     def invoke(self, func, testcase, fixture_names, globalvars):
         """invoke function with fixtures."""
@@ -958,9 +958,16 @@ class FixtureResolver(object):
         #
         def _resolve(name):
             if name not in resolved:
-                provider, releaser = self.find(name, testcase, globalvars)
-                resolved[name] = _call(name, provider)
-                releasers[name] = releaser
+                pair = self.find(name, testcase, globalvars)
+                if pair:
+                    provider, releaser = pair
+                    resolved[name] = _call(name, provider)
+                    releasers[name] = releaser
+                elif self.delegate:
+                    val = self.delegate.provide(name)
+                    resolved[name] = val
+                else:
+                    raise NameError("Fixture provider for '%s' not found." % (name,))
             return resolved[name]
         #
         def _call(name, provider):
@@ -984,14 +991,16 @@ class FixtureResolver(object):
         assert not in_progress
         #
         try:
-            self = testcase
-            return func(self, *fixtures)
+            return func(testcase, *fixtures)
         #
         finally:
             for name in resolved:
-                releaser = releasers[name]
-                if releaser:
-                    releaser(resolved[name])
+                if name in releasers:
+                    releaser = releasers[name]
+                    if releaser:
+                        releaser(resolved[name])
+                else:
+                    self.delegate.release(name, resolved[name])
 
     def find(self, name, testcase, globalvars):
         """return provide_xxx() and release_xxx() functions."""
@@ -1012,10 +1021,9 @@ class FixtureResolver(object):
                 raise TypeError("%s: expected function but got %s." % (provider_name, type(provider)))
             releaser = globalvars.get(releaser_name)
             return (provider, releaser)
-        elif self.parent:
-            return self.parent.find(name, testcase, globalvars)
-        else:
-            raise NameError("%s: no such fixture provider for '%s'." % (provider_name, name))
+        #else:
+        #    raise NameError("%s: no such fixture provider for '%s'." % (provider_name, name))
+            return None
 
     def _looped_dependency_error(self, aname, in_progress, testcase):
         names = in_progress + [aname]

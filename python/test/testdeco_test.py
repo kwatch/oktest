@@ -124,6 +124,38 @@ class TestDeco_TC(unittest.TestCase):
         self.assertEqual("<FOO>", foo)
 
 
+    global DummyFixtureResolver
+    class DummyFixtureResolver(object):
+        _values = {
+            "foo": "[FOO]",
+            "bar": "[BAR]",
+            "baz": "[BAZ]",
+        }
+        def provide(self, name):
+            return self._values.get(name)
+        def release(self, name, value):
+            self._values.pop(name, None)
+
+    @test("if delegate fixture resolver is set then use it.")
+    def t(self):
+        oktest.fixture_resolver.delegate = DummyFixtureResolver()
+        try:
+            called = []
+            @test("T1")
+            def f(self, foo, bar, baz):
+                called.append(True)
+                assert (foo) == "<FOO>"  # by provide_foo()
+                assert (bar) == "[BAR]"  # by DummyFixtureResolver
+                assert (baz) == "[BAZ]"  # by DummyFixtureResolver
+            f(self)
+            assert (called) == [True]
+            self.assertEqual([True], called)
+            # is delegate.resolve() called?
+            self.assertEqual({"foo": "[FOO]"}, DummyFixtureResolver._values)
+        finally:
+            oktest.fixture_resolver.delegate = None
+
+
     ##
     ## test fixture dependencies
     ##
