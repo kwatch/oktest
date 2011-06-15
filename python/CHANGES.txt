@@ -5,6 +5,175 @@ CHANGES
 $Release: 0.8.0 $
 
 
+Release 0.9.0
+-------------
+
+* New '@test' decorator provided. It is simple but very powerful.
+  Using @test decorator, you can write test description in free text
+  instead of test method.
+  ex::
+
+    class FooTest(unittest.TestCase):
+
+      def test_1_plus_1_should_be_2(self):  # not cool...
+        self.assertEqual(2, 1+1)
+
+      @test("1 + 1 should be 2")    # cool! easy to read & write!
+      def _(self):
+        self.assertEqual(2, 1+1)
+
+* Fixture injection support by '@test' decorator.
+  Arguments of test method are regarded as fixture names and
+  they are injected by @test decorator automatically.
+  Instance methods or global functions which name is 'provide_xxxx' are
+  regarded as fixture provider (or builder) for fixture 'xxxx'.
+  ex::
+
+    class SosTest(unittest.TestCase):
+
+      ##
+      ## fixture providers.
+      ##
+      def provide_member1(self):
+        return {"name": "Haruhi"}
+
+      def provide_member2(self):
+        return {"name": "Kyon"}
+
+      ##
+      ## fixture releaser (optional)
+      ##
+      def release_member1(self, value):
+        assert value == {"name": "Haruhi"}
+
+      ##
+      ## testcase which requires 'member1' and 'member2' fixtures.
+      ##
+      @test("validate member's names")
+      def _(self, member1, member2):
+        assert member1["name"] == "Haruhi"
+        assert member2["name"] == "Kyon"
+
+  Dependencies between fixtures are resolved automatically.
+  ex::
+
+    class BarTest(unittest.TestCase):
+
+      ##
+      ## for example:
+      ## - Fixture 'a' depends on 'b' and 'c'.
+      ## - Fixture 'c' depends on 'd'.
+      ##
+      def provide_a(b, c):  return b + c + ["A"]
+      def provide_b():      return ["B"]
+      def provide_c(d):     return d + ["C"]
+      def provide_d():      reutrn ["D"]
+
+      ##
+      ## Dependencies between fixtures are solved automatically.
+      ##
+      @test("dependency test")
+      def _(self, a):
+        assert a == ["B", "D", "C", "A"]
+
+  If loop exists in dependency then @test reports error.
+
+  If you want to integrate with other fixture library, see the following
+  example::
+
+    class MyFixtureManager(object):
+      def __init__(self):
+        self.values = { "x": 100, "y": 200 }
+      def provide(self, name):
+        return self.values[name]
+      def release(self, name, value):
+        pass
+
+    oktest.fixure_manager = MyFixtureResolver()
+
+* Supports command-line interface to execute test scripts.
+  ex::
+
+    ## run test scripts except foo_*.py
+    $ python -m oktest -x 'foo_*.py' tests/*_test.py
+    ## run test scripts in 'tests' dir with pattern '*_test.py'
+    $ python -m oktest -p '*_test.py' tests
+    ## filter by class name
+    $ python -m oktest -f class='ClassName*' tests
+    ## filter by test method name
+    $ python -m oktest -f test='*keyword*' tests
+    ## filter by user-defined option added by @test decorator
+    $ python -m oktest -f tag='*value*' tests
+
+  Try ``python -m oktest -h`` for details about command-line options.
+
+* New assertion method ``ok(x).attr(name, value)`` to check attribute.
+  ex::
+
+    d = datetime.date(2000, 12, 31)
+    ok (d).attr('year', 2000).attr('month', 12).attr('date', 31)
+
+* New assertion method ``ok(x).length(n)``. This is same as
+  ``ok(len(x)) == n``, but it is useful when chaining assertion methods.
+  ex::
+
+    ok (func()).is_a(tuple).length(2)
+
+* New feature``ok().should`` helps you to check boolean method.
+  ex::
+
+    ## same as ok ("Haruhi".startswith("Haru")) == True
+    ok ("Haruhi").should.startswith("Haru")
+
+    ## same as ok ("Haruhi".isupper()) == False
+    ok ("Haruhi").should_not.isupper()
+
+* 'ok(str1) == str2' displays diff if text1 != text2, even when using
+  with unittest module. In previous version, text diff is displayed
+  only when using oktest.run().
+  If you are unittest user and using Python < 2.7, use 'ok(str1) == str2'
+  instead of 'self.assertEqual(str2, str1)' to display text diff.
+
+* Assertion ``raises()`` supports regular expression to check error message.
+
+    def fn(): raise ValueError("ERROR-123")
+    ok (fn).raises(ValueError, re.compile(r'^[A-Z]+-\d+$'))
+
+* Helper functions in oktest.dummy module are now available as decorator.
+  This is useful when you must use Python 2.4::
+
+    from oktest.dummy import dummy_io
+    ## for Python 2.4
+    @dummy_io("SOS")
+    def d_io():
+      assert sys.stdin.read() == "SOS"
+      print("Haruhi")
+    sout, serr = d_io
+    assert sout == "Haruhi\n"
+    ## for Python 2.5 or later
+    with dummy_io("SOS") as d_io:
+      assert sys.stdin.read() == "SOS"
+      print("Haruhi")
+    sout, serr = d_io
+    assert sout == "Haruhi\n"
+
+* 'AssertionObject.expected' is renamed to 'AssertionObject.boolean'.
+  You should update your custom assertion definition.
+  ex::
+
+    import oktest
+    @oktest.assertion
+    def startswith(self, arg):
+      boolean = self.target.startswith(arg)
+      #if boolean == self.expected:      # obsolete
+      if boolean == self.boolean:
+          return True
+      self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+
+* (Experimental) New function ``NOT()`` provided which is same as ``NG()``.
+
+
+
 Release 0.8.0
 -------------
 
@@ -26,7 +195,7 @@ Release 0.8.0
   (this is necessary for Python 2.4 which is default version on CentOS.)
 
     from oktest.helper import chdir
-    
+
     def fn():
       ok (os.getcwd()) == "/tmp"
     chdir("/tmp").run(fn)
@@ -57,7 +226,7 @@ Release 0.8.0
           ok ("sos123<>".upper()) == "SOS123<>"
     if __name__ == "__main__":
       run()
-  
+
     ## terminal
     $ SPEC="returns upper case string" python test1.py
 

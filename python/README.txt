@@ -1,6 +1,6 @@
-======
-README
-======
+=============
+Oktest README
+=============
 
 $Release: 0.8.0 $
 
@@ -8,26 +8,38 @@ $Release: 0.8.0 $
 Overview
 ========
 
-Oktest is a new-style testing library for Python.
-::
+Oktest is a new-style testing library for Python. ::
 
-    from oktest import ok
-    ok (x) > 0                 # same as assert_(x > 0)
-    ok (s) == 'foo'            # same as assertEqual(s, 'foo')
-    ok (s) != 'foo'            # same as assertNotEqual(s, 'foo')
-    ok (f).raises(ValueError)  # same as assertRaises(ValueError, f)
-    ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))
-    NG (u'foo').is_a(int)      # same as assert_(not isinstance(u'foo', int))
-    ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
-    NG ('A.txt').is_dir()      # same as assert_(not os.path.isdir('A.txt'))
+    from oktest import test, ok, NG
 
-You can use ok() instead of 'assertXxx()' in unittest.
+    class FooTest(unittest.TestCase):
+
+       @test("1 + 1 should be 2")
+       def _(self):
+          ok (1+1) == 2          # same as assertEqual(2, 1+1)
+
+       @test("other examples")
+       def _(self):
+          ok (s) == 'foo'        # same as assertEqual(s, 'foo')
+          ok (s) != 'foo'        # same as assertNotEqual(s, 'foo')
+          ok (n) > 0             # same as assert_(n > 0)
+          ok (fn).raises(Error)  # same as assertRaises(Error, fn)
+          ok ([]).is_a(list)     # same as assert_(isinstance([], list))
+          NG ([]).is_a(tuple)    # same as assert_(not isinstance([], tuple))
+          ok ('A.txt').is_file() # same as assert_(os.path.isfile('A.txt'))
+          NG ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
+
+Features:
+
+* Provides ``ok()`` which is much shorter than ``self.assertXxxx()``.
+* Allow to write test name in free text.
+* Fixture injection support.
+* Tracer class is provided which can be used as mock or stub.
+* Text diff (diff -u) is displayed when texts are different.
 
 Oktest requires Python 2.4 or later (3.x is supported).
 
 See CHANGES.txt for changes.
-
-NOTICE!! Oktest is a young project and specification may change in the future.
 
 
 Download
@@ -49,26 +61,49 @@ Installation::
 Example
 =======
 
-The following is a short example. ::
+Oktest is available with unittest module which is a standard testing library
+for Python. ::
 
-    from oktest import ok, NG, run
+    import unittest
+    from oktest ok
 
-    class Example1Test(object):
+    class FooTest(unittest.TestCase):
 
-        def test_add(self):
-	    ok (1+1) == 1
+        def test_1_plus_1_should_be_2(self):
+	    ok (1+1) == 2    # instead of self.assertEqual(2, 1+1)
 
-        def test_sub(self):
-	    ok (1-1) == 0
+        def test_string_should_contain_digits(self):
+	    ok ("foo 123 bar").matches(r"\d+")
 
     if __name__ == '__main__':
-        run()
+        unittest.main()
 
+See `Assertion Reference`_ section for details about ok() and NG().
 
-The following is a long example. ::
+Using @test decorator, you can write test name in free text. ::
+
+    import unittest
+    from oktest ok, test
+
+    class FooTest(unittest.TestCase):
+
+        @test("1 + 1 should be 2")
+	def _(self):
+	    ok (1+1) == 2
+
+        @test("string should contain digits")
+	def _(self):
+	    ok ("foo 123 bar").matches(r"\d+")
+
+    if __name__ == '__main__':
+        unittest.main()
+
+See `@test Decorator`_ section for details about @test decorator.
+
+Oktest is also available without unittest. See the folloing example. ::
 
     import sys, os
-    from oktest import ok, NG, run
+    from oktest import ok, NG, test, run
 
     ## no need to extend TestCase class
     class Example1Test(object):
@@ -93,37 +128,22 @@ The following is a long example. ::
             pass
 
         ## test methods
-        def test_valtype(self):
+
+	@test("value should be a list")
+	def _(self):
             ok (self.val).is_a(list)
 
-        def test_length(self):
-            ok (len(self.val)) == 3
-
-
-    ## 'ok()' is available with unittest.TestCase
-    import unittest
-    class Example2Test(unittest.TestCase):
-
-        def setUp(self):
-            self.val = ['aaa', 'bbb', 'ccc']
-
-        def test_valtype(self):
-            ok (self.val).is_a(list)
-
-        def test_length(self):
+        @test("list length should be 3")
+        def _(self):
             ok (len(self.val)) == 3
 
     ## invoke tests
     if __name__ == '__main__':
-        run(Example1Test, Example2Test)
-        ## or
-        #run(r'.*Test$')  # specify class names by regular expression
-        ## or
-        #run()            # same as run(r'.*(Test|TestCase|_TC)$')
-
-
-NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
-See the example at the bottom of this document.
+        run()
+	## or
+        #run(r'.*Test$')
+	## or
+        #run(Example1Test, Example2Test)
 
 
 Assertion Reference
@@ -153,6 +173,9 @@ ok (x).in_delta(y, delta)
 ok (x).in_(y)
 	Raise AssertionError unless x in y.
 
+ok (x).not_in(y)
+	Raise AssertionError if x in y.
+
 ok (x).contains(y)
 	Raise AssertionError unless y in x. This is opposite of in_().
 
@@ -165,13 +188,24 @@ ok (x).is_not(y)
 ok (x).is_a(y)
 	Raise AssertionError unless isinstance(x, y).
 
-ok (x).has_attr(y)
-	Raise AssertionError unless hasattr(x, y).
+ok (x).is_not_a(y)
+	Raise AssertionError if isinstance(x, y).
+
+ok (x).has_attr(name)
+	Raise AssertionError unless hasattr(x, name).
+
+ok (x).attr(name, value)
+	Raise AssertionError unless hasattr(x, name) and getattr(x, name) == value.
 
 ok (x).matches(y[, flag=None])
 	If y is a string, raise AssertionError unless re.search(y, x).
 	If y is a re.pattern object, raise AssertionError unless y.search(x).
 	You can pass flag such as ``re.M | re.S``.
+
+ok (x).length(n):
+	Raise AssertionError unless len(x) == n.
+	This is same as ``ok (len(x)) == n``, but it is useful to chain
+	assertions, like ``ok (x).is_a(tuple).length(n)``.
 
 ok (path).is_file()
 	Raise AssertionError unless os.path.isfile(path).
@@ -184,6 +218,7 @@ ok (path).exists()
 
 ok (func).raises(error_class[, errmsg=None])
 	Raise AssertionError unless func() raises error_class.
+	Second argument is a string or regular expression (re.compile() object).
 	It sets raised exception into 'func.exception' therefore you can do another test with raised exception object. ::
 
 	    obj = "foobar"
@@ -191,6 +226,19 @@ ok (func).raises(error_class[, errmsg=None])
 	        obj.name
 	    ok (f).raises(AttributeError, "'str' object has no attribute 'name'")
 	    ok (f.exception.message) == "'str' object has no attribute 'name'"
+
+ok (func).not_raise([error_class=Exception])
+	Raise AssertionError if func() raises error_class.
+
+ok (value).should
+	Special property to test boolean method.
+	For example, ``ok (string).should.startswith('foo')`` is same as
+	to ``ok (string.startswith('foo')) == True``.
+
+ok (value).should_not
+	Special property to test boolean method.
+	For example, ``ok (string).should_not.startswith('foo')`` is same as
+	to ``ok (string.startswith('foo')) == False``.
 
 NG (x)
 	Opposite of ok(x). For example, 'NG ("foo").matches(r"[0-9]+")' is True. ::
@@ -202,11 +250,179 @@ NG (x)
 	    NG (fname).is_file()        # file doesn't exist
 
 not_ok (x)
-	Same as NG(x).
+	Same as NG(x). Provided for backward compatibility.
 
+NOT (x)
+	Same as NG(x). Provided experimentalily.
+
+
+It is possible to chain assertions. ::
+
+    ## chain assertion methods
+    ok (func()).is_a(tuple).length(2)
+    d = datetime.date(2000, 12, 31)
+    ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
 
 Oktest allows you to define custom assertion functions.
-See Tips section.
+See `Tips`_ section.
+
+
+@test Decorator
+===============
+
+Oktest provides @test decorator.
+It is simple but very powerful.
+
+Using @test decorator, you can write test description in free text instead of
+test method::
+
+    import unittest
+    from oktest import test
+
+    class FooTest(unittest.TestCase):
+
+        def test_1_plus_1_should_be_2(self):  # not cool...
+	    assert 1+1 == 2
+
+        @test("1 + 1 should be 2")    # cool! easy to read & write!
+        def _(self):
+	    assert 1+1 == 2
+
+@test decorator changes test methods.
+For example, the above code is same as the following::
+
+    class FooTest(unittest.TestCase):
+        __n = 0
+
+        def _(self):
+	    assert 1+1 == 2
+
+	__n += 1
+	_.__doc__  = "1 + 1 should be 2"
+	_.__name__ = "test_%03d: %s" % (__n, _.__doc__)
+	locals()[_.__name__] = _
+
+Non-English language is available on @test()::
+
+    class FooTest(unittest.TestCase):
+
+        @test("1 + 1 は 2 になること。")
+        def _(self):
+	    assert 1+1 == 2
+
+@test decorator accepts user-defined options. You can specify any name and
+value as option. It is accessable by 'self._options' in setUp(), therefore
+you can change behaviour of setUp() according to options. ::
+
+    class FooTest(unittest.TestCase):
+
+        def setUp(self):
+            tag = self._options.get("tag")
+	    if tag == "experimental":
+	        ....
+
+        @test("1 + 1 should be 2", tag="experimental")
+        def _(self):
+	    assert 1+1 == 2
+
+You can filter testcase by user-defined options in command-line. ::
+
+    ## do test only tagged as 'experimental'
+    $ python -m oktest.py -f tag=experimental test/*_test.py
+
+
+
+Fixture Injection
+=================
+
+@test decorator supports fixture injection.
+
+* Arguments of test method are regarded as fixture names
+  and they are injected by @test decorator automatically.
+* Instance methods or global functions which name is 'provide_xxxx' are
+  regarded as fixture provider (or builder) for fixture 'xxxx'.
+* Similar to that, instance methods or global functions which name is
+  'release_xxxx' are regarded as fixture releaser (or destroyer).
+  Notice that provider is mandatory but releaser is optional for fixture.
+
+::
+
+    class SosTest(unittest.TestCase):
+
+        ##
+        ## fixture providers
+        ##
+        def provide_member1(self):
+            return {"name": "Haruhi"}
+
+        def provide_member2(self):
+            return {"name": "Kyon"}
+
+        ##
+        ## fixture releasers (optional)
+        ##
+        def release_member1(self, value):
+            assert value == {"name": "Haruhi"}
+
+        ##
+        ## testcase which requires 'member1' and 'member2' fixtures.
+        ##
+        @test("validate member's names")
+        def _(self, member1, member2):
+            ok (member1["name"]) == "Haruhi"
+            ok (member2["name"]) == "Kyon"
+
+This feature is more flexible and useful than setUp() and tearDown().
+In my opinion, you don't need to write setUp() at all.
+
+Dependencies between fixtures are resolved automatically.
+If you know dependency injection framework such as `Spring`_ or `Guice`_,
+imagine to apply dependency injection into fixtures. ::
+
+    class BarTest(unittest.TestCase):
+
+        ##
+        ## for example:
+        ## - Fixture 'a' depends on 'b' and 'c'.
+        ## - Fixture 'c' depends on 'd'.
+        ##
+        def provide_a(b, c):  return b + c + ["A"]
+        def provide_b():      return ["B"]
+        def provide_c(d):     return d + ["C"]
+        def provide_d():      reutrn ["D"]
+
+        ##
+        ## Dependencies between fixtures are solved automatically.
+	## If loop exists in dependency then @test reports error.
+        ##
+        @test("dependency test")
+        def _(self, a):
+            assert a == ["B", "D", "C", "A"]
+
+If you want to integrate with other fixture library, create manager object
+and set it into ``oktest.fixture_manager``.
+The following is an example to use `Forge`_ as external fixture library::
+
+    ## fixture data
+    from forge import Forge
+    Forge.define('haruhi', name='Haruhi')
+    Forge.define('mikuru', name='Mikuru')
+    Forge.define('yuki',   name='Yuki')
+
+    ## manager class
+    class ForgeFixtureManager(object):
+        def provide(self, name):
+            return Forge.build(name)
+        def release(self, name, value):
+            pass
+
+    ## use it
+    oktest.fixture_manager = ForgeFixtureManager()
+
+
+..    _`Spring`: http://www.springsource.org/
+..    _`Guice`:  http://code.google.com/p/google-guice/
+..    _`Forge`:  https://github.com/mnoble/forge/
 
 
 Unified Diff
@@ -222,10 +438,11 @@ Unified Diff
 For example::
 
     ## foo_test.py
-    from oktest import *
-    
-    class FooTest(object):
-    
+    import unittest
+    from oktest import ok
+
+    class FooTest(unittest.TestCase):
+
         def test1(self):
             s1 = ( "AAA\n"
                    "BBB\n"
@@ -234,48 +451,88 @@ For example::
                    "CCC\n"
                    "DDD\n" )
             ok (s1) == s2
-    
+
     if __name__ == '__main__':
-        run(FooTest)
+        unittest.main()
 
 If you run this script, you'll find that unified diff is displayed.
 
 Output result::
 
+    $ python -V
+    Python 2.5.5
     $ python foo_test.py
-    ### FooTest
-    f
-    Failed: FooTest#test1()
-       'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
-       foo_test.py:13:  ok (s1) == s2
-    --- expected 
-    +++ actual 
+    F
+    ======================================================================
+    FAIL: test1 (__main__.FooTest)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "foo_test.py", line 14, in test1
+        ok (s1) == s2
+    AssertionError: 'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
+    --- expected
+    +++ actual
     @@ -1,3 +1,3 @@
      AAA
     +BBB
      CCC
     -DDD
 
-If you set 'oktest.DIFF' to 'repr', each line is preprocessed by repr(). This is very useful to show non-visible characters. For example::
 
-    $ vi foo_test.py    # add 'import oktest; oktest.DIFF = repr'
+    ----------------------------------------------------------------------
+    Ran 1 test in 0.006s
+
+    FAILED (failures=1)
+
+If you set ``oktest.DIFF`` to ``repr``, each line is preprocessed by ``repr()``.
+This is very useful to show non-visible characters. For example::
+
+    ## foo_test.py
+    import unittest
+    from oktest import ok
+    import oktest
+    oktest.DIFF = repr
+
+    class FooTest(unittest.TestCase):
+
+        def test1(self):
+            s1 = ( "AAA\n"
+                   "BBB  \n"     # contains white space character
+                   "CCC\n" )
+            s2 = ( "AAA\n"
+                   "BBB\n"
+                   "CCC\n" )
+            ok (s1) == s2
+
+    if __name__ == '__main__':
+        unittest.main()
+
+Result::
+
     $ python foo_test.py
-    ### FooTest
-    f
-    Failed: FooTest#test1()
-       'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
-       hoge.py:15:  ok (s1) == s2
-    --- expected 
-    +++ actual 
+    F
+    ======================================================================
+    FAIL: test1 (__main__.FooTest)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "foo_test.py", line 16, in test1
+        ok (s1) == s2
+    AssertionError: 'AAA\nBBB \nCCC\n' == 'AAA\nBBB\nCCC\n' : failed.
+    --- expected
+    +++ actual
     @@ -1,3 +1,3 @@
      'AAA\n'
-    +'BBB\n'
+    +'BBB  \n'
+    -'BBB\n'
      'CCC\n'
-    -'DDD\n'
 
-If you set 'oktest.DIFF' to False, unified diff is not displayed.
 
-Notice that this feature is only available with oktest.run() and not available with unittest module.
+    ----------------------------------------------------------------------
+    Ran 1 test in 0.011s
+
+    FAILED (failures=1)
+
+If you set '``oktest.DIFF``' to False, unified diff is not displayed.
 
 
 Tracer
@@ -328,24 +585,21 @@ There are several ways to check results::
 Example to trace method call::
 
     class Foo(object):
-        def m1(self, x):
-            return x + 1
-        def m2(self, y):
-            return y + 1
+        def add(self, x, y):
+            return x + y
+        def hello(self, name='World'):
+            return "Hello " + name
     obj = Foo()
     ## trace methods
     from oktest.tracer import Tracer
     tr = Tracer()
-    def dummy(original_func, *args, **kwargs):
-        #return original_func(*args, **kwargs)
-        return 100
-    tr.fake_method(obj, m1=dummy, m2=200)
+    tr.trace_method(obj, 'add', 'hello')
     ## call methods
-    ok (obj.m1(1)) == 100
-    ok (obj.m2(2)) == 200
+    ok (obj.add(2, 3)) == 5
+    ok (obj.hello(name="SOS")) == "Hello SOS"
     ## check results
-    ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
-    ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+    ok (tr[0]) == [obj, 'add', (2, 3), {}, 5]
+    ok (tr[1]) == [obj, 'hello', (), {'name':'SOS'}, "Hello SOS"]
 
 Example to trace function call::
 
@@ -367,24 +621,23 @@ Example to trace function call::
 Example to fake method call::
 
     class Foo(object):
-        def m1(self, x):
-            return x + 1
-        def m2(self, y):
-            return y + 1
+        def add(self, x, y):
+            return x + y
+        def hello(self, name='World'):
+            return "Hello " + name
     obj = Foo()
     ## fake methods
     from oktest.tracer import Tracer
     tr = Tracer()
     def dummy(original_func, *args, **kwargs):
-        #return original_func(*args, **kwargs)
-        return 100
-    tr.fake_method(obj, m1=dummy, m2=200)
-    ## call method
-    ok (obj.m1(1)) == 100
-    ok (obj.m2(2)) == 200
+        return "Hello!"
+    tr.fake_method(obj, add=100, hello=dummy)
+    ## call methods
+    ok (obj.add(2, 3)) == 100
+    ok (obj.hello(name="SOS")) == "Hello!"
     ## check results
-    ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
-    ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+    ok (tr[0]) == [obj, 'add', (2, 3), {}, 100]
+    ok (tr[1]) == [obj, 'hello', (), {'name':"SOS"}, "Hello!"]
 
 Example to fake function call::
 
@@ -392,7 +645,6 @@ Example to fake function call::
         return x*2
     ## fake a function
     def dummy(original_func, x):
-        #return original_func(x)
         return 'x=%s' % repr(x)
     from oktest.tracer import Tracer
     tr = Tracer()
@@ -401,6 +653,26 @@ Example to fake function call::
     ok (f(3))  == 'x=3'
     ## check results
     ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
+
+
+Command-line Interface
+======================
+
+Oktest now supports command-line interface to execute test scripts. ::
+
+    ## run test scripts except foo_*.py
+    $ python -m oktest -x 'foo_*.py' tests/*_test.py
+    ## run test scripts in 'tests' dir with pattern '*_test.py'
+    $ python -m oktest -p '*_test.py' tests
+    ## filter by class name
+    $ python -m oktest -f class='ClassName*' tests
+    ## filter by test method name
+    $ python -m oktest -f test='*keyword*' tests
+    $ python -m oktest -f '*keyword*' tests     # 'test=' is omittable
+    ## filter by user-defined option added by @test decorator
+    $ python -m oktest -f tag='*value*' tests
+
+Try ``python -m oktest -h`` for details about command-line options.
 
 
 Helpers Reference
@@ -420,8 +692,9 @@ run(\*classes)
 	    oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 
 spec(description)
-	Represents spec description. This is just a marker function, but very useful for readability.
-	**It is recommended to use spec() helper for readability of tests.** ::
+
+	Represents spec description.
+	This is just a marker function, but very useful for readability. ::
 
 	    class NumericTest(object):
 	        def test_integer(self):
@@ -449,10 +722,10 @@ chdir(dirname)
 	        # do something
 	    assert os.getcwd() == cwd                 # back to the original place
 	    ## or
+	    @chdir("/var/tmp")
 	    def fn():
 	        assert os.getcwd() == "/var/tmp"
 		# do something
-            chdir("/var/tmp").run(fn)
 
 rm_rf(filename, dirname, ...)
 	Remove file or directory recursively.
@@ -472,9 +745,9 @@ dummy_file(filename, content)
 	        # do something
 	    assert not os.path.exists("A.txt")        # file is removed
 	    ## or
+	    @dummy_file("A.txt", "aaa")
 	    def fn():
 	        assert os.path.isfile("A.txt")
-	    dummy_file("A.txt", "aaa").run(fn)
 
 dummy_dir(dirname)
 	Create dummy directory. ::
@@ -487,9 +760,9 @@ dummy_dir(dirname)
 	        # do something
 	    assert not os.path.exists("tmpdir")       # directory is removed
 	    ## or
+	    @dummy_dir("tmpdir")
 	    def fn():
 	        assert os.path.isdir("tmpdir")
-            dummy_dir("tmpdir").run(fn)
 
 dummy_values(dictionary, items_=None, \*\*kwargs):
 	Change dictionary's values temporarily. ::
@@ -503,9 +776,9 @@ dummy_values(dictionary, items_=None, \*\*kwargs):
 	        # do something
 	    assert d == {'A':10, 'B':20}              # values are backed
 	    ## or
+	    @dummy_values(d, A=1000, X=2000)
 	    def fn():
 	        assert d['A'] == 1000
-	    dummy_values(d, A=1000, X=2000).run(fn)
 
 dummy_attrs(object, items_=None, \*\*kwargs):
 	Change object's attributes temporarily.
@@ -526,9 +799,9 @@ dummy_attrs(object, items_=None, \*\*kwargs):
 	    assert obj.y == 20
 	    assert not hasattr(obj, 'z')
 	    ## or
+	    @dummy_attrs(obj, x=90, z=100)
 	    def fn():
 	        assert obj.x == 90
-	    dummy_attrs(obj, x=90, z=100).run(fn)
 
 dummy_io(stdin_content=None, func=None):
 	Set dummy I/O to sys.stdout, sys.stderr, and sys.stdin. ::
@@ -536,22 +809,24 @@ dummy_io(stdin_content=None, func=None):
 	    with dummy_io("SOS") as d_io:
 	        assert sys.stdin.read() == "SOS"
 	        print("Haruhi")
-	    assert d_io.stdout == "Haruhi\n"
-	    assert d_io.stderr == ""
+	    sout, serr = d_io
+	    assert sout == "Haruhi\n"
+	    assert serr == ""
 	    ## or
-	    def fn():
+	    @dummy_io("SOS")
+	    def d_io():
 	        assert sys.stdin.read() == "SOS"
 	        print("Haruhi")
-	    d_io = dummy_io("SOS")
-	    d_io.run(fn)
-	    assert d_io.stdout == "Haruhi\n"
+	    sout, serr = d_io
+	    assert sout == "Haruhi\n"
+	    assert serr == ""
 
 
 ``oktest.tracer`` module
 ------------------------
 
 tracer():
-	Return tracer object. See the above section for details.
+	Return tracer object. See `Tracer`_ section for details.
 
 
 Tips
@@ -564,7 +839,7 @@ Tips
     @oktest.assertion
     def startswith(self, arg):
         boolean = self.target.startswith(arg)
-        if boolean == self.expected:
+        if boolean == self.boolean:
             return True
         self.failed("%r.startswith(%r) : failed." % (self.target, arg))
 
@@ -575,13 +850,15 @@ Tips
 * It is possible to chain assertion methods. ::
 
     ## chain assertion methods
-    ok ("sos".upper()).is_a(str).matches(r'^[A-Z]+$')
+    ok (func()).is_a(tuple).length(2)
+    d = datetime.date(2000, 12, 31)
+    ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
 
-* If you call ok() or not_ok() but forget to do assertion, oktest warns it. ::
+* If you call ok() or NG() but forget to do assertion, oktest warns it. ::
 
     import oktest
-    from oktest import ok, not_ok
-    
+    from oktest import ok, NG
+
     class FooTest(object):
         def test_1(self):
             #ok (1+1) == 2
@@ -589,22 +866,11 @@ Tips
 
     oktest.run()   #=> warning: ok() is called but not tested.
 
-* You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST="ex[0-9]+"' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.
-  ::
+* $TEST environment variable is now obsolete.
+  Use command-line option instead to filter testcase by name. ::
 
-    ### filter test by name
-    $ TEST='ex[0-9]' python test/foobar_test.py
-
-* If you want to output format, create oktest.Reporter subclass and set it to oktest.REPORTER variable.
-
-
-ToDo
-====
-
-* [v] print unified diff when two strings are different
-* [_] improve reporters
-* [_] make package(?)
-* [v] report assertion objects which are not tested
+      ## filter testcase by name
+      $ python -m oktest -f test='*foobar*' test/foo_test.py
 
 
 License
