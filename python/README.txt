@@ -65,15 +65,15 @@ Oktest is available with unittest module which is a standard testing library
 for Python. ::
 
     import unittest
-    from oktest ok
+    {{*from oktest ok*}}
 
     class FooTest(unittest.TestCase):
 
         def test_1_plus_1_should_be_2(self):
-	    ok (1+1) == 2    # instead of self.assertEqual(2, 1+1)
+	    {{*ok (1+1) == 2*}}    # instead of self.assertEqual(2, 1+1)
 
         def test_string_should_contain_digits(self):
-	    ok ("foo 123 bar").matches(r"\d+")
+	    {{*ok ("foo 123 bar").matches(r"\d+")*}}
 
     if __name__ == '__main__':
         unittest.main()
@@ -83,16 +83,16 @@ See `Assertion Reference`_ section for details about ok() and NG().
 Using @test decorator, you can write test name in free text. ::
 
     import unittest
-    from oktest ok, test
+    from oktest ok, {{*test*}}
 
     class FooTest(unittest.TestCase):
 
-        @test("1 + 1 should be 2")
-	def _(self):
+        {{*@test("1 + 1 should be 2")*}}
+	{{*def _(self):*}}
 	    ok (1+1) == 2
 
-        @test("string should contain digits")
-	def _(self):
+        {{*@test("string should contain digits")*}}
+	{{*def _(self):*}}
 	    ok ("foo 123 bar").matches(r"\d+")
 
     if __name__ == '__main__':
@@ -103,28 +103,28 @@ See `@test Decorator`_ section for details about @test decorator.
 Oktest is also available without unittest. See the folloing example. ::
 
     import sys, os
-    from oktest import ok, NG, test, run
+    from oktest import ok, NG, test, {{*run*}}
 
     ## no need to extend TestCase class
     class Example1Test(object):
 
         ## invoked only once before all tests
         @classmethod
-        def before_all(cls):
+        {{*def before_all(cls):*}}
             os.mkdir('tmp.d')
 
         ## invoked only once after all tests done
         @classmethod
-        def after_all(cls):
+        {{*def after_all(cls):*}}
             import shutil
             shutil.rmtree('tmp.d')
 
         ## invoked before each test
-        def before(self):   # or setUp(self)
+        {{*def before(self):*}}   # or setUp(self)
             self.val = ['aaa', 'bbb', 'ccc']
 
         ## invoked after each test
-        def after(self):    # or tearDown(self)
+        {{*def after(self):*}}    # or tearDown(self)
             pass
 
         ## test methods
@@ -139,11 +139,11 @@ Oktest is also available without unittest. See the folloing example. ::
 
     ## invoke tests
     if __name__ == '__main__':
-        run()
+        {{*run()*}}
 	## or
-        #run(r'.*Test$')
+        #{{*run(r'.*Test$')*}}
 	## or
-        #run(Example1Test, Example2Test)
+        #{{*run(Example1Test, Example2Test)*}}
 
 
 Assertion Reference
@@ -277,15 +277,15 @@ Using @test decorator, you can write test description in free text instead of
 test method::
 
     import unittest
-    from oktest import test
+    {{*from oktest import test*}}
 
     class FooTest(unittest.TestCase):
 
         def test_1_plus_1_should_be_2(self):  # not cool...
 	    assert 1+1 == 2
 
-        @test("1 + 1 should be 2")    # cool! easy to read & write!
-        def _(self):
+        {{*@test("1 + 1 should be 2")*}}    # cool! easy to read & write!
+        {{*def _(self):*}}
 	    assert 1+1 == 2
 
 @test decorator changes test methods.
@@ -306,7 +306,7 @@ Non-English language is available on @test()::
 
     class FooTest(unittest.TestCase):
 
-        @test("1 + 1 は 2 になること。")
+        {{*@test("1 + 1 は 2 になること。")*}}
         def _(self):
 	    assert 1+1 == 2
 
@@ -317,18 +317,18 @@ you can change behaviour of setUp() according to options. ::
     class FooTest(unittest.TestCase):
 
         def setUp(self):
-            tag = self._options.get("tag")
+            tag = {{*self._options.get("tag")*}}
 	    if tag == "experimental":
 	        ....
 
-        @test("1 + 1 should be 2", tag="experimental")
+        @test("1 + 1 should be 2", {{*tag="experimental"*}})
         def _(self):
 	    assert 1+1 == 2
 
 You can filter testcase by user-defined options in command-line. ::
 
     ## do test only tagged as 'experimental'
-    $ python -m oktest.py -f tag=experimental test/*_test.py
+    $ python -m oktest.py {{*-f tag=experimental*}} test/*_test.py
 
 
 
@@ -352,23 +352,23 @@ Fixture Injection
         ##
         ## fixture providers
         ##
-        def provide_member1(self):
+        def {{*provide_member1*}}(self):
             return {"name": "Haruhi"}
 
-        def provide_member2(self):
+        def {{*provide_member2*}}(self):
             return {"name": "Kyon"}
 
         ##
         ## fixture releasers (optional)
         ##
-        def release_member1(self, value):
+        def {{*release_member1*}}(self, value):
             assert value == {"name": "Haruhi"}
 
         ##
         ## testcase which requires 'member1' and 'member2' fixtures.
         ##
         @test("validate member's names")
-        def _(self, member1, member2):
+        def _(self, {{*member1, member2*}}):
             ok (member1["name"]) == "Haruhi"
             ok (member2["name"]) == "Kyon"
 
@@ -386,17 +386,17 @@ imagine to apply dependency injection into fixtures. ::
         ## - Fixture 'a' depends on 'b' and 'c'.
         ## - Fixture 'c' depends on 'd'.
         ##
-        def provide_a(b, c):  return b + c + ["A"]
-        def provide_b():      return ["B"]
-        def provide_c(d):     return d + ["C"]
-        def provide_d():      reutrn ["D"]
+        def provide_{{*a*}}({{*b*}}, {{*c*}}):  return b + c + ["A"]
+        def provide_{{*b*}}():      return ["B"]
+        def provide_{{*c*}}({{*d*}}):     return d + ["C"]
+        def provide_{{*d*}}():      reutrn ["D"]
 
         ##
         ## Dependencies between fixtures are solved automatically.
 	## If loop exists in dependency then @test reports error.
         ##
         @test("dependency test")
-        def _(self, a):
+        def _(self, {{*a*}}):
             assert a == ["B", "D", "C", "A"]
 
 If you want to integrate with other fixture library, create manager object
@@ -411,13 +411,13 @@ The following is an example to use `Forge`_ as external fixture library::
 
     ## manager class
     class ForgeFixtureManager(object):
-        def provide(self, name):
+        {{*def provide(self, name):*}}
             return Forge.build(name)
-        def release(self, name, value):
+        {{*def release(self, name, value):*}}
             pass
 
     ## use it
-    oktest.fixture_manager = ForgeFixtureManager()
+    {{*oktest.fixture_manager =*}} ForgeFixtureManager()
 
 
 ..    _`Spring`: http://www.springsource.org/
@@ -491,16 +491,16 @@ This is very useful to show non-visible characters. For example::
     import unittest
     from oktest import ok
     import oktest
-    oktest.DIFF = repr
+    {{*oktest.DIFF = repr*}}
 
     class FooTest(unittest.TestCase):
 
         def test1(self):
             s1 = ( "AAA\n"
-                   "BBB  \n"     # contains white space character
+                   {{*"BBB  \n"*}}     # contains white space character
                    "CCC\n" )
             s2 = ( "AAA\n"
-                   "BBB\n"
+                   {{*"BBB\n"*}}
                    "CCC\n" )
             ok (s1) == s2
 
@@ -522,8 +522,8 @@ Result::
     +++ actual
     @@ -1,3 +1,3 @@
      'AAA\n'
-    +'BBB  \n'
-    -'BBB\n'
+    {{*+'BBB  \n'*}}
+    {{*-'BBB\n'*}}
      'CCC\n'
 
 
@@ -550,18 +550,18 @@ In any case, ``Tracer`` object records both arguments and return-value of method
 Example to create fake object::
 
     ## create fake objects
-    from oktest.tracer import Tracer
-    tr = Tracer()
-    foo = tr.fake_obj(m1=100, m2=200)   # method name and return-value
-    bar = tr.fake_obj(m3=lambda self, x: x+1)  # method name and body
+    {{*from oktest.tracer import Tracer*}}
+    {{*tr = Tracer()*}}
+    foo = {{*tr.fake_obj(m1=100, m2=200)*}}   # method name and return-value
+    bar = {{*tr.fake_obj(m3=lambda self, x: x+1)*}}  # method name and body
     ## call fake methods
     ok (bar.m3(0))     == 1
     ok (foo.m2(1,2,3)) == 200    # any argument can be passed
     ok (foo.m1(x=123)) == 100    # any argument can be passed
     ## check results
-    ok (repr(tr[0]))   == 'm3(0) #=> 1'
-    ok (repr(tr[1]))   == 'm2(1, 2, 3) #=> 200'
-    ok (repr(tr[2]))   == 'm1(x=123) #=> 100'
+    ok (repr({{*tr[0]*}}))   == 'm3(0) #=> 1'
+    ok (repr({{*tr[1]*}}))   == 'm2(1, 2, 3) #=> 200'
+    ok (repr({{*tr[2]*}}))   == 'm1(x=123) #=> 100'
 
 There are several ways to check results::
 
@@ -570,17 +570,17 @@ There are several ways to check results::
     obj = tr.fake_obj(meth=9)
     ok (obj.meth(1, 2, x=3)) == 9
     ## check results
-    ok (repr(tr[0]))  == 'meth(1, 2, x=3) #=> 9'
+    ok ({{*repr(tr[0])*}})  == 'meth(1, 2, x=3) #=> 9'
     ## or
-    ok (tr[0].list()) == [obj, 'meth', (1, 2), {'x': 3}, 9]
+    ok ({{*tr[0].list()*}}) == [obj, 'meth', (1, 2), {'x': 3}, 9]
     ## or
-    ok (tr[0])        == [obj, 'meth', (1, 2), {'x': 3}, 9]
+    ok ({{*tr[0]*}})        == [obj, 'meth', (1, 2), {'x': 3}, 9]
     ## or
-    ok (tr[0].receiver).is_(obj)
-    ok (tr[0].name)   == 'meth'
-    ok (tr[0].args)   == (1, 2)
-    ok (tr[0].kwargs) == {'x': 3}
-    ok (tr[0].ret)    == 9
+    ok ({{*tr[0].receiver*}}).is_(obj)
+    ok ({{*tr[0].name*}})   == 'meth'
+    ok ({{*tr[0].args*}})   == (1, 2)
+    ok ({{*tr[0].kwargs*}}) == {'x': 3}
+    ok ({{*tr[0].ret*}})    == 9
 
 Example to trace method call::
 
@@ -593,7 +593,7 @@ Example to trace method call::
     ## trace methods
     from oktest.tracer import Tracer
     tr = Tracer()
-    tr.trace_method(obj, 'add', 'hello')
+    {{*tr.trace_method(obj, 'add', 'hello')*}}
     ## call methods
     ok (obj.add(2, 3)) == 5
     ok (obj.hello(name="SOS")) == "Hello SOS"
@@ -610,8 +610,8 @@ Example to trace function call::
     ## trace functions
     from oktest.tracer import Tracer
     tr = Tracer()
-    f = tr.trace_func(f)
-    g = tr.trace_func(g)
+    {{*f = tr.trace_func(f)*}}
+    {{*g = tr.trace_func(g)*}}
     ## call functions
     ok (g(0)) == 3
     ## check results
@@ -631,7 +631,7 @@ Example to fake method call::
     tr = Tracer()
     def dummy(original_func, *args, **kwargs):
         return "Hello!"
-    tr.fake_method(obj, add=100, hello=dummy)
+    {{*tr.fake_method(obj, add=100, hello=dummy)*}}
     ## call methods
     ok (obj.add(2, 3)) == 100
     ok (obj.hello(name="SOS")) == "Hello!"
@@ -648,7 +648,7 @@ Example to fake function call::
         return 'x=%s' % repr(x)
     from oktest.tracer import Tracer
     tr = Tracer()
-    f = tr.fake_func(f, dummy)
+    {{*f = tr.fake_func(f, dummy)*}}
     ## call function
     ok (f(3))  == 'x=3'
     ## check results
@@ -661,16 +661,15 @@ Command-line Interface
 Oktest now supports command-line interface to execute test scripts. ::
 
     ## run test scripts except foo_*.py
-    $ python -m oktest -x 'foo_*.py' tests/*_test.py
+    $ python -m oktest {{*-x 'foo_*.py' tests/*_test.py*}}
     ## run test scripts in 'tests' dir with pattern '*_test.py'
-    $ python -m oktest -p '*_test.py' tests
+    $ python -m oktest {{*-p '*_test.py' tests*}}
     ## filter by class name
-    $ python -m oktest -f class='ClassName*' tests
+    $ python -m oktest {{*-f class='ClassName*'*}} tests
     ## filter by test method name
-    $ python -m oktest -f test='*keyword*' tests
-    $ python -m oktest -f '*keyword*' tests     # 'test=' is omittable
+    $ python -m oktest {{*-f test='*keyword*'*}} tests   # or {{*-f '*keyword*'*}}
     ## filter by user-defined option added by @test decorator
-    $ python -m oktest -f tag='*value*' tests
+    $ python -m oktest {{*-f tag='*value*'*}} tests
 
 Try ``python -m oktest -h`` for details about command-line options.
 
@@ -836,12 +835,12 @@ Tips
 
     ## define custom assertion function
     import oktest
-    @oktest.assertion
+    {{*@oktest.assertion*}}
     def startswith(self, arg):
-        boolean = self.target.startswith(arg)
-        if boolean == self.boolean:
+        boolean = {{*self.target*}}.startswith(arg)
+        if boolean == {{*self.boolean*}}:
             return True
-        self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+        {{*self.failed*}}("%r.startswith(%r) : failed." % (self.target, arg))
 
     ## how to use
     from oktest import ok

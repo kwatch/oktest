@@ -60,6 +60,12 @@ pre {
 	padding: 5px 10px;
 }
 
+pre strong {
+	font-weight: bold;
+	color: #600;
+}
+
+
 dl.docutils dt {
 	font-weight: bold;
 	border: dotted #090;

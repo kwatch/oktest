@@ -210,12 +210,26 @@ def task_package(c):
     pass
 
 
+def _with_backup(fn):
+    fname = "README.txt"
+    try:
+        f = open(fname); s = f.read(); f.close()
+        os.rename(fname, fname + ".bkup")
+        s = s.replace("{{*", "").replace("*}}", "")
+        f = open(fname, 'w'); f.write(s); f.close()
+        fn()
+    finally:
+        os.rename(fname + ".bkup", fname)
+
+
 @recipe
 @ingreds('edit')
 def task_sdist(c, *args, **kwargs):
     """create dist/Oktest-X.X.X.tar.gz"""
     #rm_rf(c%"dist/$(package)-$(release)*")
-    system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
+    @_with_backup
+    def fn():
+        system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
     #with chdir('dist') as d:
     #    targz = c%"$(package)-$(release).tar.gz"
     #    #tar_xzf(targz)
@@ -238,22 +252,28 @@ def _do_setup_py(c, command):
 @ingreds('edit')
 def task_eggs(c):
     """create dist/*.egg files"""
-    _do_setup_py(c, "$(bin) setup.py bdist_egg")
+    @_with_backup
+    def fn():
+        _do_setup_py(c, "$(bin) setup.py bdist_egg")
 
 
 @recipe
 @ingreds('edit')
 def task_register(c):
     """register information into PyPI"""
-    system(c%"$(python) setup.py register")
+    @_with_backup
+    def fn():
+        system(c%"$(python) setup.py register")
 
 
 @recipe
 @ingreds('edit')
 def task_upload(c):
     """upload packages"""
-    system(c%"$(python) setup.py sdist upload")
-    _do_setup_py(c, "$(bin) setup.py bdist_egg upload")
+    @_with_backup
+    def fn():
+        system(c%"$(python) setup.py sdist upload")
+        _do_setup_py(c, "$(bin) setup.py bdist_egg upload")
 
 
 @recipe
@@ -274,6 +294,8 @@ def file_website_index_html(c):
     def f(s):
         s = s.replace('README', 'Oktest - a new style testing library -')
         s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
+        s = s.replace('{{*', '<strong>')
+        s = s.replace('*}}', '</strong>')
         #s = re.sub(r'^<h(\d)>(.*?)</h\d>', r, s)
         pat = re.compile(r'^<h(\d)>(.*?)</h\d>', re.M)
         def r(m):
