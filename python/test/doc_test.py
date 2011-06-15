@@ -53,24 +53,21 @@ if True:
 #Example to trace method call::
 
     class Foo(object):
-        def m1(self, x):
-            return x + 1
-        def m2(self, y):
-            return y + 1
+        def add(self, x, y):
+            return x + y
+        def hello(self, name='World'):
+            return "Hello " + name
     obj = Foo()
     ## trace methods
     from oktest.tracer import Tracer
     tr = Tracer()
-    def dummy(original_func, *args, **kwargs):
-        #return original_func(*args, **kwargs)
-        return 100
-    tr.fake_method(obj, m1=dummy, m2=200)
+    tr.trace_method(obj, 'add', 'hello')
     ## call methods
-    ok (obj.m1(1)) == 100
-    ok (obj.m2(2)) == 200
+    ok (obj.add(2, 3)) == 5
+    ok (obj.hello(name="SOS")) == "Hello SOS"
     ## check results
-    ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
-    ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+    ok (tr[0]) == [obj, 'add', (2, 3), {}, 5]
+    ok (tr[1]) == [obj, 'hello', (), {'name':'SOS'}, "Hello SOS"]
 
 #Example to trace function call::
 
@@ -92,24 +89,23 @@ if True:
 #Example to fake method call::
 
     class Foo(object):
-        def m1(self, x):
-            return x + 1
-        def m2(self, y):
-            return y + 1
+        def add(self, x, y):
+            return x + y
+        def hello(self, name='World'):
+            return "Hello " + name
     obj = Foo()
     ## fake methods
     from oktest.tracer import Tracer
     tr = Tracer()
     def dummy(original_func, *args, **kwargs):
-        #return original_func(*args, **kwargs)
-        return 100
-    tr.fake_method(obj, m1=dummy, m2=200)
-    ## call method
-    ok (obj.m1(1)) == 100
-    ok (obj.m2(2)) == 200
+        return "Hello!"
+    tr.fake_method(obj, add=100, hello=dummy)
+    ## call methods
+    ok (obj.add(2, 3)) == 100
+    ok (obj.hello(name="SOS")) == "Hello!"
     ## check results
-    ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
-    ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+    ok (tr[0]) == [obj, 'add', (2, 3), {}, 100]
+    ok (tr[1]) == [obj, 'hello', (), {'name':"SOS"}, "Hello!"]
 
 #Example to fake function call::
 
@@ -117,7 +113,6 @@ if True:
         return x*2
     ## fake a function
     def dummy(original_func, x):
-        #return original_func(x)
         return 'x=%s' % repr(x)
     from oktest.tracer import Tracer
     tr = Tracer()
@@ -126,4 +121,24 @@ if True:
     ok (f(3))  == 'x=3'
     ## check results
     ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
+
+
+#Command-line Interface
+#======================
+
+#Oktest now supports command-line interface to execute test scripts. ::
+
+    ## run test scripts except foo_*.py
+    #$ python -m oktest -x 'foo_*.py' tests/*_test.py
+    ## run test scripts in 'tests' dir with pattern '*_test.py'
+    #$ python -m oktest -p '*_test.py' tests
+    ## filter by class name
+    #$ python -m oktest -f class='ClassName*' tests
+    ## filter by test method name
+    #$ python -m oktest -f test='*keyword*' tests
+    #$ python -m oktest -f '*keyword*' tests     # 'test=' is omittable
+    ## filter by user-defined option added by @test decorator
+    #$ python -m oktest -f tag='*value*' tests
+
+#Try ``python -m oktest -h`` for details about command-line options.
 

@@ -163,6 +163,7 @@ def file_doc_test_py(c):
     m = re.compile(pat, re.S).search(cont)
     s = m.group(1)
     s = re.compile(r'^(\S)', re.M).sub(r'#\1', s)
+    s = re.compile(r'^( *)(\$ python)', re.M).sub(r'\1#\2', s)
     #
     f = open(c.product, 'w')
     f.write(
