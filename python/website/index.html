@@ -4,12 +4,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>Oktest - a new style testing library -</title>
+<title>Oktest Oktest - a new style testing library -</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
-<div class="document" id="readme">
-<h1 class="title">Oktest - a new style testing library -</h1>
+<div class="document" id="oktest-readme">
+<h1 class="title">Oktest Oktest - a new style testing library -</h1>
 
 <p>$Release: 0.8.0 $</p>
 <div class="section" id="overview">
@@ -17,20 +17,35 @@
 <h2>Overview</h2>
 <p>Oktest is a new-style testing library for Python.</p>
 <pre class="literal-block">
-from oktest import ok
-ok (x) &gt; 0                 # same as assert_(x &gt; 0)
-ok (s) == 'foo'            # same as assertEqual(s, 'foo')
-ok (s) != 'foo'            # same as assertNotEqual(s, 'foo')
-ok (f).raises(ValueError)  # same as assertRaises(ValueError, f)
-ok (u'foo').is_a(unicode)  # same as assert_(isinstance(u'foo', unicode))
-NG (u'foo').is_a(int)      # same as assert_(not isinstance(u'foo', int))
-ok ('A.txt').is_file()     # same as assert_(os.path.isfile('A.txt'))
-NG ('A.txt').is_dir()      # same as assert_(not os.path.isdir('A.txt'))
+from oktest import test, ok, NG
+
+class FooTest(unittest.TestCase):
+
+   &#64;test(&quot;1 + 1 should be 2&quot;)
+   def _(self):
+      ok (1+1) == 2          # same as assertEqual(2, 1+1)
+
+   &#64;test(&quot;other examples&quot;)
+   def _(self):
+      ok (s) == 'foo'        # same as assertEqual(s, 'foo')
+      ok (s) != 'foo'        # same as assertNotEqual(s, 'foo')
+      ok (n) &gt; 0             # same as assert_(n &gt; 0)
+      ok (fn).raises(Error)  # same as assertRaises(Error, fn)
+      ok ([]).is_a(list)     # same as assert_(isinstance([], list))
+      NG ([]).is_a(tuple)    # same as assert_(not isinstance([], tuple))
+      ok ('A.txt').is_file() # same as assert_(os.path.isfile('A.txt'))
+      NG ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
 </pre>
-<p>You can use ok() instead of 'assertXxx()' in unittest.</p>
+<p>Features:</p>
+<ul class="simple">
+<li>Provides <tt class="docutils literal">ok()</tt> which is much shorter than <tt class="docutils literal">self.assertXxxx()</tt>.</li>
+<li>Allow to write test name in free text.</li>
+<li>Fixture injection support.</li>
+<li>Tracer class is provided which can be used as mock or stub.</li>
+<li>Text diff (diff -u) is displayed when texts are different.</li>
+</ul>
 <p>Oktest requires Python 2.4 or later (3.x is supported).</p>
 <p>See <a href="CHANGES.txt">CHANGES.txt</a> for changes.</p>
-<p>NOTICE!! Oktest is a young project and specification may change in the future.</p>
 </div>
 <div class="section" id="download">
 
@@ -50,79 +65,88 @@ $ sudo python setup.py install
 <div class="section" id="example">
 
 <h2>Example</h2>
-<p>The following is a short example.</p>
+<p>Oktest is available with unittest module which is a standard testing library
+for Python.</p>
 <pre class="literal-block">
-from oktest import ok, NG, run
+import unittest
+<strong>from oktest ok</strong>
 
-class Example1Test(object):
+class FooTest(unittest.TestCase):
 
-    def test_add(self):
-        ok (1+1) == 1
+    def test_1_plus_1_should_be_2(self):
+        <strong>ok (1+1) == 2</strong>    # instead of self.assertEqual(2, 1+1)
 
-    def test_sub(self):
-        ok (1-1) == 0
+    def test_string_should_contain_digits(self):
+        <strong>ok (&quot;foo 123 bar&quot;).matches(r&quot;\d+&quot;)</strong>
 
 if __name__ == '__main__':
-    run()
+    unittest.main()
 </pre>
-<p>The following is a long example.</p>
+<p>See <a class="reference internal" href="#assertion-reference">Assertion Reference</a> section for details about ok() and NG().</p>
+<p>Using &#64;test decorator, you can write test name in free text.</p>
+<pre class="literal-block">
+import unittest
+from oktest ok, <strong>test</strong>
+
+class FooTest(unittest.TestCase):
+
+    <strong>&#64;test(&quot;1 + 1 should be 2&quot;)</strong>
+    <strong>def _(self):</strong>
+        ok (1+1) == 2
+
+    <strong>&#64;test(&quot;string should contain digits&quot;)</strong>
+    <strong>def _(self):</strong>
+        ok (&quot;foo 123 bar&quot;).matches(r&quot;\d+&quot;)
+
+if __name__ == '__main__':
+    unittest.main()
+</pre>
+<p>See <a class="reference internal" href="#test-decorator">&#64;test Decorator</a> section for details about &#64;test decorator.</p>
+<p>Oktest is also available without unittest. See the folloing example.</p>
 <pre class="literal-block">
 import sys, os
-from oktest import ok, NG, run
+from oktest import ok, NG, test, <strong>run</strong>
 
 ## no need to extend TestCase class
 class Example1Test(object):
 
     ## invoked only once before all tests
     &#64;classmethod
-    def before_all(cls):
+    <strong>def before_all(cls):</strong>
         os.mkdir('tmp.d')
 
     ## invoked only once after all tests done
     &#64;classmethod
-    def after_all(cls):
+    <strong>def after_all(cls):</strong>
         import shutil
         shutil.rmtree('tmp.d')
 
     ## invoked before each test
-    def before(self):   # or setUp(self)
+    <strong>def before(self):</strong>   # or setUp(self)
         self.val = ['aaa', 'bbb', 'ccc']
 
     ## invoked after each test
-    def after(self):    # or tearDown(self)
+    <strong>def after(self):</strong>    # or tearDown(self)
         pass
 
     ## test methods
-    def test_valtype(self):
+
+    &#64;test(&quot;value should be a list&quot;)
+    def _(self):
         ok (self.val).is_a(list)
 
-    def test_length(self):
-        ok (len(self.val)) == 3
-
-
-## 'ok()' is available with unittest.TestCase
-import unittest
-class Example2Test(unittest.TestCase):
-
-    def setUp(self):
-        self.val = ['aaa', 'bbb', 'ccc']
-
-    def test_valtype(self):
-        ok (self.val).is_a(list)
-
-    def test_length(self):
+    &#64;test(&quot;list length should be 3&quot;)
+    def _(self):
         ok (len(self.val)) == 3
 
 ## invoke tests
 if __name__ == '__main__':
-    run(Example1Test, Example2Test)
+    <strong>run()</strong>
     ## or
-    #run(r'.*Test$')  # specify class names by regular expression
+    #<strong>run(r'.*Test$')</strong>
     ## or
-    #run()            # same as run(r'.*(Test|TestCase|_TC)$')
+    #<strong>run(Example1Test, Example2Test)</strong>
 </pre>
-<p>NOTE: Since Oktest 0.5, it is recommended to describe test scpecification by spec() helper for readability.
-See the example at the bottom of this document.</p>
 </div>
 <div class="section" id="assertion-reference">
 
@@ -144,6 +168,8 @@ See the example at the bottom of this document.</p>
 <dd>Raise AssertionError unless y-delta &lt; x &lt; y+delta.</dd>
 <dt>ok (x).in_(y)</dt>
 <dd>Raise AssertionError unless x in y.</dd>
+<dt>ok (x).not_in(y)</dt>
+<dd>Raise AssertionError if x in y.</dd>
 <dt>ok (x).contains(y)</dt>
 <dd>Raise AssertionError unless y in x. This is opposite of in_().</dd>
 <dt>ok (x).is_(y)</dt>
@@ -152,12 +178,20 @@ See the example at the bottom of this document.</p>
 <dd>Raise AssertionError if x is y.</dd>
 <dt>ok (x).is_a(y)</dt>
 <dd>Raise AssertionError unless isinstance(x, y).</dd>
-<dt>ok (x).has_attr(y)</dt>
-<dd>Raise AssertionError unless hasattr(x, y).</dd>
+<dt>ok (x).is_not_a(y)</dt>
+<dd>Raise AssertionError if isinstance(x, y).</dd>
+<dt>ok (x).has_attr(name)</dt>
+<dd>Raise AssertionError unless hasattr(x, name).</dd>
+<dt>ok (x).attr(name, value)</dt>
+<dd>Raise AssertionError unless hasattr(x, name) and getattr(x, name) == value.</dd>
 <dt>ok (x).matches(y[, flag=None])</dt>
 <dd>If y is a string, raise AssertionError unless re.search(y, x).
 If y is a re.pattern object, raise AssertionError unless y.search(x).
 You can pass flag such as <tt class="docutils literal">re.M | re.S</tt>.</dd>
+<dt>ok (x).length(n):</dt>
+<dd>Raise AssertionError unless len(x) == n.
+This is same as <tt class="docutils literal">ok (len(x)) == n</tt>, but it is useful to chain
+assertions, like <tt class="docutils literal">ok <span class="pre">(x).is_a(tuple).length(n)</span></tt>.</dd>
 <dt>ok (path).is_file()</dt>
 <dd>Raise AssertionError unless os.path.isfile(path).</dd>
 <dt>ok (path).is_dir()</dt>
@@ -166,6 +200,7 @@ You can pass flag such as <tt class="docutils literal">re.M | re.S</tt>.</dd>
 <dd>Raise AssertionError unless os.path.exists(path).</dd>
 <dt>ok (func).raises(error_class[, errmsg=None])</dt>
 <dd><p class="first">Raise AssertionError unless func() raises error_class.
+Second argument is a string or regular expression (re.compile() object).
 It sets raised exception into 'func.exception' therefore you can do another test with raised exception object.</p>
 <pre class="last literal-block">
 obj = &quot;foobar&quot;
@@ -175,6 +210,16 @@ ok (f).raises(AttributeError, &quot;'str' object has no attribute 'name'&quot;)
 ok (f.exception.message) == &quot;'str' object has no attribute 'name'&quot;
 </pre>
 </dd>
+<dt>ok (func).not_raise([error_class=Exception])</dt>
+<dd>Raise AssertionError if func() raises error_class.</dd>
+<dt>ok (value).should</dt>
+<dd>Special property to test boolean method.
+For example, <tt class="docutils literal">ok <span class="pre">(string).should.startswith('foo')</span></tt> is same as
+to <tt class="docutils literal">ok <span class="pre">(string.startswith('foo'))</span> == True</tt>.</dd>
+<dt>ok (value).should_not</dt>
+<dd>Special property to test boolean method.
+For example, <tt class="docutils literal">ok <span class="pre">(string).should_not.startswith('foo')</span></tt> is same as
+to <tt class="docutils literal">ok <span class="pre">(string.startswith('foo'))</span> == False</tt>.</dd>
 <dt>NG (x)</dt>
 <dd><p class="first">Opposite of ok(x). For example, 'NG (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
 <pre class="last literal-block">
@@ -186,10 +231,168 @@ NG (fname).is_file()        # file doesn't exist
 </pre>
 </dd>
 <dt>not_ok (x)</dt>
-<dd>Same as NG(x).</dd>
+<dd>Same as NG(x). Provided for backward compatibility.</dd>
+<dt>NOT (x)</dt>
+<dd>Same as NG(x). Provided experimentalily.</dd>
 </dl>
+<p>It is possible to chain assertions.</p>
+<pre class="literal-block">
+## chain assertion methods
+ok (func()).is_a(tuple).length(2)
+d = datetime.date(2000, 12, 31)
+ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
+</pre>
 <p>Oktest allows you to define custom assertion functions.
-See Tips section.</p>
+See <a class="reference internal" href="#tips">Tips</a> section.</p>
+</div>
+<div class="section" id="test-decorator">
+
+<h2>&#64;test Decorator</h2>
+<p>Oktest provides &#64;test decorator.
+It is simple but very powerful.</p>
+<p>Using &#64;test decorator, you can write test description in free text instead of
+test method:</p>
+<pre class="literal-block">
+import unittest
+<strong>from oktest import test</strong>
+
+class FooTest(unittest.TestCase):
+
+    def test_1_plus_1_should_be_2(self):  # not cool...
+        assert 1+1 == 2
+
+    <strong>&#64;test(&quot;1 + 1 should be 2&quot;)</strong>    # cool! easy to read &amp; write!
+    <strong>def _(self):</strong>
+        assert 1+1 == 2
+</pre>
+<p>&#64;test decorator changes test methods.
+For example, the above code is same as the following:</p>
+<pre class="literal-block">
+class FooTest(unittest.TestCase):
+    __n = 0
+
+    def _(self):
+        assert 1+1 == 2
+
+    __n += 1
+    _.__doc__  = &quot;1 + 1 should be 2&quot;
+    _.__name__ = &quot;test_%03d: %s&quot; % (__n, _.__doc__)
+    locals()[_.__name__] = _
+</pre>
+<p>Non-English language is available on &#64;test():</p>
+<pre class="literal-block">
+class FooTest(unittest.TestCase):
+
+    <strong>&#64;test(&quot;1 + 1 は 2 になること。&quot;)</strong>
+    def _(self):
+        assert 1+1 == 2
+</pre>
+<p>&#64;test decorator accepts user-defined options. You can specify any name and
+value as option. It is accessable by 'self._options' in setUp(), therefore
+you can change behaviour of setUp() according to options.</p>
+<pre class="literal-block">
+class FooTest(unittest.TestCase):
+
+    def setUp(self):
+        tag = <strong>self._options.get(&quot;tag&quot;)</strong>
+        if tag == &quot;experimental&quot;:
+            ....
+
+    &#64;test(&quot;1 + 1 should be 2&quot;, <strong>tag=&quot;experimental&quot;</strong>)
+    def _(self):
+        assert 1+1 == 2
+</pre>
+<p>You can filter testcase by user-defined options in command-line.</p>
+<pre class="literal-block">
+## do test only tagged as 'experimental'
+$ python -m oktest.py <strong>-f tag=experimental</strong> test/*_test.py
+</pre>
+</div>
+<div class="section" id="fixture-injection">
+
+<h2>Fixture Injection</h2>
+<p>&#64;test decorator supports fixture injection.</p>
+<ul class="simple">
+<li>Arguments of test method are regarded as fixture names
+and they are injected by &#64;test decorator automatically.</li>
+<li>Instance methods or global functions which name is 'provide_xxxx' are
+regarded as fixture provider (or builder) for fixture 'xxxx'.</li>
+<li>Similar to that, instance methods or global functions which name is
+'release_xxxx' are regarded as fixture releaser (or destroyer).
+Notice that provider is mandatory but releaser is optional for fixture.</li>
+</ul>
+<pre class="literal-block">
+class SosTest(unittest.TestCase):
+
+    ##
+    ## fixture providers
+    ##
+    def <strong>provide_member1</strong>(self):
+        return {&quot;name&quot;: &quot;Haruhi&quot;}
+
+    def <strong>provide_member2</strong>(self):
+        return {&quot;name&quot;: &quot;Kyon&quot;}
+
+    ##
+    ## fixture releasers (optional)
+    ##
+    def <strong>release_member1</strong>(self, value):
+        assert value == {&quot;name&quot;: &quot;Haruhi&quot;}
+
+    ##
+    ## testcase which requires 'member1' and 'member2' fixtures.
+    ##
+    &#64;test(&quot;validate member's names&quot;)
+    def _(self, <strong>member1, member2</strong>):
+        ok (member1[&quot;name&quot;]) == &quot;Haruhi&quot;
+        ok (member2[&quot;name&quot;]) == &quot;Kyon&quot;
+</pre>
+<p>This feature is more flexible and useful than setUp() and tearDown().
+In my opinion, you don't need to write setUp() at all.</p>
+<p>Dependencies between fixtures are resolved automatically.
+If you know dependency injection framework such as <a class="reference external" href="http://www.springsource.org/">Spring</a> or <a class="reference external" href="http://code.google.com/p/google-guice/">Guice</a>,
+imagine to apply dependency injection into fixtures.</p>
+<pre class="literal-block">
+class BarTest(unittest.TestCase):
+
+    ##
+    ## for example:
+    ## - Fixture 'a' depends on 'b' and 'c'.
+    ## - Fixture 'c' depends on 'd'.
+    ##
+    def provide_<strong>a</strong>(<strong>b</strong>, <strong>c</strong>):  return b + c + [&quot;A&quot;]
+    def provide_<strong>b</strong>():      return [&quot;B&quot;]
+    def provide_<strong>c</strong>(<strong>d</strong>):     return d + [&quot;C&quot;]
+    def provide_<strong>d</strong>():      reutrn [&quot;D&quot;]
+
+    ##
+    ## Dependencies between fixtures are solved automatically.
+    ## If loop exists in dependency then &#64;test reports error.
+    ##
+    &#64;test(&quot;dependency test&quot;)
+    def _(self, <strong>a</strong>):
+        assert a == [&quot;B&quot;, &quot;D&quot;, &quot;C&quot;, &quot;A&quot;]
+</pre>
+<p>If you want to integrate with other fixture library, create manager object
+and set it into <tt class="docutils literal">oktest.fixture_manager</tt>.
+The following is an example to use <a class="reference external" href="https://github.com/mnoble/forge/">Forge</a> as external fixture library:</p>
+<pre class="literal-block">
+## fixture data
+from forge import Forge
+Forge.define('haruhi', name='Haruhi')
+Forge.define('mikuru', name='Mikuru')
+Forge.define('yuki',   name='Yuki')
+
+## manager class
+class ForgeFixtureManager(object):
+    <strong>def provide(self, name):</strong>
+        return Forge.build(name)
+    <strong>def release(self, name, value):</strong>
+        pass
+
+## use it
+<strong>oktest.fixture_manager =</strong> ForgeFixtureManager()
+</pre>
 </div>
 <div class="section" id="unified-diff">
 
@@ -204,9 +407,10 @@ See Tips section.</p>
 <p>For example:</p>
 <pre class="literal-block">
 ## foo_test.py
-from oktest import *
+import unittest
+from oktest import ok
 
-class FooTest(object):
+class FooTest(unittest.TestCase):
 
     def test1(self):
         s1 = ( &quot;AAA\n&quot;
@@ -218,17 +422,22 @@ class FooTest(object):
         ok (s1) == s2
 
 if __name__ == '__main__':
-    run(FooTest)
+    unittest.main()
 </pre>
 <p>If you run this script, you'll find that unified diff is displayed.</p>
 <p>Output result:</p>
 <pre class="literal-block">
+$ python -V
+Python 2.5.5
 $ python foo_test.py
-### FooTest
-f
-Failed: FooTest#test1()
-   'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
-   foo_test.py:13:  ok (s1) == s2
+F
+======================================================================
+FAIL: test1 (__main__.FooTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;foo_test.py&quot;, line 14, in test1
+    ok (s1) == s2
+AssertionError: 'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
 --- expected
 +++ actual
 &#64;&#64; -1,3 +1,3 &#64;&#64;
@@ -236,26 +445,62 @@ Failed: FooTest#test1()
 +BBB
  CCC
 -DDD
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.006s
+
+FAILED (failures=1)
 </pre>
-<p>If you set 'oktest.DIFF' to 'repr', each line is preprocessed by repr(). This is very useful to show non-visible characters. For example:</p>
+<p>If you set <tt class="docutils literal">oktest.DIFF</tt> to <tt class="docutils literal">repr</tt>, each line is preprocessed by <tt class="docutils literal">repr()</tt>.
+This is very useful to show non-visible characters. For example:</p>
 <pre class="literal-block">
-$ vi foo_test.py    # add 'import oktest; oktest.DIFF = repr'
+## foo_test.py
+import unittest
+from oktest import ok
+import oktest
+<strong>oktest.DIFF = repr</strong>
+
+class FooTest(unittest.TestCase):
+
+    def test1(self):
+        s1 = ( &quot;AAA\n&quot;
+               <strong>&quot;BBB  \n&quot;</strong>     # contains white space character
+               &quot;CCC\n&quot; )
+        s2 = ( &quot;AAA\n&quot;
+               <strong>&quot;BBB\n&quot;</strong>
+               &quot;CCC\n&quot; )
+        ok (s1) == s2
+
+if __name__ == '__main__':
+    unittest.main()
+</pre>
+<p>Result:</p>
+<pre class="literal-block">
 $ python foo_test.py
-### FooTest
-f
-Failed: FooTest#test1()
-   'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
-   hoge.py:15:  ok (s1) == s2
+F
+======================================================================
+FAIL: test1 (__main__.FooTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;foo_test.py&quot;, line 16, in test1
+    ok (s1) == s2
+AssertionError: 'AAA\nBBB \nCCC\n' == 'AAA\nBBB\nCCC\n' : failed.
 --- expected
 +++ actual
 &#64;&#64; -1,3 +1,3 &#64;&#64;
  'AAA\n'
-+'BBB\n'
+<strong>+'BBB  \n'</strong>
+<strong>-'BBB\n'</strong>
  'CCC\n'
--'DDD\n'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (failures=1)
 </pre>
-<p>If you set 'oktest.DIFF' to False, unified diff is not displayed.</p>
-<p>Notice that this feature is only available with oktest.run() and not available with unittest module.</p>
+<p>If you set '<tt class="docutils literal">oktest.DIFF</tt>' to False, unified diff is not displayed.</p>
 </div>
 <div class="section" id="tracer">
 
@@ -271,18 +516,18 @@ Failed: FooTest#test1()
 <p>Example to create fake object:</p>
 <pre class="literal-block">
 ## create fake objects
-from oktest.tracer import Tracer
-tr = Tracer()
-foo = tr.fake_obj(m1=100, m2=200)   # method name and return-value
-bar = tr.fake_obj(m3=lambda self, x: x+1)  # method name and body
+<strong>from oktest.tracer import Tracer</strong>
+<strong>tr = Tracer()</strong>
+foo = <strong>tr.fake_obj(m1=100, m2=200)</strong>   # method name and return-value
+bar = <strong>tr.fake_obj(m3=lambda self, x: x+1)</strong>  # method name and body
 ## call fake methods
 ok (bar.m3(0))     == 1
 ok (foo.m2(1,2,3)) == 200    # any argument can be passed
 ok (foo.m1(x=123)) == 100    # any argument can be passed
 ## check results
-ok (repr(tr[0]))   == 'm3(0) #=&gt; 1'
-ok (repr(tr[1]))   == 'm2(1, 2, 3) #=&gt; 200'
-ok (repr(tr[2]))   == 'm1(x=123) #=&gt; 100'
+ok (repr(<strong>tr[0]</strong>))   == 'm3(0) #=&gt; 1'
+ok (repr(<strong>tr[1]</strong>))   == 'm2(1, 2, 3) #=&gt; 200'
+ok (repr(<strong>tr[2]</strong>))   == 'm1(x=123) #=&gt; 100'
 </pre>
 <p>There are several ways to check results:</p>
 <pre class="literal-block">
@@ -291,39 +536,36 @@ tr = Tracer()
 obj = tr.fake_obj(meth=9)
 ok (obj.meth(1, 2, x=3)) == 9
 ## check results
-ok (repr(tr[0]))  == 'meth(1, 2, x=3) #=&gt; 9'
+ok (<strong>repr(tr[0])</strong>)  == 'meth(1, 2, x=3) #=&gt; 9'
 ## or
-ok (tr[0].list()) == [obj, 'meth', (1, 2), {'x': 3}, 9]
+ok (<strong>tr[0].list()</strong>) == [obj, 'meth', (1, 2), {'x': 3}, 9]
 ## or
-ok (tr[0])        == [obj, 'meth', (1, 2), {'x': 3}, 9]
+ok (<strong>tr[0]</strong>)        == [obj, 'meth', (1, 2), {'x': 3}, 9]
 ## or
-ok (tr[0].receiver).is_(obj)
-ok (tr[0].name)   == 'meth'
-ok (tr[0].args)   == (1, 2)
-ok (tr[0].kwargs) == {'x': 3}
-ok (tr[0].ret)    == 9
+ok (<strong>tr[0].receiver</strong>).is_(obj)
+ok (<strong>tr[0].name</strong>)   == 'meth'
+ok (<strong>tr[0].args</strong>)   == (1, 2)
+ok (<strong>tr[0].kwargs</strong>) == {'x': 3}
+ok (<strong>tr[0].ret</strong>)    == 9
 </pre>
 <p>Example to trace method call:</p>
 <pre class="literal-block">
 class Foo(object):
-    def m1(self, x):
-        return x + 1
-    def m2(self, y):
-        return y + 1
+    def add(self, x, y):
+        return x + y
+    def hello(self, name='World'):
+        return &quot;Hello &quot; + name
 obj = Foo()
 ## trace methods
 from oktest.tracer import Tracer
 tr = Tracer()
-def dummy(original_func, *args, **kwargs):
-    #return original_func(*args, **kwargs)
-    return 100
-tr.fake_method(obj, m1=dummy, m2=200)
+<strong>tr.trace_method(obj, 'add', 'hello')</strong>
 ## call methods
-ok (obj.m1(1)) == 100
-ok (obj.m2(2)) == 200
+ok (obj.add(2, 3)) == 5
+ok (obj.hello(name=&quot;SOS&quot;)) == &quot;Hello SOS&quot;
 ## check results
-ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
-ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+ok (tr[0]) == [obj, 'add', (2, 3), {}, 5]
+ok (tr[1]) == [obj, 'hello', (), {'name':'SOS'}, &quot;Hello SOS&quot;]
 </pre>
 <p>Example to trace function call:</p>
 <pre class="literal-block">
@@ -334,8 +576,8 @@ def g(y):
 ## trace functions
 from oktest.tracer import Tracer
 tr = Tracer()
-f = tr.trace_func(f)
-g = tr.trace_func(g)
+<strong>f = tr.trace_func(f)</strong>
+<strong>g = tr.trace_func(g)</strong>
 ## call functions
 ok (g(0)) == 3
 ## check results
@@ -345,24 +587,23 @@ ok (tr[1]) == [None, 'f', (1,), {}, 2]
 <p>Example to fake method call:</p>
 <pre class="literal-block">
 class Foo(object):
-    def m1(self, x):
-        return x + 1
-    def m2(self, y):
-        return y + 1
+    def add(self, x, y):
+        return x + y
+    def hello(self, name='World'):
+        return &quot;Hello &quot; + name
 obj = Foo()
 ## fake methods
 from oktest.tracer import Tracer
 tr = Tracer()
 def dummy(original_func, *args, **kwargs):
-    #return original_func(*args, **kwargs)
-    return 100
-tr.fake_method(obj, m1=dummy, m2=200)
-## call method
-ok (obj.m1(1)) == 100
-ok (obj.m2(2)) == 200
+    return &quot;Hello!&quot;
+<strong>tr.fake_method(obj, add=100, hello=dummy)</strong>
+## call methods
+ok (obj.add(2, 3)) == 100
+ok (obj.hello(name=&quot;SOS&quot;)) == &quot;Hello!&quot;
 ## check results
-ok (tr[0]) == [obj, 'm1', (1,), {}, 100]
-ok (tr[1]) == [obj, 'm2', (2,), {}, 200]
+ok (tr[0]) == [obj, 'add', (2, 3), {}, 100]
+ok (tr[1]) == [obj, 'hello', (), {'name':&quot;SOS&quot;}, &quot;Hello!&quot;]
 </pre>
 <p>Example to fake function call:</p>
 <pre class="literal-block">
@@ -370,16 +611,33 @@ def f(x):
     return x*2
 ## fake a function
 def dummy(original_func, x):
-    #return original_func(x)
     return 'x=%s' % repr(x)
 from oktest.tracer import Tracer
 tr = Tracer()
-f = tr.fake_func(f, dummy)
+<strong>f = tr.fake_func(f, dummy)</strong>
 ## call function
 ok (f(3))  == 'x=3'
 ## check results
 ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 </pre>
+</div>
+<div class="section" id="command-line-interface">
+
+<h2>Command-line Interface</h2>
+<p>Oktest now supports command-line interface to execute test scripts.</p>
+<pre class="literal-block">
+## run test scripts except foo_*.py
+$ python -m oktest <strong>-x 'foo_*.py' tests/*_test.py</strong>
+## run test scripts in 'tests' dir with pattern '*_test.py'
+$ python -m oktest <strong>-p '*_test.py' tests</strong>
+## filter by class name
+$ python -m oktest <strong>-f class='ClassName*'</strong> tests
+## filter by test method name
+$ python -m oktest <strong>-f test='*keyword*'</strong> tests   # or <strong>-f '*keyword*'</strong>
+## filter by user-defined option added by &#64;test decorator
+$ python -m oktest <strong>-f tag='*value*'</strong> tests
+</pre>
+<p>Try <tt class="docutils literal">python <span class="pre">-m</span> oktest <span class="pre">-h</span></tt> for details about command-line options.</p>
 </div>
 <div class="section" id="helpers-reference">
 
@@ -398,10 +656,12 @@ oktest.run(r'.*Test$')        # invokes FooTest, BarTest, and so on
 oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 </pre>
 </dd>
-<dt>spec(description)</dt>
-<dd><p class="first">Represents spec description. This is just a marker function, but very useful for readability.
-<strong>It is recommended to use spec() helper for readability of tests.</strong></p>
-<pre class="last literal-block">
+</dl>
+<p>spec(description)</p>
+<blockquote>
+<p>Represents spec description.
+This is just a marker function, but very useful for readability.</p>
+<pre class="literal-block">
 class NumericTest(object):
     def test_integer(self):
         with spec(&quot;1+1 should be equal to 2.&quot;):
@@ -414,8 +674,7 @@ class NumericTest(object):
         for _ in spec(&quot;1+1 should be equal to 2.&quot;):
             ok (1+1) == 2
 </pre>
-</dd>
-</dl>
+</blockquote>
 </div>
 <div class="section" id="oktest-helper-module">
 
@@ -431,10 +690,10 @@ with chdir(&quot;/var/tmp&quot;):
     # do something
 assert os.getcwd() == cwd                 # back to the original place
 ## or
+&#64;chdir(&quot;/var/tmp&quot;)
 def fn():
     assert os.getcwd() == &quot;/var/tmp&quot;
     # do something
-chdir(&quot;/var/tmp&quot;).run(fn)
 </pre>
 </dd>
 <dt>rm_rf(filename, dirname, ...)</dt>
@@ -456,9 +715,9 @@ with dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;):
     # do something
 assert not os.path.exists(&quot;A.txt&quot;)        # file is removed
 ## or
+&#64;dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;)
 def fn():
     assert os.path.isfile(&quot;A.txt&quot;)
-dummy_file(&quot;A.txt&quot;, &quot;aaa&quot;).run(fn)
 </pre>
 </dd>
 <dt>dummy_dir(dirname)</dt>
@@ -472,9 +731,9 @@ with dummy_dir(&quot;tmpdir&quot;):
     # do something
 assert not os.path.exists(&quot;tmpdir&quot;)       # directory is removed
 ## or
+&#64;dummy_dir(&quot;tmpdir&quot;)
 def fn():
     assert os.path.isdir(&quot;tmpdir&quot;)
-dummy_dir(&quot;tmpdir&quot;).run(fn)
 </pre>
 </dd>
 <dt>dummy_values(dictionary, items_=None, **kwargs):</dt>
@@ -489,9 +748,9 @@ with dummy_values(d, A=1000, X=2000):
     # do something
 assert d == {'A':10, 'B':20}              # values are backed
 ## or
+&#64;dummy_values(d, A=1000, X=2000)
 def fn():
     assert d['A'] == 1000
-dummy_values(d, A=1000, X=2000).run(fn)
 </pre>
 </dd>
 <dt>dummy_attrs(object, items_=None, **kwargs):</dt>
@@ -513,9 +772,9 @@ assert obj.x == 10                        # attributes are backed
 assert obj.y == 20
 assert not hasattr(obj, 'z')
 ## or
+&#64;dummy_attrs(obj, x=90, z=100)
 def fn():
     assert obj.x == 90
-dummy_attrs(obj, x=90, z=100).run(fn)
 </pre>
 </dd>
 <dt>dummy_io(stdin_content=None, func=None):</dt>
@@ -524,15 +783,17 @@ dummy_attrs(obj, x=90, z=100).run(fn)
 with dummy_io(&quot;SOS&quot;) as d_io:
     assert sys.stdin.read() == &quot;SOS&quot;
     print(&quot;Haruhi&quot;)
-assert d_io.stdout == &quot;Haruhi\n&quot;
-assert d_io.stderr == &quot;&quot;
+sout, serr = d_io
+assert sout == &quot;Haruhi\n&quot;
+assert serr == &quot;&quot;
 ## or
-def fn():
+&#64;dummy_io(&quot;SOS&quot;)
+def d_io():
     assert sys.stdin.read() == &quot;SOS&quot;
     print(&quot;Haruhi&quot;)
-d_io = dummy_io(&quot;SOS&quot;)
-d_io.run(fn)
-assert d_io.stdout == &quot;Haruhi\n&quot;
+sout, serr = d_io
+assert sout == &quot;Haruhi\n&quot;
+assert serr == &quot;&quot;
 </pre>
 </dd>
 </dl>
@@ -542,7 +803,7 @@ assert d_io.stdout == &quot;Haruhi\n&quot;
 <h3><tt class="docutils literal">oktest.tracer</tt> module</h3>
 <dl class="docutils">
 <dt>tracer():</dt>
-<dd>Return tracer object. See the above section for details.</dd>
+<dd>Return tracer object. See <a class="reference internal" href="#tracer">Tracer</a> section for details.</dd>
 </dl>
 </div>
 </div>
@@ -554,12 +815,12 @@ assert d_io.stdout == &quot;Haruhi\n&quot;
 <pre class="literal-block">
 ## define custom assertion function
 import oktest
-&#64;oktest.assertion
+<strong>&#64;oktest.assertion</strong>
 def startswith(self, arg):
-    boolean = self.target.startswith(arg)
-    if boolean == self.expected:
+    boolean = <strong>self.target</strong>.startswith(arg)
+    if boolean == <strong>self.boolean</strong>:
         return True
-    self.failed(&quot;%r.startswith(%r) : failed.&quot; % (self.target, arg))
+    <strong>self.failed</strong>(&quot;%r.startswith(%r) : failed.&quot; % (self.target, arg))
 
 ## how to use
 from oktest import ok
@@ -569,13 +830,15 @@ ok (&quot;Sasaki&quot;).startswith(&quot;Sas&quot;)
 <li><p class="first">It is possible to chain assertion methods.</p>
 <pre class="literal-block">
 ## chain assertion methods
-ok (&quot;sos&quot;.upper()).is_a(str).matches(r'^[A-Z]+$')
+ok (func()).is_a(tuple).length(2)
+d = datetime.date(2000, 12, 31)
+ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
 </pre>
 </li>
-<li><p class="first">If you call ok() or not_ok() but forget to do assertion, oktest warns it.</p>
+<li><p class="first">If you call ok() or NG() but forget to do assertion, oktest warns it.</p>
 <pre class="literal-block">
 import oktest
-from oktest import ok, not_ok
+from oktest import ok, NG
 
 class FooTest(object):
     def test_1(self):
@@ -585,24 +848,13 @@ class FooTest(object):
 oktest.run()   #=&gt; warning: ok() is called but not tested.
 </pre>
 </li>
-<li><p class="first">You can filter test methods to invoke by environment variable $TEST. For example, 'export TEST=&quot;ex[0-9]+&quot;' will invokes 'test_ex1()', 'test_ex2()', ..., but not invoke 'test_1()', 'test_2()', and so on.</p>
+<li><p class="first">$TEST environment variable is now obsolete.
+Use command-line option instead to filter testcase by name.</p>
 <pre class="literal-block">
-### filter test by name
-$ TEST='ex[0-9]' python test/foobar_test.py
+## filter testcase by name
+$ python -m oktest -f test='*foobar*' test/foo_test.py
 </pre>
 </li>
-<li><p class="first">If you want to output format, create oktest.Reporter subclass and set it to oktest.REPORTER variable.</p>
-</li>
-</ul>
-</div>
-<div class="section" id="todo">
-
-<h2>ToDo</h2>
-<ul class="simple">
-<li>[v] print unified diff when two strings are different</li>
-<li>[_] improve reporters</li>
-<li>[_] make package(?)</li>
-<li>[v] report assertion objects which are not tested</li>
 </ul>
 </div>
 <div class="section" id="license">
