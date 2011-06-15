@@ -210,12 +210,13 @@ class AssertionObject(object):
     #    self.boolean = not self.boolean
     #    return self
 
-    def failed(self, msg, depth=2):
+    def failed(self, msg, depth=2, boolean=None):
         file, line = _get_location(depth + 1)
         diff = None
         if isinstance(msg, tuple):
             msg, diff = msg
-        if self.boolean is False:
+        if boolean is None: boolean = self.boolean
+        if boolean is False:
             msg = 'not ' + msg
         raise self._assertion_error(msg, file, line, diff)
 
@@ -352,6 +353,14 @@ def _f():
         boolean = hasattr(self.target, name)
         if boolean == self.boolean:  return self
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
+
+    @assertion
+    def attr(self, name, expected):
+        if not hasattr(self.target, name):
+            self.failed("hasattr(%r, %r) : failed." % (self.target, name), boolean=True)
+        boolean = getattr(self.target, name) == expected
+        if boolean == self.boolean:  return self
+        self.failed('attr(%r): ' % name + _msg(getattr(self.target, name), "==", expected))
 
     @assertion
     def matches(self, pattern, flags=0):

@@ -190,6 +190,22 @@ class Assertions_TC(unittest.TestCase):
         def fn(): ok ("s").hasattr("xxxxx")
 
 
+    def test_attr(self):
+        import datetime
+        d = datetime.date(2000, 12, 31)
+        ok (d).attr("year", 2000)
+        ok (d).attr("year", 2000).attr("month", 12).attr("day", 31)
+        NG (d).attr("year", 2001)
+        @be_fail("attr('year'): 2000 == 2001 : failed.")
+        def fn(): ok (d).attr("year", 2001)
+        @be_fail("not attr('year'): 2000 == 2000 : failed.")
+        def fn(): NG (d).attr("year", 2000)
+        @be_fail("hasattr(datetime.date(2000, 12, 31), 'hour') : failed.")
+        def fn(): ok (d).attr("hour", 12)
+        @be_fail("hasattr(datetime.date(2000, 12, 31), 'hour') : failed.")
+        def fn(): NG (d).attr("hour", 12)
+
+
     def test_raises(self):
         def f(): raise ValueError('errmsg1')
         ok (f).raises(ValueError)              # ValueError
