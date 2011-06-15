@@ -271,6 +271,27 @@ run()
         self.do_test(desc, script, expected)
 
 
+    def test_run_with_out_keyword_arg(self):
+        desc = "run (without args)"
+        script = r"""
+try:
+  from cStringIO import StringIO
+except ImportError:
+  from io import StringIO
+
+from oktest import *
+class FooTest(object):
+    def test_1(self):
+        ok (1+1) == 2
+
+sio = StringIO()
+run(out=sio)
+ok (sio.getvalue()) == "* FooTest.test_1 ... [ok]\n"
+"""[1:]
+        expected = ""
+        self.do_test(desc, script, expected)
+
+
     def test__min_firstlineno_of_methods(self):
         desc = "_min_firstlineno_of_methods"
         script = r"""

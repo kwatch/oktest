@@ -666,13 +666,23 @@ TEST_RUNNER = TestRunner
 
 TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
 
-def run(*targets, **filter):
+def run(*targets, **kwargs):
+    global OUT
+    out = None
+    if kwargs.get('out') and not _is_string(kwargs['out']):
+        out = kwargs.pop('out')
+    filter = kwargs
     if len(targets) == 0:
         targets = (TARGET_PATTERN, )
-    count = 0
-    for klass in _target_classes(targets):
-        runner = TEST_RUNNER(klass, REPORTER(), filter)
-        count += runner.run()
+    try:
+        bkup = OUT
+        if out: OUT = out
+        count = 0
+        for klass in _target_classes(targets):
+            runner = TEST_RUNNER(klass, REPORTER(), filter)
+            count += runner.run()
+    finally:
+        if out: OUT = bkup
     return count
 
 def _target_classes(targets):
