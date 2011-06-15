@@ -377,6 +377,12 @@ def _f():
             self.failed("not re.search(%r, %r) : failed." % (pattern, self.target))
 
     @assertion
+    def length(self, n):
+        boolean = len(self.target) == n
+        if boolean == self.boolean:  return self
+        self.failed("len(%r) == %r : failed." % (self.target, n))
+
+    @assertion
     def is_file(self):
         boolean = os.path.isfile(self.target)
         if boolean == self.boolean:  return self

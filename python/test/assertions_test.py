@@ -253,6 +253,18 @@ class Assertions_TC(unittest.TestCase):
             assert Failse, "AssertionError expected"
 
 
+    def test_length(self):
+        ok ("foo").length(3)
+        ok ([]).length(0)
+        ok ((1,2,3)).is_a(tuple).length(3)
+        @be_fail("len('foo') == 4 : failed.")
+        def fn(): ok ("foo").length(4)
+        @be_fail("len([]) == 1 : failed.")
+        def fn(): ok ([]).length(1)
+        @be_fail("len((1, 2, 3)) == 4 : failed.")
+        def fn(): ok ((1,2,3)).is_a(tuple).length(4)
+
+
     def test_is_file(self):
         fname = '__foobar.txt'
         dname = '__foobar.d'
