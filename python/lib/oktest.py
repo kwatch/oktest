@@ -981,6 +981,8 @@ class BaseReporter(Reporter):
             self.out.write('    %s\n' % text)
 
     def colorize(self, string, status):
+        if not config.color_enabled:
+            return string
         if status == ST_PASSED:  return Color.green(string, bold=True)
         if status == ST_FAILED:  return Color.red(string, bold=True)
         if status == ST_ERROR:   return Color.red(string, bold=True)
@@ -2005,6 +2007,7 @@ def _dummy():
             parser.add_option("-v", "--version",    action="store_true",     help="verion of oktest.py")
             #parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
             parser.add_option("-r", dest="report",  metavar="STYLE",         help="reporting style (plain/simple/verbose, or p/s/v)")
+            parser.add_option(      "--color",      metavar="true|false",    help="enable/disable output color")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
@@ -2171,6 +2174,16 @@ def _dummy():
             import oktest
             oktest.REPORTER = klass
 
+        def _handle_opt_color(self, opt_color, parser):
+            import oktest.config
+            if   opt_color in ('true', 'yes', 'on'):
+                oktest.config.color_enabled = True
+            elif opt_color in ('false', 'no', 'off'):
+                oktest.config.color_enabled = False
+            else:
+                #raise optparse.OptionError("--color=%r: 'true' or 'false' expected" % opt_color)
+                parser.error("--color=%r: 'true' or 'false' expected" % opt_color)
+
         def run(self, args=None):
             if args is None: args = sys.argv[1:]
             parser = self._new_cmdopt_parser()
@@ -2194,6 +2207,7 @@ def _dummy():
                 print(self._version_info())
                 return
             if opts.report: self._handle_opt_report(opts.report, parser)
+            if opts.color:  self._handle_opt_color(opts.color, parser)
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
             if opts.exclude:
