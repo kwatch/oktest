@@ -149,29 +149,29 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-* <b>FooTest</b>: <R>f</R>
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_1() > 1+1 should be 2.
+* FooTest: f
+----------------------------------------------------------------------
+[Failed] FooTest > test_1() > 1+1 should be 2.
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
-<R>AssertionError: 2 == 1 : failed.</R>
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_1() > 1-1 should be 0.
+AssertionError: 2 == 1 : failed.
+----------------------------------------------------------------------
+[Failed] FooTest > test_1() > 1-1 should be 0.
   File "__test_scenario1.py", line 10, in test_1
     ok (1-1) == 1
-<R>AssertionError: 0 == 1 : failed.</R>
-<r>----------------------------------------------------------------------</r>
-## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
+AssertionError: 0 == 1 : failed.
+----------------------------------------------------------------------
+## total:1, passed:0, failed:1, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         expected2 = r"""
-* <b>FooTest</b>: <R>f</R>
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_1()
+* FooTest: f
+----------------------------------------------------------------------
+[Failed] FooTest > test_1()
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
-<R>AssertionError: 2 == 1 : failed.</R>
-<r>----------------------------------------------------------------------</r>
-## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
+AssertionError: 2 == 1 : failed.
+----------------------------------------------------------------------
+## total:1, passed:0, failed:1, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         expected1 = oktest.Color._colorize(expected1)
         expected2 = oktest.Color._colorize(expected2)
@@ -181,6 +181,7 @@ oktest.run()
             sout, serr = self._run_oktest(fname, input)
             sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
             self.assertEqual("", serr)
+            from oktest import ok; ok (sout) == expected1
             self.assertEqual(expected1, sout)
             assert sout == expected1
             assert serr == ""
@@ -220,41 +221,41 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-* <b>FooTest</b>: <R>f</R>
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test1() > 1+1 is 2
+* FooTest: f
+----------------------------------------------------------------------
+[Failed] FooTest > test1() > 1+1 is 2
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 18, in _m3
     ok (1+1) == 0
-<R>AssertionError: 2 == 0 : failed.</R>
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test1() > 'KYON' starts with 'KY'
+AssertionError: 2 == 0 : failed.
+----------------------------------------------------------------------
+[Failed] FooTest > test1() > 'KYON' starts with 'KY'
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 21, in _m3
     ok ("KYON").starts_with("ky")
-<R>AssertionError: 'KYON'.startswith('ky') : failed.</R>
-<r>----------------------------------------------------------------------</r>
-## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
+AssertionError: 'KYON'.startswith('ky') : failed.
+----------------------------------------------------------------------
+## total:1, passed:0, failed:1, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         expected2 = r"""
-* <b>FooTest</b>: <R>f</R>
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test1()
+* FooTest: f
+----------------------------------------------------------------------
+[Failed] FooTest > test1()
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 18, in _m3
     ok (1+1) == 0
-<R>AssertionError: 2 == 0 : failed.</R>
-<r>----------------------------------------------------------------------</r>
-## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
+AssertionError: 2 == 0 : failed.
+----------------------------------------------------------------------
+## total:1, passed:0, failed:1, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         expected1 = oktest.Color._colorize(expected1)
         expected2 = oktest.Color._colorize(expected2)
@@ -295,18 +296,18 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-* <b>FooTest</b>: <R>E</R>
-<r>----------------------------------------------------------------------</r>
-[<R>ERROR</R>] FooTest > test1()
+* FooTest: E
+----------------------------------------------------------------------
+[ERROR] FooTest > test1()
   File "__test_scenario3.py", line 7, in test1
     self._m2()
   File "__test_scenario3.py", line 9, in _m2
     self._m3()
   File "__test_scenario3.py", line 15, in _m3
     None.unknownattribute
-<R>AttributeError: 'NoneType' object has no attribute 'unknownattribute'</R>
-<r>----------------------------------------------------------------------</r>
-## total:1, passed:0, failed:0, <R>error:1</R>, skipped:0   (elapsed 0.000)
+AttributeError: 'NoneType' object has no attribute 'unknownattribute'
+----------------------------------------------------------------------
+## total:1, passed:0, failed:0, error:1, skipped:0   (elapsed 0.000)
 """[1:]
         expected2 = expected1
         expected1 = oktest.Color._colorize(expected1)

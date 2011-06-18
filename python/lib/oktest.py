@@ -883,7 +883,7 @@ class BaseReporter(Reporter):
         if exc_info:
             self.report_exception(testclass, method_name, ST_ERROR, exc_info)
         if self._exceptions or exc_info:
-            self.out.write(self.separator + "\n")
+            self.write_separator()
         self.out.flush()
 
     def enter_testcase(self, testcase, testname):
@@ -930,7 +930,7 @@ class BaseReporter(Reporter):
         else:
             parent, child, desc = self._get_testcase_header_items(testcase, testname)
         indicator = self.indicator(status)
-        self.out.write(self.separator + "\n")
+        self.write_separator()
         self.out.write("[%s] %s > %s\n" % (indicator, parent, child))
         if desc: self.out.write(desc + "\n")
 
@@ -989,7 +989,7 @@ class BaseReporter(Reporter):
         #self.report_exception_header(testcase, testname, status, exc_info)
         parent, child, desc = self._get_testcase_header_items(testcase, testname)
         indicator = self.indicator(status)
-        self.out.write(self.separator + "\n")
+        self.write_separator()
         self.out.write("[%s] %s > %s > %s\n" % (indicator, parent, child, spec.desc))
         if desc: self.out.write(desc + "\n")
         #
@@ -1025,8 +1025,12 @@ class BaseReporter(Reporter):
         if status == ST_FAILED:  return Color.red(string, bold=True)
         if status == ST_ERROR:   return Color.red(string, bold=True)
         if status == ST_SKIPPED: return Color.yellow(string, bold=True)
-        if status == True:       return Color.red(string)
+        if status == "topic":    return Color.bold(string)
+        if status == "sep":      return Color.red(string)
         return Color.yellow(string)
+
+    def write_separator(self):
+        self.out.write(self.colorize(self.separator, "sep") + "\n")
 
     def status_char(self, status):
         if not hasattr(self, '_status_chars'):
@@ -1098,7 +1102,7 @@ class VerboseReporter(BaseReporter):
 
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
-        self.out.write("* %s\n" % Color.bold(self.get_testclass_name(testclass)))
+        self.out.write("* %s\n" % self.colorize(self.get_testclass_name(testclass), "topic"))
         self.out.flush()
 
     def enter_testcase(self, testcase, testname):
@@ -1125,7 +1129,7 @@ class SimpleReporter(BaseReporter):
 
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
-        self.out.write("* %s: " % Color.bold(self.get_testclass_name(testclass)))
+        self.out.write("* %s: " % self.colorize(self.get_testclass_name(testclass), "topic"))
         self.out.flush()
 
     def exit_testclass(self, *args):
