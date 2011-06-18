@@ -1423,7 +1423,7 @@ def test(description_text=None, **options):
         else:
             newfunc.__name__ = "test_%03d: %s" % (n, description_text)
             localvars[newfunc.__name__] = newfunc
-        newfunc.__doc__  = description_text
+        newfunc.__doc__  = orig_func.__doc__ or description_text
         newfunc._options = options
         newfunc._firstlineno = _func_firstlineno(orig_func)
         return newfunc

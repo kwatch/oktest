@@ -101,6 +101,19 @@ class TestDeco_TC(unittest.TestCase):
             self.fail("Nothing should be raised but got %s: %s" % (ex_class.__name__, ex))
         self.assertEqual({'tag': "test"}, test_foo._options)
 
+    @test("not to override existing document of function.")
+    def t(self):
+        @test()
+        def test_foo(self):
+            "Description"
+            pass
+        self.assertEqual("Description", test_foo.__doc__)
+        @test("new desc")
+        def test_bar(self):
+            "old desc"
+            pass
+        self.assertEqual("old desc", test_bar.__doc__)
+
 
     ##
     ## test fixtures
