@@ -745,7 +745,11 @@ TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
 
 
 def run(*targets, **kwargs):
+    out    = kwargs.pop('out', None)
+    color  = kwargs.pop('color', None)
+    filter = kwargs.pop('filter', {})
     reporter_class = kwargs.pop('reporter_class', None)
+    #
     if isinstance(reporter_class, type):
         pass
     elif isinstance(reporter_class, str):
@@ -758,18 +762,9 @@ def run(*targets, **kwargs):
     else:
         raise TypeError("%r: reporter should be string or class." % (reporter,))
     #
-    out = None
-    if kwargs.get('out') and not _is_string(kwargs['out']):
-        out = kwargs.pop('out')
+    reporter = reporter_class(out=out, color=color)
+    runner = TEST_RUNNER(reporter=reporter, filter=filter)
     #
-    color = None
-    if kwargs.get('color') and not _is_string(kwargs['color']):
-        color = kwargs.pop('color')
-    #
-    runner = TEST_RUNNER()
-    runner.reporter = reporter_class(out=out, color=color)
-    #
-    filter = kwargs
     if len(targets) == 0:
         targets = (TARGET_PATTERN, )
     #
