@@ -109,7 +109,8 @@ config = _new_module('oktest.config', {
     "debug": False,
     #"color_enabled": _sys.platform.startswith(('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
     #"color_enabled": any(lambda x: _sys.platform.startswith(x), ('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
-    "color_enabled": bool([ 1 for x in ('darwin', 'linux', 'freebsd', 'netbsd') if sys.platform.startswith(x) ]),
+    "color_available": bool([ 1 for x in ('darwin', 'linux', 'freebsd', 'netbsd') if sys.platform.startswith(x) ]),
+    "color_enabled":  None,    # None means detect automatiallly
 })
 
 
@@ -823,12 +824,21 @@ class BaseReporter(Reporter):
         if color is None: color = config.color_enabled
         self._color = color
         self.counts = {}
-        if color:
-            self.separator = self.colorize(self.separator, True)
+
+    def _set_color(self, color=None):
+        if color is not None:
+            self._color = color
+        elif config.color_enabled is not None:
+            self._color = config.color_enabled
+        elif not config.color_available:
+            self._color = False
+        else:
+            self._color = is_tty(self._out)
 
     def __get_out(self):
         if not self._out:
             self._out = OUT or sys.stdout
+            self._set_color(self._color)
         return self._out
 
     def __set_out(self, out):
@@ -1009,7 +1019,7 @@ class BaseReporter(Reporter):
             self.out.write('    %s\n' % text)
 
     def colorize(self, string, status):
-        if not config.color_enabled:
+        if not self._color:
             return string
         if status == ST_PASSED:  return Color.green(string, bold=True)
         if status == ST_FAILED:  return Color.red(string, bold=True)

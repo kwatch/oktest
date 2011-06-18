@@ -10,6 +10,7 @@ import unittest
 import oktest
 from oktest import ok, not_ok, NG
 from oktest.dummy import dummy_io
+import oktest.config
 
 echo = sys.stdout.write
 python_command = os.environ.get('PYTHON', 'python')
@@ -25,12 +26,13 @@ class RunnerTestHelper(object):
 
     def _setUp(self):
         self.filename = '_test_.py'
-        self._bkup = [sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF]
+        self._bkup = [sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF, oktest.config.color_enabled]
         oktest.OUT = sys.stdout = StringIO()
         oktest.REPORTER = oktest.OldStyleReporter
+        oktest.config.color_enabled = True
 
     def _tearDown(self):
-        sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF = self._bkup
+        sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF, oktest.config.color_enabled = self._bkup
         if os.path.exists(self.filename):
             os.unlink(self.filename)
 
