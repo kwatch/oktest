@@ -90,6 +90,15 @@ else:
 
 __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
 
+
+config = _new_module('oktest.config', {
+    "debug": False,
+    #"color_enabled": _sys.platform.startswith(('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
+    #"color_enabled": any(lambda x: _sys.platform.startswith(x), ('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
+    "color_enabled": bool([ 1 for x in ('darwin', 'linux', 'freebsd', 'netbsd') if sys.platform.startswith(x) ]),
+})
+
+
 ## not used for compatibility with unittest
 #class TestFailed(AssertionError):
 #
@@ -794,8 +803,9 @@ class BaseReporter(Reporter):
 
     separator =  "-" * 60
 
-    def __init__(self, out=None, color=True):
+    def __init__(self, out=None, color=None):
         self._out = out
+        if color is None: color = config.color_enabled
         self._color = color
         self.counts = {}
         if color:
