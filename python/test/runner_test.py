@@ -341,17 +341,17 @@ run(FooTest)
         expected = r"""
 * <b>FooTest</b>: .<R>f</R><R>E</R><R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_failed
+[<R>Failed</R>] FooTest > test_failed()
   File "_test_.py", line 9, in test_failed
     ok (1+1) == 3
 <R>AssertionError: 2 == 3 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-[<R>ERROR</R>] FooTest > test_error
+[<R>ERROR</R>] FooTest > test_error()
   File "_test_.py", line 11, in test_error
     ok (int('aaa')) == 0
 <R>ValueError: invalid literal for int() with base 10: 'aaa'</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_nested
+[<R>Failed</R>] FooTest > test_nested()
   File "_test_.py", line 13, in test_nested
     self._test1()
   File "_test_.py", line 15, in _test1
@@ -364,6 +364,56 @@ run(FooTest)
 """[1:]
         if python24:
             expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')
+        os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
+        oktest.REPORTER = oktest.SimpleReporter
+        self.do_test(desc, script, oktest.Color._colorize(expected))
+
+
+    def test_report_header(self):
+        desc = "simple reporter"
+        script = r"""
+from oktest import *
+import sys
+import unittest
+
+class BarTest(unittest.TestCase):
+
+  def test_sample1(self):
+    "Sample Description 1"
+    ok (0) == 1
+
+  @test("Sample Description 2")
+  def test_sample2(self):
+    ok (0) == 2
+
+  @test("Sample Description 3")
+  def _(self):
+    ok (0) == 3
+
+run(BarTest)
+"""[1:]
+        expected = r"""
+* <b>BarTest</b>: <R>f</R><R>f</R><R>f</R>
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] BarTest > test_sample1()
+Sample Description 1
+  File "_test_.py", line 9, in test_sample1
+    ok (0) == 1
+<R>AssertionError: 0 == 1 : failed.</R>
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] BarTest > test_sample2()
+Sample Description 2
+  File "_test_.py", line 13, in test_sample2
+    ok (0) == 2
+<R>AssertionError: 0 == 2 : failed.</R>
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] BarTest > 002: Sample Description 3
+  File "_test_.py", line 17, in _
+    ok (0) == 3
+<R>AssertionError: 0 == 3 : failed.</R>
+<r>----------------------------------------------------------------------</r>
+## total:3, passed:0, <R>failed:3</R>, error:0, skipped:0   (elapsed 0.000)
+"""[1:]
         os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
         oktest.REPORTER = oktest.SimpleReporter
         self.do_test(desc, script, oktest.Color._colorize(expected))

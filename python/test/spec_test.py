@@ -151,12 +151,12 @@ oktest.run()
         expected1 = r"""
 * <b>FooTest</b>: <R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_1 (1+1 should be 2.)
+[<R>Failed</R>] FooTest > test_1() > 1+1 should be 2.
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
 <R>AssertionError: 2 == 1 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_1 (1-1 should be 0.)
+[<R>Failed</R>] FooTest > test_1() > 1-1 should be 0.
   File "__test_scenario1.py", line 10, in test_1
     ok (1-1) == 1
 <R>AssertionError: 0 == 1 : failed.</R>
@@ -166,7 +166,7 @@ oktest.run()
         expected2 = r"""
 * <b>FooTest</b>: <R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_1
+[<R>Failed</R>] FooTest > test_1()
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
 <R>AssertionError: 2 == 1 : failed.</R>
@@ -222,7 +222,7 @@ oktest.run()
         expected1 = r"""
 * <b>FooTest</b>: <R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test1 (1+1 is 2)
+[<R>Failed</R>] FooTest > test1() > 1+1 is 2
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
@@ -231,7 +231,7 @@ oktest.run()
     ok (1+1) == 0
 <R>AssertionError: 2 == 0 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test1 ('KYON' starts with 'KY')
+[<R>Failed</R>] FooTest > test1() > 'KYON' starts with 'KY'
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
@@ -245,7 +245,7 @@ oktest.run()
         expected2 = r"""
 * <b>FooTest</b>: <R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test1
+[<R>Failed</R>] FooTest > test1()
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
@@ -297,7 +297,7 @@ oktest.run()
         expected1 = r"""
 * <b>FooTest</b>: <R>E</R>
 <r>----------------------------------------------------------------------</r>
-[<R>ERROR</R>] FooTest > test1
+[<R>ERROR</R>] FooTest > test1()
   File "__test_scenario3.py", line 7, in test1
     self._m2()
   File "__test_scenario3.py", line 9, in _m2

@@ -916,12 +916,23 @@ class BaseReporter(Reporter):
             klass, method = testcase, testname
             parent = self.get_testclass_name(klass)
             child  = method + '()'
+            desc   = None
         else:
-            parent = self.get_testclass_name(testcase.__class__)
-            child  = self.get_testcase_desc(testcase, testname)
+            parent, child, desc = self._get_testcase_header_items(testcase, testname)
         indicator = self.indicator(status)
         self.out.write(self.separator + "\n")
         self.out.write("[%s] %s > %s\n" % (indicator, parent, child))
+        if desc: self.out.write(desc + "\n")
+
+    def _get_testcase_header_items(self, testcase, testname):
+        parent = self.get_testclass_name(testcase.__class__)
+        if re.match(r'^test_\d\d\d: ', testname):
+            child = testname[5:]
+            desc  = None
+        else:
+            child = testname + '()'
+            desc  = getattr(testcase, testname).__doc__
+        return parent, child, desc
 
     def _filter(self, tb, filename, linenum, funcname):
         #return not filename.startswith(_oktest_filepath)
@@ -966,11 +977,11 @@ class BaseReporter(Reporter):
         ex = spec._exception
         exc_info = (ex.__class__, ex, spec._traceback)
         #self.report_exception_header(testcase, testname, status, exc_info)
-        parent = self.get_testclass_name(testcase.__class__)
-        child  = self.get_testcase_desc(testcase, testname)
+        parent, child, desc = self._get_testcase_header_items(testcase, testname)
         indicator = self.indicator(status)
         self.out.write(self.separator + "\n")
-        self.out.write("[%s] %s > %s (%s)\n" % (indicator, parent, child, spec.desc))
+        self.out.write("[%s] %s > %s > %s\n" % (indicator, parent, child, spec.desc))
+        if desc: self.out.write(desc + "\n")
         #
         stacktrace = self._filter_stacktrace(spec._stacktrace, spec._traceback)
         self._print_stacktrace(stacktrace)
