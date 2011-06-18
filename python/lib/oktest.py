@@ -762,10 +762,12 @@ def run(*targets, **kwargs):
     if kwargs.get('out') and not _is_string(kwargs['out']):
         out = kwargs.pop('out')
     #
+    color = None
+    if kwargs.get('color') and not _is_string(kwargs['color']):
+        color = kwargs.pop('color')
+    #
     runner = TEST_RUNNER()
-    runner.reporter = reporter_class()
-    if out:
-        runner.reporter.out = out
+    runner.reporter = reporter_class(out=out, color=color)
     #
     filter = kwargs
     if len(targets) == 0:
