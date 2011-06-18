@@ -340,17 +340,17 @@ run(FooTest)
 """[1:]
         expected = r"""
 * <b>FooTest</b>: .<R>f</R><R>E</R><R>f</R>
-<r>------------------------------------------------------------</r>
+<r>----------------------------------------------------------------------</r>
 [<R>Failed</R>] FooTest > test_failed
   File "_test_.py", line 9, in test_failed
     ok (1+1) == 3
 <R>AssertionError: 2 == 3 : failed.</R>
-<r>------------------------------------------------------------</r>
+<r>----------------------------------------------------------------------</r>
 [<R>ERROR</R>] FooTest > test_error
   File "_test_.py", line 11, in test_error
     ok (int('aaa')) == 0
 <R>ValueError: invalid literal for int() with base 10: 'aaa'</R>
-<r>------------------------------------------------------------</r>
+<r>----------------------------------------------------------------------</r>
 [<R>Failed</R>] FooTest > test_nested
   File "_test_.py", line 13, in test_nested
     self._test1()
@@ -359,7 +359,7 @@ run(FooTest)
   File "_test_.py", line 17, in _test2
     ok (1+1) == 0
 <R>AssertionError: 2 == 0 : failed.</R>
-<r>------------------------------------------------------------</r>
+<r>----------------------------------------------------------------------</r>
 ## total:4, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, skipped:0   (elapsed 0.000)
 """[1:]
         if python24:

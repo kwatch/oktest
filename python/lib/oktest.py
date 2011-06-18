@@ -816,7 +816,7 @@ class BaseReporter(Reporter):
         ST_SKIPPED: "skipped",
     }
 
-    separator =  "-" * 60
+    separator =  "-" * 70
 
     def __init__(self, out=None, color=None):
         self._out = out
