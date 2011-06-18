@@ -75,12 +75,12 @@ class TestDeco_TC(unittest.TestCase):
         @test("desc1")
         def test_foo_bar(self):
             pass
-        self.assertEqual("test_001_foo_bar", test_foo_bar.__name__)
+        self.assertEqual("test_foo_bar", test_foo_bar.__name__)
         self.assertEqual("desc1", test_foo_bar.__doc__)
         @test("desc2")
         def testFooBar(self):
             pass
-        self.assertEqual("test_002_FooBar", testFooBar.__name__)
+        self.assertEqual("testFooBar", testFooBar.__name__)
         self.assertEqual("desc2", testFooBar.__doc__)
         @test("desc3")
         def tst(self):

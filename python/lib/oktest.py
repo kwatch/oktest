@@ -1405,13 +1405,6 @@ def test(description_text, **options):
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
     def deco(orig_func):
-        orig_name = orig_func.__name__
-        if orig_name.startswith('test_'):
-            newname = 'test_%03d_' % n + orig_name[5:]
-        elif orig_name.startswith('test'):
-            newname = 'test_%03d_' % n + orig_name[4:]
-        else:
-            newname = 'test_%03d: ' % n + description_text
         argnames = func_argnames(orig_func)
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
@@ -1424,9 +1417,12 @@ def test(description_text, **options):
                 self._options = options
                 self._description = description_text
                 return orig_func(self)
-        if not orig_name.startswith('test'):
-            localvars[newname] = newfunc
-        newfunc.__name__ = newname
+        orig_name = orig_func.__name__
+        if orig_name.startswith('test'):
+            newfunc.__name__ = orig_name
+        else:
+            newfunc.__name__ = 'test_%03d: ' % n + description_text
+            localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = description_text
         newfunc._options = options
         newfunc._firstlineno = _func_firstlineno(orig_func)
