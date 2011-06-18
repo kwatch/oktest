@@ -2074,7 +2074,7 @@ def _dummy():
             parser.add_option("-K", dest="encoding", metavar="ENCODING",     help="output encoding (utf-8 when system default is US-ASCII)")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
-            parser.add_option("-U", dest="unittest", action="store_true",    help="run testcases with unittest instead of oktest")
+            parser.add_option("-U", dest="unittest", action="store_true",    help="run testcases with unittest.main instead of oktest.run")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
             parser.add_option("-f", dest="filter",  metavar="FILTER",        help="filter (class=xxx/test=xxx/useroption=xxx)")
             return parser
@@ -2172,8 +2172,7 @@ def _dummy():
             add("   ## filter by class name\n")
             add("   $ python -m oktest -f class='ClassName*' tests\n")
             add("   ## filter by test method name\n")
-            add("   $ python -m oktest -f test='*keyword*' tests\n")
-            add("   $ python -m oktest -f '*keyword*' tests     # 'test=' is omittable\n")
+            add("   $ python -m oktest -f '*method*' tests   # or -f test='*method*'\n")
             add("   ## filter by user-defined option added by @test decorator\n")
             add("   $ python -m oktest -f tag='*value*' tests\n")
             return "".join(buf)
