@@ -23,7 +23,7 @@ release   = prop('release', '0.8.0')
 package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
-kook_default_product = 'test'
+kook_default_product = 'unittest'
 
 python = prop('python', 'python')
 
@@ -67,10 +67,10 @@ assert set(TEST_NAMES) == set(test_names)
 @spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
 def task_unittest(c, *args, **kwargs):
     #optstr = " -m oktest"
-    optstr = " -m oktest -x oktest_test.py test"
+    optstr = " -m oktest -rp test"
     if kwargs.get('a'):
         for ver, execpath in python_binaries:
-            system(execpath + optstr)
+            system_f(execpath + optstr)
     else:
         system(sys.executable + optstr)
 
