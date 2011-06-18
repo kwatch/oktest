@@ -23,22 +23,14 @@ except ImportError:
 
 class RunnerTestHelper(object):
 
-    sys_stdout      = sys.stdout
-    sys_stderr      = sys.stderr
-    oktest_OUT      = oktest.OUT
-    oktest_REPORTER = oktest.REPORTER
-    oktest_DIFF     = oktest.DIFF
-
     def _setUp(self):
         self.filename = '_test_.py'
-        oktest.OUT = sys.stdout = sys.stderr = StringIO()
+        self._bkup = [sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF]
+        oktest.OUT = sys.stdout = StringIO()
         oktest.REPORTER = oktest.OldStyleReporter
 
     def _tearDown(self):
-        sys.stdout = self.sys_stdout
-        oktest.OUT = self.oktest_OUT
-        oktest.REPORTER = self.oktest_REPORTER
-        oktest.DIFF = self.oktest_DIFF
+        sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF = self._bkup
         if os.path.exists(self.filename):
             os.unlink(self.filename)
 
@@ -329,8 +321,8 @@ class RunnerReporter_TC(unittest.TestCase, RunnerTestHelper):
         script = r"""
 from oktest import *
 import sys
-sys.stderr = sys.stdout
 import unittest
+
 class FooTest(object):
   def test_success(self):
     ok (1+1) == 2
