@@ -2205,19 +2205,18 @@ def _dummy():
         def _handle_opt_encoding(self, opt_encoding, parser):
             import oktest.config
             if opt_encoding != 'none':
-                self._trace('encoding: ' + encoding)
                 oktest.config.encoding = opt_encoding
-                self._set_stdout_and_stderr_encoding(opt_encoding)
+                self._set_output_encoding(opt_encoding)
 
-        def _set_stdout_and_stderr_encoding(self, encoding):
+        def _set_output_encoding(self, encoding):
+            import oktest
+            self._trace('output encoding: ' + encoding)
             if python2:
                 import codecs
-                sys.stdout = codecs.getwriter(encoding)(sys.stdout)
-                sys.stderr = codecs.getwriter(encoding)(sys.stderr)
+                oktest.OUT = codecs.getwriter(encoding)(sys.stdout)
             elif python3:
                 import io
-                sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=encoding)
-                sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding=encoding)
+                oktest.OUT = io.TextIOWrapper(sys.stdout.buffer, encoding=encoding)
 
         def run(self, args=None):
             if args is None: args = sys.argv[1:]
@@ -2246,8 +2245,7 @@ def _dummy():
             if opts.encoding: self._handle_opt_encoding(opts.encoding, parser)
             else:
                 if sys.stdout.encoding == 'US-ASCII':
-                    self._trace('encoding: utf-8')
-                    self._set_stdout_and_stderr_encoding('utf-8')
+                    self._set_output_encoding('utf-8')
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
             if opts.exclude:
