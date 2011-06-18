@@ -2044,8 +2044,8 @@ def _dummy():
         def _load_classes(self, modules, pattern=None):
             import unittest
             from fnmatch import fnmatch
-            unittest_testcases = []    # classes
-            oktest_testcases   = []    # classes
+            unittest_testclasses = []
+            oktest_testclasses   = []
             for mod in modules:
                 for k in dir(mod):
                     if k.startswith('_'): continue
@@ -2055,14 +2055,14 @@ def _dummy():
                     if pattern and not fnmatch(klass.__name__, pattern):
                         continue
                     if issubclass(klass, unittest.TestCase):
-                        unittest_testcases.append(klass)
+                        unittest_testclasses.append(klass)
                     elif re.search(TARGET_PATTERN, klass.__name__):
-                        oktest_testcases.append(klass)
-            return unittest_testcases, oktest_testcases
+                        oktest_testclasses.append(klass)
+            return unittest_testclasses, oktest_testclasses
 
         def _run_unittest(self, klasses, pattern=None, filters=None):
             self._trace("test_pattern: %r" % (pattern,))
-            self._trace("unittest_testcases: ", klasses)
+            self._trace("unittest_testclasses: ", klasses)
             import unittest
             from fnmatch import fnmatch
             loader = unittest.TestLoader()
@@ -2089,7 +2089,7 @@ def _dummy():
 
         def _run_oktest(self, klasses, pattern=None, filters=None):
             self._trace("test_pattern: %r" % (pattern,))
-            self._trace("oktest_testcases: ", klasses)
+            self._trace("oktest_testclasses: ", klasses)
             if filters is None: filters = {}
             if pattern: filters['test'] = pattern
             import oktest
@@ -2254,12 +2254,12 @@ def _dummy():
             fval = lambda key, filters=filters: filters.pop(key, None)
             modules = self._load_modules(filepaths, fval('module'))
             pair = self._load_classes(modules, fval('class'))
-            unittest_testcases, oktest_testcases = pair
+            unittest_testclasses, oktest_testclasses = pair
             n_errors = 0
-            if unittest_testcases:
-                n_errors += self._run_unittest(unittest_testcases, fval('test'), filters)
-            if oktest_testcases:
-                n_errors += self._run_oktest(oktest_testcases, fval('test'), filters)
+            if unittest_testclasses:
+                n_errors += self._run_unittest(unittest_testclasses, fval('test'), filters)
+            if oktest_testclasses:
+                n_errors += self._run_oktest(oktest_testclasses, fval('test'), filters)
             return n_errors
 
         @classmethod
