@@ -88,6 +88,19 @@ class TestDeco_TC(unittest.TestCase):
         self.assertEqual("test_003: desc3", tst.__name__)
         self.assertEqual("desc3", tst.__doc__)
 
+    @test("description text can be None for existing test methods.")
+    def t(self):
+        try:
+            @test(tag='test')
+            def test_foo(self):
+                "Description"
+                pass
+            self.assertTrue("Nothing raised.")
+        except:
+            ex_class, ex = sys.exc_info()[:2]
+            self.fail("Nothing should be raised but got %s: %s" % (ex_class.__name__, ex))
+        self.assertEqual({'tag': "test"}, test_foo._options)
+
 
     ##
     ## test fixtures

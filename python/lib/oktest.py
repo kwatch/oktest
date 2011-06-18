@@ -1398,7 +1398,7 @@ def spec(desc):
 ## @test() decorator
 ##
 
-def test(description_text, **options):
+def test(description_text=None, **options):
     frame = sys._getframe(1)
     localvars  = frame.f_locals
     globalvars = frame.f_globals
@@ -1421,7 +1421,7 @@ def test(description_text, **options):
         if orig_name.startswith('test'):
             newfunc.__name__ = orig_name
         else:
-            newfunc.__name__ = 'test_%03d: ' % n + description_text
+            newfunc.__name__ = "test_%03d: %s" % (n, description_text)
             localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = description_text
         newfunc._options = options
