@@ -858,6 +858,7 @@ class BaseReporter(Reporter):
         sec = dt - (min * 60)
         elapsed = min and "%s:%06.3f" % (min, sec) or "%.3f" % sec
         self.out.write("## %s   (elapsed %s)\n" % (self.counts2str(), elapsed))
+        self.out.flush()
 
     def enter_testclass(self, testclass):
         self._exceptions = []
@@ -869,6 +870,7 @@ class BaseReporter(Reporter):
             self.report_exception(testclass, method_name, ST_ERROR, exc_info)
         if self._exceptions or exc_info:
             self.out.write(self.separator + "\n")
+        self.out.flush()
 
     def enter_testcase(self, testcase, testname):
         pass
@@ -934,11 +936,11 @@ class BaseReporter(Reporter):
             first_line, rest = tupl[0], None
         else:
             first_line, rest = tupl
-        self.out.write(self.colorize(first_line, status))
-        self.out.write("\n")
+        self.out.write(self.colorize(first_line, status) + "\n")
         if rest:
             self.out.write(rest)
             if not rest.endswith("\n"): self.out.write("\n")
+        self.out.flush()
 
     def report_exception_footer(self, testcase, testname, status, exc_info):
         pass
@@ -1072,6 +1074,7 @@ class VerboseReporter(BaseReporter):
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
         self.out.write("* %s\n" % Color.bold(self.get_testclass_name(testclass)))
+        self.out.flush()
 
     def enter_testcase(self, testcase, testname):
         desc = self.get_testcase_desc(testcase, testname)
@@ -1083,6 +1086,7 @@ class VerboseReporter(BaseReporter):
         indicator = self.indicator(status)
         desc = self.get_testcase_desc(testcase, testname)
         self.out.write("  - [%s] %s\n" % (indicator, desc))
+        self.out.flush()
 
 BaseReporter.register_class("verbose", VerboseReporter)
 
@@ -1097,6 +1101,7 @@ class SimpleReporter(BaseReporter):
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
         self.out.write("* %s: " % Color.bold(self.get_testclass_name(testclass)))
+        self.out.flush()
 
     def exit_testclass(self, *args):
         self.out.write("\n")
@@ -1105,6 +1110,7 @@ class SimpleReporter(BaseReporter):
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
         self.out.write(self.status_char(status))
+        self.out.flush()
 
 BaseReporter.register_class("simple", SimpleReporter)
 
@@ -1124,6 +1130,7 @@ class PlainReporter(BaseReporter):
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
         self.out.write(self.status_char(status))
+        self.out.flush()
 
     def exit_all(self):
         self.out.write("\n")
@@ -1155,6 +1162,7 @@ class UnittestStyleReporter(BaseReporter):
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
         self.out.write(self.status_char(status))
+        self.out.flush()
 
     def exit_all(self):
         self.out.write("\n")

@@ -67,6 +67,7 @@ class Spec_TC(unittest.TestCase):
         except:
             arr = sys.exc_info()
             ret = obj.__exit__(*arr)
+            del self._oktest_specs
         ex = sys.exc_info()[1]   # exception object in Python2, None in Python3
         assert ret == True
         assert isinstance(arr, tuple)
