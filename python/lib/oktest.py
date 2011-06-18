@@ -561,6 +561,41 @@ class Should(object):
         return f
 
 
+class SkipTest(Exception):
+    pass
+
+import unittest as _unittest
+if hasattr(_unittest, 'SkipTest'):
+    SkipTest = _unittest.SkipTest
+del _unittest
+
+
+class SkipObject(object):
+
+    def __call__(self, reason):
+        raise SkipTest(reason)
+
+    def when(self, condition, reason):
+        if condition:
+            def deco(func):
+                def fn(self):
+                    raise SkipTest(reason)
+                fn.__name__ = func.__name__
+                fn.__doc__  = func.__doc__
+                fn._firstlineno = _func_firstlineno(func)
+                return fn
+        else:
+            def deco(func):
+                return func
+        return deco
+
+    #def unless(self, condition, reason):
+    #    if not condition:
+    #        raise SkipException(reason)
+
+skip = SkipObject()
+
+
 ST_PASSED  = "passed"
 ST_FAILED  = "failed"
 ST_ERROR   = "error"
@@ -692,8 +727,8 @@ class TestRunner(object):
             raise
         except AssertionError:
             return ST_FAILED, sys.exc_info()
-        #except SkipTest:
-        #    return ST_SKIPPED, ()
+        except SkipTest:
+            return ST_SKIPPED, ()
         except Exception:
             return ST_ERROR, sys.exc_info()
         else:
@@ -1333,6 +1368,7 @@ class Color(object):
         s = re.sub(r'<R>(.*?)</R>', lambda m: Color.red(m.group(1), bold=True), s)
         s = re.sub(r'<r>(.*?)</r>', lambda m: Color.red(m.group(1), bold=False), s)
         s = re.sub(r'<G>(.*?)</G>', lambda m: Color.green(m.group(1), bold=True), s)
+        s = re.sub(r'<Y>(.*?)</Y>', lambda m: Color.yellow(m.group(1), bold=True), s)
         return s
 
 ##
@@ -1464,7 +1500,7 @@ def test(description_text=None, **options):
             localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = orig_func.__doc__ or description_text
         newfunc._options = options
-        newfunc._firstlineno = _func_firstlineno(orig_func)
+        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or _func_firstlineno(orig_func)
         return newfunc
     return deco
 

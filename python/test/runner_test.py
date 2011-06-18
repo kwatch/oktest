@@ -8,7 +8,7 @@ import sys, os, re
 import unittest
 
 import oktest
-from oktest import ok, not_ok, NG
+from oktest import ok, not_ok, NG, test
 from oktest.dummy import dummy_io
 import oktest.config
 
@@ -310,6 +310,110 @@ print(oktest._min_firstlineno_of_methods(BazTest))   #=> -1
 -1
 """[1:]
         self.do_test(desc, script, expected)
+
+
+
+from oktest import skip
+
+
+class SkipObject_TC(unittest.TestCase):
+
+    def test_skip_raises_SkipTest(self):
+        try:
+            skip("reason")
+            self.fail("SkipTest expected but not raised")
+        except Exception:
+            ex_class, ex = sys.exc_info()[:2]
+            self.assertEqual(oktest.SkipTest, ex_class)
+            self.assertEqual("reason", str(ex))
+
+    def test_skip_when_returns_decorator(self):
+        @skip.when(1==1, "reason2")
+        def fn(self):
+            return "A"
+        try:
+            fn(None)
+            self.fail("SkipTest expected but not raised")
+        except Exception:
+            ex_class, ex = sys.exc_info()[:2]
+            self.assertEqual(oktest.SkipTest, ex_class)
+            self.assertEqual("reason2", str(ex))
+        #
+        @skip.when(1==0, "reason3")
+        def fn(self):
+            return "A"
+        self.assertEqual("A", fn(None))
+
+    ##########
+
+    def _test_runner(self, expected, testclass):
+        out = StringIO()
+        kwargs = dict(reporter_class="verbose", out=out, color=True)
+        n_errors = oktest.run(testclass, **kwargs)
+        output = out.getvalue()
+        output = re.sub('elapsed 0\.0\d\d', 'elapsed 0.000', output)
+        self.maxDiff = None
+        self.assertEqual(oktest.Color._colorize(expected), output)
+        self.assertEqual(0, n_errors)
+
+    class _RunnterHandleSkipTest(object):
+        def test1(self):
+            skip("reason #1")
+        #
+        @skip.when(True, "reason #2")
+        def test2(self):
+            sys.exit()
+
+    def test_runner_should_handle_SkipTest(self):
+        expected = r"""
+* <b>_RunnterHandleSkipTest</b>
+  - [<Y>skipped</Y>] test1
+  - [<Y>skipped</Y>] test2
+## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
+"""[1:]
+        self._test_runner(expected, SkipObject_TC._RunnterHandleSkipTest)
+
+    class _RunnterHandleUnittestSkipTest(object):
+        @unittest.skip("reason")
+        def test1(self):
+            sys.exit()
+        @unittest.skipIf(1==1, "reason2")
+        def test2(self):
+            sys.exit()
+
+    def test_runner_should_handle_unittests_SkipTest(self):
+        expected = r"""
+* <b>_RunnterHandleUnittestSkipTest</b>
+  - [<Y>skipped</Y>] test1
+  - [<Y>skipped</Y>] test2
+## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
+"""[1:]
+        self._test_runner(expected, SkipObject_TC._RunnterHandleUnittestSkipTest)
+
+    class _AvailableWithTestDecorator(object):
+        @test("desc7")
+        def _(self):
+            skip("reason7")
+        #
+        @test("desc2")
+        @skip.when(1==1, "reason2")         # supported
+        def _(self):
+            raise Exception("xxx")
+        #
+        @skip.when(1==1, "reason3")         # NOT WORK!
+        @test("desc3")
+        def _(self):
+            pass
+
+    def test_skip_is_avaialbe_with_test_decorator(self):
+        expected = r"""
+* <b>_AvailableWithTestDecorator</b>
+  - [<Y>skipped</Y>] desc7
+  - [<Y>skipped</Y>] desc2
+  - [<G>ok</G>] desc3
+## total:3, <G>passed:1</G>, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
+"""[1:]
+        self._test_runner(expected, SkipObject_TC._AvailableWithTestDecorator)
 
 
 
