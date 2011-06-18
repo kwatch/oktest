@@ -2025,6 +2025,7 @@ def _dummy():
             parser.add_option("-K", dest="encoding", metavar="ENCODING",     help="output encoding (utf-8 when system default is US-ASCII)")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
+            parser.add_option("-U", dest="unittest", action="store_true",    help="run testcases with unittest instead of oktest")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
             parser.add_option("-f", dest="filter",  metavar="FILTER",        help="filter (class=xxx/test=xxx/useroption=xxx)")
             return parser
@@ -2044,6 +2045,7 @@ def _dummy():
         def _load_classes(self, modules, pattern=None):
             import unittest
             from fnmatch import fnmatch
+            testclasses = []
             unittest_testclasses = []
             oktest_testclasses   = []
             for mod in modules:
@@ -2055,10 +2057,12 @@ def _dummy():
                     if pattern and not fnmatch(klass.__name__, pattern):
                         continue
                     if issubclass(klass, unittest.TestCase):
+                        testclasses.append(klass)
                         unittest_testclasses.append(klass)
                     elif re.search(TARGET_PATTERN, klass.__name__):
+                        testclasses.append(klass)
                         oktest_testclasses.append(klass)
-            return unittest_testclasses, oktest_testclasses
+            return testclasses, unittest_testclasses, oktest_testclasses
 
         def _run_unittest(self, klasses, pattern=None, filters=None):
             self._trace("test_pattern: %r" % (pattern,))
@@ -2253,13 +2257,16 @@ def _dummy():
             filters = self._get_filters(opts.filter)
             fval = lambda key, filters=filters: filters.pop(key, None)
             modules = self._load_modules(filepaths, fval('module'))
-            pair = self._load_classes(modules, fval('class'))
-            unittest_testclasses, oktest_testclasses = pair
-            n_errors = 0
-            if unittest_testclasses:
-                n_errors += self._run_unittest(unittest_testclasses, fval('test'), filters)
-            if oktest_testclasses:
-                n_errors += self._run_oktest(oktest_testclasses, fval('test'), filters)
+            tupl = self._load_classes(modules, fval('class'))
+            testclasses, unittest_testclasses, oktest_testclasses = tupl
+            if opts.unittest:
+                n_errors = 0
+                if unittest_testclasses:
+                    n_errors += self._run_unittest(unittest_testclasses, fval('test'), filters)
+                if oktest_testclasses:
+                    n_errors += self._run_oktest(oktest_testclasses, fval('test'), filters)
+            else:
+                n_errors = self._run_oktest(testclasses, fval('test'), filters)
             return n_errors
 
         @classmethod
