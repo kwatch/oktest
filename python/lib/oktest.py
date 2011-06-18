@@ -741,11 +741,8 @@ def run(*targets, **kwargs):
             runner.run_class(klass)
     finally:
         runner.__exit__(sys.exc_info())
-    d = runner.reporter.counts
-    total = 0
-    for k in d:
-        total += d[k]
-    return total
+    counts = runner.reporter.counts
+    return counts.get(ST_FAILED, 0) + counts.get(ST_ERROR, 0)
 
 
 def _target_classes(targets):
@@ -2068,7 +2065,9 @@ def _dummy():
                     suite = loader.loadTestsFromTestCase(klass)
                 the_suite.addTest(suite)
             runner = unittest.TextTestRunner()
-            runner.run(the_suite)
+            result = runner.run(the_suite)
+            n_errors = len(result.errors) + len(result.failures)
+            return n_errors
 
         def _run_oktest(self, klasses, pattern=None, filters=None):
             self._trace("test_pattern: %r" % (pattern,))
@@ -2076,7 +2075,8 @@ def _dummy():
             if filters is None: filters = {}
             if pattern: filters['test'] = pattern
             import oktest
-            oktest.run(*klasses, **filters)
+            n_errors = oktest.run(*klasses, **filters)
+            return n_errors
 
         def _trace(self, msg, items=None):
             write = sys.stderr.write
@@ -2217,10 +2217,12 @@ def _dummy():
             modules = self._load_modules(filepaths, fval('module'))
             pair = self._load_classes(modules, fval('class'))
             unittest_testcases, oktest_testcases = pair
+            n_errors = 0
             if unittest_testcases:
-                self._run_unittest(unittest_testcases, fval('test'), filters)
+                n_errors += self._run_unittest(unittest_testcases, fval('test'), filters)
             if oktest_testcases:
-                self._run_oktest(oktest_testcases, fval('test'), filters)
+                n_errors += self._run_oktest(oktest_testcases, fval('test'), filters)
+            return n_errors
 
         @classmethod
         def main(cls, sys_argv=None):
@@ -2235,8 +2237,8 @@ def _dummy():
             #    sys.stderr.write("%s" % (ex, ))
             #    sys.exit(1)
             app = cls(sys_argv[0])
-            app.run()
-            sys.exit(0)
+            n_errors = app.run()
+            sys.exit(n_errors)
 
     return locals()
 
