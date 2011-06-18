@@ -1000,6 +1000,16 @@ class BaseReporter(Reporter):
             }
         return self._status_chars.get(status) or self._status_chars.get(None)
 
+    _registered = {}
+
+    @classmethod
+    def register_class(self, name, cls):
+        BaseReporter._registered[name] = cls
+
+    @classmethod
+    def get_registered_class(self, name):
+        return BaseReporter._registered.get(name)
+
 
 def is_tty(out):
     return hasattr(out, 'isatty') and out.isatty()
@@ -1062,6 +1072,8 @@ class VerboseReporter(BaseReporter):
         desc = self.get_testcase_desc(testcase, testname)
         self.out.write("  - [%s] %s\n" % (indicator, desc))
 
+BaseReporter.register_class("verbose", VerboseReporter)
+
 
 class SimpleReporter(BaseReporter):
 
@@ -1081,6 +1093,8 @@ class SimpleReporter(BaseReporter):
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
         self.out.write(self.status_char(status))
+
+BaseReporter.register_class("simple", SimpleReporter)
 
 
 class PlainReporter(BaseReporter):
@@ -1102,6 +1116,8 @@ class PlainReporter(BaseReporter):
     def exit_all(self):
         self.out.write("\n")
         self._super.exit_all(self)
+
+BaseReporter.register_class("plain", SimpleReporter)
 
 
 class UnittestStyleReporter(BaseReporter):
@@ -1147,6 +1163,8 @@ class UnittestStyleReporter(BaseReporter):
         self.out.write("%s: %s#%s()\n" % (indicator, parent, child))
         self.out.write("-" * 70 + "\n")
 
+BaseReporter.register_class("unittest", SimpleReporter)
+
 
 class OldStyleReporter(BaseReporter):
 
@@ -1191,6 +1209,8 @@ class OldStyleReporter(BaseReporter):
                 self.out.write(x)
         elif status == ST_SKIPPED:
             self.out.write("[skipped]\n")
+
+BaseReporter.register_class("oldstyle", SimpleReporter)
 
 
 #REPORTER = VerboseReporter
@@ -1961,6 +1981,8 @@ def rglob(dirpath, pattern, _entries=None):
 
 def _dummy():
 
+    global optparse
+    import optparse
 
     class MainApp(object):
 
@@ -1979,11 +2001,11 @@ def _dummy():
             #parser.opt("-x").name("exclude").arg("PAT[,PAT2,..]") .desc("exclue file pattern")
             #parser.opt("-D").name("debug")                        .desc("debug mode")
             #return parser
-            import optparse
             parser = optparse.OptionParser(conflict_handler="resolve")
             parser.add_option("-h", "--help",       action="store_true",     help="show help")
             parser.add_option("-v", "--version",    action="store_true",     help="verion of oktest.py")
             #parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
+            parser.add_option("-r", dest="report",  metavar="STYLE",         help="reporting style (plain/simple/verbose, or p/s/v)")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
@@ -2070,8 +2092,8 @@ def _dummy():
             #add(parser.help_message(20))
             add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
             add("Example:\n")
-            add("   ## run test scripts except foo_*.py\n")
-            add("   $ python -m oktest -x 'foo_*.py' tests/*_test.py\n")
+            add("   ## run test scripts verbosely except foo_*.py\n")
+            add("   $ python -m oktest -rv -x 'foo_*.py' tests/*_test.py\n")
             add("   ## run test scripts in 'tests' dir with pattern '*_test.py'\n")
             add("   $ python -m oktest -p '*_test.py' tests\n")
             add("   ## filter by class name\n")
@@ -2134,6 +2156,22 @@ def _dummy():
                 filters[pair[0]] = pair[1]
             return filters
 
+        def _handle_opt_report(self, opt_report, parser):
+            if opt_report:
+                klass = None
+                if len(opt_report) == 1:
+                    d = {"p": "plain", "s": "simple", "v": "verbose"}
+                    if opt_report in d:
+                        klass = BaseReporter.get_registered_class(d[opt_report])
+                else:
+                    klass = BaseReporter.get_registered_class(d[opt_report])
+            self._trace("reporter: %s" % klass)
+            if not klass:
+                #raise optparse.OptionError("%r: unknown report sytle (plain/simple/verbose, or p/s/v)" % opt_report)
+                parser.error("%r: unknown report sytle (plain/simple/verbose, or p/s/v)" % opt_report)
+            import oktest
+            oktest.REPORTER = klass
+
         def run(self, args=None):
             if args is None: args = sys.argv[1:]
             parser = self._new_cmdopt_parser()
@@ -2154,6 +2192,7 @@ def _dummy():
             if opts.version:
                 print(self._version_info())
                 return
+            if opts.report: self._handle_opt_report(opts.report, parser)
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
             if opts.exclude:
