@@ -11,7 +11,7 @@
 __all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test')
 __version__ = "$Release: 0.0.0 $".split()[1]
 
-import sys, os, re, types, traceback
+import sys, os, re, types, traceback, time, linecache
 
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
@@ -537,14 +537,18 @@ class Should(object):
         return f
 
 
+ST_PASSED  = "passed"
+ST_FAILED  = "failed"
+ST_ERROR   = "error"
+ST_SKIPPED = "skipped"
+
+
 class TestRunner(object):
 
     _filter_test = _filter_key = _filter_val = None
 
-    def __init__(self, klass, reporter=None, filter=None):
-        self.klass = klass
-        if reporter is None:  reporter = REPORTER()
-        self.reporter = reporter
+    def __init__(self, reporter=None, filter=None):
+        self._reporter = reporter
         self.filter = filter
         filter = filter and filter.copy() or {}
         if filter:
@@ -553,105 +557,144 @@ class TestRunner(object):
             self._filter_key  = list(filter.keys())[0]
             self._filter_val  = filter.pop(self._filter_key)
 
+    def __get_reporter(self):
+        if self._reporter is None:
+            self._reporter = REPORTER()
+        return self._reporter
+
+    def __set_reporter(self, reporter):
+        self._reporter = reporter
+
+    reporter = property(__get_reporter, __set_reporter)
+
     def _test_name(self, name):
         return re.sub(r'^test_?', '', name)
 
-    def _gather_test_methods(self):
-        pairs = []   # pairs of method name and function
-        for k in dir(self.klass):
-            v = getattr(self.klass, k)
-            if k.startswith('test') and hasattr(v, '__call__'):
-                pairs.append((k, v))
+    def get_testnames(self, klass):
+        #names = [ name for name in dir(klass) if name.startswith('test') ]
+        #names.sort()
+        #return names
+        testnames = [ k for k in dir(klass) if k.startswith('test') and hasattr(getattr(klass, k), '__class__') ]
         ## filter by test name or user-defined options
         pattern, key, val = self._filter_test, self._filter_key, self._filter_val
         if pattern or key:
-            #pairs = [ t for t in pairs
-            #              if _filtered(self.klass, t[1], t[0], pattern, key, val) ]
-            arr = []
-            for t in pairs:
-                ret = _filtered(self.klass, t[1], t[0], pattern, key, val)
-                if ret:
-                    arr.append(t)
-            pairs = arr
+            testnames = [ s for s in testnames
+                              if _filtered(klass, getattr(klass, s), s, pattern, key, val) ]
         ## filter by $TEST environment variable
         pattern = os.environ.get('TEST')
         if pattern:
-            regexp = re.compile(pattern)
-            pairs = [ t for t in pairs if regexp.search(self._test_name(t[0])) ]
+            rexp  = re.compile(pattern)
+            testnames = [ s for s in testname
+                              if rexp.search(self._test_name(s)) ]
         ## sort by linenumber
-        pairs.sort(key=lambda t: _func_firstlineno(t[1]))
-        return pairs
+        testnames.sort(key=lambda s: _func_firstlineno(getattr(klass, s)))
+        return testnames
 
-    def _new_testcase_object(self, method_name, func):
+    def _invoke(self, obj, method1, method2):
+        meth = getattr(obj, method1, None) or getattr(obj, method2, None)
+        if not meth: return meth, None
         try:
-            obj = self.klass()
+            meth()
+            return meth, None
+        except KeyboardInterrupt:
+            raise
+        except Exception:
+            return meth, sys.exc_info()
+
+    def run_class(self, klass, testnames=None):
+        self._enter_testclass(klass)
+        try:
+            method_name, exc_info = self._invoke(klass, 'before_all', 'setUpClass')
+            if not exc_info:
+                try:
+                    self.run_testcases(klass, testnames)
+                finally:
+                    method_name, exc_info = self._invoke(klass, 'after_all', 'tearDownClass')
+        finally:
+            if not exc_info: method_name = None
+            self._exit_testclass(klass, method_name, exc_info)
+
+    def run_testcases(self, klass, testnames=None):
+        if testnames is None:
+            testnames = self.get_testnames(klass)
+        for testname in testnames:
+            testcase = self._new_testcase(klass, testname)
+            self.run_testcase(testcase, testname)
+
+    def _new_testcase(self, klass, method_name):
+        try:
+            obj = klass()
         except ValueError:     # unittest.TestCase raises ValueError
-            obj = self.klass(method_name)
+            obj = klass(method_name)
+        meth = getattr(obj, method_name)
         obj.__name__ = self._test_name(method_name)
         obj._testMethodName = method_name    # unittest.TestCase compatible
-        obj._testMethodDoc  = func.__doc__   # unittest.TestCase compatible
+        obj._testMethodDoc  = meth.__doc__   # unittest.TestCase compatible
         obj._run_by_oktest  = True
         obj._oktest_specs   = []
         return obj
 
-    def _invoke_before_all(self, klass):
-        self.reporter.before_all(klass)
-        if hasattr(klass, 'before_all'):
-            klass.before_all()
-
-    def _invoke_before(self, obj):
-        self.reporter.before(obj)
-        if   hasattr(obj, 'before'):       obj.before()
-        elif hasattr(obj, 'before_each'):  obj.before_each()  # for backward compatibility
-        elif hasattr(obj, 'setUp'):        obj.setUp()
-
-    def _invoke_after(self, obj):
-        if   hasattr(obj, 'after'):       obj.after()
-        elif hasattr(obj, 'after_each'):  obj.after_each()  # for backward compatibility
-        elif hasattr(obj, 'tearDown'):    obj.tearDown()
-        self.reporter.after(obj)
-
-    def _invoke_after_all(self, klass):
-        if hasattr(klass, 'after_all'):
-            klass.after_all()
-        self.reporter.after_all(klass)
-
-    def run(self):
-        test_methods = self._gather_test_methods()
-        self._invoke_before_all(self.klass)
-        count = 0
-        for method_name, func in test_methods:
-            obj = self._new_testcase_object(method_name, func)
-            self._invoke_before(obj)
-            try:
+    def run_testcase(self, testcase, testname):
+        self._enter_testcase(testcase, testname)
+        try:
+            _, exc_info = self._invoke(testcase, 'before', 'setUp')
+            if exc_info:
+                status = ST_ERROR
+            else:
                 try:
-                    func(obj)
-                #except TestFailed, ex:
-                except ASSERTION_ERROR:
-                    _, ex, tb = sys.exc_info()
-                    if not hasattr(ex, '_raised_by_oktest'):
-                        raise
-                    count += 1
-                    self.reporter.print_failed(obj, ex, tb)
-                except Exception:
-                    _, ex, tb = sys.exc_info()
-                    count += 1
-                    self.reporter.print_error(obj, ex, tb)
-                else:
-                    specs = getattr(obj, '_oktest_specs', None)
-                    failed = False
-                    if specs:
-                        for spec in specs:
-                            if spec._exception:
-                                failed = True
-                                count += 1
-                                self.reporter.print_failed(obj, spec._exception, spec._traceback, spec._stacktrace)
-                    if not failed:
-                        self.reporter.print_passed(obj)
-            finally:
-                self._invoke_after(obj)
-        self._invoke_after_all(self.klass)
-        return count
+                    status = None
+                    try:
+                        status, exc_info = self._run_testcase(testcase, testname)
+                    except:
+                        status, exc_info = ST_ERROR, sys.exc_info()
+                finally:
+                    _, ret = self._invoke(testcase, 'after', 'tearDown')
+                    if ret:
+                        status, exc_info = ST_ERROR, ret
+                    #else:
+                        #assert status is not None
+        finally:
+            self._exit_testcase(testcase, testname, status, exc_info)
+
+    def _run_testcase(self, testcase, testname):
+        try:
+            meth = getattr(testcase, testname)
+            meth()
+        except KeyboardInterrupt:
+            raise
+        except AssertionError:
+            return ST_FAILED, sys.exc_info()
+        #except SkipTest:
+        #    return ST_SKIPPED, ()
+        except Exception:
+            return ST_ERROR, sys.exc_info()
+        else:
+            specs = getattr(testcase, '_oktest_specs', None)
+            arr = specs and [ spec for spec in specs if spec._exception ]
+            if arr: return ST_FAILED, arr
+            return ST_PASSED, ()
+
+    def _enter_testclass(self, testclass):
+        self.reporter.enter_testclass(testclass)
+
+    def _exit_testclass(self, testclass, method_name, exc_info):
+        self.reporter.exit_testclass(testclass, method_name, exc_info)
+
+    def _enter_testcase(self, testcase, testname):
+        self.reporter.enter_testcase(testcase, testname)
+
+    def _exit_testcase(self, testcase, testname, status, exc_info):
+        self.reporter.exit_testcase(testcase, testname, status, exc_info)
+
+    def __enter__(self):
+        self.reporter.enter_all()
+        return self
+
+    def __exit__(self, *args):
+        self.reporter.exit_all()
+
+
+OUT = None    # None means sys.stdout
 
 
 def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|_\d\d\d(_|: ))?')):
@@ -672,24 +715,29 @@ TEST_RUNNER = TestRunner
 
 TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
 
+
 def run(*targets, **kwargs):
-    global OUT
     out = None
     if kwargs.get('out') and not _is_string(kwargs['out']):
         out = kwargs.pop('out')
     filter = kwargs
     if len(targets) == 0:
         targets = (TARGET_PATTERN, )
+    runner = TEST_RUNNER()
+    if out:
+        runner.reporter.out = out
+    runner.__enter__()
     try:
-        bkup = OUT
-        if out: OUT = out
-        count = 0
         for klass in _target_classes(targets):
-            runner = TEST_RUNNER(klass, REPORTER(), filter)
-            count += runner.run()
+            runner.run_class(klass)
     finally:
-        if out: OUT = bkup
-    return count
+        runner.__exit__(sys.exc_info())
+    d = runner.reporter.counts
+    total = 0
+    for k in d:
+        total += d[k]
+    return total
+
 
 def _target_classes(targets):
     target_classes = []
@@ -711,9 +759,6 @@ def _target_classes(targets):
     return target_classes
 
 
-OUT = sys.stdout
-
-
 def _min_firstlineno_of_methods(klass):
     func_types = (types.FunctionType, types.MethodType)
     d = klass.__dict__
@@ -724,54 +769,194 @@ def _min_firstlineno_of_methods(klass):
 TESTCLASS_SORT_KEY = _min_firstlineno_of_methods
 
 
-
 ##
 ## Reporter
 ##
 
 class Reporter(object):
 
-    def before_all(self, klass):
-        pass
-
-    def after_all(self, klass):
-        pass
-
-    def before(self, obj):
-        pass
-
-    def after(self, obj):
-        pass
-
-    def print_passed(self, obj):
-        pass
-
-    def print_failed(self, obj, ex, tb=None, stacktrace=None):
-        pass
-
-    def print_error(self, obj, ex, tb=None, stacktrace=None):
-        pass
+    def enter_all(self): pass
+    def exit_all(self):  pass
+    def enter_testclass(self, testclass): pass
+    def exit_testclass (self, testclass, method_name, exc_info): pass
+    def enter_testcase (self, testcase, testname, status, exc_info): pass
+    def exit_testcase  (self, testcase, testname, status, exc_info): pass
 
 
 class BaseReporter(Reporter):
 
-    def before_all(self, klass):
-        self.klass = klass
+    INDICATOR = {
+        ST_PASSED:  "ok",          # or "passed" ?
+        ST_FAILED:  "Failed",
+        ST_ERROR:   "ERROR",
+        ST_SKIPPED: "skipped",
+    }
 
-    def _test_ident(self, obj):
-        return '%s#%s' % (self.klass.__name__, obj._testMethodName)
+    separator =  "-" * 60
 
-    def _write(self, str):
-        OUT.write(str)
+    def __init__(self, out=None, color=True):
+        self._out = out
+        self._color = color
+        self.counts = {}
+        if color:
+            self.separator = self.colorize(self.separator, True)
 
-    def _print_traceback_entry(self, file, line, func, text):
-        raise NotImplementedError("%s._print_traceback_entry(): not implemented yet." % self.__class__.__name__)
+    def __get_out(self):
+        if not self._out:
+            self._out = OUT or sys.stdout
+        return self._out
 
-    def _is_oktest_py(self, fpath,  _fnames=set(['oktest.py', 'oktest.pyc', 'oktest.pyo'])):
-        return os.path.basename(fpath) in _fnames
+    def __set_out(self, out):
+        self._out = out
 
-    def _print_stacktrace(self, stacktrace, file, func):
-        is_oktest_py = self._is_oktest_py
+    out = property(__get_out, __set_out)
+
+    def clear_counts(self):
+        self.counts = {ST_PASSED: 0, ST_FAILED: 0, ST_ERROR: 0, ST_SKIPPED: 0}
+
+    def counts2str(self):
+        buf = [None]; add = buf.append
+        total = 0
+        for word, status in zip(("passed", "failed", "error", "skipped"),
+                                (ST_PASSED, ST_FAILED, ST_ERROR, ST_SKIPPED)):
+            n = self.counts.get(status, 0)
+            s = "%s:%s" % (word, n)
+            if n: s = self.colorize(s, status)
+            add(s)
+            total += n
+        buf[0] = "total:%s" % total
+        return ", ".join(buf)
+
+    def enter_all(self):
+        self.clear_counts()
+        self._start_time = time.time()
+
+    def exit_all(self):
+        dt = time.time() - self._start_time
+        min = int(dt) / 60
+        sec = dt - (min * 60)
+        elapsed = min and "%s:%06.3f" % (min, sec) or "%.3f" % sec
+        self.out.write("## %s   (elapsed %s)\n" % (self.counts2str(), elapsed))
+
+    def enter_testclass(self, testclass):
+        self._exceptions = []
+
+    def exit_testclass(self, testclass, method_name, exc_info):
+        for tupl in self._exceptions:
+            self.report_exceptions(*tupl)
+        if exc_info:
+            self.report_exception(testclass, method_name, ST_ERROR, exc_info)
+        if self._exceptions or exc_info:
+            self.out.write(self.separator + "\n")
+
+    def enter_testcase(self, testcase, testname):
+        pass
+
+    def exit_testcase(self, testcase, testname, status, exc_info):
+        self.counts[status] = self.counts.setdefault(status, 0) + 1
+        if exc_info:
+            self._exceptions.append((testcase, testname, status, exc_info))
+
+    def indicator(self, status):
+        indicator = self.INDICATOR.get(status) or '???'
+        if self._color:
+            indicator = self.colorize(indicator, status)
+        return indicator
+
+    def get_testclass_name(self, testclass):
+        subject = testclass.__dict__.get('SUBJECT') or testclass
+        return getattr(subject, '__name__', None) or str(subject)
+
+    def get_testcase_desc(self, testcase, testname):
+        meth = getattr(testcase, testname)
+        return meth and meth.__doc__ and meth.__doc__ or testname
+
+    def report_exceptions(self, testcase, testname, status, exc_info):
+        if isinstance(exc_info, list):
+            specs = exc_info
+            for spec in specs:
+                self.report_spec_esception(testcase, testname, status, spec)
+        else:
+            self.report_exception(testcase, testname, status, exc_info)
+
+    def report_exception(self, testcase, testname, status, exc_info):
+        self.report_exception_header(testcase, testname, status, exc_info)
+        self.report_exception_body  (testcase, testname, status, exc_info)
+        self.report_exception_footer(testcase, testname, status, exc_info)
+
+    def report_exception_header(self, testcase, testname, status, exc_info):
+        if isinstance(testcase, type):
+            klass, method = testcase, testname
+            parent = self.get_testclass_name(klass)
+            child  = method + '()'
+        else:
+            parent = self.get_testclass_name(testcase.__class__)
+            child  = self.get_testcase_desc(testcase, testname)
+        indicator = self.indicator(status)
+        self.out.write(self.separator + "\n")
+        self.out.write("[%s] %s > %s\n" % (indicator, parent, child))
+
+    def _filter(self, tb, filename, linenum, funcname):
+        #return not filename.startswith(_oktest_filepath)
+        return "__unittest" not in tb.tb_frame.f_globals
+
+    def report_exception_body(self, testcase, testname, status, exc_info):
+        assert exc_info
+        ex_class, ex, ex_traceback = exc_info
+        #filter = not DEBUG and self._filter or None
+        filter = self._filter
+        arr = format_traceback(ex, ex_traceback, filter=filter)
+        for x in arr:
+            self.out.write(x)
+        errmsg = "%s: %s" % (ex_class.__name__, ex)
+        tupl = errmsg.split("\n", 1)
+        if len(tupl) == 1:
+            first_line, rest = tupl[0], None
+        else:
+            first_line, rest = tupl
+        self.out.write(self.colorize(first_line, status))
+        self.out.write("\n")
+        if rest:
+            self.out.write(rest)
+            if not rest.endswith("\n"): self.out.write("\n")
+
+    def report_exception_footer(self, testcase, testname, status, exc_info):
+        pass
+
+    def _print_temporary_str(self, string):
+        if is_tty(self.out):
+            self.__string = string
+            self.out.write(string)
+            self.out.flush()
+
+    def _erase_temporary_str(self):
+        if is_tty(self.out):
+            n = len(self.__string) + 1    # why '+1' ?
+            self.out.write("\b" * n)
+            self.out.flush()
+            del self.__string
+
+    def report_spec_esception(self, testcase, testname, status, spec):
+        ex = spec._exception
+        exc_info = (ex.__class__, ex, spec._traceback)
+        #self.report_exception_header(testcase, testname, status, exc_info)
+        parent = self.get_testclass_name(testcase.__class__)
+        child  = self.get_testcase_desc(testcase, testname)
+        indicator = self.indicator(status)
+        self.out.write(self.separator + "\n")
+        self.out.write("[%s] %s > %s (%s)\n" % (indicator, parent, child, spec.desc))
+        #
+        stacktrace = self._filter_stacktrace(spec._stacktrace, spec._traceback)
+        self._print_stacktrace(stacktrace)
+        #
+        self.report_exception_body(testcase, testname, status, exc_info)
+        self.report_exception_footer(testcase, testname, status, exc_info)
+
+    def _filter_stacktrace(self, stacktrace, traceback_):
+        entries = traceback.extract_tb(traceback_)
+        file, line, func, text = entries[0]
+        def is_oktest_py(file):
+            return re.search(r'oktest.py[co]?$', file)
         i = len(stacktrace) - 1
         while i >= 0 and not (stacktrace[i][0] == file and stacktrace[i][2] == func):
             i -= 1
@@ -779,166 +964,283 @@ class BaseReporter(Reporter):
         while i >= 0 and not is_oktest_py(stacktrace[i][0]):
             i -= 1
         top = i + 1
-        for t in stacktrace[top:bottom]:
-            self._print_traceback_entry(*t)
+        return stacktrace[top:bottom]
 
-    def _print_traceback(self, tb=None, stacktrace=None, all=False):
-        entries = traceback.extract_tb(tb or sys.exc_info()[2])
-        is_oktest_py = self._is_oktest_py
-        i, n = 0, len(entries)
-        if stacktrace:
-            assert all == False
-            file, line, func, text = entries[0]
-            self._print_stacktrace(stacktrace, file, func)
-        else:
-            while i < n and is_oktest_py(entries[i][0]):
-                i += 1
-        while i < n and (all or not is_oktest_py(entries[i][0])):
-            self._print_traceback_entry(*entries[i])
+    def _print_stacktrace(self, stacktrace):
+        for file, line, func, text in stacktrace:
+            self.out.write('  File "%s", line %s, in %s\n' % (file, line, func))
+            self.out.write('    %s\n' % text)
+
+    def colorize(self, string, status):
+        if status == ST_PASSED:  return Color.green(string, bold=True)
+        if status == ST_FAILED:  return Color.red(string, bold=True)
+        if status == ST_ERROR:   return Color.red(string, bold=True)
+        if status == ST_SKIPPED: return Color.yellow(string, bold=True)
+        if status == True:       return Color.red(string)
+        return Color.yellow(string)
+
+    def status_char(self, status):
+        if not hasattr(self, '_status_chars'):
+            self._status_chars = {
+                ST_PASSED : ".",
+                ST_FAILED : self.colorize("f", ST_FAILED ),
+                ST_ERROR  : self.colorize("E", ST_ERROR  ),
+                ST_SKIPPED: self.colorize("s", ST_SKIPPED),
+                None      : self.colorize("?", None),
+            }
+        return self._status_chars.get(status) or self._status_chars.get(None)
+
+
+def is_tty(out):
+    return hasattr(out, 'isatty') and out.isatty()
+
+
+def traceback_formatter(file, line, func, linestr):
+    text = linestr.strip()
+    return func and '  File "%s", line %s, in %s\n    %s\n' % (file, line, func, text) \
+                or  '  File "%s", line %s\n    %s\n'        % (file, line,       text)
+
+
+def format_traceback(exception, traceback, filter=None, formatter=traceback_formatter):
+    limit = getattr(sys, 'tracebacklimit', 200)
+    if not formatter:
+        formatter = lambda *args: args
+    pos = -1
+    if hasattr(exception, '_raised_by_oktest'):
+        _file, _line = exception.file, exception.line
+    else:
+        _file, _line = False, -1
+    tb = traceback
+    arr = []; add = arr.append
+    i = 0
+    while tb and i < limit:
+        linenum  = tb.tb_lineno
+        filename = tb.tb_frame.f_code.co_filename
+        funcname = tb.tb_frame.f_code.co_name
+        if not filter or filter(tb, linenum, filename, funcname):
+            linecache.checkcache(filename)
+            linestr = linecache.getline(filename, linenum)
+            add(formatter(filename, linenum, funcname, linestr))
+            if linenum == _line and filename == _file:
+                pos = i
             i += 1
+        tb = tb.tb_next
+    if pos >= 0:
+        arr[pos+1:] = []
+    return arr
 
 
-## NOTICE! reporter spec will be changed frequently
+class VerboseReporter(BaseReporter):
+
+    _super = BaseReporter
+
+    def __init__(self, *args, **kwargs):
+        self._super.__init__(self, *args, **kwargs)
+
+    def enter_testclass(self, testclass):
+        self._super.enter_testclass(self, testclass)
+        self.out.write("* %s\n" % Color.bold(self.get_testclass_name(testclass)))
+
+    def enter_testcase(self, testcase, testname):
+        desc = self.get_testcase_desc(testcase, testname)
+        self._print_temporary_str("  - [  ] " + desc)
+
+    def exit_testcase(self, testcase, testname, status, exc_info):
+        self._super.exit_testcase(self, testcase, testname, status, exc_info)
+        self._erase_temporary_str()
+        indicator = self.indicator(status)
+        desc = self.get_testcase_desc(testcase, testname)
+        self.out.write("  - [%s] %s\n" % (indicator, desc))
+
+
 class SimpleReporter(BaseReporter):
 
-    def before_all(self, klass):
-        self.klass = klass
-        OUT.write("### %s: " % klass.__name__)
-        self.buf = []
+    _super = BaseReporter
 
-    def after_all(self, klass):
-        OUT.write("\n")
-        OUT.write("".join(self.buf))
+    def __init__(self, *args, **kwargs):
+        self._super.__init__(self, *args, **kwargs)
 
-    def print_passed(self, obj):
-        OUT.write("."); OUT.flush()
+    def enter_testclass(self, testclass):
+        self._super.enter_testclass(self, testclass)
+        self.out.write("* %s: " % Color.bold(self.get_testclass_name(testclass)))
 
-    def _write(self, str):
-        self.buf.append(str)
+    def exit_testclass(self, *args):
+        self.out.write("\n")
+        self._super.exit_testclass(self, *args)
 
-    def _top_separator(self):
-        self._write("======================================================================\n")
-
-    def _middle_separator(self):
-        self._write("----------------------------------------------------------------------\n")
-
-    def _bottom_separator(self):
-        self._write("\n")
-
-    def _print_traceback_entry(self, file, line, func, text):
-        if func:  self._write('  File "%s", line %s, in %s\n' % (file, line, func))
-        else:     self._write('  File "%s", line %s\n'        % (file, line))
-        if text:  self._write('    %s\n' % text)
-
-    def print_failed(self, obj, ex, tb=None, stacktrace=None):
-        OUT.write("f"); OUT.flush()
-        self._top_separator()
-        self._write("Failed: %s()\n" % self._test_ident(obj))
-        self._middle_separator()
-        #self._write("  %s\n" % ex2msg(ex))
-        self._print_traceback(tb, stacktrace, all=False)
-        self._write("%s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        #if getattr(ex, 'diff', None):
-        #    self._write(ex.diff)
-        self._bottom_separator()
-
-    def print_error(self, obj, ex, tb=None, stacktrace=None):
-        OUT.write("E"); OUT.flush()
-        self._top_separator()
-        self._write("ERROR: %s()\n" % self._test_ident(obj))
-        self._middle_separator()
-        #self._write("  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_traceback(tb, stacktrace, all=True)
-        self._write("%s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._bottom_separator()
+    def exit_testcase(self, testcase, testname, status, exc_info):
+        self._super.exit_testcase(self, testcase, testname, status, exc_info)
+        self.out.write(self.status_char(status))
 
 
-## NOTICE! reporter spec will be changed frequently
+class PlainReporter(BaseReporter):
+
+    _super = BaseReporter
+
+    def __init__(self, *args, **kwargs):
+        self._super.__init__(self, *args, **kwargs)
+
+    def exit_testclass(self, testclass, method_name, exc_info):
+        if self._exceptions or exc_info:
+            self.out.write("\n")
+        self._super.exit_testclass(self, testclass, method_name, exc_info)
+
+    def exit_testcase(self, testcase, testname, status, exc_info):
+        self._super.exit_testcase(self, testcase, testname, status, exc_info)
+        self.out.write(self.status_char(status))
+
+    def exit_all(self):
+        self.out.write("\n")
+        self._super.exit_all(self)
+
+
+class UnittestStyleReporter(BaseReporter):
+
+    _super = BaseReporter
+
+    def __init__(self, *args, **kwargs):
+        self._super.__init__(self, *args, **kwargs)
+        self._color = False
+        self.separator = "-" * 70
+
+    def enter_testclass(self, testclass):
+        if getattr(self, '_exceptions', None) is None:
+            self._exceptions = []
+
+    def exit_testclass(self, testclass, method_name, exc_info):
+        if exc_info:
+            self._exceptions.append((testclass, method_name, ST_ERROR, exc_info))
+
+    def enter_testcase(self, *args):
+        self._super.enter_testcase(self, *args)
+
+    def exit_testcase(self, testcase, testname, status, exc_info):
+        self._super.exit_testcase(self, testcase, testname, status, exc_info)
+        self.out.write(self.status_char(status))
+
+    def exit_all(self):
+        self.out.write("\n")
+        for tupl in self._exceptions:
+            self.report_exceptions(*tupl)
+        self._super.exit_all(self)
+
+    def report_exception_header(self, testcase, testname, status, exc_info):
+        if isinstance(testcase, type):
+            klass, method = testcase, testname
+            parent = self.get_testclass_name(klass)
+            child  = method
+        else:
+            parent = testcase.__class__.__name__
+            child  = testname
+        indicator = self.INDICATOR.get(status) or '???'
+        self.out.write("=" * 70 + "\n")
+        self.out.write("%s: %s#%s()\n" % (indicator, parent, child))
+        self.out.write("-" * 70 + "\n")
+
+
 class OldStyleReporter(BaseReporter):
 
-    def before_all(self, klass):
-        self.klass = klass
+    _super = BaseReporter
 
-    def after_all(self, klass):
+    def enter_all(self):
         pass
 
-    def _test_ident(self, obj):
-        return '%s.%s' % (self.klass.__name__, obj._testMethodName)
+    def exit_all(self):
+        pass
 
-    def before(self, obj):
-        OUT.write("* %s ... " % self._test_ident(obj))
+    def enter_class(self, testcase, testname):
+        pass
 
-    def print_passed(self, obj):
-        OUT.write("[ok]\n")
+    def exit_class(self, testcase, testname):
+        pass
 
-    _traceback_entry_format = "   %s:%s: %s\n"
-    #_traceback_entry_format = "  - %s:%s:  %s\n"
+    def enter_testcase(self, testcase, testname):
+        self.out.write("* %s.%s ... " % (testcase.__class__.__name__, testname))
 
-    def _print_traceback_entry(self, file, line, func, text):
-        OUT.write(self._traceback_entry_format % (file, line, text))
-
-    def print_failed(self, obj, ex, tb=None, stacktrace=None):
-        raised_by_oktest = hasattr(ex, '_raised_by_oktest')
-        if raised_by_oktest:
-            OUT.write("[NG] %s\n" % ex.errmsg)
-        else:
-            OUT.write("[NG] %s\n" % ex2msg(ex))
-        self._traceback_entry_format = "   %s:%s: %s\n"
-        self._print_traceback(tb, stacktrace, all=False)
-        if raised_by_oktest:
-            if getattr(ex, 'diff', None):
-                OUT.write(ex.diff)
-
-    def print_error(self, obj, ex, tb=None, stacktrace=None):
-        OUT.write("[ERROR] %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._traceback_entry_format = "  - %s:%s:  %s\n"
-        self._print_traceback(tb, stacktrace, all=True)
-
-
-## NOTICE! reporter spec will be changed frequently
-class TapStyleReporter(BaseReporter):
-
-    BOL_PATTERN = re.compile(r'^', re.M)
-
-    def before_all(self, klass):
-        self.klass = klass
-        OUT.write("### %s\n" % klass.__name__)
-
-    def after_all(self, klass):
-        OUT.write("\n")
-
-    def print_passed(self, obj):
-        OUT.write("ok     # %s\n" % self._test_ident(obj))
-
-    def _print_traceback_entry(self, file, line, func, text):
-        OUT.write("   #  %s:%s:  %s\n" % (file, line, text))
-
-    def print_failed(self, obj, ex, tb=None, stacktrace=None):
-        OUT.write("not ok # %s\n" % self._test_ident(obj))
-        if hasattr(ex, '_raised_by_oktest'):
-            OUT.write("   #  %s\n" % ex.errmsg)
-            self._print_traceback(tb, stacktrace, all=False)
-            if getattr(ex, 'diff', None):
-                OUT.write(re.sub(self.BOL_PATTERN, '   #', ex.diff))
-        else:
-            OUT.write("   #  %s\n" % ex2msg(ex))
-            self._print_traceback(tb, stacktrace, all=False)
-
-    def print_error(self, obj, ex, tb=None, stacktrace=None):
-        OUT.write("ERROR  # %s\n" % self._test_ident(obj))
-        OUT.write("   #  %s: %s\n" % (ex.__class__.__name__, ex2msg(ex)))
-        self._print_traceback(tb, stacktrace, all=True)
+    def exit_testcase(self, testcase, testname, status, exc_info):
+        if status == ST_PASSED:
+            self.out.write("[ok]\n")
+        elif status == ST_FAILED:
+            ex_class, ex, ex_traceback = exc_info
+            flag = hasattr(ex, '_raised_by_oktest')
+            self.out.write("[NG] %s\n" % (flag and ex.errmsg or ex2msg(ex)))
+            def formatter(filepath, lineno, funcname, linestr):
+                return "   %s:%s: %s\n" % (filepath, lineno, linestr.strip())
+            arr = format_traceback(ex, ex_traceback, filter=self._filter, formatter=formatter)
+            for x in arr:
+                self.out.write(x)
+            if flag and getattr(ex, 'diff', None):
+                self.out.write(ex.diff)
+        elif status == ST_ERROR:
+            ex_class, ex, ex_traceback = exc_info
+            self.out.write("[ERROR] %s: %s\n" % (ex_class.__name__, ex2msg(ex)))
+            def formatter(filepath, lineno, funcname, linestr):
+                return "  - %s:%s:  %s\n" % (filepath, lineno, linestr.strip())
+            arr = format_traceback(ex, ex_traceback, filter=self._filter, formatter=formatter)
+            for x in arr:
+                self.out.write(x)
+        elif status == ST_SKIPPED:
+            self.out.write("[skipped]\n")
 
 
-REPORTER = SimpleReporter
+#REPORTER = VerboseReporter
+#REPORTER = SimpleReporter
+REPORTER = PlainReporter
 #REPORTER = OldStyleReporter
-#REPORTER = TapStyleReporter
 if os.environ.get('OKTEST_REPORTER'):
     REPORTER = globals().get(os.environ.get('OKTEST_REPORTER'))
     if not REPORTER:
         raise ValueError("%s: reporter class not found." % os.environ.get('OKTEST_REPORTER'))
 
 
+##
+## color
+##
+class Color(object):
+
+    @staticmethod
+    def bold(s):
+        return "\033[0;1m" + s + "\033[22m"
+
+    @staticmethod
+    def black(s):
+        return "\033[%s;30m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def red(s, bold=False):
+        return "\033[%s;31m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def green(s, bold=False):
+        return "\033[%s;32m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def yellow(s, bold=False):
+        return "\033[%s;33m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def blue(s, bold=False):
+        return "\033[%s;34m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def magenta(s, bold=False):
+        return "\033[%s;35m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def cyan(s, bold=False):
+        return "\033[%s;36m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def white(s, bold=False):
+        return "\033[%s;37m%s\033[0m" % (bold and 1 or 0, s)
+
+    @staticmethod
+    def _colorize(s):
+        s = re.sub(r'<b>(.*?)</b>', lambda m: Color.bold(m.group(1)), s)
+        s = re.sub(r'<R>(.*?)</R>', lambda m: Color.red(m.group(1), bold=True), s)
+        s = re.sub(r'<r>(.*?)</r>', lambda m: Color.red(m.group(1), bold=False), s)
+        s = re.sub(r'<G>(.*?)</G>', lambda m: Color.green(m.group(1), bold=True), s)
+        return s
 
 ##
 ## _Context

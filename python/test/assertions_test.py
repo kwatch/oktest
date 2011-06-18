@@ -43,6 +43,8 @@ def run_script(script):
     output = None
     try:
         fname = "_test_.py"
+        oktest_reporter = os.environ.get('OKTEST_REPORTER')
+        os.environ['OKTEST_REPORTER'] = 'OldStyleReporter'
         f = open(fname, "w"); f.write(script); f.close()
         io = os.popen("%s %s" % (sys.executable, fname))
         try:
@@ -51,6 +53,8 @@ def run_script(script):
             io.close()
     finally:
         os.unlink(fname)
+        if oktest_reporter:
+            os.environ['OKTEST_REPORTER'] = oktest_reporter
     return output
 
 
@@ -482,9 +486,11 @@ class FooTest(object):
 run()
 """[1:]
         expected = r"""
-### FooTest: .*** warning: oktest: ok() is called but not tested. (file '_test_.py', line 9)
-.*** warning: oktest: not_ok() is called but not tested. (file '_test_.py', line 11)
-.
+* FooTest.test_1 ... [ok]
+* FooTest.test_2 ... *** warning: oktest: ok() is called but not tested. (file '_test_.py', line 9)
+[ok]
+* FooTest.test_3 ... *** warning: oktest: not_ok() is called but not tested. (file '_test_.py', line 11)
+[ok]
 """[1:]
         #do_test_with(desc, script, expected)
         output = run_script(script)

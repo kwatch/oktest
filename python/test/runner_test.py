@@ -21,7 +21,6 @@ except ImportError:
     from io import StringIO
 
 
-
 class RunnerTestHelper(object):
 
     sys_stdout      = sys.stdout
@@ -37,7 +36,6 @@ class RunnerTestHelper(object):
 
     def _tearDown(self):
         sys.stdout = self.sys_stdout
-        sys.stderr = self.sys_stderr
         oktest.OUT = self.oktest_OUT
         oktest.REPORTER = self.oktest_REPORTER
         oktest.DIFF = self.oktest_DIFF
@@ -65,11 +63,12 @@ class RunnerTestHelper(object):
             output   = output  .replace('+++ actual ', '+++ actual')
             expected = expected.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
             output   = output  .replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
+            output   = re.sub(r'elapsed 0\.0\d\d', 'elapsed 0.000', output)
             #ver = sys.version_info[0:3]
             #if (2,7,2) <= ver < (3,2,0):
             #    expected = expected.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
             #oktest.DIFF = repr
-            #ok (output) == expected
+            ok (output) == expected
             try:
                 self.assertEqual(expected, output)
             except AssertionError:
@@ -187,18 +186,18 @@ run('FooTest')
 before_all() called.
 * FooTest.test_1 ... before() called.
 test_1() called.
-[ok]
 after() called.
+[ok]
 * FooTest.test_2 ... before() called.
 test_2() called.
+after() called.
 [NG] 2 == 3 : failed.
    _test_.py:19: ok (1+1) == 3
-after() called.
 * FooTest.test_3 ... before() called.
 test_3() called.
+after() called.
 [ERROR] ValueError: invalid literal for int() with base 10: 'abc'
   - _test_.py:22:  int('abc')
-after() called.
 after_all() called.
 """[1:]
         if python24:
@@ -230,18 +229,18 @@ run('FooTest')
         expected = r"""
 * FooTest.test_1 ... setUp() called.
 test_1() called.
-[ok]
 tearDown() called.
+[ok]
 * FooTest.test_2 ... setUp() called.
 test_2() called.
+tearDown() called.
 [NG] 2 == 3 : failed.
    _test_.py:13: ok (1+1) == 3
-tearDown() called.
 * FooTest.test_3 ... setUp() called.
 test_3() called.
+tearDown() called.
 [ERROR] ValueError: invalid literal for int() with base 10: 'abc'
   - _test_.py:16:  int('abc')
-tearDown() called.
 """[1:]
         if python24:
             expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
@@ -348,38 +347,34 @@ class FooTest(object):
 run(FooTest)
 """[1:]
         expected = r"""
-### FooTest: .fEf
-======================================================================
-Failed: FooTest#test_failed()
-----------------------------------------------------------------------
+* <b>FooTest</b>: .<R>f</R><R>E</R><R>f</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test_failed
   File "_test_.py", line 9, in test_failed
     ok (1+1) == 3
-AssertionError: 2 == 3 : failed.
-
-======================================================================
-ERROR: FooTest#test_error()
-----------------------------------------------------------------------
+<R>AssertionError: 2 == 3 : failed.</R>
+<r>------------------------------------------------------------</r>
+[<R>ERROR</R>] FooTest > test_error
   File "_test_.py", line 11, in test_error
     ok (int('aaa')) == 0
-ValueError: invalid literal for int() with base 10: 'aaa'
-
-======================================================================
-Failed: FooTest#test_nested()
-----------------------------------------------------------------------
+<R>ValueError: invalid literal for int() with base 10: 'aaa'</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test_nested
   File "_test_.py", line 13, in test_nested
     self._test1()
   File "_test_.py", line 15, in _test1
     self._test2()
   File "_test_.py", line 17, in _test2
     ok (1+1) == 0
-AssertionError: 2 == 0 : failed.
-
+<R>AssertionError: 2 == 0 : failed.</R>
+<r>------------------------------------------------------------</r>
+## total:4, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, skipped:0   (elapsed 0.000)
 """[1:]
         if python24:
             expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')
         os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
         oktest.REPORTER = oktest.SimpleReporter
-        self.do_test(desc, script, expected)
+        self.do_test(desc, script, oktest.Color._colorize(expected))
 
 
 

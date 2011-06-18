@@ -121,10 +121,14 @@ class Spec_TestScenario_TC(unittest.TestCase):
         f.write(content)
         f.close()
         command = "%s %s" % (sys.executable, file_name)
+        key = 'OKTEST_REPORTER'
+        bkup = os.environ.get(key)
         try:
+            os.environ[key] = 'SimpleReporter'
             sout, serr = _system(command)
             return sout, serr
         finally:
+            if bkup: os.environ[key] = bkup
             if os.path.exists(file_name):
                 os.unlink(file_name)
 
@@ -144,42 +148,46 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-### FooTest: ff
-======================================================================
-Failed: FooTest#test_1()
-----------------------------------------------------------------------
+* <b>FooTest</b>: <R>f</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test_1 (1+1 should be 2.)
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
-AssertionError: 2 == 1 : failed.
-
-======================================================================
-Failed: FooTest#test_1()
-----------------------------------------------------------------------
+<R>AssertionError: 2 == 1 : failed.</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test_1 (1-1 should be 0.)
   File "__test_scenario1.py", line 10, in test_1
     ok (1-1) == 1
-AssertionError: 0 == 1 : failed.
-
+<R>AssertionError: 0 == 1 : failed.</R>
+<r>------------------------------------------------------------</r>
+## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         expected2 = r"""
-### FooTest: f
-======================================================================
-Failed: FooTest#test_1()
-----------------------------------------------------------------------
+* <b>FooTest</b>: <R>f</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test_1
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
-AssertionError: 2 == 1 : failed.
-
+<R>AssertionError: 2 == 1 : failed.</R>
+<r>------------------------------------------------------------</r>
+## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
 """[1:]
+        expected1 = oktest.Color._colorize(expected1)
+        expected2 = oktest.Color._colorize(expected2)
         fname = "__test_scenario1.py"
         ## with with-stmt
         if with_stmt_available:
             sout, serr = self._run_oktest(fname, input)
+            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            self.assertEqual("", serr)
+            self.assertEqual(expected1, sout)
             assert sout == expected1
             assert serr == ""
         ## without with-stmt
         if True:
-            input2 = replace_with_stmt(input)
+            input2 = replace_with_stmt(input)   # remove 'with' statement
             sout, serr = self._run_oktest(fname, input2)
+            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
             assert sout == expected2
             assert serr == ""
 
@@ -211,54 +219,56 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-### FooTest: ff
-======================================================================
-Failed: FooTest#test1()
-----------------------------------------------------------------------
+* <b>FooTest</b>: <R>f</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test1 (1+1 is 2)
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 18, in _m3
     ok (1+1) == 0
-AssertionError: 2 == 0 : failed.
-
-======================================================================
-Failed: FooTest#test1()
-----------------------------------------------------------------------
+<R>AssertionError: 2 == 0 : failed.</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test1 ('KYON' starts with 'KY')
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 21, in _m3
     ok ("KYON").starts_with("ky")
-AssertionError: 'KYON'.startswith('ky') : failed.
-
+<R>AssertionError: 'KYON'.startswith('ky') : failed.</R>
+<r>------------------------------------------------------------</r>
+## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         expected2 = r"""
-### FooTest: f
-======================================================================
-Failed: FooTest#test1()
-----------------------------------------------------------------------
+* <b>FooTest</b>: <R>f</R>
+<r>------------------------------------------------------------</r>
+[<R>Failed</R>] FooTest > test1
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
     self._m3()
   File "__test_scenario2.py", line 18, in _m3
     ok (1+1) == 0
-AssertionError: 2 == 0 : failed.
-
+<R>AssertionError: 2 == 0 : failed.</R>
+<r>------------------------------------------------------------</r>
+## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
 """[1:]
+        expected1 = oktest.Color._colorize(expected1)
+        expected2 = oktest.Color._colorize(expected2)
         fname = "__test_scenario2.py"
         ## with with-statement
         if with_stmt_available:
             sout, serr = self._run_oktest(fname, input)
+            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
             assert sout == expected1
             assert serr == ""
         ## without with-statement
         if True:
             input2 = replace_with_stmt(input)
             sout, serr = self._run_oktest(fname, input2)
+            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
             assert sout == expected2
             assert serr == ""
 
@@ -284,24 +294,27 @@ class FooTest(object):
 oktest.run()
 """[1:]
         expected1 = r"""
-### FooTest: E
-======================================================================
-ERROR: FooTest#test1()
-----------------------------------------------------------------------
+* <b>FooTest</b>: <R>E</R>
+<r>------------------------------------------------------------</r>
+[<R>ERROR</R>] FooTest > test1
   File "__test_scenario3.py", line 7, in test1
     self._m2()
   File "__test_scenario3.py", line 9, in _m2
     self._m3()
   File "__test_scenario3.py", line 15, in _m3
     None.unknownattribute
-AttributeError: 'NoneType' object has no attribute 'unknownattribute'
-
+<R>AttributeError: 'NoneType' object has no attribute 'unknownattribute'</R>
+<r>------------------------------------------------------------</r>
+## total:1, passed:0, failed:0, <R>error:1</R>, skipped:0   (elapsed 0.000)
 """[1:]
         expected2 = expected1
+        expected1 = oktest.Color._colorize(expected1)
+        expected2 = oktest.Color._colorize(expected2)
         fname = "__test_scenario3.py"
         ## with with-statement
         if with_stmt_available:
             sout, serr = self._run_oktest(fname, input)
+            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
             assert sout == expected1
             assert serr == ""
         ## without with-statement
@@ -309,6 +322,7 @@ AttributeError: 'NoneType' object has no attribute 'unknownattribute'
             input2 = replace_with_stmt(input)
             input2 = input2.replace('ok (1+1) == 0', '#ok (1+1) == 0')
             sout, serr = self._run_oktest(fname, input2)
+            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
             assert sout == expected2
             assert serr == ""
 
