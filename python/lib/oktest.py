@@ -610,7 +610,11 @@ class TestRunner(object):
             testnames = [ s for s in testname
                               if rexp.search(self._test_name(s)) ]
         ## sort by linenumber
-        testnames.sort(key=lambda s: _func_firstlineno(getattr(klass, s)))
+        def fn(testname, klass=klass):
+            func = getattr(klass, testname)
+            lineno = getattr(func, '_firstlineno', None) or _func_firstlineno(func)
+            return (lineno, testname)
+        testnames.sort(key=fn)
         return testnames
 
     def _invoke(self, obj, method1, method2):
@@ -1425,6 +1429,7 @@ def test(description_text, **options):
         newfunc.__name__ = newname
         newfunc.__doc__  = description_text
         newfunc._options = options
+        newfunc._firstlineno = _func_firstlineno(orig_func)
         return newfunc
     return deco
 
