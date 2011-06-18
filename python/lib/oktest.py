@@ -1262,9 +1262,9 @@ class OldStyleReporter(BaseReporter):
 BaseReporter.register_class("oldstyle", SimpleReporter)
 
 
-#REPORTER = VerboseReporter
+REPORTER = VerboseReporter
 #REPORTER = SimpleReporter
-REPORTER = PlainReporter
+#REPORTER = PlainReporter
 #REPORTER = OldStyleReporter
 if os.environ.get('OKTEST_REPORTER'):
     REPORTER = globals().get(os.environ.get('OKTEST_REPORTER'))
@@ -2151,8 +2151,8 @@ def _dummy():
             #add(parser.help_message(20))
             add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
             add("Example:\n")
-            add("   ## run test scripts verbosely except foo_*.py\n")
-            add("   $ python -m oktest -rv -x 'foo_*.py' tests/*_test.py\n")
+            add("   ## run test scripts except foo_*.py in plain format\n")
+            add("   $ python -m oktest -x 'foo_*.py' -rp tests/*_test.py\n")
             add("   ## run test scripts in 'tests' dir with pattern '*_test.py'\n")
             add("   $ python -m oktest -p '*_test.py' tests\n")
             add("   ## filter by class name\n")
