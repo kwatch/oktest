@@ -854,7 +854,7 @@ class BaseReporter(Reporter):
 
     def exit_all(self):
         dt = time.time() - self._start_time
-        min = int(dt) / 60
+        min = int(int(dt) / 60)     # int / int is float on Python3
         sec = dt - (min * 60)
         elapsed = min and "%s:%06.3f" % (min, sec) or "%.3f" % sec
         self.out.write("## %s   (elapsed %s)\n" % (self.counts2str(), elapsed))
