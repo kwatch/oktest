@@ -1179,7 +1179,7 @@ class PlainReporter(BaseReporter):
         self.out.write("\n")
         self._super.exit_all(self)
 
-BaseReporter.register_class("plain", SimpleReporter)
+BaseReporter.register_class("plain", PlainReporter)
 
 
 class UnittestStyleReporter(BaseReporter):
@@ -2140,13 +2140,13 @@ def _dummy():
             n_errors = len(result.errors) + len(result.failures)
             return n_errors
 
-        def _run_oktest(self, klasses, pattern=None, filters=None):
+        def _run_oktest(self, klasses, pattern, kwargs):
             self._trace("test_pattern: %r" % (pattern,))
             self._trace("oktest_testclasses: ", klasses)
-            if filters is None: filters = {}
-            if pattern: filters['test'] = pattern
+            if pattern:
+                kwargs.setdefault('filter', {})['test'] = pattern
             import oktest
-            n_errors = oktest.run(*klasses, **filters)
+            n_errors = oktest.run(*klasses, **kwargs)
             return n_errors
 
         def _trace(self, msg, items=None):
@@ -2230,20 +2230,14 @@ def _dummy():
             return filters
 
         def _handle_opt_report(self, opt_report, parser):
-            if opt_report:
-                klass = None
-                if len(opt_report) == 1:
-                    d = {"p": "plain", "s": "simple", "v": "verbose"}
-                    if opt_report in d:
-                        klass = BaseReporter.get_registered_class(d[opt_report])
-                else:
-                    klass = BaseReporter.get_registered_class(d[opt_report])
-            self._trace("reporter: %s" % klass)
-            if not klass:
+            key = None
+            d = {"p": "plain", "s": "simple", "v": "verbose"}
+            key = d.get(opt_report, opt_report)
+            self._trace("reporter: %s" % key)
+            if not BaseReporter.get_registered_class(d[opt_report]):
                 #raise optparse.OptionError("%r: unknown report sytle (plain/simple/verbose, or p/s/v)" % opt_report)
                 parser.error("%r: unknown report sytle (plain/simple/verbose, or p/s/v)" % opt_report)
-            import oktest
-            oktest.REPORTER = klass
+            return key
 
         def _handle_opt_color(self, opt_color, parser):
             import oktest.config
@@ -2254,22 +2248,16 @@ def _dummy():
             else:
                 #raise optparse.OptionError("--color=%r: 'true' or 'false' expected" % opt_color)
                 parser.error("--color=%r: 'true' or 'false' expected" % opt_color)
+            return oktest.config.color_enabled
 
-        def _handle_opt_encoding(self, opt_encoding, parser):
-            import oktest.config
-            if opt_encoding != 'none':
-                oktest.config.encoding = opt_encoding
-                self._set_output_encoding(opt_encoding)
-
-        def _set_output_encoding(self, encoding):
-            import oktest
+        def _get_output_writer(self, encoding):
             self._trace('output encoding: ' + encoding)
             if python2:
                 import codecs
-                oktest.OUT = codecs.getwriter(encoding)(sys.stdout)
-            elif python3:
+                return codecs.getwriter(encoding)(sys.stdout)
+            if python3:
                 import io
-                oktest.OUT = io.TextIOWrapper(sys.stdout.buffer, encoding=encoding)
+                return io.TextIOWrapper(sys.stdout.buffer, encoding=encoding)
 
         def run(self, args=None):
             if args is None: args = sys.argv[1:]
@@ -2293,12 +2281,18 @@ def _dummy():
             if opts.version:
                 print(self._version_info())
                 return
-            if opts.report: self._handle_opt_report(opts.report, parser)
-            if opts.color:  self._handle_opt_color(opts.color, parser)
-            if opts.encoding: self._handle_opt_encoding(opts.encoding, parser)
-            else:
-                if sys.stdout.encoding == 'US-ASCII':
-                    self._set_output_encoding('utf-8')
+            #
+            reporter_class = out = color = None
+            if opts.report:
+                reporter_class = self._handle_opt_report(opts.report, parser)
+            if opts.color:
+                color = self._handle_opt_color(opts.color, parser)
+            if opts.encoding:
+                out = self._get_output_writer(opts.encoding)
+            elif sys.stdout.encoding == 'US-ASCII':
+                out = self._get_output_writer('utf-8')
+            kwargs = dict(reporter_class=reporter_class, out=out, color=color)
+            #
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
             if opts.exclude:
@@ -2308,14 +2302,15 @@ def _dummy():
             modules = self._load_modules(filepaths, fval('module'))
             tupl = self._load_classes(modules, fval('class'))
             testclasses, unittest_testclasses, oktest_testclasses = tupl
+            kwargs['filter'] = filters
             if opts.unittest:
                 n_errors = 0
                 if unittest_testclasses:
                     n_errors += self._run_unittest(unittest_testclasses, fval('test'), filters)
                 if oktest_testclasses:
-                    n_errors += self._run_oktest(oktest_testclasses, fval('test'), filters)
+                    n_errors += self._run_oktest(oktest_testclasses, fval('test'), kwargs)
             else:
-                n_errors = self._run_oktest(testclasses, fval('test'), filters)
+                n_errors = self._run_oktest(testclasses, fval('test'), kwargs)
             return n_errors
 
         @classmethod
