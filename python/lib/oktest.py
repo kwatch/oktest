@@ -1420,7 +1420,8 @@ def test(description_text, **options):
                 self._options = options
                 self._description = description_text
                 return orig_func(self)
-        localvars[newname] = newfunc
+        if not orig_name.startswith('test'):
+            localvars[newname] = newfunc
         newfunc.__name__ = newname
         newfunc.__doc__  = description_text
         newfunc._options = options
