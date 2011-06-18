@@ -745,15 +745,32 @@ TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
 
 
 def run(*targets, **kwargs):
+    reporter_class = kwargs.pop('reporter_class', None)
+    if isinstance(reporter_class, type):
+        pass
+    elif isinstance(reporter_class, str):
+        key = reporter_class
+        reporter_class = BaseReporter.get_registered_class(key)
+        if not reporter_class:
+            raise ValueError("%r: no such reporter class." % key)
+    elif not reporter_class:
+        reporter_class = REPORTER
+    else:
+        raise TypeError("%r: reporter should be string or class." % (reporter,))
+    #
     out = None
     if kwargs.get('out') and not _is_string(kwargs['out']):
         out = kwargs.pop('out')
+    #
+    runner = TEST_RUNNER()
+    runner.reporter = reporter_class()
+    if out:
+        runner.reporter.out = out
+    #
     filter = kwargs
     if len(targets) == 0:
         targets = (TARGET_PATTERN, )
-    runner = TEST_RUNNER()
-    if out:
-        runner.reporter.out = out
+    #
     runner.__enter__()
     try:
         for klass in _target_classes(targets):
