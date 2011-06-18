@@ -2005,6 +2005,7 @@ def _dummy():
             #parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
             parser.add_option("-r", dest="report",  metavar="STYLE",         help="reporting style (plain/simple/verbose, or p/s/v)")
             parser.add_option(      "--color",      metavar="true|false",    help="enable/disable output color")
+            parser.add_option("-K", dest="encoding", metavar="ENCODING",     help="output encoding (utf-8 when system default is US-ASCII)")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
             parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
@@ -2184,6 +2185,23 @@ def _dummy():
                 #raise optparse.OptionError("--color=%r: 'true' or 'false' expected" % opt_color)
                 parser.error("--color=%r: 'true' or 'false' expected" % opt_color)
 
+        def _handle_opt_encoding(self, opt_encoding, parser):
+            import oktest.config
+            if opt_encoding != 'none':
+                self._trace('encoding: ' + encoding)
+                oktest.config.encoding = opt_encoding
+                self._set_stdout_and_stderr_encoding(opt_encoding)
+
+        def _set_stdout_and_stderr_encoding(self, encoding):
+            if python2:
+                import codecs
+                sys.stdout = codecs.getwriter(encoding)(sys.stdout)
+                sys.stderr = codecs.getwriter(encoding)(sys.stderr)
+            elif python3:
+                import io
+                sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=encoding)
+                sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding=encoding)
+
         def run(self, args=None):
             if args is None: args = sys.argv[1:]
             parser = self._new_cmdopt_parser()
@@ -2208,6 +2226,11 @@ def _dummy():
                 return
             if opts.report: self._handle_opt_report(opts.report, parser)
             if opts.color:  self._handle_opt_color(opts.color, parser)
+            if opts.encoding: self._handle_opt_encoding(opts.encoding, parser)
+            else:
+                if sys.stdout.encoding == 'US-ASCII':
+                    self._trace('encoding: utf-8')
+                    self._set_stdout_and_stderr_encoding('utf-8')
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
             if opts.exclude:
