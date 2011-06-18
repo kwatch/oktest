@@ -54,6 +54,11 @@ def run_script(script):
     return output
 
 
+class DummyObject(object):
+    pass
+
+
+
 class Assertions_TC(unittest.TestCase):
 
 
@@ -204,6 +209,29 @@ class Assertions_TC(unittest.TestCase):
         def fn(): ok (d).attr("hour", 12)
         @be_fail("hasattr(datetime.date(2000, 12, 31), 'hour') : failed.")
         def fn(): NG (d).attr("hour", 12)
+        ##
+        obj = DummyObject()
+        obj.val = "aaa\nbbb\nccc\n"
+        expected = r"""
+attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ aaa
+-bbbb
++bbb
+ ccc
+"""[1:]
+        try:
+            ok (obj).attr('val', "aaa\nbbbb\nccc\n")
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            actual = str(ex)
+            actual = actual.replace("--- expected ", "--- expected")
+            actual = actual.replace("+++ actual ",   "+++ actual")
+            self.assertEqual(expected, actual)
+        else:
+            raise AssertionError("AsertionError expected but not raised")
 
 
     def test_raises(self):

@@ -360,7 +360,13 @@ def _f():
             self.failed("hasattr(%r, %r) : failed." % (self.target, name), boolean=True)
         boolean = getattr(self.target, name) == expected
         if boolean == self.boolean:  return self
-        self.failed('attr(%r): ' % name + _msg(getattr(self.target, name), "==", expected))
+        prefix = 'attr(%r): ' % name
+        msg = _msg(getattr(self.target, name), "==", expected)
+        if isinstance(msg, tuple):
+            msg = (prefix + msg[0], msg[1])
+        else:
+            msg = prefix + msg
+        self.failed(msg)
 
     @assertion
     def matches(self, pattern, flags=0):
