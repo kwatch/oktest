@@ -28,11 +28,6 @@ if python2:
     def _func_firstlineno(func):
         func = getattr(func, 'im_func', func)
         return func.func_code.co_firstlineno
-    def _read_file(fname):
-        f = open(fname)
-        s = f.read()
-        f.close()
-        return s
 if python3:
     xrange = range
     from io import StringIO
@@ -46,13 +41,32 @@ if python3:
         return func.__name__
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
-    def _read_file(fname, encoding='utf-8'):
-        #with open(fname, encoding=encoding) as f:
-        #    s = f.read()
-        f = open(fname, encoding=encoding)
-        s = f.read()
+
+def _read_binary_file(fname):
+    f = open(fname, 'rb')
+    try:
+        b = f.read()
+    finally:
         f.close()
-        return s
+    return b
+if python2:
+    _rexp_magic_comment = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)')
+    def _read_text_file(fname):
+        b = _read_binary_file(fname)
+        m = _rexp_magic_comment.match(b)
+        encoding = m and m.group(1) or 'utf-8'
+        u = b.decode(encoding)
+        assert isinstance(u, unicode)
+        return u
+if python3:
+    _rexp_magic_comment = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)'.encode('us-ascii'))
+    def _read_text_file(fname):
+        b = _read_binary_file(fname)
+        m = _rexp_magic_comment.match(b)
+        encoding = m and m.group(1).decode('us-ascii') or 'utf-8'
+        u = b.decode(encoding)
+        assert isinstance(u, str)
+        return u
 
 def _get_location(depth=0):
     frame = sys._getframe(depth+1)
@@ -1952,7 +1966,10 @@ def load_module(mod_name, filepath, content=None):
     mod.__dict__["__file__"] = filepath
     #mod.__dict__["__file__"] = os.path.abspath(filepath)
     if content is None:
-        content = _read_file(filepath)
+        if python2:
+            content = _read_binary_file(filepath)
+        if python3:
+            content = _read_text_file(filepath)
     if filepath:
         code = compile(content, filepath, "exec")
         exec(code, mod.__dict__, mod.__dict__)
