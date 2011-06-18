@@ -373,47 +373,54 @@ class SkipObject_TC(unittest.TestCase):
 """[1:]
         self._test_runner(expected, SkipObject_TC._RunnterHandleSkipTest)
 
-    class _RunnterHandleUnittestSkipTest(object):
-        @unittest.skip("reason")
-        def test1(self):
-            sys.exit()
-        @unittest.skipIf(1==1, "reason2")
-        def test2(self):
-            sys.exit()
+    try:
+        import unittest
+        unittest.skip
+    except AttributeError:
+        pass
+    else:
 
-    def test_runner_should_handle_unittests_SkipTest(self):
-        expected = r"""
+        class _RunnterHandleUnittestSkipTest(object):
+            @unittest.skip("reason")
+            def test1(self):
+                sys.exit()
+            @unittest.skipIf(1==1, "reason2")
+            def test2(self):
+                sys.exit()
+
+        def test_runner_should_handle_unittests_SkipTest(self):
+            expected = r"""
 * <b>_RunnterHandleUnittestSkipTest</b>
   - [<Y>skipped</Y>] test1
   - [<Y>skipped</Y>] test2
 ## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
 """[1:]
-        self._test_runner(expected, SkipObject_TC._RunnterHandleUnittestSkipTest)
+            self._test_runner(expected, SkipObject_TC._RunnterHandleUnittestSkipTest)
 
-    class _AvailableWithTestDecorator(object):
-        @test("desc7")
-        def _(self):
-            skip("reason7")
-        #
-        @test("desc2")
-        @skip.when(1==1, "reason2")         # supported
-        def _(self):
-            raise Exception("xxx")
-        #
-        @skip.when(1==1, "reason3")         # NOT WORK!
-        @test("desc3")
-        def _(self):
-            pass
+        class _AvailableWithTestDecorator(object):
+            @test("desc7")
+            def _(self):
+                skip("reason7")
+            #
+            @test("desc2")
+            @skip.when(1==1, "reason2")         # supported
+            def _(self):
+                raise Exception("xxx")
+            #
+            @skip.when(1==1, "reason3")         # NOT WORK!
+            @test("desc3")
+            def _(self):
+                pass
 
-    def test_skip_is_avaialbe_with_test_decorator(self):
-        expected = r"""
+        def test_skip_is_avaialbe_with_test_decorator(self):
+            expected = r"""
 * <b>_AvailableWithTestDecorator</b>
   - [<Y>skipped</Y>] desc7
   - [<Y>skipped</Y>] desc2
   - [<G>ok</G>] desc3
 ## total:3, <G>passed:1</G>, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
 """[1:]
-        self._test_runner(expected, SkipObject_TC._AvailableWithTestDecorator)
+            self._test_runner(expected, SkipObject_TC._AvailableWithTestDecorator)
 
 
 
