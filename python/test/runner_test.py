@@ -421,6 +421,37 @@ Sample Description 2
         self.do_test(desc, script, oktest.Color._colorize(expected))
 
 
+    def test_base_reporter_to_set_color_automatically(self):
+        klass = oktest.BaseReporter
+        # __init__ doesn't set color if out is not passed
+        reporter = klass()
+        self.assertEqual(None, reporter._color)
+        # setter sets color
+        reporter = klass()
+        reporter.out = sys.stdout
+        self.assertEqual(True, reporter._color)
+        # getter sets color
+        reporter = klass()
+        assert reporter.out is not None
+        self.assertEqual(True, reporter._color)
+        # __init__ sets color if out is passed
+        reporter = klass(out=sys.stdout)
+        self.assertEqual(True, reporter._color)
+        # color is enabled only if out is a tty
+        try:
+            from cStringIO import StringIO
+        except ImportError:
+            from io import StringIO
+        sio = StringIO()
+        assert sio.isatty() == False
+        oktest.config.color_enabled = False
+        reporter = klass(out=sio)
+        self.assertEqual(False, reporter._color)
+        # color is enabled if config.color.enabled is True
+        oktest.config.color_enabled = True
+        reporter = klass(out=sio)
+        self.assertEqual(True, reporter._color)
+
 
 class Diff_TC(unittest.TestCase, RunnerTestHelper):
     def setUp(self):    self._setUp()

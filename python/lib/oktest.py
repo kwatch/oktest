@@ -839,9 +839,8 @@ class BaseReporter(Reporter):
     separator =  "-" * 70
 
     def __init__(self, out=None, color=None):
-        self._out = out
-        if color is None: color = config.color_enabled
         self._color = color
+        self.out = out
         self.counts = {}
 
     def _set_color(self, color=None):
@@ -856,12 +855,13 @@ class BaseReporter(Reporter):
 
     def __get_out(self):
         if not self._out:
-            self._out = OUT or sys.stdout
-            self._set_color(self._color)
+            self.out = OUT or sys.stdout
         return self._out
 
     def __set_out(self, out):
         self._out = out
+        if out is not None and self._color is None:
+            self._set_color(None)
 
     out = property(__get_out, __set_out)
 
