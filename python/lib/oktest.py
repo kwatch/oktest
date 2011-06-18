@@ -913,8 +913,7 @@ class BaseReporter(Reporter):
     def report_exception_body(self, testcase, testname, status, exc_info):
         assert exc_info
         ex_class, ex, ex_traceback = exc_info
-        #filter = not DEBUG and self._filter or None
-        filter = self._filter
+        filter = not config.debug and self._filter or None
         arr = format_traceback(ex, ex_traceback, filter=filter)
         for x in arr:
             self.out.write(x)
@@ -2180,6 +2179,8 @@ def _dummy():
             if opts.debug:
                 self.debug = True
                 _trace = self._trace
+                import oktest.config
+                oktest.config.debug = True
             else:
                 _trace = self._trace = lambda msg, items=None: None
             _trace("python: " + sys.version.split()[0])
