@@ -182,6 +182,7 @@ class TestDeco_TC(unittest.TestCase):
 
     @test("if delegate fixture resolver is set then use it.")
     def t(self):
+        bkup = oktest.fixture_manager
         oktest.fixture_manager = DummyFixtureManager()
         try:
             called = []
@@ -197,7 +198,7 @@ class TestDeco_TC(unittest.TestCase):
             # is delegate.resolve() called?
             self.assertEqual({"foo": "[FOO]"}, DummyFixtureManager._values)
         finally:
-            oktest.fixture_manager = None
+            oktest.fixture_manager = bkup
 
 
     ##
@@ -266,7 +267,25 @@ class TestDeco_TC(unittest.TestCase):
 
 
 
+class TestDeco2_TC(unittest.TestCase):
+
+    def provide_item1(self):
+        return ["<item1>"]
+
+    @test()
+    def testWithExistingMethod(self, item1):
+        """@test decorator is available with existing test methods"""
+        self.assertEqual(["<item1>"], item1)
+
+    @test("desc")
+    def testWithExistingMethod2(self, item1):
+        """@test decorator is available with existing test methods"""
+        self.assertEqual(["<item1>"], item1)
+
+
+
 if __name__ == '__main__':
     #unittest.main()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeco_TC)
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDeco2_TC))
     unittest.TextTestRunner(verbosity=2).run(suite)
