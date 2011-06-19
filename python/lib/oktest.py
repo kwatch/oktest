@@ -1550,10 +1550,8 @@ class FixtureInjector(object):
         #
         fixtures = [ _resolve(name) for name in fixture_names ]
         assert not in_progress
-        #
         try:
             return func(testcase, *fixtures)
-        #
         finally:
             self._release_fixtures(resolved, releasers)
 
