@@ -643,7 +643,7 @@ class TestRunner(object):
         pattern = os.environ.get('TEST')
         if pattern:
             rexp  = re.compile(pattern)
-            testnames = [ s for s in testname
+            testnames = [ s for s in testnames
                               if rexp.search(self._test_name(s)) ]
         ## sort by linenumber
         def fn(testname, klass=klass):
