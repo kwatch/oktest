@@ -8,7 +8,7 @@ import sys, os, re
 import unittest
 
 import oktest
-from oktest import ok, not_ok, NG, NOT
+from oktest import ok, not_ok, NG, NOT, python3
 
 
 def be_fail(message):
@@ -39,18 +39,31 @@ def be_error(error_class, message):
     return deco
 
 
-def run_script(script):
+def run_script(script, use_subprocess=False):
     output = None
     try:
         fname = "_test_.py"
+        command = "%s %s" % (sys.executable, fname)
         oktest_reporter = os.environ.get('OKTEST_REPORTER')
         os.environ['OKTEST_REPORTER'] = 'OldStyleReporter'
         f = open(fname, "w"); f.write(script); f.close()
-        io = os.popen("%s %s" % (sys.executable, fname))
-        try:
-            output = io.read()
-        finally:
-            io.close()
+        if use_subprocess:
+            from subprocess import Popen, PIPE, STDOUT
+            p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+            stdin, stdouterr = p.stdin, p.stdout
+            try:
+                stdin.close()
+                output = stdouterr.read()
+            finally:
+                stdouterr.close()
+            if python3:
+                output = output.decode('utf-8')
+        else:
+            io = os.popen(command)
+            try:
+                output = io.read()
+            finally:
+                io.close()
     finally:
         os.unlink(fname)
         if oktest_reporter:
@@ -463,8 +476,13 @@ Ran 2 tests in 0.000s
 FAILED (failures=1)
 """[1:]
         #do_test_with(desc, script, expected)
-        output = run_script(script)
+        #output = run_script(script)
+        output = run_script(script, True)
         output = re.sub(r'tests in 0\.(\d\d\d)s', 'tests in 0.000s', output)
+        tupl = sys.version_info[:2]
+        if (3,0) <= tupl <= (3,1):
+            sys.stderr.write("\033[0;31m*** skip because not supported\033[0m\n")
+            return
         self.assertEqual(expected, output)
 
 
