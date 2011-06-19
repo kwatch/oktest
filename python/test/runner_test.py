@@ -348,7 +348,7 @@ class SkipObject_TC(unittest.TestCase):
 
     def _test_runner(self, expected, testclass):
         out = StringIO()
-        kwargs = dict(reporter_class="verbose", out=out, color=True)
+        kwargs = dict(style="verbose", out=out, color=True)
         n_errors = oktest.run(testclass, **kwargs)
         output = out.getvalue()
         output = re.sub('elapsed 0\.0\d\d', 'elapsed 0.000', output)

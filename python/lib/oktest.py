@@ -783,21 +783,18 @@ def run(*targets, **kwargs):
     out    = kwargs.pop('out', None)
     color  = kwargs.pop('color', None)
     filter = kwargs.pop('filter', {})
-    reporter_class = kwargs.pop('reporter_class', None)
+    style  = kwargs.pop('style', None)
+    klass  = kwargs.pop('reporter_class', None)
     #
-    if isinstance(reporter_class, type):
-        pass
-    elif isinstance(reporter_class, str):
-        key = reporter_class
-        reporter_class = BaseReporter.get_registered_class(key)
-        if not reporter_class:
-            raise ValueError("%r: no such reporter class." % key)
-    elif not reporter_class:
-        reporter_class = REPORTER
-    else:
-        raise TypeError("%r: reporter should be string or class." % (reporter,))
+    if not klass:
+        if style:
+            klass = BaseReporter.get_registered_class(style)
+            if not klass:
+                raise ValueError("%r: unknown report style." % style)
+        else:
+            klass = REPORTER
     #
-    reporter = reporter_class(out=out, color=color)
+    reporter = klass(out=out, color=color)
     runner = TEST_RUNNER(reporter=reporter, filter=filter)
     #
     if len(targets) == 0:
@@ -2317,16 +2314,16 @@ def _dummy():
                 print(self._version_info())
                 return
             #
-            reporter_class = out = color = None
+            style = out = color = None
             if opts.report:
-                reporter_class = self._handle_opt_report(opts.report, parser)
+                style = self._handle_opt_report(opts.report, parser)
             if opts.color:
                 color = self._handle_opt_color(opts.color, parser)
             if opts.encoding:
                 out = self._get_output_writer(opts.encoding)
             elif sys.stdout.encoding == 'US-ASCII':
                 out = self._get_output_writer('utf-8')
-            kwargs = dict(reporter_class=reporter_class, out=out, color=color)
+            kwargs = dict(style=style, out=out, color=color)
             #
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
