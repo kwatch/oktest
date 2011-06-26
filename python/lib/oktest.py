@@ -119,7 +119,7 @@ config = _new_module('oktest.config', {
     "debug": False,
     #"color_enabled": _sys.platform.startswith(('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
     #"color_enabled": any(lambda x: _sys.platform.startswith(x), ('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
-    "color_available": bool([ 1 for x in ('darwin', 'linux', 'freebsd', 'netbsd') if sys.platform.startswith(x) ]),
+    "color_available": bool([ 1 for p in ('darwin', 'linux', 'freebsd', 'netbsd') if sys.platform.startswith(p) ]),
     "color_enabled":  None,    # None means detect automatiallly
 })
 
@@ -860,7 +860,7 @@ class Reporter(object):
     def exit_all(self):  pass
     def enter_testclass(self, testclass): pass
     def exit_testclass (self, testclass, method_name, exc_info): pass
-    def enter_testcase (self, testcase, testname, status, exc_info): pass
+    def enter_testcase (self, testcase, testname): pass
     def exit_testcase  (self, testcase, testname, status, exc_info): pass
 
 
@@ -1102,12 +1102,12 @@ class BaseReporter(Reporter):
     _registered = {}
 
     @classmethod
-    def register_class(self, name, cls):
-        BaseReporter._registered[name] = cls
+    def register_class(cls, name, klass):
+        cls._registered[name] = klass
 
     @classmethod
-    def get_registered_class(self, name):
-        return BaseReporter._registered.get(name)
+    def get_registered_class(cls, name):
+        return cls._registered.get(name)
 
 
 def is_tty(out):
@@ -1338,7 +1338,7 @@ class Color(object):
         return "\033[0;1m" + s + "\033[22m"
 
     @staticmethod
-    def black(s):
+    def black(s, bold=False):
         return "\033[%s;30m%s\033[0m" % (bold and 1 or 0, s)
 
     @staticmethod
@@ -1383,7 +1383,7 @@ class Color(object):
 ##
 class _Context(object):
 
-    def __enter__(self, *args):
+    def __enter__(self):
         return self
 
     def __exit__(self, *args):
@@ -1423,7 +1423,7 @@ class Spec(_Context):
     def __enter__(self):
         self._testcase = tc = self._find_testcase_object()
         if getattr(tc, '_run_by_oktest', None):
-            getattr(tc, '_oktest_specs').append(self)
+            tc._oktest_specs.append(self)
         return self
 
     def _find_testcase_object(self):
