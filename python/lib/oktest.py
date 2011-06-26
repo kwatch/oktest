@@ -167,15 +167,21 @@ def _truncated_repr(obj, max=80+15):
 
 
 def _msg(target, op, other=None):
-    if _diff_p(target, op, other):
-        diff = _diff(target, other)
-        msg = "%s == %s : failed." % (_truncated_repr(target), _truncated_repr(other))
-        return (msg, diff)
     if   op.endswith('()'):   msg = '%r%s'     % (target, op)
     elif op.startswith('.'):  msg = '%r%s(%r)' % (target, op, other)
     else:                     msg = '%r %s %r' % (target, op, other)
     msg += " : failed."
     return msg
+
+
+def _msg2(target, op, other=None):
+    diff_str = _diff_p(target, op, other) and _diff(target, other) or ''
+    if diff_str:
+        #msg = "actual %s expected : failed.\n" % (op,)
+        msg = "%s == %s : failed." % (_truncated_repr(target), _truncated_repr(other))
+        return (msg, diff_str)
+    else:
+        return _msg(target, op, other)
 
 
 DIFF = True
@@ -286,7 +292,8 @@ def _f():
     def __eq__(self, other):
         boolean = self.target == other
         if boolean == self.boolean:  return self
-        self.failed(_msg(self.target, '==', other))
+        #self.failed(_msg(self.target, '==', other))
+        self.failed(_msg2(self.target, '==', other))
 
     @assertion
     def __ne__(self, other):
@@ -395,7 +402,7 @@ def _f():
         boolean = getattr(self.target, name) == expected
         if boolean == self.boolean:  return self
         prefix = 'attr(%r): ' % name
-        msg = _msg(getattr(self.target, name), "==", expected)
+        msg = _msg2(getattr(self.target, name), "==", expected)
         if isinstance(msg, tuple):
             msg = (prefix + msg[0], msg[1])
         else:
