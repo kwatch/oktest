@@ -469,7 +469,7 @@ def _f():
         self.failed('os.path.exists(%r) : failed.' % self.target)
 
     @assertion
-    def not_exist(self):  # DEPRECATED
+    def not_exist(self):
         boolean = not os.path.exists(self.target)
         if boolean == self.boolean:  return self
         self.failed('not os.path.exists(%r) : failed.' % self.target)
