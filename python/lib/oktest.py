@@ -1493,7 +1493,7 @@ def test(description_text=None, **options):
             def newfunc(self):
                 self._options = options
                 self._description = description_text
-                return fixture_injector.invoke(orig_func, self, fixture_names, globalvars)
+                return fixture_injector.invoke(self, orig_func, globalvars)
         else:
             def newfunc(self):
                 self._options = options
@@ -1529,54 +1529,58 @@ fixture_manager = FixtureManager()
 
 class FixtureInjector(object):
 
-    def invoke(self, func, testcase, fixture_names, *opts):
+    def invoke(self, object, func, *opts):
         """invoke function with fixtures."""
-        releasers = {"self": None}       # {"fixture_name": releaser_func()}
-        resolved  = {"self": testcase}   # {"fixture_name": fixture_value}
+        releasers = {"self": None}     # {"arg_name": releaser_func()}
+        resolved  = {"self": object}   # {"arg_name": arg_value}
         in_progress = []
+        ##
+        arg_names = func_argnames(func)
         ## default arg values of test method are stored into 'resolved' dict
         ## in order for providers to access to them
         defaults = func_defaults(func)
         if defaults:
             idx = - len(defaults)
-            for argname, default in zip(fixture_names[idx:], defaults):
-                resolved[argname] = default
-            fixture_names = fixture_names[:idx]
-        #
-        def _resolve(name):
-            if name not in resolved:
-                pair = self.find(name, testcase, *opts)
+            for aname, default in zip(arg_names[idx:], defaults):
+                resolved[aname] = default
+            arg_names = arg_names[:idx]
+        ##
+        def _resolve(arg_name):
+            aname = arg_name
+            if aname not in resolved:
+                pair = self.find(aname, object, *opts)
                 if pair:
                     provider, releaser = pair
-                    resolved[name] = _call(name, provider)
-                    releasers[name] = releaser
+                    resolved[aname] = _call(provider, aname)
+                    releasers[aname] = releaser
                 else:
-                    resolved[name] = fixture_manager.provide(name)
-            return resolved[name]
-        def _call(name, provider):
-            argnames = func_argnames(provider)
-            if not argnames:
+                    resolved[aname] = fixture_manager.provide(aname)
+            return resolved[aname]
+        def _call(provider, resolving_arg_name):
+            arg_names = func_argnames(provider)
+            if not arg_names:
                 return provider()
-            in_progress.append(name)
+            in_progress.append(resolving_arg_name)
             defaults = func_defaults(provider)
             if not defaults:
-                args = [ _get_arg(aname) for aname in argnames ]
+                arg_values = [ _get_value(aname) for aname in arg_names ]
             else:
                 idx  = - len(defaults)
-                args = [ _get_arg(aname) for aname in argnames[:idx] ]
-                for aname, default in zip(argnames[idx:], defaults):
-                    args.append(resolved.get(aname, default))
-            in_progress.remove(name)
-            return provider(*args)
-        def _get_arg(aname):
-            if aname in resolved:        return resolved[aname]
-            if aname not in in_progress: return _resolve(aname)
-            raise self._looped_dependency_error(aname, in_progress, testcase)
-        #
-        fixtures = [ _resolve(name) for name in fixture_names ]
+                arg_values = [ _get_value(aname) for aname in arg_names[:idx] ]
+                for aname, default in zip(arg_names[idx:], defaults):
+                    arg_values.append(resolved.get(aname, default))
+            in_progress.remove(resolving_arg_name)
+            return provider(*arg_values)
+        def _get_value(arg_name):
+            if arg_name in resolved:        return resolved[arg_name]
+            if arg_name not in in_progress: return _resolve(arg_name)
+            raise self._looped_dependency_error(arg_name, in_progress, object)
+        ##
+        arguments = [ _resolve(aname) for aname in arg_names ]
         assert not in_progress
         try:
-            return func(testcase, *fixtures)
+            #return func(object, *arguments)
+            return func(*arguments)
         finally:
             self._release_fixtures(resolved, releasers)
 
@@ -1589,19 +1593,19 @@ class FixtureInjector(object):
             else:
                 fixture_manager.release(name, resolved[name])
 
-    def find(self, name, testcase, *opts):
+    def find(self, name, object, *opts):
         """return provide_xxx() and release_xxx() functions."""
         globalvars = opts[0]
         provider_name = 'provide_' + name
         releaser_name = 'release_' + name
-        meth = getattr(testcase, provider_name, None)
+        meth = getattr(object, provider_name, None)
         if meth:
             provider = meth
             if python2:
                 if hasattr(meth, 'im_func'):  provider = meth.im_func
             elif python3:
                 if hasattr(meth, '__func__'): provider = meth.__func__
-            releaser = getattr(testcase, releaser_name, None)
+            releaser = getattr(object, releaser_name, None)
             return (provider, releaser)
         elif provider_name in globalvars:
             provider = globalvars[provider_name]
@@ -1613,14 +1617,14 @@ class FixtureInjector(object):
         #    raise NameError("%s: no such fixture provider for '%s'." % (provider_name, name))
             return None
 
-    def _looped_dependency_error(self, aname, in_progress, testcase):
+    def _looped_dependency_error(self, aname, in_progress, object):
         names = in_progress + [aname]
         pos   = names.index(aname)
         loop  = '=>'.join(names[pos:])
         if pos > 0:
             loop = '->'.join(names[0:pos]) + '->' + loop
-        classname = testcase.__class__.__name__
-        testdesc  = testcase._description
+        classname = object.__class__.__name__
+        testdesc  = object._description
         return LoopedDependencyError("fixture dependency is looped: %s (class: %s, test: '%s')" % (loop, classname, testdesc))
 
 
