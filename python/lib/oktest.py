@@ -2132,7 +2132,7 @@ def _dummy():
             parser.add_option(      "--color",      metavar="true|false",    help="enable/disable output color")
             parser.add_option("-K", dest="encoding", metavar="ENCODING",     help="output encoding (utf-8 when system default is US-ASCII)")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
-            parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
+            #parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-U", dest="unittest", action="store_true",    help="run testcases with unittest.main instead of oktest.run")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
             parser.add_option("-f", dest="filter",  metavar="FILTER",        help="filter (class=xxx/test=xxx/useroption=xxx)")
@@ -2224,8 +2224,8 @@ def _dummy():
             #add(parser.help_message(20))
             add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
             add("Example:\n")
-            add("   ## run test scripts except foo_*.py in plain format\n")
-            add("   $ python -m oktest -x 'foo_*.py' -sp tests/*_test.py\n")
+            add("   ## run test scripts in plain format\n")
+            add("   $ python -m oktest -sp tests/*_test.py\n")
             add("   ## run test scripts in 'tests' dir with pattern '*_test.py'\n")
             add("   $ python -m oktest -p '*_test.py' tests\n")
             add("   ## filter by class name\n")
@@ -2267,16 +2267,16 @@ def _dummy():
                     _trace("testdir: %r, pattern: %r, files: " % (testdir, pat), files)
             return filepaths
 
-        def _exclude_files(self, filepaths, pattern):
-            from fnmatch import fnmatch
-            _trace = self._trace
-            basename = os.path.basename
-            original = filepaths[:]
-            for pat in pattern.split(","):
-                filepaths = [ fpath for fpath in filepaths
-                                  if not fnmatch(basename(fpath), pat) ]
-            _trace("excluded: %r" % (list(set(original) - set(filepaths)), ))
-            return filepaths
+        #def _exclude_files(self, filepaths, pattern):
+        #    from fnmatch import fnmatch
+        #    _trace = self._trace
+        #    basename = os.path.basename
+        #    original = filepaths[:]
+        #    for pat in pattern.split(","):
+        #        filepaths = [ fpath for fpath in filepaths
+        #                          if not fnmatch(basename(fpath), pat) ]
+        #    _trace("excluded: %r" % (list(set(original) - set(filepaths)), ))
+        #    return filepaths
 
         def _get_filters(self, opts_filter):
             filters = {}
@@ -2353,8 +2353,8 @@ def _dummy():
             #
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
-            if opts.exclude:
-                filepaths = self._exclude_files(filepaths, opts.exclude)
+            #if opts.exclude:
+            #    filepaths = self._exclude_files(filepaths, opts.exclude)
             filters = self._get_filters(opts.filter)
             fval = lambda key, filters=filters: filters.pop(key, None)
             modules = self._load_modules(filepaths, fval('module'))
