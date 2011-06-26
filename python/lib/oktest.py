@@ -2099,8 +2099,7 @@ def _dummy():
             parser = optparse.OptionParser(conflict_handler="resolve")
             parser.add_option("-h", "--help",       action="store_true",     help="show help")
             parser.add_option("-v", "--version",    action="store_true",     help="verion of oktest.py")
-            #parser.add_option("-s", dest="testdir", metavar="DIR[,DIR2,..]", help="test directory (default 'test' or 'tests')")
-            parser.add_option("-r", dest="report",  metavar="STYLE",         help="reporting style (plain/simple/verbose, or p/s/v)")
+            parser.add_option("-s", dest="style",   metavar="STYLE",         help="reporting style (plain/simple/verbose, or p/s/v)")
             parser.add_option(      "--color",      metavar="true|false",    help="enable/disable output color")
             parser.add_option("-K", dest="encoding", metavar="ENCODING",     help="output encoding (utf-8 when system default is US-ASCII)")
             parser.add_option("-p", dest="pattern", metavar="PAT[,PAT2,..]", help="test script pattern (default '*_test.py,test_*.py')")
@@ -2197,7 +2196,7 @@ def _dummy():
             add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
             add("Example:\n")
             add("   ## run test scripts except foo_*.py in plain format\n")
-            add("   $ python -m oktest -x 'foo_*.py' -rp tests/*_test.py\n")
+            add("   $ python -m oktest -x 'foo_*.py' -sp tests/*_test.py\n")
             add("   ## run test scripts in 'tests' dir with pattern '*_test.py'\n")
             add("   $ python -m oktest -p '*_test.py' tests\n")
             add("   ## filter by class name\n")
@@ -2313,8 +2312,8 @@ def _dummy():
                 return
             #
             style = out = color = None
-            if opts.report:
-                style = self._handle_opt_report(opts.report, parser)
+            if opts.style:
+                style = self._handle_opt_report(opts.style, parser)
             if opts.color:
                 color = self._handle_opt_color(opts.color, parser)
             if opts.encoding:
