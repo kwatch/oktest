@@ -202,6 +202,21 @@ class TestDeco_TC(unittest.TestCase):
 
 
     ##
+    ## default parameter values
+    ##
+    def provide_para1(self, x=10, y=20):
+        return [x, y]
+
+    @test("provider can take default parameter values.")
+    def t(self, para1):
+        assert para1 == [10, 20]
+
+    @test("default param value of test methods are passed into providers.")
+    def t(self, para1, y=30):
+        assert para1 == [10, 30]
+
+
+    ##
     ## test fixture dependencies
     ##
 

@@ -1534,6 +1534,14 @@ class FixtureInjector(object):
         releasers = {"self": None}       # {"fixture_name": releaser_func()}
         resolved  = {"self": testcase}   # {"fixture_name": fixture_value}
         in_progress = []
+        ## default arg values of test method are stored into 'resolved' dict
+        ## in order for providers to access to them
+        defaults = func_defaults(func)
+        if defaults:
+            idx = - len(defaults)
+            for argname, default in zip(fixture_names[idx:], defaults):
+                resolved[argname] = default
+            fixture_names = fixture_names[:idx]
         #
         def _resolve(name):
             if name not in resolved:
@@ -1550,7 +1558,14 @@ class FixtureInjector(object):
             if not argnames:
                 return provider()
             in_progress.append(name)
-            args = [ _get_arg(aname) for aname in argnames ]
+            defaults = func_defaults(provider)
+            if not defaults:
+                args = [ _get_arg(aname) for aname in argnames ]
+            else:
+                idx  = - len(defaults)
+                args = [ _get_arg(aname) for aname in argnames[:idx] ]
+                for aname, default in zip(argnames[idx:], defaults):
+                    args.append(resolved.get(aname, default))
             in_progress.remove(name)
             return provider(*args)
         def _get_arg(aname):
