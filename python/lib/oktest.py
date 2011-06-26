@@ -91,6 +91,11 @@ if python3:
             codeobj = func.__code__
             index = 0
         return codeobj.co_varnames[index:codeobj.co_argcount]
+    def func_defaults(func):
+        if isinstance(func, types.MethodType):
+            return func.__func__.__defaults__
+        else:
+            return func.__defaults__
 else:
     def func_argnames(func):
         if isinstance(func, types.MethodType):
@@ -100,6 +105,11 @@ else:
             codeobj = func.func_code
             index = 0
         return codeobj.co_varnames[index:codeobj.co_argcount]
+    def func_defaults(func):
+        if isinstance(func, types.MethodType):
+            return func.im_func.func_defaults
+        else:
+            return func.func_defaults
 
 
 __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
