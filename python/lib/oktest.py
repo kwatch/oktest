@@ -2299,7 +2299,7 @@ def _dummy():
             d = {"p": "plain", "s": "simple", "v": "verbose"}
             key = d.get(opt_report, opt_report)
             self._trace("reporter: %s" % key)
-            if not BaseReporter.get_registered_class(d[opt_report]):
+            if not BaseReporter.get_registered_class(key):
                 #raise optparse.OptionError("%r: unknown report sytle (plain/simple/verbose, or p/s/v)" % opt_report)
                 parser.error("%r: unknown report sytle (plain/simple/verbose, or p/s/v)" % opt_report)
             return key
