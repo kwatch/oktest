@@ -2324,7 +2324,7 @@ def _dummy():
                 import io
                 return io.TextIOWrapper(sys.stdout.buffer, encoding=encoding)
 
-        def run(self, args=None):
+        def run(self, args=None, **kwargs):
             if args is None: args = sys.argv[1:]
             parser = self._new_cmdopt_parser()
             #opts = parser.parse(args)
@@ -2347,16 +2347,15 @@ def _dummy():
                 print(self._version_info())
                 return
             #
-            style = out = color = None
             if opts.style:
-                style = self._handle_opt_report(opts.style, parser)
+                kwargs['style'] = self._handle_opt_report(opts.style, parser)
             if opts.color:
-                color = self._handle_opt_color(opts.color, parser)
-            if opts.encoding:
-                out = self._get_output_writer(opts.encoding)
-            elif sys.stdout.encoding == 'US-ASCII':
-                out = self._get_output_writer('utf-8')
-            kwargs = dict(style=style, out=out, color=color)
+                kwargs['color'] = self._handle_opt_color(opts.color, parser)
+            if 'out' not in kwargs:
+                if opts.encoding:
+                    kwargs['out'] = self._get_output_writer(opts.encoding)
+                elif not hasattr(sys.stdout, 'encoding') or sys.stdout.encoding == 'US-ASCII':
+                    kwargs['out'] = self._get_output_writer('utf-8')
             #
             pattern = opts.pattern or '*_test.py,test_*.py'
             filepaths = self._get_files(args, pattern)
