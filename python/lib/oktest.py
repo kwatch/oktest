@@ -2328,7 +2328,7 @@ def _dummy():
             if args is None: args = sys.argv[1:]
             parser = self._new_cmdopt_parser()
             #opts = parser.parse(args)
-            opts, args = parser.parse_args()
+            opts, args = parser.parse_args(args)
             if opts.debug:
                 self.debug = True
                 _trace = self._trace
