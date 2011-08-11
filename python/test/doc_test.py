@@ -135,8 +135,7 @@ if True:
     ## filter by class name
     #$ python -m oktest -f class='ClassName*' tests
     ## filter by test method name
-    #$ python -m oktest -f test='*keyword*' tests
-    #$ python -m oktest -f '*keyword*' tests     # 'test=' is omittable
+    #$ python -m oktest -f test='*keyword*' tests   # or -f '*keyword*'
     ## filter by user-defined option added by @test decorator
     #$ python -m oktest -f tag='*value*' tests
 
