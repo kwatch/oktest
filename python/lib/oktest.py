@@ -672,14 +672,14 @@ class TestRunner(object):
 
     def _invoke(self, obj, method1, method2):
         meth = getattr(obj, method1, None) or getattr(obj, method2, None)
-        if not meth: return meth, None
+        if not meth: return None, None
         try:
             meth()
             return meth, None
         except KeyboardInterrupt:
             raise
         except Exception:
-            return meth, sys.exc_info()
+            return meth.__name__, sys.exc_info()
 
     def run_class(self, klass, testnames=None):
         self._enter_testclass(klass)

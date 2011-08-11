@@ -199,6 +199,58 @@ after_all() called.
         self.do_test(desc, script, expected)
 
 
+    def test_when_error_raised_on_before_all(self):
+        desc = "when error raised on before_all"
+        script = r"""
+from oktest import *
+class FooTest(object):
+    def before_all(cls):
+        print('before_all() called.')
+        "s".foobar   # AttributeError
+    before_all = classmethod(before_all)
+    def test_1(self):
+        print('test_1() called.')
+run('FooTest')
+"""[1:]
+        expected = r"""
+before_all() called.
+<r>----------------------------------------------------------------------</r>
+[ERROR] FooTest > before_all()
+  File "_test_.py", line 5, in before_all
+    "s".foobar   # AttributeError
+<R>AttributeError: 'str' object has no attribute 'foobar'</R>
+<r>----------------------------------------------------------------------</r>
+"""[1:]
+        self.do_test(desc, script, oktest.Color._colorize(expected))
+
+
+    def test_when_error_raised_on_after_all(self):
+        desc = "when error raised on after_all"
+        script = r"""
+from oktest import *
+class FooTest(object):
+    def after_all(cls):
+        print('after_all() called.')
+        1 + "x"  # TypeError
+    after_all = classmethod(after_all)
+    def test_1(self):
+        print('test_1() called.')
+run('FooTest')
+"""[1:]
+        expected = r"""
+* FooTest.test_1 ... test_1() called.
+[ok]
+after_all() called.
+<r>----------------------------------------------------------------------</r>
+[<R>ERROR</R>] FooTest > after_all()
+  File "_test_.py", line 5, in after_all
+    1 + "x"  # TypeError
+<R>TypeError: unsupported operand type(s) for +: 'int' and 'str'</R>
+<r>----------------------------------------------------------------------</r>
+"""[1:]
+        self.do_test(desc, script, oktest.Color._colorize(expected))
+
+
     def test_setup_teardown(self):
         desc = "setUp()/tearDown()"
         script = r"""
