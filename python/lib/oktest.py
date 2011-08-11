@@ -559,7 +559,7 @@ class Should(object):
         val = getattr(ass.target, key)
         if not hasattr(val, '__call__'):
             msg = "%s.%s: not a callable." % (type(ass.target).__name__, key)
-            raise ValueError(msg)
+            raise ValueError(msg)   # or TypeError?
         ass._tested = tested
         def f(*args, **kwargs):
             ass._tested = True
@@ -2016,7 +2016,7 @@ def _dummy():
             for method_name in method_names:
                 method_obj = getattr(obj, method_name, None)
                 if method_obj is None:
-                    raise ValueError("%s: no method found on %r." % (method_name, obj))
+                    raise NameError("%s: method not found on %r." % (method_name, obj))
                 setattr(obj, method_name, self._wrap_method(method_obj, None))
             return None
 

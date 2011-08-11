@@ -196,6 +196,9 @@ class Tracer_TC(unittest.TestCase):
         if spec("traces method calls into trace object."):
             ok (tr[0]) == [obj, 'bye', (), {}, "Bye!"]
             ok (tr[1]) == [obj, 'hello', ('Haruhi',), {}, "Hello Haruhi!"]
+        if spec("raises NameError when specified method is not found."):
+            def fn(): tr.trace_method(obj, 'foobarbaz')
+            ok (fn).raises(NameError, re.compile(r"^foobarbaz: method not found on "))
 
     def test_fake_method(self):
         tr = Tracer()
