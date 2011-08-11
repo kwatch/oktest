@@ -1526,7 +1526,7 @@ def test(description_text=None, **options):
 class FixtureManager(object):
 
     def provide(self, name):
-        raise ValueError("Fixture provider for '%s' not found." % (name,))
+        raise NameError("Fixture provider for '%s' not found." % (name,))
 
     def release(self, name, value):
         pass

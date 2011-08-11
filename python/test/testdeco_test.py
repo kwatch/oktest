@@ -200,6 +200,31 @@ class TestDeco_TC(unittest.TestCase):
         finally:
             oktest.fixture_manager = bkup
 
+    global DummyTestCase3
+    class DummyTestCase3(object):
+        @test("xxx")
+        def _(self, foo):
+            pass
+
+    @test("raises NameError if fixture provider is not found.")
+    def t(self):
+        from StringIO import StringIO
+        out = StringIO()
+        oktest.run(DummyTestCase3, out=out)
+        output = out.getvalue()
+        expected = r"""
+* DummyTestCase3
+  - [ERROR] xxx
+----------------------------------------------------------------------
+[ERROR] DummyTestCase3 > 001: xxx
+NameError: Fixture provider for 'foo' not found.
+----------------------------------------------------------------------
+## total:1, passed:0, failed:0, error:1, skipped:0   (elapsed 0.001)
+"""[1:]
+        expected = re.sub(r'elapsed \d\.\d\d\d', 'elapsed 0.000', expected)
+        output   = re.sub(r'elapsed \d\.\d\d\d', 'elapsed 0.000', output)
+        assert output == expected
+
 
     ##
     ## default parameter values
