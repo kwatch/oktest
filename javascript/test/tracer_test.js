@@ -179,6 +179,6 @@ var topic  = oktest.topic,
   });
 
 
-if (process.argv[1] === __filename) {
+if (require.main === module) {
     oktest.main();
 }

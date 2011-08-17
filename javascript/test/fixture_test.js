@@ -391,7 +391,7 @@ var tests = {
 //  suite.export(module);     // allow vows command to execute this script
 //}
 
-if (process.argv[1] === __filename) {
+if (require.main === module) {
   (function(expected_count) {
     var count = 0;
     function run_func(fn) {
