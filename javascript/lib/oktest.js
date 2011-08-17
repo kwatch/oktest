@@ -1917,7 +1917,7 @@ oktest.TEMPLATE = (""
       //|    spec    = oktest.spec,
       //|    ok      = oktest.ok,
       //|    NG      = oktest.NG,
-      //|    preCond = oktest.preCond;
+      //|    precond = oktest.precond;
       //|
       //|
       //|+ topic("ClassName", function() {
@@ -1962,7 +1962,7 @@ oktest.TEMPLATE = (""
       + '    spec    = oktest.spec,\n'
       + '    ok      = oktest.ok,\n'
       + '    NG      = oktest.NG,\n'
-      + '    preCond = oktest.preCond;\n'
+      + '    precond = oktest.precond;\n'
       + '\n'
       + '\n'
       + '+ topic("ClassName", function() {\n'
@@ -2042,7 +2042,7 @@ oktest.mainapp.MainApp = function MainApp(script) {
       + "  $ node oktest.js -sp tests/*_test.py\n"
       + "  ## run test scripts in 'tests' dir with pattern '*_test.py'\n"
       + "  $ node oktest.js -p '*_test.py' tests\n"
-      + "  ## filter by tipic\n"
+      + "  ## filter by topic\n"
       + "  $ node oktest.js -f topic='*pattern*' tests\n"
       + "  ## filter by spec\n"
       + "  $ node oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'\n"
