@@ -56,6 +56,8 @@ def dist(c):
     mkdir_p(dist_dir)
     store(files, dist_dir)
     #
+    system(c%'chmod 0755 $(dist_dir)/lib/oktest.js')
+    #
     replacer = [
         (r'\$Release:.*?\$',   r'$Release: %s $'   % release),
         (r'\$Copyright:.*?\$', r'$Copyright: %s $' % copyright),
@@ -65,12 +67,6 @@ def dist(c):
         (r'\$License\$',   license),
     ]
     edit(c%'$(dist_dir)/**/*', by=replacer)
-    #
-    bin_dir = dist_dir + '/bin'
-    os.path.isdir(bin_dir) or mkdir_p(bin_dir)
-    cp('lib/oktest.js', bin_dir)
-    system(c%'chmod 0755 $(bin_dir)/oktest.js')
-    #
     from kook.utils import glob2
     with chdir(dist_dir):
         filenames = [ x for x in glob2('**/*')

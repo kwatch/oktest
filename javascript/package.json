@@ -13,11 +13,10 @@
   "directories": {
     "lib": "./lib",
     "test": "./test",
-    "doc": "./doc",
-    "bin": "./bin"
+    "doc": "./doc"
   },
   "bin": {
-    "oktest.js": "./bin/oktest.js"
+    "oktest.js": "./lib/oktest.js"
   },
   "engines": {
     "node": "*"
