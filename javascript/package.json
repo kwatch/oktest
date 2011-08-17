@@ -1,0 +1,23 @@
+{
+  "name": "Oktest.js",
+  "description": "a new-style testing library for node.js",
+  "version": "0.1.0",
+  "homepage": "https://bitbucket.org/kwatch/oktest/src/tip/javascript/",
+  "repository": {
+    "type": "mercurial",
+    "url": "https://bitbucket.org/kwatch/oktest/"
+  },
+  "author": "Makoto Kuwata <kwa@kuwata-lab.com>",
+  "main": "oktest",
+  "directories": {
+    "lib": "./lib",
+    "test": "./test",
+    "doc": "./doc",
+    "bin": "./bin"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": ["cmdopt"],
+  "devDependencies": []
+}
