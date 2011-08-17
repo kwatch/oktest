@@ -44,6 +44,7 @@ Install
 =======
 
     $ npm install oktest
+    $ which oktest.js
     $ oktest.js -h
 
 

@@ -89,13 +89,14 @@ Example code</div>
 <p>If you have installed npm:
 </p>
 <pre class="terminal">$ npm install oktest
+$ which oktest.js
 $ oktest.js -h
 </pre>
 <p>Or just download a file <a href="https://bitbucket.org/kwatch/oktest/raw/tip/javascript/lib/oktest.js">oktest.js</a> and place it into your current directory
 and type:
 </p>
 <pre class="terminal">$ chmod +x oktest.js
-$ node oktest.js -h
+$ ./oktest.js -h
 </pre>
 <br>
 
@@ -104,9 +105,9 @@ $ node oktest.js -h
 <h2 class="section1">Example</h2>
 <p>If you are tring oktest.js for the first time, generate skeleton and try it:
 </p>
-<pre class="terminal">$ node oktest.js -g &gt; example_test.js
+<pre class="terminal">$ oktest.js -g &gt; example_test.js
 $ vi example_test.js
-$ node oktest.js example_test.js
+$ oktest.js example_test.js
 </pre>
 <p>The following is an example to demonstrate Oktest.js.
 The points are:
@@ -179,9 +180,9 @@ For example you can write <code>assert.equal(1+1, 2)</code> instead of <code>ok 
 </pre>
 <p>You can change reporting format.
 </p>
-<pre class="terminal">$ node oktest.js -sv example_test.js    # verbose format (default)
-$ node oktest.js -ss example_test.js    # simple format
-$ node oktest.js -sp example_test.js    # plain format
+<pre class="terminal">$ oktest.js -sv example_test.js    # verbose format (default)
+$ oktest.js -ss example_test.js    # simple format
+$ oktest.js -sp example_test.js    # plain format
 </pre>
 <p>See <a href="#tips">Tips</a> section for details.
 </p>
@@ -850,15 +851,15 @@ tracer.dummy({}, {a:1, b:2});
 <pre class="program">$ ls oktest.js
 oktest.js
 ## run test scripts in plain format
-$ node oktest.js -sp tests/*_test.py
+$ oktest.js -sp tests/*_test.py
 ## run test scripts in 'tests' dir with pattern '*_test.py'
-$ node oktest.js -p '*_test.py' tests
+$ oktest.js -p '*_test.py' tests
 ## filter by tipic
-$ node oktest.js -f topic='*pattern*' tests
+$ oktest.js -f topic='*pattern*' tests
 ## filter by spec
-$ node oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'
+$ oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'
 </pre>
-<p>Type <code>node oktest.js -h</code> for details about command-line options.
+<p>Type <code>oktest.js -h</code> for details about command-line options.
 </p>
 <br>
 

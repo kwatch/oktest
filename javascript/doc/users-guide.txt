@@ -58,6 +58,7 @@ If you have installed npm:
 
     .====================
     $ npm install oktest
+    $ which oktest.js
     $ oktest.js -h
     .====================
 
@@ -66,7 +67,7 @@ and type:
 
     .====================
     $ chmod +x oktest.js
-    $ node oktest.js -h
+    $ ./oktest.js -h
     .====================
 
 
@@ -76,9 +77,9 @@ and type:
 If you are tring oktest.js for the first time, generate skeleton and try it:
 
     .====================
-    $ node oktest.js -g > example_test.js
+    $ oktest.js -g > example_test.js
     $ vi example_test.js
-    $ node oktest.js example_test.js
+    $ oktest.js example_test.js
     .====================
 
 The following is an example to demonstrate Oktest.js.
@@ -152,9 +153,9 @@ The following is an output example:
 You can change reporting format.
 
     .====================
-    $ node oktest.js -sv example_test.js    # verbose format (default)
-    $ node oktest.js -ss example_test.js    # simple format
-    $ node oktest.js -sp example_test.js    # plain format
+    $ oktest.js -sv example_test.js    # verbose format (default)
+    $ oktest.js -ss example_test.js    # simple format
+    $ oktest.js -sp example_test.js    # plain format
     .====================
 
 See {{<Tips|#tips>}} section for details.
@@ -841,16 +842,16 @@ Oktest now supports command-line interface to execute test scripts.
     $ ls oktest.js
     oktest.js
     ## run test scripts in plain format
-    $ node oktest.js -sp tests/*_test.py
+    $ oktest.js -sp tests/*_test.py
     ## run test scripts in 'tests' dir with pattern '*_test.py'
-    $ node oktest.js -p '*_test.py' tests
+    $ oktest.js -p '*_test.py' tests
     ## filter by tipic
-    $ node oktest.js -f topic='*pattern*' tests
+    $ oktest.js -f topic='*pattern*' tests
     ## filter by spec
-    $ node oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'
+    $ oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'
     .--------------------
 
-Type {{,node oktest.js -h,}} for details about command-line options.
+Type {{,oktest.js -h,}} for details about command-line options.
 
 
 
