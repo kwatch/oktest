@@ -1,0 +1,936 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html">
+  <title>Oktest.js User's Guide</title>
+  <meta name="generator" content="kwaser">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="stylesheet" href="docstyle.css" type="text/css">
+ </head>
+ <body>
+
+  <blockquote>
+   <div class="mainbody">
+
+    <div align="left"><h1>Oktest.js User's Guide</h1></div>
+<p>$Release: 0.0.0 $<br>
+$Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $<br>
+$License: MIT License $
+</p>
+Table of Contents
+<div class="toc">
+<ul>
+  <li><a href="#overview">Overview</a>
+  </li>
+  <li><a href="#install">Install</a>
+  </li>
+  <li><a href="#example">Example</a>
+  </li>
+  <li><a href="#assertion-reference">Assertion Reference</a>
+  </li>
+  <li><a href="#before-after">before/after/beforeAll/afterA</a>
+  </li>
+  <li><a href="#fixture-injection">Fixture Injection</a>
+  </li>
+  <li><a href="#unified-diff">Unified Diff</a>
+  </li>
+  <li><a href="#tracer">Tracer</a>
+  </li>
+  <li><a href="#skip-test">Skip Test</a>
+  </li>
+  <li><a href="#command-line-interface">Command-line Interface</a>
+  </li>
+  <li><a href="#tips">Tips</a>
+  </li>
+</ul>
+</div>
+<a name="overview"></a>
+<h2 class="section1">Overview</h2>
+<p>Oktest.js is a new-style testing library for Node.js.
+</p>
+<div class="program_caption">
+Example code</div>
+<pre class="program">    var oktest = require("oktest");
+    var topic  = oktest.topic,
+        spec   = oktest.spec,
+        ok     = oktest.ok;
+
+    <strong>topic</strong>("target to test", function() {
+        <strong>spec</strong>("specification description", function() {
+            <code>ok (1+1).is(2)</code>;      // same as assert.ok(1+1 === 2)
+            <code>ok (1+1, '===', 2)</code>;  // same as assert.ok(1+1 === 2)
+            <code>ok (1+1).isNot(1)</code>;   // same as assert.ok(1+1 !== 1)
+        });
+    });
+
+    if (process.argv[1] === __filename) {
+        oktest.main();
+    }
+</pre>
+<p>Features:
+</p>
+<ul type="disc">
+<li>Provides <code>ok()</code> which is much shorter than <code>assert.xxxx()</code>.
+</li>
+<li>Allows to write tests in nested structure.
+</li>
+<li><a href="#fixture-injection">Fixture Injection</a> support.
+</li>
+<li>Text diff (diff -u) is displayed when texts are different.
+</li>
+</ul>
+<p>See <a href="CHANGES.txt">CHANGES.txt</a> for changes.
+</p>
+<br>
+
+
+<a name="install"></a>
+<h2 class="section1">Install</h2>
+<p>If you have installed npm:
+</p>
+<pre class="terminal">$ npm install oktest
+$ oktest.js -h
+</pre>
+<p>Or just download a file <a href="https://bitbucket.org/kwatch/oktest/raw/tip/javascript/lib/oktest.js">oktest.js</a> and place it into your current directory
+and type:
+</p>
+<pre class="terminal">$ chmod +x oktest.js
+$ node oktest.js -h
+</pre>
+<br>
+
+
+<a name="example"></a>
+<h2 class="section1">Example</h2>
+<p>If you are tring oktest.js for the first time, generate skeleton and try it:
+</p>
+<pre class="terminal">$ node oktest.js -g &gt; example_test.js
+$ vi example_test.js
+$ node oktest.js example_test.js
+</pre>
+<p>The following is an example to demonstrate Oktest.js.
+The points are:
+</p>
+<ul type="disc">
+<li>Test code is belong to spec.
+</li>
+<li>Each spec belongs to topic.
+</li>
+<li>Topic can be nestable to make tests structured.
+</li>
+<li>Use ok() or NG() instead of assert.xxxx().
+</li>
+</ul>
+<pre class="program">    "use strict";
+    var oktest = require("oktest");
+    var topic  = oktest.topic,
+        spec   = oktest.spec,
+        ok     = oktest.ok,
+        NG     = oktest.NG;
+
+    topic("ClassName", function() {
+
+        topic(".methodName()", function() {
+
+            spec("1+1 should be 2", function() {
+                ok (1+1).is(2);      // same as assert.ok(1+1 === 2)
+                // or
+                ok (1+1, '===', 2);
+            });
+
+            spec("other examples", function() {
+                ok (null).eq(undefined);         // assert.ok(null == undefined)
+                ok (null, '==', undefined);      // assert.ok(null == undefined)
+                ok (null).ne(false);             // assert.ok(null != false)
+                ok (null, '!=', false);          // assert.ok(null != false)
+                ok (null).isNot(undefined);      // assert.ok(null !== undefined)
+                ok (null, '!==', undefined);     // assert.ok(null !== undefined)
+                ok ([1,2,3]).isa(Array);         // assert.ok([1,2,3] instanceof Array)
+                ok (2).inArray([1,2,3]);         // verify whether 2 is in [1,2,3]
+                ok ('y').inObject({x:1, y:2});   // assert.ok('y' in {x:1, y:2})
+                ok ("foo").isString();           // assert.ok(typeof("foo")==='string')
+                ok ([1,2,3]).all().isNumber();   // assert for each item in array
+                function fn() { throw new Error("errmsg"); };
+                ok (fn).throws_(Error, "errmsg");  // verify whether error is thrown
+                ok (fn.exception.message).match(/errmsg/);
+            });
+
+        });
+
+    });
+
+    if (process.argv[1] === __filename) {
+        oktest.main();  // or  oktest.run();
+    }
+</pre>
+<p>See <a href="#assertion-reference">Assertion Reference</a> section for details about ok() and NG().
+</p>
+<p><code>assert.xxxx()</code> is also available with Oktest.js.
+For example you can write <code>assert.equal(1+1, 2)</code> instead of <code>ok (1+1).eq(2)</code>.
+</p>
+<p>The following is an output example:
+</p>
+<pre class="terminal">$ node example_test.js
+* ClassName
+  * .methodName()
+    - [ok] 1+1 should be 2
+    - [ok] other examples
+## total:2, passed:2, failed:0, error:0, skipped:0  (in 0.003s)
+</pre>
+<p>You can change reporting format.
+</p>
+<pre class="terminal">$ node oktest.js -sv example_test.js    # verbose format (default)
+$ node oktest.js -ss example_test.js    # simple format
+$ node oktest.js -sp example_test.js    # plain format
+</pre>
+<p>See <a href="#tips">Tips</a> section for details.
+</p>
+<br>
+
+
+<a name="assertion-reference"></a>
+<h2 class="section1">Assertion Reference</h2>
+<p>ok (x).eq(y) or ok (x, '==', y)
+	Raises AssertionError unless x == y.
+</p>
+<p>ok (x).ne(y) or ok (x, '!=', y)
+	Raises AssertionError unless x != y.
+</p>
+<p>ok (x).is(y) or ok (x, '===', y)
+	Raises AssertionError unless x == y.
+</p>
+<p>ok (x).isNot(y) or ok (x, '!==', y)
+	Raises AssertionError unless x != y.
+</p>
+<p>ok (x).gt(y) or ok (x, '&gt;', y)
+	Raises AssertionError unless x &gt; y.
+</p>
+<p>ok (x).ge(y) or ok (x, '&gt;=', y)
+	Raises AssertionError unless x &gt;= y.
+</p>
+<p>ok (x).lt(y) or ok (x, '&lt;', y)
+	Raises AssertionError unless x &lt; y.
+</p>
+<p>ok (x).le(y) or ok (x, '&lt;=', y)
+	Raises AssertionError unless x &lt;= y.
+</p>
+<p>ok (x).deepEqual(y)
+	Same as assert.deepEqual(x, y), but it reports diff when
+	x and y are different.
+</p>
+<p>ok (x).inDelta(y, delta)
+	Raises AssertionError unless y-delta &lt; x &lt; y+delta.
+</p>
+<p>ok (x).isa(klass)
+	Raises AssertionError unless x instanceof klass.
+</p>
+<p>ok (x).match(rexp)
+	Raises AssertionError unless x.match(rexp).
+</p>
+<p>ok (x).hasAttr(name[, value])
+	Raises AssertionError unless name in x.
+	In addition, when value is specified, raises AssertionError unless x.name === value.
+</p>
+<p>ok (x).inObject(obj)
+	Raises AssertionError unless x in obj.
+</p>
+<p>ok (x).inArray(arr)
+	Raises AssertionError unless x exists in arr.
+</p>
+<p>ok (x).length(n):
+	Raise AssertionError unless x.length === n.
+	This is same as <code>ok (x.length) == n</code>, but it is useful to chain
+	assertions, like <code>ok (x).isa(Array).length(n)</code>.
+</p>
+<p>ok (path).isFile()
+	Raise AssertionError unless path is a file.
+</p>
+<p>ok (path).isDirectory()
+	Raise AssertionError unless path is a directory.
+</p>
+<p>ok (path).exists()
+	Raise AssertionError unless path exist as file or directory.
+</p>
+<p>ok (path).notExist()
+	Raise AssertionError unless path doesn't exist as file nor directory.
+</p>
+<p>ok (func).throws_(errorClass[, errorMsg])
+	Raise AssertionError unless func() throw errorClass.
+	Second argument is a string or regular expression to be matched error message.
+	It sets raised exception into 'func.exception' therefore you can do another test with thrown exception object.
+</p>
+<pre class="program">	    var fs = require('fs');
+	    function fn() { fs.statSync('not.exist'); }
+	    ok (fn).throws_(Error, /No such file or directory/);
+	    ok (<strong>fn.exception</strong>.code).is('ENOENT')
+</pre>
+<p>ok (func).throws(errorClass[, errorMsg])
+	Same as throws_().
+	Notice that 'throws' is a reserved keyword of JavaScript and
+	some tools reports warning if you use 'throws' in your script.
+</p>
+<p>ok (func).notThrow([errorClass=Exception])
+	Raise AssertionError if func() raises exception of errorClass.
+</p>
+<p>NG (x)
+	Opposite of ok(x). For example, 'NG ("foo").isNumber()' is true.
+</p>
+<p>NOT (x)
+	Same as NG(x). Provided experimentalily.
+</p>
+<p>precond (x)
+	Same as ok(x), but intended to check precondition of test
+	instead of assertion.
+</p>
+<pre class="program">	    precond (filename).notExist();  // pre-condition of test
+	    createFileTask(filename);
+	    ok (flename).isFile();          // assertion
+</pre>
+<p>It is possible to chain assertions.
+</p>
+<pre class="program">// chain assertion methods
+ok (arr).isa(Array).length(2)
+ok (obj).hasAttr('name', 'Haruhi').hasAttr('gender', 'F')
+</pre>
+<p>Oktest.js allows you to define custom assertion functions.
+See <a href="#tips">Tips</a> section.
+</p>
+<br>
+
+
+<a name="before-after"></a>
+<h2 class="section1">before/after/beforeAll/afterA</h2>
+<p>Oktest supports <code>before()</code>, <code>after()</code>, <code>beforeAll()</code> and <code>afterA()</code>
+which are correspond to <code>setUp()</code>, <code>tearDown()</code>, <code>setUpAll()</code> and <code>tearDownAll()</code>
+respectively:
+</p>
+<pre class="program">    "use strict";
+    var oktest = require("oktest");
+    var topic  = oktest.topic,
+        spec   = oktest.spec,
+        ok     = oktest.ok,
+        NG     = oktest.NG;
+
+    topic("Parent", function() {
+
+        this.beforeAll = function() { console.log("# in Parent.beforeAll()"); };
+        this.afterAll  = function() { console.log("# in Parent.afterAll()"); };
+        this.before    = function() { console.log("#   in Parent.before()"); };
+        this.after     = function() { console.log("#   in Parent.after()"); };
+
+        topic("Child", function() {
+
+            this.beforeAll = function() { console.log("# in Child.beforeAll()"); };
+            this.afterAll  = function() { console.log("# in Child.afterAll()"); };
+            this.before    = function() { console.log("#   in Child.before()"); };
+            this.after     = function() { console.log("#   in Child.after()"); };
+
+            spec("spec1", function() {
+                ok (1).is(1);
+            });
+
+            spec("spec2", function() {
+                ok (2).is(2);
+            });
+
+        });
+
+    });
+
+    if (process.argv[1] === __filename) {
+        oktest.main();
+    }
+</pre>
+<p>Result example:
+</p>
+<pre class="terminal">$ node example_test.js -C
+* Parent
+# in Parent.beforeAll()
+  * Child
+# in Child.beforeAll()
+#   in Parent.before()
+#   in Child.before()
+#   in Child.after()
+#   in Parent.after()
+    - [ok] spec1
+#   in Parent.before()
+#   in Child.before()
+#   in Child.after()
+#   in Parent.after()
+    - [ok] spec2
+# in Child.afterAll()
+# in Parent.afterAll()
+</pre>
+<p>Notice that before() and after() are not recommended very much <sup>(<a href="#fnref:1" name="fnlink:1">*1</a>)</sup> in Oktest.js because they are not flexible.
+Use <a href="#fixture-injection">Fixture Injection</a> instead because it is more flexible than them.
+</p>
+<p>Why before() and after() are not good?
+For example if you want change behaviour of before()/after(), you must
+change topics. This means that behaviour of before()/after() restricts
+to structure of test topics and specs. It's not preferable.
+</p>
+<p>Use <a href="#fixture-injection">Fixture Injection</a> instead because it doesn't have this weakness.
+</p>
+<div class="footnote">
+ <dl compact>
+  <dt>(<a name="fnref:1" href="#fnlink:1">*1</a>)</dt>
+  <dd><code>beforeAll()</code> and <code>afterAll()</code> are recommended, because these are not covered by Fixture Injection.</dd>
+ </dl>
+</div>
+<br>
+
+
+<a name="fixture-injection"></a>
+<h2 class="section1">Fixture Injection</h2>
+<p>Oktest.js supports fixture injection.
+</p>
+<ul type="disc">
+<li>Arguments of spec body function are regarded as fixture names
+   and they are injected by Oktest.js automatically.
+</li>
+<li>Functions which name is <code>provideXxx()</code> are regarded as fixture provider
+   (or builder) function for fixture <code>xxx</code>.
+</li>
+<li>Similar to that, functions which name is <code>releaseXxx()</code> are regarded as
+   fixture releaser (or destroyer).
+   Notice that provider is mandatory but releaser is optional for fixture.
+</li>
+<li>Providers and releasers should be defined in topics.
+</li>
+</ul>
+<pre class="program">    "use strict";
+    var oktest = require("oktest");
+    var topic  = oktest.topic,
+        spec   = oktest.spec,
+        ok     = oktest.ok,
+        NG     = oktest.NG;
+
+
+    topic("Parent", function() {
+
+        /// define fixture provider and releaser in topics.
+        /// (releaser is an optional)
+        <strong>this.provideLeader</strong> = function()    { return "Haruhi"; };
+        <strong>this.releaseLeader</strong> = function(val) { ok (val).is("Haruhi"); };
+
+        topic("Child", function() {
+
+            /// define another fixture provider and releaser in topics.
+            <strong>this.provideMember</strong> = function()    { return "Kyon"; };
+            <strong>this.releaseMember</strong> = function(val) { ok (val).is("Kyon"); };
+
+            /// specify fixture names which you want to use in spec body,
+            /// and Oktest injects them automatically.
+            spec("Fixture injection example", function(<strong>leader, member</strong>) {
+                ok (leader).is("Haruhi");
+                ok (member).is("Kyon");
+                /// the above two lines are equivarent to:
+                //var leader = provideLeader();
+                //var member = provideMember();
+                //try {
+                //  ok (leader).is("Haruhi");
+                //  ok (member).is("Kyon");
+                //} finally {
+                //  if (releaseLeader) releaseLeader(leader);
+                //  if (releaseMember) releaseMember(member);
+                //}
+            });
+
+        });
+
+    });
+
+
+    if (process.argv[1] === __filename) {
+        oktest.main();
+    }
+</pre>
+<p>This feature is more flexible and useful than <code>setUp()</code> and <code>tearDown()</code>.
+</p>
+<p>For example, the following code ensures that dummy files are removed
+automatically at the end of test without <code>tearDown()</code>.
+</p>
+<pre class="program">    topic("Example", function() {
+
+        <strong>this.provideCleaner = function() {</strong>
+            <strong>var items = [];</strong>
+            <strong>return items;</strong>
+        <strong>};</strong>
+        <strong>this.releaseCleaner = function(items) {</strong>
+            <strong>for (var i = 0, n = items.length; i &lt; n; i++) {</strong>
+                <strong>oktest.util.rm_rf(items[i]);</strong>
+            <strong>}</strong>
+        <strong>};</strong>
+
+        spec("Fixture injection example", function(<strong>cleaner</strong>) {
+            /// create dummy files
+            var fs = require("fs");
+            fs.writeFileSync("foo.txt", "dummy content", "utf8");
+            fs.writeFileSync("bar.txt", "dummy content", "utf8");
+            ok ("foo.txt").isFile();
+            ok ("bar.txt").isFile();
+            /// register them to be removed on teardown
+            <strong>cleaner.push("foo.txt", "bar.txt");</strong>
+        });
+
+    });
+</pre>
+<p>In fact this is very useful, therefore Oktest.js supports cleaner in default.
+</p>
+<pre class="program">    topic("Example", function() {
+
+        /// No need to define provideCleaner() nor releaseCleaner()
+        spec("cleaner fixture is always available", function(<strong>cleaner</strong>) {
+            ...
+            <strong>cleaner.add("foo.txt", "bar.txt");</strong>
+            ...
+        });
+
+    });
+</pre>
+<p>Dependencies between fixtures are resolved automatically.
+If you know dependency injection framework such as <a href="http://www.springsource.org/">Spring</a> or <a href="http://code.google.com/p/google-guice/">Guice</a>,
+imagine to apply dependency injection into fixtures.
+</p>
+<pre class="program">    topic("Fixture Injection", function() {
+
+        ///
+        /// for example:
+        /// - Fixture 'a' depends on 'b' and 'c'.
+        /// - Fixture 'c' depends on 'd'.
+        ///
+        this.provideA = function(<strong>b, c</strong>) { return b+c+"&lt;A&gt;"; };
+        this.provideB = function()     { return "&lt;B&gt;"; };
+        this.provideC = function(<strong>d</strong>)    { return d+"&lt;C&gt;"; };
+        this.provideD = function()     { return "&lt;D&gt;"; };
+
+        ///
+        /// Dependencies between fixtures are solved automatically.
+        /// If loop exists in dependency then error will be throw.
+        ///
+        spec("dependency between fixtures is solved", function(<strong>a</strong>) {
+            ok (a).is("&lt;B&gt;&lt;D&gt;&lt;C&gt;&lt;A&gt;");
+        });
+
+    });
+</pre>
+<p>It is possible to pass parameters from specs to provider functions.
+This is useful to change providers' behaviour as you need:
+</p>
+<pre class="program">    topic("Example", function() {
+
+        /// parameter name should start with '_'
+        this.provideUser = function(<strong>_name</strong>) {
+            // change behavior according to parameters are passed or not
+            <strong>if (_name === undefined)</strong> {
+                <strong>_name = "John Smith";</strong>
+            <strong>}</strong>
+            return {name: _name};
+        };
+
+        /// when parameters are specified
+        spec("parameters are passed to providers", <strong>{_name:"Kyon"}</strong>, function(user) {
+            ok (user.name).is(<strong>"Kyon"</strong>);
+        });
+
+        /// when parameters are not specified
+        spec("provider uses default values", function(user) {
+            ok (user.name).is(<strong>"John Smith"</strong>);
+        });
+
+    });
+</pre>
+<p>If you want to integrate with other fixture library, create manager object
+and set it into <code>oktest.fixture.manager</code>.
+</p>
+<pre class="program">    /// fixture manager class
+    function FixtureManger() {
+        this.fixtures = {};
+    }
+    FixtureManger.prototype.<strong>provide = function(name) {</strong>
+        <strong>return this.fixtures[name];</strong>
+    <strong>};</strong>
+    FixtureManger.prototype.<strong>release = function(name, value) {</strong>
+        <strong>// do something to release value</strong>
+    <strong>};</strong>
+
+    // fixture manager object
+    var mgr = new FixtureManager();
+    mgr.items["haruhi"] = {name: "Haruhi"};
+    mgr.items["mikuru"] = {name: "Mikuru"};
+    mgr.items["yuki"]   = {name: "Yuki"};
+
+    // use it
+    <strong>oktest.fixture.manager =</strong> mger;
+</pre>
+<br>
+
+
+<a name="unified-diff"></a>
+<h2 class="section1">Unified Diff</h2>
+<p><code>ok(x).eq(y)</code> and <code>ok(x).is(y)</code> prints unified diff (diff -u) if x and y are different text.
+</p>
+<p>For example:
+</p>
+<pre class="program">    topic("Unified diff", function() {
+
+        var text1 = "Haruhi\n"
+                  + "Mikuru\n"
+                  + "Yuki\n"
+                  + "Ituski\n"
+                  + "Kyon\n";
+        var text2 = "Haruhi\n"
+                  + "Michiru\n"
+                  + "Yuki\n"
+                  + "Ituski\n"
+                  + "Kyon\n";
+
+        spec("display diff when texts are different", function() {
+            ok (text1).is(text2);
+        });
+
+    });
+</pre>
+<p>If you run this script, you'll find that unified diff is displayed.
+</p>
+<p>Output example:
+</p>
+<pre class="terminal">    $ node example_test.js
+    * Unified diff
+      - [Failed] display diff when texts are different
+    ----------------------------------------------------------------------
+    [Failed] Unified diff &gt; display diff when texts are different
+    AssertionError: $actual === $expected : failed.
+    +++ $actual
+    --- $expected
+    @@ -1 +1
+     Haruhi
+    +Mikuru
+    -Michiru
+     Yuki
+     Ituski
+     Kyon
+
+        at spec (/home/kwatch/example_test.js:22:20)
+            ok (text1).is(text2);
+    ----------------------------------------------------------------------
+    ## total:1, passed:0, failed:1, error:0, skipped:0  (in 0.006s)
+</pre>
+<p>It is good idea to compare complex objects with util.inspect().
+</p>
+<pre class="program">    topic("Unified diff", function() {
+
+        var team1 = {
+            team: "SOS",
+            members: [
+                {name: "Haruhi"},
+                {name: "Mikuru"},
+                {name: "Yuki"},
+                {name: "Itsuki"},
+                {name: "Kyon"}
+            ]
+        };
+        var team2 = {
+            team: "SOS",
+            members: [
+                {name: "Haruhi"},
+                {name: "Michiru"},
+                {name: "Yuki"},
+                {name: "Itsuki"},
+                {name: "Kyon"}
+            ]
+        };
+        spec("display diff when texts are different", function() {
+            <strong>var util = require("util");</strong>
+            <strong>ok (util.inspect(team1)).eq(util.inspect(team2));</strong>
+        });
+
+    });
+</pre>
+<p>Output example:
+</p>
+<pre class="terminal">    $ node example_test.js
+    * Unified diff
+      - [Failed] display diff when texts are different
+    ----------------------------------------------------------------------
+    [Failed] Unified diff &gt; display diff when texts are different
+    AssertionError: $actual == $expected : failed.
+    +++ $actual
+    --- $expected
+    @@ -1 +1
+     { team: 'SOS',
+       members:
+        [ { name: 'Haruhi' },
+    +     { name: 'Mikuru' },
+    -     { name: 'Michiru' },
+          { name: 'Yuki' },
+          { name: 'Itsuki' },
+          { name: 'Kyon' } ] }
+     \ No newline at end of file
+
+        at spec (/home/kwatch/example_test.js:34:34)
+            ok (util.inspect(team1)).eq(util.inspect(team2));
+    ----------------------------------------------------------------------
+    ## total:1, passed:0, failed:1, error:0, skipped:0  (in 0.009s)
+</pre>
+<br>
+
+
+<a name="tracer"></a>
+<h2 class="section1">Tracer</h2>
+<p><span style="color:#FF0000">(Experimental)</span>
+</p>
+<p>Oktest provides tracer object which can be stub or mock object.
+</p>
+<p>Tracer object have four methods:
+</p>
+<p>trace(object, method1, method2, ...)
+	Trace method calls.
+</p>
+<p>traceFunc(func[, name])
+	Create new function to trace function call of func and return it.
+	Second argument is necessary if func is anonymous function.
+</p>
+<p>dummy(object, {name1:returnval1, name2:returnval2, ...})
+	Create dummy methods with dummy return values.
+</p>
+<p>fake({name1:returnval1, name2:returnval2, ...})
+	Return fake object.
+	This is a short cut of dummy():
+</p>
+<pre class="program">/// for example,
+var obj = tracer.fake({a:1, b:2});
+/// ... is a short cut of:
+var obj = {}
+tracer.dummy({}, {a:1, b:2});
+</pre>
+<p>In any case, <code>Tracer</code> object records both arguments and return-value of method calls.
+</p>
+<p>The following is an comprehensive example to demonstrace tracer features:
+</p>
+<pre class="program">    "use strict";
+    var oktest = require("oktest");
+    var topic  = oktest.topic,
+        spec   = oktest.spec,
+        ok     = oktest.ok,
+        NG     = oktest.NG;
+
+
+    topic("Tracer demo", function() {
+
+        this.provideObj = function() {
+            return {
+                add: function(x, y) { return x + y; },
+                sub: function(x, y) { return x - y; }
+            };
+        };
+
+
+        ///
+        /// example to trace method calls
+        ///
+        topic("#trace()", function() {
+            spec("traces method calls", function(obj) {
+                /// create tracer object
+                var tr = oktest.tracer.create();
+                /// register methods to trace
+                tr.trace(obj, 'add', 'sub');
+                /// call methods
+                ok (obj.add(1, 2)).is(3);
+                ok (obj.sub(5, 1)).is(4);
+                /// verify method calls
+                ok (tr.called.length).is(2);
+                ok (tr.called[0]).deepEqual({
+                    object: obj, method: 'add', args: [1, 2], ret: 3 });
+                ok (tr.called[1]).deepEqual({
+                    object: obj, method: 'sub', args: [5, 1], ret: 4 });
+            });
+        });
+
+        ///
+        topic("#traceFunc()", function() {
+            spec("returns new func to trace function call.", function(obj) {
+                /// target functions to trace
+                function add(x, y) { return x + y; }
+                var sub = function(x, y) { return x - y; };
+                /// create tracer object
+                var tr = oktest.tracer.create();
+                /// trace functions
+                add = tr.traceFunc(add);
+                sub = tr.traceFunc(sub, "sub"); // specify name to record
+                /// call functions
+                ok (add(1, 2)).is(3);
+                ok (sub(5, 1)).is(4);
+                /// verify function calls
+                ok (tr.called.length).is(2);
+                ok (tr.called[0]).deepEqual({
+                    object: null, name: 'add', args: [1, 2], ret: 3 });
+                ok (tr.called[1]).deepEqual({
+                    object: null, name: 'sub', args: [5, 1], ret: 4 });
+            });
+        });
+
+        ///
+        /// example to set dummy methods
+        ///
+        topic("#dummy()", function() {
+            spec("sets dummy methods", function(obj) {
+                /// create tracer object
+                var tr = oktest.tracer.create();
+                /// register dummy method names and return values
+                tr.dummy(obj, {add: 100, sub: 200});
+                /// call methods
+                ok (obj.add(1, 2)).is(100);   // != 3
+                ok (obj.sub(5, 1)).is(200);   // != 4
+                /// verify method calls
+                ok (tr.called.length).is(2);
+                ok (tr.called[0]).deepEqual({
+                    object: obj, method: 'add', args: [1, 2], ret: 100 });
+                ok (tr.called[1]).deepEqual({
+                    object: obj, method: 'sub', args: [5, 1], ret: 200 });
+            });
+        });
+
+        ///
+        /// example to create fake object
+        ///
+        topic("#fake()", function() {
+            spec("returns fake object", function() {
+                /// create tracer object
+                var tr = oktest.tracer.create();
+                /// create fake object with dummy method names and return values
+                var obj = tr.fake({add: 100, sub: 200});
+                /// call methods
+                ok (obj.add(1, 2)).is(100);   // != 3
+                ok (obj.sub(5, 1)).is(200);   // != 4
+                /// verify method calls
+                ok (tr.called.length).is(2);
+                ok (tr.called[0]).deepEqual({
+                    object: obj, method: 'add', args: [1, 2], ret: 100 });
+                ok (tr.called[1]).deepEqual({
+                    object: obj, method: 'sub', args: [5, 1], ret: 200 });
+            });
+        });
+
+    });
+
+
+    if (process.argv[1] === __filename) {
+        oktest.main();
+    }
+</pre>
+<br>
+
+
+<a name="skip-test"></a>
+<h2 class="section1">Skip Test</h2>
+<p>It is possible to skip tests according to a certain condition.
+</p>
+<pre class="program">    import unittest
+    from oktest import ok, run, <strong>skip, skipWhen</strong>
+
+    topic("Skip Demo", function() {
+
+        spec("skip example", function() {
+            if (condition) <strong>skip("...reason...")</strong>;
+            /// or
+            <strong>skipWhen(condition, "...reason...")</strong>;
+            /// ...
+        });
+
+    });
+</pre>
+<br>
+
+
+<a name="command-line-interface"></a>
+<h2 class="section1">Command-line Interface</h2>
+<p>Oktest now supports command-line interface to execute test scripts.
+</p>
+<pre class="program">$ ls oktest.js
+oktest.js
+## run test scripts in plain format
+$ node oktest.js -sp tests/*_test.py
+## run test scripts in 'tests' dir with pattern '*_test.py'
+$ node oktest.js -p '*_test.py' tests
+## filter by tipic
+$ node oktest.js -f topic='*pattern*' tests
+## filter by spec
+$ node oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'
+</pre>
+<p>Type <code>node oktest.js -h</code> for details about command-line options.
+</p>
+<br>
+
+
+<a name="tips"></a>
+<h2 class="section1">Tips</h2>
+<ul type="disc">
+<li>You can define your own custom assertion function.
+<pre class="program">    // define custom assertion function
+    function assertStartWith(bool, actual, expected) {
+        var s = actual.substr(0, expected.length);
+        if ((s === expected) === bool)
+            return null;
+        var errmsg = (bool ? "" : "NOT ")
+            + "$actual starts with " + util.inspect(expected) + " : failed.\n"
+            + "  $actual: " + util.inspect(actual);
+        return errmsg;
+    }
+    // register
+    oktest.assertion.register("startWith", assertStartWith);
+
+    // how to use
+    ok ("Haruhi").startWith("Haru");
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li>It is possible to chain assertion methods.
+<pre class="program">// chain assertion methods
+ok (arr).isa(Array).length(2)
+ok (obj).hasAttr("name", "Haruhi").hasAttr("gender", "F");
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li>If you want to change reporting format, specify <code>-sp</code> (plain),
+   <code>-ss</code> (simple), or <code>-sv</code> (verbose) in command-line:
+<pre class="terminal">$ node example_test.js -sp    # or -s plain
+</pre>
+   Or pass <code>{style:"plain"}</code> to <code>oktest.run()</code>.
+<pre class="program">if (process.argv[1] === __filename) {
+    oktest.run({style:"plain"});
+}
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li><code>oktest.run()</code> returns total number of failures and errors.
+<pre class="program">// exit with status code 0 when no errors.
+process.exit(oktest.run());
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li>If you call ok() or NG() but forget to do assertion, Oktest.js warns it.
+<pre class="program">    topic("example", function() {
+        spec("warned when assertion is not done", function() {
+            //ok (1+1).is(2);
+            ok (1+1)   // missing assertion
+        });
+    });
+
+    oktest.run()   #=&gt; warning: ok() is called but not tested.
+</pre>
+</li>
+</ul>
+<br>
+
+
+
+   </div>
+  </blockquote>
+
+ </body>
+</html>
