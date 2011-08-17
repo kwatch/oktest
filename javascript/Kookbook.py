@@ -67,14 +67,14 @@ def dist(c):
         (r'\$License\$',   license),
     ]
     edit(c%'$(dist_dir)/**/*', by=replacer)
-    from kook.utils import glob2
-    with chdir(dist_dir):
-        filenames = [ x for x in glob2('**/*')
-                            if os.path.isfile(x) ]
-    filenames.append("")
-    s = "\n".join(filenames)
-    with open(".npminclude", 'w') as f:
-        f.write(s)
+    #
+    #from kook.utils import glob2
+    #with chdir(dist_dir):
+    #    filenames = [ x for x in glob2('**/*') if os.path.isfile(x) ]
+    #filenames.append("")
+    #s = "\n".join(filenames)
+    #with open(".npminclude", 'w') as f:
+    #    f.write(s)
 
 
 @recipe
