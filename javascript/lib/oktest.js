@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 ///
-/// oktest.js - new-style testing library for node.js
+/// oktest.js - a new-style testing library for node.js
 ///
 /// $Release: $
 /// $Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
@@ -380,29 +380,6 @@ var fmt = oktest.util.fmt;
 ///
 /// color
 ///
-
-//oktest.util.Color = {
-//  black:   function black(s)   { return "\033[0;30m" + s + "\033[0m"; },
-//  red:     function red(s)     { return "\033[0;31m" + s + "\033[0m"; },
-//  green:   function green(s)   { return "\033[0;32m" + s + "\033[0m"; },
-//  yellow:  function yellow(s)  { return "\033[0;33m" + s + "\033[0m"; },
-//  blue:    function blue(s)    { return "\033[0;34m" + s + "\033[0m"; },
-//  magenta: function magenta(s) { return "\033[0;35m" + s + "\033[0m"; },
-//  cyan:    function cyan(s)    { return "\033[0;36m" + s + "\033[0m"; },
-//  white:   function white(s)   { return "\033[0;37m" + s + "\033[0m"; },
-//  //
-//  bold:    function bold(s)    { return "\033[1;1m" + s + "\033[22m"; }
-//};
-//
-//oktest.util.Color.Bold = {
-//  red:     function red(s)     { return "\033[1;31m" + s + "\033[0m"; },
-//  green:   function green(s)   { return "\033[1;32m" + s + "\033[0m"; },
-//  yellow:  function yellow(s)  { return "\033[1;33m" + s + "\033[0m"; },
-//  blue:    function blue(s)    { return "\033[1;34m" + s + "\033[0m"; },
-//  magenta: function magenta(s) { return "\033[1;35m" + s + "\033[0m"; },
-//  cyan:    function cyan(s)    { return "\033[1;36m" + s + "\033[0m"; },
-//  white:   function white(s)   { return "\033[1;37m" + s + "\033[0m"; }
-//};
 
 oktest.util.Color = {
   black  : function black  (s) { return "\x1b[0;30m" + s + "\x1b[0m"; },
