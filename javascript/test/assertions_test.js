@@ -1,9 +1,20 @@
-var vows   = require("vows");
+//var vows   = require("vows");
 var assert = require("assert");
 var fs     = require("fs");
 var util   = require("util");
-var oktest = require("oktest");
 
+if (! assert.match) {
+  assert.match = function match(actual, rexp) {
+    assert.ok(actual.match(rexp));
+  };
+}
+if (! assert.instanceOf) {
+  assert.instanceOf = function instanceOf(actual, classobj) {
+    assert.ok(actual instanceof classobj);
+  };
+}
+
+var oktest = require("oktest");
 var ok = oktest.ok;
 var NG = oktest.NG;
 
@@ -25,7 +36,8 @@ function _shouldBeFailed(func, errmsg) {
 }
 
 
-var suite = vows.describe("oktest.assertion").addBatch({
+//var suite = vows.describe("oktest.assertion").addBatch({
+var tests = {
 
   "AssertionObject": {
 
@@ -773,12 +785,39 @@ var suite = vows.describe("oktest.assertion").addBatch({
     }
   }
 
-});
+//});
+};
 
+
+//if (process.argv[1] === __filename) {
+//  suite.run();
+//}
+//else {
+//  suite.export(module);     // allow vows command to execute this script
+//}
 
 if (process.argv[1] === __filename) {
-  suite.run();
-}
-else {
-  suite.export(module);     // allow vows command to execute this script
+  (function(expected_count) {
+    var count = 0;
+    function run_func(fn) {
+      count++;
+      try {
+        fn();
+        util.print('.');
+      }
+      catch (ex) {
+        util.print('E');
+        throw ex;
+      }
+    }
+    function run_obj(obj) {
+      for (var k in obj) {
+        var v = obj[k];
+        typeof(v) === 'function' ? run_func(v) : run_obj(v);
+      }
+    }
+    run_obj(tests);
+    util.print(" (" + count + " tests finished)\n");
+    assert.equal(count, expected_count);
+  })(89);
 }
