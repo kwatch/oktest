@@ -67,6 +67,7 @@ def dist(c):
         (r'\$License\$',   license),
     ]
     edit(c%'$(dist_dir)/**/*', by=replacer)
+    cp('Kookbook.py', dist_dir)   # don't edit 'Kookbook.py'
     #
     #from kook.utils import glob2
     #with chdir(dist_dir):
