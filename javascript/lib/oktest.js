@@ -86,10 +86,10 @@ oktest.util = {
         throw new Error("format(): too less arguments.");
       }
       switch (m1) {
-      case 's':  return String(args[i]);        break;
-      case 'd':  return parseInt(args[i]);      break;
-      case 'r':  return util.inspect(args[i]);  break;
-      case '%':  return '%';                    break;
+      case 's':  return String(args[i]);
+      case 'd':  return parseInt(args[i]);
+      case 'r':  return util.inspect(args[i]);
+      case '%':  return '%';
       default:
         throw new Error(util.inspect('%'+m1) + ": unsupported format.");
       }
