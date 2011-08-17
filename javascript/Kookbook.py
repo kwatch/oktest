@@ -42,7 +42,7 @@ def test(c):
 
 
 files = [
-    'README.rst', 'CHANGES.txt', 'MIT-LICENSE', 'Kookbook.py', 'package.json',
+    'README.txt', 'CHANGES.txt', 'MIT-LICENSE', 'Kookbook.py', 'package.json',
     'lib/oktest.js',
     'doc/users-guide.html', 'doc/docstyle.css',
     'test/*_test.js',
