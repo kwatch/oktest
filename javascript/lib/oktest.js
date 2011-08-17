@@ -1952,7 +1952,7 @@ oktest.TEMPLATE = (""
       //|  });
       //|
       //|
-      //|if (process.argv[1] === __filename) {
+      //|if (require.main === module) {
       //|    oktest.main();
       //|}
       + '"use strict";\n'
@@ -1997,7 +1997,7 @@ oktest.TEMPLATE = (""
       + '  });\n'
       + '\n'
       + '\n'
-      + 'if (process.argv[1] === __filename) {\n'
+      + 'if (require.main === module) {\n'
       + '    oktest.main();\n'
       + '}\n'
 );
