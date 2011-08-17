@@ -2144,6 +2144,15 @@ oktest.main = function main() {
 };
 
 
-if (process.argv[1] === __filename) {
-  oktest.main();
+function _actualFilepath(filepath) {
+  if (fs.lstatSync(filepath).isSymbolicLink()) {
+    return path.resolve(path.dirname(filepath), fs.readlinkSync(filepath));
+  }
+  return filepath;
+}
+
+if (process.argv[1]) {
+  if (process.argv[1] === __filename || _actualFilepath(process.argv[1]) === __filename) {
+    oktest.main();
+  }
 }
