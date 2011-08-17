@@ -2094,7 +2094,7 @@ oktest.mainapp.MainApp = function MainApp(script) {
     for (i = 0, n = filename_list.length; i < n; i++) {
       var fpath = filename_list[i];
       _dp("fpath", fpath);
-      require('./'+fpath);
+      require(fs.realpathSync(fpath));
     }
     var n_errors = oktest.run(kwargs);
     return n_errors;
