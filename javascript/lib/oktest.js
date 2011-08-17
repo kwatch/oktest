@@ -14,7 +14,6 @@ var oktest = exports;
 oktest.__version__ = '$Release: 0.0.0 $'.split(' ')[1];
 
 var assert = require("assert");
-var system = require("system");
 var fs     = require("fs");
 var os     = require("os");
 var path   = require("path");
@@ -42,7 +41,7 @@ oktest.util = {
 
   _dp: function debugprint(name, arg) {
     if (oktest.config.debug) {
-      system.print("** debug: "+name+"="+util.inspect(arg));
+      util.print("** debug: "+name+"="+util.inspect(arg));
     }
   },
 
@@ -1534,7 +1533,7 @@ oktest.reporter.Reporter = function Reporter() {
 
 oktest.reporter.BaseReporter = function BaseReporter(opts) {
   if (! opts) opts = {};
-  this.out = opts.out ? opts.out : system.stdout;
+  this.out = opts.out ? opts.out : process.stdout;
   var flag_color = "color" in opts ? opts.color : null;
   if (flag_color == null) {
     flag_color = oktest.config.color_available && this._isatty();
@@ -1976,7 +1975,7 @@ oktest.TEMPLATE = (""
       //|  });
       //|
       //|
-      //|if (require("system").args[1] === __filename) {
+      //|if (process.argv[1] === __filename) {
       //|    oktest.main();
       //|}
       + '"use strict";\n'
@@ -2021,7 +2020,7 @@ oktest.TEMPLATE = (""
       + '  });\n'
       + '\n'
       + '\n'
-      + 'if (require("system").args[1] === __filename) {\n'
+      + 'if (process.argv[1] === __filename) {\n'
       + '    oktest.main();\n'
       + '}\n'
 );
@@ -2083,15 +2082,15 @@ oktest.mainapp.MainApp = function MainApp(script) {
     _dp("opts", opts);
     //
     if (opts.help) {
-      system.print(this._helpMessage(parser));
+      util.print(this._helpMessage(parser));
       return 0;
     }
     if (opts.version) {
-      system.print(oktest.__version__);
+      util.print(oktest.__version__);
       return 0;
     }
     if (opts.generate) {
-      system.print(oktest.TEMPLATE);
+      util.print(oktest.TEMPLATE);
       return 0;
     }
     //
@@ -2160,8 +2159,8 @@ oktest.mainapp.MainApp = function MainApp(script) {
 
 
 oktest.main = function main() {
-  var script = system.args[1];
-  var args   = system.args.slice(2);
+  var script = process.argv[1];
+  var args   = process.argv.slice(2);
   var app = new oktest.mainapp.MainApp(script);
   var n_errors = app.run(args);
   //process.exit(n_errors);
