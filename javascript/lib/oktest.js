@@ -87,7 +87,7 @@ oktest.util = {
       }
       switch (m1) {
       case 's':  return String(args[i]);
-      case 'd':  return parseInt(args[i]);
+      case 'd':  return parseInt(args[i], 10);
       case 'r':  return util.inspect(args[i]);
       case '%':  return '%';
       default:
@@ -127,7 +127,8 @@ oktest.util = {
       console.error("** warning: rm_rf() skips '"+path+"' (are you realy?).");
       return;
     }
-    try { var fstat = fs.statSync(path); }
+    var fstat;
+    try { fstat = fs.statSync(path); }
     catch (ex) { return; }
     if (fstat.isFile()) {
       fs.unlinkSync(path);
@@ -202,10 +203,10 @@ oktest.util = {
   msec2str: function msec2str(msec) {
     if (msec === 0) return '0.000';
     var sec = msec / 1000.0;
-    var min = parseInt(sec / 60);
+    var min = parseInt(sec / 60, 10);
     if (min === 0) return "" + sec;
     sec -= 60 * min;
-    sec = parseInt(sec * 1000) / 1000.0;
+    sec = parseInt(sec * 1000, 10) / 1000.0;
     var zero = sec < 10 ? '0' : '';
     return "" + min + ":" + zero + sec;
   },
@@ -857,8 +858,9 @@ oktest.assertion.AssertionArray = function AssertionArray(array, bool) {
 
 oktest.assertion.AssertionArray._methodFactory = function _methodFactory(methodName) {
   return function () {
+    var i, n;
     try {
-      for (var i = 0, n = this.array.length; i < n; i++) {
+      for (i = 0, n = this.array.length; i < n; i++) {
         var assObj = this.bool ? oktest.ok (this.array[i]) : oktest.NG(this.array[i]);
         var method = assObj[methodName];
         method.apply(assObj, arguments);
@@ -934,8 +936,8 @@ oktest.assertion._ok = function _ok(actual, op, expected, bool) {
       var shared = oktest._sharedFilenames;
       if (! (filename in shared)) shared[filename] = filename;
       assObj._file   = shared[filename];
-      assObj._line   = parseInt(m[2]);
-      assObj._column = parseInt(m[3]);
+      assObj._line   = parseInt(m[2], 10);
+      assObj._column = parseInt(m[3], 10);
     }
     else {
       assObj._file = assObj._line = assObj._column = null;
@@ -1056,7 +1058,7 @@ oktest.core.TestObject = function TestObject() {
     var style  = oktest.config.style;
     if (opts.style) style = opts.style;
     var klass = oktest.reporter.getRegisteredClass(style);
-    if (! klass) throw Error("'"+style+"': unknown style.");
+    if (! klass) throw new Error("'"+style+"': unknown style.");
     var reporter = new klass();
     if (opts.out) reporter.out = opts.out;
     if ('color' in opts && typeof(opts.color) === 'boolean') {
@@ -1690,7 +1692,7 @@ oktest.reporter.BaseReporter.prototype = new oktest.reporter.Reporter();
       }
       var m = line.match(/^    at .* \((.*):(\d+):\d+\)/);
       if (! m) continue;
-      var filepath = m[1], linenum = parseInt(m[2]);
+      var filepath = m[1], linenum = parseInt(m[2], 10);
       var linestr = this._linecache.fetch(filepath, linenum);
       this.echo('        ' + oktest.util.strip(linestr || ''));
     }
@@ -2116,7 +2118,7 @@ oktest.mainapp.MainApp = function MainApp(script) {
     }
     if (opts.filter) {
       var key, val;
-      var pair = oktest.util.split2(opts.filter, /=/);
+      var pair = oktest.util.split2(opts.filter, '=');
       if (pair.length == 1) {
         key = 'spec';  val = pair[0];
       }
