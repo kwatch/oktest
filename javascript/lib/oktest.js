@@ -41,7 +41,7 @@ oktest.util = {
 
   _dp: function debugprint(name, arg) {
     if (oktest.config.debug) {
-      util.print("** debug: "+name+"="+util.inspect(arg));
+      util.print("** debug: "+name+"="+util.inspect(arg)+"\n");
     }
   },
 
