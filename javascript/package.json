@@ -1,7 +1,7 @@
 {
   "name": "Oktest.js",
   "description": "a new-style testing library for node.js",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "homepage": "https://bitbucket.org/kwatch/oktest/src/tip/javascript/",
   "repository": {
     "type": "mercurial",
@@ -14,6 +14,9 @@
     "test": "./test",
     "doc": "./doc",
     "bin": "./bin"
+  },
+  "bin": {
+    "oktest.js": "./bin/oktest.js"
   },
   "engines": {
     "node": "*"
