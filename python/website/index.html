@@ -1,15 +1,14 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>Oktest Oktest - a new style testing library -</title>
+<title>Oktest - a new style testing library -</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="oktest-readme">
-<h1 class="title">Oktest Oktest - a new style testing library -</h1>
+<h1 class="title">Oktest - a new style testing library -</h1>
 
 <p>$Release: 0.8.0 $</p>
 <div class="section" id="overview">
@@ -40,8 +39,8 @@ class FooTest(unittest.TestCase):
 <ul class="simple">
 <li>Provides <tt class="docutils literal">ok()</tt> which is much shorter than <tt class="docutils literal">self.assertXxxx()</tt>.</li>
 <li>Allow to write test name in free text.</li>
-<li>Fixture injection support.</li>
-<li>Tracer class is provided which can be used as mock or stub.</li>
+<li><a class="reference internal" href="#fixture-injection">Fixture Injection</a> support.</li>
+<li><a class="reference internal" href="#tracer">Tracer</a> class is provided which can be used as mock or stub.</li>
 <li>Text diff (diff -u) is displayed when texts are different.</li>
 </ul>
 <p>Oktest requires Python 2.4 or later (3.x is supported).</p>
@@ -112,12 +111,12 @@ class Example1Test(object):
 
     ## invoked only once before all tests
     &#64;classmethod
-    <strong>def before_all(cls):</strong>
+    <strong>def before_all(cls):</strong>  # or setUpClass(cls)
         os.mkdir('tmp.d')
 
     ## invoked only once after all tests done
     &#64;classmethod
-    <strong>def after_all(cls):</strong>
+    <strong>def after_all(cls):</strong>  # or tearDownClass(cls)
         import shutil
         shutil.rmtree('tmp.d')
 
@@ -147,6 +146,7 @@ if __name__ == '__main__':
     ## or
     #<strong>run(Example1Test, Example2Test)</strong>
 </pre>
+<p><tt class="docutils literal">Oktest.run()</tt> accepts unittest.TestCase and other class.</p>
 </div>
 <div class="section" id="assertion-reference">
 
@@ -347,8 +347,68 @@ class SosTest(unittest.TestCase):
         ok (member1[&quot;name&quot;]) == &quot;Haruhi&quot;
         ok (member2[&quot;name&quot;]) == &quot;Kyon&quot;
 </pre>
-<p>This feature is more flexible and useful than setUp() and tearDown().
-In my opinion, you don't need to write setUp() at all.</p>
+<p>This feature is more flexible and useful than setUp() and tearDown().</p>
+<p>For example, the following code ensures that dummy files are removed
+automatically at the end of test without tearDown().</p>
+<pre class="literal-block">
+import os, shutil
+
+def <strong>provide_cleaner()</strong>:
+    paths = []
+    return paths
+
+def <strong>release_cleaner(paths)</strong>:
+    assert isinstance(paths, list)
+    ## remove dummy files registered
+    for path in paths:
+        if os.path.isfile(path):
+            os.unlink(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+
+class FooTest(unittest.TestCase):
+
+    &#64;test(&quot;example1&quot;)
+    def _(self, <strong>cleaner</strong>):
+        fpath = &quot;dummy.txt&quot;
+        ## register dummy file
+        <strong>cleaner.append(fpath)</strong>
+        ## create dummy file and do test with it
+        f = open(fpath, &quot;w&quot;); f.write(&quot;DUUUMY&quot;); f.close()
+        ok (fpath).is_file()
+</pre>
+<p>Default parameter values of test methods are passed into provider functions
+if necessary. Using this, you can change provider behaviour as you need.</p>
+<pre class="literal-block">
+## provider can have default value of argument
+def provide_tempfile(<strong>content=&quot;dummy&quot;</strong>):
+    filename = '__tmp.txt'
+    with open(filename, 'w') as f:
+        f.write(content)
+    return filename
+
+def release_tempfile(filename):
+    if os.path.exists(filename):
+        os.unlink(filename)
+
+class FooTest(unittest.TestCase):
+
+    ## override default value of providers by test method's
+    ## default argument value
+    &#64;test(&quot;example&quot;)
+    def _(self, tempfile, <strong>content=&quot;AAAA&quot;</strong>):
+        with open(tempfile) as f:
+            s = f.read()
+        ok (s) == <strong>&quot;AAAA&quot;</strong>
+
+    ## if you don't specify default value in test method,
+    ## provider's default value is used
+    &#64;test(&quot;example&quot;)
+    def _(self, tempfile):
+        with open(tempfile) as f:
+            s = f.read()
+        ok (s) == <strong>&quot;dummy&quot;</strong>
+</pre>
 <p>Dependencies between fixtures are resolved automatically.
 If you know dependency injection framework such as <a class="reference external" href="http://www.springsource.org/">Spring</a> or <a class="reference external" href="http://code.google.com/p/google-guice/">Guice</a>,
 imagine to apply dependency injection into fixtures.</p>
@@ -372,6 +432,14 @@ class BarTest(unittest.TestCase):
     &#64;test(&quot;dependency test&quot;)
     def _(self, <strong>a</strong>):
         assert a == [&quot;B&quot;, &quot;D&quot;, &quot;C&quot;, &quot;A&quot;]
+</pre>
+<p>Fixture injection is provided by &#64;test decorator, and it is available
+with existing test methods:</p>
+<pre class="literal-block">
+<strong>&#64;test()</strong>
+def test_sample1(self, <strong>member1, member2</strong>):
+    &quot;&quot;&quot;description&quot;&quot;&quot;
+    ...
 </pre>
 <p>If you want to integrate with other fixture library, create manager object
 and set it into <tt class="docutils literal">oktest.fixture_manager</tt>.
@@ -621,6 +689,45 @@ ok (f(3))  == 'x=3'
 ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 </pre>
 </div>
+<div class="section" id="skip-test">
+
+<h2>Skip Test</h2>
+<p>(Experimental)
+It is possible to skip tests according to a certain condition.</p>
+<pre class="literal-block">
+import unittest
+from oktest import ok, run, <strong>skip</strong>
+
+class SkipExampleTest(unittest.TestCase):
+
+    &#64;test(&quot;example of skip&quot;)
+    def _(self):
+        if some_condition:
+            <strong>skip(&quot;reason to skip&quot;)</strong>
+        ...
+
+    &#64;test(&quot;example of skip&quot;)
+    <strong>&#64;skip.when(some_condition, &quot;reason to skip&quot;)</strong>
+    def _(self):
+        ...
+
+    ## unittest2 helpers are also available (if you installed it)
+    &#64;unittest.skipIf(some_condition, &quot;reason to skip&quot;)
+    def testExample(self):
+        ...
+
+if __name__ == '__main__':
+    run()
+</pre>
+<p>Notice that the following doesn't work correctly.</p>
+<pre class="literal-block">
+## NG: &#64;skip.when should be the below of &#64;test
+&#64;skip.when(some_condition, &quot;reason to skip&quot;)
+&#64;test(&quot;example of skip&quot;)
+def _(self):
+    ...
+</pre>
+</div>
 <div class="section" id="command-line-interface">
 
 <h2>Command-line Interface</h2>
@@ -833,6 +940,12 @@ ok (&quot;Sasaki&quot;).startswith(&quot;Sas&quot;)
 ok (func()).is_a(tuple).length(2)
 d = datetime.date(2000, 12, 31)
 ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
+</pre>
+</li>
+<li><p class="first"><tt class="docutils literal">oktest.run()</tt> returns total number of failures and errors.</p>
+<pre class="literal-block">
+## exit with status code 0 when no errors.
+sys.exit(run())
 </pre>
 </li>
 <li><p class="first">If you call ok() or NG() but forget to do assertion, oktest warns it.</p>
