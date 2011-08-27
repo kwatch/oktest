@@ -15,12 +15,12 @@ Release 0.9.0
 
     class FooTest(unittest.TestCase):
 
-      def test_1_plus_1_should_be_2(self):  # not cool...
-        self.assertEqual(2, 1+1)
+        def test_1_plus_1_should_be_2(self):  # not cool...
+            self.assertEqual(2, 1+1)
 
-      @test("1 + 1 should be 2")    # cool! easy to read & write!
-      def _(self):
-        self.assertEqual(2, 1+1)
+        @test("1 + 1 should be 2")    # cool! easy to read & write!
+        def _(self):
+            self.assertEqual(2, 1+1)
 
 * Fixture injection support by '@test' decorator.
   Arguments of test method are regarded as fixture names and
@@ -31,71 +31,71 @@ Release 0.9.0
 
     class SosTest(unittest.TestCase):
 
-      ##
-      ## fixture providers.
-      ##
-      def provide_member1(self):
-        return {"name": "Haruhi"}
+        ##
+        ## fixture providers.
+        ##
+        def provide_member1(self):
+            return {"name": "Haruhi"}
 
-      def provide_member2(self):
-        return {"name": "Kyon"}
+        def provide_member2(self):
+            return {"name": "Kyon"}
 
-      ##
-      ## fixture releaser (optional)
-      ##
-      def release_member1(self, value):
-        assert value == {"name": "Haruhi"}
+        ##
+        ## fixture releaser (optional)
+        ##
+        def release_member1(self, value):
+            assert value == {"name": "Haruhi"}
 
-      ##
-      ## testcase which requires 'member1' and 'member2' fixtures.
-      ##
-      @test("validate member's names")
-      def _(self, member1, member2):
-        assert member1["name"] == "Haruhi"
-        assert member2["name"] == "Kyon"
+        ##
+        ## testcase which requires 'member1' and 'member2' fixtures.
+        ##
+        @test("validate member's names")
+        def _(self, member1, member2):
+            assert member1["name"] == "Haruhi"
+            assert member2["name"] == "Kyon"
 
   Dependencies between fixtures are resolved automatically.
   ex::
 
     class BarTest(unittest.TestCase):
 
-      ##
-      ## for example:
-      ## - Fixture 'a' depends on 'b' and 'c'.
-      ## - Fixture 'c' depends on 'd'.
-      ##
-      def provide_a(b, c):  return b + c + ["A"]
-      def provide_b():      return ["B"]
-      def provide_c(d):     return d + ["C"]
-      def provide_d():      reutrn ["D"]
+        ##
+        ## for example:
+        ## - Fixture 'a' depends on 'b' and 'c'.
+        ## - Fixture 'c' depends on 'd'.
+        ##
+        def provide_a(b, c):  return b + c + ["A"]
+        def provide_b():      return ["B"]
+        def provide_c(d):     return d + ["C"]
+        def provide_d():      reutrn ["D"]
 
-      ##
-      ## Dependencies between fixtures are solved automatically.
-      ##
-      @test("dependency test")
-      def _(self, a):
-        assert a == ["B", "D", "C", "A"]
+        ##
+        ## Dependencies between fixtures are solved automatically.
+        ##
+        @test("dependency test")
+        def _(self, a):
+            assert a == ["B", "D", "C", "A"]
 
   If loop exists in dependency then @test reports error.
 
   If you want to integrate with other fixture library, see the following
   example::
 
-    class MyFixtureManager(object):
-      def __init__(self):
-        self.values = { "x": 100, "y": 200 }
-      def provide(self, name):
-        return self.values[name]
-      def release(self, name, value):
-        pass
+      class MyFixtureManager(object):
+          def __init__(self):
+              self.values = { "x": 100, "y": 200 }
+          def provide(self, name):
+              return self.values[name]
+          def release(self, name, value):
+              pass
 
-    oktest.fixure_manager = MyFixtureResolver()
+      oktest.fixure_manager = MyFixtureResolver()
 
 * Supports command-line interface to execute test scripts.
   ex::
 
-    ## run test scripts except foo_*.py
-    $ python -m oktest -x 'foo_*.py' tests/*_test.py
+    ## run test scripts except foo_*.py in plain style
+    $ python -m oktest -x 'foo_*.py' -sp tests/*_test.py
     ## run test scripts in 'tests' dir with pattern '*_test.py'
     $ python -m oktest -p '*_test.py' tests
     ## filter by class name
@@ -106,6 +106,13 @@ Release 0.9.0
     $ python -m oktest -f tag='*value*' tests
 
   Try ``python -m oktest -h`` for details about command-line options.
+
+* Reporting style is changed. Oktest now provides three reporing styles.
+  - plain (similar to unittest)
+  - simple
+  - verbose (default)
+  All of these styles are colored to emphasize errors.
+  If you want change reporting style, specify ``-r`` option in command-line.
 
 * New assertion method ``ok(x).attr(name, value)`` to check attribute.
   ex::
@@ -146,14 +153,14 @@ Release 0.9.0
     ## for Python 2.4
     @dummy_io("SOS")
     def d_io():
-      assert sys.stdin.read() == "SOS"
-      print("Haruhi")
+        assert sys.stdin.read() == "SOS"
+        print("Haruhi")
     sout, serr = d_io
     assert sout == "Haruhi\n"
     ## for Python 2.5 or later
     with dummy_io("SOS") as d_io:
-      assert sys.stdin.read() == "SOS"
-      print("Haruhi")
+        assert sys.stdin.read() == "SOS"
+        print("Haruhi")
     sout, serr = d_io
     assert sout == "Haruhi\n"
 
@@ -164,13 +171,51 @@ Release 0.9.0
     import oktest
     @oktest.assertion
     def startswith(self, arg):
-      boolean = self.target.startswith(arg)
-      #if boolean == self.expected:      # obsolete
-      if boolean == self.boolean:
-          return True
-      self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+        boolean = self.target.startswith(arg)
+        #if boolean == self.expected:      # obsolete
+        if boolean == self.boolean:
+            return True
+        self.failed("%r.startswith(%r) : failed." % (self.target, arg))
+
+* ``oktest.run()`` is changed to return number of failures and errors
+  of tests.::
+
+    sys.exit(oktest.run())   # status code == number of failures and errors
+
+* ``before_each()`` and ``after_each()`` are now non-supported.
+  Use ``before()`` and ``after()`` intead.
 
 * (Experimental) New function ``NOT()`` provided which is same as ``NG()``.
+
+* (Experimental) ``skip()`` and ``@skip.when()`` are provided to skip tests::
+
+    from oktest import skip
+
+    class FooTest(unittest.TestCase):
+
+        def test_1(self):
+            if sys.version.startswith('2.'):
+                reason = "not available on Python 2.x"
+                skip(reason)    # raises SkipTest
+            ...
+
+        @skip.when(sys.version.startswith('2.'), "not available on Python 2.x")
+        def test_2(self):
+            ...
+
+  If you want to use @skip.when with @test decorator, see the folloing::
+
+     ## OK
+     @test("description")
+     @skip.when(condition, "reason")
+     def _(self):
+         ...
+
+     ## NG
+     @skip.when(condition, "reason")
+     @test("description")
+     def _(self):
+         ...
 
 
 

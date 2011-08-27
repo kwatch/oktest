@@ -33,8 +33,8 @@ Features:
 
 * Provides ``ok()`` which is much shorter than ``self.assertXxxx()``.
 * Allow to write test name in free text.
-* Fixture injection support.
-* Tracer class is provided which can be used as mock or stub.
+* `Fixture Injection`_ support.
+* `Tracer`_ class is provided which can be used as mock or stub.
 * Text diff (diff -u) is displayed when texts are different.
 
 Oktest requires Python 2.4 or later (3.x is supported).
@@ -70,10 +70,10 @@ for Python. ::
     class FooTest(unittest.TestCase):
 
         def test_1_plus_1_should_be_2(self):
-	    {{*ok (1+1) == 2*}}    # instead of self.assertEqual(2, 1+1)
+            {{*ok (1+1) == 2*}}    # instead of self.assertEqual(2, 1+1)
 
         def test_string_should_contain_digits(self):
-	    {{*ok ("foo 123 bar").matches(r"\d+")*}}
+            {{*ok ("foo 123 bar").matches(r"\d+")*}}
 
     if __name__ == '__main__':
         unittest.main()
@@ -88,12 +88,12 @@ Using @test decorator, you can write test name in free text. ::
     class FooTest(unittest.TestCase):
 
         {{*@test("1 + 1 should be 2")*}}
-	{{*def _(self):*}}
-	    ok (1+1) == 2
+        {{*def _(self):*}}
+            ok (1+1) == 2
 
         {{*@test("string should contain digits")*}}
-	{{*def _(self):*}}
-	    ok ("foo 123 bar").matches(r"\d+")
+        {{*def _(self):*}}
+            ok ("foo 123 bar").matches(r"\d+")
 
     if __name__ == '__main__':
         unittest.main()
@@ -110,12 +110,12 @@ Oktest is also available without unittest. See the folloing example. ::
 
         ## invoked only once before all tests
         @classmethod
-        {{*def before_all(cls):*}}
+        {{*def before_all(cls):*}}  # or setUpClass(cls)
             os.mkdir('tmp.d')
 
         ## invoked only once after all tests done
         @classmethod
-        {{*def after_all(cls):*}}
+        {{*def after_all(cls):*}}  # or tearDownClass(cls)
             import shutil
             shutil.rmtree('tmp.d')
 
@@ -129,8 +129,8 @@ Oktest is also available without unittest. See the folloing example. ::
 
         ## test methods
 
-	@test("value should be a list")
-	def _(self):
+        @test("value should be a list")
+        def _(self):
             ok (self.val).is_a(list)
 
         @test("list length should be 3")
@@ -140,10 +140,12 @@ Oktest is also available without unittest. See the folloing example. ::
     ## invoke tests
     if __name__ == '__main__':
         {{*run()*}}
-	## or
+        ## or
         #{{*run(r'.*Test$')*}}
-	## or
+        ## or
         #{{*run(Example1Test, Example2Test)*}}
+
+``Oktest.run()`` accepts unittest.TestCase and other class.
 
 
 Assertion Reference
@@ -282,11 +284,11 @@ test method::
     class FooTest(unittest.TestCase):
 
         def test_1_plus_1_should_be_2(self):  # not cool...
-	    assert 1+1 == 2
+            assert 1+1 == 2
 
         {{*@test("1 + 1 should be 2")*}}    # cool! easy to read & write!
         {{*def _(self):*}}
-	    assert 1+1 == 2
+            assert 1+1 == 2
 
 @test decorator changes test methods.
 For example, the above code is same as the following::
@@ -295,12 +297,12 @@ For example, the above code is same as the following::
         __n = 0
 
         def _(self):
-	    assert 1+1 == 2
+            assert 1+1 == 2
 
-	__n += 1
-	_.__doc__  = "1 + 1 should be 2"
-	_.__name__ = "test_%03d: %s" % (__n, _.__doc__)
-	locals()[_.__name__] = _
+        __n += 1
+        _.__doc__  = "1 + 1 should be 2"
+        _.__name__ = "test_%03d: %s" % (__n, _.__doc__)
+        locals()[_.__name__] = _
 
 Non-English language is available on @test()::
 
@@ -308,7 +310,7 @@ Non-English language is available on @test()::
 
         {{*@test("1 + 1 は 2 になること。")*}}
         def _(self):
-	    assert 1+1 == 2
+            assert 1+1 == 2
 
 @test decorator accepts user-defined options. You can specify any name and
 value as option. It is accessable by 'self._options' in setUp(), therefore
@@ -318,12 +320,12 @@ you can change behaviour of setUp() according to options. ::
 
         def setUp(self):
             tag = {{*self._options.get("tag")*}}
-	    if tag == "experimental":
-	        ....
+            if tag == "experimental":
+                ....
 
         @test("1 + 1 should be 2", {{*tag="experimental"*}})
         def _(self):
-	    assert 1+1 == 2
+            assert 1+1 == 2
 
 You can filter testcase by user-defined options in command-line. ::
 
@@ -373,7 +375,67 @@ Fixture Injection
             ok (member2["name"]) == "Kyon"
 
 This feature is more flexible and useful than setUp() and tearDown().
-In my opinion, you don't need to write setUp() at all.
+
+For example, the following code ensures that dummy files are removed
+automatically at the end of test without tearDown(). ::
+
+    import os, shutil
+
+    def {{*provide_cleaner()*}}:
+        paths = []
+        return paths
+
+    def {{*release_cleaner(paths)*}}:
+        assert isinstance(paths, list)
+        ## remove dummy files registered
+        for path in paths:
+            if os.path.isfile(path):
+                os.unlink(path)
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+
+    class FooTest(unittest.TestCase):
+
+        @test("example1")
+        def _(self, {{*cleaner*}}):
+            fpath = "dummy.txt"
+            ## register dummy file
+            {{*cleaner.append(fpath)*}}
+            ## create dummy file and do test with it
+            f = open(fpath, "w"); f.write("DUUUMY"); f.close()
+            ok (fpath).is_file()
+
+Default parameter values of test methods are passed into provider functions
+if necessary. Using this, you can change provider behaviour as you need. ::
+
+    ## provider can have default value of argument
+    def provide_tempfile({{*content="dummy"*}}):
+        filename = '__tmp.txt'
+	with open(filename, 'w') as f:
+	    f.write(content)
+	return filename
+
+    def release_tempfile(filename):
+        if os.path.exists(filename):
+	    os.unlink(filename)
+
+    class FooTest(unittest.TestCase):
+
+        ## override default value of providers by test method's
+	## default argument value
+        @test("example")
+	def _(self, tempfile, {{*content="AAAA"*}}):
+	    with open(tempfile) as f:
+	        s = f.read()
+	    ok (s) == {{*"AAAA"*}}
+
+        ## if you don't specify default value in test method,
+	## provider's default value is used
+        @test("example")
+	def _(self, tempfile):
+	    with open(tempfile) as f:
+	        s = f.read()
+	    ok (s) == {{*"dummy"*}}
 
 Dependencies between fixtures are resolved automatically.
 If you know dependency injection framework such as `Spring`_ or `Guice`_,
@@ -393,11 +455,19 @@ imagine to apply dependency injection into fixtures. ::
 
         ##
         ## Dependencies between fixtures are solved automatically.
-	## If loop exists in dependency then @test reports error.
+        ## If loop exists in dependency then @test reports error.
         ##
         @test("dependency test")
         def _(self, {{*a*}}):
             assert a == ["B", "D", "C", "A"]
+
+Fixture injection is provided by @test decorator, and it is available
+with existing test methods::
+
+    {{*@test()*}}
+    def test_sample1(self, {{*member1, member2*}}):
+        """description"""
+	...
 
 If you want to integrate with other fixture library, create manager object
 and set it into ``oktest.fixture_manager``.
@@ -655,6 +725,45 @@ Example to fake function call::
     ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 
 
+Skip Test
+=========
+
+(Experimental)
+It is possible to skip tests according to a certain condition. ::
+
+    import unittest
+    from oktest import ok, run, {{*skip*}}
+
+    class SkipExampleTest(unittest.TestCase):
+
+        @test("example of skip")
+	def _(self):
+	    if some_condition:
+	        {{*skip("reason to skip")*}}
+	    ...
+
+        @test("example of skip")
+	{{*@skip.when(some_condition, "reason to skip")*}}
+	def _(self):
+	    ...
+
+        ## unittest2 helpers are also available (if you installed it)
+	@unittest.skipIf(some_condition, "reason to skip")
+	def testExample(self):
+	    ...
+
+    if __name__ == '__main__':
+        run()
+
+Notice that the following doesn't work correctly. ::
+
+        ## NG: @skip.when should be the below of @test
+	@skip.when(some_condition, "reason to skip")
+        @test("example of skip")
+	def _(self):
+	    ...
+
+
 Command-line Interface
 ======================
 
@@ -724,7 +833,7 @@ chdir(dirname)
 	    @chdir("/var/tmp")
 	    def fn():
 	        assert os.getcwd() == "/var/tmp"
-		# do something
+	        # do something
 
 rm_rf(filename, dirname, ...)
 	Remove file or directory recursively.
@@ -852,6 +961,11 @@ Tips
     ok (func()).is_a(tuple).length(2)
     d = datetime.date(2000, 12, 31)
     ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
+
+* ``oktest.run()`` returns total number of failures and errors. ::
+
+    ## exit with status code 0 when no errors.
+    sys.exit(run())
 
 * If you call ok() or NG() but forget to do assertion, oktest warns it. ::
 
