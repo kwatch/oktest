@@ -1,5 +1,5 @@
 ###
-### $Release: 0.8.0 $
+### $Release: 0.9.0 $
 ### $Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -17,7 +17,7 @@ else:
 
 def fn():
     name       = 'Oktest'    ## $Package: Oktest $
-    version    = '0.8.0'     ## $Release: 0.8.0 $
+    version    = '0.9.0'     ## $Release: 0.9.0 $
     author     = 'makoto kuwata'
     email      = 'kwa@kuwata-lab.com'
     maintainer = author
