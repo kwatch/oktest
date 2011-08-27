@@ -294,7 +294,8 @@ def file_website_index_html(c):
     opts = '--stylesheet-path=style.css --link-stylesheet --strip-class=field --strip-class=field-name --strip-class=field-body'
     system(c%'rst2html.py $(opts) $(ingred) > $(product)')
     def f(s):
-        s = s.replace('README', 'Oktest - a new style testing library -')
+        s = re.sub('<\?xml version=".*" encoding=".*" *\?>\n', '', s)
+        s = s.replace('Oktest README', 'Oktest - a new style testing library -')
         s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
         s = s.replace('{{*', '<strong>')
         s = s.replace('*}}', '</strong>')
