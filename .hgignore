@@ -1,3 +1,13 @@
 syntax:glob
 *~
-.DS_Store
+*.DS_Store
+*.pyc
+*.pyo
+__pycache__/*
+*.rbc
+*.class
+*.o
+*.cache
+tmp/*
+.svn/*
+local/*
