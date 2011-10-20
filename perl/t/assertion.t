@@ -1298,6 +1298,76 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
+    for (TARGET("#can_()")) {
+
+        #: returns $this when $actual can respond to $expected method.
+        {
+            my $obj = bless({name=>'SOS'}, 'Dummy');
+            my $ret = OK ($obj)->can_('isa');
+            is($ret->{actual}->{name}, 'SOS');
+        }
+
+        #: throws exception when $actual cannot respond to $expected method.
+        {
+            my $expected =
+                "[Failed] \$actual->can_('foobar') : failed.\n" .
+                "  \$actual:   'foobar'\n";
+            my $obj = bless({}, 'Dummy');
+            undef $@;
+            eval { OK ($obj)->can_('foobar') };
+            is(_chomp($@), $expected);
+            undef $@;
+        }
+
+        #: error when no method name specified.
+        {
+            my $expected =
+                "[ERROR] OK()->can_(): method name required.\n";
+            my $obj = bless({}, 'Dummy');
+            undef $@;
+            eval { OK ($obj)->can_('') };
+            is(_chomp($@), $expected);
+            undef $@;
+        }
+
+    }
+
+
+    for (TARGET("#can_not()")) {
+
+        #: returns $this when $actual can NOT respond to $expected method.
+        {
+            my $obj = bless({name=>"SOS"}, 'Dummy');
+            my $ret = OK ($obj)->can_not('foo');
+            is($ret->{actual}->{name}, 'SOS');
+        }
+
+        #: throws exception when $actual can respond to $expected method.
+        {
+            my $expected =
+                "[Failed] ! \$actual->can_not('isa') : failed.\n" .
+                "  \$actual:   'isa'\n";
+            my $obj = bless({}, 'Dummy');
+            undef $@;
+            eval { OK ($obj)->can_not('isa') };
+            is(_chomp($@), $expected);
+            undef $@;
+        }
+
+        #: error when no method name specified.
+        {
+            my $expected =
+                "[ERROR] OK()->can_not(): method name required.\n";
+            my $obj = bless({}, 'Dummy');
+            undef $@;
+            eval { OK ($obj)->can_not('') };
+            is(_chomp($@), $expected);
+            undef $@;
+        }
+
+    }
+
+
     for (TARGET("#same()")) {
 
         #: returns $this when actual and expected are same.

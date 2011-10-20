@@ -778,6 +778,34 @@ sub attr {
     return $this;
 }
 
+sub can_ {
+    my ($this, $method) = @_;
+    return $this->_can_or_not($method, 1==1, 'can_', '');
+}
+
+sub can_not {
+    my ($this, $method) = @_;
+    return $this->_can_or_not($method, 0==1, 'can_not', '! ');
+}
+
+sub _can_or_not {
+    my ($this, $method, $bool, $caller, $op) = @_;
+    $this->_done();
+    my $actual = $this->{actual};
+    unless ($method) {
+        my $msg =
+            "[ERROR] OK()->$caller(): method name required.\n";
+        $this->_die($msg);
+    }
+    unless (!! $actual->can($method) == $bool) {
+        my $msg =
+            "[Failed] $op\$actual->$caller('$method') : failed.\n" .
+            "  \$actual:   " . _repr($method);
+        $this->_die($msg);
+    }
+    return $this;
+}
+
 sub same {
     my ($this, $expected) = @_;
     return $this->_same_or_not($expected, '==', 1==1);
@@ -2179,6 +2207,8 @@ Example (02_assertions.t):
 	        OK ($obj)->is_a('FooClass');
 	        OK ($obj)->not_a('BarClass');
 	        OK ($obj)->attr('x', 1)->attr('y', 2);
+	        OK ($obj)->can_('isa')->can_('can');
+	        OK ($obj)->can_not('foo')->can_not('bar');
 	        my $arr = [1, 2, 3];
 	        OK ($arr)->length(3);
 	        my $arr2 = [1, 2, 3];
