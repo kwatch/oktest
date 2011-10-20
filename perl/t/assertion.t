@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 no warnings 'void';   # suppress 'Useless use of ... in void context'
-use Test::More tests => 152;
+use Test::More tests => 158;
 
 
 use Oktest qw(OK);
