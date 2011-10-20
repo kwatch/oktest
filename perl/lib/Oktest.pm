@@ -1020,94 +1020,110 @@ package Oktest::TestMoreMigration;    ## !! EXPERIMENTAL !!
 use base 'Exporter';
 our @EXPORT = qw(ok is isnt like unlike cmp_ok is_deeply can_ok isa_ok pass fail
                  dies_ok lives_ok lives_and warning_like);
+use Oktest;
 
 sub ok {
-    my ($expr, $desc) = @_;
-    OK ($expr)->is_true();
+    my ($condition, $test_name) = @_;
+    OK ($condition)->is_true();
 }
 
 sub is {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual) eq $expected;
+    my ($this, $that, $test_name) = @_;
+    OK ($this) eq $that;
 }
 
 sub isnt {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual) ne $expected;
+    my ($this, $that, $test_name) = @_;
+    OK ($this) ne $that;
 }
 
 sub like {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual)->matches($expected);
+    my ($this, $regexp, $test_name) = @_;
+    OK ($this)->matches($regexp);
 }
 
 sub unlike {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual)->not_match($expected);
+    my ($this, $regexp, $test_name) = @_;
+    OK ($this)->not_match($regexp);
 }
 
 sub cmp_ok {
-    my ($actual, $op, $expected, $desc) = @_;
-    if    ($op eq '==') { OK ($actual) == $expected }
-    elsif ($op eq '!=') { OK ($actual) != $expected }
-    elsif ($op eq '>' ) { OK ($actual) >  $expected }
-    elsif ($op eq '>=') { OK ($actual) >= $expected }
-    elsif ($op eq '<' ) { OK ($actual) <  $expected }
-    elsif ($op eq '<=') { OK ($actual) <= $expected }
-    elsif ($op eq 'eq') { OK ($actual) eq $expected }
-    elsif ($op eq 'ne') { OK ($actual) ne $expected }
-    elsif ($op eq 'gt') { OK ($actual) gt $expected }
-    elsif ($op eq 'ge') { OK ($actual) ge $expected }
-    elsif ($op eq 'lt') { OK ($actual) lt $expected }
-    elsif ($op eq 'le') { OK ($actual) le $expected }
-    elsif ($op eq '=~') { OK ($actual)->matches($expected) }
-    elsif ($op eq '!~') { OK ($actual)->not_match($expected) }
+    my ($this, $op, $that, $test_name) = @_;
+    if    ($op eq '==') { OK ($this) == $that }
+    elsif ($op eq '!=') { OK ($this) != $that }
+    elsif ($op eq '>' ) { OK ($this) >  $that }
+    elsif ($op eq '>=') { OK ($this) >= $that }
+    elsif ($op eq '<' ) { OK ($this) <  $that }
+    elsif ($op eq '<=') { OK ($this) <= $that }
+    elsif ($op eq 'eq') { OK ($this) eq $that }
+    elsif ($op eq 'ne') { OK ($this) ne $that }
+    elsif ($op eq 'gt') { OK ($this) gt $that }
+    elsif ($op eq 'ge') { OK ($this) ge $that }
+    elsif ($op eq 'lt') { OK ($this) lt $that }
+    elsif ($op eq 'le') { OK ($this) le $that }
+    elsif ($op eq '=~') { OK ($this)->matches($that) }
+    elsif ($op eq '!~') { OK ($this)->not_match($that) }
     else { die "Oktest::TestMoreMigration::cmp_ok(): operator '$op' not supported.\n" };
 }
 
 sub is_deeply {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual)->equals($expected);
+    my ($complex_structure1, $complex_structure2, $test_name) = @_;
+    OK ($complex_structure1)->equals($complex_structure2);
 }
 
 sub can_ok {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual)->can_($expected);
+    my ($module, @methods) = @_;
+    OK ($module)->can_($_) for (@methods);
 }
 
 sub isa_ok {
-    my ($actual, $expected, $desc) = @_;
-    OK ($actual)->is_a($expected);
+    my ($object, $class) = @_;
+    OK ($object)->is_a($class);
 }
 
 sub pass {
-    my ($msg) = @_;
+    my ($test_name) = @_;
     return;
 }
 
 sub fail {
-    my ($msg) = @_;
-    OK()->_die($msg);
+    my ($test_name) = @_;
+    OK()->_die($test_name);
 }
 
+#sub eq_array {
+#    my ($this, $that) = @_;
+#    OK ($this)->equals($that);
+#}
+#
+#sub eq_hash {
+#    my ($this, $that) = @_;
+#    OK ($this)->equals($that);
+#}
+#
+#sub eq_set {
+#    my ($this, $that) = @_;
+#    OK ($this)->equals($that);
+#}
+
 sub dies_ok(&;@) {
-    my ($block, $msg) = @_;
-    OK ($block)->dies($msg);
+    my ($coderef, $description) = @_;
+    OK ($coderef)->dies($description);
 }
 
 sub lives_ok(&;@) {
-    my ($block, $msg) = @_;
-    OK ($block)->not_die();
+    my ($coderef, $description) = @_;
+    OK ($coderef)->not_die();
 }
 
 sub lives_and(&;@) {
-    my ($block, $msg) = @_;
-    OK ($block)->not_die();
+    my ($test, $description) = @_;
+    OK ($test)->not_die();
 }
 
 sub warning_like {
-    my ($block, $pattern, $msg) = @_;
-    OK ($block)->warns($pattern);
+    my ($coderef, $pattern, $test_name) = @_;
+    OK ($coderef)->warns($pattern);
 }
 
 $INC{'Oktest/TestMoreMigration.pm'} = __FILE__;
