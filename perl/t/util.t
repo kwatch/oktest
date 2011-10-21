@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 64;
+use Test::More tests => 68;
 use Oktest;
 
 
@@ -57,6 +57,40 @@ for (TARGET('Oktest::Util')) {
         {
             my $usec = Oktest::Util::current_time();
             ok(Oktest::Util::is_float($usec));
+        }
+
+    }
+
+
+    for (TARGET('index()')) {
+
+        #: returns index of item which satisfies condition.
+        {
+            my $ret = Oktest::Util::index { $_ % 4 == 0 } (3, 6, 9, 12, 15);
+            is($ret, 3);
+        }
+
+        #: returns -1 when there is no item to satisfy condition.
+        {
+            my $ret = Oktest::Util::index { $_ % 7 == 0 } (3, 6, 9, 12, 15);
+            is($ret, -1);
+        }
+
+    }
+
+
+    for (TARGET('index_denied()')) {
+
+        #: returns index of item which satisfies condition.
+        {
+            my $ret = Oktest::Util::index_denied { $_ % 3 == 0 } (3, 6, 9, 13, 15);
+            is($ret, 3);
+        }
+
+        #: returns -1 when there is no item to satisfy condition.
+        {
+            my $ret = Oktest::Util::index_denied { $_ % 3 == 0 } (3, 6, 9, 12, 15);
+            is($ret, -1);
         }
 
     }

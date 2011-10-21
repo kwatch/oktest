@@ -1688,6 +1688,26 @@ sub current_time {
     return $sec + $usec / 1000000.0
 }
 
+sub index(&@) {
+    my ($block, @arr) = @_;
+    my $i = 0;
+    for (@arr) {
+        return $i if $block->($_);
+        $i++;
+    }
+    return -1;
+}
+
+sub index_denied(&@) {
+    my ($block, @arr) = @_;
+    my $i = 0;
+    for (@arr) {
+        return $i unless $block->($_);
+        $i++;
+    }
+    return -1;
+}
+
 sub is_string {
     my ($arg) = @_;
     return 0 if ref($arg);              # not scalar
