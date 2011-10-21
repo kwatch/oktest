@@ -768,12 +768,14 @@ sub has {
             '  $actual:   ' . _repr($actual);
         $this->_die($msg);
     }
-    unless ($actual->{$name} eq $expected) {
-        my $msg =
-            "[Failed] \$actual->{$name} eq \$expected : failed.\n" .
-            "  \$actual->{$name}: " . _repr($actual->{$name}) .
-            "  \$expected:      " . _repr($expected);
-        $this->_die($msg);
+    if ($#_ == 2) {  # when expected value is passed
+        unless ($actual->{$name} eq $expected) {
+            my $msg =
+                "[Failed] \$actual->{$name} eq \$expected : failed.\n" .
+                "  \$actual->{$name}: " . _repr($actual->{$name}) .
+                "  \$expected:      " . _repr($expected);
+            $this->_die($msg);
+        }
     }
     return $this;
 }
@@ -2228,6 +2230,7 @@ Example (02_assertions.t):
 	        OK ($obj)->is_a('FooClass');
 	        OK ($obj)->not_a('BarClass');
 	        OK ($obj)->has('x', 1)->has('y', 2);
+	        OK ($obj)->has('x')->has('y');
 	        OK ($obj)->can_('isa')->can_('can');
 	        OK ($obj)->can_not('foo')->can_not('bar');
 	        my $arr = [1, 2, 3];

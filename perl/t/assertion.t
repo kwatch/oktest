@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 no warnings 'void';   # suppress 'Useless use of ... in void context'
-use Test::More tests => 158;
+use Test::More tests => 159;
 
 
 use Oktest qw(OK);
@@ -1263,10 +1263,17 @@ for (TARGET('Oktest::AssertionObject')) {
 
     for (TARGET("#has()")) {
 
-        #: returns $this when actual object has expected attrbute.
+        #: returns $this when actual object has expected key and value.
         {
             my $obj = {"name"=>"Haruhi", "team"=>"SOS"};
             my $ret = OK ($obj)->has('name', "Haruhi");
+            ok($ret->{actual} == $obj);
+        }
+
+        #: checks only key existence when value is not passed.
+        {
+            my $obj = {"name"=>"Haruhi", "team"=>"SOS"};
+            my $ret = OK ($obj)->has('name');
             ok($ret->{actual} == $obj);
         }
 
