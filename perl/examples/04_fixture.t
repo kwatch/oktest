@@ -53,7 +53,7 @@ target "Context Example", sub {
 
     spec "'before' block can set context data.", sub {
         my $context = shift;
-        OK ($context)->attr('team', "SOS");
+        OK ($context)->has('team', "SOS");
     };
 
 };

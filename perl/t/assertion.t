@@ -1261,12 +1261,12 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
-    for (TARGET("#attr()")) {
+    for (TARGET("#has()")) {
 
         #: returns $this when actual object has expected attrbute.
         {
             my $obj = {"name"=>"Haruhi", "team"=>"SOS"};
-            my $ret = OK ($obj)->attr('name', "Haruhi");
+            my $ret = OK ($obj)->has('name', "Haruhi");
             ok($ret->{actual} == $obj);
         }
 
@@ -1274,7 +1274,7 @@ for (TARGET('Oktest::AssertionObject')) {
         {
             undef $@;
             my $obj = {"name"=>"Haruhi"};
-            eval { OK ($obj)->attr('team', "SOS") };
+            eval { OK ($obj)->has('team', "SOS") };
             my $expected =
                 "[Failed] defined(\$actual->{team}) : failed.\n" .
                 "  \$actual:   {\n" .
@@ -1287,7 +1287,7 @@ for (TARGET('Oktest::AssertionObject')) {
         {
             undef $@;
             my $obj = {"name"=>"Haruhi"};
-            eval { OK ($obj)->attr('name', "Sasaki") };
+            eval { OK ($obj)->has('name', "Sasaki") };
             my $expected =
                 "[Failed] \$actual->{name} eq \$expected : failed.\n" .
                 "  \$actual->{name}: 'Haruhi'\n" .

@@ -758,7 +758,7 @@ sub length {
     return $this;
 }
 
-sub attr {
+sub has {
     my ($this, $name, $expected) = @_;
     $this->_done();
     my $actual = $this->{actual};
@@ -2227,7 +2227,7 @@ Example (02_assertions.t):
 	        my $obj = bless({'x'=>1, 'y'=>2}, 'FooClass');
 	        OK ($obj)->is_a('FooClass');
 	        OK ($obj)->not_a('BarClass');
-	        OK ($obj)->attr('x', 1)->attr('y', 2);
+	        OK ($obj)->has('x', 1)->has('y', 2);
 	        OK ($obj)->can_('isa')->can_('can');
 	        OK ($obj)->can_not('foo')->can_not('bar');
 	        my $arr = [1, 2, 3];
@@ -2276,7 +2276,7 @@ Assertion methods are chainable.
 	## object is an array reference and it's length is 3.
 	OK ([1,2,3])->is_arrayref()->length(3);
 	## object has 'name' and 'team' attributes.
-	OK ($obj)->attr('name', "Haruhi")->attr('team', "SOS");
+	OK ($obj)->has('name', "Haruhi")->has('team', "SOS");
 
 
 =head2 Setup/Teadown
@@ -2385,7 +2385,7 @@ Example:
 
 	    spec "'before' block can set context data.", sub {
 	        my $context = shift;
-	        OK ($context)->attr('team', "SOS");
+	        OK ($context)->has('team', "SOS");
 	    };
 
 	};

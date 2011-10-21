@@ -56,7 +56,7 @@ target "Assertion Example", sub {
         my $obj = bless({'x'=>1, 'y'=>2}, 'FooClass');
         OK ($obj)->is_a('FooClass');
         OK ($obj)->not_a('BarClass');
-        OK ($obj)->attr('x', 1)->attr('y', 2);
+        OK ($obj)->has('x', 1)->has('y', 2);
         OK ($obj)->can_('isa')->can_('can');
         OK ($obj)->can_not('foo')->can_not('bar');
         my $arr = [1, 2, 3];
