@@ -901,19 +901,12 @@ sub all {
     my ($this, $block) = @_;
     $this->_done();
     my $actual = $this->{actual};
-    my $i = 0;
-    my $found = 0==1;
-    for (@$actual) {
-        unless ($block->($_)) {
-            $found = 1==1;
-            last;
-        }
-        $i++;
-    }
+    my $index = &Oktest::Util::index_denied($block, @$actual);
+    my $found = $index >= 0;
     if ($found) {
         my $msg =
-            "[Failed] OK(\$actual)->all(sub{...}) : failed at index=$i.\n" .
-            "  \$actual->[$i]: " . _repr($actual->[$i]);
+            "[Failed] OK(\$actual)->all(sub{...}) : failed at index=$index.\n" .
+            "  \$actual->[$index]: " . _repr($actual->[$index]);
         $this->_die($msg);
     }
     return $this;
@@ -923,15 +916,7 @@ sub any {
     my ($this, $block) = @_;
     $this->_done();
     my $actual = $this->{actual};
-    my $i = 0;
-    my $found = 0==1;
-    for (@$actual) {
-        if ($block->($_)) {
-            $found = 1==1;
-            last;
-        }
-        $i++;
-    }
+    my $found = &Oktest::Util::index($block, @$actual) >= 0;
     unless ($found) {
         my $msg =
             "[Failed] OK(\$actual)->any(sub{...}) : failed.\n" .
