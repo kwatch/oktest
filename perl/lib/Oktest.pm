@@ -801,8 +801,8 @@ sub _can_or_not {
     }
     unless (!! $actual->can($method) == $bool) {
         my $msg =
-            "[Failed] $op\$actual->$caller('$method') : failed.\n" .
-            "  \$actual:   " . _repr($method);
+            "[Failed] $op\$actual->can('$method') : failed.\n" .
+            "  \$actual:   " . _repr($actual);
         $this->_die($msg);
     }
     return $this;

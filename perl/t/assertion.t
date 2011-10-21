@@ -1317,8 +1317,8 @@ for (TARGET('Oktest::AssertionObject')) {
         #: throws exception when $actual cannot respond to $expected method.
         {
             my $expected =
-                "[Failed] \$actual->can_('foobar') : failed.\n" .
-                "  \$actual:   'foobar'\n";
+                "[Failed] \$actual->can('foobar') : failed.\n" .
+                "  \$actual:   bless( {}, 'Dummy' )\n";
             my $obj = bless({}, 'Dummy');
             undef $@;
             eval { OK ($obj)->can_('foobar') };
@@ -1352,8 +1352,8 @@ for (TARGET('Oktest::AssertionObject')) {
         #: throws exception when $actual can respond to $expected method.
         {
             my $expected =
-                "[Failed] ! \$actual->can_not('isa') : failed.\n" .
-                "  \$actual:   'isa'\n";
+                "[Failed] ! \$actual->can('isa') : failed.\n" .
+                "  \$actual:   bless( {}, 'Dummy' )\n";
             my $obj = bless({}, 'Dummy');
             undef $@;
             eval { OK ($obj)->can_not('isa') };
