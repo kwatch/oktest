@@ -1008,164 +1008,6 @@ sub not_exist {
 
 
 
-package Oktest::Migration::TestMore;    ## !! EXPERIMENTAL !!
-use base 'Exporter';
-our @EXPORT = qw(ok is isnt like unlike cmp_ok is_deeply can_ok isa_ok pass fail
-                 throws_ok dies_ok lives_ok lives_and warning_like diag note explain);
-#use Oktest;
-no warnings 'void';
-
-sub ok {
-    my ($condition, $test_name) = @_;
-    Oktest::OK ($condition)->is_true();
-    return 1==1;
-}
-
-sub is {
-    my ($this, $that, $test_name) = @_;
-    Oktest::OK ($this) eq $that;
-    return 1==1;
-}
-
-sub isnt {
-    my ($this, $that, $test_name) = @_;
-    Oktest::OK ($this) ne $that;
-    return 1==1;
-}
-
-sub like {
-    my ($this, $regexp, $test_name) = @_;
-    Oktest::OK ($this)->matches($regexp);
-    return 1==1;
-}
-
-sub unlike {
-    my ($this, $regexp, $test_name) = @_;
-    Oktest::OK ($this)->not_match($regexp);
-    return 1==1;
-}
-
-sub cmp_ok {
-    my ($this, $op, $that, $test_name) = @_;
-    if    ($op eq '==') { Oktest::OK ($this) == $that }
-    elsif ($op eq '!=') { Oktest::OK ($this) != $that }
-    elsif ($op eq '>' ) { Oktest::OK ($this) >  $that }
-    elsif ($op eq '>=') { Oktest::OK ($this) >= $that }
-    elsif ($op eq '<' ) { Oktest::OK ($this) <  $that }
-    elsif ($op eq '<=') { Oktest::OK ($this) <= $that }
-    elsif ($op eq 'eq') { Oktest::OK ($this) eq $that }
-    elsif ($op eq 'ne') { Oktest::OK ($this) ne $that }
-    elsif ($op eq 'gt') { Oktest::OK ($this) gt $that }
-    elsif ($op eq 'ge') { Oktest::OK ($this) ge $that }
-    elsif ($op eq 'lt') { Oktest::OK ($this) lt $that }
-    elsif ($op eq 'le') { Oktest::OK ($this) le $that }
-    elsif ($op eq '=~') { Oktest::OK ($this)->matches($that) }
-    elsif ($op eq '!~') { Oktest::OK ($this)->not_match($that) }
-    else { die "Oktest::TestMoreMigration::cmp_ok(): operator '$op' not supported.\n" };
-    return 1==1;
-}
-
-sub is_deeply {
-    my ($complex_structure1, $complex_structure2, $test_name) = @_;
-    Oktest::OK ($complex_structure1)->equals($complex_structure2);
-    return 1==1;
-}
-
-sub can_ok {
-    my ($module, @methods) = @_;
-    Oktest::OK ($module)->can_($_) for (@methods);
-    return 1==1;
-}
-
-sub isa_ok {
-    my ($object, $class) = @_;
-    Oktest::OK ($object)->is_a($class);
-    return 1==1;
-}
-
-sub pass {
-    my ($test_name) = @_;
-    return 1==1;
-}
-
-sub fail {
-    my ($test_name) = @_;
-    my $msg =
-        "[Failed] $test_name\n";
-    Oktest::OK()->_done()->_die($msg);
-    return;
-}
-
-#sub eq_array {
-#    my ($this, $that) = @_;
-#    Oktest::OK ($this)->equals($that);
-#}
-#
-#sub eq_hash {
-#    my ($this, $that) = @_;
-#    Oktest::OK ($this)->equals($that);
-#}
-#
-#sub eq_set {
-#    my ($this, $that) = @_;
-#    Oktest::OK ($this)->equals($that);
-#}
-
-sub throws_ok(&$;$) {
-    my ($coderef, $pattern, $description) = @_;
-    Oktest::OK ($coderef)->dies($pattern);
-    return 1==1;
-}
-
-sub dies_ok(&;$) {
-    my ($coderef, $description) = @_;
-    Oktest::OK ($coderef)->dies();
-    return 1==1;
-}
-
-sub lives_ok(&;$) {
-    my ($coderef, $description) = @_;
-    Oktest::OK ($coderef)->not_die();
-    return 1==1;
-}
-
-sub lives_and(&;$) {
-    my ($test, $description) = @_;
-    Oktest::OK ($test)->not_die();
-    return 1==1;
-}
-
-sub warning_like(&$;$) {
-    my ($coderef, $pattern, $test_name) = @_;
-    Oktest::OK ($coderef)->warns($pattern);
-    return 1==1;
-}
-
-sub diag {
-    my ($message) = @_;
-    print STDOUT "# $message\n";
-    return 0==1;
-}
-
-sub note {              ## TODO: check original spec
-    my ($message) = @_;
-    print STDOUT "# $message\n";
-    return 0==1;
-}
-
-sub explain {           ## TODO: check original spec
-    my ($value) = @_;
-    use Data::Dumper;
-    local $Data::Dumper::Terse = 1;
-    $_ = Dumper($value);
-    s/^        //mg;
-    return $_;
-}
-
-$INC{'Oktest/Migration/TestMore.pm'} = __FILE__;
-
-
-
 package Oktest::Runner;
 
 our $RUNNER = 'Oktest::Runner::DefaultRunner';
@@ -1871,6 +1713,164 @@ sub PRINT {
         $this->{output} .= $arg;
     }
 }
+
+
+
+package Oktest::Migration::TestMore;    ## !! EXPERIMENTAL !!
+use base 'Exporter';
+our @EXPORT = qw(ok is isnt like unlike cmp_ok is_deeply can_ok isa_ok pass fail
+                 throws_ok dies_ok lives_ok lives_and warning_like diag note explain);
+#use Oktest;
+no warnings 'void';
+
+sub ok {
+    my ($condition, $test_name) = @_;
+    Oktest::OK ($condition)->is_true();
+    return 1==1;
+}
+
+sub is {
+    my ($this, $that, $test_name) = @_;
+    Oktest::OK ($this) eq $that;
+    return 1==1;
+}
+
+sub isnt {
+    my ($this, $that, $test_name) = @_;
+    Oktest::OK ($this) ne $that;
+    return 1==1;
+}
+
+sub like {
+    my ($this, $regexp, $test_name) = @_;
+    Oktest::OK ($this)->matches($regexp);
+    return 1==1;
+}
+
+sub unlike {
+    my ($this, $regexp, $test_name) = @_;
+    Oktest::OK ($this)->not_match($regexp);
+    return 1==1;
+}
+
+sub cmp_ok {
+    my ($this, $op, $that, $test_name) = @_;
+    if    ($op eq '==') { Oktest::OK ($this) == $that }
+    elsif ($op eq '!=') { Oktest::OK ($this) != $that }
+    elsif ($op eq '>' ) { Oktest::OK ($this) >  $that }
+    elsif ($op eq '>=') { Oktest::OK ($this) >= $that }
+    elsif ($op eq '<' ) { Oktest::OK ($this) <  $that }
+    elsif ($op eq '<=') { Oktest::OK ($this) <= $that }
+    elsif ($op eq 'eq') { Oktest::OK ($this) eq $that }
+    elsif ($op eq 'ne') { Oktest::OK ($this) ne $that }
+    elsif ($op eq 'gt') { Oktest::OK ($this) gt $that }
+    elsif ($op eq 'ge') { Oktest::OK ($this) ge $that }
+    elsif ($op eq 'lt') { Oktest::OK ($this) lt $that }
+    elsif ($op eq 'le') { Oktest::OK ($this) le $that }
+    elsif ($op eq '=~') { Oktest::OK ($this)->matches($that) }
+    elsif ($op eq '!~') { Oktest::OK ($this)->not_match($that) }
+    else { die "Oktest::TestMoreMigration::cmp_ok(): operator '$op' not supported.\n" };
+    return 1==1;
+}
+
+sub is_deeply {
+    my ($complex_structure1, $complex_structure2, $test_name) = @_;
+    Oktest::OK ($complex_structure1)->equals($complex_structure2);
+    return 1==1;
+}
+
+sub can_ok {
+    my ($module, @methods) = @_;
+    Oktest::OK ($module)->can_($_) for (@methods);
+    return 1==1;
+}
+
+sub isa_ok {
+    my ($object, $class) = @_;
+    Oktest::OK ($object)->is_a($class);
+    return 1==1;
+}
+
+sub pass {
+    my ($test_name) = @_;
+    return 1==1;
+}
+
+sub fail {
+    my ($test_name) = @_;
+    my $msg =
+        "[Failed] $test_name\n";
+    Oktest::OK()->_done()->_die($msg);
+    return;
+}
+
+#sub eq_array {
+#    my ($this, $that) = @_;
+#    Oktest::OK ($this)->equals($that);
+#}
+#
+#sub eq_hash {
+#    my ($this, $that) = @_;
+#    Oktest::OK ($this)->equals($that);
+#}
+#
+#sub eq_set {
+#    my ($this, $that) = @_;
+#    Oktest::OK ($this)->equals($that);
+#}
+
+sub throws_ok(&$;$) {
+    my ($coderef, $pattern, $description) = @_;
+    Oktest::OK ($coderef)->dies($pattern);
+    return 1==1;
+}
+
+sub dies_ok(&;$) {
+    my ($coderef, $description) = @_;
+    Oktest::OK ($coderef)->dies();
+    return 1==1;
+}
+
+sub lives_ok(&;$) {
+    my ($coderef, $description) = @_;
+    Oktest::OK ($coderef)->not_die();
+    return 1==1;
+}
+
+sub lives_and(&;$) {
+    my ($test, $description) = @_;
+    Oktest::OK ($test)->not_die();
+    return 1==1;
+}
+
+sub warning_like(&$;$) {
+    my ($coderef, $pattern, $test_name) = @_;
+    Oktest::OK ($coderef)->warns($pattern);
+    return 1==1;
+}
+
+sub diag {
+    my ($message) = @_;
+    print STDOUT "# $message\n";
+    return 0==1;
+}
+
+sub note {              ## TODO: check original spec
+    my ($message) = @_;
+    print STDOUT "# $message\n";
+    return 0==1;
+}
+
+sub explain {           ## TODO: check original spec
+    my ($value) = @_;
+    use Data::Dumper;
+    local $Data::Dumper::Terse = 1;
+    $_ = Dumper($value);
+    s/^        //mg;
+    return $_;
+}
+
+$INC{'Oktest/Migration/TestMore.pm'} = __FILE__;
 
 
 
