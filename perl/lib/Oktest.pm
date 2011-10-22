@@ -2139,11 +2139,6 @@ Example (01_basic.t):
 	no warnings 'void';   # suppress 'Useless use of ... in void context'
 	use Oktest;
 
-	use strict;
-	use warnings;
-	no warnings 'void';   # suppress 'Useless use of ... in void context'
-	use Oktest;
-
 	## 'target' represents topic of test (such as ClassName or method_name())
 	target "ClassName", sub {
 
@@ -2555,6 +2550,64 @@ Oktest provides 'oktest.pl' script for command-line interface.
 	## filter by target name
 	$ oktest.pl --target='ClassName' t        # string
 	$ oktest.pl --target='/^\w+$/' t          # regexp
+
+
+=head1 REFERENCE
+
+
+=head2 package Oktest
+
+
+=over 1
+
+=item target(String name, Code block)
+
+Represents spec target, for example ClassName, method_name(), or feature-name.
+
+Block of 'target()' can contain other 'target()', 'case_when()', and 'spec()'.
+
+
+=item case_when(String description, Code block)
+
+Represents test context, for example "when data is not found in database..."
+or "when argument is not passed...".
+
+This is almost same as 'target()', but intended to represent test context.
+
+Block of 'case_when()' can contain 'blocks()', 'spec()', or other 'case_when()'.
+
+
+=item spec(String description[, Code block])
+
+Represents spec details, for example "should return integer value" or
+"should die with appropriate message".
+
+Argument 'description' describes spec description, and 'block' contains
+assertions to validate your code.
+
+If body block is not passed then 'sub { TODO("not implemented yet") }' is
+created instead.
+
+Body of 'spec()' can't contain both 'targets()', 'case_when()' nor 'spec()'.
+
+This function should be called in blocks of 'target()' or 'case_when()'.
+
+
+=item skip_when(Boolean condition, String reason)
+
+If condition is true then the rest assertions in the same spec are skipped.
+
+This should be called in blocks of 'spec()'.
+
+
+=item TODO(String description)
+
+Represents that the test code is not wrote yet.
+
+This should be called in blocks of 'spec()'.
+
+
+=back
 
 
 =head1 TODO
