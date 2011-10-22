@@ -58,6 +58,7 @@ sub __yield_block {
 
 sub spec {
     my ($spec_desc, $block) = @_;
+    $block ||= sub { TODO("not implemented yet.") };
     my $so = Oktest::SpecObject->new($spec_desc, $block);
     my $to = $Oktest::TargetObject::__current;
     $to->_add_spec($so) if $to;

@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 58;
+use Test::More tests => 60;
 
 use Oktest;
 
@@ -127,6 +127,15 @@ for (TARGET('Oktest')) {
             my $called = 0;
             my $so = spec "description1", sub { $called = 1; };
             is($called, 0);
+        }
+
+        #: new block containing TODO is created when block is not passed.
+        {
+            my $so = spec "desc1";
+            is(ref($so->{block}), 'CODE');
+            undef $@;
+            eval { $so->{block}->() };
+            is($@, "[TODO] not implemented yet.\n");
         }
 
 #        #: block passed throws exception when assertion is failed.
