@@ -12,6 +12,6 @@ recipe 'test', {
 recipe 'examples', {
     desc   => 'run examples',
     method => sub {
-        sys 'bin/oktest.pl examples';
+        sys 'bin/oktest.pl -sv examples';
     }
 };
