@@ -2482,8 +2482,12 @@ Example of Skip and TODO:
 
 	    ## example of 'TODO()'
 	    spec "another cool feature is available", sub {
-	        TODO "not implemented yet!";
+	        TODO "not implemented yet.";
 	    };
+
+	    ## Tips: if spec body is not specified then it is regarded as TODO.
+	    ## For example, the following line is equivarent to above.
+	    spec "another cool feature is available";
 
 	};
 
