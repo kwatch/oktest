@@ -1464,11 +1464,11 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
-    for (TARGET("#is_true()")) {
+    for (TARGET("#is_truthy()")) {
 
         #: returns $this when expression is truthy.
         {
-            my $ret = OK (1==1)->is_true();
+            my $ret = OK (1==1)->is_truthy();
             is($ret->{actual}, 1==1);
         }
 
@@ -1478,18 +1478,18 @@ for (TARGET('Oktest::AssertionObject')) {
                 "[Failed] OK(\$expression) : assertion failed.\n" .
                 "  \$expression:  ''\n";
             undef $@;
-            eval { OK (0==1)->is_true() };
+            eval { OK (0==1)->is_truthy() };
             is(_chomp($@), $expected);
         }
 
     }
 
 
-    for (TARGET("#is_false()")) {
+    for (TARGET("#is_falsy()")) {
 
         #: returns $this when expression is falthy.
         {
-            my $ret = OK (0==1)->is_false();
+            my $ret = OK (0==1)->is_falsy();
             is($ret->{actual}, 0==1);
         }
 
@@ -1499,7 +1499,7 @@ for (TARGET('Oktest::AssertionObject')) {
                 "[Failed] OK(! \$expression) : assertion failed.\n" .
                 "  \$expression:  1\n";
             undef $@;
-            eval { OK (1==1)->is_false() };
+            eval { OK (1==1)->is_falsy() };
             is(_chomp($@), $expected);
         }
 

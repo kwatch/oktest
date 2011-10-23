@@ -857,7 +857,7 @@ sub _same_or_not {
     return $this;
 }
 
-sub is_true {
+sub is_truthy {
     my ($this) = @_;
     $this->_done();
     unless ($this->{actual}) {
@@ -869,7 +869,7 @@ sub is_true {
     return $this;
 }
 
-sub is_false {
+sub is_falsy {
     my ($this) = @_;
     $this->_done();
     unless (! $this->{actual}) {
@@ -1745,7 +1745,7 @@ no warnings 'void';
 
 sub ok {
     my ($condition, $test_name) = @_;
-    Oktest::OK ($condition)->is_true();
+    Oktest::OK ($condition)->is_truthy();
     return 1==1;
 }
 
@@ -2273,8 +2273,8 @@ Example (02_assertions.t):
 	    };
 
 	    spec "logical expression", sub {
-	        OK (1==1)->is_true();
-	        OK (0==1)->is_false();
+	        OK (1==1)->is_truthy();
+	        OK (0==1)->is_falsy();
 	    };
 
 	    spec "regular expression", sub {

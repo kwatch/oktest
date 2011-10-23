@@ -36,8 +36,8 @@ target "Assertion Example", sub {
     };
 
     spec "logical expression", sub {
-        OK (1==1)->is_true();
-        OK (0==1)->is_false();
+        OK (1==1)->is_truthy();
+        OK (0==1)->is_falsy();
     };
 
     spec "regular expression", sub {
