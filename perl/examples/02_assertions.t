@@ -20,6 +20,7 @@ target "Assertion Example", sub {
         OK (1+1) >= 2;
         OK (1+1) <  3;
         OK (1+1) <= 2;
+        OK (1+1)->cmp('==', 2);   # or '!=', '>', and so on
         OK (3.141)->in_delta(3.14, 0.01);
     };
 
@@ -30,6 +31,7 @@ target "Assertion Example", sub {
         OK ('aaa') le 'aaa';
         OK ('bbb') gt 'aaa';
         OK ('aaa') ge 'aaa';
+        OK ('aaa')->cmp('eq', 'aaa');   # or 'ne', 'lt', and so on
         OK ('aaa')->length(3);
     };
 

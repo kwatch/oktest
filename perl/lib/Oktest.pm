@@ -467,6 +467,25 @@ sub _str_le {
     return _assert { $_[0] le $_[1] } 'le', 0, @_;
 }
 
+sub cmp {
+    my ($this, $op, $expected) = @_;
+    if    ($op eq '==') { return $this->_num_eq($expected); }
+    elsif ($op eq '!=') { return $this->_num_ne($expected); }
+    elsif ($op eq '<' ) { return $this->_num_lt($expected); }
+    elsif ($op eq '<=') { return $this->_num_le($expected); }
+    elsif ($op eq '>' ) { return $this->_num_gt($expected); }
+    elsif ($op eq '>=') { return $this->_num_ge($expected); }
+    elsif ($op eq 'eq') { return $this->_str_eq($expected); }
+    elsif ($op eq 'ne') { return $this->_str_ne($expected); }
+    elsif ($op eq 'lt') { return $this->_str_lt($expected); }
+    elsif ($op eq 'le') { return $this->_str_le($expected); }
+    elsif ($op eq 'gt') { return $this->_str_gt($expected); }
+    elsif ($op eq 'ge') { return $this->_str_ge($expected); }
+    elsif ($op eq '=~') { return $this->matches($expected); }
+    elsif ($op eq '!~') { return $this->not_match($expected); }
+    else { $this->_die("[ERROR] OK()->cmp(): '$op': unknown operator.\n"); }
+}
+
 sub in_delta {
     my ($this, $expected, $delta) = @_;
     $this->_done();
@@ -2238,6 +2257,7 @@ Example (02_assertions.t):
 	        OK (1+1) >= 2;
 	        OK (1+1) <  3;
 	        OK (1+1) <= 2;
+	        OK (1+1)->cmp('==', 2);   # or '!=', '>', and so on
 	        OK (3.141)->in_delta(3.14, 0.01);
 	    };
 
@@ -2248,6 +2268,7 @@ Example (02_assertions.t):
 	        OK ('aaa') le 'aaa';
 	        OK ('bbb') gt 'aaa';
 	        OK ('aaa') ge 'aaa';
+	        OK ('aaa')->cmp('eq', 'aaa');   # or 'ne', 'lt', and so on
 	        OK ('aaa')->length(3);
 	    };
 

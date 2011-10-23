@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 no warnings 'void';   # suppress 'Useless use of ... in void context'
-use Test::More tests => 159;
+use Test::More tests => 174;
 
 
 use Oktest qw(OK);
@@ -545,6 +545,38 @@ for (TARGET('Oktest::AssertionObject')) {
             undef $@;
             eval { OK ('B') le 'A'; };
             is(_chomp($@), $expected);
+        }
+
+    }
+
+
+    for (TARGET("#cmp()")) {
+
+        #: returns $this when comparison is true.
+        {
+            my $ret;
+            $ret = OK (1+1)->cmp('==', 2);            is($ret->{actual}, 2);
+            $ret = OK (1+1)->cmp('!=', 0);            is($ret->{actual}, 2);
+            $ret = OK (1+1)->cmp('>',  1);            is($ret->{actual}, 2);
+            $ret = OK (1+1)->cmp('>=', 2);            is($ret->{actual}, 2);
+            $ret = OK (1+1)->cmp('<',  3);            is($ret->{actual}, 2);
+            $ret = OK (1+1)->cmp('<=', 2);            is($ret->{actual}, 2);
+            $ret = OK ('a')->cmp('eq', 'a');          is($ret->{actual}, 'a');
+            $ret = OK ('a')->cmp('ne', 'b');          is($ret->{actual}, 'a');
+            $ret = OK ('a')->cmp('lt', 'b');          is($ret->{actual}, 'a');
+            $ret = OK ('a')->cmp('le', 'a');          is($ret->{actual}, 'a');
+            $ret = OK ('b')->cmp('gt', 'a');          is($ret->{actual}, 'b');
+            $ret = OK ('b')->cmp('ge', 'b');          is($ret->{actual}, 'b');
+            $ret = OK ('a')->cmp('=~', qr/\w+/);      is($ret->{actual}, 'a');
+            $ret = OK ('a')->cmp('!~', qr/\d+/);      is($ret->{actual}, 'a');
+        }
+
+        #: throws exception when unknown operator specified.
+        {
+            undef $@;
+            eval { OK ('x')->cmp('<>', 'x') };
+            is (_chomp($@), "[ERROR] OK()->cmp(): '<>': unknown operator.\n");
+            Oktest::__clear();
         }
 
     }
