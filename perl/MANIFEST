@@ -5,10 +5,11 @@ examples/02_assertions.t
 examples/03_hello.t
 examples/04_fixture.t
 examples/05_misc.t
+examples/06_migration.t
 Kookbook.pl
 lib/Oktest.pm
 Makefile.PL
-MANIFEST			This list of files
+MANIFEST
 MIT-LICENSE
 README
 t/assertion.t
