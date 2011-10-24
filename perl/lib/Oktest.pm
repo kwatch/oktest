@@ -896,6 +896,32 @@ sub is_falsy {
     return $this;
 }
 
+sub is_defined {
+    my ($this) = @_;
+    $this->_done();
+    my $actual = $this->{actual};
+    unless (defined($actual)) {
+        my $msg =
+            "[Failed] defined(\$actual) : failed.\n" .
+            "  \$actual:  " . _repr($actual);
+        $this->_die($msg);
+    }
+    return $this;
+}
+
+sub not_defined {
+    my ($this) = @_;
+    $this->_done();
+    my $actual = $this->{actual};
+    unless (! defined($actual)) {
+        my $msg =
+            "[Failed] ! defined(\$actual) : failed.\n" .
+            "  \$actual:  " . _repr($actual);
+        $this->_die($msg);
+    }
+    return $this;
+}
+
 sub equals {     ## !! EXPERIMENTAL !!
     my ($this, $expected) = @_;
     $this->_done();
@@ -2290,6 +2316,8 @@ Example (02_assertions.t):
 	    spec "logical expression", sub {
 	        OK (1==1)->is_truthy();
 	        OK (0==1)->is_falsy();
+	        OK (0)->is_defined();
+	        OK (undef)->not_defined();
 	    };
 
 	    spec "regular expression", sub {
@@ -2358,7 +2386,7 @@ Example (02_assertions.t):
 Assertion methods are chainable.
 
 	## object is an array reference and it's length is 3.
-	OK ([1,2,3])->is_arrayref()->length(3);
+	OK ([1,2,3])->is_ref('ARRAY')->length(3);
 	## object has 'name' and 'team' attributes.
 	OK ($obj)->has('name', "Haruhi")->has('team', "SOS");
 

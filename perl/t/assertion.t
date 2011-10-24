@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 no warnings 'void';   # suppress 'Useless use of ... in void context'
-use Test::More tests => 174;
+use Test::More tests => 179;
 
 
 use Oktest qw(OK);
@@ -1506,6 +1506,50 @@ for (TARGET('Oktest::AssertionObject')) {
                 "  \$expression:  1\n";
             undef $@;
             eval { OK (1==1)->is_falsy() };
+            is(_chomp($@), $expected);
+        }
+
+    }
+
+
+    for (TARGET("#is_defined()")) {
+
+        #: returns $this when actual is defined.
+        {
+            my $ret = OK (0)->is_defined();
+            is($ret->{actual}, 0);
+            my $ret2 = OK ('')->is_defined();
+            is($ret2->{actual}, '');
+        }
+
+        #: throws exception when actual is not defined.
+        {
+            my $expected =
+                "[Failed] defined(\$actual) : failed.\n" .
+                "  \$actual:  undef\n";
+            undef $@;
+            eval { OK (undef)->is_defined() };
+            is(_chomp($@), $expected);
+        }
+
+    }
+
+
+    for (TARGET("#not_defined()")) {
+
+        #: returns $this when actual is not defined.
+        {
+            my $ret = OK (undef)->not_defined();
+            ok(! defined($ret->{actual}));
+        }
+
+        #: throws exception when actual is defined.
+        {
+            my $expected =
+                "[Failed] ! defined(\$actual) : failed.\n" .
+                "  \$actual:  ''\n";
+            undef $@;
+            eval { OK (0==1)->not_defined() };
             is(_chomp($@), $expected);
         }
 

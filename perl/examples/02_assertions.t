@@ -38,6 +38,8 @@ target "Assertion Example", sub {
     spec "logical expression", sub {
         OK (1==1)->is_truthy();
         OK (0==1)->is_falsy();
+        OK (0)->is_defined();
+        OK (undef)->not_defined();
     };
 
     spec "regular expression", sub {
