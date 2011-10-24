@@ -61,10 +61,11 @@ recipe 'dist', {
         ## create MANIFEST file
         cd $dir, sub {
             #sys 'make -f ../../Makefile manifest';
-            rm 'MANIFEST';
-            sys 'perl "-MExtUtils::Manifest=mkmanifest" -e mkmanifest 2>/dev/null';
+            #rm 'MANIFEST';
+            #sys 'perl "-MExtUtils::Manifest=mkmanifest" -e mkmanifest 2>/dev/null';
+            sys "find . -type f | sed -e 's=^\\./==g' > MANIFEST";
             cp 'MANIFEST', '../..';
-            rm 'MANIFEST.bak' if -f 'MANIFEST.bak';
+            #rm 'MANIFEST.bak' if -f 'MANIFEST.bak';
         };
         ## edit files
         cd $dir, sub {
