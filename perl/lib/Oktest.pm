@@ -311,10 +311,25 @@ sub _done {
     return $this;
 }
 
+our $__dumped_with_indent;
+{
+    local $Data::Dumper::Terse = 1;
+    $_ = Dumper([1]);
+    $__dumped_with_indent = /        1/m;    ## true for Perl<=5.22, false for Perl>=5.14
+}
+
 sub _repr {
     my ($arg) = @_;
     local $Data::Dumper::Terse = 1;
-    return Dumper($arg);
+    if ($__dumped_with_indent) {
+        return Dumper($arg);
+    }
+    else {
+        local $Data::Dumper::Pad = '        ';
+        my $s = Dumper($arg);
+        $s =~ s/^        //;
+        return $s;
+    }
 }
 
 sub _validate_expected {
@@ -1462,7 +1477,7 @@ sub exit_spec {
     print $this->_indent($depth), "- [", $label, "] ", $so->{desc};
     if ($errmsg) {
         if ($status eq 's' || $status eq 't') {
-            my $_ = $errmsg;
+            $_ = $errmsg;
             s/^\[(Skipped|TODO)\] ?//;
             chomp();
             print ' ## ', $_;

@@ -22,6 +22,12 @@ sub _chomp {
     return $errmsg;
 }
 
+sub _modify {
+    my ($expected) = @_;
+    $expected =~ s/\(\?-xism:/(?^:/g if qr// eq '(?^:)';  # Perl 5.14 or later?
+    return $expected;
+}
+
 
 
 for (TARGET('Oktest::AssertionObject')) {
@@ -645,7 +651,7 @@ for (TARGET('Oktest::AssertionObject')) {
                 "  \$expected: qr/(?-xism:^\\w+\$)/\n";
             undef $@;
             eval { OK ('Haruhi!')->matches(qr/^\w+$/); };
-            is(_chomp($@), $expected);
+            is(_chomp($@), _modify($expected));
         }
 
         #: throws exception when pattern is not passed.
@@ -683,7 +689,7 @@ for (TARGET('Oktest::AssertionObject')) {
                 "  \$expected: qr/(?-xism:^\\d+\$)/\n";
             undef $@;
             eval { OK ('12345')->not_match(qr/^\d+$/); };
-            is(_chomp($@), $expected);
+            is(_chomp($@), _modify($expected));
         }
 
         #: throws exception when pattern is not passed.
@@ -826,7 +832,7 @@ for (TARGET('Oktest::AssertionObject')) {
             undef $@;
             my $code = sub { die 'SOS' };
             eval { OK ($code)->dies(qr/^SOS  at .* line .*$/) };
-            is(_chomp($@), $expected);
+            is(_chomp($@), _modify($expected));
         }
 
     }
@@ -922,7 +928,7 @@ for (TARGET('Oktest::AssertionObject')) {
             undef $@;
             my $code = sub { warn 'SOS' };
             eval { OK ($code)->warns(qr/^SOS  at .* line .*$/) };
-            is(_chomp($@), $expected);
+            is(_chomp($@), _modify($expected));
         }
 
     }

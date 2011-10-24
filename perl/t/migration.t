@@ -54,6 +54,11 @@ sub _chomp {
     return $output;
 }
 
+sub _modify {
+    my ($expected) = @_;
+    $expected =~ s/\(\?-xism:/(?^:/g if qr// eq '(?^:)';  # Perl 5.14 or later?
+    return $expected;
+}
 
 
 for (TARGET("Oktest::TestMoreMigration")) {
@@ -164,7 +169,7 @@ for (TARGET("Oktest::TestMoreMigration")) {
                 "    eval { like('SOS', qr/^\\w+\\d\$/, 'test name') };\n" .
                 "";
             #_assert_eq(_chomp($@), $expected);
-            _assert_eq($@, $expected);
+            _assert_eq($@, _modify($expected));
         };
 
     }
@@ -192,7 +197,7 @@ for (TARGET("Oktest::TestMoreMigration")) {
                 "    eval { unlike('SOS', qr/^[A-Z]+\$/, 'test name') };\n" .
                 "";
             #_assert_eq(_chomp($@), $expected);
-            _assert_eq($@, $expected);
+            _assert_eq($@, _modify($expected));
         };
 
     }
@@ -407,7 +412,7 @@ for (TARGET("Oktest::TestMoreMigration")) {
                 "    eval { (throws_ok { die \"SOS\\n\" } qr/[0-9]+/) };\n" .
                 "";
             #_assert_eq(_chomp($@), $expected);
-            _assert_eq($@, $expected);
+            _assert_eq($@, _modify($expected));
         };
 
     }
@@ -518,7 +523,7 @@ for (TARGET("Oktest::TestMoreMigration")) {
                 "    eval { warning_like { my \$x = 1 } qr/[A-Z]+/ };\n" .
                 "";
             #_assert_eq(_chomp($@), $expected);
-            _assert_eq($@, $expected);
+            _assert_eq($@, _modify($expected));
         };
 
         #: throws exception when warning message not matched to expected pattern.
@@ -537,7 +542,7 @@ for (TARGET("Oktest::TestMoreMigration")) {
                 "    eval { warning_like { warn(\"SOS\\n\") } qr/[0-9]+/ };\n" .
                 "";
             #_assert_eq(_chomp($@), $expected);
-            _assert_eq($@, $expected);
+            _assert_eq($@, _modify($expected));
         };
 
     }
