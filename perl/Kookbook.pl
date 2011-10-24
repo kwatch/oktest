@@ -8,11 +8,29 @@ my $license   = 'MIT License';
 
 $kook_default = 'test';
 
+my @perl_bin_paths = (
+    '/opt/lang/perl/5.8.9/bin',
+    '/opt/lang/perl/5.10.1/bin',
+    '/opt/lang/perl/5.12.4/bin',
+    '/opt/lang/perl/5.14.2/bin',
+);
+
 recipe 'test', {
     desc   => 'do test',
+    spices => ["-a: test with Perl 5.8, 5.10, 5.12, and 5.14"],
     method => sub {
-        sys 'prove t';
-        #sys 'bin/oktest.pl examples';
+        my ($c, $opts) = @_;
+        if ($opts->{a}) {
+            for my $binpath (@perl_bin_paths) {
+                my $ver = ($binpath =~ /5(?:\.\d+)+/ && $&);
+                print "#---- Perl $ver --------------------\n";
+                sys "$binpath/prove t";
+            }
+        }
+        else {
+            sys 'prove t';
+            #sys 'bin/oktest.pl examples';
+        }
     }
 };
 
