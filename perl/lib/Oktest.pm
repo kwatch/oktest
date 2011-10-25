@@ -1601,7 +1601,7 @@ package Oktest::Util;
 use base 'Exporter';
 our @EXPORT_OK = qw(strip last_item length
                     is_string is_number is_integer is_float
-                    read_file write_file read_line_from rm_rf
+                    read_file write_file read_line_from rm_rf system3
                     capture capture_stdouterr capture_stdout capture_stderr);
 
 sub strip {
@@ -1727,6 +1727,21 @@ sub _rm_rf {
         }
         rmdir($path);
     }
+}
+
+sub system3 {
+    use IPC::Open3;
+    use Symbol;
+    my ($command, $input) = @_;
+    my ($IN, $OUT, $ERR) = (gensym, gensym, gensym);
+    open3($IN, $OUT, $ERR, $command);
+    print $IN $input if $input;
+    close $IN;
+    my @output = <$OUT>;
+    my @error  = <$ERR>;
+    close $OUT;
+    close $ERR;
+    return join("", @output), join("", @error);
 }
 
 sub capture(&) {

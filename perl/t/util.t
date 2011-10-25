@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 68;
+use Test::More tests => 74;
 use Oktest;
 
 
@@ -224,6 +224,29 @@ for (TARGET('Oktest::Util')) {
             ok(! -e "_test_ex.d");
             ok(-f "_test_foo.tmp");
             unlink("_test_foo.tmp") or die "unlink(): $!";
+        }
+
+    }
+
+
+    for (TARGET('system3()')) {
+
+        #: invokes OS command and returns output of STDOUT and STDERR.
+        {
+            my ($sout, $serr) = Oktest::Util::system3("echo SOS");
+            is($sout, "SOS\n");
+            is($serr, '');
+            ($sout, $serr) = Oktest::Util::system3("echo SOS 1>&2");
+            is($sout, '');
+            is($serr, "SOS\n");
+        }
+
+        #: takes 2nd argument as STDIN content.
+        {
+            my $input = "Haruhi\nMikuru\nYuki\n";
+            my ($sout, $serr) = Oktest::Util::system3("cat -n", $input);
+            is($sout, "     1\tHaruhi\n     2\tMikuru\n     3\tYuki\n");
+            is($serr, '');
         }
 
     }
