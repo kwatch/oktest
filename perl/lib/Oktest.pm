@@ -1732,8 +1732,7 @@ sub _rm_rf {
 sub capture(&) {
     my ($block) = @_;
     my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
-    my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
-    tied(*STDOUT)->combine(tied(*STDERR));
+    local *STDERR = *STDOUT;
     $block->();
     return $sout->output;
 }
@@ -1768,26 +1767,20 @@ package Oktest::Util::PrintHandler;
 
 sub TIEHANDLE {
     my ($class) = @_;
-    my $this = { outputs => [""] };
+    my $this = { output => "" };
     return bless($this, $class);
 }
 
 sub PRINT {
     my ($this, @args) = @_;
     for my $arg (@args) {
-        $this->{outputs}->[0] .= $arg;
+        $this->{output} .= $arg;
     }
-}
-
-sub combine {
-    my ($this, $other) = @_;
-    $other->{outputs} = $this->{outputs};
-    return $this;
 }
 
 sub output {
     my ($this) = @_;
-    return $this->{outputs}->[0];
+    return $this->{output};
 }
 
 
