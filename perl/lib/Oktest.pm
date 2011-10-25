@@ -566,6 +566,7 @@ sub not_match {
 }
 
 sub is_a {
+    no warnings 'misc';  # suppress warning of "Can't locate package %s for %s::ISA"
     my ($this, $expected) = @_;
     $this->_done();
     #return _assert { $_[0]->isa($_[1]) } ' instanceof ', 0, @_;
@@ -581,6 +582,7 @@ sub is_a {
 }
 
 sub not_a {
+    no warnings 'misc';  # suppress warning of "Can't locate package %s for %s::ISA"
     my ($this, $expected) = @_;
     $this->_done();
     #return _assert { ! $_[0]->isa($_[1]) } ' instanceof ', 0, @_;
@@ -598,7 +600,6 @@ sub not_a {
 sub dies {
     my ($this, $errmsg) = @_;
     $this->_done();
-    #return _assert { $_[0]->isa($_[1]) } ' instanceof ', 0, @_;
     $errmsg = '' unless defined($errmsg);
     my $actual = $this->{actual};
     undef $@;
