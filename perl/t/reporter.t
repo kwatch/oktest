@@ -26,12 +26,12 @@ sub _run_with_capture {
 
 sub _setup_successful_test {
     Oktest::__clear();
-    target "ClassName", sub {
-        target "#method()", sub {
+    topic "ClassName", sub {
+        topic "#method()", sub {
             spec "spec1", sub { OK (1+1) == 2 };
             spec "spec2", sub { OK (1-1) == 0 };
         };
-        target "#method2()", sub {
+        topic "#method2()", sub {
             spec "spec3", sub { OK (1*1) == 1 };
         };
     };
@@ -40,13 +40,13 @@ sub _setup_successful_test {
 
 sub _setup_failure_test {
     Oktest::__clear();
-    target "ClassName", sub {
-        target "#methodA()", sub {
+    topic "ClassName", sub {
+        topic "#methodA()", sub {
             spec "spec1", sub { OK (1+1) == 2 };
             spec "spec2", sub { OK (1+1) == 1 };
             spec "spec3", sub { OK (1-1) == 0 };
         };
-        target "#methodB()", sub {
+        topic "#methodB()", sub {
             spec "spec4", sub { OK (1+1) == 0 };
             spec "spec5", sub { die "<ERROR>\n" };
         };
@@ -56,8 +56,8 @@ sub _setup_failure_test {
 
 sub _setup_casewhen_test {
     Oktest::__clear();
-    target "Class", sub {
-        target "#method()", sub {
+    topic "Class", sub {
+        topic "#method()", sub {
             spec "S1", sub { OK(1+1) == 2 };
             case_when "value is positive...", sub {
                 spec "S2", sub { OK(1+1) == 2 };
@@ -72,8 +72,8 @@ sub _setup_casewhen_test {
 
 sub _setup_misc_test {
     Oktest::__clear();
-    target "ClassName", sub {
-        target "#methodA()", sub {
+    topic "ClassName", sub {
+        topic "#methodA()", sub {
             spec "spec1", sub { OK (1+1) == 2 };
             spec "spec2", sub { skip_when 1==1, "not supported" };
             spec "spec3", sub { TODO "not implemented yet" };
@@ -85,7 +85,7 @@ sub _setup_misc_test {
 for (TARGET('Oktest::Runner::TapReporter')) {
 
     #: prints test plan for TAP.
-    #: prints target names.
+    #: prints topic names.
     #: prints spec descriptions.
     #: prints elapsed time.
     {
@@ -190,7 +190,7 @@ for (TARGET('Oktest::Runner::TapReporter')) {
 
 for (TARGET('Oktest::Runner::VerboseReporter')) {
 
-    #: reports target names and spec descriptions.
+    #: reports topic names and spec descriptions.
     {
         my $expected =
             "* ClassName\n" .
@@ -312,7 +312,7 @@ for (TARGET('Oktest::Runner::VerboseReporter')) {
 
 for (TARGET('Oktest::Runner::SimpleReporter')) {
 
-    #: reports target names.
+    #: reports topic names.
     {
         my $expected =
             "* ClassName\n" .
@@ -415,7 +415,7 @@ for (TARGET('Oktest::Runner::SimpleReporter')) {
 
 for (TARGET('Oktest::Runner::PlainReporter')) {
 
-    #: reports target names.
+    #: reports topic names.
     {
         my $expected =
             "...\n" .

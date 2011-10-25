@@ -11,7 +11,7 @@ no warnings 'void';   # suppress 'Useless use of ... in void context'
 use Oktest;
 
 
-target "Misc", sub {
+topic "Misc", sub {
 
     spec "ex", sub {
         OK (1+1) == 2;

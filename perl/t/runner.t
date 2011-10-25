@@ -46,12 +46,12 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
             Oktest::__clear();
             #
             my @called = ();
-            target "ClassName", sub {
-                target "#method()", sub {
+            topic "ClassName", sub {
+                topic "#method()", sub {
                     spec "spec1", sub { push(@called, 'spec1') };
                     spec "spec2", sub { push(@called, 'spec2') };
                 };
-                target "#method2()", sub {
+                topic "#method2()", sub {
                     spec "spec3", sub { push(@called, 'spec3') };
                 };
             };
@@ -65,19 +65,19 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
     }
 
 
-    for (TARGET('#run_target()')) {
+    for (TARGET('#run_topic()')) {
 
         #: calls 'before_all' and 'after_all' blocks.
         {
             Oktest::__clear();
             #
-            target "Parent", sub {
+            topic "Parent", sub {
                 before_all { print "[Parent] before_all()\n" };
                 after_all  { print "[Parent] after_all()\n" };
                 before     { print "[Parent] before()\n" };
                 after      { print "[Parent] after()\n" };
                 #
-                target "Child1", sub {
+                topic "Child1", sub {
                     before_all { print "[Child1] before_all()\n" };
                     after_all  { print "[Child1] after_all()\n" };
                     before     { print "[Child1] before()\n" };
@@ -113,21 +113,21 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
             is($actual, $expected);
         }
 
-        #: calls 'after_all' even when errors happened in specs or child targets.
+        #: calls 'after_all' even when errors happened in specs or child topics.
         {
             Oktest::__clear();
             #
-            target "Parent", sub {
+            topic "Parent", sub {
                 before_all { print "[Parent] before_all()\n" };
                 after_all  { print "[Parent] after_all()\n" };
                 #
-                target "Child1", sub {
+                topic "Child1", sub {
                     before_all { print "[Child1] before_all()\n" };
                     after_all  { print "[Child1] after_all()\n" };
                     spec "spec1", sub { OK (1+1) == 1 };
                 };
                 #
-                target "Child2", sub {
+                topic "Child2", sub {
                     before_all { print "[Child2] before_all()\n" };
                     after_all  { print "[Child2] after_all()\n" };
                     spec "spec2", sub { OK ('a') eq 'b' };
@@ -174,12 +174,12 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
 #        #: calls targes and specs in mixed order
 #        {
 #            Oktest::__clear();
-#            target "Example", sub {
-#                target "T1", sub {
+#            topic "Example", sub {
+#                topic "T1", sub {
 #                    spec "S1", sub { OK(1+1) == 2 };
 #                };
 #                spec "S2", sub { OK(1+1) == 2 };
-#                target "T3", sub {
+#                topic "T3", sub {
 #                    spec "S3", sub { OK(1+1) == 2 };
 #                };
 #                spec "S4", sub { OK(1+1) == 2 };
@@ -206,16 +206,16 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
 
     for (TARGET('#run_spec()')) {
 
-        #: calls 'before' and 'after' blocks in ancestor's targets.
+        #: calls 'before' and 'after' blocks in ancestor's topics.
         {
             Oktest::__clear();
             #
-            target "Parent", sub {
+            topic "Parent", sub {
                 my ($this) = @_;
                 before     { print "[Parent] before()\n" };
                 after      { print "[Parent] after()\n" };
                 #
-                target "Child1", sub {
+                topic "Child1", sub {
                     my ($this) = @_;
                     before     { print "[Child1] before()\n" };
                     after      { print "[Child1] after()\n" };
@@ -223,7 +223,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
                     spec "spec2", sub { OK ('a') eq 'a' };
                 };
                 #
-                target "Child2", sub {
+                topic "Child2", sub {
                     my ($this) = @_;
                     before     { print "[Child2] before()\n" };
                     after      { print "[Child2] after()\n" };
@@ -270,7 +270,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
             Oktest::__clear();
             #
             my $after_called = 0;
-            target "Hello", sub {
+            topic "Hello", sub {
                 after { $after_called = 1; };
                 spec "example", sub { die "SomethingError\n"; };
             };
@@ -295,7 +295,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
         {
             Oktest::__clear();
             #
-            target "Hello", sub {
+            topic "Hello", sub {
                 after { die "AnotherError\n" };
                 spec "example", sub { die "SomethingError\n" };
             };
@@ -323,7 +323,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
             my $before_called = 0;
             my $after_called  = 0;
             my $body_called   = 0;
-            target "Hello", sub {
+            topic "Hello", sub {
                 before { $before_called = 1; die "SomethingError\n"; };
                 after  { $after_called  = 1; };
                 spec "example", sub { $body_called = 1; };
@@ -360,7 +360,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
             is($Oktest::__assertion_objects[1]->{_done}, 0==1);
             is($Oktest::__assertion_objects[2]->{_done}, 1==1);
             ## run_specs() calls Oktest::__sweep() which removes done assertion objects.
-            target "Example", sub {
+            topic "Example", sub {
                 spec "spec", sub {
                 };
             };
@@ -376,7 +376,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
         {
             Oktest::__clear();
             my $called = 0==1;
-            target "Example", sub {
+            topic "Example", sub {
                 spec "example", sub {
                     at_end {
                         $called = 1==1;
@@ -398,12 +398,12 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
 
         my $setup_shallow_tree = sub {
             Oktest::__clear();
-            target "Parent", sub {
-                target "Child1", sub {
+            topic "Parent", sub {
+                topic "Child1", sub {
                     spec "A1", sub { OK (1+1) == 2 };
                     spec "B1", sub { OK (1+1) == 2 };
                 };
-                target "Child2", sub {
+                topic "Child2", sub {
                     spec "A2", sub { OK (1+1) == 2 };
                     spec "B2", sub { OK (1+1) == 2 };
                 };
@@ -443,23 +443,23 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
 
         my $setup_deep_tree = sub {
             Oktest::__clear();
-            target "Root", sub {
-                target "Mother", sub {
-                    target "ChildA", sub {
+            topic "Root", sub {
+                topic "Mother", sub {
+                    topic "ChildA", sub {
                         spec "X1", sub { OK (1+1) == 2 };
                         spec "Y1", sub { OK (1+1) == 2 };
                     };
-                    target "ChildB", sub {
+                    topic "ChildB", sub {
                         spec "X2", sub { OK (1+1) == 2 };
                         spec "Y2", sub { OK (1+1) == 2 };
                     };
                 };
-                target "Father", sub {
-                    target "ChildC", sub {
+                topic "Father", sub {
+                    topic "ChildC", sub {
                         spec "X3", sub { OK (1+1) == 2 };
                         spec "Y3", sub { OK (1+1) == 2 };
                     };
-                    target "ChildD", sub {
+                    topic "ChildD", sub {
                         spec "X4", sub { OK (1+1) == 2 };
                         spec "Y4", sub { OK (1+1) == 2 };
                     };
@@ -467,7 +467,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
             };
         };
 
-        #: skip targets when target filter is specified.
+        #: skip topics when topic filter is specified.
         {
             my $expected =
                 "1..2\n" .
@@ -479,10 +479,10 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
                 "## ok:2, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)\n" .
                 "";
             $setup_deep_tree->();
-            my $actual1 = _run_with_capture(target=>'ChildC');
+            my $actual1 = _run_with_capture(topic=>'ChildC');
             is($actual1, $expected);
             $setup_deep_tree->();
-            my $actual2 = _run_with_capture(target=>qr/^Child[C]$/);
+            my $actual2 = _run_with_capture(topic=>qr/^Child[C]$/);
             is($actual2, $expected);
         }
 
@@ -502,11 +502,11 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
                 "## ok:4, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)\n" .
                 "";
             $setup_deep_tree->();
-            my $actual1 = _run_with_capture(target=>qr/Child[BC]/);
+            my $actual1 = _run_with_capture(topic=>qr/Child[BC]/);
             is($actual1, $expected);
         }
 
-        #: don't skip children of filter-matched target.
+        #: don't skip children of filter-matched topic.
         {
             $setup_deep_tree->();
             my $expected =
@@ -521,7 +521,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
                 "ok 4 - Y4\n" .
                 "## ok:4, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)\n" .
                 "";
-            my $actual1 = _run_with_capture(target=>'Father');
+            my $actual1 = _run_with_capture(topic=>'Father');
             is($actual1, $expected);
         }
 

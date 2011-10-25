@@ -35,9 +35,9 @@ sub say {
 package main;
 use Oktest;
 
-target "Hello", sub {
+topic "Hello", sub {
 
-    target "new()", sub {
+    topic "new()", sub {
 
         spec "takes user name.", sub {
             my $obj = Hello->new("Haruhi");
@@ -51,7 +51,7 @@ target "Hello", sub {
 
     };
 
-    target "say()", sub {
+    topic "say()", sub {
 
         spec "returns greeting message.", sub {
             my $obj = Hello->new("Sasaki");

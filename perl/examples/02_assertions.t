@@ -11,7 +11,7 @@ no warnings 'void';   # suppress 'Useless use of ... in void context'
 use Oktest;
 
 
-target "Assertion Example", sub {
+topic "Assertion Example", sub {
 
     spec "numeric operators", sub {
         OK (1+1) == 2;

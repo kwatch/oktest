@@ -9,7 +9,7 @@ SYNOPSIS
             no warnings 'void';   # suppress 'Useless use of ... in void context'
             use Oktest;
 
-            target "Example1", sub {
+            topic "Example1", sub {
 
                 spec "1 + 1 should be equal to 2.", sub {
                     OK (1+1) == 2;
@@ -48,7 +48,7 @@ DESCRIPTION
     Oktest allows you to write your test code in structured format.
 
     *
-     'target' represents topic or subject of test. Normally, it represents
+     'topic' represents topic or subject of test. Normally, it represents
      ClassName or method_name().
 
     *
@@ -65,11 +65,11 @@ DESCRIPTION
             no warnings 'void';   # suppress 'Useless use of ... in void context'
             use Oktest;
 
-            ## 'target' represents topic of test (such as ClassName or method_name())
-            target "ClassName", sub {
+            ## 'topic' represents topic of test (such as ClassName or method_name())
+            topic "ClassName", sub {
 
-                ## 'target' can be nestable
-                target "method_name()", sub {
+                ## 'topic' can be nestable
+                topic "method_name()", sub {
 
                     ## 'spec' describes details of test
                     spec "1 + 1 should be equal to 2.", sub {
@@ -77,7 +77,7 @@ DESCRIPTION
                         OK (1+1) == 2;
                     };
 
-                    ## a target can contain multiple specs.
+                    ## a topic can contain multiple specs.
                     spec "'x' repeats string.", sub {
                         ## a spec can contain multiple assertions.
                         OK ('a' x 3) eq 'aaa';
@@ -114,15 +114,15 @@ DESCRIPTION
     Points:
 
     *
-     'target()' can be nestable. In other words, 'target()' can contain
-     multiple specs and/ore other targets.
+     'topic()' can be nestable. In other words, 'topic()' can contain
+     multiple specs and/ore other topics.
 
     *
      'spec()' can NOT be nestable. You should not put other targes or specs
      in a spec block.
 
     *
-     'case_when()' can contain specs, but cannot contain target.
+     'case_when()' can contain specs, but cannot contain topic.
 
     *
      Result is reported by specs, not assertions. For example, a spec
@@ -144,7 +144,7 @@ DESCRIPTION
             no warnings 'void';   # suppress 'Useless use of ... in void context'
             use Oktest;
 
-            target "Assertion Example", sub {
+            topic "Assertion Example", sub {
 
                 spec "numeric operators", sub {
                     OK (1+1) == 2;
@@ -263,19 +263,19 @@ DESCRIPTION
             no warnings 'void';   # suppress 'Useless use of ... in void context'
             use Oktest;
 
-            target "Parent", sub {
+            topic "Parent", sub {
 
                 before_all { print "= [Parent] before_all\n" };
                 after_all  { print "= [Parent] after_all\n" };
                 before     { print "= [Parent] before\n" };
                 after      { print "= [Parent] after\n" };
 
-                target "Child1", sub {
+                topic "Child1", sub {
                     spec "A1", sub { OK (1+1) == 2 };
                     spec "B1", sub { OK (1-1) == 0 };
                 };
 
-                target "Child2", sub {
+                topic "Child2", sub {
                     before_all { print "  = [Child] before_all\n" };
                     after_all  { print "  = [Child] after_all\n" };
                     before     { print "  = [Child] before\n" };
@@ -323,7 +323,7 @@ DESCRIPTION
 
     Example:
 
-            target "Context Example", sub {
+            topic "Context Example", sub {
 
                 my $member;
                 before {
@@ -348,7 +348,7 @@ DESCRIPTION
 
     Example:
 
-            target "at_end() example" sub {
+            topic "at_end() example" sub {
 
                 spec "create and remove files", sub {
                     # create data files
@@ -368,7 +368,7 @@ DESCRIPTION
   Skip and TODO
     Example of Skip and TODO:
 
-            target "Misc", sub {
+            topic "Misc", sub {
 
                 ## example of 'skip_when()'
                 spec "some cool feature is available", sub {
@@ -400,7 +400,7 @@ DESCRIPTION
             use Oktest;
             use Oktest::Migration::TestMore;    # imports migration helpers
 
-            target "Migration Example", sub {
+            topic "Migration Example", sub {
 
                 spec "helpers", sub {
                     ok(1+1 == 2, "test name");
@@ -427,11 +427,11 @@ DESCRIPTION
             1;
 
   Filter by Pattern
-    You can filter targets or specs by pattern.
+    You can filter topics or specs by pattern.
 
-            ## filter targets
-            $ perl t/foo.t --target='ClassName'      # by string
-            $ perl t/foo.t --target=/^\w+$/          # by regular expression
+            ## filter topics
+            $ perl t/foo.t --topic='ClassName'      # by string
+            $ perl t/foo.t --topic=/^\w+$/          # by regular expression
 
             ## filter specs
             $ perl t/foo.t --spec='1+1 should be 2'  # by string
@@ -481,24 +481,24 @@ DESCRIPTION
             $ oktest.pl --spec='1+1 should be 2' t    # string
             $ oktest.pl --spec='/^.*should.*$/' t     # regexp
 
-            ## filter by target name
-            $ oktest.pl --target='ClassName' t        # string
-            $ oktest.pl --target='/^\w+$/' t          # regexp
+            ## filter by topic name
+            $ oktest.pl --topic='ClassName' t        # string
+            $ oktest.pl --topic='/^\w+$/' t          # regexp
 
 REFERENCE
   package Oktest
-    target(String name, Code block)
-     Represents spec target, for example ClassName, method_name(), or
+    topic(String name, Code block)
+     Represents spec topic, for example ClassName, method_name(), or
      feature-name.
 
-     Block of 'target()' can contain other 'target()', 'case_when()', and
+     Block of 'topic()' can contain other 'topic()', 'case_when()', and
      'spec()'.
 
     case_when(String description, Code block)
      Represents test context, for example "when data is not found in
      database..." or "when argument is not passed...".
 
-     This is almost same as 'target()', but intended to represent test
+     This is almost same as 'topic()', but intended to represent test
      context.
 
      Block of 'case_when()' can contain 'blocks()', 'spec()', or other
@@ -514,11 +514,10 @@ REFERENCE
      If body block is not passed then 'sub { TODO("not implemented yet") }'
      is created instead.
 
-     Body of 'spec()' can't contain both 'targets()', 'case_when()' nor
+     Body of 'spec()' can't contain both 'topics()', 'case_when()' nor
      'spec()'.
 
-     This function should be called in blocks of 'target()' or
-     'case_when()'.
+     This function should be called in blocks of 'topic()' or 'case_when()'.
 
     skip_when(Boolean condition, String reason)
      If condition is true then the rest assertions in the same spec are

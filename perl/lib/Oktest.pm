@@ -12,7 +12,7 @@ use Data::Dumper;
 
 package Oktest;
 use base 'Exporter';
-our @EXPORT    = qw(OK pre_cond target case_when spec before after before_all after_all at_end skip_when TODO);
+our @EXPORT    = qw(OK pre_cond topic case_when spec before after before_all after_all at_end skip_when TODO);
 our @EXPORT_OK = qw(run main with);
 our $VERSION   = ('$Release: 0.0.0 $' =~ /\d+(\.\d+)*/ && $&);
 our @__assertion_objects = ();
@@ -29,9 +29,9 @@ sub OK {
 
 *pre_cond = *OK;    ## alias of OK(), representing pre-condition
 
-sub target {
-    my ($target_name, $block) = @_;
-    my $to = Oktest::TargetObject->new($target_name);
+sub topic {
+    my ($topic_name, $block) = @_;
+    my $to = Oktest::TopicObject->new($topic_name);
     return __yield_block($to, $block);
 }
 
@@ -43,16 +43,16 @@ sub case_when {
 
 sub __yield_block {
     my ($to, $block) = @_;
-    my $parent = $Oktest::TargetObject::__current;
+    my $parent = $Oktest::TopicObject::__current;
     if ($parent) {
-        $parent->_add_target($to);
+        $parent->_add_topic($to);
     }
     else {
-        push(@Oktest::TargetObject::__tops, $to);
+        push(@Oktest::TopicObject::__tops, $to);
     }
-    $Oktest::TargetObject::__current = $to;
+    $Oktest::TopicObject::__current = $to;
     $block->($to);
-    $Oktest::TargetObject::__current = $parent;
+    $Oktest::TopicObject::__current = $parent;
     return $to;
 }
 
@@ -60,15 +60,15 @@ sub spec {
     my ($spec_desc, $block) = @_;
     $block ||= sub { TODO("not implemented yet.") };
     my $so = Oktest::SpecObject->new($spec_desc, $block);
-    my $to = $Oktest::TargetObject::__current;
+    my $to = $Oktest::TopicObject::__current;
     $to->_add_spec($so) if $to;
     return $so;
 }
 
 sub _set_fixture {
     my ($name, $block) = @_;
-    my $to = $Oktest::TargetObject::__current
-        or die "$name() should be called in target block.";
+    my $to = $Oktest::TopicObject::__current
+        or die "$name() should be called in topic block.";
     $to->$name($block);
 }
 
@@ -116,7 +116,7 @@ our %_default_opts = (
     reporter => undef,
     style    => 'tap',
     spec     => undef,
-    target   => undef,
+    topic   => undef,
     report_skipped => 0==1,
     report_todo    => 0==1,
 );
@@ -128,11 +128,11 @@ sub run {
     my $runner = $Oktest::Runner::RUNNER->new();
     $runner->{reporter}      = $reporter;
     $runner->{filter_spec}   = $opts{spec};
-    $runner->{filter_target} = $opts{target};
+    $runner->{filter_topic} = $opts{topic};
     $reporter->{report_skipped} ||= $opts{report_skipped};
     $reporter->{report_todo}    ||= $opts{report_todo};
-    my @targets = @Oktest::TargetObject::__tops;
-    $runner->run_all(@targets);
+    my @topics = @Oktest::TopicObject::__tops;
+    $runner->run_all(@topics);
 }
 
 sub main {
@@ -146,7 +146,7 @@ sub with(&) {
 
 sub __clear {
     @__assertion_objects = ();
-    Oktest::TargetObject::__clear();
+    Oktest::TopicObject::__clear();
 }
 
 sub __at_exit {
@@ -168,7 +168,7 @@ sub __sweep {
 
 
 
-package Oktest::TargetObject;
+package Oktest::TopicObject;
 
 our $__current = undef;
 our @__tops = ();
@@ -182,8 +182,8 @@ sub __last {
 }
 
 sub __clear {
-    $Oktest::TargetObject::__current = undef;
-    @Oktest::TargetObject::__tops = ();
+    $Oktest::TopicObject::__current = undef;
+    @Oktest::TopicObject::__tops = ();
 }
 
 sub new {
@@ -191,7 +191,7 @@ sub new {
     my $this = {
         name     => $name,
         parent   => $parent,
-        targets  => [],
+        topics  => [],
         specs    => [],
         status   => $EXEC,
     };
@@ -200,13 +200,13 @@ sub new {
 
 sub accept {
     my ($this, $runner, $depth) = @_;
-    return $runner->run_target($this, $depth);
+    return $runner->run_topic($this, $depth);
 }
 
-sub _add_target {
+sub _add_topic {
     my ($this, $to) = @_;
-    die unless $to->isa('Oktest::TargetObject');
-    push(@{$this->{targets}}, $to);
+    die unless $to->isa('Oktest::TopicObject');
+    push(@{$this->{topics}}, $to);
     $to->{parent} = $this;
     return $this;
 }
@@ -222,7 +222,7 @@ sub _add_spec {
 sub _count_specs {
     my ($this) = @_;
     my $n = 0;
-    for my $to (@{$this->{targets}}) {
+    for my $to (@{$this->{topics}}) {
         $n += $to->_count_specs();
     }
     if ($this->{status} == $EXEC) {
@@ -253,12 +253,12 @@ sub after_all {
     $this->{_after_all} = $block;
 }
 
-$INC{'Oktest/TargetObject'} = __FILE__;
+$INC{'Oktest/TopicObject'} = __FILE__;
 
 
 
 package Oktest::CaseObject;
-our @ISA = ('Oktest::TargetObject');
+our @ISA = ('Oktest::TopicObject');
 
 sub new {
     my ($class, $desc) = @_;
@@ -270,7 +270,7 @@ sub new {
 
 package Oktest::SpecObject;
 
-our $EXEC = $Oktest::TargetObject::EXEC;
+our $EXEC = $Oktest::TopicObject::EXEC;
 
 sub new {
     my ($class, $desc, $block) = @_;
@@ -1118,10 +1118,10 @@ sub reporter {
 }
 
 sub run_all {
-    my ($this, @targets) = @_;
+    my ($this, @topics) = @_;
 }
 
-sub run_target {
+sub run_topic {
     my ($this, $to, $depth) = @_;
 }
 
@@ -1145,9 +1145,9 @@ sub detect_status {
 package Oktest::Runner::DefaultRunner;
 our @ISA = ('Oktest::Runner::Base');
 
-our $EXEC   = $Oktest::TargetObject::EXEC;
-our $IGNORE = $Oktest::TargetObject::IGNORE;
-our $ENTER  = $Oktest::TargetObject::ENTER;
+our $EXEC   = $Oktest::TopicObject::EXEC;
+our $IGNORE = $Oktest::TopicObject::IGNORE;
+our $ENTER  = $Oktest::TopicObject::ENTER;
 
 sub new {
     my ($class) = @_;
@@ -1157,20 +1157,20 @@ sub new {
 }
 
 sub run_all {
-    my ($this, @targets) = @_;
-    $this->_filter(@targets);
-    $this->reporter->enter_all(@targets);
-    for my $to (@targets) {
-        #$this->run_target($to, 0);
+    my ($this, @topics) = @_;
+    $this->_filter(@topics);
+    $this->reporter->enter_all(@topics);
+    for my $to (@topics) {
+        #$this->run_topic($to, 0);
         $to->accept($this, 0);
     }
-    $this->reporter->exit_all(@targets);
+    $this->reporter->exit_all(@topics);
 }
 
-sub run_target {
-    my ($this, $to, $depth) = @_;        ## $to is a TargetObject
+sub run_topic {
+    my ($this, $to, $depth) = @_;        ## $to is a TopicObject
     return if $to->{status} == $IGNORE;
-    $this->reporter->enter_target($to, $depth);
+    $this->reporter->enter_topic($to, $depth);
     $to->{_before_all}->() if $to->{_before_all};
     #
     if ($to->{status} == $EXEC) {
@@ -1180,13 +1180,13 @@ sub run_target {
         }
     }
     #
-    for my $child (@{$to->{targets}}) {
-        #$this->run_target($child, $depth + 1);
+    for my $child (@{$to->{topics}}) {
+        #$this->run_topic($child, $depth + 1);
         $child->accept($this, $depth + 1);
     }
     #
     $to->{_after_all}->() if $to->{_after_all};
-    $this->reporter->exit_target($to, $depth);
+    $this->reporter->exit_topic($to, $depth);
 }
 
 sub run_spec {
@@ -1194,7 +1194,7 @@ sub run_spec {
     $this->reporter->enter_spec($so, $depth);
     my $context = {
         spec   => $so->{desc},
-        target => $so->{parent}->{name},
+        topic => $so->{parent}->{name},
     };
     my $errmsg;
     undef $@;
@@ -1244,22 +1244,22 @@ sub _run_afters {
 }
 
 sub _filter {
-    my ($this, @targets) = @_;
+    my ($this, @topics) = @_;
     #
     my $pat1 = $this->{filter_spec};
-    _filter_specs($pat1, @targets) if $pat1;
+    _filter_specs($pat1, @topics) if $pat1;
     #
-    my $pat2 = $this->{filter_target};
-    _filter_targets($pat2, @targets) if $pat2;
+    my $pat2 = $this->{filter_topic};
+    _filter_topics($pat2, @topics) if $pat2;
     #
     if ($pat1 || $pat2) {
-        _change_status_recursively($_) for @targets;
+        _change_status_recursively($_) for @topics;
     }
 }
 
 sub _filter_specs {
-    my ($pat, @targets) = @_;
-    for my $to (@targets) {
+    my ($pat, @topics) = @_;
+    for my $to (@topics) {
         my $found = 0==1;
         for my $so (@{$to->{specs}}) {
             if ($so->{desc} =~ $pat) {
@@ -1270,16 +1270,16 @@ sub _filter_specs {
             }
         }
         $to->{status} = $IGNORE unless $found;
-        _filter_specs($pat, @{$to->{targets}});
+        _filter_specs($pat, @{$to->{topics}});
     }
 }
 
-sub _filter_targets {
-    my ($pat, @targets) = @_;
-    for my $to (@targets) {
+sub _filter_topics {
+    my ($pat, @topics) = @_;
+    for my $to (@topics) {
         unless ($to->{name} =~ $pat) {
             $to->{status} = $IGNORE;
-            _filter_targets($pat, @{$to->{targets}});
+            _filter_topics($pat, @{$to->{topics}});
         }
     }
 }
@@ -1287,7 +1287,7 @@ sub _filter_targets {
 sub _change_status_recursively {
     my ($to) = @_;
     my $flag = 0==1;
-    for my $child (@{$to->{targets}}) {
+    for my $child (@{$to->{topics}}) {
         my $ret = _change_status_recursively($child);
         $flag = 1==1 if $ret;
     }
@@ -1296,7 +1296,7 @@ sub _change_status_recursively {
     }
     elsif ($flag) {
         $to->{status} = $ENTER;
-        return 1==1;   # not ignored, because non-ignored target exists in targets
+        return 1==1;   # not ignored, because non-ignored topic exists in topics
     }
     else {
         return 0==1;   # ignored
@@ -1358,12 +1358,12 @@ sub _indent {
 }
 
 sub enter_all {
-    my ($this, @targets) = @_;
+    my ($this, @topics) = @_;
     $this->{_started_at} = [gettimeofday()];
 };
 
 sub exit_all {
-    my ($this, @targets) = @_;
+    my ($this, @topics) = @_;
     my $elapsed = tv_interval($this->{_started_at});
     undef $this->{_started_at};
     my $c = $this->{counts};
@@ -1372,11 +1372,11 @@ sub exit_all {
     print $s;
 }
 
-sub enter_target {
+sub enter_topic {
     my ($this, $to, $depth) = @_;
 };
 
-sub exit_target {
+sub exit_topic {
     my ($this, $to, $depth) = @_;
 };
 
@@ -1456,16 +1456,16 @@ package Oktest::Reporter::TapReporter;
 our @ISA = ('Oktest::Reporter::Base');
 
 sub enter_all {
-    my ($this, @targets) = @_;
-    $this->SUPER::enter_all(@targets);
+    my ($this, @topics) = @_;
+    $this->SUPER::enter_all(@topics);
     my $n = 0;
-    for my $to (@targets) {
+    for my $to (@topics) {
         $n += $to->_count_specs();
     }
     print "1..$n\n";
 }
 
-sub enter_target {
+sub enter_topic {
     my ($this, $to, $depth) = @_;
     print '## ', $this->_indent($depth), $this->_itemize($to), $to->{name}, "\n";
 };
@@ -1503,21 +1503,21 @@ package Oktest::Reporter::VerboseReporter;
 our @ISA = ('Oktest::Reporter::Base');
 
 sub enter_all {
-    my ($this, @targets) = @_;
-    $this->SUPER::enter_all(@targets);
+    my ($this, @topics) = @_;
+    $this->SUPER::enter_all(@topics);
     $this->{exc_stack} = [];
 }
 
-sub enter_target {
+sub enter_topic {
     my ($this, $to, $depth) = @_;
-    $this->SUPER::enter_target($to, $depth);
+    $this->SUPER::enter_topic($to, $depth);
     push(@{$this->{exc_stack}}, []);
     print $this->_indent($depth), $this->_itemize($to), $to->{name}, "\n";
 };
 
-sub exit_target {
+sub exit_topic {
     my ($this, $to, $depth) = @_;
-    $this->SUPER::exit_target($to, $depth);
+    $this->SUPER::exit_topic($to, $depth);
     my $exc_items = pop(@{$this->{exc_stack}});
     $this->_report_errmsg_list(@$exc_items);
     undef @$exc_items;
@@ -1549,16 +1549,16 @@ package Oktest::Reporter::SimpleReporter;
 our @ISA = ('Oktest::Reporter::Base');
 
 sub enter_all {
-    my ($this, @targets) = @_;
-    $this->SUPER::enter_all(@targets);
+    my ($this, @topics) = @_;
+    $this->SUPER::enter_all(@topics);
     $this->{exc_stack} = [];
     $this->{_nl} = 1==1;
 }
 
-sub enter_target {
+sub enter_topic {
     my ($this, $to, $depth) = @_;
     return if $to->isa('Oktest::CaseObject');
-    $this->SUPER::enter_target($to, $depth);
+    $this->SUPER::enter_topic($to, $depth);
     push(@{$this->{exc_stack}}, []);
     print "\n" unless $this->{_nl};
     print $this->_indent($depth), $this->_itemize($to), $to->{name};
@@ -1566,10 +1566,10 @@ sub enter_target {
     $this->{_nl} = 0==1;
 };
 
-sub exit_target {
+sub exit_topic {
     my ($this, $to, $depth) = @_;
     return if $to->isa('Oktest::CaseObject');
-    $this->SUPER::exit_target($to, $depth);
+    $this->SUPER::exit_topic($to, $depth);
     my $exc_items = pop(@{$this->{exc_stack}});
     print "\n" unless $this->{_nl};
     $this->{_nl} = 1==1;
@@ -1597,16 +1597,16 @@ package Oktest::Reporter::PlainReporter;
 our @ISA = ('Oktest::Reporter::Base');
 
 sub enter_all {
-    my ($this, @targets) = @_;
-    $this->SUPER::enter_all(@targets);
+    my ($this, @topics) = @_;
+    $this->SUPER::enter_all(@topics);
     $this->{exc_items} = [];
 }
 
 sub exit_all {
-    my ($this, @targets) = @_;
+    my ($this, @topics) = @_;
     print "\n";
     $this->_report_errmsg_list(@{$this->{exc_items}});
-    $this->SUPER::exit_all(@targets);
+    $this->SUPER::exit_all(@topics);
 }
 
 sub exit_spec {
@@ -1992,7 +1992,7 @@ our $optdef_table = [
     ['version',   'v', 'version', '',         'show version'],
     ['style',     's', 'style',   'name',     'reporting style (tap/verbose/simple/plain, or t/v/s/p)'],
     ['spec',      '',  'spec',    'regexp',   'filter by spec description'],
-    ['target',    '',  'target',  'regexp',   'filter by target name'],
+    ['topic',    '',  'topic',  'regexp',   'filter by topic name'],
     ['r_skipped', '',  'report-skipped', '',  'report detail of skipped items'],
     ['r_todo',    '',  'report-todo',    '',  'report detail of TODO items'],
     ['debug',     'D', 'debug',   '',         ''],
@@ -2059,7 +2059,7 @@ sub execute {
     my $run_options = {
         reporter => $reporter,
         spec     => _str_or_rexp($opts->{spec}),
-        target   => _str_or_rexp($opts->{target}),
+        topic   => _str_or_rexp($opts->{topic}),
     };
     ## load files
     my @filepaths = ();
@@ -2172,7 +2172,7 @@ Oktest - a new-style testing library
 	no warnings 'void';   # suppress 'Useless use of ... in void context'
 	use Oktest;
 
-	target "Example1", sub {
+	topic "Example1", sub {
 
 	    spec "1 + 1 should be equal to 2.", sub {
 	        OK (1+1) == 2;
@@ -2227,7 +2227,7 @@ Oktest allows you to write your test code in structured format.
 
 =item *
 
-'target' represents topic or subject of test.
+'topic' represents topic or subject of test.
  Normally, it represents ClassName or method_name().
 
 =item *
@@ -2248,11 +2248,11 @@ Example (01_basic.t):
 	no warnings 'void';   # suppress 'Useless use of ... in void context'
 	use Oktest;
 
-	## 'target' represents topic of test (such as ClassName or method_name())
-	target "ClassName", sub {
+	## 'topic' represents topic of test (such as ClassName or method_name())
+	topic "ClassName", sub {
 
-	    ## 'target' can be nestable
-	    target "method_name()", sub {
+	    ## 'topic' can be nestable
+	    topic "method_name()", sub {
 
 	        ## 'spec' describes details of test
 	        spec "1 + 1 should be equal to 2.", sub {
@@ -2260,7 +2260,7 @@ Example (01_basic.t):
 	            OK (1+1) == 2;
 	        };
 
-                ## a target can contain multiple specs.
+                ## a topic can contain multiple specs.
 	        spec "'x' repeats string.", sub {
                     ## a spec can contain multiple assertions.
 	            OK ('a' x 3) eq 'aaa';
@@ -2300,8 +2300,8 @@ Points:
 
 =item *
 
-'target()' can be nestable.
-In other words, 'target()' can contain multiple specs and/ore other targets.
+'topic()' can be nestable.
+In other words, 'topic()' can contain multiple specs and/ore other topics.
 
 =item *
 
@@ -2310,7 +2310,7 @@ You should not put other targes or specs in a spec block.
 
 =item *
 
-'case_when()' can contain specs, but cannot contain target.
+'case_when()' can contain specs, but cannot contain topic.
 
 =item *
 
@@ -2338,7 +2338,7 @@ Example (02_assertions.t):
 	no warnings 'void';   # suppress 'Useless use of ... in void context'
 	use Oktest;
 
-	target "Assertion Example", sub {
+	topic "Assertion Example", sub {
 
 	    spec "numeric operators", sub {
 	        OK (1+1) == 2;
@@ -2467,19 +2467,19 @@ Example (04_fixture.t):
 	no warnings 'void';   # suppress 'Useless use of ... in void context'
 	use Oktest;
 
-	target "Parent", sub {
+	topic "Parent", sub {
 
 	    before_all { print "= [Parent] before_all\n" };
 	    after_all  { print "= [Parent] after_all\n" };
 	    before     { print "= [Parent] before\n" };
 	    after      { print "= [Parent] after\n" };
 
-	    target "Child1", sub {
+	    topic "Child1", sub {
 	        spec "A1", sub { OK (1+1) == 2 };
 	        spec "B1", sub { OK (1-1) == 0 };
 	    };
 
-	    target "Child2", sub {
+	    topic "Child2", sub {
 	        before_all { print "  = [Child] before_all\n" };
 	        after_all  { print "  = [Child] after_all\n" };
 	        before     { print "  = [Child] before\n" };
@@ -2527,7 +2527,7 @@ Of course, you can use outer-closure variables instead of context data.
 
 Example:
 
-	target "Context Example", sub {
+	topic "Context Example", sub {
 
 	    my $member;
 	    before {
@@ -2553,7 +2553,7 @@ called at end of spec block.
 
 Example:
 
-	target "at_end() example" sub {
+	topic "at_end() example" sub {
 
 	    spec "create and remove files", sub {
 	        # create data files
@@ -2575,7 +2575,7 @@ Example:
 
 Example of Skip and TODO:
 
-	target "Misc", sub {
+	topic "Misc", sub {
 
 	    ## example of 'skip_when()'
 	    spec "some cool feature is available", sub {
@@ -2609,7 +2609,7 @@ Migration example (06_migrate.t):
 	use Oktest;
 	use Oktest::Migration::TestMore;    # imports migration helpers
 
-	target "Migration Example", sub {
+	topic "Migration Example", sub {
 
 	    spec "helpers", sub {
 	        ok(1+1 == 2, "test name");
@@ -2638,11 +2638,11 @@ Migration example (06_migrate.t):
 
 =head2 Filter by Pattern
 
-You can filter targets or specs by pattern.
+You can filter topics or specs by pattern.
 
-	## filter targets
-	$ perl t/foo.t --target='ClassName'      # by string
-	$ perl t/foo.t --target=/^\w+$/          # by regular expression
+	## filter topics
+	$ perl t/foo.t --topic='ClassName'      # by string
+	$ perl t/foo.t --topic=/^\w+$/          # by regular expression
 
 	## filter specs
 	$ perl t/foo.t --spec='1+1 should be 2'  # by string
@@ -2696,9 +2696,9 @@ Oktest provides 'oktest.pl' script for command-line interface.
 	$ oktest.pl --spec='1+1 should be 2' t    # string
 	$ oktest.pl --spec='/^.*should.*$/' t     # regexp
 
-	## filter by target name
-	$ oktest.pl --target='ClassName' t        # string
-	$ oktest.pl --target='/^\w+$/' t          # regexp
+	## filter by topic name
+	$ oktest.pl --topic='ClassName' t        # string
+	$ oktest.pl --topic='/^\w+$/' t          # regexp
 
 
 =head1 REFERENCE
@@ -2709,11 +2709,11 @@ Oktest provides 'oktest.pl' script for command-line interface.
 
 =over 1
 
-=item target(String name, Code block)
+=item topic(String name, Code block)
 
-Represents spec target, for example ClassName, method_name(), or feature-name.
+Represents spec topic, for example ClassName, method_name(), or feature-name.
 
-Block of 'target()' can contain other 'target()', 'case_when()', and 'spec()'.
+Block of 'topic()' can contain other 'topic()', 'case_when()', and 'spec()'.
 
 
 =item case_when(String description, Code block)
@@ -2721,7 +2721,7 @@ Block of 'target()' can contain other 'target()', 'case_when()', and 'spec()'.
 Represents test context, for example "when data is not found in database..."
 or "when argument is not passed...".
 
-This is almost same as 'target()', but intended to represent test context.
+This is almost same as 'topic()', but intended to represent test context.
 
 Block of 'case_when()' can contain 'blocks()', 'spec()', or other 'case_when()'.
 
@@ -2737,9 +2737,9 @@ assertions to validate your code.
 If body block is not passed then 'sub { TODO("not implemented yet") }' is
 created instead.
 
-Body of 'spec()' can't contain both 'targets()', 'case_when()' nor 'spec()'.
+Body of 'spec()' can't contain both 'topics()', 'case_when()' nor 'spec()'.
 
-This function should be called in blocks of 'target()' or 'case_when()'.
+This function should be called in blocks of 'topic()' or 'case_when()'.
 
 
 =item skip_when(Boolean condition, String reason)

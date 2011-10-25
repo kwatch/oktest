@@ -14,19 +14,19 @@ no warnings 'void';   # suppress 'Useless use of ... in void context'
 use Oktest;
 
 
-target "Parent", sub {
+topic "Parent", sub {
 
     before_all { print "= [Parent] before_all\n" };
     after_all  { print "= [Parent] after_all\n" };
     before     { print "= [Parent] before\n" };
     after      { print "= [Parent] after\n" };
 
-    target "Child1", sub {
+    topic "Child1", sub {
         spec "A1", sub { OK (1+1) == 2 };
         spec "B1", sub { OK (1-1) == 0 };
     };
 
-    target "Child2", sub {
+    topic "Child2", sub {
         before_all { print "  = [Child] before_all\n" };
         after_all  { print "  = [Child] after_all\n" };
         before     { print "  = [Child] before\n" };
@@ -38,7 +38,7 @@ target "Parent", sub {
 };
 
 
-target "Context Example", sub {
+topic "Context Example", sub {
 
     my $member;
     before {

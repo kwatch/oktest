@@ -161,7 +161,7 @@ for (TARGET('Oktest::MainApp')) {
             "use warnings;\n" .
             "no warnings 'void';\n" .
             "use Oktest;\n" .
-            "target 'Ex1', sub {\n" .
+            "topic 'Ex1', sub {\n" .
             "    spec 'S1', sub {\n" .
             "        OK (1+1) == 2;\n" .
             "    };\n" .
@@ -272,7 +272,7 @@ for (TARGET('Oktest::MainApp')) {
                 "  -v, --version        : show version\n" .
                 "  -s, --style=name     : reporting style (tap/verbose/simple/plain, or t/v/s/p)\n" .
                 "      --spec=regexp    : filter by spec description\n" .
-                "      --target=regexp  : filter by target name\n" .
+                "      --topic=regexp   : filter by topic name\n" .
                 "      --report-skipped : report detail of skipped items\n" .
                 "      --report-todo    : report detail of TODO items\n" .
                 "";
@@ -304,15 +304,15 @@ for (TARGET('Oktest::MainApp')) {
         "use strict;\n" .
         "use warnings;\n" .
         "use Oktest;\n" .
-        "target 'ClassName', sub {\n" .
-        "  target 'methodA', sub {\n" .
+        "topic 'ClassName', sub {\n" .
+        "  topic 'methodA', sub {\n" .
         "    spec 'A1', sub { OK(1+1)==2 };\n" .
         "    spec 'A2', sub { OK(1+1)==1 };\n" .
         "    spec 'A3', sub { die \"ORA800\n\" };\n" .
         "    spec 'A4', sub { skip_when 1==1, 'not supported' };\n" .
         "    spec 'A5', sub { TODO('not implemented') };\n" .
         "  };\n" .
-        "  target 'methodB', sub {\n" .
+        "  topic 'methodB', sub {\n" .
         "    spec 'B1', sub { OK(1+1)==2 };\n" .
         "  };\n" .
         "};\n" .
@@ -618,11 +618,11 @@ for (TARGET('Oktest::MainApp')) {
     }
 
 
-    for (TARGET("'--target=pattern'")) {
+    for (TARGET("'--topic=pattern'")) {
 
-        #: filters targets by pattern string.
+        #: filters topics by pattern string.
         {
-            my $output = $run_examples->('--target=say()');
+            my $output = $run_examples->('--topic=say()');
             my $expected =
                 "1..1\n" .
                 "## * Hello\n" .
@@ -633,9 +633,9 @@ for (TARGET('Oktest::MainApp')) {
             is($output, $expected);
         }
 
-        #: filters targets by pattern regexp.
+        #: filters topics by pattern regexp.
         {
-            my $output = $run_examples->('--target=/new\(\)/');
+            my $output = $run_examples->('--topic=/new\(\)/');
             my $expected =
                 "1..2\n" .
                 "## * Hello\n" .

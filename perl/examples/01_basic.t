@@ -11,11 +11,11 @@ no warnings 'void';   # suppress 'Useless use of ... in void context'
 use Oktest;
 
 
-## 'target' represents topic of test (such as ClassName or method_name())
-target "ClassName", sub {
+## 'topic' represents topic of test (such as ClassName or method_name())
+topic "ClassName", sub {
 
-    ## 'target' can be nestable
-    target "method_name()", sub {
+    ## 'topic' can be nestable
+    topic "method_name()", sub {
 
         ## 'spec' describes details of test
         spec "1 + 1 should be equal to 2.", sub {
@@ -23,7 +23,7 @@ target "ClassName", sub {
             OK (1+1) == 2;
         };
 
-        ## a target can contain multiple specs.
+        ## a topic can contain multiple specs.
         spec "'x' repeats string.", sub {
             ## a spec can contain multiple assertions.
             OK ('a' x 3) eq 'aaa';

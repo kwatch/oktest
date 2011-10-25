@@ -12,7 +12,7 @@ use Oktest;
 use Oktest::Migration::TestMore;
 
 
-target "Migration Example", sub {
+topic "Migration Example", sub {
 
     spec "helpers", sub {
         ok(1+1 == 2, "test name");
