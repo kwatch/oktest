@@ -1731,7 +1731,7 @@ sub _rm_rf {
 
 sub capture(&) {
     my ($block) = @_;
-    my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
+    my $sout = tie(local *STDOUT, 'Oktest::Util::__PrintHandler');
     local *STDERR = *STDOUT;
     $block->();
     return $sout->output;
@@ -1739,22 +1739,22 @@ sub capture(&) {
 
 sub capture_stdouterr(&) {
     my ($block) = @_;
-    my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
-    my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
+    my $sout = tie(local *STDOUT, 'Oktest::Util::__PrintHandler');
+    my $serr = tie(local *STDERR, 'Oktest::Util::__PrintHandler');
     $block->();
     return ($sout->output, $serr->output);
 }
 
 sub capture_stdout(&) {
     my ($block) = @_;
-    my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
+    my $sout = tie(local *STDOUT, 'Oktest::Util::__PrintHandler');
     $block->();
     return $sout->output;
 }
 
 sub capture_stderr(&) {
     my ($block) = @_;
-    my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
+    my $serr = tie(local *STDERR, 'Oktest::Util::__PrintHandler');
     $block->();
     return $serr->output;
 }
@@ -1763,7 +1763,7 @@ $INC{'Oktest/Util.pm'} = __FILE__;
 
 
 
-package Oktest::Util::PrintHandler;
+package Oktest::Util::__PrintHandler;
 
 sub TIEHANDLE {
     my ($class) = @_;
