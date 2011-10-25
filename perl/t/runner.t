@@ -364,7 +364,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
                 spec "spec", sub {
                 };
             };
-            Oktest::Util::capture {
+            Oktest::Util::capture_stdouterr {
                 Oktest::run();
             };
             is($#Oktest::__assertion_objects, 0);
@@ -385,7 +385,7 @@ for (TARGET('Oktest::Runner::DefaultRunner')) {
                     die "SomethingError";
                 };
             };
-            Oktest::Util::capture {
+            Oktest::Util::capture_stdouterr {
                 Oktest::run();
             };
             is($called, 1==1, "at_end() is called in spite of 'die' called.");

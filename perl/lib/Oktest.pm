@@ -1602,7 +1602,7 @@ use base 'Exporter';
 our @EXPORT_OK = qw(strip last_item length
                     is_string is_number is_integer is_float
                     read_file write_file read_line_from rm_rf
-                    capture capture_stdout capture_stderr);
+                    capture_stdouterr capture_stdout capture_stderr);
 
 sub strip {
     my ($s) = @_;
@@ -1729,7 +1729,7 @@ sub _rm_rf {
     }
 }
 
-sub capture(&) {
+sub capture_stdouterr(&) {
     my ($block) = @_;
     my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
     my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
@@ -1774,6 +1774,7 @@ sub output {
     my ($this) = @_;
     return $this->{output};
 }
+
 
 
 package Oktest::Migration::TestMore;    ## !! EXPERIMENTAL !!

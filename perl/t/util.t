@@ -229,11 +229,11 @@ for (TARGET('Oktest::Util')) {
     }
 
 
-    for (TARGET('capture()')) {
+    for (TARGET('capture_stdouterr()')) {
 
-        #: captures STDOUT and STDERR.
+        #: captures STDOUT and STDERR, and returns strings.
         {
-            my ($sout, $serr) = Oktest::Util::capture {
+            my ($sout, $serr) = Oktest::Util::capture_stdouterr {
                 print "Haruhi\n";
                 print STDERR "Sasaki\n";
             };
@@ -249,7 +249,7 @@ for (TARGET('Oktest::Util')) {
         #: captures STDOUT.
         {
             my $stdout;
-            my ($sout, $serr) = Oktest::Util::capture {
+            my ($sout, $serr) = Oktest::Util::capture_stdouterr {
                 $stdout = Oktest::Util::capture_stdout {
                     print "Haruhi\n";
                     print STDERR "Sasaki\n";
@@ -268,7 +268,7 @@ for (TARGET('Oktest::Util')) {
         #: captures STDOUT.
         {
             my $stderr;
-            my ($sout, $serr) = Oktest::Util::capture {
+            my ($sout, $serr) = Oktest::Util::capture_stdouterr {
                 $stderr = Oktest::Util::capture_stderr {
                     print "Haruhi\n";
                     print STDERR "Sasaki\n";

@@ -394,7 +394,7 @@ for (TARGET('Oktest')) {
             my $linenum  = __LINE__ - 1;
             my $filename = __FILE__;
             is($#Oktest::__assertion_objects, 1);
-            my ($sout, $serr) = Oktest::Util::capture {
+            my ($sout, $serr) = Oktest::Util::capture_stdouterr {
                 Oktest::__at_exit();
             };
             is($sout, '');
