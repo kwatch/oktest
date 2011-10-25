@@ -1602,7 +1602,7 @@ use base 'Exporter';
 our @EXPORT_OK = qw(strip last_item length
                     is_string is_number is_integer is_float
                     read_file write_file read_line_from rm_rf
-                    capture_stdouterr capture_stdout capture_stderr);
+                    capture capture_stdouterr capture_stdout capture_stderr);
 
 sub strip {
     my ($s) = @_;
@@ -1729,6 +1729,15 @@ sub _rm_rf {
     }
 }
 
+sub capture(&) {
+    my ($block) = @_;
+    my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
+    my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
+    tied(*STDOUT)->combine(tied(*STDERR));
+    $block->();
+    return $sout->output;
+}
+
 sub capture_stdouterr(&) {
     my ($block) = @_;
     my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
@@ -1759,20 +1768,26 @@ package Oktest::Util::PrintHandler;
 
 sub TIEHANDLE {
     my ($class) = @_;
-    my $this = { output => "" };
+    my $this = { outputs => [""] };
     return bless($this, $class);
 }
 
 sub PRINT {
     my ($this, @args) = @_;
     for my $arg (@args) {
-        $this->{output} .= $arg;
+        $this->{outputs}->[0] .= $arg;
     }
+}
+
+sub combine {
+    my ($this, $other) = @_;
+    $other->{outputs} = $this->{outputs};
+    return $this;
 }
 
 sub output {
     my ($this) = @_;
-    return $this->{output};
+    return $this->{outputs}->[0];
 }
 
 

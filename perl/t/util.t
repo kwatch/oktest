@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 67;
+use Test::More tests => 68;
 use Oktest;
 
 
@@ -224,6 +224,21 @@ for (TARGET('Oktest::Util')) {
             ok(! -e "_test_ex.d");
             ok(-f "_test_foo.tmp");
             unlink("_test_foo.tmp") or die "unlink(): $!";
+        }
+
+    }
+
+
+    for (TARGET('capture()')) {
+
+        #: captures STDOUT and STDERR, and returns a string.
+        {
+            my $out = Oktest::Util::capture {
+                print "Haruhi\n";
+                print STDERR "Mikuru\n";
+                print "Yuki\n";
+            };
+            is($out, "Haruhi\nMikuru\nYuki\n");
         }
 
     }
