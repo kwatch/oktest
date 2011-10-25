@@ -1305,6 +1305,7 @@ sub create_instance {
 
 
 package Oktest::Reporter::Base;
+use Time::HiRes qw(gettimeofday tv_interval);
 
 our %STATUS_LABELS = (
     '.' => 'ok',
@@ -1332,13 +1333,13 @@ sub _indent {
 
 sub enter_all {
     my ($this, @targets) = @_;
-    $this->{_started_at} = Oktest::Util::current_time();
+    $this->{_started_at} = [gettimeofday()];
 };
 
 sub exit_all {
     my ($this, @targets) = @_;
-    my $now = Oktest::Util::current_time();
-    my $elapsed = $now - $this->{_started_at};
+    my $elapsed = tv_interval($this->{_started_at});
+    undef $this->{_started_at};
     my $c = $this->{counts};
     my $s = sprintf("## ok:%s, failed:%s, error:%s, skipped:%s, todo:%s  (elapsed: %.3f)\n",
                     $c->{'.'}||0, $c->{'f'}||0, $c->{'E'}||0, $c->{'s'}||0, $c->{'t'}||0, $elapsed);
