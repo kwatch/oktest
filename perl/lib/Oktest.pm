@@ -372,10 +372,11 @@ sub _stacktrace {
     for (; $i < $max; $i++) {
         my ($pkgname, $filename, $linenum, @rest) = caller($i);
         last if ! $filename || $filename eq __FILE__;
-        my $line = Oktest::Util::read_line_from($filename, $linenum);
-        $str .=
-            "File '$filename', line $linenum:\n" .
-            "    " . Oktest::Util::strip($line) . "\n";
+        $str .= "File '$filename', line $linenum:\n";
+        if (-f $filename) {
+            my $line = Oktest::Util::read_line_from($filename, $linenum);
+            $str .= "    " . Oktest::Util::strip($line) . "\n";
+        }
     }
     return $str;
 }
