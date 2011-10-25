@@ -1734,21 +1734,21 @@ sub capture(&) {
     my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
     my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
     $block->();
-    return ($sout->{output}, $serr->{output});
+    return ($sout->output, $serr->output);
 }
 
 sub capture_stdout(&) {
     my ($block) = @_;
     my $sout = tie(local *STDOUT, 'Oktest::Util::PrintHandler');
     $block->();
-    return $sout->{output};
+    return $sout->output;
 }
 
 sub capture_stderr(&) {
     my ($block) = @_;
     my $serr = tie(local *STDERR, 'Oktest::Util::PrintHandler');
     $block->();
-    return $serr->{output};
+    return $serr->output;
 }
 
 $INC{'Oktest/Util.pm'} = __FILE__;
@@ -1770,6 +1770,10 @@ sub PRINT {
     }
 }
 
+sub output {
+    my ($this) = @_;
+    return $this->{output};
+}
 
 
 package Oktest::Migration::TestMore;    ## !! EXPERIMENTAL !!
