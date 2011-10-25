@@ -387,7 +387,19 @@ sub _assert(&@) {
         my $msg = $this->_validate_expected($expected, $op);
         die $msg if $msg;
     }
+    #unless (defined($expected)) {
+    #    my $msg =
+    #        "[ERROR] OK() $op \$expected: \$expected is undefined value.\n" .
+    #        "  \$expected: " . _repr($expected);
+    #    $this->_die($msg);
+    #}
     my $actual = $this->{actual};
+    #unless (defined($actual)) {
+    #    my $msg =
+    #        "[ERROR] OK(\$actual): \$actual is undefined value.\n" .
+    #        "  \$actual:   " . _repr($actual);
+    #    $this->_die($msg);
+    #}
     return $this if $closure->($actual, $expected);
     my $msg = $this->_failed_message($actual, $op, $expected);
     $this->_die($msg);
@@ -409,31 +421,38 @@ use overload
 
 sub _num_eq {
     #my ($this, $expected) = @_;
+    no warnings 'uninitialized';   # suppress warning 'Use of uninitialized value'
     return _assert { $_[0] == $_[1] } '==', 1, @_;
 }
 
 sub _num_ne {
     #my ($this, $expected) = @_;
+    no warnings 'uninitialized';
     return _assert { $_[0] != $_[1] } '!=', 1, @_;
 }
 
 sub _num_gt {
+    no warnings 'uninitialized';
     return _assert { $_[0] > $_[1] } '>', 1, @_;
 }
 
 sub _num_ge {
+    no warnings 'uninitialized';
     return _assert { $_[0] >= $_[1] } '>=', 1, @_;
 }
 
 sub _num_lt {
+    no warnings 'uninitialized';
     return _assert { $_[0] < $_[1] } '<', 1, @_;
 }
 
 sub _num_le {
+    no warnings 'uninitialized';
     return _assert { $_[0] <= $_[1] } '<=', 1, @_;
 }
 
 sub _str_eq {
+    no warnings 'uninitialized';
     #return _assert { $_[0] eq $_[1] } 'eq', 0, @_;
     my ($this, $expected) = @_;
     $this->_done();
@@ -463,22 +482,27 @@ sub _str_eq {
 }
 
 sub _str_ne {
+    no warnings 'uninitialized';
     return _assert { $_[0] ne $_[1] } 'ne', 0, @_;
 }
 
 sub _str_gt {
+    no warnings 'uninitialized';
     return _assert { $_[0] gt $_[1] } 'gt', 0, @_;
 }
 
 sub _str_ge {
+    no warnings 'uninitialized';
     return _assert { $_[0] ge $_[1] } 'ge', 0, @_;
 }
 
 sub _str_lt {
+    no warnings 'uninitialized';
     return _assert { $_[0] lt $_[1] } 'lt', 0, @_;
 }
 
 sub _str_le {
+    no warnings 'uninitialized';
     return _assert { $_[0] le $_[1] } 'le', 0, @_;
 }
 

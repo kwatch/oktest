@@ -53,7 +53,7 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
-    for (TARGET('->_die()')) {
+    for (TARGET('#_die()')) {
 
         #: appends stacktrace information into error message.
         {
@@ -85,6 +85,33 @@ for (TARGET('Oktest::AssertionObject')) {
         }
 
     }
+
+
+    #for (TARGET('::_assert()')) {
+    #
+    #    #: throws exception when $actual is undef.
+    #    {
+    #        my $expected =
+    #            "[ERROR] OK(\$actual): \$actual is undefined value.\n" .
+    #            "  \$actual:   undef\n";
+    #        undef $@;
+    #        eval { OK (undef) == 0 };
+    #        is(_chomp($@), $expected);
+    #        undef $@;
+    #    }
+    #
+    #    #: throws exception when $expected is undef.
+    #    {
+    #        my $expected =
+    #            "[ERROR] OK() == \$expected: \$expected is undefined value.\n" .
+    #            "  \$expected: undef\n";
+    #        undef $@;
+    #        eval { OK (0) == undef };
+    #        is(_chomp($@), $expected);
+    #        undef $@;
+    #    }
+    #
+    #}
 
 
     for (TARGET("'==' operator")) {
