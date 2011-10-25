@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 no warnings 'void';   # suppress 'Useless use of ... in void context'
-use Test::More tests => 179;
+use Test::More tests => 170;
 
 
 use Oktest qw(OK);
@@ -1723,18 +1723,18 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
-    for (TARGET("#is_file()")) {
+    for (TARGET("#file_exists()")) {
 
         #: returns $this when file exists.
         {
-            my $ret = OK (__FILE__)->is_file();
+            my $ret = OK (__FILE__)->file_exists();
             is($ret->{actual}, __FILE__);
         }
 
         #: throws exception when file not exist.
         {
             undef $@;
-            eval { OK ("foobar.php")->is_file() };
+            eval { OK ("foobar.php")->file_exists() };
             my $expected =
                 "[Failed] -f \$actual : failed (file not exist).\n" .
                 "  \$actual:   'foobar.php'\n";
@@ -1744,7 +1744,7 @@ for (TARGET('Oktest::AssertionObject')) {
         #: throws exception when not a file.
         {
             undef $@;
-            eval { OK ("/")->is_file() };
+            eval { OK ("/")->file_exists() };
             my $expected =
                 "[Failed] -f \$actual : failed (not a file).\n" .
                 "  \$actual:   '/'\n";
@@ -1754,20 +1754,20 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
-    for (TARGET("#is_directory()")) {
+    for (TARGET("#dir_exists()")) {
 
         #: returns $this when directory exists.
         {
             use Cwd;
             my $path = getcwd();
-            my $ret = OK ($path)->is_dir();
+            my $ret = OK ($path)->dir_exists();
             is($ret->{actual}, $path);
         }
 
         #: throws exception when directory not exist.
         {
             undef $@;
-            eval { OK ("foobar_php")->is_dir() };
+            eval { OK ("foobar_php")->dir_exists() };
             my $expected =
                 "[Failed] -d \$actual : failed (directory not exist).\n" .
                 "  \$actual:   'foobar_php'\n";
@@ -1777,7 +1777,7 @@ for (TARGET('Oktest::AssertionObject')) {
         #: throws exception when not a directory.
         {
             undef $@;
-            eval { OK (__FILE__)->is_dir() };
+            eval { OK (__FILE__)->dir_exists() };
             my $expected =
                 "[Failed] -d \$actual : failed (not a directory).\n" .
                 "  \$actual:   '" . __FILE__ . "'\n";
@@ -1787,81 +1787,81 @@ for (TARGET('Oktest::AssertionObject')) {
     }
 
 
-    for (TARGET("#not_file()")) {
-
-        #: returns $this when doesn't exist.
-        {
-            my $ret = OK ("foobar_py")->not_file();
-            is($ret->{actual}, "foobar_py");
-        }
-
-        #: returns $this when not a file.
-        {
-            my $ret = OK ("/")->not_file();
-            is($ret->{actual}, "/");
-        }
-
-        #: throws exception when file exists.
-        {
-            undef $@;
-            eval { OK (__FILE__)->not_file() };
-            my $expected =
-                "[Failed] ! -f \$actual : failed (file exists).\n" .
-                "  \$actual:   '" . __FILE__ . "'\n";
-            is(_chomp($@), $expected);
-        }
-
-    }
-
-
-    for (TARGET("#not_dir()")) {
-
-        #: returns $this when doesn't exist.
-        {
-            my $ret = OK ("foobar_py")->not_dir();
-            is($ret->{actual}, "foobar_py");
-        }
-
-        #: returns $this when not a dir.
-        {
-            my $ret = OK (__FILE__)->not_dir();
-            is($ret->{actual}, __FILE__);
-        }
-
-        #: throws exception when directory exists.
-        {
-            undef $@;
-            eval { OK ("/")->not_dir() };
-            my $expected =
-                "[Failed] ! -d \$actual : failed (directory exists).\n" .
-                "  \$actual:   '/'\n";
-            is(_chomp($@), $expected);
-        }
-
-    }
-
-
-    for (TARGET("#exist()")) {
-
-        #: returns $this when file or directory exists.
-        {
-            my $ret = OK (__FILE__)->exist();
-            is($ret->{actual}, __FILE__);
-            my $ret2 = OK ("/")->exist();
-            is($ret2->{actual}, "/");
-        }
-
-        #: throws exception when neigther file nor directory exist.
-        {
-            undef $@;
-            eval { OK ("foobar_py")->exist() };
-            my $expected =
-                "[Failed] -e \$actual : failed (file or directory not found).\n" .
-                "  \$actual:   'foobar_py'\n";
-            is(_chomp($@), $expected);
-        }
-
-    }
+#    for (TARGET("#not_file()")) {
+#
+#        #: returns $this when doesn't exist.
+#        {
+#            my $ret = OK ("foobar_py")->not_file();
+#            is($ret->{actual}, "foobar_py");
+#        }
+#
+#        #: returns $this when not a file.
+#        {
+#            my $ret = OK ("/")->not_file();
+#            is($ret->{actual}, "/");
+#        }
+#
+#        #: throws exception when file exists.
+#        {
+#            undef $@;
+#            eval { OK (__FILE__)->not_file() };
+#            my $expected =
+#                "[Failed] ! -f \$actual : failed (file exists).\n" .
+#                "  \$actual:   '" . __FILE__ . "'\n";
+#            is(_chomp($@), $expected);
+#        }
+#
+#    }
+#
+#
+#    for (TARGET("#not_dir()")) {
+#
+#        #: returns $this when doesn't exist.
+#        {
+#            my $ret = OK ("foobar_py")->not_dir();
+#            is($ret->{actual}, "foobar_py");
+#        }
+#
+#        #: returns $this when not a dir.
+#        {
+#            my $ret = OK (__FILE__)->not_dir();
+#            is($ret->{actual}, __FILE__);
+#        }
+#
+#        #: throws exception when directory exists.
+#        {
+#            undef $@;
+#            eval { OK ("/")->not_dir() };
+#            my $expected =
+#                "[Failed] ! -d \$actual : failed (directory exists).\n" .
+#                "  \$actual:   '/'\n";
+#            is(_chomp($@), $expected);
+#        }
+#
+#    }
+#
+#
+#    for (TARGET("#exist()")) {
+#
+#        #: returns $this when file or directory exists.
+#        {
+#            my $ret = OK (__FILE__)->exist();
+#            is($ret->{actual}, __FILE__);
+#            my $ret2 = OK ("/")->exist();
+#            is($ret2->{actual}, "/");
+#        }
+#
+#        #: throws exception when neigther file nor directory exist.
+#        {
+#            undef $@;
+#            eval { OK ("foobar_py")->exist() };
+#            my $expected =
+#                "[Failed] -e \$actual : failed (file or directory not found).\n" .
+#                "  \$actual:   'foobar_py'\n";
+#            is(_chomp($@), $expected);
+#        }
+#
+#    }
 
 
     for (TARGET("#not_exist()")) {

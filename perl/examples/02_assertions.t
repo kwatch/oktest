@@ -76,12 +76,8 @@ target "Assertion Example", sub {
         use Cwd qw(getcwd);
         my $file = __FILE__;
         my $pwd  = getcwd();
-        OK ($file)->is_file();
-        OK ($pwd )->not_file();
-        OK ($pwd )->is_dir();
-        OK ($file)->not_dir();
-        OK ($file)->exist();
-        OK ($pwd )->exist();
+        OK ($file)->file_exists();
+        OK ($pwd )->dir_exists();
         OK ("NotExist.txt")->not_exist();
     };
 

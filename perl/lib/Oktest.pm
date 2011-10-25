@@ -1020,17 +1020,17 @@ sub any {
     return $this;
 }
 
-sub is_file {
+sub file_exists {
     my ($this) = @_;
-    return $this->_is_file_or_dir('file', '-f', -f $this->{actual});
+    return $this->_file_or_dir_exists('file', '-f', -f $this->{actual});
 }
 
-sub is_dir {
+sub dir_exists {
     my ($this) = @_;
-    return $this->_is_file_or_dir('directory', '-d', -d $this->{actual});
+    return $this->_file_or_dir_exists('directory', '-d', -d $this->{actual});
 }
 
-sub _is_file_or_dir {
+sub _file_or_dir_exists {
     my ($this, $kind, $op, $bool) = @_;
     $this->_done();
     my $actual = $this->{actual};
@@ -1044,41 +1044,41 @@ sub _is_file_or_dir {
     return $this;
 }
 
-sub not_file {
-    my ($this) = @_;
-    return $this->_not_file_or_dir('file', '-f', -f $this->{actual});
-}
-
-sub not_dir {
-    my ($this) = @_;
-    return $this->_not_file_or_dir('directory', '-d', -d $this->{actual});
-}
-
-sub _not_file_or_dir {
-    my ($this, $kind, $op, $bool) = @_;
-    $this->_done();
-    my $actual = $this->{actual};
-    unless (! $bool) {
-        my $msg =
-            "[Failed] ! $op \$actual : failed ($kind exists).\n" .
-            "  \$actual:   " . _repr($actual);
-        $this->_die($msg);
-    }
-    return $this;
-}
-
-sub exist {
-    my ($this) = @_;
-    $this->_done();
-    my $actual = $this->{actual};
-    unless (-e $actual) {
-        my $msg =
-            "[Failed] -e \$actual : failed (file or directory not found).\n" .
-            "  \$actual:   " . _repr($actual);
-        $this->_die($msg);
-    }
-    return $this;
-}
+#sub not_file {
+#    my ($this) = @_;
+#    return $this->_not_file_or_dir('file', '-f', -f $this->{actual});
+#}
+#
+#sub not_dir {
+#    my ($this) = @_;
+#    return $this->_not_file_or_dir('directory', '-d', -d $this->{actual});
+#}
+#
+#sub _not_file_or_dir {
+#    my ($this, $kind, $op, $bool) = @_;
+#    $this->_done();
+#    my $actual = $this->{actual};
+#    unless (! $bool) {
+#        my $msg =
+#            "[Failed] ! $op \$actual : failed ($kind exists).\n" .
+#            "  \$actual:   " . _repr($actual);
+#        $this->_die($msg);
+#    }
+#    return $this;
+#}
+#
+#sub exist {
+#    my ($this) = @_;
+#    $this->_done();
+#    my $actual = $this->{actual};
+#    unless (-e $actual) {
+#        my $msg =
+#            "[Failed] -e \$actual : failed (file or directory not found).\n" .
+#            "  \$actual:   " . _repr($actual);
+#        $this->_die($msg);
+#    }
+#    return $this;
+#}
 
 sub not_exist {
     my ($this) = @_;
@@ -2403,12 +2403,8 @@ Example (02_assertions.t):
 	        use Cwd qw(getcwd);
 	        my $file = __FILE__;
 	        my $pwd  = getcwd();
-	        OK ($file)->is_file();
-	        OK ($pwd )->is_dir();
-	        OK ($file)->exist();
-	        OK ($pwd )->exist();
-	        OK ($pwd )->not_file();
-	        OK ($file)->not_dir();
+	        OK ($file)->file_exists();
+	        OK ($pwd )->dir_exists();
 	        OK ("NotExist.txt")->not_exist();
 	    };
 
