@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 68;
+use Test::More tests => 67;
 use Oktest;
 
 
@@ -46,17 +46,6 @@ for (TARGET('Oktest::Util')) {
         {
             my $arr = ["Haruhi", "Mikuru", "Yuki"];
             is(Oktest::Util::length(@$arr), 3);
-        }
-
-    }
-
-
-    for (TARGET('current_time()')) {
-
-        #: returns current time (microsec)
-        {
-            my $usec = Oktest::Util::current_time();
-            ok(Oktest::Util::is_float($usec));
         }
 
     }

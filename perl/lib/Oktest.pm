@@ -1599,11 +1599,10 @@ sub exit_spec {
 
 package Oktest::Util;
 use base 'Exporter';
-our @EXPORT_OK = qw(strip last_item length current_time
+our @EXPORT_OK = qw(strip last_item length
                     is_string is_number is_integer is_float
                     read_file write_file read_line_from rm_rf
                     capture capture_stdout capture_stderr);
-use Time::HiRes qw(gettimeofday);
 
 sub strip {
     my ($s) = @_;
@@ -1621,11 +1620,6 @@ sub last_item {
 sub length {
     my (@arr) = @_;
     return $#arr + 1;
-}
-
-sub current_time {
-    my ($sec, $usec) = gettimeofday();
-    return $sec + $usec / 1000000.0
 }
 
 sub index(&@) {
