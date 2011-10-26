@@ -567,7 +567,8 @@ sub not_match {
 }
 
 sub is_a {
-    no warnings 'misc';  # suppress warning of "Can't locate package %s for %s::ISA"
+    no warnings 'misc';    # suppress warning of "Can't locate package %s for %s::ISA" (for Perl 5.8)
+    no warnings 'syntax';  # suppress warning of "Can't locate package %s for %s::ISA" (for Perl 5.10 or later)
     my ($this, $expected) = @_;
     $this->_done();
     #return _assert { $_[0]->isa($_[1]) } ' instanceof ', 0, @_;
@@ -583,7 +584,8 @@ sub is_a {
 }
 
 sub not_a {
-    no warnings 'misc';  # suppress warning of "Can't locate package %s for %s::ISA"
+    no warnings 'misc';    # suppress warning of "Can't locate package %s for %s::ISA" (for Perl 5.8)
+    no warnings 'syntax';  # suppress warning of "Can't locate package %s for %s::ISA" (for Perl 5.10 or later)
     my ($this, $expected) = @_;
     $this->_done();
     #return _assert { ! $_[0]->isa($_[1]) } ' instanceof ', 0, @_;
