@@ -3,6 +3,14 @@ Changes
 =======
 
 
+Release 0.0101 (2011-10-26)
+---------------------------
+
+* [bugfix] Fix not to install 'Kookbook.pl' into 'lib/perl5' directory.
+
+* [bugfix] Fix 'is_a' and 'not_a' assertions to suppress "Can't locate package" warning on Perl >= 5.10
+
+
 Release 0.0100 (2011-10-26)
 ---------------------------
 
