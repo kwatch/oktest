@@ -3,6 +3,14 @@ Changes
 =======
 
 
+Release 0.0102 (2011-10-30)
+---------------------------
+
+* [bugfix] Fix POD document.
+
+* [update] Add 'Oktest Internal' section to POD document.
+
+
 Release 0.0101 (2011-10-26)
 ---------------------------
 
