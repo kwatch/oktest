@@ -2171,7 +2171,7 @@ Oktest - a new-style testing library
 
 	use strict;
 	use warnings;
-	no warnings 'void';   # suppress 'Useless use of ... in void context'
+	no warnings 'void';   # suppress warning 'Useless use of ... in void context'
 	use Oktest;
 
 	topic "Example1", sub {
@@ -2230,16 +2230,16 @@ Oktest allows you to write your test code in structured format.
 =item *
 
 'topic' represents topic or subject of test.
- Normally, it represents ClassName or method_name().
+Normally, it represents ClassName, method_name() or feature name.
 
 =item *
 
 'spec' represens specification details.
- You can write description in a free text.
+You can write description in a free text.
 
 =item *
 
-'case_when' represens text context.
+'case_when' represens test context or condition.
 
 =back
 
@@ -2247,7 +2247,7 @@ Example (01_basic.t):
 
 	use strict;
 	use warnings;
-	no warnings 'void';   # suppress 'Useless use of ... in void context'
+	no warnings 'void';   # suppress warning 'Useless use of ... in void context'
 	use Oktest;
 
 	## 'topic' represents topic of test (such as ClassName or method_name())
@@ -2294,7 +2294,7 @@ Output:
 	##   * method_name()
 	ok 1 - 1 + 1 should be equal to 2.
 	ok 2 - 'x' repeats string.
-	## elapsed: 0.000
+	## ok:2, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)
 
 Points:
 
@@ -2337,7 +2337,7 @@ Example (02_assertions.t):
 
 	use strict;
 	use warnings;
-	no warnings 'void';   # suppress 'Useless use of ... in void context'
+	no warnings 'void';   # suppress warning 'Useless use of ... in void context'
 	use Oktest;
 
 	topic "Assertion Example", sub {
@@ -2438,7 +2438,7 @@ Assertion methods are chainable.
 	OK ($obj)->has('name', "Haruhi")->has('team', "SOS");
 
 
-=head2 Setup/Teadown
+=head2 Setup/Teardown
 
 Oktest provides fixtures (= setup or teardown function).
 
@@ -2466,7 +2466,7 @@ Example (04_fixture.t):
 
 	use strict;
 	use warnings;
-	no warnings 'void';   # suppress 'Useless use of ... in void context'
+	no warnings 'void';   # suppress warning 'Useless use of ... in void context'
 	use Oktest;
 
 	topic "Parent", sub {
@@ -2522,7 +2522,7 @@ Output example:
 	ok 4 - B4
 	  = [Child] after_all
 	= [Parent] after_all
-	## elapsed: 0.000
+	## ok:4, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)
 
 Context data (= a hash object) is passed to 'before' and 'after' blocks.
 Of course, you can use outer-closure variables instead of context data.
@@ -2606,7 +2606,7 @@ Migration example (06_migrate.t):
 
 	use strict;
 	use warnings;
-	no warnings 'void';   # suppress 'Useless use of ... in void context'
+	no warnings 'void';   # suppress warning 'Useless use of ... in void context'
 
 	use Oktest;
 	use Oktest::Migration::TestMore;    # imports migration helpers
@@ -2656,18 +2656,18 @@ You can filter topics or specs by pattern.
 In default, Oktest reports results in TAP style format.
 You can change it by '--style' or '-s' option.
 
-Plain style ('-s simple' or '-ss'):
+Plain style ('-s plain' or '-sp'):
 
-	$ perl examples/01_basic.t -ss
+	$ perl examples/01_basic.t -sp
 	..
-	## elapsed: 0.000
+	## ok:2, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)
 
 Simple style ('-s simple' or '-ss'):
 
 	$ perl examples/01_basic.t -ss
 	* ClassName
 	  * method_name(): ..
-	## elapsed: 0.000
+	## ok:2, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)
 
 Verbose style ('-s verbose' or '-sv'):
 
@@ -2676,7 +2676,7 @@ Verbose style ('-s verbose' or '-sv'):
 	  * method_name()
 	    - [ok] 1 + 1 should be equal to 2.
 	    - [ok] 'x' repeats string.
-	## elapsed: 0.001
+	## ok:2, failed:0, error:0, skipped:0, todo:0  (elapsed: 0.000)
 
 
 =head2 Command-line Interface
@@ -2788,5 +2788,6 @@ makoto kuwata E<lt>kwa@kuwata-lab.comE<gt>
 =head1 LICENSE
 
 MIT License
+
 
 =cut
