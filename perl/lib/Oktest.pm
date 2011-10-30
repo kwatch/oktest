@@ -2327,6 +2327,8 @@ You don't need to update test plan manually, wow!
 
 =back
 
+If you want to know internal mechanism of Oktest, see L</"Oktest Internal"> section.
+
 
 =head2 Assertions
 
@@ -2703,6 +2705,75 @@ Oktest provides 'oktest.pl' script for command-line interface.
 	$ oktest.pl --topic='/^\w+$/' t          # regexp
 
 
+=head2 Oktest Internal
+
+Internal of Oktest consist of three stages:
+(1) create tee of topics,
+(2) counts number of specs,
+(3) calls spec blocks.
+
+For example:
+
+	topic "ClassName", sub {
+	    topic "method_foo()", sub {
+	        sub "spec1", sub { ... };
+	        sub "spec2", sub { ... };
+	    };
+	    topic "method_bar()", sub {
+	        sub "spec3", sub { ... };
+	        sub "spec4", sub { ... };
+	    };
+	};
+	Oktest::main();
+
+The above code is equvarent roughly to the follwing:
+
+	## Step (1): creates tree of topics
+	## (Notice that topic blocks are called but spec blocks are not called yet)
+	my $t1 = TopicObject->new("ClassName");
+	my $t2 = TopicObject->new("method_foo()", $t1);
+	$t2->add_spec(SpecObject->new("spec1", sub { ... }));
+	$t2->add_spec(SpecObject->new("spec2", sub { ... }));
+	my $t3 = TopicObject->new("method_bar()", $t1);
+	$t3->add_spec(SpecObject->new("spec3", sub { ... }));
+	$t3->add_spec(SpecObject->new("spec4", sub { ... }));
+
+	## Step (2): counts number of specs and prints test plan
+	my $n = $t1->_count_specs();
+	print "1..$n\n";
+
+	## Step (3): call spec blocks and prints results
+	for my $to ($t1->{topics}) {         ## $to is TopicObject
+	    for my $so ($to->{specs}) {      ## $so is SpecObject
+	        undef $@;
+	        eval { $so->{block}->() };
+	        print $@ ? "not ok - " : "ok - ";
+	        print $so->{desc}, "\n";
+	    }
+	}
+
+The above shows difference between Oktest and Test::More.
+
+=over 1
+
+=item *
+
+Test::More requries you to maintain test plan by yourself,
+on the other hand Oktest counts test plan automatically.
+
+=item *
+
+Test::More prints result ('ok' or 'not ok') for each assertions,
+on the other hand Oktest prints result for each specs.
+
+=item *
+
+It is difficult to do only a certain test in Test::More, on the other hand
+it is easy to filter topic or spec in Oktest.
+
+=back
+
+
 =head1 REFERENCE
 
 
@@ -2717,6 +2788,8 @@ Represents spec topic, for example ClassName, method_name(), or feature-name.
 
 Block of 'topic()' can contain other 'topic()', 'case_when()', and 'spec()'.
 
+See L</"Structured Test Code"> section for sample code.
+
 
 =item case_when(String description, Code block)
 
@@ -2725,7 +2798,9 @@ or "when argument is not passed...".
 
 This is almost same as 'topic()', but intended to represent test context.
 
-Block of 'case_when()' can contain 'blocks()', 'spec()', or other 'case_when()'.
+Block of 'case_when()' can contain 'block()', 'spec()', or other 'case_when()'.
+
+See L</"Structured Test Code"> section for sample code.
 
 
 =item spec(String description[, Code block])
@@ -2743,12 +2818,30 @@ Body of 'spec()' can't contain both 'topics()', 'case_when()' nor 'spec()'.
 
 This function should be called in blocks of 'topic()' or 'case_when()'.
 
+See L</"Structured Test Code"> section for sample code.
+
+
+=item OK(Any actual)
+
+Represents assertion.
+
+See L</"Assertions"> section for sample code.
+
+If you call OK() but no assertion specified, Oktest will report you about it.
+
+	## Assertion 'is_a' specified
+	OK (Class->new())->is_a('Class');
+	## No assertion specified, and Oktest will report you about it
+	OK (Class->new())->isa('Class');   # 'isa' is not an assertion
+
 
 =item skip_when(Boolean condition, String reason)
 
 If condition is true then the rest assertions in the same spec are skipped.
 
 This should be called in blocks of 'spec()'.
+
+See L</"Skip and TODO"> section for sample code.
 
 
 =item TODO(String description)
@@ -2757,13 +2850,83 @@ Represents that the test code is not wrote yet.
 
 This should be called in blocks of 'spec()'.
 
+See L</"Skip and TODO"> section for sample code.
+
+
+=item before(Code block)
+
+Register code block to be called before each spec.
+If topics are nested then outer 'before' block is called before inner 'before' block.
+
+This is equivarent to setUp() method in xUnit.
+
+See L</"Setup/Teardown"> section for sample code.
+
+
+=item after(Code block)
+
+Register code block to be called after each spec.
+If topics are nested then inner 'after' block is called before outer 'after' block.
+
+This is equivarent to tearDown() method in xUnit.
+
+See L</"Setup/Teardown"> section for sample code.
+
+
+=item before_all(Code block)
+
+Register code block to be called before all specs.
+In other words, this code block is called only once.
+
+See L</"Setup/Teardown"> section for sample code.
+
+
+=item after_all(Code block)
+
+Register code block to be called after all specs.
+In other words, this code block is called only once.
+
+See L</"Setup/Teardown"> section for sample code.
+
+
+=item at_exit(Code block)
+
+Register code block to be called after that spec.
+This is very convenient to specify 'tearDown' operation for a certaion spec.
+
+This should be called in spec block.
+
+See L</"Setup/Teardown"> section for sample code.
+
+
+=item Oktest::main()
+
+Runs all specs and reports result.
+
+This should be called as 'Oktest::main()', not 'main()'.
+
+See L</"Structured Test Code"> section for sample code.
+
 
 =back
+
+
+=head2 package Oktest::Migration::TestMore
+
+See L</"Test::More Migration"> section.
 
 
 =head1 TODO
 
 =over 1
+
+=item *
+
+[_] User-Defined Assertion
+
+=item *
+
+[_] Colorized Output
 
 =item *
 
