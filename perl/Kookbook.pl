@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 my $project   = prop('project', 'Oktest');
-my $release   = prop('release', '0.0101');
+my $release   = prop('release', '0.0102');
 my $copyright = 'copyright(c) 2010-2011 kuwata-lab.com all rights reserved';
 my $license   = 'MIT License';
 
