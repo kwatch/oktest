@@ -213,7 +213,7 @@ def task_package(c):
     pass
 
 
-def _with_backup(fn):
+def _with_README_backup(fn):
     fname = "README.txt"
     try:
         f = open(fname); s = f.read(); f.close()
@@ -230,7 +230,7 @@ def _with_backup(fn):
 def task_sdist(c, *args, **kwargs):
     """create dist/Oktest-X.X.X.tar.gz"""
     #rm_rf(c%"dist/$(package)-$(release)*")
-    @_with_backup
+    @_with_README_backup
     def fn():
         system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
     #with chdir('dist') as d:
@@ -255,7 +255,7 @@ def _do_setup_py(c, command):
 @ingreds('edit')
 def task_eggs(c):
     """create dist/*.egg files"""
-    @_with_backup
+    @_with_README_backup
     def fn():
         _do_setup_py(c, "$(bin) setup.py bdist_egg")
 
@@ -264,7 +264,7 @@ def task_eggs(c):
 @ingreds('edit')
 def task_register(c):
     """register information into PyPI"""
-    @_with_backup
+    @_with_README_backup
     def fn():
         system(c%"$(python) setup.py register")
 
@@ -273,7 +273,7 @@ def task_register(c):
 @ingreds('edit')
 def task_upload(c):
     """upload packages"""
-    @_with_backup
+    @_with_README_backup
     def fn():
         system(c%"$(python) setup.py sdist upload")
         _do_setup_py(c, "$(bin) setup.py bdist_egg upload")
