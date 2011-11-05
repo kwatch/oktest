@@ -777,7 +777,8 @@ Skip Test
 It is possible to skip tests according to a certain condition. ::
 
     import unittest
-    from oktest import ok, run, {{*skip*}}
+    from oktest import ok, run, test, {{*skip*}}
+    some_condition = True
 
     class SkipExampleTest(unittest.TestCase):
 

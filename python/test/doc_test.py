@@ -123,6 +123,46 @@ if True:
     ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 
 
+#Skip Test
+#=========
+
+#(Experimental)
+#It is possible to skip tests according to a certain condition. ::
+
+    import unittest
+    from oktest import ok, run, test, skip
+    some_condition = True
+
+    class SkipExampleTest(unittest.TestCase):
+
+        @test("example of skip")
+        def _(self):
+            if some_condition:
+                skip("reason to skip")
+            ok (0) == 1 #...
+
+        @test("example of skip")
+        @skip.when(some_condition, "reason to skip")
+        def _(self):
+            ok (0) == 1 #...
+
+        ## unittest2 helpers are also available (if you installed it)
+        @unittest.skipIf(some_condition, "reason to skip")
+        def testExample(self):
+            ok (0) == 1 #...
+
+    if __name__ == '__main__':
+        run()
+
+#Notice that the following doesn't work correctly. ::
+
+        ## NG: @skip.when should be the below of @test
+        @skip.when(some_condition, "reason to skip")
+        @test("example of skip")
+        def _(self):
+            ok (0) == 1 #...
+
+
 #Command-line Interface
 #======================
 
