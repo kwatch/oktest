@@ -696,35 +696,36 @@ class TestRunner(object):
 
     def run_testcases(self, klass, testnames=None):
         if testnames is None:
-            context_list = getattr(klass, '_context_list', None)
-            if context_list:
-                items = []
-                for tname in self.get_testnames(klass):
-                    meth = getattr(klass, tname)
-                    if not hasattr(meth, '_test_context'):
-                        items.append((tname, meth))
-                items.extend(context_list)
-                TestContext._sort_items(items)
-                self._run_items(klass, items)
-                return
-            else:
-                testnames = self.get_testnames(klass)
-        for testname in testnames:
-            testcase = self._new_testcase(klass, testname)
-            self.run_testcase(testcase, testname)
+            testnames = self.get_testnames(klass)
+        context_list = getattr(klass, '_context_list', None)
+        if context_list:
+            items = []
+            for tname in testnames:
+                meth = getattr(klass, tname)
+                if not hasattr(meth, '_test_context'):
+                    items.append((tname, meth))
+            items.extend(context_list)
+            TestContext._sort_items(items)
+            allowed = dict.fromkeys(testnames)
+            self._run_items(klass, items, allowed)
+        else:
+            for testname in testnames:
+                testcase = self._new_testcase(klass, testname)
+                self.run_testcase(testcase, testname)
 
-    def _run_items(self, klass, items):
+    def _run_items(self, klass, items, allowed):
         for item in items:
             if isinstance(item, tuple):
                 testname = item[0]
-                testcase = self._new_testcase(klass, testname)
-                self.run_testcase(testcase, testname)
+                if testname in allowed:
+                    testcase = self._new_testcase(klass, testname)
+                    self.run_testcase(testcase, testname)
             else:
                 assert isinstance(item, TestContext)
                 context = item
                 self._enter_testcontext(context)
                 try:
-                    self._run_items(klass, context.items)
+                    self._run_items(klass, context.items, allowed)
                 finally:
                     self._exit_testcontext(context)
 
@@ -1078,16 +1079,18 @@ class BaseReporter(Reporter):
 
     def _print_temporary_str(self, string):
         if is_tty(self.out):
-            self.__string = string
+            #self.__string = string
             self.out.write(string)
             self.out.flush()
 
-    def _erase_temporary_str(self):
+    def _erase_temporary_str(self, _eraser="\b"*255):
         if is_tty(self.out):
-            n = len(self.__string) + 1    # why '+1' ?
-            self.out.write("\b" * n)
+            #n = len(self.__string) + 1    # why '+1' ?
+            #self.out.write("\b" * n)      # not work with wide-chars
+            #self.out.flush()
+            #del self.__string
+            self.out.write(_eraser)
             self.out.flush()
-            del self.__string
 
     def report_spec_esception(self, testcase, testname, status, spec):
         ex = spec._exception
