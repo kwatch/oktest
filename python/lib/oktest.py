@@ -696,10 +696,37 @@ class TestRunner(object):
 
     def run_testcases(self, klass, testnames=None):
         if testnames is None:
-            testnames = self.get_testnames(klass)
+            context_list = getattr(klass, '_context_list', None)
+            if context_list:
+                items = []
+                for tname in self.get_testnames(klass):
+                    meth = getattr(klass, tname)
+                    if not hasattr(meth, '_test_context'):
+                        items.append((tname, meth))
+                items.extend(context_list)
+                TestContext._sort_items(items)
+                self._run_items(klass, items)
+                return
+            else:
+                testnames = self.get_testnames(klass)
         for testname in testnames:
             testcase = self._new_testcase(klass, testname)
             self.run_testcase(testcase, testname)
+
+    def _run_items(self, klass, items):
+        for item in items:
+            if isinstance(item, tuple):
+                testname = item[0]
+                testcase = self._new_testcase(klass, testname)
+                self.run_testcase(testcase, testname)
+            else:
+                assert isinstance(item, TestContext)
+                context = item
+                self._enter_testcontext(context)
+                try:
+                    self._run_items(klass, context.items)
+                finally:
+                    self._exit_testcontext(context)
 
     def _new_testcase(self, klass, method_name):
         try:
@@ -765,6 +792,12 @@ class TestRunner(object):
 
     def _exit_testcase(self, testcase, testname, status, exc_info):
         self.reporter.exit_testcase(testcase, testname, status, exc_info)
+
+    def _enter_testcontext(self, context):
+        self.reporter.enter_testcontext(context)
+
+    def _exit_testcontext(self, context):
+        self.reporter.exit_testcontext(context)
 
     def __enter__(self):
         self.reporter.enter_all()
@@ -869,6 +902,8 @@ class Reporter(object):
     def exit_testclass (self, testclass, method_name, exc_info): pass
     def enter_testcase (self, testcase, testname): pass
     def exit_testcase  (self, testcase, testname, status, exc_info): pass
+    def enter_testcontext (self, context): pass
+    def exit_testcontext  (self, context): pass
 
 
 class BaseReporter(Reporter):
@@ -886,6 +921,7 @@ class BaseReporter(Reporter):
         self._color = color
         self.out = out
         self.counts = {}
+        self._context_stack = []
 
     def _set_color(self, color=None):
         if color is not None:
@@ -956,6 +992,13 @@ class BaseReporter(Reporter):
         self.counts[status] = self.counts.setdefault(status, 0) + 1
         if exc_info:
             self._exceptions.append((testcase, testname, status, exc_info))
+
+    def enter_testcontext(self, context):
+        self._context_stack.append(context)
+
+    def exit_testcontext(self, context):
+        popped = self._context_stack.pop()
+        assert popped is context
 
     def indicator(self, status):
         indicator = self.INDICATOR.get(status) or '???'
@@ -1081,15 +1124,16 @@ class BaseReporter(Reporter):
             self.out.write('  File "%s", line %s, in %s\n' % (file, line, func))
             self.out.write('    %s\n' % text)
 
-    def colorize(self, string, status):
+    def colorize(self, string, kind):
         if not self._color:
             return string
-        if status == ST_PASSED:  return Color.green(string, bold=True)
-        if status == ST_FAILED:  return Color.red(string, bold=True)
-        if status == ST_ERROR:   return Color.red(string, bold=True)
-        if status == ST_SKIPPED: return Color.yellow(string, bold=True)
-        if status == "topic":    return Color.bold(string)
-        if status == "sep":      return Color.red(string)
+        if kind == ST_PASSED:  return Color.green(string, bold=True)
+        if kind == ST_FAILED:  return Color.red(string, bold=True)
+        if kind == ST_ERROR:   return Color.red(string, bold=True)
+        if kind == ST_SKIPPED: return Color.yellow(string, bold=True)
+        if kind == "topic":    return Color.bold(string)
+        if kind == "sep":      return Color.red(string)
+        if kind == "context":  return Color.bold(string)
         return Color.yellow(string)
 
     def write_separator(self):
@@ -1162,6 +1206,7 @@ class VerboseReporter(BaseReporter):
 
     def __init__(self, *args, **kwargs):
         self._super.__init__(self, *args, **kwargs)
+        self.depth = 1
 
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
@@ -1170,15 +1215,27 @@ class VerboseReporter(BaseReporter):
 
     def enter_testcase(self, testcase, testname):
         desc = self.get_testcase_desc(testcase, testname)
-        self._print_temporary_str("  - [  ] " + desc)
+        self._print_temporary_str("  " * self.depth + "- [  ] " + desc)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
         self._erase_temporary_str()
         indicator = self.indicator(status)
         desc = self.get_testcase_desc(testcase, testname)
-        self.out.write("  - [%s] %s\n" % (indicator, desc))
+        self.out.write("  " * self.depth + "- [%s] %s\n" % (indicator, desc))
         self.out.flush()
+
+    def enter_testcontext(self, context):
+        self._super.enter_testcontext(self, context)
+        s = context.desc
+        if not (s.startswith("when ") or s == "else:"):
+            s = self.colorize(s, "context")
+        self.out.write("  " * self.depth + "+ %s\n" % s)
+        self.depth += 1
+
+    def exit_testcontext(self, context):
+        self._super.exit_testcontext(self, context)
+        self.depth -= 1
 
 BaseReporter.register_class("verbose", VerboseReporter)
 
@@ -1640,6 +1697,125 @@ fixture_injector = FixtureInjector()
 
 class LoopedDependencyError(ValueError):
     pass
+
+
+##
+## test context
+##
+def context():
+
+    __all__ = ('subject', 'case_when', 'case_else')
+    global TestContext
+
+    class TestContext(object):
+        """grouping test methods.
+
+        normally created with subject() or case_when() helpers.
+
+        ex::
+            class HelloClassTest(unittest.TestCase):
+                SUBJECT = Hello
+                with subject('#method1()'):
+                    @test("spec1")
+                    def _(self):
+                        ...
+                    @test("spec2")
+                    def _(self):
+                        ...
+                with subject('#method2()'):
+                    with case_when('condition'):
+                        @test("spec3")
+                        def _(self):
+                    with case_else():
+                        @test("spec3")
+                        def _(self):
+                        ...
+        """
+
+        def __init__(self, desc, _lineno=None):
+            self.desc = desc
+            self.items = []
+            self.parent = None
+            self._lineno = _lineno
+
+        def __repr__(self):
+            return "<TestContext desc=%r items=[%s]>" % \
+                       (self.desc, ','.join(repr(x) for x in self.items))
+
+        def __enter__(self):
+            f_locals = sys._getframe(1).f_locals
+            self._f_locals = f_locals
+            self._varnames = set(f_locals.keys())
+            stack = f_locals.setdefault('_context_stack', [])
+            if not stack:
+                f_locals.setdefault('_context_list', []).append(self)
+            else:
+                self.parent = stack[-1]
+                self.parent.items.append(self)
+            stack.append(self)
+            return self
+
+        def __exit__(self, *args):
+            f_locals = self._f_locals
+            popped = f_locals['_context_stack'].pop()
+            assert popped is self
+            newvars = set(f_locals.keys()) - self._varnames
+            for name in newvars:
+                if name.startswith('test'):
+                    func = f_locals[name]
+                    if not hasattr(func, '_test_context'):
+                        func._test_context = self.desc
+                        self.items.append((name, func))
+            self._sort_items(self.items)
+            del self._f_locals
+            del self._varnames
+
+        @staticmethod
+        def _sort_items(items):
+            def fn(item):
+                if isinstance(item, tuple):
+                    return getattr(item[1], '_firstlineno', None) or \
+                           _func_firstlineno(item[1])
+                elif isinstance(item, TestContext):
+                    return item._lineno or 0
+                else:
+                    assert False, "** item=%r" % (item, )
+            items.sort(key=fn)
+
+        @staticmethod
+        def _inspect_items(items):
+            def _inspect(items, depth, add):
+                for item in items:
+                    if isinstance(item, tuple):
+                        add("  " * depth + "- %s()\n" % item[0])
+                    else:
+                        add("  " * depth + "- Context: %r\n" % item.desc)
+                        _inspect(item.items, depth+1, add)
+            buf = []
+            _inspect(items, 0, buf.append)
+            return "".join(buf)
+
+
+    def subject(desc):
+        """helper to group test methods by subject"""
+        lineno = sys._getframe(1).f_lineno
+        return TestContext(desc, _lineno=lineno)
+
+    def case_when(desc):
+        """helper to group test methods by condition"""
+        lineno = sys._getframe(1).f_lineno
+        return TestContext("when " + desc + ":", _lineno=lineno)
+
+    def case_else():
+        """corresponding helper with case_when()"""
+        lineno = sys._getframe(1).f_lineno
+        return TestContext("else:", _lineno=lineno)
+
+
+    return locals()
+
+context = _new_module("oktest.context", context())
+context.TestContext = TestContext
 
 
 ##

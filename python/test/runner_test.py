@@ -14,7 +14,25 @@ import oktest.config
 
 echo = sys.stdout.write
 python_command = os.environ.get('PYTHON', 'python')
-python24 = sys.version_info[0:2] == (2, 4)
+python24 = sys.version_info[0:2] <= (2, 4)
+def withstmt_not_available():
+    if python24:
+        sys.stderr.write("*** skip because with-statment is not supported\n")
+        return True
+    return False
+
+prefix = "from __future__ import with_statement\nif True:\n"
+
+def _exec_code(code):
+    import unittest
+    import oktest
+    from oktest import ok, test
+    from oktest.context import subject, case_when, case_else
+    lvars = {'unittest': unittest, 'oktest': oktest,
+             'ok': ok, 'test': test, 'subject': subject,
+             'case_when': case_when, 'case_else': case_else }
+    exec(prefix + code, lvars, lvars)
+    return lvars
 
 try:
     from cStringIO import StringIO
@@ -614,6 +632,52 @@ Sample Description 2
         oktest.config.color_enabled = True
         reporter = klass(out=sio)
         self.assertEqual(True, reporter._color)
+
+
+class VerboseReporter_TC(unittest.TestCase):
+
+    def test_with_test_context(self):
+        if withstmt_not_available(): return
+        input = r"""
+        class _WithTestContext1(unittest.TestCase):
+          with subject('module hello'):
+            with subject('#method1'):
+              @test('spec1')
+              def _(self):
+                ok (1) == 1
+              with case_when('condition1'):
+                @test('spec2')
+                def _(self):
+                  ok (2) == 2
+                @test('spec3')
+                def _(self):
+                  ok (3) == 3
+              with case_else():
+                @test('spec4')
+                def _(self):
+                  ok (4) == 4
+
+"""[1:]
+        expected = r"""
+* <b>_WithTestContext1</b>
+  + <b>module hello</b>
+    + <b>#method1</b>
+      - [<G>ok</G>] spec1
+      + when condition1:
+        - [<G>ok</G>] spec2
+        - [<G>ok</G>] spec3
+      + else:
+        - [<G>ok</G>] spec4
+## total:4, <G>passed:4</G>, failed:0, error:0, skipped:0   (elapsed 0.000)
+"""[1:]
+        lvars = _exec_code(input)
+        klass = lvars.get('_WithTestContext1')
+        out = StringIO()
+        oktest.run(klass, out=out, color=True, style="verbose")
+        actual = out.getvalue()
+        actual = re.sub(r'elapsed 0\.0\d\d', 'elapsed 0.000', actual)
+        ok (actual) == oktest.Color._colorize(expected)
+
 
 
 class Diff_TC(unittest.TestCase, RunnerTestHelper):
