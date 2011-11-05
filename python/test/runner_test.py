@@ -27,10 +27,10 @@ def _exec_code(code):
     import unittest
     import oktest
     from oktest import ok, test
-    from oktest.context import subject, case_when, case_else
+    from oktest.context import subject, situation
     lvars = {'unittest': unittest, 'oktest': oktest,
              'ok': ok, 'test': test, 'subject': subject,
-             'case_when': case_when, 'case_else': case_else }
+             'situation': situation }
     exec(prefix + code, lvars, lvars)
     return lvars
 
@@ -645,14 +645,14 @@ class VerboseReporter_TC(unittest.TestCase):
               @test('spec1')
               def _(self):
                 ok (1) == 1
-              with case_when('condition1'):
+              with situation('when condition1:'):
                 @test('spec2')
                 def _(self):
                   ok (2) == 2
                 @test('spec3')
                 def _(self):
                   ok (3) == 0
-              with case_else():
+              with situation('else:'):
                 @test('spec4')
                 def _(self):
                   ok (4) == 4

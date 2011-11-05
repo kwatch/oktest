@@ -26,7 +26,7 @@ def withstmt_not_available():
 
 import oktest
 from oktest import ok, test, run
-from oktest.context import TestContext, subject, case_when, case_else
+from oktest.context import TestContext, subject, situation
 
 
 def inspect_test_contexts(context_list):
@@ -54,8 +54,7 @@ prefix = "from __future__ import with_statement\nif True:\n"
 
 def _exec_code(code):
     lvars = {'unittest': unittest, 'ok': ok, 'test': test,
-             'subject': subject,
-             'case_when': case_when, 'case_else': case_else }
+             'subject': subject, 'situation': situation }
     exec(code, lvars, lvars)
     return lvars
 
@@ -95,21 +94,21 @@ class TestContext_TC(unittest.TestCase):
         ok (actual) == expected
 
 
-    def test_case_when(self):
+    def test_situation(self):
         """TextContent can be nestable"""
         if withstmt_not_available(): return
         input = prefix + r"""
-        class _CaseWhenTest1(unittest.TestCase):
+        class _SituationTest1(unittest.TestCase):
           with subject('module hello'):
             with subject('#method1'):
               def test_1(self):
                 ok (1) == 1
-              with case_when('condtion1'):
+              with situation('when condtion1:'):
                 def test_2(self):
                   ok (2) == 2
                 def test_3(self):
                   ok (3) == 3
-              with case_else():
+              with situation('else:'):
                 def test_4(self):
                   ok (4) == 4
               def test_5(self):
@@ -131,7 +130,7 @@ class TestContext_TC(unittest.TestCase):
     - test_5()
 """[1:]
         lvars = _exec_code(input)
-        klass = lvars.get('_CaseWhenTest1')
+        klass = lvars.get('_SituationTest1')
         actual = inspect_test_contexts(klass._context_list)
         ok (actual) == expected
 
@@ -146,7 +145,7 @@ class TestContext_TC(unittest.TestCase):
               @test('spec1')
               def _(self):
                 ok (1) == 1
-              with case_when('condition1'):
+              with situation('when condition1:'):
                 @test('spec2')
                 def _(self):
                   ok (2) == 2

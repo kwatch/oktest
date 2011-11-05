@@ -1715,13 +1715,13 @@ class LoopedDependencyError(ValueError):
 ##
 def context():
 
-    __all__ = ('subject', 'case_when', 'case_else')
+    __all__ = ('subject', 'situation', )
     global TestContext
 
     class TestContext(object):
         """grouping test methods.
 
-        normally created with subject() or case_when() helpers.
+        normally created with subject() or situation() helpers.
 
         ex::
             class HelloClassTest(unittest.TestCase):
@@ -1734,10 +1734,10 @@ def context():
                     def _(self):
                         ...
                 with subject('#method2()'):
-                    with case_when('condition'):
+                    with situation('when condition:'):
                         @test("spec3")
                         def _(self):
-                    with case_else():
+                    with situation('else:')
                         @test("spec3")
                         def _(self):
                         ...
@@ -1812,15 +1812,10 @@ def context():
         lineno = sys._getframe(1).f_lineno
         return TestContext(desc, _lineno=lineno)
 
-    def case_when(desc):
-        """helper to group test methods by condition"""
+    def situation(desc):
+        """helper to group test methods by situation or condition"""
         lineno = sys._getframe(1).f_lineno
-        return TestContext("when " + desc + ":", _lineno=lineno)
-
-    def case_else():
-        """corresponding helper with case_when()"""
-        lineno = sys._getframe(1).f_lineno
-        return TestContext("else:", _lineno=lineno)
+        return TestContext(desc, _lineno=lineno)
 
 
     return locals()

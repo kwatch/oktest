@@ -503,14 +503,14 @@ Test Context
 Oktest provides helper functions to describe test methods in structural style. ::
 
     from oktest import ok, test
-    {{*from oktest.context import subject, case_when, case_else*}}
+    {{*from oktest.context import subject, situation*}}
 
     class SampleTestCase(unittest.TestCase):
         {{*SUBJECT = "Sample"*}}
 
         {{*with subject("method1()"):*}}
 
-            {{*with case_when("condition"):*}}
+            {{*with situation("when condition:"):*}}
 
                 @test("spec1")
                 def _(self):
@@ -520,7 +520,7 @@ Oktest provides helper functions to describe test methods in structural style. :
                 def _(self):
                   ...
 
-            {{*with case_else():*}}
+            {{*with situation("else:"):*}}
 
                 @test("spec3")
                 def _(self):
