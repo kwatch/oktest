@@ -2572,7 +2572,7 @@ def _dummy():
             #    sys.stderr.write("%s" % (ex, ))
             #    sys.exit(1)
             app = cls(sys_argv[0])
-            n_errors = app.run()
+            n_errors = app.run(sys_argv[1:])
             sys.exit(n_errors)
 
     return locals()
@@ -2580,6 +2580,11 @@ def _dummy():
 
 mainapp = _new_module('oktest.mainapp', _dummy(), helper)
 del _dummy
+
+
+def main(*args):
+    sys_argv = [__file__] + sys.argv + list(args)
+    mainapp.MainApp.main(sys_argv)
 
 
 if __name__ == '__main__':
