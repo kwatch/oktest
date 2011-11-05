@@ -981,7 +981,7 @@ class BaseReporter(Reporter):
         for tupl in self._exceptions:
             self.report_exceptions(*tupl)
         if exc_info:
-            self.report_exception(testclass, method_name, ST_ERROR, exc_info)
+            self.report_exception(testclass, method_name, ST_ERROR, exc_info, None)
         if self._exceptions or exc_info:
             self.write_separator()
         self.out.flush()
@@ -992,7 +992,8 @@ class BaseReporter(Reporter):
     def exit_testcase(self, testcase, testname, status, exc_info):
         self.counts[status] = self.counts.setdefault(status, 0) + 1
         if exc_info:
-            self._exceptions.append((testcase, testname, status, exc_info))
+            context = self._context_stack and self._context_stack[-1] or None
+            self._exceptions.append((testcase, testname, status, exc_info, context))
 
     def enter_testcontext(self, context):
         self._context_stack.append(context)
@@ -1015,30 +1016,37 @@ class BaseReporter(Reporter):
         meth = getattr(testcase, testname)
         return meth and meth.__doc__ and meth.__doc__ or testname
 
-    def report_exceptions(self, testcase, testname, status, exc_info):
+    def report_exceptions(self, testcase, testname, status, exc_info, context):
         if isinstance(exc_info, list):
             specs = exc_info
             for spec in specs:
-                self.report_spec_esception(testcase, testname, status, spec)
+                self.report_spec_esception(testcase, testname, status, spec, context)
         else:
-            self.report_exception(testcase, testname, status, exc_info)
+            self.report_exception(testcase, testname, status, exc_info, context)
 
-    def report_exception(self, testcase, testname, status, exc_info):
-        self.report_exception_header(testcase, testname, status, exc_info)
-        self.report_exception_body  (testcase, testname, status, exc_info)
-        self.report_exception_footer(testcase, testname, status, exc_info)
+    def report_exception(self, testcase, testname, status, exc_info, context):
+        self.report_exception_header(testcase, testname, status, exc_info, context)
+        self.report_exception_body  (testcase, testname, status, exc_info, context)
+        self.report_exception_footer(testcase, testname, status, exc_info, context)
 
-    def report_exception_header(self, testcase, testname, status, exc_info):
+    def report_exception_header(self, testcase, testname, status, exc_info, context):
         if isinstance(testcase, type):
             klass, method = testcase, testname
-            parent = self.get_testclass_name(klass)
-            child  = method + '()'
+            title = "%s > %s()" % (self.get_testclass_name(klass), method)
             desc   = None
         else:
             parent, child, desc = self._get_testcase_header_items(testcase, testname)
+            items = [child]
+            c = context
+            while c:
+                items.append(c.desc)
+                c = c.parent
+            items.append(parent)
+            items.reverse()
+            title = " > ".join(items)
         indicator = self.indicator(status)
         self.write_separator()
-        self.out.write("[%s] %s > %s\n" % (indicator, parent, child))
+        self.out.write("[%s] %s\n" % (indicator, title))
         if desc: self.out.write(desc + "\n")
 
     def _get_testcase_header_items(self, testcase, testname):
@@ -1055,7 +1063,7 @@ class BaseReporter(Reporter):
         #return not filename.startswith(_oktest_filepath)
         return "__unittest" not in tb.tb_frame.f_globals
 
-    def report_exception_body(self, testcase, testname, status, exc_info):
+    def report_exception_body(self, testcase, testname, status, exc_info, context):
         assert exc_info
         ex_class, ex, ex_traceback = exc_info
         filter = not config.debug and self._filter or None
@@ -1074,7 +1082,7 @@ class BaseReporter(Reporter):
             if not rest.endswith("\n"): self.out.write("\n")
         self.out.flush()
 
-    def report_exception_footer(self, testcase, testname, status, exc_info):
+    def report_exception_footer(self, testcase, testname, status, exc_info, context):
         pass
 
     def _print_temporary_str(self, string):
@@ -1092,10 +1100,10 @@ class BaseReporter(Reporter):
             self.out.write(_eraser)
             self.out.flush()
 
-    def report_spec_esception(self, testcase, testname, status, spec):
+    def report_spec_esception(self, testcase, testname, status, spec, context):
         ex = spec._exception
         exc_info = (ex.__class__, ex, spec._traceback)
-        #self.report_exception_header(testcase, testname, status, exc_info)
+        #self.report_exception_header(testcase, testname, status, exc_info, context)
         parent, child, desc = self._get_testcase_header_items(testcase, testname)
         indicator = self.indicator(status)
         self.write_separator()
@@ -1105,8 +1113,8 @@ class BaseReporter(Reporter):
         stacktrace = self._filter_stacktrace(spec._stacktrace, spec._traceback)
         self._print_stacktrace(stacktrace)
         #
-        self.report_exception_body(testcase, testname, status, exc_info)
-        self.report_exception_footer(testcase, testname, status, exc_info)
+        self.report_exception_body(testcase, testname, status, exc_info, context)
+        self.report_exception_footer(testcase, testname, status, exc_info, context)
 
     def _filter_stacktrace(self, stacktrace, traceback_):
         entries = traceback.extract_tb(traceback_)
@@ -1322,7 +1330,7 @@ class UnittestStyleReporter(BaseReporter):
             self.report_exceptions(*tupl)
         self._super.exit_all(self)
 
-    def report_exception_header(self, testcase, testname, status, exc_info):
+    def report_exception_header(self, testcase, testname, status, exc_info, context):
         if isinstance(testcase, type):
             klass, method = testcase, testname
             parent = self.get_testclass_name(klass)

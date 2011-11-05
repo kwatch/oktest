@@ -651,7 +651,7 @@ class VerboseReporter_TC(unittest.TestCase):
                   ok (2) == 2
                 @test('spec3')
                 def _(self):
-                  ok (3) == 3
+                  ok (3) == 0
               with case_else():
                 @test('spec4')
                 def _(self):
@@ -665,10 +665,16 @@ class VerboseReporter_TC(unittest.TestCase):
       - [<G>ok</G>] spec1
       + when condition1:
         - [<G>ok</G>] spec2
-        - [<G>ok</G>] spec3
+        - [<R>Failed</R>] spec3
       + else:
         - [<G>ok</G>] spec4
-## total:4, <G>passed:4</G>, failed:0, error:0, skipped:0   (elapsed 0.000)
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] _WithTestContext1 > module hello > #method1 > when condition1: > 003: spec3
+  File "<string>", line 15, in _
+    
+<R>AssertionError: 3 == 0 : failed.</R>
+<r>----------------------------------------------------------------------</r>
+## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
 """[1:]
         lvars = _exec_code(input)
         klass = lvars.get('_WithTestContext1')
