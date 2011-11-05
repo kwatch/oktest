@@ -5,6 +5,38 @@ CHANGES
 $Release: 0.9.0 $
 
 
+Release 0.10.0
+--------------
+
+* (Experimental) Test context supported.
+  It helps you to describe specification in structured style.
+  ex::
+
+    from oktest import ok, test
+    from oktest.context import subject, case_when, case_else
+
+    class SampleTestCase(unittest.TestCase):
+      SUBJECT = "Sample"
+
+      with subject("method1()"):
+
+        with case_when("condition"):
+
+          @test("spec1")
+            def _(self):
+            ...
+
+          @test("spec2")
+          def _(self):
+            ...
+
+        with case_else():
+
+          @test("spec3")
+          def _(self):
+            ...
+
+
 Release 0.9.0
 -------------
 
@@ -216,7 +248,6 @@ Release 0.9.0
      @test("description")
      def _(self):
          ...
-
 
 
 Release 0.8.0

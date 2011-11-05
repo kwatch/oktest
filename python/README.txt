@@ -411,31 +411,31 @@ if necessary. Using this, you can change provider behaviour as you need. ::
     ## provider can have default value of argument
     def provide_tempfile({{*content="dummy"*}}):
         filename = '__tmp.txt'
-	with open(filename, 'w') as f:
-	    f.write(content)
-	return filename
+        with open(filename, 'w') as f:
+            f.write(content)
+        return filename
 
     def release_tempfile(filename):
         if os.path.exists(filename):
-	    os.unlink(filename)
+            os.unlink(filename)
 
     class FooTest(unittest.TestCase):
 
         ## override default value of providers by test method's
-	## default argument value
+        ## default argument value
         @test("example")
-	def _(self, tempfile, {{*content="AAAA"*}}):
-	    with open(tempfile) as f:
-	        s = f.read()
-	    ok (s) == {{*"AAAA"*}}
+        def _(self, tempfile, {{*content="AAAA"*}}):
+            with open(tempfile) as f:
+                s = f.read()
+            ok (s) == {{*"AAAA"*}}
 
         ## if you don't specify default value in test method,
-	## provider's default value is used
+        ## provider's default value is used
         @test("example")
-	def _(self, tempfile):
-	    with open(tempfile) as f:
-	        s = f.read()
-	    ok (s) == {{*"dummy"*}}
+        def _(self, tempfile):
+            with open(tempfile) as f:
+                s = f.read()
+            ok (s) == {{*"dummy"*}}
 
 Dependencies between fixtures are resolved automatically.
 If you know dependency injection framework such as `Spring`_ or `Guice`_,
@@ -467,7 +467,7 @@ with existing test methods::
     {{*@test()*}}
     def test_sample1(self, {{*member1, member2*}}):
         """description"""
-	...
+        ...
 
 If you want to integrate with other fixture library, create manager object
 and set it into ``oktest.fixture_manager``.
@@ -493,6 +493,51 @@ The following is an example to use `Forge`_ as external fixture library::
 ..    _`Spring`: http://www.springsource.org/
 ..    _`Guice`:  http://code.google.com/p/google-guice/
 ..    _`Forge`:  https://github.com/mnoble/forge/
+
+
+Test Context
+============
+
+*(Experimental)*
+
+Oktest provides helper functions to describe test methods in structural style. ::
+
+    from oktest import ok, test
+    {{*from oktest.context import subject, case_when, case_else*}}
+
+    class SampleTestCase(unittest.TestCase):
+        {{*SUBJECT = "Sample"*}}
+
+        {{*with subject("method1()"):*}}
+
+            {{*with case_when("condition"):*}}
+
+                @test("spec1")
+                def _(self):
+                  ...
+
+                @test("spec2")
+                def _(self):
+                  ...
+
+            {{*with case_else():*}}
+
+                @test("spec3")
+                def _(self):
+                    ...
+
+Output example::
+
+    * Sample
+      + method1()
+        + when condition:
+          - [ok] spec1
+          - [ok] spec2
+        + else:
+          - [ok] spec3
+    ## total:3, passed:3, failed:0, error:0, skipped:0   (elapsed 0.001)
+
+(Notice that this feature is experimental and may be changed in the future.)
 
 
 Unified Diff
@@ -737,20 +782,20 @@ It is possible to skip tests according to a certain condition. ::
     class SkipExampleTest(unittest.TestCase):
 
         @test("example of skip")
-	def _(self):
-	    if some_condition:
-	        {{*skip("reason to skip")*}}
-	    ...
+        def _(self):
+            if some_condition:
+                {{*skip("reason to skip")*}}
+            ...
 
         @test("example of skip")
-	{{*@skip.when(some_condition, "reason to skip")*}}
-	def _(self):
-	    ...
+        {{*@skip.when(some_condition, "reason to skip")*}}
+        def _(self):
+            ...
 
         ## unittest2 helpers are also available (if you installed it)
-	@unittest.skipIf(some_condition, "reason to skip")
-	def testExample(self):
-	    ...
+        @unittest.skipIf(some_condition, "reason to skip")
+        def testExample(self):
+            ...
 
     if __name__ == '__main__':
         run()
@@ -758,10 +803,10 @@ It is possible to skip tests according to a certain condition. ::
 Notice that the following doesn't work correctly. ::
 
         ## NG: @skip.when should be the below of @test
-	@skip.when(some_condition, "reason to skip")
+        @skip.when(some_condition, "reason to skip")
         @test("example of skip")
-	def _(self):
-	    ...
+        def _(self):
+            ...
 
 
 Command-line Interface
