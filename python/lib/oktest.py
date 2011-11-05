@@ -2255,7 +2255,7 @@ del _dummy
 
 
 ##
-## main
+## mainapp
 ##
 
 def load_module(mod_name, filepath, content=None):
@@ -2578,9 +2578,9 @@ def _dummy():
     return locals()
 
 
-main = _new_module('oktest.main', _dummy(), helper)
+mainapp = _new_module('oktest.mainapp', _dummy(), helper)
 del _dummy
 
 
 if __name__ == '__main__':
-    main.MainApp.main()
+    mainapp.MainApp.main()
