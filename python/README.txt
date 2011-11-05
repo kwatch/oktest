@@ -103,7 +103,8 @@ See `@test Decorator`_ section for details about @test decorator.
 Oktest is also available without unittest. See the folloing example. ::
 
     import sys, os
-    from oktest import ok, NG, test, {{*run*}}
+    {{*import oktest*}}
+    from oktest import ok, NG, test
 
     ## no need to extend TestCase class
     class Example1Test(object):
@@ -139,13 +140,13 @@ Oktest is also available without unittest. See the folloing example. ::
 
     ## invoke tests
     if __name__ == '__main__':
-        {{*run()*}}
+        {{*oktest.main()*}}
         ## or
-        #{{*run(r'.*Test$')*}}
+        #{{*oktest.run(r'.*Test$')*}}
         ## or
-        #{{*run(Example1Test, Example2Test)*}}
+        #{{*oktest.run(Example1Test, Example2Test)*}}
 
-``Oktest.run()`` accepts unittest.TestCase and other class.
+Both ``Oktest.main()`` and ``Oktest.run()`` accept unittest.TestCase and other class.
 
 
 Assertion Reference
@@ -548,7 +549,7 @@ Unified Diff
 * both x and y are str or unicode
 * and x != y
 * and oktest.DIFF is True or 'repr'
-* and invoked with oktest.run()
+* and invoked with oktest.main() or oktest.run()
 
 For example::
 
@@ -777,7 +778,8 @@ Skip Test
 It is possible to skip tests according to a certain condition. ::
 
     import unittest
-    from oktest import ok, run, test, {{*skip*}}
+    import oktest
+    from oktest import ok, test, {{*skip*}}
     some_condition = True
 
     class SkipExampleTest(unittest.TestCase):
@@ -799,7 +801,7 @@ It is possible to skip tests according to a certain condition. ::
             ...
 
     if __name__ == '__main__':
-        run()
+        oktest.main()
 
 Notice that the following doesn't work correctly. ::
 
@@ -819,6 +821,8 @@ Oktest now supports command-line interface to execute test scripts. ::
     $ python -m oktest {{*-x 'foo_*.py' tests/*_test.py*}}
     ## run test scripts in 'tests' dir with pattern '*_test.py'
     $ python -m oktest {{*-p '*_test.py' tests*}}
+    ## reports result in plain format (p: plain, s: simple, v: verbose)
+    $ python -m oktest {{*-sp*}} tests
     ## filter by class name
     $ python -m oktest {{*-f class='ClassName*'*}} tests
     ## filter by test method name
@@ -828,6 +832,11 @@ Oktest now supports command-line interface to execute test scripts. ::
 
 Try ``python -m oktest -h`` for details about command-line options.
 
+If you use ``oktest.main()`` in your test script, it accepts command-line options. ::
+
+    ## reports output in plain format
+    $ python test/foobar_test.py {{*-sp -f test='*keyword*'*}}
+
 
 Helpers Reference
 =================
@@ -835,6 +844,14 @@ Helpers Reference
 
 ``oktest`` module
 -----------------
+
+main(\*args):
+	Invokes tests of each class.
+	Args represents command-line options. ::
+
+	    import oktest
+	    oktest.main()         # same as: python -m oktest
+	    oktest.main('-sp')    # same as: python -m oktest -sp
 
 run(\*classes)
 	Invokes tests of each class.
@@ -846,6 +863,8 @@ run(\*classes)
 	    oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 
 spec(description)
+
+	{{*(Obsolete! Don't use this!)*}}
 
 	Represents spec description.
 	This is just a marker function, but very useful for readability. ::

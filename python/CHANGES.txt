@@ -8,7 +8,18 @@ $Release: 0.9.0 $
 Release 0.10.0
 --------------
 
-* (Experimental) Test context supported.
+* [change] 'spec()' is obsoleted completely.
+
+* [enhance] Add 'oktest.main()' which is a replacement of 'oktest.run()'.
+  Using 'oktest.main()' instead of 'oktest.run()', command options are available.
+  ex::
+
+    ## for example:
+    $ python test/foobar_test.py -sp -f test='*keyword*'
+    ## is almost same as:
+    $ python -m oktest test/foobar_test.py -sp -f test='*keyword*'
+
+* [enhance] (Experimental) Test context supported.
   It helps you to describe specification in structured style.
   ex::
 

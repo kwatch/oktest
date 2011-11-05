@@ -130,7 +130,8 @@ if True:
 #It is possible to skip tests according to a certain condition. ::
 
     import unittest
-    from oktest import ok, run, test, skip
+    import oktest
+    from oktest import ok, test, skip
     some_condition = True
 
     class SkipExampleTest(unittest.TestCase):
@@ -152,7 +153,7 @@ if True:
             ok (0) == 1 #...
 
     if __name__ == '__main__':
-        run()
+        oktest.main()
 
 #Notice that the following doesn't work correctly. ::
 
@@ -172,6 +173,8 @@ if True:
     #$ python -m oktest -x 'foo_*.py' tests/*_test.py
     ## run test scripts in 'tests' dir with pattern '*_test.py'
     #$ python -m oktest -p '*_test.py' tests
+    ## reports result in plain format (p: plain, s: simple, v: verbose)
+    #$ python -m oktest -sp tests
     ## filter by class name
     #$ python -m oktest -f class='ClassName*' tests
     ## filter by test method name
@@ -180,4 +183,9 @@ if True:
     #$ python -m oktest -f tag='*value*' tests
 
 #Try ``python -m oktest -h`` for details about command-line options.
+
+#If you use ``oktest.main()`` in your test script, it accepts command-line options. ::
+
+    ## reports output in plain format
+    #$ python test/foobar_test.py -sp -f test='*keyword*'
 
