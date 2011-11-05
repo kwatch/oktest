@@ -179,7 +179,7 @@ AssertionError: 2 == 1 : failed.
         ## with with-stmt
         if with_stmt_available:
             sout, serr = self._run_oktest(fname, input)
-            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            sout = re.sub(r'elapsed 0.\d\d\d', 'elapsed 0.000', sout)
             self.assertEqual("", serr)
             from oktest import ok; ok (sout) == expected1
             self.assertEqual(expected1, sout)
@@ -189,7 +189,7 @@ AssertionError: 2 == 1 : failed.
         if True:
             input2 = replace_with_stmt(input)   # remove 'with' statement
             sout, serr = self._run_oktest(fname, input2)
-            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            sout = re.sub(r'elapsed 0.\d\d\d', 'elapsed 0.000', sout)
             assert sout == expected2
             assert serr == ""
 
@@ -263,14 +263,14 @@ AssertionError: 2 == 0 : failed.
         ## with with-statement
         if with_stmt_available:
             sout, serr = self._run_oktest(fname, input)
-            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            sout = re.sub(r'elapsed 0.\d\d\d', 'elapsed 0.000', sout)
             assert sout == expected1
             assert serr == ""
         ## without with-statement
         if True:
             input2 = replace_with_stmt(input)
             sout, serr = self._run_oktest(fname, input2)
-            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            sout = re.sub(r'elapsed 0.\d\d\d', 'elapsed 0.000', sout)
             assert sout == expected2
             assert serr == ""
 
@@ -316,7 +316,7 @@ AttributeError: 'NoneType' object has no attribute 'unknownattribute'
         ## with with-statement
         if with_stmt_available:
             sout, serr = self._run_oktest(fname, input)
-            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            sout = re.sub(r'elapsed 0.\d\d\d', 'elapsed 0.000', sout)
             assert sout == expected1
             assert serr == ""
         ## without with-statement
@@ -324,7 +324,7 @@ AttributeError: 'NoneType' object has no attribute 'unknownattribute'
             input2 = replace_with_stmt(input)
             input2 = input2.replace('ok (1+1) == 0', '#ok (1+1) == 0')
             sout, serr = self._run_oktest(fname, input2)
-            sout = re.sub(r'elapsed 0.0\d\d', 'elapsed 0.000', sout)
+            sout = re.sub(r'elapsed 0.\d\d\d', 'elapsed 0.000', sout)
             assert sout == expected2
             assert serr == ""
 
