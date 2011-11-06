@@ -146,7 +146,7 @@ class Todo_TC(unittest.TestCase):
             expected = r"""
 * <b>_TodoIsAvailableWithTestDecorator</b>
   - [<R>Failed</R>] SPEC3
-  - [<G>ok</G>] SPEC4
+  - [<G>passed</G>] SPEC4
   - [<Y>TODO</Y>] SPEC1
   - [<R>Failed</R>] SPEC2
 <r>----------------------------------------------------------------------</r>

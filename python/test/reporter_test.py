@@ -147,7 +147,7 @@ class VerboseReporter_TC(unittest.TestCase):
         input = INPUT_COMPREHENSIVE
         expected = r"""
 * <b>class 'Foo'</b>
-  - [<G>ok</G>] 1+1 should be 2
+  - [<G>passed</G>] 1+1 should be 2
   - [<R>Failed</R>] 1-1 should be 0
   - [<R>ERROR</R>] length of empty list should be 0
   - [<Y>skipped</Y>] should be skipped
@@ -165,12 +165,12 @@ class VerboseReporter_TC(unittest.TestCase):
 * <b>_Foo_TestCase</b>
   + <b>module hello</b>
     + <b>#method1</b>
-      - [<G>ok</G>] spec1
+      - [<G>passed</G>] spec1
       + when condition1:
-        - [<G>ok</G>] spec2
+        - [<G>passed</G>] spec2
         - [<R>Failed</R>] spec3
       + else:
-        - [<G>ok</G>] spec4
+        - [<G>passed</G>] spec4
 """[1:] + OUTPUT_WITH_TEST_CONTEXT
         actual = _do_test(input, color=True, style="verbose")
         ok (actual) == _colorize(expected)

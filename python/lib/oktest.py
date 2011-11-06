@@ -894,7 +894,7 @@ class Reporter(object):
 class BaseReporter(Reporter):
 
     INDICATOR = {
-        ST_PASSED:  "ok",          # or "passed" ?
+        ST_PASSED:  "passed",          # or "ok" ?
         ST_FAILED:  "Failed",
         ST_ERROR:   "ERROR",
         ST_SKIPPED: "skipped",
@@ -1232,7 +1232,7 @@ class VerboseReporter(BaseReporter):
 
     def enter_testcase(self, testcase, testname):
         desc = self.get_testcase_desc(testcase, testname)
-        self._print_temporary_str("  " * self.depth + "- [  ] " + desc)
+        self._print_temporary_str("  " * self.depth + "- [      ] " + desc)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)

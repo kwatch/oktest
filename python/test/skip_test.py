@@ -130,7 +130,7 @@ class Skip_TC(unittest.TestCase):
 * <b>_AvailableWithTestDecorator</b>
   - [<Y>skipped</Y>] desc7
   - [<Y>skipped</Y>] desc2
-  - [<G>ok</G>] desc3
+  - [<G>passed</G>] desc3
 ## total:3, <G>passed:1</G>, failed:0, error:0, <Y>skipped:2</Y>, todo:0   (0.000 sec)
 """[1:]
             self._test_runner(expected, Skip_TC._AvailableWithTestDecorator)

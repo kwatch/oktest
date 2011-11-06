@@ -537,10 +537,10 @@ Output example::
     * Sample
       + method1()
         + when condition:
-          - [ok] spec1
-          - [ok] spec2
+          - [passed] spec1
+          - [passed] spec2
         + else:
-          - [ok] spec3
+          - [passed] spec3
     ## total:3, passed:3, failed:0, error:0, skipped:0, todo:0   (0.000 sec)
 
 (Notice that this feature is experimental and may be changed in the future.)
