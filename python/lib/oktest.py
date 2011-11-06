@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test')
+__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail')
 __version__ = "$Release: 0.9.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
@@ -483,6 +483,9 @@ def NOT(target):     # experimental. prefer to NG()?
     obj = ASSERTION_OBJECT(target, False)
     obj._location = util.get_location(1)
     return obj
+
+def fail(desc):
+    raise AssertionError(desc)
 
 
 class Should(object):

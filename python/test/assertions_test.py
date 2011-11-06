@@ -401,6 +401,17 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             os.rmdir('foobar.d')
 
 
+    def test_fail(self):
+        try:
+            oktest.fail("description")
+            self.faild("oktest.fail() should raise AssertionError but not")
+        except:
+            ex = sys.exc_info()[1]
+            #self.assertEqual(AssertionError, type(ex))     # not work on Python 2.4
+            self.assertTrue(isinstance(ex, AssertionError))
+            self.assertEqual("description", str(ex))
+
+
     def test_should(self):
         ok ("foobar").should.startswith("foob")
         @be_fail("'foobar'.startswith('aaa') : failed.")
