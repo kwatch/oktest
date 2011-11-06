@@ -75,7 +75,7 @@ class RunnerTestHelper(object):
             output   = output  .replace('+++ actual ', '+++ actual')
             expected = expected.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
             output   = output  .replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
-            output   = re.sub(r'elapsed 0\.0\d\d', 'elapsed 0.000', output)
+            output   = re.sub(r'0\.0\d\d sec', '0.000 sec', output)
             #ver = sys.version_info[0:3]
             #if (2,7,2) <= ver < (3,2,0):
             #    expected = expected.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
@@ -432,7 +432,7 @@ run(FooTest)
     ok (1+1) == 0
 <R>AssertionError: 2 == 0 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, skipped:0   (elapsed 0.000)
+## total:4, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, skipped:0   (0.000 sec)
 """[1:]
         if python24:
             expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')
@@ -484,7 +484,7 @@ Sample Description 2
     ok (0) == 3
 <R>AssertionError: 0 == 3 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:3, passed:0, <R>failed:3</R>, error:0, skipped:0   (elapsed 0.000)
+## total:3, passed:0, <R>failed:3</R>, error:0, skipped:0   (0.000 sec)
 """[1:]
         os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
         oktest.REPORTER = oktest.SimpleReporter

@@ -222,10 +222,9 @@ class TestDeco_TC(unittest.TestCase):
 [ERROR] DummyTestCase3 > 001: xxx
 NameError: Fixture provider for 'foo' not found.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:0, error:1, skipped:0   (elapsed 0.001)
+## total:1, passed:0, failed:0, error:1, skipped:0   (0.000 sec)
 """[1:]
-        expected = re.sub(r'elapsed \d\.\d\d\d', 'elapsed 0.000', expected)
-        output   = re.sub(r'elapsed \d\.\d\d\d', 'elapsed 0.000', output)
+        output   = re.sub(r'\d\.\d\d\d sec', '0.000 sec', output)
         assert output == expected
 
 

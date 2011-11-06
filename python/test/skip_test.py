@@ -63,7 +63,7 @@ class Skip_TC(unittest.TestCase):
         kwargs = dict(style="verbose", out=out, color=True)
         n_errors = oktest.run(testclass, **kwargs)
         output = out.getvalue()
-        output = re.sub('elapsed 0\.\d\d\d', 'elapsed 0.000', output)
+        output = re.sub('0\.\d\d\d sec', '0.000 sec', output)
         self.maxDiff = None
         self.assertEqual(oktest.Color._colorize(expected), output)
         self.assertEqual(0, n_errors)
@@ -81,7 +81,7 @@ class Skip_TC(unittest.TestCase):
 * <b>_RunnterHandleSkipTest</b>
   - [<Y>skipped</Y>] test1
   - [<Y>skipped</Y>] test2
-## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
+## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (0.000 sec)
 """[1:]
         self._test_runner(expected, Skip_TC._RunnterHandleSkipTest)
 
@@ -106,7 +106,7 @@ class Skip_TC(unittest.TestCase):
 * <b>_RunnterHandleUnittestSkipTest</b>
   - [<Y>skipped</Y>] test1
   - [<Y>skipped</Y>] test2
-## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
+## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>   (0.000 sec)
 """[1:]
             self._test_runner(expected, Skip_TC._RunnterHandleUnittestSkipTest)
 
@@ -131,7 +131,7 @@ class Skip_TC(unittest.TestCase):
   - [<Y>skipped</Y>] desc7
   - [<Y>skipped</Y>] desc2
   - [<G>ok</G>] desc3
-## total:3, <G>passed:1</G>, failed:0, error:0, <Y>skipped:2</Y>   (elapsed 0.000)
+## total:3, <G>passed:1</G>, failed:0, error:0, <Y>skipped:2</Y>   (0.000 sec)
 """[1:]
             self._test_runner(expected, Skip_TC._AvailableWithTestDecorator)
 

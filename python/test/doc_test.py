@@ -211,7 +211,7 @@ try:
     #|$ python test/add_test.py
     #|* add()
     #|  - [TODO] returns sum of arguments.
-    #|## total:1, passed:0, failed:0, error:0, skipped:0, todo:1   (elapsed 0.000)
+    #|## total:1, passed:0, failed:0, error:0, skipped:0, todo:1   (0.000 sec)
 
 #If test decoreated by @todo doesn't raise AssertionError, Oktest will report
 #you that, for example::
@@ -223,7 +223,7 @@ try:
     #|[Failed] add() > 001: returns sum of arguments.
     #|_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.
     #|----------------------------------------------------------------------
-    #|## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (elapsed 0.000)
+    #|## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
 
 #Notice that the following will not work::
 

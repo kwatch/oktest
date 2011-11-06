@@ -973,7 +973,7 @@ class BaseReporter(Reporter):
         min = int(int(dt) / 60)     # int / int is float on Python3
         sec = dt - (min * 60)
         elapsed = min and "%s:%06.3f" % (min, sec) or "%.3f" % sec
-        self.out.write("## %s   (elapsed %s)\n" % (self.counts2str(), elapsed))
+        self.out.write("## %s   (%s sec)\n" % (self.counts2str(), elapsed))
         self.out.flush()
 
     def enter_testclass(self, testclass):
