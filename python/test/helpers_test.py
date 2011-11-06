@@ -4,7 +4,7 @@
 ### $License: MIT License $
 ###
 
-import sys, os, re
+import sys, os, re, shutil
 import unittest
 import oktest
 from oktest import ok, NG, run, spec
@@ -13,6 +13,8 @@ from oktest.helper import flatten, rm_rf
 from oktest.dummy import *
 
 available_with_statement = sys.version_info[0:2] > (2, 4)
+
+os.environ['OKTEST_WARNING_DISABLED'] = 'true'
 
 
 def do_exec(script, **kwargs):
@@ -242,7 +244,6 @@ class helper_rm_rf_TC(unittest.TestCase):
         assert os.path.isfile('_rm_rf/B/C/X.txt')
         assert os.path.isfile('_rm_rf/Y.txt')
     def tearDown(setup):
-        import shutil
         if os.path.isdir('_rm_rf'):
             shutil.rmtree('_rm_rf')
     def test_remove_files_recursively(self):

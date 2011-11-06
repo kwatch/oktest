@@ -18,6 +18,8 @@ try:
 except ImportError:
     from io import StringIO
 
+os.environ['OKTEST_WARNING_DISABLED'] = 'true'
+
 
 class Call_TC(unittest.TestCase):
 

@@ -1483,9 +1483,9 @@ class _RunnableContext(_Context):
 
 
 ##
-## spec()
+## spec()   # deprecated
 ##
-class Spec(_Context):
+class Spec(_Context):   # deprecated
 
     _exception  = None
     _traceback  = None
@@ -1547,7 +1547,10 @@ class Spec(_Context):
     __nonzero__ = __bool__    # for Python2
 
 
-def spec(desc):
+def spec(desc):   # deprecated
+    if not os.getenv('OKTEST_WARNING_DISABLED'):
+        import warnings
+        warnings.warn("oktest.spec() is deprecated.", DeprecationWarning, 2)
     return Spec(desc)
 
 

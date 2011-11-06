@@ -10,6 +10,7 @@ import unittest
 
 import oktest
 from oktest import ok, run, spec, Spec
+os.environ['OKTEST_WARNING_DISABLED'] = 'true'
 
 with_stmt_available = sys.version_info >= (2, 5,)
 
