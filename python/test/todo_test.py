@@ -17,7 +17,7 @@ from oktest import not_yet, _ExpectedFailure, _UnexpectedSuccess
 
 
 
-class NotYet_TC(unittest.TestCase):
+class Todo_TC(unittest.TestCase):
 
 
     ### @not_yet()
@@ -83,11 +83,11 @@ class NotYet_TC(unittest.TestCase):
     def test_runner_should_handle_ExpectedFailure(self):
         expected = r"""
 * <b>_RunnerHandleExpectedFailureTest</b>
-  - [<Y>NotYet</Y>] test1
+  - [<Y>TODO</Y>] test1
   - [<R>Unexpected</R>] test2
-## total:2, passed:0, failed:0, error:0, skipped:0, <Y>not-yet:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
+## total:2, passed:0, failed:0, error:0, skipped:0, <Y>todo:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
 """[1:]
-        self._test_runner(expected, NotYet_TC._RunnerHandleExpectedFailureTest, 1)
+        self._test_runner(expected, Todo_TC._RunnerHandleExpectedFailureTest, 1)
 
     try:
         import unittest
@@ -107,13 +107,13 @@ class NotYet_TC(unittest.TestCase):
         def test_runner_should_handle_unittests_ExpectedFailure(self):
             expected = r"""
 * <b>_RunnerHandleUnittestExpectedFailure</b>
-  - [<Y>NotYet</Y>] test1
+  - [<Y>TODO</Y>] test1
   - [<R>Unexpected</R>] test2
-## total:2, passed:0, failed:0, error:0, skipped:0, <Y>not-yet:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
+## total:2, passed:0, failed:0, error:0, skipped:0, <Y>todo:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
 """[1:]
-            self._test_runner(expected, NotYet_TC._RunnerHandleUnittestExpectedFailure, 1)
+            self._test_runner(expected, Todo_TC._RunnerHandleUnittestExpectedFailure, 1)
 
-        class _NotYetIsAvailableWithTestDecorator(object):
+        class _TodoIsAvailableWithTestDecorator(object):
             @test("SPEC1")
             @not_yet
             def _(self):
@@ -136,20 +136,20 @@ class NotYet_TC(unittest.TestCase):
 
         def test_not_yet_is_avaialbe_with_test_decorator(self):
             expected = r"""
-* <b>_NotYetIsAvailableWithTestDecorator</b>
+* <b>_TodoIsAvailableWithTestDecorator</b>
   - [<R>Failed</R>] SPEC3
   - [<G>ok</G>] SPEC4
-  - [<Y>NotYet</Y>] SPEC1
+  - [<Y>TODO</Y>] SPEC1
   - [<R>Unexpected</R>] SPEC2
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _NotYetIsAvailableWithTestDecorator > 003: SPEC3
-  File "test/not_yet_test.py", line 130, in _
+[<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 003: SPEC3
+  File "test/todo_test.py", line 130, in _
     assert 1 == 0, "expected failure"
 <R>AssertionError: expected failure</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:1</G>, <R>failed:1</R>, error:0, skipped:0, <Y>not-yet:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
+## total:4, <G>passed:1</G>, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
 """[1:]
-            self._test_runner(expected, NotYet_TC._NotYetIsAvailableWithTestDecorator, 2)
+            self._test_runner(expected, Todo_TC._TodoIsAvailableWithTestDecorator, 2)
 
 
 

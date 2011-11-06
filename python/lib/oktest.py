@@ -589,7 +589,7 @@ ST_PASSED  = "passed"
 ST_FAILED  = "failed"
 ST_ERROR   = "error"
 ST_SKIPPED = "skipped"
-ST_NOT_YET = "not-yet"
+ST_TODO    = "todo"
 ST_UNEXPECTED = "unexpected"
 
 
@@ -749,7 +749,7 @@ class TestRunner(object):
         except SkipTest:
             return ST_SKIPPED, ()
         except _ExpectedFailure:   # when failed expectedly
-            return ST_NOT_YET, ()
+            return ST_TODO, ()
         except _UnexpectedSuccess: # when passed unexpectedly
             return ST_UNEXPECTED, ()
         except Exception:
@@ -893,7 +893,7 @@ class BaseReporter(Reporter):
         ST_FAILED:  "Failed",
         ST_ERROR:   "ERROR",
         ST_SKIPPED: "skipped",
-        ST_NOT_YET: "NotYet",
+        ST_TODO:    "TODO",
         ST_UNEXPECTED: "Unexpected",
     }
 
@@ -933,7 +933,7 @@ class BaseReporter(Reporter):
             ST_FAILED:     0,
             ST_ERROR:      0,
             ST_SKIPPED:    0,
-            ST_NOT_YET:    0,
+            ST_TODO:       0,
             ST_UNEXPECTED: 0,
         }
 
@@ -942,7 +942,7 @@ class BaseReporter(Reporter):
         (ST_FAILED,     "failed",     True),
         (ST_ERROR,      "error",      True),
         (ST_SKIPPED,    "skipped",    True),
-        (ST_NOT_YET,    "not-yet",    False),
+        (ST_TODO,       "todo",       False),
         (ST_UNEXPECTED, "unexpected", False),
     ]
 
@@ -1139,7 +1139,7 @@ class BaseReporter(Reporter):
         if kind == ST_FAILED:  return Color.red(string, bold=True)
         if kind == ST_ERROR:   return Color.red(string, bold=True)
         if kind == ST_SKIPPED: return Color.yellow(string, bold=True)
-        if kind == ST_NOT_YET: return Color.yellow(string, bold=True)
+        if kind == ST_TODO:    return Color.yellow(string, bold=True)
         if kind == ST_UNEXPECTED: return Color.red(string, bold=True)
         if kind == "topic":    return Color.bold(string)
         if kind == "sep":      return Color.red(string)
