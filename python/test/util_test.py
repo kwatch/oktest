@@ -22,7 +22,7 @@ class Util_TC(unittest.TestCase):
             assert isinstance(cp932, str)
             f = open(fname, 'wb'); f.write(cp932); f.close()
             try:
-                u = oktest._read_text_file(fname)
+                u = oktest.util.read_text_file(fname)
                 self.assertEqual(unicode, type(u))
                 self.assertEqual(input.decode('utf-8'), u)
             finally:
@@ -33,7 +33,7 @@ class Util_TC(unittest.TestCase):
             assert isinstance(cp932, bytes)
             f = open(fname, 'wb'); f.write(cp932); f.close()
             try:
-                s = oktest._read_text_file(fname)
+                s = oktest.util.read_text_file(fname)
                 self.assertEqual(str, type(s))
                 self.assertEqual(input, s)
             finally:

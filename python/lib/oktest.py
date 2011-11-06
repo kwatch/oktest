@@ -42,36 +42,6 @@ if python3:
     def _func_firstlineno(func):
         return func.__code__.co_firstlineno
 
-def _read_binary_file(fname):
-    f = open(fname, 'rb')
-    try:
-        b = f.read()
-    finally:
-        f.close()
-    return b
-if python2:
-    _rexp_magic_comment = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)')
-    def _read_text_file(fname):
-        b = _read_binary_file(fname)
-        m = _rexp_magic_comment.match(b)
-        encoding = m and m.group(1) or 'utf-8'
-        u = b.decode(encoding)
-        assert isinstance(u, unicode)
-        return u
-if python3:
-    _rexp_magic_comment = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)'.encode('us-ascii'))
-    def _read_text_file(fname):
-        b = _read_binary_file(fname)
-        m = _rexp_magic_comment.match(b)
-        encoding = m and m.group(1).decode('us-ascii') or 'utf-8'
-        u = b.decode(encoding)
-        assert isinstance(u, str)
-        return u
-
-def _get_location(depth=0):
-    frame = sys._getframe(depth+1)
-    return (frame.f_code.co_filename, frame.f_lineno)
-
 def _new_module(name, local_vars, util=None):
     mod = type(sys)(name)
     sys.modules[name] = mod
@@ -81,35 +51,6 @@ def _new_module(name, local_vars, util=None):
             util.__dict__[k] = mod.__dict__[k]
         util.__all__ += mod.__all__
     return mod
-
-if python3:
-    def func_argnames(func):
-        if isinstance(func, types.MethodType):
-            codeobj = func.__func__.__code__
-            index = 1
-        else:
-            codeobj = func.__code__
-            index = 0
-        return codeobj.co_varnames[index:codeobj.co_argcount]
-    def func_defaults(func):
-        if isinstance(func, types.MethodType):
-            return func.__func__.__defaults__
-        else:
-            return func.__defaults__
-else:
-    def func_argnames(func):
-        if isinstance(func, types.MethodType):
-            codeobj = func.im_func.func_code
-            index = 1
-        else:
-            codeobj = func.func_code
-            index = 0
-        return codeobj.co_varnames[index:codeobj.co_argcount]
-    def func_defaults(func):
-        if isinstance(func, types.MethodType):
-            return func.im_func.func_defaults
-        else:
-            return func.func_defaults
 
 
 __unittest = True    # see unittest.TestResult._is_relevant_tb_level()
@@ -251,7 +192,7 @@ class AssertionObject(object):
     #    return self
 
     def failed(self, msg, depth=2, boolean=None):
-        file, line = _get_location(depth + 1)
+        file, line = util.get_location(depth + 1)
         diff = None
         if isinstance(msg, tuple):
             msg, diff = msg
@@ -525,22 +466,22 @@ ASSERTION_OBJECT = AssertionObject
 
 def ok(target):
     obj = ASSERTION_OBJECT(target, True)
-    obj._location = _get_location(1)
+    obj._location = util.get_location(1)
     return obj
 
 def NG(target):
     obj = ASSERTION_OBJECT(target, False)
-    obj._location = _get_location(1)
+    obj._location = util.get_location(1)
     return obj
 
 def not_ok(target):  # for backward compatibility
     obj = ASSERTION_OBJECT(target, False)
-    obj._location = _get_location(1)
+    obj._location = util.get_location(1)
     return obj
 
 def NOT(target):     # experimental. prefer to NG()?
     obj = ASSERTION_OBJECT(target, False)
-    obj._location = _get_location(1)
+    obj._location = util.get_location(1)
     return obj
 
 
@@ -1620,7 +1561,7 @@ def test(description_text=None, **options):
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
     def deco(orig_func):
-        argnames = func_argnames(orig_func)
+        argnames = util.func_argnames(orig_func)
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
             def newfunc(self):
@@ -1668,10 +1609,10 @@ class FixtureInjector(object):
         resolved  = {"self": object}   # {"arg_name": arg_value}
         in_progress = []
         ##
-        arg_names = func_argnames(func)
+        arg_names = util.func_argnames(func)
         ## default arg values of test method are stored into 'resolved' dict
         ## in order for providers to access to them
-        defaults = func_defaults(func)
+        defaults = util.func_defaults(func)
         if defaults:
             idx = - len(defaults)
             for aname, default in zip(arg_names[idx:], defaults):
@@ -1690,11 +1631,11 @@ class FixtureInjector(object):
                     resolved[aname] = fixture_manager.provide(aname)
             return resolved[aname]
         def _call(provider, resolving_arg_name):
-            arg_names = func_argnames(provider)
+            arg_names = util.func_argnames(provider)
             if not arg_names:
                 return provider()
             in_progress.append(resolving_arg_name)
-            defaults = func_defaults(provider)
+            defaults = util.func_defaults(provider)
             if not defaults:
                 arg_values = [ _get_value(aname) for aname in arg_names ]
             else:
@@ -1957,6 +1898,67 @@ def _dummy():
                 from shutil import rmtree
                 rmtree(fname)
 
+    def get_location(depth=0):
+        frame = sys._getframe(depth+1)
+        return (frame.f_code.co_filename, frame.f_lineno)
+
+    def read_binary_file(fname):
+        f = open(fname, 'rb')
+        try:
+            b = f.read()
+        finally:
+            f.close()
+        return b
+
+    if python2:
+        _rexp = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)')
+        def read_text_file(fname,  _rexp=_rexp, _read_binary_file=read_binary_file):
+            b = _read_binary_file(fname)
+            m = _rexp.match(b)
+            encoding = m and m.group(1) or 'utf-8'
+            u = b.decode(encoding)
+            assert isinstance(u, unicode)
+            return u
+    if python3:
+        _rexp = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)'.encode('us-ascii'))
+        def read_text_file(fname,  _rexp=_rexp, _read_binary_file=read_binary_file):
+            b = _read_binary_file(fname)
+            m = _rexp.match(b)
+            encoding = m and m.group(1).decode('us-ascii') or 'utf-8'
+            u = b.decode(encoding)
+            assert isinstance(u, str)
+            return u
+
+    from types import MethodType as _MethodType
+
+    if python2:
+        def func_argnames(func):
+            if isinstance(func, _MethodType):
+                codeobj = func.im_func.func_code
+                index = 1
+            else:
+                codeobj = func.func_code
+                index = 0
+            return codeobj.co_varnames[index:codeobj.co_argcount]
+        def func_defaults(func):
+            if isinstance(func, _MethodType):
+                return func.im_func.func_defaults
+            else:
+                return func.func_defaults
+    if python3:
+        def func_argnames(func):
+            if isinstance(func, _MethodType):
+                codeobj = func.__func__.__code__
+                index = 1
+            else:
+                codeobj = func.__code__
+                index = 0
+            return codeobj.co_varnames[index:codeobj.co_argcount]
+        def func_defaults(func):
+            if isinstance(func, _MethodType):
+                return func.__func__.__defaults__
+            else:
+                return func.__defaults__
 
     return locals()
 
@@ -2323,9 +2325,9 @@ def load_module(mod_name, filepath, content=None):
     #mod.__dict__["__file__"] = os.path.abspath(filepath)
     if content is None:
         if python2:
-            content = _read_binary_file(filepath)
+            content = util.read_binary_file(filepath)
         if python3:
-            content = _read_text_file(filepath)
+            content = util.read_text_file(filepath)
     if filepath:
         code = compile(content, filepath, "exec")
         exec(code, mod.__dict__, mod.__dict__)

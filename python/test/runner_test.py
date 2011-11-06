@@ -614,10 +614,10 @@ class NotYetDecorator_TC(unittest.TestCase):
         def test_not_yet_is_avaialbe_with_test_decorator(self):
             expected = r"""
 * <b>_NotYetIsAvailableWithTestDecorator</b>
-  - [<R>Failed</R>] SPEC3
-  - [<G>ok</G>] SPEC4
   - [<Y>NotYet</Y>] SPEC1
   - [<R>Unexpected</R>] SPEC2
+  - [<R>Failed</R>] SPEC3
+  - [<G>ok</G>] SPEC4
 <r>----------------------------------------------------------------------</r>
 [<R>Failed</R>] _NotYetIsAvailableWithTestDecorator > 003: SPEC3
   File "test/runner_test.py", line 607, in _
