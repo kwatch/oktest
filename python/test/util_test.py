@@ -361,6 +361,20 @@ class util_TC(unittest.TestCase):
             self.assertTrue("'utf8' codec can't decode byte 0x82 in position 0: invalid start byte", str(ex))
 
 
+    def test_helper_1(self):
+        """'help' is an alias of 'util'"""
+        import oktest
+        import oktest.util
+        ok (oktest).has_attr('helper')
+        ok (oktest.helper).is_(oktest.util)
+
+    def test_helper_2(self):
+        """'help' is an alias of 'util'"""
+        def fn():
+            import oktest.helper
+        ok (fn).not_raise()
+
+
 
 if __name__ == '__main__':
     #oktest.run()

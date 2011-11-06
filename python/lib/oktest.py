@@ -1966,6 +1966,9 @@ def _dummy():
 util = _new_module('oktest.util', _dummy())
 del _dummy
 
+helper = util  ## 'help' is an alias of 'util' (for backward compatibility)
+sys.modules['oktest.helper'] = sys.modules['oktest.util']
+
 
 
 ##
