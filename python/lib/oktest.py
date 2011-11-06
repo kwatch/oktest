@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail')
+__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'not_yet', 'main')
 __version__ = "$Release: 0.9.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
