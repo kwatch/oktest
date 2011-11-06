@@ -208,7 +208,10 @@ class TestDeco_TC(unittest.TestCase):
 
     @test("raises NameError if fixture provider is not found.")
     def t(self):
-        from StringIO import StringIO
+        try:
+            from StringIO import StringIO
+        except ImportError:
+            from io import StringIO
         out = StringIO()
         oktest.run(DummyTestCase3, out=out)
         output = out.getvalue()
