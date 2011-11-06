@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'not_yet', 'main')
+__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'todo', 'main')
 __version__ = "$Release: 0.9.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
@@ -557,7 +557,7 @@ class SkipObject(object):
 skip = SkipObject()
 
 
-def not_yet(func):
+def todo(func):
     def deco(*args, **kwargs):
         exc_info = None
         try:

@@ -13,21 +13,21 @@ except ImportError:
 
 import oktest
 from oktest import ok, test
-from oktest import not_yet, _ExpectedFailure, _UnexpectedSuccess
+from oktest import todo, _ExpectedFailure, _UnexpectedSuccess
 
 
 
 class Todo_TC(unittest.TestCase):
 
 
-    ### @not_yet()
+    ### @todo()
 
-    def test_not_yet_1(self):
+    def test_todo_1(self):
         """
-        test method decorated by @not_yet should raises _ExpectedFailure exception
+        test method decorated by @todo should raises _ExpectedFailure exception
         with assertion information when it failed expectedly.
         """
-        @not_yet
+        @todo
         def fn(self):
             assert 1+1 == 0, "DESC1"
         try:
@@ -41,12 +41,12 @@ class Todo_TC(unittest.TestCase):
             assert ex.exc_info[0] == AssertionError
             assert str(ex.exc_info[1]) == "DESC1"
 
-    def test_not_yet_2(self):
+    def test_todo_2(self):
         """
-        test method decorated by @not_yet should raises _UnExpectedSuccess exception
+        test method decorated by @todo should raises _UnExpectedSuccess exception
         without assertion information when it passed unexpectedly.
         """
-        @not_yet
+        @todo
         def fn(self):
             assert 1+1 == 2, "DESC1"
         try:
@@ -72,11 +72,11 @@ class Todo_TC(unittest.TestCase):
         self.assertEqual(expected_n_errors, n_errors)
 
     class _RunnerHandleExpectedFailureTest(object):
-        @not_yet
+        @todo
         def test1(self):
             assert 1 == 0, "DESC1"    # expected failure
         #
-        @not_yet
+        @todo
         def test2(self):
             assert 1 == 1, "DESC2"    # unexpected success
 
@@ -115,26 +115,26 @@ class Todo_TC(unittest.TestCase):
 
         class _TodoIsAvailableWithTestDecorator(object):
             @test("SPEC1")
-            @not_yet
+            @todo
             def _(self):
                 assert 1 == 0, "expected failure"
             #
             @test("SPEC2")
-            @not_yet
+            @todo
             def _(self):
                 assert 1 == 1, "unexpected success"
             #
-            @not_yet         # NOT WORK!
+            @todo         # NOT WORK!
             @test("SPEC3")
             def _(self):
                 assert 1 == 0, "expected failure"
             #
-            @not_yet         # NOT WORK!
+            @todo         # NOT WORK!
             @test("SPEC4")
             def _(self):
                 assert 1 == 1, "unexpected success"
 
-        def test_not_yet_is_avaialbe_with_test_decorator(self):
+        def test_todo_is_avaialbe_with_test_decorator(self):
             expected = r"""
 * <b>_TodoIsAvailableWithTestDecorator</b>
   - [<R>Failed</R>] SPEC3
