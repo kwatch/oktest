@@ -23,10 +23,14 @@ release   = prop('release', '0.9.0')
 package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
-kook_default_product = 'unittest'
+kookbook.default = 'unittest'
 
-python = prop('python', 'python')
+python = prop('python', sys.executable)
 
+
+###
+### test
+###
 
 python_binaries = [
     ('2.4', '/opt/local/bin/python2.4'),
@@ -80,14 +84,13 @@ def task_unittest(c, *args, **kwargs):
 @ingreds('test/doc_test.py')
 @spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
 def task_test(c, *args, **kwargs):
-    """test 'doctest', 'helpers', 'tracer', or 'doc'"""
+    """do test"""
     flag_all = bool(kwargs.get('a'))
     if flag_all:
         pairs = python_binaries
     else:
         ver = '%s.%s' % (sys.version_info[0:2])
-        bin = 'python' # or sys.executable
-        pairs = [ (ver, bin) ]
+        pairs = [ (ver, python) ]
     test_names = args or TEST_NAMES
     gvars = globals()
     funcs = []
@@ -198,6 +201,81 @@ def file_doc_test_py(c):
     f.close()
 
 
+def _with_README_backup(fn):
+    fname = "README.txt"
+    try:
+        f = open(fname); s = f.read(); f.close()
+        os.rename(fname, fname + ".bkup")
+        s = s.replace("{{*", "").replace("*}}", "")
+        f = open(fname, 'w'); f.write(s); f.close()
+        fn()
+    finally:
+        os.rename(fname + ".bkup", fname)
+
+
+###
+### package, dist
+###
+
+text_files = ['README.txt', 'CHANGES.txt', 'MIT-LICENSE', 'Kookbook.py', 'MANIFEST', 'MANIFEST.in', 'setup.py']
+
+
+@recipe
+@ingreds('dist')
+def task_package(c):
+    """create package"""
+    ## setup
+    dir = c%"dist/$(package)-$(release)"
+    @pushd(dir)
+    def do():
+        #system(c%'$(python) setup.py sdist')
+        system(c%'$(python) setup.py sdist --force-manifest')
+        #system('python setup.py sdist --keep-temp')
+    cp(c%'$(dir)/MANIFEST', '.')
+
+
+@recipe
+def task_dist(c, *args, **kwargs):
+    """create Oktest-X.X.X/ directory"""
+    ## create dir
+    dir = c%"dist/$(package)-$(release)"
+    if os.path.isdir(dir):
+        rm_rf(dir)
+    mkdir(dir)
+    ## copy files
+    files = [ f for f in text_files if os.path.exists(f) ]
+    store(files, dir)
+    store('lib/**/*.py', 'test/*.py', dir)
+    ## edit files
+    replacer = [
+        (r'\$Package\$',   package),
+        (r'\$Release\$',   release),
+        (r'\$Copyright\$', copyright),
+        (r'\$License\$',   license),
+        (r'\$Package:.*?\$',    '$Package: %s $'   % package),
+        (r'\$Release:.*?\$',    '$Release: %s $'   % release),
+        (r'\$Copyright:.*?\$',  '$Copyright: %s $' % copyright),
+        (r'\$License:.*?\$',    '$License: %s $'   % license),
+    ]
+    edit(c%"$(dir)/**/*", exclude=['Kookbook.py'], by=replacer)
+    edit(c%"$(dir)/README.txt", by=[(r'\{\{\*(.*?)\*\}\}', r'\1')])
+    ## MANIFEST
+    #@pushd(dir)
+    #def do():
+    #    rm_f('MANIFEST')
+    #    system(c%'$(python) setup.py sdist --force-manifest')
+
+
+kookbook.load('@kook/books/clean.py')
+CLEAN.extend(('**/*.pyc', '**/__pycache__', 'lib/*.egg-info', '%s.zip' % package))
+
+
+@recipe
+def task_manifest(c):
+    """update MANIFEST file"""
+    system(c%'$(python) setup.py sdist --force-manifest')
+
+
 def replacer(s):
     #s = re.sub(r'\$Package\$',   package,   s)
     #s = re.sub(r'\$Release\$',   release,   s)
@@ -225,83 +303,10 @@ def task_edit(c):
     edit('setup.py', by=repl)
 
 
-@recipe
-@ingreds('sdist', 'eggs')
-def task_package(c):
-    """create package"""
-    pass
 
-
-def _with_README_backup(fn):
-    fname = "README.txt"
-    try:
-        f = open(fname); s = f.read(); f.close()
-        os.rename(fname, fname + ".bkup")
-        s = s.replace("{{*", "").replace("*}}", "")
-        f = open(fname, 'w'); f.write(s); f.close()
-        fn()
-    finally:
-        os.rename(fname + ".bkup", fname)
-
-
-@recipe
-@ingreds('edit')
-def task_sdist(c, *args, **kwargs):
-    """create dist/Oktest-X.X.X.tar.gz"""
-    #rm_rf(c%"dist/$(package)-$(release)*")
-    @_with_README_backup
-    def fn():
-        system(c%'$(python) setup.py sdist')   # or setup.py sdist --keep-temp
-    #with chdir('dist') as d:
-    #    targz = c%"$(package)-$(release).tar.gz"
-    #    #tar_xzf(targz)
-    #    system(c%"tar xzf $(targz)")
-    #    dir = targz.replace('.tar.gz', '')
-    #    edit(c%"$(dir)/**/*", by=replacer)
-    #    mv(targz, c%"$(targz).old")
-    #    #tar_czf(c%"$(dir).tar.gz", dir)
-    #    system(c%"tar -cf $(dir).tar $(dir)")
-    #    system(c%"gzip -f9 $(dir).tar")
-
-
-def _do_setup_py(c, command):
-    for ver, bin in python_binaries:
-        system(c%command)
-        rm_rf(c%'lib/$(package).egg-info')
-
-
-@recipe
-@ingreds('edit')
-def task_eggs(c):
-    """create dist/*.egg files"""
-    @_with_README_backup
-    def fn():
-        _do_setup_py(c, "$(bin) setup.py bdist_egg")
-
-
-@recipe
-@ingreds('edit')
-def task_register(c):
-    """register information into PyPI"""
-    @_with_README_backup
-    def fn():
-        system(c%"$(python) setup.py register")
-
-
-@recipe
-@ingreds('edit')
-def task_upload(c):
-    """upload packages"""
-    @_with_README_backup
-    def fn():
-        system(c%"$(python) setup.py sdist upload")
-        _do_setup_py(c, "$(bin) setup.py bdist_egg upload")
-
-
-@recipe
-def task_clean(c):
-    rm_rf('**/*.pyc', '**/__pycache__', 'dist', 'build', 'lib/*.egg-info', c%'$(package).zip')
-
+###
+### website
+###
 
 @recipe
 @product('website/index.html')
@@ -328,12 +333,6 @@ def file_website_index_html(c):
         s = re.sub(pat, r, s)
         return s
     edit(c.product, by=f)
-
-
-@recipe
-def task_manifest(c):
-    """update MANIFEST file"""
-    system(c%'$(python) setup.py sdist --force-manifest')
 
 
 @recipe
