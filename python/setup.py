@@ -5,26 +5,34 @@
 ###
 
 import sys, re, os
+#arg1 = len(sys.argv) > 1 and sys.argv[1] or None
+#if arg1 == 'egg_info':
+#    from ez_setup import use_setuptools
+#    use_setuptools()
+#if arg1 == 'bdist_egg':
+#    from setuptools import setup
+#else:
+#    from distutils.core import setup
 arg1 = len(sys.argv) > 1 and sys.argv[1] or None
-if arg1 == 'egg_info':
-    from ez_setup import use_setuptools
-    use_setuptools()
-if arg1 == 'bdist_egg':
-    from setuptools import setup
-else:
+if arg1 == 'sdist':
     from distutils.core import setup
+else:
+    try:
+        from setuptools import setup
+    except ImportError:
+        from distutils.core import setup
 
 
 def fn():
-    name       = 'Oktest'    ## $Package: Oktest $
-    version    = '0.9.0'     ## $Release: 0.9.0 $
-    author     = 'makoto kuwata'
-    email      = 'kwa@kuwata-lab.com'
-    maintainer = author
-    maintainer_email = email
-    url        = 'http://pypi.python.org/pypi'
-    desc       = 'a new-style testing library'
-    detail     = r"""
+    name             = '$Package$'
+    version          = '$Release$'
+    author           = 'makoto kuwata'
+    author_email     = 'kwa@kuwata-lab.com'
+    #maintainer       = author
+    #maintainer_email = author_email
+    url              = 'http://pypi.python.org/pypi'
+    description      = 'a new-style testing library'
+    long_description = r"""
 Oktest is a new-style testing library for Python. ::
 
     from oktest import test, ok, NG
@@ -60,10 +68,7 @@ See README_ for details.
 
 .. _README: http://packages.python.org/Oktest
 """[1:]
-    license    = 'MIT License'     ## $License: MIT License $
-    platforms  = 'any'
-    #download  = 'http://downloads.sourceforge.net/oktest/Oktest-%s.tar.gz' % version
-    download   = 'http://pypi.python.org/packages/source/O/Oktest/Oktest-%s.tar.gz' % version
+    download_url = 'http://pypi.python.org/packages/source/O/$Package$/$Package$-$Release$.tar.gz'
     classifiers = [
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -79,15 +84,18 @@ See README_ for details.
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.0',
         'Programming Language :: Python :: 3.1',
+        'Programming Language :: Python :: 3.2',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Testing'
     ]
+    platforms    = 'any'
+    license      = '$License$'
 
     py_modules   = ['oktest']
     package_dir  = {'': 'lib'}
-    #scripts     = ['bin/pytenjin']
-    #packages    = ['tenjin']
-    zip_safe     = False
+    #scripts     = ['bin/oktest.py']
+    #packages    = ['oktest']
+    #zip_safe     = False
 
     return locals()
 
