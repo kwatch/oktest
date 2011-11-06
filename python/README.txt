@@ -4,6 +4,8 @@ Oktest README
 
 $Release: 0.9.0 $
 
+.. contents::
+
 
 Overview
 ========
@@ -62,7 +64,7 @@ Example
 =======
 
 Oktest is available with unittest module which is a standard testing library
-for Python. ::
+of Python. ::
 
     import unittest
     {{*from oktest ok*}}
@@ -257,6 +259,9 @@ not_ok (x)
 
 NOT (x)
 	Same as NG(x). Provided experimentalily.
+
+fail(message)
+	Raises AssertionError with message.
 
 
 It is possible to chain assertions. ::
@@ -774,7 +779,8 @@ Example to fake function call::
 Skip Test
 =========
 
-(Experimental)
+*(Experimental)*
+
 It is possible to skip tests according to a certain condition. ::
 
     import unittest
@@ -810,6 +816,62 @@ Notice that the following doesn't work correctly. ::
         @test("example of skip")
         def _(self):
             ...
+
+
+@todo decorator
+===============
+
+@todo decorator represents that "this test will be failed expectedly
+because feature is not implemented yet, therefore don't count
+this test as failed, please!".
+
+Code Example::
+
+    import unittest
+    from oktest import ok, test, {{*todo*}}
+
+    def add(x, y):
+        return 0    ## not implemented yet!
+
+    class AddTest(unittest.TestCase):
+        SUBJECT = 'add()'
+
+        @test("returns sum of arguments.")
+        {{*@todo*}}      # equivarent to @unittest.expectedFailure
+        def _(self):
+            n = add(10, 20)
+            ok (n) == 30    # will be failed expectedly
+                            # (because add() is not implemented yet)
+
+    if __name__ == '__main__':
+        import oktest
+        oktest.main()
+
+Output Example::
+
+    $ python test/add_test.py
+    * add()
+      - [TODO] returns sum of arguments.
+    ## total:1, passed:0, failed:0, error:0, skipped:0, todo:1   (elapsed 0.000)
+
+If test decoreated by @todo doesn't raise AssertionError, Oktest will report
+you that, for example::
+
+    $ python test/add_test.py
+    * add()
+      - [Failed] returns sum of arguments.
+    ----------------------------------------------------------------------
+    [Failed] add() > 001: returns sum of arguments.
+    _UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.
+    ----------------------------------------------------------------------
+    ## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (elapsed 0.000)
+
+Notice that the following will not work::
+
+    ## NG: @todo should be appeared after @test decorator
+    @todo
+    @test("....")
+    def _(self): ...
 
 
 Command-line Interface
@@ -882,13 +944,18 @@ spec(description)
 	                ok (1+1) == 2
 
 
-``oktest.helper`` module
+``oktest.util`` module
 ------------------------
+
+Since 0.10.0, ``oktest.helper`` is renamed to ``oktest.util``, but
+``oktest.helper`` is still available for backward compatibility.
+
 
 chdir(dirname)
 	Change current directory to dirname temporarily. ::
 
 	    import os
+	    from oktest.util import chdir
 	    cwd = os.getcwd()                         # current working directory
 	    with chdir("/var/tmp"):
 	        assert os.getcwd() == "/var/tmp"      # current directory is changed!
@@ -998,8 +1065,8 @@ dummy_io(stdin_content=None, func=None):
 ``oktest.tracer`` module
 ------------------------
 
-tracer():
-	Return tracer object. See `Tracer`_ section for details.
+Tracer:
+	Tracer class. See `Tracer`_ section for details.
 
 
 Tips

@@ -8,7 +8,11 @@ $Release: 0.9.0 $
 Release 0.10.0
 --------------
 
-* [change] 'spec()' is obsoleted completely.
+* [change] 'oktest.spec()' is obsoleted completely.
+  It will print warning message if you use it.
+
+* [change] 'oktest.helper' module is renamed to 'oktest.util'.
+  ('oktest.helper' is still available for backward compabibility.)
 
 * [enhance] Add 'oktest.main()' which is a replacement of 'oktest.run()'.
   Using 'oktest.main()' instead of 'oktest.run()', command options are available.
@@ -19,6 +23,30 @@ Release 0.10.0
     ## is almost same as:
     $ python -m oktest test/foobar_test.py -sp -f test='*keyword*'
 
+* [enhance] Add 'oktest.fail(message)' which is same as 'unittest.fail(message)'.
+  ex::
+
+    from oktest import fail
+    fail("not impelmented yet")    # will raise AssertionError
+
+* [enhance] (Experimental) Add '@todo' decorator which is equivarent to
+  '@unittest.expectedFailure'.
+  ex::
+
+    from oktest import ok, test, todo
+
+    def add(x, y):
+        return 0      # not implemented yet!
+
+    class AddTest(unittest.TestCase):
+        @test("returns sum of arguments.")
+	@todo         # equivarent to @unittest.expectedFailure
+        def _(self):
+	    ok (10, 20) == 30   ## will be failed expectedly
+	                        ## (because not implemented yet)
+
+  Expected failure of assertion is reported as '[TODO]', not '[Failed]'.
+
 * [enhance] (Experimental) Test context supported.
   It helps you to describe specification in structured style.
   ex::
@@ -27,7 +55,7 @@ Release 0.10.0
     from oktest.context import subject, situation
 
     class SampleTestCase(unittest.TestCase):
-      SUBJECT = "Sample"
+      SUBJECT = "class 'Sample'"
 
       with subject("method1()"):
 
@@ -46,6 +74,18 @@ Release 0.10.0
           @test("spec3")
           def _(self):
             ...
+
+  Output exmple::
+
+    $ python test/example_test.py
+    * class 'Sample'
+      + method1()
+        + when condition:
+	  - [ok] spec1
+	  - [ok] spec2
+        + else:
+	  - [ok] spec3
+    ## total:3, passed:3, failed:0, error:0, skipped:0   (elapsed 0.000)
 
 
 Release 0.9.0
