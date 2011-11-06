@@ -135,7 +135,7 @@ OUTPUT_WITH_TEST_CONTEXT = r"""
     ok (3) == 0
 <R>AssertionError: 3 == 0 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0   (0.000 sec)
+## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0, todo:0   (0.000 sec)
 """[1:]
 
 

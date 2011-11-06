@@ -541,7 +541,7 @@ Output example::
           - [ok] spec2
         + else:
           - [ok] spec3
-    ## total:3, passed:3, failed:0, error:0, skipped:0   (0.000 sec)
+    ## total:3, passed:3, failed:0, error:0, skipped:0, todo:0   (0.000 sec)
 
 (Notice that this feature is experimental and may be changed in the future.)
 

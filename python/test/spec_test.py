@@ -162,7 +162,7 @@ AssertionError: 2 == 1 : failed.
     ok (1-1) == 1
 AssertionError: 0 == 1 : failed.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:1, error:0, skipped:0   (0.000 sec)
+## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
 """[1:]
         expected2 = r"""
 * FooTest: f
@@ -172,7 +172,7 @@ AssertionError: 0 == 1 : failed.
     ok (1+1) == 1
 AssertionError: 2 == 1 : failed.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:1, error:0, skipped:0   (0.000 sec)
+## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
 """[1:]
         expected1 = oktest.Color._colorize(expected1)
         expected2 = oktest.Color._colorize(expected2)
@@ -242,7 +242,7 @@ AssertionError: 2 == 0 : failed.
     ok ("KYON").starts_with("ky")
 AssertionError: 'KYON'.startswith('ky') : failed.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:1, error:0, skipped:0   (0.000 sec)
+## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
 """[1:]
         expected2 = r"""
 * FooTest: f
@@ -256,7 +256,7 @@ AssertionError: 'KYON'.startswith('ky') : failed.
     ok (1+1) == 0
 AssertionError: 2 == 0 : failed.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:1, error:0, skipped:0   (0.000 sec)
+## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
 """[1:]
         expected1 = oktest.Color._colorize(expected1)
         expected2 = oktest.Color._colorize(expected2)
@@ -308,7 +308,7 @@ oktest.run()
     None.unknownattribute
 AttributeError: 'NoneType' object has no attribute 'unknownattribute'
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:0, error:1, skipped:0   (0.000 sec)
+## total:1, passed:0, failed:0, error:1, skipped:0, todo:0   (0.000 sec)
 """[1:]
         expected2 = expected1
         expected1 = oktest.Color._colorize(expected1)

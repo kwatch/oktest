@@ -947,7 +947,7 @@ class BaseReporter(Reporter):
         (ST_FAILED,     "failed",     True),
         (ST_ERROR,      "error",      True),
         (ST_SKIPPED,    "skipped",    True),
-        (ST_TODO,       "todo",       False),
+        (ST_TODO,       "todo",       True),
         #(ST_UNEXPECTED, "unexpected", False),
     ]
 
