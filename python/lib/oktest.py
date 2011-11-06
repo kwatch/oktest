@@ -562,7 +562,7 @@ def todo(func):
         exc_info = None
         try:
             func(*args, **kwargs)
-            raise _UnexpectedSuccess()
+            raise _UnexpectedSuccess("test should be failed (because not implemented yet), but passed unexpectedly.")
         except AssertionError:
             raise _ExpectedFailure(sys.exc_info())
     deco.__name__ = func.__name__
@@ -590,7 +590,7 @@ ST_FAILED  = "failed"
 ST_ERROR   = "error"
 ST_SKIPPED = "skipped"
 ST_TODO    = "todo"
-ST_UNEXPECTED = "unexpected"
+#ST_UNEXPECTED = "unexpected"
 
 
 class TestRunner(object):
@@ -751,7 +751,11 @@ class TestRunner(object):
         except _ExpectedFailure:   # when failed expectedly
             return ST_TODO, ()
         except _UnexpectedSuccess: # when passed unexpectedly
-            return ST_UNEXPECTED, ()
+            #return ST_UNEXPECTED, ()
+            ex = sys.exc_info()[1]
+            if not ex.args:
+                ex.args = ("test should be failed (because not implemented yet), but passed unexpectedly.",)
+            return ST_FAILED, sys.exc_info()
         except Exception:
             return ST_ERROR, sys.exc_info()
         else:
@@ -837,7 +841,8 @@ def run(*targets, **kwargs):
         runner.__exit__(sys.exc_info())
     counts = runner.reporter.counts
     get = counts.get
-    return get(ST_FAILED, 0) + get(ST_ERROR, 0) + get(ST_UNEXPECTED, 0)
+    #return get(ST_FAILED, 0) + get(ST_ERROR, 0) + get(ST_UNEXPECTED, 0)
+    return get(ST_FAILED, 0) + get(ST_ERROR, 0)
 
 
 def _target_classes(targets):
@@ -894,7 +899,7 @@ class BaseReporter(Reporter):
         ST_ERROR:   "ERROR",
         ST_SKIPPED: "skipped",
         ST_TODO:    "TODO",
-        ST_UNEXPECTED: "Unexpected",
+        #ST_UNEXPECTED: "Unexpected",
     }
 
     separator =  "-" * 70
@@ -934,7 +939,7 @@ class BaseReporter(Reporter):
             ST_ERROR:      0,
             ST_SKIPPED:    0,
             ST_TODO:       0,
-            ST_UNEXPECTED: 0,
+            #ST_UNEXPECTED: 0,
         }
 
     _counts2str_table = [
@@ -943,7 +948,7 @@ class BaseReporter(Reporter):
         (ST_ERROR,      "error",      True),
         (ST_SKIPPED,    "skipped",    True),
         (ST_TODO,       "todo",       False),
-        (ST_UNEXPECTED, "unexpected", False),
+        #(ST_UNEXPECTED, "unexpected", False),
     ]
 
     def counts2str(self):
@@ -1140,7 +1145,7 @@ class BaseReporter(Reporter):
         if kind == ST_ERROR:   return Color.red(string, bold=True)
         if kind == ST_SKIPPED: return Color.yellow(string, bold=True)
         if kind == ST_TODO:    return Color.yellow(string, bold=True)
-        if kind == ST_UNEXPECTED: return Color.red(string, bold=True)
+        #if kind == ST_UNEXPECTED: return Color.red(string, bold=True)
         if kind == "topic":    return Color.bold(string)
         if kind == "sep":      return Color.red(string)
         if kind == "context":  return Color.bold(string)

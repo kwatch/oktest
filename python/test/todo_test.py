@@ -84,8 +84,12 @@ class Todo_TC(unittest.TestCase):
         expected = r"""
 * <b>_RunnerHandleExpectedFailureTest</b>
   - [<Y>TODO</Y>] test1
-  - [<R>Unexpected</R>] test2
-## total:2, passed:0, failed:0, error:0, skipped:0, <Y>todo:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
+  - [<R>Failed</R>] test2
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] _RunnerHandleExpectedFailureTest > test2()
+<R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
+<r>----------------------------------------------------------------------</r>
+## total:2, passed:0, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>   (elapsed 0.000)
 """[1:]
         self._test_runner(expected, Todo_TC._RunnerHandleExpectedFailureTest, 1)
 
@@ -108,8 +112,12 @@ class Todo_TC(unittest.TestCase):
             expected = r"""
 * <b>_RunnerHandleUnittestExpectedFailure</b>
   - [<Y>TODO</Y>] test1
-  - [<R>Unexpected</R>] test2
-## total:2, passed:0, failed:0, error:0, skipped:0, <Y>todo:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
+  - [<R>Failed</R>] test2
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] _RunnerHandleUnittestExpectedFailure > test2()
+<R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
+<r>----------------------------------------------------------------------</r>
+## total:2, passed:0, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>   (elapsed 0.000)
 """[1:]
             self._test_runner(expected, Todo_TC._RunnerHandleUnittestExpectedFailure, 1)
 
@@ -140,14 +148,17 @@ class Todo_TC(unittest.TestCase):
   - [<R>Failed</R>] SPEC3
   - [<G>ok</G>] SPEC4
   - [<Y>TODO</Y>] SPEC1
-  - [<R>Unexpected</R>] SPEC2
+  - [<R>Failed</R>] SPEC2
 <r>----------------------------------------------------------------------</r>
 [<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 003: SPEC3
-  File "test/todo_test.py", line 130, in _
+  File "test/todo_test.py", line 138, in _
     assert 1 == 0, "expected failure"
 <R>AssertionError: expected failure</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:1</G>, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>, <R>unexpected:1</R>   (elapsed 0.000)
+[<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 002: SPEC2
+<R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
+<r>----------------------------------------------------------------------</r>
+## total:4, <G>passed:1</G>, <R>failed:2</R>, error:0, skipped:0, <Y>todo:1</Y>   (elapsed 0.000)
 """[1:]
             self._test_runner(expected, Todo_TC._TodoIsAvailableWithTestDecorator, 2)
 
