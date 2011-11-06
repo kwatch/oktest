@@ -523,58 +523,6 @@ Sample Description 2
         self.assertEqual(True, reporter._color)
 
 
-class VerboseReporter_TC(unittest.TestCase):
-
-    def test_with_test_context(self):
-        if withstmt_not_available(): return
-        input = r"""
-        class _WithTestContext1(unittest.TestCase):
-          with subject('module hello'):
-            with subject('#method1'):
-              @test('spec1')
-              def _(self):
-                ok (1) == 1
-              with situation('when condition1:'):
-                @test('spec2')
-                def _(self):
-                  ok (2) == 2
-                @test('spec3')
-                def _(self):
-                  ok (3) == 0
-              with situation('else:'):
-                @test('spec4')
-                def _(self):
-                  ok (4) == 4
-
-"""[1:]
-        expected = r"""
-* <b>_WithTestContext1</b>
-  + <b>module hello</b>
-    + <b>#method1</b>
-      - [<G>ok</G>] spec1
-      + when condition1:
-        - [<G>ok</G>] spec2
-        - [<R>Failed</R>] spec3
-      + else:
-        - [<G>ok</G>] spec4
-<r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _WithTestContext1 > module hello > #method1 > when condition1: > 003: spec3
-  File "<string>", line 15, in _
-    
-<R>AssertionError: 3 == 0 : failed.</R>
-<r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0   (elapsed 0.000)
-"""[1:]
-        lvars = _exec_code(input)
-        klass = lvars.get('_WithTestContext1')
-        out = StringIO()
-        oktest.run(klass, out=out, color=True, style="verbose")
-        actual = out.getvalue()
-        actual = re.sub(r'elapsed 0\.0\d\d', 'elapsed 0.000', actual)
-        ok (actual) == oktest.Color._colorize(expected)
-
-
-
 class Diff_TC(unittest.TestCase, RunnerTestHelper):
     def setUp(self):    self._setUp()
     def tearDown(self): self._tearDown()
