@@ -613,10 +613,40 @@ class SkipObject(object):
 skip = SkipObject()
 
 
+def not_yet(func):
+    def deco(*args, **kwargs):
+        exc_info = None
+        try:
+            func(*args, **kwargs)
+            raise _UnexpectedSuccess()
+        except AssertionError:
+            raise _ExpectedFailure(sys.exc_info())
+    deco.__name__ = func.__name__
+    deco.__doc__  = func.__doc__
+    return deco
+
+class _ExpectedFailure(Exception):
+
+    def __init__(self, exc_info=None):
+        if exc_info:
+            self.exc_info = exc_info
+
+class _UnexpectedSuccess(Exception):
+    pass
+
+try:
+    from unittest.case import _ExpectedFailure, _UnexpectedSuccess
+except ImportError:
+    pass
+
+
+
 ST_PASSED  = "passed"
 ST_FAILED  = "failed"
 ST_ERROR   = "error"
 ST_SKIPPED = "skipped"
+ST_NOT_YET = "not-yet"
+ST_UNEXPECTED = "unexpected"
 
 
 class TestRunner(object):
@@ -774,6 +804,10 @@ class TestRunner(object):
             return ST_FAILED, sys.exc_info()
         except SkipTest:
             return ST_SKIPPED, ()
+        except _ExpectedFailure:   # when failed expectedly
+            return ST_NOT_YET, ()
+        except _UnexpectedSuccess: # when passed unexpectedly
+            return ST_UNEXPECTED, ()
         except Exception:
             return ST_ERROR, sys.exc_info()
         else:
@@ -858,7 +892,8 @@ def run(*targets, **kwargs):
     finally:
         runner.__exit__(sys.exc_info())
     counts = runner.reporter.counts
-    return counts.get(ST_FAILED, 0) + counts.get(ST_ERROR, 0)
+    get = counts.get
+    return get(ST_FAILED, 0) + get(ST_ERROR, 0) + get(ST_UNEXPECTED, 0)
 
 
 def _target_classes(targets):
@@ -914,6 +949,8 @@ class BaseReporter(Reporter):
         ST_FAILED:  "Failed",
         ST_ERROR:   "ERROR",
         ST_SKIPPED: "skipped",
+        ST_NOT_YET: "NotYet",
+        ST_UNEXPECTED: "Unexpected",
     }
 
     separator =  "-" * 70
@@ -947,17 +984,33 @@ class BaseReporter(Reporter):
     out = property(__get_out, __set_out)
 
     def clear_counts(self):
-        self.counts = {ST_PASSED: 0, ST_FAILED: 0, ST_ERROR: 0, ST_SKIPPED: 0}
+        self.counts = {
+            ST_PASSED:     0,
+            ST_FAILED:     0,
+            ST_ERROR:      0,
+            ST_SKIPPED:    0,
+            ST_NOT_YET:    0,
+            ST_UNEXPECTED: 0,
+        }
+
+    _counts2str_table = [
+        (ST_PASSED,     "passed",     True),
+        (ST_FAILED,     "failed",     True),
+        (ST_ERROR,      "error",      True),
+        (ST_SKIPPED,    "skipped",    True),
+        (ST_NOT_YET,    "not-yet",    False),
+        (ST_UNEXPECTED, "unexpected", False),
+    ]
 
     def counts2str(self):
         buf = [None]; add = buf.append
         total = 0
-        for word, status in zip(("passed", "failed", "error", "skipped"),
-                                (ST_PASSED, ST_FAILED, ST_ERROR, ST_SKIPPED)):
+        for word, status, required in self._counts2str_table:
             n = self.counts.get(status, 0)
             s = "%s:%s" % (word, n)
             if n: s = self.colorize(s, status)
-            add(s)
+            if required or n:
+                add(s)
             total += n
         buf[0] = "total:%s" % total
         return ", ".join(buf)
@@ -1142,6 +1195,8 @@ class BaseReporter(Reporter):
         if kind == ST_FAILED:  return Color.red(string, bold=True)
         if kind == ST_ERROR:   return Color.red(string, bold=True)
         if kind == ST_SKIPPED: return Color.yellow(string, bold=True)
+        if kind == ST_NOT_YET: return Color.yellow(string, bold=True)
+        if kind == ST_UNEXPECTED: return Color.red(string, bold=True)
         if kind == "topic":    return Color.bold(string)
         if kind == "sep":      return Color.red(string)
         if kind == "context":  return Color.bold(string)
