@@ -104,7 +104,7 @@ OUTPUT_COMPREHENSIVE = r"""
 [<R>Failed</R>] class 'Foo' > 006: unexpected success
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:6, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skipped:1</Y>, <Y>todo:1</Y>   (0.000 sec)
+## total:6, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skipped:1</Y>, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
 
@@ -135,7 +135,7 @@ OUTPUT_WITH_TEST_CONTEXT = r"""
     ok (3) == 0
 <R>AssertionError: 3 == 0 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0, todo:0   (0.000 sec)
+## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
 
 
