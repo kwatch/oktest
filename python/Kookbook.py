@@ -166,9 +166,17 @@ def file_doc_test_py(c):
     pat = r'\n(Tracer\n=+\n.*?)\nHelpers Reference'
     m = re.compile(pat, re.S).search(cont)
     s = m.group(1)
+    #
+    rexp = re.compile(r'^(    )', re.M)
+    def fn(m, rexp=rexp):
+        console = m.group(1)
+        return "\n\n" + rexp.sub(r'\1#|', console) + "\n"
+    s = re.compile(r'\n\n(    \$ .*?\n)\n', re.M|re.S).sub(fn, s)
+    #
     s = re.compile(r'^(\S)', re.M).sub(r'#\1', s)
     s = re.compile(r'^( *)(\$ python)', re.M).sub(r'\1#\2', s)
     s = re.compile(r'^([ \t]*)(\.\.\.)', re.M).sub(r'\1ok (0) == 1 #...', s)
+    s = re.compile(r'def _\(self\): \.\.\.').sub('def _(self): pass', s)
     s = re.sub(r'\{\{\*(.*?)\*\}\}', r'\1', s)
     #
     f = open(c.product, 'w')
