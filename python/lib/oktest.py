@@ -1161,6 +1161,8 @@ class BaseReporter(Reporter):
                 ST_FAILED : self.colorize("f", ST_FAILED ),
                 ST_ERROR  : self.colorize("E", ST_ERROR  ),
                 ST_SKIPPED: self.colorize("s", ST_SKIPPED),
+                ST_TODO   : self.colorize("t", ST_TODO),
+                #ST_UNEXPECTED: self.colorize("u", ST_UNEXPECTED),
                 None      : self.colorize("?", None),
             }
         return self._status_chars.get(status) or self._status_chars.get(None)
@@ -1393,6 +1395,12 @@ class OldStyleReporter(BaseReporter):
                 self.out.write(x)
         elif status == ST_SKIPPED:
             self.out.write("[skipped]\n")
+        elif status == ST_TODO:
+            self.out.write("[TODO]\n")
+        #elif status == ST_UNEXPECTED:
+        #    self.out.write("[Unexpected]\n")
+        else:
+            assert False, "UNREACHABLE: status=%r" % (status,)
 
 BaseReporter.register_class("oldstyle", SimpleReporter)
 
