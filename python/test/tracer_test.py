@@ -10,7 +10,7 @@ import unittest
 
 import oktest
 from oktest import ok, NG, run, spec
-from oktest.helper import *
+from oktest.util import *
 from oktest.tracer import Tracer, Call, FakeObject
 
 try:

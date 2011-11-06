@@ -72,14 +72,14 @@ def _get_location(depth=0):
     frame = sys._getframe(depth+1)
     return (frame.f_code.co_filename, frame.f_lineno)
 
-def _new_module(name, local_vars, helper=None):
+def _new_module(name, local_vars, util=None):
     mod = type(sys)(name)
     sys.modules[name] = mod
     mod.__dict__.update(local_vars)
-    if helper and getattr(mod, '__all__', None):
+    if util and getattr(mod, '__all__', None):
         for k in mod.__all__:
-            helper.__dict__[k] = mod.__dict__[k]
-        helper.__all__ += mod.__all__
+            util.__dict__[k] = mod.__dict__[k]
+        util.__all__ += mod.__all__
     return mod
 
 if python3:
@@ -1883,7 +1883,7 @@ context.TestContext = TestContext
 
 
 ##
-## helpers
+## util
 ##
 def _dummy():
 
@@ -1961,7 +1961,7 @@ def _dummy():
     return locals()
 
 
-helper = _new_module('oktest.helper', _dummy())
+util = _new_module('oktest.util', _dummy())
 del _dummy
 
 
@@ -2092,7 +2092,7 @@ def _dummy():
     return locals()
 
 
-dummy = _new_module('oktest.dummy', _dummy(), helper)
+dummy = _new_module('oktest.dummy', _dummy(), util)
 del _dummy
 
 
@@ -2307,7 +2307,7 @@ def _dummy():
     return locals()
 
 
-tracer = _new_module('oktest.tracer', _dummy(), helper)
+tracer = _new_module('oktest.tracer', _dummy(), util)
 del _dummy
 
 
@@ -2636,7 +2636,7 @@ def _dummy():
     return locals()
 
 
-mainapp = _new_module('oktest.mainapp', _dummy(), helper)
+mainapp = _new_module('oktest.mainapp', _dummy(), util)
 del _dummy
 
 

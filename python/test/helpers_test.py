@@ -8,8 +8,8 @@ import sys, os, re, shutil
 import unittest
 import oktest
 from oktest import ok, NG, run, spec
-from oktest.helper import *
-from oktest.helper import flatten, rm_rf
+from oktest.util import *
+from oktest.util import flatten, rm_rf
 from oktest.dummy import *
 
 available_with_statement = sys.version_info[0:2] > (2, 4)
@@ -156,7 +156,7 @@ class DummyClass(object):
     pass
 
 
-class helper_TC(unittest.TestCase):
+class util_TC(unittest.TestCase):
 
     def test_chdir(self):
         try:
@@ -168,7 +168,7 @@ class helper_TC(unittest.TestCase):
             if spec("change directory temporarily when used with with-stmt."):
                 script = r"""if True:
                 import oktest
-                with oktest.helper.chdir(tmpdir):
+                with oktest.util.chdir(tmpdir):
                     ok (os.getcwd()) != cwd
                     ok (os.getcwd()) == tmpdir_path
                 ok (os.getcwd()) == cwd  """
@@ -179,9 +179,9 @@ class helper_TC(unittest.TestCase):
                 def f():
                     ok (os.getcwd()) != cwd
                     ok (os.getcwd()) == tmpdir_path
-                oktest.helper.chdir(tmpdir, f)
+                oktest.util.chdir(tmpdir, f)
                 ok (os.getcwd()) == cwd
-                oktest.helper.chdir(tmpdir).run(f)
+                oktest.util.chdir(tmpdir).run(f)
                 ok (os.getcwd()) == cwd
         finally:
             os.rmdir(tmpdir)
@@ -191,7 +191,7 @@ class helper_TC(unittest.TestCase):
         if spec("takes a class object and adds local vars to it when used with with-stmt."):
             script = r"""if True:
             import oktest
-            with oktest.helper.using(DummyClass) as obj:
+            with oktest.util.using(DummyClass) as obj:
                 def test_1(self):
                     ok (1+1) == 2
                 def test_2(self):
@@ -205,7 +205,7 @@ class helper_TC(unittest.TestCase):
 
     def test_flatten(self):
         if spec("flatten nested list or tuple."):
-            ret = oktest.helper.flatten([[1, (2, (3, 4)), 5]])
+            ret = oktest.util.flatten([[1, (2, (3, 4)), 5]])
             ok (ret) == [1, 2, 3, 4, 5]
             ret = flatten([1, [2, 3, [4, 5, [[[6]]]], [7, 8]]])
             ok (ret) == [1, 2, 3, 4, 5, 6, 7, 8]
@@ -222,7 +222,7 @@ class helper_TC(unittest.TestCase):
                 ok (fname).is_file()
             #
             if spec("removes files and directories recursively."):
-                oktest.helper.rm_rf('_test_foo1', '_test_foo2', '_test_bar9')
+                oktest.util.rm_rf('_test_foo1', '_test_foo2', '_test_bar9')
                 ok ('_test_foo1').not_exist()
                 ok ('_test_foo2').not_exist()
                 ok ('_test_bar9').not_exist()
@@ -232,7 +232,7 @@ class helper_TC(unittest.TestCase):
                     shutil.rmtree(x)
 
 
-class helper_rm_rf_TC(unittest.TestCase):
+class util_rm_rf_TC(unittest.TestCase):
 
     def setUp(self):
         os.mkdir('_rm_rf')
