@@ -171,11 +171,29 @@ def file_doc_test_py(c):
     f.write(
         "import re\n"
         "from oktest import ok\n"
+        "import unittest\n"
+        "def skipIf(condition, reason):\n"
+        "    def deco(func):\n"
+        "        if not condition:\n"
+        "            return func\n"
+        "        def func2(*args, **kwargs):\n"
+        "            return reason\n"
+        "        return func2\n"
+        "    return deco\n"
         "\n"
-        "if True:\n"
-        "\n"
+        "try:\n"
+        "    _skipIf_bkup = getattr(unittest, 'skipIf', None)\n"
+        "    unittest.skipIf = skipIf\n"
+        "    del skipIf\n"
+        "#--------------------------------------------------\n"
     )
     f.write(s)
+    f.write(
+        "#--------------------------------------------------\n"
+        "finally:\n"
+        "    if _skipIf_bkup:\n"
+        "        unittest.skipIf = _skipIf_bkup\n"
+    )
     f.close()
 
 

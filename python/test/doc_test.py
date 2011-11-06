@@ -1,8 +1,20 @@
 import re
 from oktest import ok
+import unittest
+def skipIf(condition, reason):
+    def deco(func):
+        if not condition:
+            return func
+        def func2(*args, **kwargs):
+            return reason
+        return func2
+    return deco
 
-if True:
-
+try:
+    _skipIf_bkup = getattr(unittest, 'skipIf', None)
+    unittest.skipIf = skipIf
+    del skipIf
+#--------------------------------------------------
 #Tracer
 #======
 
@@ -189,3 +201,7 @@ if True:
     ## reports output in plain format
     #$ python test/foobar_test.py -sp -f test='*keyword*'
 
+#--------------------------------------------------
+finally:
+    if _skipIf_bkup:
+        unittest.skipIf = _skipIf_bkup
