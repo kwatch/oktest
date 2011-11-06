@@ -56,7 +56,7 @@ def _with_backup(filepath):
     return deco
 
 
-TEST_NAMES = ('oktest', 'helpers', 'tracer', 'spec', 'testdeco',
+TEST_NAMES = ('oktest', 'tracer', 'spec', 'testdeco',
               'doc', 'assertions', 'dummy', 'runner', 'util', 'context')
 test_names = [ os.path.basename(x).replace('_test.py', '')
                    for x in glob("test/*_test.py") ]
