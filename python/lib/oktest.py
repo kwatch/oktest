@@ -1478,7 +1478,7 @@ def _dummy():
         """ex.
              class MyTest(object):
                 pass
-             with oktest.Using(MyTest):
+             with oktest.util.Using(MyTest):
                 def test_1(self):
                   ok (1+1) == 2
              if __name__ == '__main__':
