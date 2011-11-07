@@ -331,6 +331,8 @@ def file_website_index_html(c):
     opts = '--stylesheet-path=style.css --link-stylesheet --strip-class=field --strip-class=field-name --strip-class=field-body'
     system(c%'rst2html.py $(opts) $(ingred) > $(product)')
     def f(s):
+        s = s.replace('0.0.0', release)
+        s = s.replace('$Release$', release)
         s = re.sub('<\?xml version=".*" encoding=".*" *\?>\n', '', s)
         s = s.replace('Oktest README', 'Oktest - a new style testing library -')
         s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
@@ -345,7 +347,23 @@ def file_website_index_html(c):
         s = re.sub(pat, r, s)
         return s
     edit(c.product, by=f)
-
+    #
+    def f2(s):
+        s = re.sub(r'<head>\n',
+                   ('<head>\n'
+                    '<meta http-equiv="Refresh" content="5;url=http://www.kuwata-lab.com/oktest/oktest-py_users-guide.html" />\n'
+                    ),
+                   s)
+        s = re.sub(r'<div class="document" id="oktest-readme">\n',
+                   ('<div class="document" id="oktest-readme">\n'
+                    '<div id="attention" style="border:solid 2px red;background:#FEE;font-size:large;padding:10px;margin-bottom:20px;">\n'
+                    '  <p><strong style="color:red">ATTENTION</strong></p>\n'
+                    '  <p>Oktest homepage is moved to <a href="http://www.kuwata-lab.com/oktest/">http://www.kuwata-lab.com/oktest/</a></p>\n'
+                    '</div><!-- /attention -->\n'
+                    ),
+                   s)
+        return s
+    edit(c.product, by=f2)
 
 @recipe
 @product('website/CHANGES.txt')
