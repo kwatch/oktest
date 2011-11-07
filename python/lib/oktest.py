@@ -1433,7 +1433,7 @@ def _dummy():
     ##
     ## _Context
     ##
-    class _Context(object):
+    class Context(object):
 
         def __enter__(self):
             return self
@@ -1442,7 +1442,7 @@ def _dummy():
             return None
 
 
-    class _RunnableContext(_Context):
+    class RunnableContext(Context):
 
         def run(self, func, *args, **kwargs):
             self.__enter__()
@@ -1459,7 +1459,7 @@ def _dummy():
         __call__ = run    # for backward compatibility
 
 
-    class Chdir(_RunnableContext):
+    class Chdir(RunnableContext):
 
         def __init__(self, dirname):
             self.dirname = dirname
@@ -1474,7 +1474,7 @@ def _dummy():
             os.chdir(self.back_to)
 
 
-    class Using(_Context):
+    class Using(Context):
         """ex.
              class MyTest(object):
                 pass
@@ -1652,7 +1652,7 @@ class Color(object):
 ##
 ## spec()   # deprecated
 ##
-class Spec(util._Context):   # deprecated
+class Spec(util.Context):   # deprecated
 
     _exception  = None
     _traceback  = None
@@ -2004,7 +2004,7 @@ def _dummy():
     __all__ = ('dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars', 'dummy_io')
 
 
-    class DummyFile(util._RunnableContext):
+    class DummyFile(util.RunnableContext):
 
         def __init__(self, filename, content):
             self.filename = filename
@@ -2023,7 +2023,7 @@ def _dummy():
             os.unlink(self.path)
 
 
-    class DummyDir(util._RunnableContext):
+    class DummyDir(util.RunnableContext):
 
         def __init__(self, dirname):
             self.dirname = dirname
@@ -2038,7 +2038,7 @@ def _dummy():
             shutil.rmtree(self.path)
 
 
-    class DummyValues(util._RunnableContext):
+    class DummyValues(util.RunnableContext):
 
         def __init__(self, dictionary, items_=None, **kwargs):
             self.dict = dictionary
@@ -2065,7 +2065,7 @@ def _dummy():
             self.__dict__.clear()
 
 
-    class DummyIO(util._RunnableContext):
+    class DummyIO(util.RunnableContext):
 
         def __init__(self, stdin_content=None):
             self.stdin_content = stdin_content

@@ -36,28 +36,28 @@ def _do_exec(script, **kwargs):
 
 
 
-class _Context_TC(unittest.TestCase):
+class Context_TC(unittest.TestCase):
 
 
     def test___enter__(self):
         """returns self."""
-        ctx = oktest.util._Context()
+        ctx = oktest.util.Context()
         ok (ctx.__enter__()).is_(ctx)
 
 
     def test__exit__(self):
         """returns None."""
-        ctx = oktest.util._Context()
+        ctx = oktest.util.Context()
         ok (ctx.__exit__()) == None
 
 
 
-class _RunnableContext_TC(unittest.TestCase):
+class RunnableContext_TC(unittest.TestCase):
 
 
     def test_run_1(self):
         """calls __enter__() and __exit__() to emurate with-statement."""
-        ctx = oktest.util._RunnableContext()
+        ctx = oktest.util.RunnableContext()
         ret = None
         called = []
         def enter(*args):
@@ -78,7 +78,7 @@ class _RunnableContext_TC(unittest.TestCase):
 
     def test_run_2(self):
         """returns value which func returned."""
-        ctx = oktest.util._RunnableContext()
+        ctx = oktest.util.RunnableContext()
         def func():
             return 123
         ret = ctx.run(func)
@@ -87,7 +87,7 @@ class _RunnableContext_TC(unittest.TestCase):
 
     def test_deco_1(self):
         """decorates function."""
-        ctx = oktest.util._RunnableContext()
+        ctx = oktest.util.RunnableContext()
         @ctx.deco
         def func(x):
             return x + 10
@@ -96,7 +96,7 @@ class _RunnableContext_TC(unittest.TestCase):
 
     def test_deco_2(self):
         """__enter__() and __exit__() are called when decoreated function called."""
-        ctx = oktest.util._RunnableContext()
+        ctx = oktest.util.RunnableContext()
         called = []
         def enter(*args): called.append(('enter', args))
         def exit(*args): called.append(('exit', args))
