@@ -747,7 +747,7 @@ class TestRunner(object):
         except AssertionError:
             return ST_FAILED, sys.exc_info()
         except SkipTest:
-            return ST_SKIPPED, ()
+            return ST_SKIPPED, sys.exc_info()
         except _ExpectedFailure:   # when failed expectedly
             return ST_TODO, ()
         except _UnexpectedSuccess: # when passed unexpectedly
@@ -993,7 +993,7 @@ class BaseReporter(Reporter):
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self.counts[status] = self.counts.setdefault(status, 0) + 1
-        if exc_info:
+        if exc_info and status != ST_SKIPPED:
             context = self._context_stack and self._context_stack[-1] or None
             self._exceptions.append((testcase, testname, status, exc_info, context))
 
@@ -1235,11 +1235,18 @@ class VerboseReporter(BaseReporter):
         self._print_temporary_str("  " * self.depth + "- [      ] " + desc)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
+        s = ""
+        if status == ST_SKIPPED:
+            ex = exc_info[1]
+            #reason = getattr(ex, 'reason', '')
+            reason = ex.args[0]
+            s = " (reason: %s)" % (reason, )
+            exc_info = ()
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
         self._erase_temporary_str()
         indicator = self.indicator(status)
         desc = self.get_testcase_desc(testcase, testname)
-        self.out.write("  " * self.depth + "- [%s] %s\n" % (indicator, desc))
+        self.out.write("  " * self.depth + "- [%s] %s%s\n" % (indicator, desc, s))
         self.out.flush()
 
     def enter_testcontext(self, context):

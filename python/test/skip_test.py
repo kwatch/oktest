@@ -65,6 +65,7 @@ class Skip_TC(unittest.TestCase):
         output = out.getvalue()
         output = re.sub('0\.\d\d\d sec', '0.000 sec', output)
         self.maxDiff = None
+        oktest.ok (output) == oktest.Color._colorize(expected)
         self.assertEqual(oktest.Color._colorize(expected), output)
         self.assertEqual(0, n_errors)
 
@@ -79,8 +80,8 @@ class Skip_TC(unittest.TestCase):
     def test_runner_should_handle_SkipTest(self):
         expected = r"""
 * <b>_RunnterHandleSkipTest</b>
-  - [<Y>skipped</Y>] test1
-  - [<Y>skipped</Y>] test2
+  - [<Y>skipped</Y>] test1 (reason: reason #1)
+  - [<Y>skipped</Y>] test2 (reason: reason #2)
 ## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>, todo:0  (0.000 sec)
 """[1:]
         self._test_runner(expected, Skip_TC._RunnterHandleSkipTest)
@@ -93,7 +94,7 @@ class Skip_TC(unittest.TestCase):
     else:
 
         class _RunnterHandleUnittestSkipTest(unittest.TestCase):
-            @unittest.skip("reason")
+            @unittest.skip("reason1")
             def test1(self):
                 self.fail("unreachable")
             #
@@ -104,8 +105,8 @@ class Skip_TC(unittest.TestCase):
         def test_runner_should_handle_unittests_SkipTest(self):
             expected = r"""
 * <b>_RunnterHandleUnittestSkipTest</b>
-  - [<Y>skipped</Y>] test1
-  - [<Y>skipped</Y>] test2
+  - [<Y>skipped</Y>] test1 (reason: reason1)
+  - [<Y>skipped</Y>] test2 (reason: reason2)
 ## total:2, passed:0, failed:0, error:0, <Y>skipped:2</Y>, todo:0  (0.000 sec)
 """[1:]
             self._test_runner(expected, Skip_TC._RunnterHandleUnittestSkipTest)
@@ -128,8 +129,8 @@ class Skip_TC(unittest.TestCase):
         def test_skip_is_avaialbe_with_test_decorator(self):
             expected = r"""
 * <b>_AvailableWithTestDecorator</b>
-  - [<Y>skipped</Y>] desc7
-  - [<Y>skipped</Y>] desc2
+  - [<Y>skipped</Y>] desc7 (reason: reason7)
+  - [<Y>skipped</Y>] desc2 (reason: reason2)
   - [<G>passed</G>] desc3
 ## total:3, <G>passed:1</G>, failed:0, error:0, <Y>skipped:2</Y>, todo:0  (0.000 sec)
 """[1:]

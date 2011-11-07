@@ -150,7 +150,7 @@ class VerboseReporter_TC(unittest.TestCase):
   - [<G>passed</G>] 1+1 should be 2
   - [<R>Failed</R>] 1-1 should be 0
   - [<R>ERROR</R>] length of empty list should be 0
-  - [<Y>skipped</Y>] should be skipped
+  - [<Y>skipped</Y>] should be skipped (reason: REASON)
   - [<Y>TODO</Y>] expected failure
   - [<R>Failed</R>] unexpected success
 """[1:] + OUTPUT_COMPREHENSIVE
