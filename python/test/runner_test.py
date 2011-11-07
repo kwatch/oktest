@@ -45,13 +45,13 @@ class RunnerTestHelper(object):
 
     def _setUp(self):
         self.filename = '_test_.py'
-        self._bkup = [sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF, oktest.config.color_enabled]
-        oktest.OUT = sys.stdout = StringIO()
+        self._bkup = [sys.stdout, oktest.REPORTER, oktest.DIFF, oktest.config.color_enabled]
+        sys.stdout = StringIO()
         oktest.REPORTER = oktest.OldStyleReporter
         oktest.config.color_enabled = True
 
     def _tearDown(self):
-        sys.stdout, oktest.OUT, oktest.REPORTER, oktest.DIFF, oktest.config.color_enabled = self._bkup
+        sys.stdout, oktest.REPORTER, oktest.DIFF, oktest.config.color_enabled = self._bkup
         if os.path.exists(self.filename):
             os.unlink(self.filename)
 
@@ -60,7 +60,7 @@ class RunnerTestHelper(object):
         gvars = {}
         code = compile(script, self.filename, "exec")
         exec(code, gvars, gvars)
-        output = oktest.OUT.getvalue()
+        output = sys.stdout.getvalue()
         #
         if isinstance(output, str):
             output = re.sub(r' at 0x[0-9a-f]{6,9}', '', output)

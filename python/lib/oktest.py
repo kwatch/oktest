@@ -782,9 +782,6 @@ class TestRunner(object):
         self.reporter.exit_all()
 
 
-OUT = None    # None means sys.stdout
-
-
 def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|_\d\d\d(_|: ))?')):
     from fnmatch import fnmatch
     if pattern:
@@ -914,7 +911,7 @@ class BaseReporter(Reporter):
 
     def __get_out(self):
         if not self._out:
-            self.out = OUT or sys.stdout
+            self.out = sys.stdout
         return self._out
 
     def __set_out(self, out):
