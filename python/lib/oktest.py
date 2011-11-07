@@ -1423,40 +1423,40 @@ if os.environ.get('OKTEST_REPORTER'):
 
 
 ##
-## _Context
-##
-class _Context(object):
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        return None
-
-
-class _RunnableContext(_Context):
-
-    def run(self, func, *args, **kwargs):
-        self.__enter__()
-        try:
-            return func(*args, **kwargs)
-        finally:
-            self.__exit__(*sys.exc_info())
-
-    def deco(self, func):
-        def f(*args, **kwargs):
-            return self.run(func, *args, **kwargs)
-        return f
-
-    __call__ = run    # for backward compatibility
-
-
-##
 ## util
 ##
 def _dummy():
 
     __all__ = ('chdir', 'rm_rf')
+
+
+    ##
+    ## _Context
+    ##
+    class _Context(object):
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+
+    class _RunnableContext(_Context):
+
+        def run(self, func, *args, **kwargs):
+            self.__enter__()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                self.__exit__(*sys.exc_info())
+
+        def deco(self, func):
+            def f(*args, **kwargs):
+                return self.run(func, *args, **kwargs)
+            return f
+
+        __call__ = run    # for backward compatibility
 
 
     class Chdir(_RunnableContext):
@@ -1652,7 +1652,7 @@ class Color(object):
 ##
 ## spec()   # deprecated
 ##
-class Spec(_Context):   # deprecated
+class Spec(util._Context):   # deprecated
 
     _exception  = None
     _traceback  = None
@@ -2004,7 +2004,7 @@ def _dummy():
     __all__ = ('dummy_file', 'dummy_dir', 'dummy_values', 'dummy_attrs', 'dummy_environ_vars', 'dummy_io')
 
 
-    class DummyFile(_RunnableContext):
+    class DummyFile(util._RunnableContext):
 
         def __init__(self, filename, content):
             self.filename = filename
@@ -2023,7 +2023,7 @@ def _dummy():
             os.unlink(self.path)
 
 
-    class DummyDir(_RunnableContext):
+    class DummyDir(util._RunnableContext):
 
         def __init__(self, dirname):
             self.dirname = dirname
@@ -2038,7 +2038,7 @@ def _dummy():
             shutil.rmtree(self.path)
 
 
-    class DummyValues(_RunnableContext):
+    class DummyValues(util._RunnableContext):
 
         def __init__(self, dictionary, items_=None, **kwargs):
             self.dict = dictionary
@@ -2065,7 +2065,7 @@ def _dummy():
             self.__dict__.clear()
 
 
-    class DummyIO(_RunnableContext):
+    class DummyIO(util._RunnableContext):
 
         def __init__(self, stdin_content=None):
             self.stdin_content = stdin_content
