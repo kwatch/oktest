@@ -26,7 +26,8 @@ def withstmt_not_available():
 
 import oktest
 from oktest import ok, test, run
-from oktest.context import TestContext, subject, situation
+from oktest.context import TestContext  #, subject, situation
+from oktest import subject, situation
 
 
 def inspect_test_contexts(context_list):

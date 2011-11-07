@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'todo', 'main')
+__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'todo', 'subject', 'situation', 'main')
 __version__ = "$Release: 0.9.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
@@ -1837,6 +1837,8 @@ def context():
 
 context = _new_module("oktest.context", context())
 context.TestContext = TestContext
+subject   = context.subject
+situation = context.situation
 
 
 ##
