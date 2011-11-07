@@ -14,6 +14,7 @@ except ImportError:
 import oktest
 from oktest import test
 from oktest import skip
+from oktest.util import Color
 
 
 
@@ -65,8 +66,8 @@ class Skip_TC(unittest.TestCase):
         output = out.getvalue()
         output = re.sub('0\.\d\d\d sec', '0.000 sec', output)
         self.maxDiff = None
-        oktest.ok (output) == oktest.Color._colorize(expected)
-        self.assertEqual(oktest.Color._colorize(expected), output)
+        oktest.ok (output) == Color._colorize(expected)
+        self.assertEqual(Color._colorize(expected), output)
         self.assertEqual(0, n_errors)
 
     class _RunnterHandleSkipTest(object):

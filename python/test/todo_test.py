@@ -14,7 +14,7 @@ except ImportError:
 import oktest
 from oktest import ok, test
 from oktest import todo, _ExpectedFailure, _UnexpectedSuccess
-
+from oktest.util import Color
 
 
 class Todo_TC(unittest.TestCase):
@@ -66,9 +66,9 @@ class Todo_TC(unittest.TestCase):
         n_errors = oktest.run(testclass, **kwargs)
         output = out.getvalue()
         output = re.sub('0\.\d\d\d sec', '0.000 sec', output)
-        ok (output) == oktest.Color._colorize(expected)
+        ok (output) == Color._colorize(expected)
         self.maxDiff = None
-        self.assertEqual(oktest.Color._colorize(expected), output)
+        self.assertEqual(Color._colorize(expected), output)
         self.assertEqual(expected_n_errors, n_errors)
 
     class _RunnerHandleExpectedFailureTest(object):

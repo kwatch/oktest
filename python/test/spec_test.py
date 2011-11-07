@@ -10,6 +10,7 @@ import unittest
 
 import oktest
 from oktest import ok, run, spec, Spec
+from oktest.util import Color
 os.environ['OKTEST_WARNING_DISABLED'] = 'true'
 
 with_stmt_available = sys.version_info >= (2, 5,)
@@ -174,8 +175,8 @@ AssertionError: 2 == 1 : failed.
 ----------------------------------------------------------------------
 ## total:1, passed:0, failed:1, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
-        expected1 = oktest.Color._colorize(expected1)
-        expected2 = oktest.Color._colorize(expected2)
+        expected1 = Color._colorize(expected1)
+        expected2 = Color._colorize(expected2)
         fname = "__test_scenario1.py"
         ## with with-stmt
         if with_stmt_available:
@@ -258,8 +259,8 @@ AssertionError: 2 == 0 : failed.
 ----------------------------------------------------------------------
 ## total:1, passed:0, failed:1, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
-        expected1 = oktest.Color._colorize(expected1)
-        expected2 = oktest.Color._colorize(expected2)
+        expected1 = Color._colorize(expected1)
+        expected2 = Color._colorize(expected2)
         fname = "__test_scenario2.py"
         ## with with-statement
         if with_stmt_available:
@@ -311,8 +312,8 @@ AttributeError: 'NoneType' object has no attribute 'unknownattribute'
 ## total:1, passed:0, failed:0, error:1, skipped:0, todo:0  (0.000 sec)
 """[1:]
         expected2 = expected1
-        expected1 = oktest.Color._colorize(expected1)
-        expected2 = oktest.Color._colorize(expected2)
+        expected1 = Color._colorize(expected1)
+        expected2 = Color._colorize(expected2)
         fname = "__test_scenario3.py"
         ## with with-statement
         if with_stmt_available:

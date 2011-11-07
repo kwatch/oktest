@@ -1132,16 +1132,16 @@ class BaseReporter(Reporter):
     def colorize(self, string, kind):
         if not self._color:
             return string
-        if kind == ST_PASSED:  return Color.green(string, bold=True)
-        if kind == ST_FAILED:  return Color.red(string, bold=True)
-        if kind == ST_ERROR:   return Color.red(string, bold=True)
-        if kind == ST_SKIPPED: return Color.yellow(string, bold=True)
-        if kind == ST_TODO:    return Color.yellow(string, bold=True)
-        #if kind == ST_UNEXPECTED: return Color.red(string, bold=True)
-        if kind == "topic":    return Color.bold(string)
-        if kind == "sep":      return Color.red(string)
-        if kind == "context":  return Color.bold(string)
-        return Color.yellow(string)
+        if kind == ST_PASSED:  return util.Color.green(string, bold=True)
+        if kind == ST_FAILED:  return util.Color.red(string, bold=True)
+        if kind == ST_ERROR:   return util.Color.red(string, bold=True)
+        if kind == ST_SKIPPED: return util.Color.yellow(string, bold=True)
+        if kind == ST_TODO:    return util.Color.yellow(string, bold=True)
+        #if kind == ST_UNEXPECTED: return util.Color.red(string, bold=True)
+        if kind == "topic":    return util.Color.bold(string)
+        if kind == "sep":      return util.Color.red(string)
+        if kind == "context":  return util.Color.bold(string)
+        return util.Color.yellow(string)
 
     def write_separator(self):
         self.out.write(self.colorize(self.separator, "sep") + "\n")
@@ -1587,65 +1587,64 @@ def _dummy():
             else:
                 return func.__defaults__
 
-    return locals()
+    ##
+    ## color
+    ##
+    class Color(object):
 
+        @staticmethod
+        def bold(s):
+            return "\033[0;1m" + s + "\033[22m"
+
+        @staticmethod
+        def black(s, bold=False):
+            return "\033[%s;30m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def red(s, bold=False):
+            return "\033[%s;31m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def green(s, bold=False):
+            return "\033[%s;32m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def yellow(s, bold=False):
+            return "\033[%s;33m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def blue(s, bold=False):
+            return "\033[%s;34m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def magenta(s, bold=False):
+            return "\033[%s;35m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def cyan(s, bold=False):
+            return "\033[%s;36m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def white(s, bold=False):
+            return "\033[%s;37m%s\033[0m" % (bold and 1 or 0, s)
+
+        @staticmethod
+        def _colorize(s):
+            s = re.sub(r'<b>(.*?)</b>', lambda m: Color.bold(m.group(1)), s)
+            s = re.sub(r'<R>(.*?)</R>', lambda m: Color.red(m.group(1), bold=True), s)
+            s = re.sub(r'<r>(.*?)</r>', lambda m: Color.red(m.group(1), bold=False), s)
+            s = re.sub(r'<G>(.*?)</G>', lambda m: Color.green(m.group(1), bold=True), s)
+            s = re.sub(r'<Y>(.*?)</Y>', lambda m: Color.yellow(m.group(1), bold=True), s)
+            return s
+
+
+    return locals()
 
 util = _new_module('oktest.util', _dummy())
 del _dummy
 
 helper = util  ## 'help' is an alias of 'util' (for backward compatibility)
 sys.modules['oktest.helper'] = sys.modules['oktest.util']
-
-
-##
-## color
-##
-class Color(object):
-
-    @staticmethod
-    def bold(s):
-        return "\033[0;1m" + s + "\033[22m"
-
-    @staticmethod
-    def black(s, bold=False):
-        return "\033[%s;30m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def red(s, bold=False):
-        return "\033[%s;31m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def green(s, bold=False):
-        return "\033[%s;32m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def yellow(s, bold=False):
-        return "\033[%s;33m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def blue(s, bold=False):
-        return "\033[%s;34m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def magenta(s, bold=False):
-        return "\033[%s;35m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def cyan(s, bold=False):
-        return "\033[%s;36m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def white(s, bold=False):
-        return "\033[%s;37m%s\033[0m" % (bold and 1 or 0, s)
-
-    @staticmethod
-    def _colorize(s):
-        s = re.sub(r'<b>(.*?)</b>', lambda m: Color.bold(m.group(1)), s)
-        s = re.sub(r'<R>(.*?)</R>', lambda m: Color.red(m.group(1), bold=True), s)
-        s = re.sub(r'<r>(.*?)</r>', lambda m: Color.red(m.group(1), bold=False), s)
-        s = re.sub(r'<G>(.*?)</G>', lambda m: Color.green(m.group(1), bold=True), s)
-        s = re.sub(r'<Y>(.*?)</Y>', lambda m: Color.yellow(m.group(1), bold=True), s)
-        return s
 
 
 ##

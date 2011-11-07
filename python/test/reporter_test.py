@@ -14,6 +14,7 @@ except ImportError:
 import oktest
 from oktest import ok, test, skip, todo
 from oktest.context import subject, situation
+from oktest.util import Color
 
 python_command = os.environ.get('PYTHON', 'python')
 python24 = sys.version_info[0:2] <= (2, 4)
@@ -47,7 +48,7 @@ def _do_test(code_str, **kwargs):
     return re.sub(r'0\.\d\d\d sec', '0.000 sec', actual)
 
 def _colorize(expected):
-    return oktest.Color._colorize(expected)
+    return Color._colorize(expected)
 
 
 INPUT_COMPREHENSIVE = r"""

@@ -14,6 +14,7 @@ except ImportError:
 import oktest
 from oktest import ok, not_ok, NG, test
 from oktest.dummy import dummy_io
+from oktest.util import Color
 import oktest.config
 
 echo = sys.stdout.write
@@ -239,7 +240,7 @@ before_all() called.
 <R>AttributeError: 'str' object has no attribute 'foobar'</R>
 <r>----------------------------------------------------------------------</r>
 """[1:]
-        self.do_test(desc, script, oktest.Color._colorize(expected))
+        self.do_test(desc, script, Color._colorize(expected))
 
 
     def test_when_error_raised_on_after_all(self):
@@ -266,7 +267,7 @@ after_all() called.
 <R>TypeError: unsupported operand type(s) for +: 'int' and 'str'</R>
 <r>----------------------------------------------------------------------</r>
 """[1:]
-        self.do_test(desc, script, oktest.Color._colorize(expected))
+        self.do_test(desc, script, Color._colorize(expected))
 
 
     def test_setup_teardown(self):
@@ -438,7 +439,7 @@ run(FooTest)
             expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')
         os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
         oktest.REPORTER = oktest.SimpleReporter
-        self.do_test(desc, script, oktest.Color._colorize(expected))
+        self.do_test(desc, script, Color._colorize(expected))
 
 
     def test_report_header(self):
@@ -488,7 +489,7 @@ Sample Description 2
 """[1:]
         os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
         oktest.REPORTER = oktest.SimpleReporter
-        self.do_test(desc, script, oktest.Color._colorize(expected))
+        self.do_test(desc, script, Color._colorize(expected))
 
 
     def test_base_reporter_to_set_color_automatically(self):
