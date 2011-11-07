@@ -78,14 +78,6 @@ config = _new_module('oktest.config', {
 ASSERTION_ERROR = AssertionError
 
 
-def ex2msg(ex):
-    #return ex.message   # deprecated since Python 2.6
-    #return str(ex)      # may be empty
-    #return ex.args[0]   # ex.args may be empty (ex. AssertionError)
-    #return (ex.args or ['(no error message)'])[0]
-    return str(ex) or '(no error message)'
-
-
 def _diff_p(target, op, other):
     if op != '==':             return False
     if target == other:        return False
@@ -1384,7 +1376,7 @@ class OldStyleReporter(BaseReporter):
         elif status == ST_FAILED:
             ex_class, ex, ex_traceback = exc_info
             flag = hasattr(ex, '_raised_by_oktest')
-            self.out.write("[NG] %s\n" % (flag and ex.errmsg or ex2msg(ex)))
+            self.out.write("[NG] %s\n" % (flag and ex.errmsg or util.ex2msg(ex)))
             def formatter(filepath, lineno, funcname, linestr):
                 return "   %s:%s: %s\n" % (filepath, lineno, linestr.strip())
             arr = format_traceback(ex, ex_traceback, filter=self._filter, formatter=formatter)
@@ -1394,7 +1386,7 @@ class OldStyleReporter(BaseReporter):
                 self.out.write(ex.diff)
         elif status == ST_ERROR:
             ex_class, ex, ex_traceback = exc_info
-            self.out.write("[ERROR] %s: %s\n" % (ex_class.__name__, ex2msg(ex)))
+            self.out.write("[ERROR] %s: %s\n" % (ex_class.__name__, util.ex2msg(ex)))
             def formatter(filepath, lineno, funcname, linestr):
                 return "  - %s:%s:  %s\n" % (filepath, lineno, linestr.strip())
             arr = format_traceback(ex, ex_traceback, filter=self._filter, formatter=formatter)
@@ -1508,6 +1500,13 @@ def _dummy():
     def using(klass):                       ## undocumented
         return Using(klass)
 
+
+    def ex2msg(ex):
+        #return ex.message   # deprecated since Python 2.6
+        #return str(ex)      # may be empty
+        #return ex.args[0]   # ex.args may be empty (ex. AssertionError)
+        #return (ex.args or ['(no error message)'])[0]
+        return str(ex) or '(no error message)'
 
     def flatten(arr, type=(list, tuple)):   ## undocumented
         L = []
