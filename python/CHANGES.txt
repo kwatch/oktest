@@ -52,7 +52,7 @@ Release 0.10.0
   ex::
 
     from oktest import ok, test
-    from oktest.context import subject, situation
+    from oktest import subject, situation
 
     class SampleTestCase(unittest.TestCase):
       SUBJECT = "class 'Sample'"
@@ -75,17 +75,43 @@ Release 0.10.0
           def _(self):
             ...
 
+    if __name__ == '__main__':
+        import oktest
+        oktest.main()
+
   Output exmple::
 
     $ python test/example_test.py
     * class 'Sample'
       + method1()
         + when condition:
-	  - [ok] spec1
-	  - [ok] spec2
+	  - [passed] spec1
+	  - [passed] spec2
         + else:
-	  - [ok] spec3
-    ## total:3, passed:3, failed:0, error:0, skipped:0   (elapsed 0.000)
+	  - [passed] spec3
+    ## total:3, passed:3, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+
+* [change] Output is changed.
+
+    ###
+    ### previous version
+    ###
+    $ python test/foo_test.py
+    * FooTest
+      - [ok] test1
+      - [ok] test2
+      - [skipped] test3
+    ## total:3, passed:2, failed:0, error:0, skipped:1   (elapsed 0.000)
+
+    ###
+    ### in this release
+    ###
+    $ python test/foo_test.py
+    * FooTest
+      - [passed] test1
+      - [passed] test2
+      - [skipped] test3 (reason: REASON)
+    ## total:3, passed:2, failed:0, error:0, skipped:1, todo:0  (0.000 sec)
 
 
 Release 0.9.0

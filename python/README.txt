@@ -2,7 +2,7 @@
 Oktest README
 =============
 
-Release:: $Release$
+Release: $Release$
 
 .. contents::
 
@@ -24,12 +24,12 @@ Oktest is a new-style testing library for Python. ::
        def _(self):
           ok (s) == 'foo'        # same as assertEqual(s, 'foo')
           ok (s) != 'foo'        # same as assertNotEqual(s, 'foo')
-          ok (n) > 0             # same as assert_(n > 0)
+          ok (n) > 0             # same as assertTrue(n > 0)
           ok (fn).raises(Error)  # same as assertRaises(Error, fn)
-          ok ([]).is_a(list)     # same as assert_(isinstance([], list))
-          NG ([]).is_a(tuple)    # same as assert_(not isinstance([], tuple))
-          ok ('A.txt').is_file() # same as assert_(os.path.isfile('A.txt'))
-          NG ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
+          ok ([]).is_a(list)     # same as assertTrue(isinstance([], list))
+          NG ([]).is_a(tuple)    # same as assertTrue(not isinstance([], tuple))
+          ok ('A.txt').is_file() # same as assertTrue(os.path.isfile('A.txt'))
+          NG ('A.txt').is_dir()  # same as assertTrue(not os.path.isdir('A.txt'))
 
 Features:
 
@@ -504,12 +504,12 @@ The following is an example to use `Forge`_ as external fixture library::
 Test Context
 ============
 
-*(Experimental)*
+**(Experimental)**
 
 Oktest provides helper functions to describe test methods in structural style. ::
 
     from oktest import ok, test
-    {{*from oktest.context import subject, situation*}}
+    {{*from oktest import subject, situation*}}
 
     class SampleTestCase(unittest.TestCase):
         {{*SUBJECT = "Sample"*}}
@@ -779,7 +779,7 @@ Example to fake function call::
 Skip Test
 =========
 
-*(Experimental)*
+**(Experimental)**
 
 It is possible to skip tests according to a certain condition. ::
 
@@ -907,13 +907,24 @@ Helpers Reference
 ``oktest`` module
 -----------------
 
-main(\*args):
+fail(message)
+	Raises AssertionError exception with message.
+
+main(\*args)
 	Invokes tests of each class.
 	Args represents command-line options. ::
 
 	    import oktest
 	    oktest.main()         # same as: python -m oktest
 	    oktest.main('-sp')    # same as: python -m oktest -sp
+
+NG(actual)
+	Represents test assertion.
+	See `Assertion Reference`_ section.
+
+ok(actual)
+	Represents test assertion.
+	See `Assertion Reference`_ section.
 
 run(\*classes)
 	Invokes tests of each class.
@@ -924,9 +935,16 @@ run(\*classes)
 	    oktest.run(r'.*Test$')        # invokes FooTest, BarTest, and so on
 	    oktest.run()                  # same as oktest.run('.*(Test|TestCase|_TC)$')
 
-spec(description)
+subject(name)
+	Represents subject of specs such as ClassName, method_name() or feature name.
+	See `Test Context`_ section.
 
-	{{*(Obsolete! Don't use this!)*}}
+situation(desc)
+	Represents situation of specs such as a certain condition.
+	See `Test Context`_ section.
+
+spec(description)
+	**(Obsolete! Don't use this!)**
 
 	Represents spec description.
 	This is just a marker function, but very useful for readability. ::
@@ -942,6 +960,20 @@ spec(description)
 	            ## tips: 'for' statement is available instead of 'with' for Python 2.4
 	            for _ in spec("1+1 should be equal to 2."):
 	                ok (1+1) == 2
+
+skip(reason)
+	Skip test method.
+	Equivarent to ``unittest.skip()`` or ``unittest.skipIf()``.
+	See `Skip Test`_ section.
+
+test(desc)
+	Decorator to generate test method with spec description.
+	See `@test Decorator`_ section.
+
+todo()
+	Represents that the test will be failed expectedly.
+	Equivarent to ``unittest.expectedFailure()``.
+	See `@todo decorator`_ section.
 
 
 ``oktest.util`` module
