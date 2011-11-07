@@ -1423,6 +1423,182 @@ if os.environ.get('OKTEST_REPORTER'):
 
 
 ##
+## _Context
+##
+class _Context(object):
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return None
+
+
+class _RunnableContext(_Context):
+
+    def run(self, func, *args, **kwargs):
+        self.__enter__()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            self.__exit__(*sys.exc_info())
+
+    def deco(self, func):
+        def f(*args, **kwargs):
+            return self.run(func, *args, **kwargs)
+        return f
+
+    __call__ = run    # for backward compatibility
+
+
+##
+## util
+##
+def _dummy():
+
+    __all__ = ('chdir', 'rm_rf')
+
+
+    class Chdir(_RunnableContext):
+
+        def __init__(self, dirname):
+            self.dirname = dirname
+            self.path    = os.path.abspath(dirname)
+            self.back_to = os.getcwd()
+
+        def __enter__(self, *args):
+            os.chdir(self.path)
+            return self
+
+        def __exit__(self, *args):
+            os.chdir(self.back_to)
+
+
+    class Using(_Context):
+        """ex.
+             class MyTest(object):
+                pass
+             with oktest.Using(MyTest):
+                def test_1(self):
+                  ok (1+1) == 2
+             if __name__ == '__main__':
+                oktest.run(MyTest)
+        """
+        def __init__(self, klass):
+            self.klass = klass
+
+        def __enter__(self):
+            localvars = sys._getframe(1).f_locals
+            self._start_names = localvars.keys()
+            if python3: self._start_names = list(self._start_names)
+            return self
+
+        def __exit__(self, *args):
+            localvars  = sys._getframe(1).f_locals
+            curr_names = localvars.keys()
+            diff_names = list(set(curr_names) - set(self._start_names))
+            for name in diff_names:
+                setattr(self.klass, name, localvars[name])
+
+
+    def chdir(path, func=None):
+        cd = Chdir(path)
+        return func is not None and cd.run(func) or cd
+
+    def using(klass):                       ## undocumented
+        return Using(klass)
+
+
+    def flatten(arr, type=(list, tuple)):   ## undocumented
+        L = []
+        for x in arr:
+            if isinstance(x, type):
+                L.extend(flatten(x))
+            else:
+                L.append(x)
+        return L
+
+    def rm_rf(*fnames):
+        for fname in flatten(fnames):
+            if os.path.isfile(fname):
+                os.unlink(fname)
+            elif os.path.isdir(fname):
+                from shutil import rmtree
+                rmtree(fname)
+
+    def get_location(depth=0):
+        frame = sys._getframe(depth+1)
+        return (frame.f_code.co_filename, frame.f_lineno)
+
+    def read_binary_file(fname):
+        f = open(fname, 'rb')
+        try:
+            b = f.read()
+        finally:
+            f.close()
+        return b
+
+    if python2:
+        _rexp = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)')
+        def read_text_file(fname,  _rexp=_rexp, _read_binary_file=read_binary_file):
+            b = _read_binary_file(fname)
+            m = _rexp.match(b)
+            encoding = m and m.group(1) or 'utf-8'
+            u = b.decode(encoding)
+            assert isinstance(u, unicode)
+            return u
+    if python3:
+        _rexp = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)'.encode('us-ascii'))
+        def read_text_file(fname,  _rexp=_rexp, _read_binary_file=read_binary_file):
+            b = _read_binary_file(fname)
+            m = _rexp.match(b)
+            encoding = m and m.group(1).decode('us-ascii') or 'utf-8'
+            u = b.decode(encoding)
+            assert isinstance(u, str)
+            return u
+
+    from types import MethodType as _MethodType
+
+    if python2:
+        def func_argnames(func):
+            if isinstance(func, _MethodType):
+                codeobj = func.im_func.func_code
+                index = 1
+            else:
+                codeobj = func.func_code
+                index = 0
+            return codeobj.co_varnames[index:codeobj.co_argcount]
+        def func_defaults(func):
+            if isinstance(func, _MethodType):
+                return func.im_func.func_defaults
+            else:
+                return func.func_defaults
+    if python3:
+        def func_argnames(func):
+            if isinstance(func, _MethodType):
+                codeobj = func.__func__.__code__
+                index = 1
+            else:
+                codeobj = func.__code__
+                index = 0
+            return codeobj.co_varnames[index:codeobj.co_argcount]
+        def func_defaults(func):
+            if isinstance(func, _MethodType):
+                return func.__func__.__defaults__
+            else:
+                return func.__defaults__
+
+    return locals()
+
+
+util = _new_module('oktest.util', _dummy())
+del _dummy
+
+helper = util  ## 'help' is an alias of 'util' (for backward compatibility)
+sys.modules['oktest.helper'] = sys.modules['oktest.util']
+
+
+##
 ## color
 ##
 class Color(object):
@@ -1471,34 +1647,6 @@ class Color(object):
         s = re.sub(r'<G>(.*?)</G>', lambda m: Color.green(m.group(1), bold=True), s)
         s = re.sub(r'<Y>(.*?)</Y>', lambda m: Color.yellow(m.group(1), bold=True), s)
         return s
-
-##
-## _Context
-##
-class _Context(object):
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        return None
-
-
-class _RunnableContext(_Context):
-
-    def run(self, func, *args, **kwargs):
-        self.__enter__()
-        try:
-            return func(*args, **kwargs)
-        finally:
-            self.__exit__(*sys.exc_info())
-
-    def deco(self, func):
-        def f(*args, **kwargs):
-            return self.run(func, *args, **kwargs)
-        return f
-
-    __call__ = run    # for backward compatibility
 
 
 ##
@@ -1846,154 +1994,6 @@ context = _new_module("oktest.context", context())
 context.TestContext = TestContext
 subject   = context.subject
 situation = context.situation
-
-
-##
-## util
-##
-def _dummy():
-
-    __all__ = ('chdir', 'rm_rf')
-
-
-    class Chdir(_RunnableContext):
-
-        def __init__(self, dirname):
-            self.dirname = dirname
-            self.path    = os.path.abspath(dirname)
-            self.back_to = os.getcwd()
-
-        def __enter__(self, *args):
-            os.chdir(self.path)
-            return self
-
-        def __exit__(self, *args):
-            os.chdir(self.back_to)
-
-
-    class Using(_Context):
-        """ex.
-             class MyTest(object):
-                pass
-             with oktest.Using(MyTest):
-                def test_1(self):
-                  ok (1+1) == 2
-             if __name__ == '__main__':
-                oktest.run(MyTest)
-        """
-        def __init__(self, klass):
-            self.klass = klass
-
-        def __enter__(self):
-            localvars = sys._getframe(1).f_locals
-            self._start_names = localvars.keys()
-            if python3: self._start_names = list(self._start_names)
-            return self
-
-        def __exit__(self, *args):
-            localvars  = sys._getframe(1).f_locals
-            curr_names = localvars.keys()
-            diff_names = list(set(curr_names) - set(self._start_names))
-            for name in diff_names:
-                setattr(self.klass, name, localvars[name])
-
-
-    def chdir(path, func=None):
-        cd = Chdir(path)
-        return func is not None and cd.run(func) or cd
-
-    def using(klass):                       ## undocumented
-        return Using(klass)
-
-
-    def flatten(arr, type=(list, tuple)):   ## undocumented
-        L = []
-        for x in arr:
-            if isinstance(x, type):
-                L.extend(flatten(x))
-            else:
-                L.append(x)
-        return L
-
-    def rm_rf(*fnames):
-        for fname in flatten(fnames):
-            if os.path.isfile(fname):
-                os.unlink(fname)
-            elif os.path.isdir(fname):
-                from shutil import rmtree
-                rmtree(fname)
-
-    def get_location(depth=0):
-        frame = sys._getframe(depth+1)
-        return (frame.f_code.co_filename, frame.f_lineno)
-
-    def read_binary_file(fname):
-        f = open(fname, 'rb')
-        try:
-            b = f.read()
-        finally:
-            f.close()
-        return b
-
-    if python2:
-        _rexp = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)')
-        def read_text_file(fname,  _rexp=_rexp, _read_binary_file=read_binary_file):
-            b = _read_binary_file(fname)
-            m = _rexp.match(b)
-            encoding = m and m.group(1) or 'utf-8'
-            u = b.decode(encoding)
-            assert isinstance(u, unicode)
-            return u
-    if python3:
-        _rexp = re.compile(r'(?:^#!.*?\r?\n)?#.*?coding:[ \t]*([-\w]+)'.encode('us-ascii'))
-        def read_text_file(fname,  _rexp=_rexp, _read_binary_file=read_binary_file):
-            b = _read_binary_file(fname)
-            m = _rexp.match(b)
-            encoding = m and m.group(1).decode('us-ascii') or 'utf-8'
-            u = b.decode(encoding)
-            assert isinstance(u, str)
-            return u
-
-    from types import MethodType as _MethodType
-
-    if python2:
-        def func_argnames(func):
-            if isinstance(func, _MethodType):
-                codeobj = func.im_func.func_code
-                index = 1
-            else:
-                codeobj = func.func_code
-                index = 0
-            return codeobj.co_varnames[index:codeobj.co_argcount]
-        def func_defaults(func):
-            if isinstance(func, _MethodType):
-                return func.im_func.func_defaults
-            else:
-                return func.func_defaults
-    if python3:
-        def func_argnames(func):
-            if isinstance(func, _MethodType):
-                codeobj = func.__func__.__code__
-                index = 1
-            else:
-                codeobj = func.__code__
-                index = 0
-            return codeobj.co_varnames[index:codeobj.co_argcount]
-        def func_defaults(func):
-            if isinstance(func, _MethodType):
-                return func.__func__.__defaults__
-            else:
-                return func.__defaults__
-
-    return locals()
-
-
-util = _new_module('oktest.util', _dummy())
-del _dummy
-
-helper = util  ## 'help' is an alias of 'util' (for backward compatibility)
-sys.modules['oktest.helper'] = sys.modules['oktest.util']
-
 
 
 ##
