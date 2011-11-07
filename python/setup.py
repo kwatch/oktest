@@ -30,7 +30,8 @@ def fn():
     author_email     = 'kwa@kuwata-lab.com'
     #maintainer       = author
     #maintainer_email = author_email
-    url              = 'http://pypi.python.org/pypi'
+    #url              = 'http://pypi.python.org/pypi'
+    url              = 'http://www.kuwata-lab.com/oktest/'
     description      = 'a new-style testing library'
     long_description = r"""
 Oktest is a new-style testing library for Python. ::
@@ -47,12 +48,12 @@ Oktest is a new-style testing library for Python. ::
        def _(self):
           ok (s) == 'foo'        # same as assertEqual(s, 'foo')
           ok (s) != 'foo'        # same as assertNotEqual(s, 'foo')
-          ok (n) > 0             # same as assert_(n > 0)
+          ok (n) > 0             # same as assertTrue(n > 0)
           ok (fn).raises(Error)  # same as assertRaises(Error, fn)
-          ok ([]).is_a(list)     # same as assert_(isinstance([], list))
-          NG ([]).is_a(tuple)    # same as assert_(not isinstance([], tuple))
-          ok ('A.txt').is_file() # same as assert_(os.path.isfile('A.txt'))
-          NG ('A.txt').is_dir()  # same as assert_(not os.path.isdir('A.txt'))
+          ok ([]).is_a(list)     # same as assertTrue(isinstance([], list))
+          NG ([]).is_a(tuple)    # same as assertTrue(not isinstance([], tuple))
+          ok ('A.txt').is_file() # same as assertTrue(os.path.isfile('A.txt'))
+          NG ('A.txt').is_dir()  # same as assertTrue(not os.path.isdir('A.txt'))
 
 Features:
 
@@ -64,9 +65,9 @@ Features:
 
 Oktest requires Python 2.4 or later (3.x is supported).
 
-See README_ for details.
+See `User's Guide`_ for details.
 
-.. _README: http://packages.python.org/Oktest
+.. _`User's Guide`: http://www.kuwata-lab.com/oktest/oktest-py_users-guide.html
 """[1:]
     download_url = 'http://pypi.python.org/packages/source/O/$Package$/$Package$-$Release$.tar.gz'
     classifiers = [
