@@ -55,6 +55,7 @@ def _with_backup(filepath):
                 cp(bkup, filepath)
                 return func(*args, **kwargs)
             finally:
+                cp(filepath, '/tmp/' + filepath)
                 mv(bkup, filepath)
         return new_func
     return deco
@@ -111,51 +112,51 @@ for tname in TEST_NAMES:
     exec(r'''
 def _run_%s_test(c, ver, bin):
     fpath = 'test/%s_test.py'
-    _invoke_test(c, ver, bin, fpath)
+    #_invoke_test(c, ver, bin, fpath)
+    system(bin + ' ' + fpath)
 ''' % (tname, tname))
-
 
 def _run_oktest_test(c, ver, bin):
     """invoke 'test/oktest_test.py'"""
     fpath = "test/oktest_test.py"
     cmd = c%("PYTHON=$(bin) $(bin) " + fpath)
-    if ver == '2.4':
-        @_with_backup(fpath)
-        def f():
-            line = 'from __future__ import with_statement'
-            s = read_file(fpath).replace(line, '#' + line)
-            write_file(fpath, s)
-            system(cmd)
-        f()
-    else:
-        system(cmd)
+    #if ver == '2.4':
+    #    @_with_backup(fpath)
+    #    def f():
+    #        line = 'from __future__ import with_statement'
+    #        s = read_file(fpath).replace(line, '#' + line)
+    #        write_file(fpath, s)
+    #        system(cmd)
+    #    f()
+    #else:
+    #    system(cmd)
+    system(cmd)
 
+#def _invoke_test(c, ver, bin, fpath):
+#    def replacer_for_py24(s):
+#        s = re.sub(r'(from __future__ import .*)', r'#\1', s)
+#        s = re.sub(r'with spec\(', r'if spec(', s)
+#        rexp = re.compile(r'^([ \t]*#\+\n)(.*?)^([ \t]*#\-\n)', re.M | re.S)
+#        def modify(m):
+#            commented = re.compile(r'^', re.M).sub(r'#', m.group(2))
+#            return '#' + m.group(1) + commented + m.group(3)
+#        s = rexp.sub(modify, s)
+#        return s
+#    cmd = c%"$(bin) $(fpath)"
+#    if ver == '2.4':
+#        @_with_backup(fpath)
+#        def f():
+#            edit(fpath, by=replacer_for_py24)
+#            system(cmd)
+#        f()
+#    else:
+#        system(cmd)
+#
+#def _run_doc_test(c, ver, bin):
+#    """invoke 'test/doc_test.py'"""
+#    fpath = "test/doc_test.py"
+#    system(c%"$(bin) $(fpath)")
 
-def _invoke_test(c, ver, bin, fpath):
-    def replacer_for_py24(s):
-        s = re.sub(r'(from __future__ import .*)', r'#\1', s)
-        s = re.sub(r'with spec\(', r'if spec(', s)
-        rexp = re.compile(r'^([ \t]*#\+\n)(.*?)^([ \t]*#\-\n)', re.M | re.S)
-        def modify(m):
-            commented = re.compile(r'^', re.M).sub(r'#', m.group(2))
-            return '#' + m.group(1) + commented + m.group(3)
-        s = rexp.sub(modify, s)
-        return s
-    cmd = c%"$(bin) $(fpath)"
-    if ver == '2.4':
-        @_with_backup(fpath)
-        def f():
-            edit(fpath, by=replacer_for_py24)
-            system(cmd)
-        f()
-    else:
-        system(cmd)
-
-
-def _run_doc_test(c, ver, bin):
-    """invoke 'test/doc_test.py'"""
-    fpath = "test/doc_test.py"
-    system(c%"$(bin) $(fpath)")
 
 
 @recipe
