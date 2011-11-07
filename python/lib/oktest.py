@@ -3,13 +3,13 @@
 ###
 ### oktest.py -- new style test utility
 ###
-### $Release: 0.9.0 $
+### $Release: $
 ### $Copyright: copyright(c) 2010-2011 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 
 __all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'todo', 'subject', 'situation', 'main')
-__version__ = "$Release: 0.9.0 $".split()[1]
+__version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
 

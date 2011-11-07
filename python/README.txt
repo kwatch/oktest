@@ -2,7 +2,7 @@
 Oktest README
 =============
 
-$Release: 0.9.0 $
+Release:: $Release$
 
 .. contents::
 
@@ -53,10 +53,10 @@ Installation::
 
     ## if you have installed easy_install:
     $ sudo easy_install Oktest
-    ## or download Oktest-0.9.0.tar.gz and install it
-    $ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.9.0.tar.gz
-    $ tar xzf Oktest-0.9.0.tar.gz
-    $ cd Oktest-0.9.0/
+    ## or download Oktest-0.0.0.tar.gz and install it
+    $ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.0.0.tar.gz
+    $ tar xzf Oktest-0.0.0.tar.gz
+    $ cd Oktest-0.0.0/
     $ sudo python setup.py install
 
 

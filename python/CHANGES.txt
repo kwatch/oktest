@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-$Release: 0.9.0 $
+Release:: $Release$
 
 
 Release 0.10.0

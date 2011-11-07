@@ -266,7 +266,11 @@ def task_dist(c, *args, **kwargs):
         (r'\$License:.*?\$',    '$License: %s $'   % license),
     ]
     edit(c%"$(dir)/**/*", exclude=[c%'$(dir)/Kookbook.py'], by=replacer)
-    edit(c%"$(dir)/README.txt", by=[(r'\{\{\*(.*?)\*\}\}', r'\1')])
+    replacer2 = [
+        (r'\{\{\*(.*?)\*\}\}', r'\1'),
+        (r'0\.0\.0', release),
+    ]
+    edit(c%"$(dir)/README.txt", by=replacer2)
     ## MANIFEST
     #@pushd(dir)
     #def do():
