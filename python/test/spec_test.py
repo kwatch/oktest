@@ -9,7 +9,8 @@ import sys, os, re
 import unittest
 
 import oktest
-from oktest import ok, run, spec, Spec
+from oktest import ok, run
+from oktest import spec, Spec
 from oktest.util import Color
 os.environ['OKTEST_WARNING_DISABLED'] = 'true'
 
@@ -26,6 +27,7 @@ def replace_with_stmt(content):
 class Spec_TC(unittest.TestCase):
 
     def test___init__(self):
+        """takes description."""
         assert Spec("SOS").desc == "SOS"
 
     def test___enter__(self):
@@ -78,10 +80,54 @@ class Spec_TC(unittest.TestCase):
         assert obj._stacktrace
         assert isinstance(obj._stacktrace, list)
 
-    def test_spec(self):
-        obj = spec("SOS")
-        assert isinstance(obj, Spec)
-        assert obj.desc == "SOS"
+    def test___iter___1(sefl):
+        """emurates with-stmt when used with for-stmt."""
+        called = []
+        def enter(*args):
+            called.append(('enter', args))
+        def exit(*args):
+            called.append(('exit', args))
+        obj = Spec('foo')
+        obj.__enter__ = enter
+        obj.__exit__  = exit
+        i = 0
+        for x in obj:
+            i += 1
+            called.append(('yield', x))
+            ok (x).is_(obj)
+        ok (i) == 1
+        ok (called[0]) == ('enter', ())
+        ok (called[1]) == ('yield', obj)
+        ok (called[2]) == ('exit', (None, None, None))
+
+    def test___bool___1(self):
+        """returns True when $SPEC is not set."""
+        obj = Spec('SOS')
+        ok (bool(obj)) == True
+
+    def test___bool___2(self):
+        """returns False when $SPEC not matched to SPEC."""
+        obj = Spec('SOS')
+        try:
+            os.environ['SPEC'] = 'SOS'
+            ok (bool(obj)) == True
+            os.environ['SPEC'] = 'SOS!'
+            ok (bool(obj)) == False
+            os.environ['SPEC'] = 'OS'
+            ok (bool(obj)) == True
+        finally:
+            os.environ.pop('SPEC')
+
+
+    def test_spec_1(self):
+        """returns oktest.Spec object."""
+        obj = spec('Haruhi')
+        ok (obj).is_a(Spec)
+
+    def test_spec_2(self):
+        """takes description."""
+        obj = spec('Haruhi')
+        ok (obj.desc) == 'Haruhi'
 
 
 try:
@@ -273,6 +319,8 @@ AssertionError: 2 == 0 : failed.
             input2 = replace_with_stmt(input)
             sout, serr = self._run_oktest(fname, input2)
             sout = re.sub(r'0.\d\d\d sec', '0.000 sec', sout)
+            ok (sout) == expected2
+            ok (serr) == ""
             assert sout == expected2
             assert serr == ""
 

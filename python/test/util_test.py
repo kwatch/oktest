@@ -9,7 +9,7 @@
 import sys, os, re, shutil
 import unittest
 import oktest
-from oktest import ok, NG, run, spec
+from oktest import ok, NG, run
 from oktest import python2, python3
 from oktest.util import chdir, flatten, rm_rf
 
@@ -112,71 +112,6 @@ class RunnableContext_TC(unittest.TestCase):
         ok (called[1]) == ('func', (456,))
         ok (called[2]) == ('exit', (None, None, None))
         ok (ret) == 999
-
-
-
-class Spec_TC(unittest.TestCase):
-
-
-    def test___init___1(self):
-        """takes description."""
-        obj = oktest.Spec('foobar')
-        ok (obj.desc) == 'foobar'
-
-
-    def test___iter___1(sefl):
-        """emurates with-stmt when used with for-stmt."""
-        called = []
-        def enter(*args):
-            called.append(('enter', args))
-        def exit(*args):
-            called.append(('exit', args))
-        obj = oktest.Spec('foo')
-        obj.__enter__ = enter
-        obj.__exit__  = exit
-        i = 0
-        for x in obj:
-            i += 1
-            called.append(('yield', x))
-            ok (x).is_(obj)
-        ok (i) == 1
-        ok (called[0]) == ('enter', ())
-        ok (called[1]) == ('yield', obj)
-        ok (called[2]) == ('exit', (None, None, None))
-
-
-    def test___bool___1(self):
-        """returns True when $SPEC is not set."""
-        obj = oktest.Spec('SOS')
-        ok (bool(obj)) == True
-
-    def test___bool___2(self):
-        """returns False when $SPEC not matched to SPEC."""
-        obj = oktest.Spec('SOS')
-        try:
-            os.environ['SPEC'] = 'SOS'
-            ok (bool(obj)) == True
-            os.environ['SPEC'] = 'SOS!'
-            ok (bool(obj)) == False
-            os.environ['SPEC'] = 'OS'
-            ok (bool(obj)) == True
-        finally:
-            os.environ.pop('SPEC')
-
-
-
-class GLOBAL_TC(unittest.TestCase):
-
-
-    def test_spec_1(self):
-        """returns oktest.Spec object."""
-        obj = oktest.spec('Haruhi')
-        ok (obj).is_a(oktest.Spec)
-
-    def test_spec_2(self):
-        """takes description."""
-        obj = oktest.spec('Haruhi')
-        ok (obj.desc) == 'Haruhi'
 
 
 
