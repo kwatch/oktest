@@ -1110,13 +1110,11 @@ class BaseReporter(Reporter):
     def _filter_stacktrace(self, stacktrace, traceback_):
         entries = traceback.extract_tb(traceback_)
         file, line, func, text = entries[0]
-        def is_oktest_py(file):
-            return re.search(r'oktest.py[co]?$', file)
         i = len(stacktrace) - 1
         while i >= 0 and not (stacktrace[i][0] == file and stacktrace[i][2] == func):
             i -= 1
         bottom = i
-        while i >= 0 and not is_oktest_py(stacktrace[i][0]):
+        while i >= 0 and not _is_oktest_py(stacktrace[i][0]):
             i -= 1
         top = i + 1
         return stacktrace[top:bottom]
@@ -1165,6 +1163,11 @@ class BaseReporter(Reporter):
     @classmethod
     def get_registered_class(cls, name):
         return cls._registered.get(name)
+
+
+def _is_oktest_py(filepath, _dirpath=os.path.dirname(__file__)):
+    #return re.search(r'oktest.py[co]?$', filepath)
+    return filepath.startswith(_dirpath)
 
 
 def is_tty(out):
