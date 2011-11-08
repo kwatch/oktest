@@ -17,30 +17,10 @@ python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
 if python2:
     from cStringIO import StringIO
-    def _is_string(val):
-        return isinstance(val, (str, unicode))
-    def _is_class(obj):
-        return isinstance(obj, (types.TypeType, types.ClassType))
-    def _is_unbound(method):
-        return not method.im_self
-    def _func_name(func):
-        return func.func_name
-    def _func_firstlineno(func):
-        func = getattr(func, 'im_func', func)
-        return func.func_code.co_firstlineno
 if python3:
     xrange = range
     from io import StringIO
-    def _is_string(val):
-        return isinstance(val, (str, bytes))
-    def _is_class(obj):
-        return isinstance(obj, (type, ))
-    def _is_unbound(method):
-        return not method.__self__
-    def _func_name(func):
-        return func.__name__
-    def _func_firstlineno(func):
-        return func.__code__.co_firstlineno
+
 
 def _new_module(name, local_vars, util=None):
     mod = type(sys)(name)
@@ -81,8 +61,8 @@ ASSERTION_ERROR = AssertionError
 def _diff_p(target, op, other):
     if op != '==':             return False
     if target == other:        return False
-    #if not _is_string(target): return False
-    #if not _is_string(other):  return False
+    #if not util._is_string(target): return False
+    #if not util._is_string(other):  return False
     if not DIFF:               return False
     is_a = isinstance
     if is_a(target, str) and is_a(other, str):
@@ -535,7 +515,7 @@ class SkipObject(object):
                     raise SkipTest(reason)
                 fn.__name__ = func.__name__
                 fn.__doc__  = func.__doc__
-                fn._firstlineno = _func_firstlineno(func)
+                fn._firstlineno = util._func_firstlineno(func)
                 return fn
         else:
             def deco(func):
@@ -631,7 +611,7 @@ class TestRunner(object):
         ## sort by linenumber
         def fn(testname, klass=klass):
             func = getattr(klass, testname)
-            lineno = getattr(func, '_firstlineno', None) or _func_firstlineno(func)
+            lineno = getattr(func, '_firstlineno', None) or util._func_firstlineno(func)
             return (lineno, testname)
         testnames.sort(key=fn)
         return testnames
@@ -839,13 +819,13 @@ def _target_classes(targets):
     rexp_type = type(re.compile('x'))
     vars = None
     for arg in targets:
-        if _is_class(arg):
+        if util._is_class(arg):
             klass = arg
             target_classes.append(klass)
-        elif _is_string(arg) or isinstance(arg, rexp_type):
-            rexp = _is_string(arg) and re.compile(arg) or arg
+        elif util._is_string(arg) or isinstance(arg, rexp_type):
+            rexp = util._is_string(arg) and re.compile(arg) or arg
             if vars is None: vars = sys._getframe(2).f_locals
-            klasses = [ vars[k] for k in vars if rexp.search(k) and _is_class(vars[k]) ]
+            klasses = [ vars[k] for k in vars if rexp.search(k) and util._is_class(vars[k]) ]
             if TESTCLASS_SORT_KEY:
                 klasses.sort(key=TESTCLASS_SORT_KEY)
             target_classes.extend(klasses)
@@ -857,7 +837,7 @@ def _target_classes(targets):
 def _min_firstlineno_of_methods(klass):
     func_types = (types.FunctionType, types.MethodType)
     d = klass.__dict__
-    linenos = [ _func_firstlineno(d[k]) for k in d
+    linenos = [ util._func_firstlineno(d[k]) for k in d
                 if k.startswith('test') and type(d[k]) in func_types ]
     return linenos and min(linenos) or -1
 
@@ -1421,6 +1401,29 @@ def _dummy():
 
     __all__ = ('chdir', 'rm_rf')
 
+    if python2:
+        def _is_string(val):
+            return isinstance(val, (str, unicode))
+        def _is_class(obj):
+            return isinstance(obj, (types.TypeType, types.ClassType))
+        def _is_unbound(method):
+            return not method.im_self
+        def _func_name(func):
+            return func.func_name
+        def _func_firstlineno(func):
+            func = getattr(func, 'im_func', func)
+            return func.func_code.co_firstlineno
+    if python3:
+        def _is_string(val):
+            return isinstance(val, (str, bytes))
+        def _is_class(obj):
+            return isinstance(obj, (type, ))
+        def _is_unbound(method):
+            return not method.__self__
+        def _func_name(func):
+            return func.__name__
+        def _func_firstlineno(func):
+            return func.__code__.co_firstlineno
 
     ##
     ## _Context
@@ -1750,7 +1753,7 @@ def test(description_text=None, **options):
             localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = orig_func.__doc__ or description_text
         newfunc._options = options
-        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or _func_firstlineno(orig_func)
+        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         return newfunc
     return deco
 
@@ -1954,7 +1957,7 @@ def context():
             def fn(item):
                 if isinstance(item, tuple):
                     return getattr(item[1], '_firstlineno', None) or \
-                           _func_firstlineno(item[1])
+                           util._func_firstlineno(item[1])
                 elif isinstance(item, TestContext):
                     return item._lineno or 0
                 else:
@@ -2243,7 +2246,7 @@ def _dummy():
         def _wrap_func(self, func, block):
             tr = self
             def newfunc(*args, **kwargs):                # no 'self'
-                call = Call(None, _func_name(func), args, kwargs, None)
+                call = Call(None, util._func_name(func), args, kwargs, None)
                 tr.calls.append(call)
                 if block:
                     ret = block(func, *args, **kwargs)
@@ -2259,9 +2262,9 @@ def _dummy():
             func = method_obj
             tr = self
             def newfunc(self, *args, **kwargs):          # has 'self'
-                call = Call(self, _func_name(func), args, kwargs, None)
+                call = Call(self, util._func_name(func), args, kwargs, None)
                 tr.calls.append(call)
-                if _is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
+                if util._is_unbound(func): args = (self, ) + args   # call with 'self' if unbound method
                 if block:
                     ret = block(func, *args, **kwargs)
                 else:
