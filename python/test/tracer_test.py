@@ -9,7 +9,7 @@ import sys, os, re
 import unittest
 
 import oktest
-from oktest import ok, NG, run, spec
+from oktest import ok, NG, run
 from oktest.util import *
 from oktest.tracer import Tracer, Call, FakeObject
 
@@ -19,6 +19,9 @@ except ImportError:
     from io import StringIO
 
 os.environ['OKTEST_WARNING_DISABLED'] = 'true'
+
+def spec(desc):
+    return bool(True)
 
 
 class Call_TC(unittest.TestCase):
