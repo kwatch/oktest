@@ -498,6 +498,56 @@ _do_test("before/after/beforeAll/afterAll are called if defined.", function() {
 
 
 //// line: 500
+_do_test("'this' points spec object in before()/after().", function() {
+  var out = new oktest.util.StringIO();
+  var t = oktest.create();
+  t.topic("outer", function() {
+    var these = [];
+    this.before = function(this_) {
+      assert.ok(this.constructor  === oktest.core.SpecObject);
+      assert.ok(this_.constructor === oktest.core.SpecObject);
+      these.push(this, this_);
+    };
+    this.after  = function(this_) {
+      assert.ok(this.constructor  === oktest.core.SpecObject);
+      assert.ok(this_.constructor === oktest.core.SpecObject);
+    };
+
+    t.topic("inner", function() {
+      this.before = function(this_) {
+        assert.ok(this.constructor  === oktest.core.SpecObject);
+        assert.ok(this_.constructor === oktest.core.SpecObject);
+        these.push(this, this_);
+      };
+      this.after  = function(this_) {
+        assert.ok(this.constructor  === oktest.core.SpecObject);
+        assert.ok(this_.constructor === oktest.core.SpecObject);
+      };
+      t.spec("spec#1", function() {
+        for (var i = 0, n = these.length; i < n; i++) {
+          assert.ok (this === these[i]);
+        }
+      });
+    });
+
+  });
+  //
+  var expected = (
+    ''
+    + '* <b>outer</b>\n'
+    + '  * <b>inner</b>\n'
+    + '    - [<G>ok</G>] spec#1\n'
+    + '## total:1, <G>passed:1</G>, failed:0, error:0, skipped:0  (in 0.000s)\n'
+  );
+  _doRun(t, expected, {out:out});
+});
+
+
+
+
+
+
+//// line: 550
 _do_test("show unified diff if texts are different.", function() {
   var out = new oktest.util.StringIO();
   var t = oktest.create();
@@ -551,7 +601,7 @@ _do_test("show unified diff if texts are different.", function() {
     //| jjj
     //| kkk
     //| 
-    //|    at spec (/tmp/runner_test.js:532:18)
+    //|    at spec (/tmp/runner_test.js:582:18)
     //|        ok (text1).eq(text2);
     //|<r>----------------------------------------------------------------------</r>
     //|## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0  (in 0.000s)
@@ -573,7 +623,7 @@ _do_test("show unified diff if texts are different.", function() {
     + ' jjj\n'
     + ' kkk\n'
     + ' \n'
-    + '    at spec (/tmp/runner_test.js:532:18)\n'
+    + '    at spec (/tmp/runner_test.js:582:18)\n'
     + '        ok (text1).eq(text2);\n'
     + '<r>----------------------------------------------------------------------</r>\n'
     + '## total:1, passed:0, <R>failed:1</R>, error:0, skipped:0  (in 0.000s)\n'
@@ -597,7 +647,7 @@ _do_test("show unified diff if texts are different.", function() {
 
 
 
-//// line: 600
+//// line: 650
 _do_test("oktest.skip() skips test", function() {
   var t = oktest.create();
   t.topic("topic1", function() {

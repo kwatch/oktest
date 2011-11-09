@@ -1426,11 +1426,11 @@ oktest.runner.TestRunner.prototype = new oktest.runner.Runner();
     var status = 'passed', exception = null;
     try {
       try {
-        this._invokeBefore(so.parent);  // so.parent is a TopicObject
+        this._invokeBefore(so.parent, so);  // so.parent is a TopicObject
         this._invokeWithFixtures(so);
       }
       finally {
-        this._invokeAfter(so.parent);  // so.parent is a TopicObject
+        this._invokeAfter(so.parent, so);  // so.parent is a TopicObject
       }
     }
     catch (ex) {
@@ -1442,15 +1442,15 @@ oktest.runner.TestRunner.prototype = new oktest.runner.Runner();
     this.reporter.onExitSpec(so, status, exception);
   };
 
-  def._invokeBefore = function _invokeBefore(to) {
-    if (to.parent) this._invokeBefore(to.parent);
-    if (to.before) to.before();
+  def._invokeBefore = function _invokeBefore(to, so) {
+    if (to.parent) this._invokeBefore(to.parent, so);
+    if (to.before) to.before.call(so, so);
   };
 
-  def._invokeAfter = function _invokeAfter(to) {
-    if (to.after) to.after();
-    //if (to.parent) this._invokeAfter(to.parent);
-    while ((to = to.parent)) if (to.after) to.after();
+  def._invokeAfter = function _invokeAfter(to, so) {
+    if (to.after) to.after.call(so, so);
+    //if (to.parent) this._invokeAfter(to.parent, so);
+    while ((to = to.parent)) if (to.after) to.after.call(so, so);
   };
 
   def._invokeWithFixtures = function _invokeWithFixtures(so) {
