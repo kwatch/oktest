@@ -42,6 +42,7 @@ config = _new_module('oktest.config', {
     #"color_enabled": any(lambda x: _sys.platform.startswith(x), ('darwin', 'linux', 'freebsd', 'netbsd'))  # not work on Python2.4
     "color_available": bool([ 1 for p in ('darwin', 'linux', 'freebsd', 'netbsd') if sys.platform.startswith(p) ]),
     "color_enabled":  None,    # None means detect automatiallly
+    "TARGET_PATTERN": '.*(Test|TestCase|_TC)$',   # class name pattern of test case
 })
 
 
@@ -778,9 +779,6 @@ def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|
 TEST_RUNNER = TestRunner
 
 
-TARGET_PATTERN = '.*(Test|TestCase|_TC)$'
-
-
 def run(*targets, **kwargs):
     out    = kwargs.pop('out', None)
     color  = kwargs.pop('color', None)
@@ -800,7 +798,7 @@ def run(*targets, **kwargs):
     runner = TEST_RUNNER(reporter=reporter, filter=filter)
     #
     if len(targets) == 0:
-        targets = (TARGET_PATTERN, )
+        targets = (config.TARGET_PATTERN, )
     #
     runner.__enter__()
     try:
@@ -2445,7 +2443,7 @@ def _dummy():
                     if issubclass(klass, unittest.TestCase):
                         testclasses.append(klass)
                         unittest_testclasses.append(klass)
-                    elif re.search(TARGET_PATTERN, klass.__name__):
+                    elif re.search(config.TARGET_PATTERN, klass.__name__):
                         testclasses.append(klass)
                         oktest_testclasses.append(klass)
             return testclasses, unittest_testclasses, oktest_testclasses
