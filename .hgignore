@@ -5,3 +5,4 @@ syntax:glob
 dist/*
 tmp/*
 archives/*
+local/*
