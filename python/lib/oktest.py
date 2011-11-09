@@ -2498,7 +2498,7 @@ def _dummy():
             buf = []; add = buf.append
             add("Usage: python -m oktest [options] file_or_directory...\n")
             #add(parser.help_message(20))
-            add(re.sub(r'^.*\n.*\nOptions:\n', '', parser.format_help()))
+            add(re.sub(r'^.*\n.*\n[oO]ptions:\n', '', parser.format_help()))
             add("Example:\n")
             add("   ## run test scripts in plain format\n")
             add("   $ python -m oktest -sp tests/*_test.py\n")
