@@ -2437,7 +2437,7 @@ def _dummy():
             oktest_testclasses   = []
             for mod in modules:
                 for k in dir(mod):
-                    if k.startswith('_'): continue
+                    #if k.startswith('_'): continue
                     v = getattr(mod, k)
                     if not isinstance(v, type): continue
                     klass = v
