@@ -2080,7 +2080,14 @@ oktest.mainapp.MainApp = function MainApp(script) {
   def.run = function run(args) {
     var _dp = oktest.util._dp;
     var parser = this.newCmdoptParser();
-    var opts = parser.parse(args);
+    var opts;
+    try {
+      opts = parser.parse(args);
+    }
+    catch (err) {
+      process.stderr.write(this.script + ": " + err.message + "\n");
+      return 1;
+    }
     if (opts.debug) oktest.config.debug = true;
     _dp("args", args);
     _dp("opts", opts);
