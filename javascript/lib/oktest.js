@@ -2146,9 +2146,10 @@ oktest.mainapp.MainApp = function MainApp(script) {
 })(oktest.mainapp.MainApp.prototype);
 
 
-oktest.main = function main() {
-  var script = process.argv[1];
-  var args   = process.argv.slice(2);
+oktest.main = function main(process_argv) {
+  if (process_argv == null) process_argv = process.argv;
+  var script = process_argv[1];
+  var args   = process_argv.slice(2);
   var app = new oktest.mainapp.MainApp(script);
   var n_errors = app.run(args);
   //process.exit(n_errors);
