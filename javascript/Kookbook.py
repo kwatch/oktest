@@ -2,22 +2,12 @@ from __future__ import with_statement
 
 import sys, os, re, glob
 
-#release   = prop('release',   '0.0.0')
-def read_version_from(filename):
-    with open(filename) as f:
-        for line in f:
-            m = re.search(r'"version":\s*"(.*?)"', line)
-            if m:
-                release = m.group(1)
-                break
-        else:
-            raise Exception("version is not found in package.json")
-    return release
-release   = prop('release',   read_version_from("package.json"))
-copyright = prop('copyright', 'copyright(c) 2010-2011 kuwata-lab.com all rights reserved')
-license   = prop('license',   'MIT License')
+package   = 'oktest'
+release   = prop('release', '0.1.0')
+copyright = 'copyright(c) 2010-2011 kuwata-lab.com all rights reserved'
+license   = 'MIT License'
 
-kook_default_product = "test"
+kookbook.default = "test"
 
 
 node_path = os.environ.get('NODE_PATH')
@@ -29,7 +19,8 @@ if not node_path:
 nodejs = "node --strict_mode"
 
 
-dist_dir = 'dist-' + release
+def dist_dir():
+    return "dist/oktest-" + release
 
 
 @recipe
@@ -41,22 +32,24 @@ def test(c):
             system(c%"$(nodejs) $(fname)")
 
 
-files = [
+text_files = [
     'README.txt', 'CHANGES.txt', 'MIT-LICENSE', 'Kookbook.py', 'package.json',
-    'lib/oktest.js',
-    'doc/users-guide.html', 'doc/docstyle.css',
-    'test/*_test.js',
 ]
 
 
 @recipe
 def dist(c):
     """create 'dist-x.x.x' directory and copy files to it"""
-    rm_rf(dist_dir)
-    mkdir_p(dist_dir)
-    store(files, dist_dir)
+    dir = dist_dir()
+    rm_rf(dir)
+    mkdir_p(dir)
     #
-    system(c%'chmod 0755 $(dist_dir)/lib/oktest.js')
+    store(text_files, dir)
+    store("lib/*.js", "doc/users-guide.html", "doc/docstyle.css", "test/*_test.js", dir)
+    #
+    mkdir(c%"$(dir)/bin")
+    cp("lib/oktest.js", c%"$(dir)/bin/oktest.js")
+    system(c%"chmod 0755 $(dir)/bin/oktest.js")
     #
     replacer = [
         (r'\$Release:.*?\$',   r'$Release: %s $'   % release),
@@ -66,23 +59,15 @@ def dist(c):
         (r'\$Copyright\$', copyright),
         (r'\$License\$',   license),
     ]
-    edit(c%'$(dist_dir)/**/*', by=replacer)
-    cp('Kookbook.py', dist_dir)   # don't edit 'Kookbook.py'
-    #
-    #from kook.utils import glob2
-    #with chdir(dist_dir):
-    #    filenames = [ x for x in glob2('**/*') if os.path.isfile(x) ]
-    #filenames.append("")
-    #s = "\n".join(filenames)
-    #with open(".npminclude", 'w') as f:
-    #    f.write(s)
+    edit(c%'$(dir)/**/*', by=replacer)
+    cp('Kookbook.py', dir)   # don't edit 'Kookbook.py'
 
 
 @recipe
 @ingreds('dist')
-def npm_publish(c):
+def publish(c):
     """upload package; you must do 'npm adduser' in advance"""
-    with chdir(dist_dir):
+    with chdir(dist_dir()):
         system("npm publish .")
 
 
