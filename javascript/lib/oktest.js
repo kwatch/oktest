@@ -1519,11 +1519,7 @@ oktest.reporter.Reporter = function Reporter() {
 oktest.reporter.BaseReporter = function BaseReporter(opts) {
   if (! opts) opts = {};
   this.out = opts.out ? opts.out : process.stdout;
-  var flag_color = "color" in opts ? opts.color : null;
-  if (flag_color == null) {
-    flag_color = oktest.config.color_available && this._isatty();
-  }
-  this.enableColor(flag_color);
+  this._setColorFlag("color" in opts ? opts.color : null);
 };
 oktest.reporter.BaseReporter.prototype = new oktest.reporter.Reporter();
 
@@ -1627,6 +1623,13 @@ oktest.reporter.BaseReporter.prototype = new oktest.reporter.Reporter();
     //s = "error:"  +d.error;   buf.push(d.error   ? c.error  (s) : s);
     //s = "skipped:"+d.skipped; buf.push(d.skipped ? c.skipped(s) : s);
     return buf.join(", ");
+  };
+
+  def._setColorFlag = function _setColorFlag(flag) {
+    if (flag == null) {
+      flag = oktest.config.color_available && this._isatty();
+    }
+    this.enableColor(flag);
   };
 
   def.enableColor = function enableColor(flag) {
