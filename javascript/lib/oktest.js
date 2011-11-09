@@ -2176,9 +2176,11 @@ oktest.main = function main(process_argv) {
   var app = new oktest.mainapp.MainApp(script);
   var n_errors = app.run(args);
   //process.exit(n_errors);
+  return n_errors;
 };
 
 
 if (require.main === module) {
-  oktest.main();
+  var n_errors = oktest.main();
+  process.exit(n_errors);
 }
