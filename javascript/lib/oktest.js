@@ -2065,7 +2065,7 @@ oktest.mainapp.MainApp = function MainApp(script) {
       return 0;
     }
     if (opts.version) {
-      util.print(oktest.__version__);
+      util.print(oktest.__version__ + "\n");
       return 0;
     }
     if (opts.generate) {
