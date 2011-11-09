@@ -47,9 +47,9 @@ def dist(c):
     store(text_files, dir)
     store("lib/*.js", "doc/users-guide.html", "doc/docstyle.css", "test/*_test.js", dir)
     #
-    mkdir(c%"$(dir)/bin")
-    cp("lib/oktest.js", c%"$(dir)/bin/oktest.js")
-    system(c%"chmod 0755 $(dir)/bin/oktest.js")
+    #mkdir(c%"$(dir)/bin")
+    #cp("lib/oktest.js", c%"$(dir)/bin/oktest.js")
+    #system(c%"chmod 0755 $(dir)/bin/oktest.js")
     #
     replacer = [
         (r'\$Release:.*?\$',   r'$Release: %s $'   % release),
