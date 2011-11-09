@@ -1702,6 +1702,7 @@ oktest.reporter.BaseReporter.prototype = new oktest.reporter.Reporter();
 
   def.printExceptionStack = function printExceptionStack(so, ex) {
     var str = ex.stack;
+    if (! str) throw ex;  // ex. RangeError: Maximum call stack size exceeded
     if (! oktest.config.debug) {
       str = str.replace(/^    at .*\boktest\.js:\d+.*(\n|$)/gm, '');
       str = str.replace(/^(    at) SpecObject\.body /gm, '$1 spec ');
