@@ -2346,6 +2346,7 @@ del _dummy
 ##
 ## mainapp
 ##
+import unittest
 
 def load_module(mod_name, filepath, content=None):
     mod = type(os)(mod_name)
@@ -2429,7 +2430,6 @@ def _dummy():
             return modules
 
         def _load_classes(self, modules, pattern=None):
-            import unittest
             from fnmatch import fnmatch
             testclasses = []
             unittest_testclasses = []
@@ -2453,8 +2453,6 @@ def _dummy():
         def _run_unittest(self, klasses, pattern=None, filters=None):
             self._trace("test_pattern: %r" % (pattern,))
             self._trace("unittest_testclasses: ", klasses)
-            import unittest
-            from fnmatch import fnmatch
             loader = unittest.TestLoader()
             the_suite = unittest.TestSuite()
             rexp = re.compile(r'^test(_|_\d\d\d(_|: ))?')
@@ -2472,7 +2470,8 @@ def _dummy():
                 else:
                     suite = loader.loadTestsFromTestCase(klass)
                 the_suite.addTest(suite)
-            runner = unittest.TextTestRunner()
+            #runner = unittest.TextTestRunner()
+            runner = unittest.TextTestRunner(stream=sys.stderr)
             result = runner.run(the_suite)
             n_errors = len(result.errors) + len(result.failures)
             return n_errors
@@ -2482,8 +2481,8 @@ def _dummy():
             self._trace("oktest_testclasses: ", klasses)
             if pattern:
                 kwargs.setdefault('filter', {})['test'] = pattern
-            import oktest
-            n_errors = oktest.run(*klasses, **kwargs)
+            import oktest; run = oktest.run    # don't remove!
+            n_errors = run(*klasses, **kwargs)
             return n_errors
 
         def _trace(self, msg, items=None):
@@ -2534,7 +2533,6 @@ def _dummy():
             return filepaths
 
         def _find_files_recursively(self, testdir, pattern):
-            _trace = self._trace
             isdir = os.path.isdir
             assert isdir(testdir)
             filepaths = []
@@ -2542,7 +2540,7 @@ def _dummy():
                 files = rglob(testdir, pat)
                 if files:
                     filepaths.extend(files)
-                    _trace("testdir: %r, pattern: %r, files: " % (testdir, pat), files)
+                    self._trace("testdir: %r, pattern: %r, files: " % (testdir, pat), files)
             return filepaths
 
         #def _exclude_files(self, filepaths, pattern):
