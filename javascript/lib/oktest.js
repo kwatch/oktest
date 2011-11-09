@@ -1079,6 +1079,11 @@ oktest.core.TestObject = function TestObject() {
     return counts['failed'] + counts['error'];
   };
 
+  def.clear = function clear(args) {
+    this._topics.length = 0;
+    this._stack.length = 0;
+  };
+
 })(oktest.core.TestObject.prototype);
 
 
