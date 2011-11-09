@@ -498,10 +498,10 @@ class Should(object):
 class SkipTest(Exception):
     pass
 
-import unittest as _unittest
-if hasattr(_unittest, 'SkipTest'):
-    SkipTest = _unittest.SkipTest
-del _unittest
+try:
+    from unittest import SkipTest
+except ImportError:
+    pass
 
 
 class SkipObject(object):
