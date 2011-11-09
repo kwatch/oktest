@@ -63,7 +63,7 @@ def _with_backup(filepath):
 
 TEST_NAMES = ('tracer', 'spec', 'testdeco',
               'doc', 'assertions', 'dummy', 'runner', 'context', 'reporter',
-              'util', 'skip', 'todo', )
+              'util', 'skip', 'todo', 'mainapp', )
 test_names = [ os.path.basename(x).replace('_test.py', '')
                    for x in glob("test/*_test.py") ]
 assert set(TEST_NAMES) == set(test_names)
