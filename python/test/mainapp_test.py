@@ -18,6 +18,7 @@ py31 = major == 3 and minor == 1
 py32 = major == 3 and minor >= 2
 #
 py271 = major == 2 and minor == 7 and teeny <= 1
+py314 = major == 3 and minor == 1 and teeny >= 4
 py320 = major == 3 and minor == 2 and teeny <= 0
 #
 import unittest
@@ -129,7 +130,7 @@ OUTPUT_ERRORS2 = r"""
 <r>----------------------------------------------------------------------</r>
 """[1:]
 
-if py27 or py31 or py32:
+if py27 or py314 or py32:
     OUTPUT_ERRORS2 = r"""
 <r>----------------------------------------------------------------------</r>
 [<R>Failed</R>] Sos_TC > test_bbb()
@@ -294,7 +295,7 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1747, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1748, in newfunc
     return orig_func(self)
   File "/usr/local/lib/python/site-packages/oktest.py", line 517, in fn
     raise SkipTest(reason)
@@ -317,11 +318,11 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1747, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1748, in newfunc
     return orig_func(self)
   File "/usr/local/lib/python/site-packages/oktest.py", line 541, in deco
     raise _ExpectedFailure(sys.exc_info())
-oktest._ExpectedFailure
+oktest._ExpectedFailure: expected failure
 
 ======================================================================
 FAIL: 1-1 should be 0
@@ -379,13 +380,13 @@ AssertionError: msg
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/usr/local/lib/python/unittest.py", line 483, in run
+  File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1747, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1748, in newfunc
     return orig_func(self)
   File "/usr/local/lib/python/site-packages/oktest.py", line 541, in deco
     raise _ExpectedFailure(sys.exc_info())
-oktest._ExpectedFailure
+oktest._ExpectedFailure: expected failure
 
 ======================================================================
 FAIL: test_002: 1-1 should be 0 (_sos_test.SosTest)
@@ -403,9 +404,9 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected
-+++ actual
-@@ -1 +1 @@
+--- expected 
++++ actual 
+@@ -1,1 +1,1 @@
 -aaa
 +bbb
 
@@ -415,6 +416,11 @@ Ran 7 tests in 0.000s
 
 FAILED (failures=2, errors=2, skipped=1)
 """[1:]
+    if py314:
+        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
+        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('--- expected ', '--- expected')
+        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('+++ actual ', '+++ actual')
+        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(' line 480,', ' line 483,')
 
 
 
