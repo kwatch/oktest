@@ -2113,8 +2113,10 @@ oktest.mainapp.MainApp = function MainApp(script) {
     for (var i = 0, n = args.length; i < n; i++) {
       var filename = args[i];
       var fstat = oktest.util.fstat(filename);
-      if (! fstat)
-        throw cmdopt.ParseError(filename + ": no such file or directory.");
+      if (! fstat) {
+        //throw new cmdopt.ParseError(filename + ": no such file or directory.");
+        throw new Error("'" + filename + "': no such file or directory.");
+      }
       if (fstat.isFile()) {
         filename_list.push(filename);
       }
