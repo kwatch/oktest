@@ -546,6 +546,7 @@ def todo(func):
 class _ExpectedFailure(Exception):
 
     def __init__(self, exc_info=None):
+        Exception.__init__(self, "expected failure")
         if exc_info:
             self.exc_info = exc_info
 

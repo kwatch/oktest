@@ -204,7 +204,7 @@ SkipTest: REASON
 ======================================================================
 ERROR: not yet
 ----------------------------------------------------------------------
-_ExpectedFailure
+_ExpectedFailure: expected failure
 
 ======================================================================
 FAIL: 1-1 should be 0
@@ -233,9 +233,6 @@ Ran 7 tests in 0.000s
 
 FAILED (failures=2, errors=3)
 """[1:]
-
-if py24:
-    OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('_ExpectedFailure', '_ExpectedFailure: <unprintable instance object>')
 
 if py27 or py32:
     OUTPUT_UNITTEST = r"""
