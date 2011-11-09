@@ -1,9 +1,9 @@
 {
   "name": "oktest",
   "description": "a new-style testing library for node.js",
-  "version": "0.1.0",
+  "version": "$Release$",
   "tags": ["test", "testing", "mock"],
-  "homepage": "https://bitbucket.org/kwatch/oktest/src/tip/javascript/",
+  "homepage": "https://bitbucket.org/kwatch/oktest/src/javascript/javascript/",
   "repository": {
     "type": "mercurial",
     "url": "https://bitbucket.org/kwatch/oktest/"
