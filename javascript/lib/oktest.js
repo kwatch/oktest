@@ -573,7 +573,11 @@ oktest.assertion.AssertionObject = function AssertionObject(actual, bool) {
 
 
   def.deepEqual = function deepEqual(expected) {
-    if (! this.bool) return this.NotDeepEqual(expected);
+    if (! this.bool) return this._notDeepEqual(expected);
+    return this._deepEqual(expected);
+  };
+
+  def._deepEqual = function _deepEqual(expected) {
     this._done = true;
     try {
       assert.deepEqual(this.actual, expected);
@@ -593,7 +597,11 @@ oktest.assertion.AssertionObject = function AssertionObject(actual, bool) {
   };
 
   def.notDeepEqual = function notDeepEqual(expected) {
-    if (! this.bool) return this.deepEqual(expected);
+    if (! this.bool) return this._deepEqual(expected);
+    return this._notDeepEqual(expected);
+  };
+
+  def._notDeepEqual = function _notDeepEqual(expected) {
     this._done = true;
     try {
       assert.notDeepEqual(this.actual, expected);
