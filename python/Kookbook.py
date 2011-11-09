@@ -23,7 +23,7 @@ release   = prop('release', '0.10.0')
 package   = prop('package', 'Oktest')
 copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
-kookbook.default = 'unittest'
+kookbook.default = 'test'
 
 python = prop('python', sys.executable)
 
@@ -71,7 +71,8 @@ assert set(TEST_NAMES) == set(test_names)
 
 @recipe
 @spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
-def task_unittest(c, *args, **kwargs):
+def task_test(c, *args, **kwargs):
+    """do test by oktest"""
     #optstr = " -m oktest"
     optstr = " -m oktest -sp test"
     if kwargs.get('a'):
@@ -84,8 +85,8 @@ def task_unittest(c, *args, **kwargs):
 @recipe
 @ingreds('test/doc_test.py')
 @spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
-def task_test(c, *args, **kwargs):
-    """do test"""
+def task_unittest(c, *args, **kwargs):
+    """do test by unittest module"""
     flag_all = bool(kwargs.get('a'))
     if flag_all:
         pairs = python_binaries
