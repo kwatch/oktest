@@ -501,7 +501,8 @@ class SkipTest(Exception):
 try:
     from unittest import SkipTest
 except ImportError:
-    pass
+    if python2:
+        sys.exc_clear()
 
 
 class SkipObject(object):
@@ -554,7 +555,8 @@ class _UnexpectedSuccess(Exception):
 try:
     from unittest.case import _ExpectedFailure, _UnexpectedSuccess
 except ImportError:
-    pass
+    if python2:
+        sys.exc_clear()
 
 
 
