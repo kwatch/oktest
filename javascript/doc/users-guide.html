@@ -57,15 +57,13 @@ Example code</div>
 
     <strong>topic</strong>("target to test", function() {
         <strong>spec</strong>("specification description", function() {
-            <code>ok (1+1).is(2)</code>;      // same as assert.ok(1+1 === 2)
-            <code>ok (1+1, '===', 2)</code>;  // same as assert.ok(1+1 === 2)
-            <code>ok (1+1).isNot(1)</code>;   // same as assert.ok(1+1 !== 1)
+            <strong>ok (1+1).is(2)</strong>;      // same as assert.ok(1+1 === 2)
+            <strong>ok (1+1, '===', 2)</strong>;  // same as assert.ok(1+1 === 2)
+            <strong>ok (1+1).isNot(1)</strong>;   // same as assert.ok(1+1 !== 1)
         });
     });
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
 </pre>
 <p>Features:
 </p>
@@ -160,9 +158,7 @@ The points are:
 
     });
 
-    if (process.argv[1] === __filename) {
-        oktest.main();  // or  oktest.run();
-    }
+    if (require.main === module) oktest.main(); // or oktest.run();
 </pre>
 <p>See <a href="#assertion-reference">Assertion Reference</a> section for details about ok() and NG().
 </p>
@@ -191,102 +187,206 @@ $ oktest.js -sp example_test.js    # plain format
 
 <a name="assertion-reference"></a>
 <h2 class="section1">Assertion Reference</h2>
-<p>ok (x).eq(y) or ok (x, '==', y)
+<dl class="dl1">
+<dt class="dt1">
+ok (x).eq(y) or ok (x, '==', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x == y.
-</p>
-<p>ok (x).ne(y) or ok (x, '!=', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).ne(y) or ok (x, '!=', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x != y.
-</p>
-<p>ok (x).is(y) or ok (x, '===', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).is(y) or ok (x, '===', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x == y.
-</p>
-<p>ok (x).isNot(y) or ok (x, '!==', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).isNot(y) or ok (x, '!==', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x != y.
-</p>
-<p>ok (x).gt(y) or ok (x, '&gt;', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).gt(y) or ok (x, '&gt;', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x &gt; y.
-</p>
-<p>ok (x).ge(y) or ok (x, '&gt;=', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).ge(y) or ok (x, '&gt;=', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x &gt;= y.
-</p>
-<p>ok (x).lt(y) or ok (x, '&lt;', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).lt(y) or ok (x, '&lt;', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x &lt; y.
-</p>
-<p>ok (x).le(y) or ok (x, '&lt;=', y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).le(y) or ok (x, '&lt;=', y)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x &lt;= y.
-</p>
-<p>ok (x).deepEqual(y)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).deepEqual(y)</dt>
+<dd class="dd1">
 	Same as assert.deepEqual(x, y), but it reports diff when
 	x and y are different.
-</p>
-<p>ok (x).inDelta(y, delta)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).inDelta(y, delta)</dt>
+<dd class="dd1">
 	Raises AssertionError unless y-delta &lt; x &lt; y+delta.
-</p>
-<p>ok (x).isa(klass)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).isa(klass)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x instanceof klass.
-</p>
-<p>ok (x).match(rexp)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).match(rexp)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x.match(rexp).
-</p>
-<p>ok (x).hasAttr(name[, value])
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).hasAttr(name[, value])</dt>
+<dd class="dd1">
 	Raises AssertionError unless name in x.
 	In addition, when value is specified, raises AssertionError unless x.name === value.
-</p>
-<p>ok (x).inObject(obj)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).inObject(obj)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x in obj.
-</p>
-<p>ok (x).inArray(arr)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).inArray(arr)</dt>
+<dd class="dd1">
 	Raises AssertionError unless x exists in arr.
-</p>
-<p>ok (x).length(n):
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (x).length(n):</dt>
+<dd class="dd1">
 	Raise AssertionError unless x.length === n.
 	This is same as <code>ok (x.length) == n</code>, but it is useful to chain
 	assertions, like <code>ok (x).isa(Array).length(n)</code>.
-</p>
-<p>ok (path).isFile()
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (path).isFile()</dt>
+<dd class="dd1">
 	Raise AssertionError unless path is a file.
-</p>
-<p>ok (path).isDirectory()
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (path).isDirectory()</dt>
+<dd class="dd1">
 	Raise AssertionError unless path is a directory.
-</p>
-<p>ok (path).exists()
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (path).exists()</dt>
+<dd class="dd1">
 	Raise AssertionError unless path exist as file or directory.
-</p>
-<p>ok (path).notExist()
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (path).notExist()</dt>
+<dd class="dd1">
 	Raise AssertionError unless path doesn't exist as file nor directory.
-</p>
-<p>ok (func).throws_(errorClass[, errorMsg])
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (func).throws_(errorClass[, errorMsg])</dt>
+<dd class="dd1">
 	Raise AssertionError unless func() throw errorClass.
 	Second argument is a string or regular expression to be matched error message.
 	It sets raised exception into 'func.exception' therefore you can do another test with thrown exception object.
-</p>
 <pre class="program">	    var fs = require('fs');
 	    function fn() { fs.statSync('not.exist'); }
 	    ok (fn).throws_(Error, /No such file or directory/);
 	    ok (<strong>fn.exception</strong>.code).is('ENOENT')
 </pre>
-<p>ok (func).throws(errorClass[, errorMsg])
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (func).throws(errorClass[, errorMsg])</dt>
+<dd class="dd1">
 	Same as throws_().
 	Notice that 'throws' is a reserved keyword of JavaScript and
 	some tools reports warning if you use 'throws' in your script.
-</p>
-<p>ok (func).notThrow([errorClass=Exception])
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+ok (func).notThrow([errorClass=Exception])</dt>
+<dd class="dd1">
 	Raise AssertionError if func() raises exception of errorClass.
-</p>
-<p>NG (x)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+NG (x)</dt>
+<dd class="dd1">
 	Opposite of ok(x). For example, 'NG ("foo").isNumber()' is true.
-</p>
-<p>NOT (x)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+NOT (x)</dt>
+<dd class="dd1">
 	Same as NG(x). Provided experimentalily.
-</p>
-<p>precond (x)
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+precond (x)</dt>
+<dd class="dd1">
 	Same as ok(x), but intended to check precondition of test
 	instead of assertion.
-</p>
 <pre class="program">	    precond (filename).notExist();  // pre-condition of test
 	    createFileTask(filename);
 	    ok (flename).isFile();          // assertion
 </pre>
+</dd>
+</dl>
 <p>It is possible to chain assertions.
 </p>
 <pre class="program">// chain assertion methods
@@ -338,9 +438,7 @@ respectively:
 
     });
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
 </pre>
 <p>Result example:
 </p>
@@ -362,12 +460,12 @@ respectively:
 # in Child.afterAll()
 # in Parent.afterAll()
 </pre>
-<p>Notice that before() and after() are not recommended very much <sup>(<a href="#fnref:1" name="fnlink:1">*1</a>)</sup> in Oktest.js because they are not flexible.
+<p>Notice that <code>before()</code> and <code>after()</code> are not recommended very much <sup>(<a href="#fnref:1" name="fnlink:1">*1</a>)</sup> in Oktest.js because they are not flexible.
 Use <a href="#fixture-injection">Fixture Injection</a> instead because it is more flexible than them.
 </p>
-<p>Why before() and after() are not good?
-For example if you want change behaviour of before()/after(), you must
-change topics. This means that behaviour of before()/after() restricts
+<p>Why <code>before()</code> and <code>after()</code> are not good?
+For example if you want change behaviour of <code>before()</code>/<code>after()</code>, you must
+change topics. This means that behaviour of <code>before()</code>/<code>after()</code> restricts
 to structure of test topics and specs. It's not preferable.
 </p>
 <p>Use <a href="#fixture-injection">Fixture Injection</a> instead because it doesn't have this weakness.
@@ -442,9 +540,7 @@ to structure of test topics and specs. It's not preferable.
     });
 
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
 </pre>
 <p>This feature is more flexible and useful than <code>setUp()</code> and <code>tearDown()</code>.
 </p>
@@ -685,26 +781,42 @@ and set it into <code>oktest.fixture.manager</code>.
 </p>
 <p>Tracer object have four methods:
 </p>
-<p>trace(object, method1, method2, ...)
+<dl class="dl1">
+<dt class="dt1">
+trace(object, method1, method2, ...)</dt>
+<dd class="dd1">
 	Trace method calls.
-</p>
-<p>traceFunc(func[, name])
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+traceFunc(func[, name])</dt>
+<dd class="dd1">
 	Create new function to trace function call of func and return it.
 	Second argument is necessary if func is anonymous function.
-</p>
-<p>dummy(object, {name1:returnval1, name2:returnval2, ...})
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+dummy(object, {name1:returnval1, name2:returnval2, ...})</dt>
+<dd class="dd1">
 	Create dummy methods with dummy return values.
-</p>
-<p>fake({name1:returnval1, name2:returnval2, ...})
+</dd>
+</dl>
+<dl class="dl1">
+<dt class="dt1">
+fake({name1:returnval1, name2:returnval2, ...})</dt>
+<dd class="dd1">
 	Return fake object.
 	This is a short cut of dummy():
-</p>
 <pre class="program">/// for example,
 var obj = tracer.fake({a:1, b:2});
 /// ... is a short cut of:
 var obj = {}
 tracer.dummy({}, {a:1, b:2});
 </pre>
+</dd>
+</dl>
 <p>In any case, <code>Tracer</code> object records both arguments and return-value of method calls.
 </p>
 <p>The following is an comprehensive example to demonstrace tracer features:
@@ -816,9 +928,7 @@ tracer.dummy({}, {a:1, b:2});
     });
 
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
 </pre>
 <br>
 
@@ -846,11 +956,9 @@ tracer.dummy({}, {a:1, b:2});
 
 <a name="command-line-interface"></a>
 <h2 class="section1">Command-line Interface</h2>
-<p>Oktest now supports command-line interface to execute test scripts.
+<p>Oktest.js provides command-line script in order to execute test scripts.
 </p>
-<pre class="program">$ ls oktest.js
-oktest.js
-## run test scripts in plain format
+<pre class="terminal">## run test scripts in plain format
 $ oktest.js -sp tests/*_test.py
 ## run test scripts in 'tests' dir with pattern '*_test.py'
 $ oktest.js -p '*_test.py' tests
@@ -900,9 +1008,7 @@ ok (obj).hasAttr("name", "Haruhi").hasAttr("gender", "F");
 <pre class="terminal">$ node example_test.js -sp    # or -s plain
 </pre>
    Or pass <code>{style:"plain"}</code> to <code>oktest.run()</code>.
-<pre class="program">if (process.argv[1] === __filename) {
-    oktest.run({style:"plain"});
-}
+<pre class="program">if (require.main === module) oktest.run({style:"plain"});
 </pre>
 </li>
 </ul>

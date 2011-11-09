@@ -29,15 +29,13 @@ Oktest.js is a new-style testing library for Node.js.
 
     {{*topic*}}("target to test", function() {
         {{*spec*}}("specification description", function() {
-            {{,ok (1+1).is(2),}};      // same as assert.ok(1+1 === 2)
-            {{,ok (1+1, '===', 2),}};  // same as assert.ok(1+1 === 2)
-            {{,ok (1+1).isNot(1),}};   // same as assert.ok(1+1 !== 1)
+            {{*ok (1+1).is(2)*}};      // same as assert.ok(1+1 === 2)
+            {{*ok (1+1, '===', 2)*}};  // same as assert.ok(1+1 === 2)
+            {{*ok (1+1).isNot(1)*}};   // same as assert.ok(1+1 !== 1)
         });
     });
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
     .--------------------
 
 
@@ -129,9 +127,7 @@ The points are:
 
     });
 
-    if (process.argv[1] === __filename) {
-        oktest.main();  // or  oktest.run();
-    }
+    if (require.main === module) oktest.main(); // or oktest.run();
     .--------------------
 
 See {{<Assertion Reference|#assertion-reference>}} section for details about ok() and NG().
@@ -164,71 +160,71 @@ See {{<Tips|#tips>}} section for details.
 
 .$ Assertion Reference		| assertion-reference
 
-ok (x).eq(y) or ok (x, '==', y)
+.: ok (x).eq(y) or ok (x, '==', y)
 	Raises AssertionError unless x == y.
 
-ok (x).ne(y) or ok (x, '!=', y)
+.: ok (x).ne(y) or ok (x, '!=', y)
 	Raises AssertionError unless x != y.
 
-ok (x).is(y) or ok (x, '===', y)
+.: ok (x).is(y) or ok (x, '===', y)
 	Raises AssertionError unless x == y.
 
-ok (x).isNot(y) or ok (x, '!==', y)
+.: ok (x).isNot(y) or ok (x, '!==', y)
 	Raises AssertionError unless x != y.
 
-ok (x).gt(y) or ok (x, '>', y)
+.: ok (x).gt(y) or ok (x, '>', y)
 	Raises AssertionError unless x > y.
 
-ok (x).ge(y) or ok (x, '>=', y)
+.: ok (x).ge(y) or ok (x, '>=', y)
 	Raises AssertionError unless x >= y.
 
-ok (x).lt(y) or ok (x, '<', y)
+.: ok (x).lt(y) or ok (x, '<', y)
 	Raises AssertionError unless x < y.
 
-ok (x).le(y) or ok (x, '<=', y)
+.: ok (x).le(y) or ok (x, '<=', y)
 	Raises AssertionError unless x <= y.
 
-ok (x).deepEqual(y)
+.: ok (x).deepEqual(y)
 	Same as assert.deepEqual(x, y), but it reports diff when
 	x and y are different.
 
-ok (x).inDelta(y, delta)
+.: ok (x).inDelta(y, delta)
 	Raises AssertionError unless y-delta < x < y+delta.
 
-ok (x).isa(klass)
+.: ok (x).isa(klass)
 	Raises AssertionError unless x instanceof klass.
 
-ok (x).match(rexp)
+.: ok (x).match(rexp)
 	Raises AssertionError unless x.match(rexp).
 
-ok (x).hasAttr(name[, value])
+.: ok (x).hasAttr(name[, value])
 	Raises AssertionError unless name in x.
 	In addition, when value is specified, raises AssertionError unless x.name === value.
 
-ok (x).inObject(obj)
+.: ok (x).inObject(obj)
 	Raises AssertionError unless x in obj.
 
-ok (x).inArray(arr)
+.: ok (x).inArray(arr)
 	Raises AssertionError unless x exists in arr.
 
-ok (x).length(n):
+.: ok (x).length(n):
 	Raise AssertionError unless x.length === n.
 	This is same as {{,ok (x.length) == n,}}, but it is useful to chain
 	assertions, like {{,ok (x).isa(Array).length(n),}}.
 
-ok (path).isFile()
+.: ok (path).isFile()
 	Raise AssertionError unless path is a file.
 
-ok (path).isDirectory()
+.: ok (path).isDirectory()
 	Raise AssertionError unless path is a directory.
 
-ok (path).exists()
+.: ok (path).exists()
 	Raise AssertionError unless path exist as file or directory.
 
-ok (path).notExist()
+.: ok (path).notExist()
 	Raise AssertionError unless path doesn't exist as file nor directory.
 
-ok (func).throws_(errorClass[, errorMsg])
+.: ok (func).throws_(errorClass[, errorMsg])
 	Raise AssertionError unless func() throw errorClass.
 	Second argument is a string or regular expression to be matched error message.
 	It sets raised exception into 'func.exception' therefore you can do another test with thrown exception object.
@@ -239,21 +235,21 @@ ok (func).throws_(errorClass[, errorMsg])
 	    ok ({{*fn.exception*}}.code).is('ENOENT')
             .--------------------
 
-ok (func).throws(errorClass[, errorMsg])
+.: ok (func).throws(errorClass[, errorMsg])
 	Same as throws_().
 	Notice that 'throws' is a reserved keyword of JavaScript and
 	some tools reports warning if you use 'throws' in your script.
 
-ok (func).notThrow([errorClass=Exception])
+.: ok (func).notThrow([errorClass=Exception])
 	Raise AssertionError if func() raises exception of errorClass.
 
-NG (x)
+.: NG (x)
 	Opposite of ok(x). For example, 'NG ("foo").isNumber()' is true.
 
-NOT (x)
+.: NOT (x)
 	Same as NG(x). Provided experimentalily.
 
-precond (x)
+.: precond (x)
 	Same as ok(x), but intended to check precondition of test
 	instead of assertion.
             .--------------------
@@ -315,9 +311,7 @@ respectively:
 
     });
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
     .--------------------
 
 Result example:
@@ -342,12 +336,12 @@ Result example:
     # in Parent.afterAll()
     .====================
 
-Notice that before() and after() are not recommended very much {{({{,beforeAll(),}} and {{,afterAll(),}} are recommended, because these are not covered by Fixture Injection.)}} in Oktest.js because they are not flexible.
+Notice that {{,before(),}} and {{,after(),}} are not recommended very much {{({{,beforeAll(),}} and {{,afterAll(),}} are recommended, because these are not covered by Fixture Injection.)}} in Oktest.js because they are not flexible.
 Use {{<Fixture Injection|#fixture-injection>}} instead because it is more flexible than them.
 
-Why before() and after() are not good?
-For example if you want change behaviour of before()/after(), you must
-change topics. This means that behaviour of before()/after() restricts
+Why {{,before(),}} and {{,after(),}} are not good?
+For example if you want change behaviour of {{,before(),}}/{{,after(),}}, you must
+change topics. This means that behaviour of {{,before(),}}/{{,after(),}} restricts
 to structure of test topics and specs. It's not preferable.
 
 Use {{<Fixture Injection|#fixture-injection>}} instead because it doesn't have this weakness.
@@ -411,9 +405,7 @@ Oktest.js supports fixture injection.
     });
 
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
     .--------------------
 
 
@@ -672,17 +664,17 @@ Oktest provides tracer object which can be stub or mock object.
 
 Tracer object have four methods:
 
-trace(object, method1, method2, ...)
+.: trace(object, method1, method2, ...)
 	Trace method calls.
 
-traceFunc(func[, name])
+.: traceFunc(func[, name])
 	Create new function to trace function call of func and return it.
 	Second argument is necessary if func is anonymous function.
 
-dummy(object, {name1:returnval1, name2:returnval2, ...})
+.: dummy(object, {name1:returnval1, name2:returnval2, ...})
 	Create dummy methods with dummy return values.
 
-fake({name1:returnval1, name2:returnval2, ...})
+.: fake({name1:returnval1, name2:returnval2, ...})
 	Return fake object.
 	This is a short cut of dummy():
 	    .--------------------
@@ -805,9 +797,7 @@ The following is an comprehensive example to demonstrace tracer features:
     });
 
 
-    if (process.argv[1] === __filename) {
-        oktest.main();
-    }
+    if (require.main === module) oktest.main();
     .--------------------
 
 
@@ -817,8 +807,8 @@ The following is an comprehensive example to demonstrace tracer features:
 It is possible to skip tests according to a certain condition.
 
     .--------------------
-    import unittest
-    from oktest import ok, run, {{*skip, skipWhen*}}
+    var {{*skip     = oktest.skip*}},
+        {{*skipWhen = oktest.skipWhen*}};
 
     topic("Skip Demo", function() {
 
@@ -836,11 +826,9 @@ It is possible to skip tests according to a certain condition.
 
 .$ Command-line Interface	| command-line-interface
 
-Oktest now supports command-line interface to execute test scripts.
+Oktest.js provides command-line script in order to execute test scripts.
 
-    .--------------------
-    $ ls oktest.js
-    oktest.js
+    .====================
     ## run test scripts in plain format
     $ oktest.js -sp tests/*_test.py
     ## run test scripts in 'tests' dir with pattern '*_test.py'
@@ -849,7 +837,7 @@ Oktest now supports command-line interface to execute test scripts.
     $ oktest.js -f topic='*pattern*' tests
     ## filter by spec
     $ oktest.js -f '*pattern*' tests   # or -f spec='*pattern*'
-    .--------------------
+    .====================
 
 Type {{,oktest.js -h,}} for details about command-line options.
 
@@ -890,9 +878,7 @@ Type {{,oktest.js -h,}} for details about command-line options.
     .====================
    Or pass {{,{style:"plain"},}} to {{,oktest.run(),}}.
     .--------------------
-    if (process.argv[1] === __filename) {
-        oktest.run({style:"plain"});
-    }
+    if (require.main === module) oktest.run({style:"plain"});
     .--------------------
 
 .* {{,oktest.run(),}} returns total number of failures and errors.
