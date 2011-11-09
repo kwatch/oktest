@@ -811,7 +811,11 @@ oktest.assertion.AssertionObject = function AssertionObject(actual, bool) {
   };
 
   def.exists = function exists() {
-    if (! this.bool) return this.notExist();
+    if (! this.bool) return this._notExist();
+    return this._exists();
+  };
+
+  def._exists = function _exists() {
     this._done = true;
     var fstat = oktest.util.fstat(this.actual);
     if (fstat) return this;
@@ -821,7 +825,11 @@ oktest.assertion.AssertionObject = function AssertionObject(actual, bool) {
   };
 
   def.notExist = function notExist() {
-    if (! this.bool) return this.exists();
+    if (! this.bool) return this._exists();
+    return this._notExist();
+  };
+
+  def._notExist = function _notExist() {
     this._done = true;
     var fstat = oktest.util.fstat(this.actual);
     if (! fstat) return this;
