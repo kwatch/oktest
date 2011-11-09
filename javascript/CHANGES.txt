@@ -1,9 +1,27 @@
 .=title:	CHANGES
 
 
+.$ Release 0.2.0 (2011-11-09)
+
+.* [change] Change '-p' option to match basename of file.
+
+.* [bugfix] Fix 'before()' and 'after()' fixtures to set 'this' correctly.
+
+.* [bugfix] Fix max recursive call error on 'deepEqual()' and 'exists()'
+   when used with 'NG()'.
+
+.* [bugfix] Fix to print command-line option error.
+
+.* [bugfix] Fix to raise correct error when file not found in command-line.
+
+.* [bugfix] Fix reporter to handle error which doesn't have stack information.
+
+.* [bugfix] Print newline when '-v' specified in command-line.
+
+.* [change] (internal) Add 'TestObject#clear()' which is useful to test Oktest itself.
+
+
+
 .$ Release 0.1.0 (2011-08-17)
 
 first public release.
-
-
-
