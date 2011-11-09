@@ -174,8 +174,9 @@ oktest.util = {
         var item = items[i];
         if (item == '.' || item == '..') continue;
         var child = dirpath ? dirpath + '/' + item : item;
+        var basename = path.basename(child);
+        if (rexp.exec(basename)) matched.push(child);
         var fstat = fs.statSync(child);
-        if (rexp.exec(child)) matched.push(child);
         if (fstat.isDirectory()) {
           _findFiles(rexp, child, matched);
         }
