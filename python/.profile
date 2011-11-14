@@ -48,7 +48,8 @@ esac
 ##
 ## set $PYTHONPATH
 ##
-sitedir="local/lib/python/site-packages"
+pyver=`python -c 'import sys; print("%s.%s"%sys.version_info[:2])'`
+sitedir="local/lib/python$pyver/site-packages"
 if [ -d "$PWD/lib" ]; then
     echo export PYTHONPATH=.:'$PWD'/$sitedir:'$PWD'/lib
     export PYTHONPATH=.:$PWD/$sitedir:$PWD/lib
@@ -56,6 +57,7 @@ else
     echo export PYTHONPATH=.:'$PWD'/$sitedir:'$PWD'
     export PYTHONPATH=.:$PWD/$sitedir:$PWD
 fi
+unset pyver
 unset sitedir
 
 
