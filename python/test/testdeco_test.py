@@ -17,6 +17,10 @@ def provide_g1():
 def provide_g4():
     return {"key": "G4"}
 
+def provide_g5(self):
+    self.g5 = "G5"
+    return {"key": "G5"}
+
 _releasers_are_called = {}
 
 def release_g1(value):
@@ -24,6 +28,9 @@ def release_g1(value):
 
 #def release_g4():
 #    pass
+
+def release_g5(self, value):
+    assert self.g5 == "G5"
 
 
 class TestDeco_TC(unittest.TestCase):
@@ -166,6 +173,11 @@ class TestDeco_TC(unittest.TestCase):
     @test("provider function can invoke without self.")
     def t(self, foo):
         self.assertEqual("<FOO>", foo)
+
+
+    @test("global provider and releaser function can take 'self' argument.")
+    def t(self, g5):
+        self.assertEqual("G5", self.g5)
 
 
     global DummyFixtureManager

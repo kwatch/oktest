@@ -1836,7 +1836,11 @@ class FixtureInjector(object):
             if name in releasers:
                 releaser = releasers[name]
                 if releaser:
-                    releaser(resolved[name])
+                    names = util.func_argnames(releaser)
+                    if names and names[0] == "self":
+                        releaser(resolved["self"], resolved[name])
+                    else:
+                        releaser(resolved[name])
             else:
                 fixture_manager.release(name, resolved[name])
 
