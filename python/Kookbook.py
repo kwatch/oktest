@@ -19,13 +19,14 @@ import sys, os, re
 from glob import glob
 from kook.utils import read_file, write_file
 
-release   = prop('release', '0.10.0')
 package   = prop('package', 'Oktest')
+release   = prop('release', '0.10.0')
 copyright = prop('copyright', "copyright(c) 2010-2011 kuwata-lab.com all rights reserved")
 license   = "MIT License"
-kookbook.default = 'test'
+python    = prop('python', sys.executable)
+basename  = "%s-%s" % (package, release)
 
-python = prop('python', sys.executable)
+kookbook.default = 'test'
 
 
 ###
@@ -229,55 +230,56 @@ def _with_README_backup(fn):
 
 text_files = ['README.txt', 'CHANGES.txt', 'MIT-LICENSE', 'Kookbook.py', 'MANIFEST', 'MANIFEST.in', 'setup.py']
 
+class pkg(Category):
 
-@recipe
-@ingreds('dist')
-def task_package(c):
-    """create package"""
-    ## setup
-    dir = c%"dist/$(package)-$(release)"
-    @pushd(dir)
-    def do():
-        #system(c%'$(python) setup.py sdist')
-        system(c%'$(python) setup.py sdist --force-manifest')
-        #system('python setup.py sdist --keep-temp')
-    cp(c%'$(dir)/MANIFEST', '.')
+    @recipe
+    @ingreds('pkg:dist')
+    def default(c):
+        """create packages"""
+        ## setup
+        dir = c%"dist/$(basename)"
+        @pushd(dir)
+        def do():
+            #system(c%'$(python) setup.py sdist')
+            system(c%'$(python) setup.py sdist --force-manifest')
+            system(c%'$(python) setup.py bdist_egg')
+        cp(c%'$(dir)/MANIFEST', '.')
 
 
-@recipe
-def task_dist(c, *args, **kwargs):
-    """create Oktest-X.X.X/ directory"""
-    ## create dir
-    dir = c%"dist/$(package)-$(release)"
-    if os.path.isdir(dir):
-        rm_rf(dir)
-    mkdir(dir)
-    ## copy files
-    files = [ f for f in text_files if os.path.exists(f) ]
-    store(files, dir)
-    store('lib/**/*.py', 'test/*.py', dir)
-    ## edit files
-    replacer = [
-        (r'\$Package\$',   package),
-        (r'\$Release\$',   release),
-        (r'\$Copyright\$', copyright),
-        (r'\$License\$',   license),
-        (r'\$Package:.*?\$',    '$Package: %s $'   % package),
-        (r'\$Release:.*?\$',    '$Release: %s $'   % release),
-        (r'\$Copyright:.*?\$',  '$Copyright: %s $' % copyright),
-        (r'\$License:.*?\$',    '$License: %s $'   % license),
-    ]
-    edit(c%"$(dir)/**/*", exclude=[c%'$(dir)/Kookbook.py'], by=replacer)
-    replacer2 = [
-        (r'\{\{\*(.*?)\*\}\}', r'\1'),
-        (r'0\.0\.0', release),
-    ]
-    edit(c%"$(dir)/README.txt", by=replacer2)
-    ## MANIFEST
-    #@pushd(dir)
-    #def do():
-    #    rm_f('MANIFEST')
-    #    system(c%'$(python) setup.py sdist --force-manifest')
+    @recipe
+    def dist(c, *args, **kwargs):
+        """create Oktest-X.X.X/ directory"""
+        ## create dir
+        dir = c%"dist/$(basename)"
+        if os.path.isdir(dir):
+            rm_rf(dir)
+        mkdir(dir)
+        ## copy files
+        files = [ f for f in text_files if os.path.exists(f) ]
+        store(files, dir)
+        store('lib/**/*.py', 'test/*.py', dir)
+        ## edit files
+        replacer = [
+            (r'\$(Package)\$',   package),
+            (r'\$(Release)\$',   release),
+            (r'\$(Copyright)\$', copyright),
+            (r'\$(License)\$',   license),
+            (r'\$(Package):.*?\$',    r'$\1: %s $' % package),
+            (r'\$(Release):.*?\$',    r'$\1: %s $' % release),
+            (r'\$(Copyright):.*?\$',  r'$\1: %s $' % copyright),
+            (r'\$(License):.*?\$',    r'$\1: %s $' % license),
+        ]
+        edit(c%"$(dir)/**/*", exclude=[c%'$(dir)/Kookbook.py'], by=replacer)
+        replacer2 = [
+            (r'\{\{\*(.*?)\*\}\}', r'\1'),
+            (r'0\.0\.0', release),
+        ]
+        edit(c%"$(dir)/README.txt", by=replacer2)
+        ## MANIFEST
+        #@pushd(dir)
+        #def do():
+        #    rm_f('MANIFEST')
+        #    system(c%'$(python) setup.py sdist --force-manifest')
 
 
 kookbook.load('@kook/books/clean.py')
