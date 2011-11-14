@@ -65,9 +65,10 @@ Features:
 
 Oktest requires Python 2.4 or later (3.x is supported).
 
-See `User's Guide`_ for details.
+See `User's Guide`_ and `CHANGES.txt`_ for details.
 
 .. _`User's Guide`: http://www.kuwata-lab.com/oktest/oktest-py_users-guide.html
+.. _`CHANGES.txt`: http://www.kuwata-lab.com/oktest/oktest-py_CHANGES.txt
 """[1:]
     download_url = 'http://pypi.python.org/packages/source/O/$Package$/$Package$-$Release$.tar.gz'
     classifiers = [
