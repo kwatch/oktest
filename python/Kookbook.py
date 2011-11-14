@@ -365,7 +365,7 @@ def file_website_index_html(c):
                     ),
                    s)
         return s
-    edit(c.product, by=f2)
+    #edit(c.product, by=f2)
 
 @recipe
 @product('website/CHANGES.txt')
