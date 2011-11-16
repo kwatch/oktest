@@ -403,6 +403,15 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             ok (fname).is_file()
             ok (dname).not_file()
             ok (dname).is_not_file()
+            #
+            @be_fail("os.path.isfile(%r) : failed." % dname)
+            def fn(): ok (dname).is_file()
+            @be_fail("os.path.isfile('not-exist') : failed.")
+            def fn(): ok ('not-exist').is_file()
+            @be_fail("not os.path.isfile(%r) : failed." % fname)
+            def fn(): ok (fname).not_file()
+            @be_fail("not os.path.isfile(%r) : failed." % fname)
+            def fn(): ok (fname).is_not_file()
         finally:
             os.unlink(fname)
             os.rmdir(dname)
@@ -420,6 +429,15 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             ok (dname).is_dir()
             ok (fname).not_dir()
             ok (fname).is_not_dir()
+            #
+            @be_fail("os.path.isdir(%r) : failed." % fname)
+            def fn(): ok (fname).is_dir()
+            @be_fail("os.path.isdir('not-exist') : failed.")
+            def fn(): ok ('not-exist').is_dir()
+            @be_fail("not os.path.isdir(%r) : failed." % dname)
+            def fn(): ok (dname).not_dir()
+            @be_fail("not os.path.isdir(%r) : failed." % dname)
+            def fn(): ok (dname).is_not_dir()
         finally:
             os.unlink(fname)
             os.rmdir(dname)
