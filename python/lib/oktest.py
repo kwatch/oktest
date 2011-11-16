@@ -360,7 +360,7 @@ def _f():
         self.failed('os.path.isfile(%r) : failed.' % self.target)
 
     @assertion
-    def is_not_file(self):  # DEPRECATED
+    def not_file(self):
         boolean = not os.path.isfile(self.target)
         if boolean == self.boolean:  return self
         self.failed('not os.path.isfile(%r) : failed.' % self.target)
@@ -372,7 +372,7 @@ def _f():
         self.failed('os.path.isdir(%r) : failed.' % self.target)
 
     @assertion
-    def is_not_dir(self):  # DEPRECATED
+    def not_dir(self):
         boolean = not os.path.isdir(self.target)
         if boolean == self.boolean:  return self
         self.failed('not os.path.isdir(%r) : failed.' % self.target)
@@ -428,7 +428,9 @@ def _f():
         return self
 
     AssertionObject._raise_or_not = _raise_or_not
-    AssertionObject.hasattr = has_attr    # for backward compatibility
+    AssertionObject.hasattr = has_attr      # for backward compatibility
+    AssertionObject.is_not_file = not_file  # for backward compatibility
+    AssertionObject.is_not_dir  = not_dir   # for backward compatibility
 
 _f()
 del _f

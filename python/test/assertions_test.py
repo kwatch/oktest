@@ -401,6 +401,7 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             os.mkdir(dname)
             #
             ok (fname).is_file()
+            ok (dname).not_file()
             ok (dname).is_not_file()
         finally:
             os.unlink(fname)
@@ -417,6 +418,7 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             os.mkdir(dname)
             #
             ok (dname).is_dir()
+            ok (fname).not_dir()
             ok (fname).is_not_dir()
         finally:
             os.unlink(fname)
