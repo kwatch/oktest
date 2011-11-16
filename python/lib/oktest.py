@@ -1709,6 +1709,13 @@ class Spec(util.Context):   # deprecated
         if ex:
             raise ex
 
+    def __call__(self, func):
+        self.__enter__()
+        try:
+            func()
+        finally:
+            self.__exit__(*sys.exc_info())
+
     def __bool__(self):       # for Pyton3
         filter = os.environ.get('SPEC')
         return not filter or (filter in self.desc)

@@ -100,6 +100,32 @@ class Spec_TC(unittest.TestCase):
         ok (called[1]) == ('yield', obj)
         ok (called[2]) == ('exit', (None, None, None))
 
+    def test___call___1(self):
+        """emurates with-stmt when called as decorator."""
+        arr = []
+        def fn():
+            obj = Spec('foo')
+            @obj
+            def _():
+                arr.append("before")
+                ok (1+1) == 2     # passed
+                arr.append("after")
+        ok (fn).not_raise()
+        ok (arr) == ["before", "after"]
+
+    def test___call___2(self):
+        """emurates with-stmt when called as decorator."""
+        arr = []
+        def fn():
+            obj = Spec('foo')
+            @obj
+            def _():
+                arr.append("before")
+                ok (1+1) == 1    # failed
+                arr.append("after")
+        ok (fn).raises(AssertionError, "2 == 1 : failed.")
+        ok (arr) == ["before"]
+
     def test___bool___1(self):
         """returns True when $SPEC is not set."""
         obj = Spec('SOS')
