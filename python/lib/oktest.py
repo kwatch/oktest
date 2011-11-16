@@ -336,13 +336,14 @@ def _f():
             self.failed("re.search(%r, %r) : failed." % (pattern, self.target))
 
     @assertion
-    def not_match(self, pattern):  # DEPRECATED
+    def not_match(self, pattern, flag=0):
         if isinstance(pattern, type(re.compile('x'))):
             boolean = not pattern.search(self.target)
             if boolean == self.boolean:  return self
             self.failed("not re.search(%r, %r) : failed." % (pattern.pattern, self.target))
         else:
-            boolean = not re.search(pattern, self.target)
+            rexp = re.compile(pattern, flag)
+            boolean = not rexp.search(self.target)
             if boolean == self.boolean:  return self
             self.failed("not re.search(%r, %r) : failed." % (pattern, self.target))
 
