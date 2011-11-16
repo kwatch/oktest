@@ -250,6 +250,71 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         else:
             raise AssertionError("AsertionError expected but not raised")
 
+    def test_matches(self):
+        # passed
+        try:
+            ok ("SOS").matches(r'^[A-Z]+$')
+        except:
+            raise
+        #
+        try:
+            ok ("SOS").matches(re.compile(r'^[A-Z]+$'))
+        except:
+            raise
+        #
+        try:
+            ok ("SOS").matches(r'^[A-Z]+$', re.M)
+        except:
+            raise
+        # failed
+        try:
+            ok ("SOS").matches(r'[0-9]+')
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            self.assertEqual("re.search('[0-9]+', 'SOS') : failed.", str(ex))
+        else:
+            raise AssertionError("AssertionError expected but not raised")
+        #
+        try:
+            ok ("SOS").matches(re.compile(r'[0-9]+'))
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            self.assertEqual("re.search('[0-9]+', 'SOS') : failed.", str(ex))
+        else:
+            raise AssertionError("AssertionError expected but not raised")
+
+    def test_not_match(self):
+        # passed
+        try:
+            ok ("SOS").not_match(r'^[0-9]+$')
+        except:
+            raise
+        #
+        try:
+            ok ("SOS").not_match(re.compile(r'^[0-9]+$'))
+        except:
+            raise
+        #
+        try:
+            ok ("SOS").not_match(r'^[0-9]+$', re.M)
+        except:
+            raise
+        # failed
+        try:
+            ok ("SOS").not_match(r'[A-Z]+')
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            self.assertEqual("not re.search('[A-Z]+', 'SOS') : failed.", str(ex))
+        else:
+            raise AssertionError("AssertionError expected but not raised")
+        #
+        try:
+            ok ("SOS").not_match(re.compile(r'[A-Z]+'))
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            self.assertEqual("not re.search('[A-Z]+', 'SOS') : failed.", str(ex))
+        else:
+            raise AssertionError("AssertionError expected but not raised")
 
     def test_raises(self):
         def f(): raise ValueError('errmsg1')
