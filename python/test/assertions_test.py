@@ -425,6 +425,30 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             os.rmdir(dname)
 
 
+    def test_exists(self):
+        fname = '__foobar.txt'
+        dname = '__foobar.d'
+        try:
+            f = open(fname, 'w')
+            f.write('foobar')
+            f.close()
+            os.mkdir(dname)
+            #
+            ok (dname).exists()
+            ok (fname).exists()
+            ok ("not-found").not_exist()
+            #
+            @be_fail("os.path.exists('not-exist') : failed.")
+            def fn(): ok ('not-exist').exists()
+            @be_fail("not os.path.exists(%r) : failed." % fname)
+            def fn(): ok (fname).not_exist()
+            @be_fail("not os.path.exists(%r) : failed." % dname)
+            def fn(): ok (dname).not_exist()
+        finally:
+            os.unlink(fname)
+            os.rmdir(dname)
+
+
     ## ------------------------------------------------------------
 
 
