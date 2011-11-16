@@ -1717,9 +1717,9 @@ class Spec(util.Context):   # deprecated
 
 
 def spec(desc):   # deprecated
-    if not os.getenv('OKTEST_WARNING_DISABLED'):
-        import warnings
-        warnings.warn("oktest.spec() is deprecated.", DeprecationWarning, 2)
+    #if not os.getenv('OKTEST_WARNING_DISABLED'):
+    #    import warnings
+    #    warnings.warn("oktest.spec() is deprecated.", DeprecationWarning, 2)
     return Spec(desc)
 
 
