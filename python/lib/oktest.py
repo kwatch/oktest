@@ -132,8 +132,6 @@ def assertion(func):
     def deco(self, *args):
         self._tested = True
         return func(self, *args)
-    if python2:
-        deco.func_name = func.func_name
     deco.__name__ = func.__name__
     deco.__doc__ = func.__doc__
     setattr(AssertionObject, func.__name__, deco)
