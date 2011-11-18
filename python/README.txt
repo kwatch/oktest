@@ -202,9 +202,14 @@ ok (x).has_attr(name)
 ok (x).attr(name, value)
 	Raise AssertionError unless hasattr(x, name) and getattr(x, name) == value.
 
-ok (x).matches(y[, flag=None])
+ok (x).matches(y[, flag=0])
 	If y is a string, raise AssertionError unless re.search(y, x).
 	If y is a re.pattern object, raise AssertionError unless y.search(x).
+	You can pass flag such as ``re.M | re.S``.
+
+ok (x).not_match(y[, flag=0])
+	If y is a string, raise AssertionError if re.search(y, x).
+	If y is a re.pattern object, raise AssertionError if y.search(x).
 	You can pass flag such as ``re.M | re.S``.
 
 ok (x).length(n):
@@ -215,11 +220,20 @@ ok (x).length(n):
 ok (path).is_file()
 	Raise AssertionError unless os.path.isfile(path).
 
+ok (path).not_file()
+	Raise AssertionError if os.path.isfile(path).
+
 ok (path).is_dir()
 	Raise AssertionError unless os.path.isdir(path).
 
+ok (path).not_dir()
+	Raise AssertionError if os.path.isdir(path).
+
 ok (path).exists()
 	Raise AssertionError unless os.path.exists(path).
+
+ok (path).not_exist()
+	Raise AssertionError if os.path.exists(path).
 
 ok (func).raises(error_class[, errmsg=None])
 	Raise AssertionError unless func() raises error_class.
@@ -903,6 +917,9 @@ If you use ``oktest.main()`` in your test script, it accepts command-line option
 Helpers Reference
 =================
 
+.. role:: strike
+    :class: strike
+
 
 ``oktest`` module
 -----------------
@@ -944,7 +961,8 @@ situation(desc)
 	See `Test Context`_ section.
 
 spec(description)
-	**(Obsolete! Don't use this!)**
+	:strike:`(Obsolete! Don't use this!)`
+	NOT OBSOLETED
 
 	Represents spec description.
 	This is just a marker function, but very useful for readability. ::
@@ -957,6 +975,10 @@ spec(description)
 	                def f(): 1/0
 	                ok (f).raises(ZeroDivisionError,
 	                              "integer division or modulo by zero")
+	            ## spec() is also available as decorator
+	            @spec("1+1 should be equal to 2.")
+		    def _():
+	                ok (1+1) == 2
 	            ## tips: 'for' statement is available instead of 'with' for Python 2.4
 	            for _ in spec("1+1 should be equal to 2."):
 	                ok (1+1) == 2
