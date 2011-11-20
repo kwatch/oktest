@@ -342,6 +342,7 @@ def file_website_index_html(c):
         s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
         s = s.replace('{{*', '<strong>')
         s = s.replace('*}}', '</strong>')
+        s = re.sub(r'<span class="strike">(.*?)</span>', r'<del>\1</del>', s)
         #s = re.sub(r'^<h(\d)>(.*?)</h\d>', r, s)
         pat = re.compile(r'^<h(\d)>(.*?)</h\d>', re.M)
         def r(m):
