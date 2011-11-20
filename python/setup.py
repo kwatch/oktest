@@ -30,8 +30,8 @@ def fn():
     author_email     = 'kwa@kuwata-lab.com'
     #maintainer       = author
     #maintainer_email = author_email
-    #url              = 'http://pypi.python.org/pypi'
-    url              = 'http://www.kuwata-lab.com/oktest/'
+    url              = 'http://packages.python.org/Oktest/'
+    #url              = 'http://www.kuwata-lab.com/oktest/'
     description      = 'a new-style testing library'
     long_description = r"""
 Oktest is a new-style testing library for Python. ::
