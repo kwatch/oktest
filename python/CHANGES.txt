@@ -2,7 +2,60 @@
 CHANGES
 =======
 
-Release:: $Release$
+
+Release 0.11.0
+--------------
+
+* [change] 'spec()' is now NOT obsoleted.
+
+* [change] 'spec()' is now available as function decorator.
+  ex::
+
+    class FooTest(unittest.TestCase):
+      def test_method1(self)
+        @spec("1+1 should be 2")
+	def _():
+	  ok (1+1) == 2
+        @spec("1-1 should be 0")
+	def _():
+	  ok (1-1) == 0
+
+* [enhance] New assertions: not_file(), not_dir() and not_exist().
+  ex::
+
+    ok (".").not_file()         # same as NG (".").is_file()
+    ok (__file__).not_dir()     # same as NG (__file__).is_dir()
+    ok ("foobar").not_exist()   # same as NG ("foobar").exists()
+
+* [enhance] New assertion: not_match().
+  ex::
+
+    ok ("SOS").not_match(r"\d+")  # same as NG ("SOS").matches(r"\d+")
+
+* [enhance] Global provider/releaser functions can take 'self' argument.
+  ex::
+
+    def provide_logname(self):
+        self._LOGNAME = os.getenv('LOGNAME')
+	os.environ['LOGNAME'] = "Haruhi"
+	return os.environ['LOGNAME']
+
+    def release_logname(self, value):
+        os.environ['LOGNAME'] = self._LOGNAME
+
+* [change] Change not to ignore test classes which name starts with '_'.
+
+* [change] (internal) Move some utility functions to 'util' module.
+
+* [change] (internal) Move '_Context' and '_RunnableContext' classes into 'util' module.
+
+* [change] (internal) Move 'Color' class into 'util' module
+
+* [change] (internal) Remove 'OUT' variable in 'Reporter' class
+
+* [change] (internal) Move 'TARGET_PATTERN' variable to 'config'
+
+* [bugfix] Fix to clear ImportError after trying to import unittest2
 
 
 Release 0.10.0
