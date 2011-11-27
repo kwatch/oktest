@@ -1064,13 +1064,13 @@ class BaseReporter(Reporter):
             self.out.write(string)
             self.out.flush()
 
-    def _erase_temporary_str(self, _eraser="\b"*255):
+    def _erase_temporary_str(self):
         if is_tty(self.out):
             #n = len(self.__string) + 1    # why '+1' ?
             #self.out.write("\b" * n)      # not work with wide-chars
             #self.out.flush()
             #del self.__string
-            self.out.write(_eraser)
+            self.out.write("\r")  # or "\r\033[K"
             self.out.flush()
 
     def report_spec_esception(self, testcase, testname, status, spec, context):
