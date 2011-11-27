@@ -1751,11 +1751,9 @@ oktest.reporter.VerboseReporter.prototype = new oktest.reporter.BaseReporter();
     }
   };
 
-  def._eraser = oktest.util.repeat("\b\b\b\b\b\b\b\b\b\b\b", 25);
-
   def.onExitSpec   = function onExitSpec(so, status, exception) {
     if (this.colorEnabled && this._isatty()) {
-      this.write(this._eraser);
+      this.write("\r");   // or "\r\x1b[K"
     }
     this._super.onExitSpec.apply(this, [so, status, exception]);
     this.printSpec(so, status, exception);
