@@ -23,13 +23,32 @@ def dist_dir():
     return "dist/oktest-" + release
 
 
-@recipe
-def test(c):
-    """do test"""
-    #system(c%"$(nodejs) math_test.js")
-    with chdir("test"):
-        for fname in glob.glob("*_test.js"):
-            system(c%"$(nodejs) $(fname)")
+vs_home = os.getenv('VS_PATH', '').split(':')[0]
+nodejs_executables = [
+    ('0.4', vs_home + '/node/0.4.11/bin/node'),
+    ('0.5', vs_home + '/node/0.5.10/bin/node'),
+    ('0.6', vs_home + '/node/0.6.3/bin/node'),
+]
+
+
+class test(Category):
+
+    @recipe
+    def default(c):
+        """do test"""
+        #system(c%"$(nodejs) math_test.js")
+        with chdir("test"):
+            for fname in glob.glob("*_test.js"):
+                system(c%"$(nodejs) $(fname)")
+
+    @recipe
+    def all(c):
+        """do test on Node.js 0.4, 0.5. and 0.6"""
+        with chdir("test"):
+            for ver, bin in nodejs_executables:
+                print("******************** Node.js %s ********************" % ver)
+                for fname in glob.glob("*_test.js"):
+                    system(c%"$(bin) $(fname)")
 
 
 text_files = [
