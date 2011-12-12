@@ -1936,51 +1936,6 @@ oktest.tracer.Tracer = function Tracer() {
 /// template
 ///
 oktest.TEMPLATE = (""
-      //|"use strict";
-      //|//require.paths.push(".");   // or export $NODE_PATH=$PWD
-      //|var oktest = require("oktest");
-      //|var topic   = oktest.topic,
-      //|    spec    = oktest.spec,
-      //|    ok      = oktest.ok,
-      //|    NG      = oktest.NG,
-      //|    precond = oktest.precond;
-      //|
-      //|
-      //|topic("ClassName", function() {
-      //|
-      //|    topic(".methodName()", function() {
-      //|
-      //|        spec("description #1", function() {
-      //|            ok (1+1).is(2);
-      //|            ok (1+1, '===', 2);
-      //|        });
-      //|
-      //|        spec("throws Error with error message", function() {
-      //|            function fn() { throw new Error("errmsg"); };
-      //|            ok (fn).throws_(Error, "errmsg");  // or ok (fn).throws(...)
-      //|            ok (fn.exception.message).match(/errmsg/);
-      //|        });
-      //|
-      //|        /// fixture injection example
-      //|
-      //|        this.provideYuki   = function() { return "Humanoid Interface"; };
-      //|        this.provideMikuru = function() { return "Time Traveler"; };
-      //|
-      //|        spec("Yuki is a humanoid interface", function(yuki) {
-      //|            ok (yuki).is("Humanoid Interface");
-      //|        });
-      //|        spec("Mikuru is a time traveler", function(mikuru) {
-      //|            ok (mikuru).is("Time Traveler");
-      //|        });
-      //|
-      //|    });
-      //|
-      //|});
-      //|
-      //|
-      //|if (require.main === module) {
-      //|    oktest.main();
-      //|}
       + '"use strict";\n'
       + '//require.paths.push(".");   // or export $NODE_PATH=$PWD\n'
       + 'var oktest = require("oktest");\n'
