@@ -2047,21 +2047,21 @@ oktest.mainapp.MainApp = function MainApp(script) {
   def.newCmdoptParser = function newCmdoptParser() {
     if (! cmdopt) cmdopt = require("cmdopt");
     var parser = new cmdopt.Parser();
-    parser.option('-h', '--help')                        .desc("show help");
-    parser.option('-v', '--version')                     .desc("version");
-    parser.option('-s').name('style')   .arg('STYLE')    .desc("reporting style (verbose/simple/plain, or v/s/p)");
-    parser.option('-p').name('pattern') .arg('PATTERN')  .desc("file pattern to search (default '*_test.js')");
-    parser.option('-f').name('filter')  .arg('KEY=VAL')  .desc("filter topic or spec to run (see examples)");
-    parser.option('-g').name('generate')                 .desc("generate template");
-    parser.option('-c').name('color')                    .desc("enable output colorize");
-    parser.option('-C').name('nocolor')                  .desc("disable output colorize");
-    parser.option('-D').name('debug')                    .desc("debug");
+    parser.add("-h, --help",          "show help");
+    parser.add("-v, --version",       "version");
+    parser.add("-s STYLE   #style",   "reporting style (verbose/simple/plain, or v/s/p)");
+    parser.add("-p PATTERN #pattern", "file pattern to search (default '*_test.js')");
+    parser.add("-f KEY=VAL #filter",  "filter topic or spec to run (see examples)");
+    parser.add("-g  #generate",       "generate template");
+    parser.add("-c  #color",          "enable output colorize");
+    parser.add("-C  #nocolor",        "disable output colorize");
+    parser.add("-D  #debug",          "debug");
     return parser;
   };
 
   def._helpMessage = function _helpMessage(parser) {
     var buf = "Usage: node " + this.script + " [options] file [file2...]\n";
-    buf += parser.helpMessage();
+    buf += parser.help();
     buf += (""
       + "Example:\n"
       + "  ## run test scripts in plain format\n"
@@ -2084,8 +2084,11 @@ oktest.mainapp.MainApp = function MainApp(script) {
       opts = parser.parse(args);
     }
     catch (err) {
-      process.stderr.write(this.script + ": " + err.message + "\n");
-      return 1;
+      if (err instanceof cmdopt.ParseError) {
+        process.stderr.write(this.script + ": " + err.message + "\n");
+        return 1;
+      }
+      throw err;
     }
     if (opts.debug) oktest.config.debug = true;
     _dp("args", args);
