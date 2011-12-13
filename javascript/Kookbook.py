@@ -3,7 +3,7 @@ from __future__ import with_statement
 import sys, os, re, glob
 
 package   = 'oktest'
-release   = prop('release', '0.2.1')
+release   = prop('release', '0.2.2')
 copyright = 'copyright(c) 2010-2011 kuwata-lab.com all rights reserved'
 license   = 'MIT License'
 
