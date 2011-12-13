@@ -2002,15 +2002,15 @@ oktest.mainapp.MainApp = function MainApp(script) {
   def.newCmdoptParser = function newCmdoptParser() {
     if (! cmdopt) cmdopt = require("cmdopt");
     var parser = new cmdopt.Parser();
-    parser.add("-h, --help",          "show help");
-    parser.add("-v, --version",       "version");
-    parser.add("-s STYLE   #style",   "reporting style (verbose/simple/plain, or v/s/p)");
-    parser.add("-p PATTERN #pattern", "file pattern to search (default '*_test.js')");
-    parser.add("-f KEY=VAL #filter",  "filter topic or spec to run (see examples)");
-    parser.add("-g  #generate",       "generate template");
-    parser.add("-c  #color",          "enable output colorize");
-    parser.add("-C  #nocolor",        "disable output colorize");
-    parser.add("-D  #debug",          "debug");
+    parser.option("-h, --help",          "show help");
+    parser.option("-v, --version",       "version");
+    parser.option("-s STYLE   #style",   "reporting style (verbose/simple/plain, or v/s/p)");
+    parser.option("-p PATTERN #pattern", "file pattern to search (default '*_test.js')");
+    parser.option("-f KEY=VAL #filter",  "filter topic or spec to run (see examples)");
+    parser.option("-g  #generate",       "generate template");
+    parser.option("-c  #color",          "enable output colorize");
+    parser.option("-C  #nocolor",        "disable output colorize");
+    parser.option("-D  #debug",          "debug");
     return parser;
   };
 
