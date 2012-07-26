@@ -16,9 +16,13 @@ import sys, os, re, types, traceback, time, linecache
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
 if python2:
+    _unicode = unicode
+    _bytes   = str
     from cStringIO import StringIO
 if python3:
     xrange = range
+    _unicode = str
+    _bytes   = bytes
     from io import StringIO
 
 
@@ -901,6 +905,20 @@ class BaseReporter(Reporter):
         if out is not None and self._color is None:
             self._set_color(None)
 
+    def write(self, string):
+        try:
+            self.out.write(string)
+        except UnicodeDecodeError:
+            if isinstance(string, _bytes):
+                self.out.write(string.decode('utf-8'))
+            else:
+                raise
+        except UnicodeEncodeError:
+            if isinstance(string, _unicode):
+                self.out.write(string.encode('utf-8'))
+            else:
+                raise
+
     out = property(__get_out, __set_out)
 
     def clear_counts(self):
@@ -944,7 +962,7 @@ class BaseReporter(Reporter):
         min = int(int(dt) / 60)     # int / int is float on Python3
         sec = dt - (min * 60)
         elapsed = min and "%s:%06.3f" % (min, sec) or "%.3f" % sec
-        self.out.write("## %s  (%s sec)\n" % (self.counts2str(), elapsed))
+        self.write("## %s  (%s sec)\n" % (self.counts2str(), elapsed))
         self.out.flush()
 
     def enter_testclass(self, testclass):
@@ -1019,8 +1037,8 @@ class BaseReporter(Reporter):
             title = " > ".join(items)
         indicator = self.indicator(status)
         self.write_separator()
-        self.out.write("[%s] %s\n" % (indicator, title))
-        if desc: self.out.write(desc + "\n")
+        self.write("[%s] %s\n" % (indicator, title))
+        if desc: self.write(desc + "\n")
 
     def _get_testcase_header_items(self, testcase, testname):
         parent = self.get_testclass_name(testcase.__class__)
@@ -1042,17 +1060,20 @@ class BaseReporter(Reporter):
         filter = not config.debug and self._filter or None
         arr = format_traceback(ex, ex_traceback, filter=filter)
         for x in arr:
-            self.out.write(x)
-        errmsg = "%s: %s" % (ex_class.__name__, ex)
+            self.write(x)
+        try:
+            errmsg = "%s: %s" % (ex_class.__name__, ex)
+        except UnicodeEncodeError:
+            errmsg = unicode("%s: %s") % (ex_class.__name__, ex)
         tupl = errmsg.split("\n", 1)
         if len(tupl) == 1:
             first_line, rest = tupl[0], None
         else:
             first_line, rest = tupl
-        self.out.write(self.colorize(first_line, status) + "\n")
+        self.write(self.colorize(first_line, status) + "\n")
         if rest:
-            self.out.write(rest)
-            if not rest.endswith("\n"): self.out.write("\n")
+            self.write(rest)
+            if not rest.endswith("\n"): self.write("\n")
         self.out.flush()
 
     def report_exception_footer(self, testcase, testname, status, exc_info, context):
@@ -1061,16 +1082,16 @@ class BaseReporter(Reporter):
     def _print_temporary_str(self, string):
         if is_tty(self.out):
             #self.__string = string
-            self.out.write(string)
+            self.write(string)
             self.out.flush()
 
     def _erase_temporary_str(self):
         if is_tty(self.out):
             #n = len(self.__string) + 1    # why '+1' ?
-            #self.out.write("\b" * n)      # not work with wide-chars
+            #self.write("\b" * n)          # not work with wide-chars
             #self.out.flush()
             #del self.__string
-            self.out.write("\r")  # or "\r\033[K"
+            self.write("\r")     # or "\r\033[K"
             self.out.flush()
 
     def report_spec_esception(self, testcase, testname, status, spec, context):
@@ -1080,8 +1101,8 @@ class BaseReporter(Reporter):
         parent, child, desc = self._get_testcase_header_items(testcase, testname)
         indicator = self.indicator(status)
         self.write_separator()
-        self.out.write("[%s] %s > %s > %s\n" % (indicator, parent, child, spec.desc))
-        if desc: self.out.write(desc + "\n")
+        self.write("[%s] %s > %s > %s\n" % (indicator, parent, child, spec.desc))
+        if desc: self.write(desc + "\n")
         #
         stacktrace = self._filter_stacktrace(spec._stacktrace, spec._traceback)
         self._print_stacktrace(stacktrace)
@@ -1103,8 +1124,8 @@ class BaseReporter(Reporter):
 
     def _print_stacktrace(self, stacktrace):
         for file, line, func, text in stacktrace:
-            self.out.write('  File "%s", line %s, in %s\n' % (file, line, func))
-            self.out.write('    %s\n' % text)
+            self.write('  File "%s", line %s, in %s\n' % (file, line, func))
+            self.write('    %s\n' % text)
 
     def colorize(self, string, kind):
         if not self._color:
@@ -1121,7 +1142,7 @@ class BaseReporter(Reporter):
         return util.Color.yellow(string)
 
     def write_separator(self):
-        self.out.write(self.colorize(self.separator, "sep") + "\n")
+        self.write(self.colorize(self.separator, "sep") + "\n")
 
     def status_char(self, status):
         if not hasattr(self, '_status_chars'):
@@ -1201,7 +1222,7 @@ class VerboseReporter(BaseReporter):
 
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
-        self.out.write("* %s\n" % self.colorize(self.get_testclass_name(testclass), "topic"))
+        self.write("* %s\n" % self.colorize(self.get_testclass_name(testclass), "topic"))
         self.out.flush()
 
     def enter_testcase(self, testcase, testname):
@@ -1220,7 +1241,7 @@ class VerboseReporter(BaseReporter):
         self._erase_temporary_str()
         indicator = self.indicator(status)
         desc = self.get_testcase_desc(testcase, testname)
-        self.out.write("  " * self.depth + "- [%s] %s%s\n" % (indicator, desc, s))
+        self.write("  " * self.depth + "- [%s] %s%s\n" % (indicator, desc, s))
         self.out.flush()
 
     def enter_testcontext(self, context):
@@ -1228,7 +1249,7 @@ class VerboseReporter(BaseReporter):
         s = context.desc
         if not (s.startswith("when ") or s == "else:"):
             s = self.colorize(s, "context")
-        self.out.write("  " * self.depth + "+ %s\n" % s)
+        self.write("  " * self.depth + "+ %s\n" % s)
         self.depth += 1
 
     def exit_testcontext(self, context):
@@ -1247,16 +1268,16 @@ class SimpleReporter(BaseReporter):
 
     def enter_testclass(self, testclass):
         self._super.enter_testclass(self, testclass)
-        self.out.write("* %s: " % self.colorize(self.get_testclass_name(testclass), "topic"))
+        self.write("* %s: " % self.colorize(self.get_testclass_name(testclass), "topic"))
         self.out.flush()
 
     def exit_testclass(self, *args):
-        self.out.write("\n")
+        self.write("\n")
         self._super.exit_testclass(self, *args)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
-        self.out.write(self.status_char(status))
+        self.write(self.status_char(status))
         self.out.flush()
 
 BaseReporter.register_class("simple", SimpleReporter)
@@ -1271,16 +1292,16 @@ class PlainReporter(BaseReporter):
 
     def exit_testclass(self, testclass, method_name, exc_info):
         if self._exceptions or exc_info:
-            self.out.write("\n")
+            self.write("\n")
         self._super.exit_testclass(self, testclass, method_name, exc_info)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
-        self.out.write(self.status_char(status))
+        self.write(self.status_char(status))
         self.out.flush()
 
     def exit_all(self):
-        self.out.write("\n")
+        self.write("\n")
         self._super.exit_all(self)
 
 BaseReporter.register_class("plain", PlainReporter)
@@ -1308,11 +1329,11 @@ class UnittestStyleReporter(BaseReporter):
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self._super.exit_testcase(self, testcase, testname, status, exc_info)
-        self.out.write(self.status_char(status))
+        self.write(self.status_char(status))
         self.out.flush()
 
     def exit_all(self):
-        self.out.write("\n")
+        self.write("\n")
         for tupl in self._exceptions:
             self.report_exceptions(*tupl)
         self._super.exit_all(self)
@@ -1326,9 +1347,9 @@ class UnittestStyleReporter(BaseReporter):
             parent = testcase.__class__.__name__
             child  = testname
         indicator = self.INDICATOR.get(status) or '???'
-        self.out.write("=" * 70 + "\n")
-        self.out.write("%s: %s#%s()\n" % (indicator, parent, child))
-        self.out.write("-" * 70 + "\n")
+        self.write("=" * 70 + "\n")
+        self.write("%s: %s#%s()\n" % (indicator, parent, child))
+        self.write("-" * 70 + "\n")
 
 BaseReporter.register_class("unittest", SimpleReporter)
 
@@ -1350,36 +1371,36 @@ class OldStyleReporter(BaseReporter):
         pass
 
     def enter_testcase(self, testcase, testname):
-        self.out.write("* %s.%s ... " % (testcase.__class__.__name__, testname))
+        self.write("* %s.%s ... " % (testcase.__class__.__name__, testname))
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         if status == ST_PASSED:
-            self.out.write("[ok]\n")
+            self.write("[ok]\n")
         elif status == ST_FAILED:
             ex_class, ex, ex_traceback = exc_info
             flag = hasattr(ex, '_raised_by_oktest')
-            self.out.write("[NG] %s\n" % (flag and ex.errmsg or util.ex2msg(ex)))
+            self.write("[NG] %s\n" % (flag and ex.errmsg or util.ex2msg(ex)))
             def formatter(filepath, lineno, funcname, linestr):
                 return "   %s:%s: %s\n" % (filepath, lineno, linestr.strip())
             arr = format_traceback(ex, ex_traceback, filter=self._filter, formatter=formatter)
             for x in arr:
-                self.out.write(x)
+                self.write(x)
             if flag and getattr(ex, 'diff', None):
-                self.out.write(ex.diff)
+                self.write(ex.diff)
         elif status == ST_ERROR:
             ex_class, ex, ex_traceback = exc_info
-            self.out.write("[ERROR] %s: %s\n" % (ex_class.__name__, util.ex2msg(ex)))
+            self.write("[ERROR] %s: %s\n" % (ex_class.__name__, util.ex2msg(ex)))
             def formatter(filepath, lineno, funcname, linestr):
                 return "  - %s:%s:  %s\n" % (filepath, lineno, linestr.strip())
             arr = format_traceback(ex, ex_traceback, filter=self._filter, formatter=formatter)
             for x in arr:
-                self.out.write(x)
+                self.write(x)
         elif status == ST_SKIPPED:
-            self.out.write("[skipped]\n")
+            self.write("[skipped]\n")
         elif status == ST_TODO:
-            self.out.write("[TODO]\n")
+            self.write("[TODO]\n")
         #elif status == ST_UNEXPECTED:
-        #    self.out.write("[Unexpected]\n")
+        #    self.write("[Unexpected]\n")
         else:
             assert False, "UNREACHABLE: status=%r" % (status,)
 
