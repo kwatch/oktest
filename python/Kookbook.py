@@ -132,7 +132,7 @@ def _run_oktest_test(c, ver, bin):
     #    f()
     #else:
     #    system(cmd)
-    system(cmd)
+    system_f(cmd)
 
 #def _invoke_test(c, ver, bin, fpath):
 #    def replacer_for_py24(s):
