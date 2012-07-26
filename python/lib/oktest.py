@@ -1425,6 +1425,7 @@ def _dummy():
     __all__ = ('chdir', 'rm_rf')
 
     if python2:
+        _unicode = unicode
         def _is_string(val):
             return isinstance(val, (str, unicode))
         def _is_class(obj):
@@ -1437,6 +1438,7 @@ def _dummy():
             func = getattr(func, 'im_func', func)
             return func.func_code.co_firstlineno
     if python3:
+        _unicode = str
         def _is_string(val):
             return isinstance(val, (str, bytes))
         def _is_class(obj):
@@ -1581,6 +1583,23 @@ def _dummy():
             u = b.decode(encoding)
             assert isinstance(u, str)
             return u
+
+    import unicodedata as _unicodedata
+    _WIDE_CHARS = {'W': 2, 'F': 2, 'A': 2}
+
+    def zenkaku_shorten(unicode_string, max_width,
+                      _unicode=_unicode, _eaw=_unicodedata.east_asian_width, _widths={'W': 2, 'F': 2, 'A': 2}):
+        if not isinstance(unicode_string, _unicode):
+            raise TypeError('unicode expected but got %s.' % type(unicode_string))
+        w = i = 0
+        for ch in unicode_string:
+            w += _widths.get(_eaw(ch), 1)   # 2 when zenkaku, 1 when hankaku
+            if w > max_width:
+                break
+            i += 1
+        else:
+            return unicode_string
+        return unicode_string[:i]
 
     from types import MethodType as _MethodType
 
