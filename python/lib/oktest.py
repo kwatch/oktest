@@ -13,6 +13,10 @@ __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
 
+ENCODING = 'utf-8'
+TERMINAL_WIDTH = 80
+
+
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
 if python2:
@@ -1083,8 +1087,8 @@ class BaseReporter(Reporter):
         if is_tty(self.out):
             #self.__string = string
             if not util._is_unicode(string):
-                string = string.decode('utf-8')
-            shorten = util.zenkaku_shorten(string, 77)
+                string = string.decode(ENCODING)
+            shorten = util.zenkaku_shorten(string, TERMINAL_WIDTH - 4)
             if shorten == string:
                 self.write(string)
             else:
