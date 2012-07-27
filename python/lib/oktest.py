@@ -1428,6 +1428,8 @@ def _dummy():
         _unicode = unicode
         def _is_string(val):
             return isinstance(val, (str, unicode))
+        def _is_unicode(val):
+            return isinstance(val, unicode)
         def _is_class(obj):
             return isinstance(obj, (types.TypeType, types.ClassType))
         def _is_unbound(method):
@@ -1441,6 +1443,8 @@ def _dummy():
         _unicode = str
         def _is_string(val):
             return isinstance(val, (str, bytes))
+        def _is_unicode(val):
+            return isinstance(val, str)
         def _is_class(obj):
             return isinstance(obj, (type, ))
         def _is_unbound(method):
