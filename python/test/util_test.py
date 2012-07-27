@@ -11,7 +11,7 @@ import unittest
 import oktest
 from oktest import ok, NG, run
 from oktest import python2, python3
-from oktest.util import chdir, flatten, rm_rf, zenkaku_shorten
+from oktest.util import chdir, flatten, rm_rf, zenkaku_width, zenkaku_shorten
 
 
 available_with_statement = sys.version_info[0:2] > (2, 4)
@@ -294,6 +294,15 @@ class util_TC(unittest.TestCase):
             ex = sys.exc_info()[1]
             self.assertEqual(UnicodeDecodeError, ex.__class__)
             self.assertTrue("'utf8' codec can't decode byte 0x82 in position 0: invalid start byte", str(ex))
+
+    def test_zenkaku_width_1(self):
+        if python2:
+            _unistr = lambda s: s.decode('utf-8')
+        elif python3:
+            _unistr = lambda s: s
+        ok (zenkaku_width(_unistr("SOS"))) == 3
+        ok (zenkaku_width(_unistr("ハルヒ"))) == 6
+        ok (zenkaku_width(_unistr("SOS/ハルヒ"))) == 10
 
     def test_zenkaku_shorten_1(self):
         if python2:

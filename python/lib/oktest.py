@@ -1602,6 +1602,12 @@ def _dummy():
     import unicodedata as _unicodedata
     _WIDE_CHARS = {'W': 2, 'F': 2, 'A': 2}
 
+    def zenkaku_width(unicode_string,
+                      _unicode=_unicode, _eaw=_unicodedata.east_asian_width, _widths=_WIDE_CHARS):
+        if not isinstance(unicode_string, _unicode):
+            raise TypeError('unicode expected but got %s.' % type(unicode_string))
+        return sum( _widths.get(_eaw(ch), 1) for ch in unicode_string )
+
     def zenkaku_shorten(unicode_string, max_width,
                       _unicode=_unicode, _eaw=_unicodedata.east_asian_width, _widths={'W': 2, 'F': 2, 'A': 2}):
         if not isinstance(unicode_string, _unicode):
