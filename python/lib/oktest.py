@@ -1082,7 +1082,14 @@ class BaseReporter(Reporter):
     def _print_temporary_str(self, string):
         if is_tty(self.out):
             #self.__string = string
-            self.write(string)
+            if not util._is_unicode(string):
+                string = string.decode('utf-8')
+            shorten = util.zenkaku_shorten(string, 77)
+            if shorten == string:
+                self.write(string)
+            else:
+                #self.write(string)
+                self.write(shorten + '...')
             self.out.flush()
 
     def _erase_temporary_str(self):
