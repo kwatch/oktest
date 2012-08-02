@@ -1088,12 +1088,12 @@ class BaseReporter(Reporter):
             #self.__string = string
             if not util._is_unicode(string):
                 string = string.decode(ENCODING)
-            shorten = util.zenkaku_shorten(string, TERMINAL_WIDTH - 4)
-            if shorten == string:
-                self.write(string)
-            else:
+            if util.zenkaku_width(string) >= TERMINAL_WIDTH:
+                shorten = util.zenkaku_shorten(string, TERMINAL_WIDTH - 4)
                 #self.write(string)
                 self.write(shorten + '...')
+            else:
+                self.write(string)
             self.out.flush()
 
     def _erase_temporary_str(self):
