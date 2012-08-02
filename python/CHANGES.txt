@@ -3,6 +3,14 @@ CHANGES
 =======
 
 
+Release 0.11.1
+--------------
+
+* [bugfix] fix '-s verbose' (verbose mode) option to clear long test description.
+
+* [bugfix] fix test reporter not to raise UnicodeEncodeError/UnicodeDecodeError.
+
+
 Release 0.11.0
 --------------
 
