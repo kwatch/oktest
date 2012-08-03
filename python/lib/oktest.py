@@ -1139,6 +1139,8 @@ class BaseReporter(Reporter):
             self.write('    %s\n' % text)
 
     def colorize(self, string, kind):
+        if self._color is None:
+            self._set_color(None)
         if not self._color:
             return string
         if kind == ST_PASSED:  return util.Color.green(string, bold=True)
