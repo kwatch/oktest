@@ -125,6 +125,9 @@ class Spec_TC(unittest.TestCase):
                 arr.append("after")
         ok (fn).raises(AssertionError, "2 == 1 : failed.")
         ok (arr) == ["before"]
+        #
+        if hasattr(self, '_oktest_specs'):
+            self._oktest_specs[:] = []
 
     def test___bool___1(self):
         """returns True when $SPEC is not set."""
