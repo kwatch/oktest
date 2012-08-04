@@ -292,17 +292,17 @@ def task_manifest(c):
     system(c%'$(python) setup.py sdist --force-manifest')
 
 
-def replacer(s):
-    #s = re.sub(r'\$'r'Package\$',   package,   s)
-    #s = re.sub(r'\$'r'Release\$',   release,   s)
-    #s = re.sub(r'\$'r'Copyright\$', copyright, s)
-    #s = re.sub(r'\$'r'License\$',   license,   s)
-    s = re.sub(r'\$'r'Package:[^%]*?\$',    '$''Package: %s $'   % package,   s)
-    s = re.sub(r'\$'r'Release:[^%]*?\$',    '$''Release: %s $'   % release,   s)
-    s = re.sub(r'\$'r'Copyright:[^%]*?\$',  '$''Copyright: %s $' % copyright, s)
-    s = re.sub(r'\$'r'License:[^%]*?\$',    '$''License: %s $'   % license,   s)
-    s = re.sub(r'%s-\d+\.\d+\.\d+' % package, '%s-%s' % (package, release), s)
-    return s
+replacer = [
+    #(r'\$'r'Package\$',   package),
+    #(r'\$'r'Release\$',   release),
+    #(r'\$'r'Copyright\$', copyright),
+    #(r'\$'r'License\$',   license),
+    (r'\$'r'Package:[^%]*?\$',    '$''Package: %s $'   % package),
+    (r'\$'r'Release:[^%]*?\$',    '$''Release: %s $'   % release),
+    (r'\$'r'Copyright:[^%]*?\$',  '$''Copyright: %s $' % copyright),
+    (r'\$'r'License:[^%]*?\$',    '$''License: %s $'   % license),
+    (r'%s-\d+\.\d+\.\d+' % package, '%s-%s' % (package, release)),
+]
 
 
 @recipe
