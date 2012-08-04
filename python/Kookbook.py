@@ -293,14 +293,14 @@ def task_manifest(c):
 
 
 def replacer(s):
-    #s = re.sub(r'\$Package\$',   package,   s)
-    #s = re.sub(r'\$Release\$',   release,   s)
-    #s = re.sub(r'\$Copyright\$', copyright, s)
-    #s = re.sub(r'\$License\$',   license,   s)
-    s = re.sub(r'\$Package:[^%]*?\$',    '$Package: %s $'   % package,   s)
-    s = re.sub(r'\$Release:[^%]*?\$',    '$Release: %s $'   % release,   s)
-    s = re.sub(r'\$Copyright:[^%]*?\$',  '$Copyright: %s $' % copyright, s)
-    s = re.sub(r'\$License:[^%]*?\$',    '$License: %s $'   % license,   s)
+    #s = re.sub(r'\$'r'Package\$',   package,   s)
+    #s = re.sub(r'\$'r'Release\$',   release,   s)
+    #s = re.sub(r'\$'r'Copyright\$', copyright, s)
+    #s = re.sub(r'\$'r'License\$',   license,   s)
+    s = re.sub(r'\$'r'Package:[^%]*?\$',    '$''Package: %s $'   % package,   s)
+    s = re.sub(r'\$'r'Release:[^%]*?\$',    '$''Release: %s $'   % release,   s)
+    s = re.sub(r'\$'r'Copyright:[^%]*?\$',  '$''Copyright: %s $' % copyright, s)
+    s = re.sub(r'\$'r'License:[^%]*?\$',    '$''License: %s $'   % license,   s)
     s = re.sub(r'%s-\d+\.\d+\.\d+' % package, '%s-%s' % (package, release), s)
     return s
 
@@ -337,7 +337,7 @@ def file_website_index_html(c):
     system(c%'rst2html.py $(opts) $(ingred) > $(product)')
     def f(s):
         s = s.replace('0.0.0', release)
-        s = s.replace('$Release$', release)
+        s = s.replace('$''Release$', release)
         s = re.sub('<\?xml version=".*" encoding=".*" *\?>\n', '', s)
         s = s.replace('Oktest README', 'Oktest - a new style testing library -')
         s = s.replace('See CHANGES.txt', 'See <a href="CHANGES.txt">CHANGES.txt</a>')
