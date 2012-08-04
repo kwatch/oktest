@@ -306,18 +306,23 @@ def replacer(s):
 
 
 @recipe
-def task_edit(c):
+@spices("[filenames]")
+def task_edit(c, *args):
     """update $Release$, $Copyrigh$, and $License$ in files"""
-    with open('MANIFEST') as f:
-        filenames = [ line.strip() for line in f if not line.startswith('#') ]
-    #filenames.remove('Kookbook.py')
-    filenames.append('website/index.html')
+    if args:
+        filenames = args
+    else:
+        with open('MANIFEST') as f:
+            filenames = [ line.strip() for line in f if not line.startswith('#') ]
+        #filenames.remove('Kookbook.py')
+        filenames.append('website/index.html')
     edit(filenames, by=replacer)
     #
     def repl(s):
         pat = r"^([ \t]*\w+\s*=\s*)'.*?'(\s*##\s*\$(?:Package|Release|License): (.*?) \$)"
         return re.compile(pat, re.M).sub(r"\1'\3'\2", s)
-    edit('setup.py', by=repl)
+    if 'setup.py' in filenames:
+        edit('setup.py', by=repl)
 
 
 
