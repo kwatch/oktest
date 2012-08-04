@@ -81,7 +81,7 @@ class Spec_TC(unittest.TestCase):
         assert isinstance(obj._stacktrace, list)
 
     def test___iter___1(sefl):
-        """emurates with-stmt when used with for-stmt."""
+        """emulates with-stmt when used with for-stmt."""
         called = []
         def enter(*args):
             called.append(('enter', args))
@@ -101,7 +101,7 @@ class Spec_TC(unittest.TestCase):
         ok (called[2]) == ('exit', (None, None, None))
 
     def test___call___1(self):
-        """emurates with-stmt when called as decorator."""
+        """emulates with-stmt when called as decorator."""
         arr = []
         def fn():
             obj = Spec('foo')
@@ -114,7 +114,7 @@ class Spec_TC(unittest.TestCase):
         ok (arr) == ["before", "after"]
 
     def test___call___2(self):
-        """emurates with-stmt when called as decorator."""
+        """emulates with-stmt when called as decorator."""
         arr = []
         def fn():
             obj = Spec('foo')
