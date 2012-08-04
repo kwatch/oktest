@@ -308,7 +308,8 @@ def replacer(s):
 @recipe
 def task_edit(c):
     """update $Release$, $Copyrigh$, and $License$ in files"""
-    filenames = read_file('MANIFEST').splitlines()
+    with open('MANIFEST') as f:
+        filenames = [ line.strip() for line in f if not line.startswith('#') ]
     filenames.remove('Kookbook.py')
     filenames.append('website/index.html')
     edit(filenames, by=replacer)
