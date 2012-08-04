@@ -306,8 +306,10 @@ replacer = [
 
 
 @recipe
-@spices("[filenames]")
-def task_edit(c, *args):
+@spices("--copyright: update only $""Copyright$",
+        "--license:   update only $""License$",
+        "[filenames]")
+def task_edit(c, *args, **kwargs):
     """update $Release$, $Copyrigh$, and $License$ in files"""
     if args:
         filenames = args
@@ -316,10 +318,19 @@ def task_edit(c, *args):
             filenames = [ line.strip() for line in f if not line.startswith('#') ]
         #filenames.remove('Kookbook.py')
         filenames.append('website/index.html')
-    edit(filenames, by=replacer)
+    if 'copyright' in kwargs:
+        replacer_ = [ t for t in replacer if t[0].find('Copyright') >= 0 ]
+        patternstr = 'Copyright'
+    elif 'license' in kwargs:
+        replacer_ = [ t for t in replacer if t[0].find('License') >= 0 ]
+        patternstr = 'License'
+    else:
+        replacer_ = replacer[:]
+        patternstr = 'Package|Release|Copyright|License'
+    edit(filenames, by=replacer_)
     #
     def repl(s):
-        pat = r"^([ \t]*\w+\s*=\s*)'.*?'(\s*##\s*\$(?:Package|Release|License): (.*?) \$)"
+        pat = r"^([ \t]*\w+\s*=\s*)'.*?'(\s*##\s*\$(?:"+patternstr+r"): (.*?) \$)"
         return re.compile(pat, re.M).sub(r"\1'\3'\2", s)
     if 'setup.py' in filenames:
         edit('setup.py', by=repl)
