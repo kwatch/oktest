@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###
 ### $Release: $
 ### $Copyright: copyright(c) 2010-2012 kuwata-lab.com all rights reserved $
@@ -128,6 +129,11 @@ class TestDeco_TC(unittest.TestCase):
             pass
         self.assertEqual(_._options, {'sid': 'abc123_-', 'tag': 'hom'})
         self.assertEqual(self._options, {'sid': 'xyz', 'tag': 'abc'})
+
+    @test("日本語文字列をサポート")
+    def _(self):
+        assert isinstance(self._testMethodName, str)
+        assert "日本語文字列をサポート" in self._testMethodName
 
 
     ##
