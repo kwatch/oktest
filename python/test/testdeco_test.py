@@ -121,6 +121,14 @@ class TestDeco_TC(unittest.TestCase):
             pass
         self.assertEqual("old desc", test_bar.__doc__)
 
+    @test("[!xyz] regards '[!foobar]' as spec id.", tag='abc')
+    def t(self):
+        @test("[!abc123_-] description", tag='hom')
+        def _(self):
+            pass
+        self.assertEqual(_._options, {'sid': 'abc123_-', 'tag': 'hom'})
+        self.assertEqual(self._options, {'sid': 'xyz', 'tag': 'abc'})
+
 
     ##
     ## test fixtures

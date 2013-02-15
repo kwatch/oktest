@@ -1805,6 +1805,9 @@ def test(description_text=None, **options):
     globalvars = frame.f_globals
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
+    m = SPEC_ID_REXP.match(description_text or '')
+    if m:
+        options['sid'] = m.group(1)
     def deco(orig_func):
         if hasattr(orig_func, '_original_function'):
             orig_func_ = orig_func._original_function or orig_func
@@ -1833,6 +1836,8 @@ def test(description_text=None, **options):
         newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         return newfunc
     return deco
+
+SPEC_ID_REXP = re.compile(r'^\[\!([-\w]+)\]')
 
 
 ##
