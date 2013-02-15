@@ -163,6 +163,41 @@ class Todo_TC(unittest.TestCase):
             self._test_runner(expected, Todo_TC._TodoIsAvailableWithTestDecorator, 2)
 
 
+        class _TodoIsAvailableWithFixtureArguments(object):
+            def provide_a(self):
+                return "AAA"
+            def provide_b(self):
+                return "BBB"
+            def provide_c(self):
+                return "CCC"
+            #
+            @test("WILL FAIL BECAUSE PASSED UNEXPECTEDLY")
+            @todo
+            def _(self, a, b, c="---"):
+                assert a == "AAA", "expected failure"
+                assert b == "BBB", "expected failure"
+                assert c == "---", "expected failure"
+            #
+            @test("WILL PASS BECAUSE FAILED EXPECTEDLY")
+            @todo
+            def _(self, a, b):
+                assert False
+
+        def test_todo_is_avaialbe_with_fixture_arguments(self):
+            expected = r"""
+* <b>_TodoIsAvailableWithFixtureArguments</b>
+  - [<R>Failed</R>] WILL FAIL BECAUSE PASSED UNEXPECTEDLY
+  - [<Y>TODO</Y>] WILL PASS BECAUSE FAILED EXPECTEDLY
+<r>----------------------------------------------------------------------</r>
+[<R>Failed</R>] _TodoIsAvailableWithFixtureArguments > 001: WILL FAIL BECAUSE PASSED UNEXPECTEDLY
+<R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
+<r>----------------------------------------------------------------------</r>
+## total:2, passed:0, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>  (0.000 sec)
+"""[1:]
+
+            self._test_runner(expected, Todo_TC._TodoIsAvailableWithFixtureArguments, 1)
+
+
 
 if __name__ == '__main__':
     unittest.main()

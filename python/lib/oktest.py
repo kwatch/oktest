@@ -550,6 +550,7 @@ def todo(func):
             raise _ExpectedFailure(sys.exc_info())
     deco.__name__ = func.__name__
     deco.__doc__  = func.__doc__
+    deco._original_function = func
     return deco
 
 class _ExpectedFailure(Exception):
@@ -1805,7 +1806,11 @@ def test(description_text=None, **options):
     n = localvars.get('__n', 0) + 1
     localvars['__n'] = n
     def deco(orig_func):
-        argnames = util.func_argnames(orig_func)
+        if hasattr(orig_func, '_original_function'):
+            orig_func_ = orig_func._original_function or orig_func
+        else:
+            orig_func_ = orig_func
+        argnames = util.func_argnames(orig_func_)
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
             def newfunc(self):
@@ -1853,10 +1858,14 @@ class FixtureInjector(object):
         resolved  = {"self": object}   # {"arg_name": arg_value}
         in_progress = []
         ##
-        arg_names = util.func_argnames(func)
+        if hasattr(func, '_original_function'):
+            func_ = func._original_function or func
+        else:
+            func_ = func
+        arg_names = util.func_argnames(func_)
         ## default arg values of test method are stored into 'resolved' dict
         ## in order for providers to access to them
-        defaults = util.func_defaults(func)
+        defaults = util.func_defaults(func_)
         if defaults:
             idx = - len(defaults)
             for aname, default in zip(arg_names[idx:], defaults):
