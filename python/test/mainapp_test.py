@@ -69,11 +69,11 @@ from oktest import ok, NG, test, fail, skip, todo
 
 class SosTest(unittest.TestCase):
     # passed
-    @test("1+1 should be 2")
+    @test("1+1 should be 2", tag='tag1')
     def _(self):
         ok (1+1) == 2
     # failed
-    @test("1-1 should be 0")
+    @test("1-1 should be 0", tag='tag2')
     def _(self):
         ok (1-1) == 2
     # error
@@ -671,6 +671,19 @@ mainapp_test.py: error: -p option requires an argument
         self._chk((expected, "", 0), (sout, serr, ex))
         #
         sout, serr, ex = self._run_app('-f', '*aaa*', '--color=true')
+        self._chk((expected, "", 0), (sout, serr, ex))
+
+
+    def test_main__filter__tag(self):
+        expected = r"""
+* <b>SosTest</b>
+  - [<G>passed</G>] 1+1 should be 2
+* <b>Sos_TC</b>
+## total:1, <G>passed:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+"""[1:]
+        expected = Color._colorize(expected)
+        #
+        sout, serr, ex = self._run_app('-f', 'tag=tag1', '--color=true')
         self._chk((expected, "", 0), (sout, serr, ex))
 
 
