@@ -22,7 +22,7 @@ class Todo_TC(unittest.TestCase):
 
     ### @todo()
 
-    def test_todo_1(self):
+    def test_todo__when_failed_expectdly(self):
         """
         test method decorated by @todo should raises _ExpectedFailure exception
         with assertion information when it failed expectedly.
@@ -41,9 +41,9 @@ class Todo_TC(unittest.TestCase):
             assert ex.exc_info[0] == AssertionError
             assert str(ex.exc_info[1]) == "DESC1"
 
-    def test_todo_2(self):
+    def test_todo__when_passed_unexpectedly(self):
         """
-        test method decorated by @todo should raises _UnExpectedSuccess exception
+        test method decorated by @todo should raise _UnExpectedSuccess exception
         without assertion information when it passed unexpectedly.
         """
         @todo
