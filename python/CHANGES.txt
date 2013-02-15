@@ -2,6 +2,39 @@
 CHANGES
 =======
 
+Release 0.12.0 (???)
+--------------------
+
+* [enhance] @test decorator regards '[!xxx]' in description as spec id.
+  ex::
+
+    ## python
+    class HomhomTest(unittest.TestCase):
+      @test('[!bk201] 1+1 should be 2')    # spec id is 'bk201'
+      def _(self):
+        ok (1+1) == 2
+      @test('[!nov11] 1-1 should be 0')    # spec id is 'nov11'
+      def _(self):
+        ok (1-1) == 0
+
+  You can filter tests by spec id (sid).
+
+    ## command-line
+    bash$ python -m oktest test/example_test.py -f sid=bk201
+
+* [bugfix] @todo decorator now supports fixture arguments.
+  ex::
+
+    class FooTest(unittest.TestCase):
+      #
+      def provide_x(self):
+        return 123
+      #
+      @test('example')
+      @todo              # error on ver 0.11 but not since this release
+      def _(self, x):
+        assert False
+
 
 Release 0.11.1
 --------------
