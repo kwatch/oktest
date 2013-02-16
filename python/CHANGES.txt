@@ -6,6 +6,53 @@ CHANGES
 Release 0.12.0 (???)
 --------------------
 
+
+* [enhance] @at_end decorator registers callback which is invoked after test.
+  This is similar to tearDown() method, but more flexible than it.
+  ex::
+
+    from oktest import at_end
+
+    class HomhomTest(unittest.TestCase):
+      def test1(self):
+        ## create dummy file
+        tmpfile = 'dummy.txt'
+        with open(tmpfile, 'w') as f:
+          f.write("blablabla")
+        ## register callback to delete dummy file at end of test case
+        @at_end
+        def _():
+          os.unlink(tmpfile)
+        ## do test
+        with open(tmpfile) as f:
+          ok (f.read()) == "blablabla"
+
+  You can use @at_end instead of fixture release functions.
+  ex::
+
+    class HomhomTest(unittest.TestCase):
+
+      ##
+      ## fixture provider -- use @at_end instead of releaser
+      ##
+      def provide_tmpfile(self):
+        ## create dummy file
+        tmpfile = 'dummy.txt'
+        with open(tmpfile, 'w') as f:
+          f.write('blablabla')
+        ## register callback to delete dummy file at end of test case
+        @at_end
+        def _():
+          os.unlink(tmpfile)
+        ## return fixture data
+        return tmpfile
+
+      ##
+      ## fixture releaser -- no need to define because we have @at_end!
+      ##
+      #def release_tmpfile(self, tmpfile):
+      #  os.unlink(tmpfile)
+
 * [enhance] @test decorator regards '[!xxx]' in description as spec id.
   ex::
 
