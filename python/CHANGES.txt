@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 =======
 CHANGES
 =======
@@ -22,6 +23,13 @@ Release 0.12.0 (???)
     ## command-line
     bash$ python -m oktest test/example_test.py -f sid=bk201
 
+* [bugfix] @todo decorator now supports unicode description.
+  ex::
+
+    @test(u"日本語")    # error on previous version but not in this release
+    def _(self):
+      ok (1+1) == 2
+
 * [bugfix] @todo decorator now supports fixture arguments.
   ex::
 
@@ -31,7 +39,7 @@ Release 0.12.0 (???)
         return 123
       #
       @test('example')
-      @todo              # error on ver 0.11 but not since this release
+      @todo             # error on previous version but not on this release
       def _(self, x):
         assert False
 
