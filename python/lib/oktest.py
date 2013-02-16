@@ -1829,7 +1829,10 @@ def test(description_text=None, **options):
         if orig_name.startswith('test'):
             newfunc.__name__ = orig_name
         else:
-            newfunc.__name__ = "test_%03d: %s" % (n, description_text)
+            s = "test_%03d: %s" % (n, description_text)
+            if python2 and isinstance(s, unicode):
+                s = s.encode('utf-8')
+            newfunc.__name__ = s
             localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = orig_func.__doc__ or description_text
         newfunc._options = options

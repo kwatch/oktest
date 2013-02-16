@@ -11,6 +11,9 @@ import unittest
 import oktest
 from oktest import test
 
+python2 = sys.version_info[0] == 2
+python3 = sys.version_info[0] == 3
+
 
 def provide_g1():
     return {"key": "G1"}
@@ -134,6 +137,17 @@ class TestDeco_TC(unittest.TestCase):
     def _(self):
         assert isinstance(self._testMethodName, str)
         assert "日本語文字列をサポート" in self._testMethodName
+
+    if python2:
+        #desc1 = u"ユニコード文字列をサポート"
+        desc1 = "ユニコード文字列をサポート".decode('utf-8')
+        assert isinstance(desc1, unicode)
+    else:
+        desc1 = "ユニコード文字列をサポート"
+    @test(desc1)
+    def _(self):
+        assert isinstance(self._testMethodName, str)
+        assert "ユニコード文字列をサポート" in self._testMethodName
 
 
     ##
