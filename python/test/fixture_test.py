@@ -7,6 +7,11 @@
 
 import sys, os, re
 import unittest
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 import oktest
 from oktest import test, at_end
@@ -253,6 +258,64 @@ class Feature_at_end_TC(unittest.TestCase):
             ex = sys.exc_info()[1]
             self_.assertEqual(RuntimeError, type(ex))
             self_.assertEqual(("'self' is expected as first argument.",), ex.args)
+
+
+    class Foo_TC(unittest.TestCase):
+        _instances = []
+        def setUp(self):
+            self.__class__._instances.append(self)
+            self._values = ['setUp']
+        def tearDown(self):
+            self._values.append('tearDown')
+        def test1(self):
+            @at_end
+            def _():
+                self._values.append('at_end')
+            self._values.append('test1')
+            assert False
+
+    def test_at_end__invoked_before_tearDown(self):
+        actual = self._run_test_class(self.Foo_TC)
+        expected = ['setUp', 'test1', 'at_end', 'tearDown']
+        self.assertEqual(expected, actual)
+
+    def _run_test_class(self, testclass):
+        from oktest import TestRunner, PlainReporter
+        out = StringIO()
+        reporter = PlainReporter(out, color=False)
+        runner = TestRunner(reporter)
+        runner.run_class(testclass)
+        instances = testclass._instances
+        assert len(instances) == 1
+        return instances[0]._values
+
+
+    class Bar_TC(unittest.TestCase):
+        _instances = []
+        def setUp(self):
+            self.__class__._instances.append(self)
+            self._values = ['setUp']
+        def tearDown(self):
+            self._values.append('tearDown')
+        def provide_x(self):
+            @at_end
+            def _():
+                self._values.append('x')
+            return 'X'
+        def provide_y(self):
+            at_end(lambda: self._values.append('y'))
+            return 'Y'
+        @test("desc1")
+        def _(self, x, y):
+            @at_end
+            def _():
+                self._values.append('desc1')
+            assert False
+
+    def test_at_end__invoked_in_reverse_order(self):
+        actual = self._run_test_class(self.Bar_TC)
+        expected = ['setUp', 'desc1', 'y', 'x', 'tearDown']
+        self.assertEqual(expected, actual)
 
 
 

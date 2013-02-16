@@ -726,9 +726,14 @@ class TestRunner(object):
                     except:
                         status, exc_info = ST_ERROR, sys.exc_info()
                 finally:
+                    errs = None
+                    if hasattr(testcase, '_at_end_blocks'):
+                        errs = self._run_blocks(testcase._at_end_blocks[::-1])
                     _, ret = self._invoke(testcase, 'after', 'tearDown')
                     if ret:
                         status, exc_info = ST_ERROR, ret
+                    elif errs:
+                        status, exc_info = ST_ERROR, errs[0]
                     #else:
                         #assert status is not None
         finally:
@@ -759,6 +764,15 @@ class TestRunner(object):
             arr = specs and [ spec for spec in specs if spec._exception ]
             if arr: return ST_FAILED, arr
             return ST_PASSED, ()
+
+    def _run_blocks(self, blocks):
+        errors = []
+        for func, args, kwargs in blocks:
+            try:
+                func(*args, **kwargs)
+            except:
+                errors.append(sys.exc_info())
+        return errors
 
     def _enter_testclass(self, testclass):
         self.reporter.enter_testclass(testclass)
