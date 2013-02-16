@@ -62,7 +62,7 @@ def _with_backup(filepath):
     return deco
 
 
-TEST_NAMES = ('tracer', 'spec', 'testdeco',
+TEST_NAMES = ('tracer', 'spec', 'testdeco', 'fixture',
               'doc', 'assertions', 'dummy', 'runner', 'context', 'reporter',
               'util', 'skip', 'todo', 'mainapp', )
 test_names = [ os.path.basename(x).replace('_test.py', '')
