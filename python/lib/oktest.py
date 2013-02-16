@@ -8,7 +8,7 @@
 ### $License: MIT License $
 ###
 
-__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'todo', 'subject', 'situation', 'main')
+__all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', 'todo', 'at_end', 'subject', 'situation', 'main')
 __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
@@ -468,6 +468,16 @@ def NOT(target):     # experimental. prefer to NG()?
 
 def fail(desc):
     raise AssertionError(desc)
+
+def at_end(func, *args, **kwargs):
+    frame = sys._getframe(1)
+    self_var = frame.f_code.co_varnames[0]  # 'self'
+    if self_var != 'self':
+        raise RuntimeError("'self' is expected as first argument.")
+    self_obj = frame.f_locals.get(self_var)  # self
+    attr_name = '_at_end_blocks'  # not '_cleanups'!
+    self_obj.__dict__.setdefault(attr_name, []).append((func, args, kwargs))
+    return func
 
 
 class Should(object):

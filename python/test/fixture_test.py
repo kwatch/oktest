@@ -9,7 +9,7 @@ import sys, os, re
 import unittest
 
 import oktest
-from oktest import test
+from oktest import test, at_end
 
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
@@ -219,6 +219,40 @@ NameError: Fixture provider for 'foo' not found.
             self.assertEqual(expected, str(ex))
         else:
             assert False, "LoopedDependencyError expected but not raised."
+
+
+
+class Feature_at_end_TC(unittest.TestCase):
+
+    def test_at_end__stores_funcs_with_args(self):
+        attr = '_at_end_blocks'
+        assert not hasattr(self, attr)
+        #
+        @at_end
+        def fn():
+            pass
+        assert hasattr(self, attr)
+        self.assertEqual(getattr(self, attr), [(fn, (), {})])
+        #
+        def fn2(x, y, z):
+            pass
+        at_end(fn2, 2, 3, z=4)
+        self.assertEqual(getattr(self, attr), [(fn, (), {}), (fn2, (2,3), {'z':4})])
+
+    def test_at_end__raises_error_when_1st_arg_is_not_self(self_):
+        #def fn():
+        #    @at_end
+        #    def _():
+        #        pass
+        #self_.assertRaises(RuntimeError, fn)
+        try:
+            @at_end
+            def _():
+                pass
+        except:
+            ex = sys.exc_info()[1]
+            self_.assertEqual(RuntimeError, type(ex))
+            self_.assertEqual(("'self' is expected as first argument.",), ex.args)
 
 
 
