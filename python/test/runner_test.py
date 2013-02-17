@@ -12,9 +12,10 @@ except ImportError:
     from io import StringIO
 
 import oktest
-from oktest import ok, not_ok, NG, test
+from oktest import ok, not_ok, NG, test, at_end
 from oktest.dummy import dummy_io
 from oktest.util import Color
+from oktest.tracer import Tracer
 import oktest.config
 
 echo = sys.stdout.write
@@ -312,83 +313,57 @@ tearDown() called.
         self.do_test(desc, script, expected)
 
 
-    def test_multiple_errors(self):
-        desc = "setUp()/tearDown()"
-        script = r"""
-from oktest import *
-class FooTest(object):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        raise RuntimeError("*** tearDown() ***")
-    #
-    def provide_x(self):
-        @at_end
-        def _():
-            raise RuntimeError("*** @at_end ***")
-        return "X"
-    def provide_y(self):
-        return "Y"
-    def release_y(self, value):
-        raise RuntimeError("*** release_y() ***")
-    #
-    @test("test_1")
-    def test_1(self, x, y):
-        assert False
-    @test("test_2")
-    def test_2(self, x, y):
-        raise RuntimeError("*** test_2() ***")
-#
-run(FooTest, color=False)
-"""[1:]
-        error_expected = r"""
-----------------------------------------------------------------------
-[ERROR] FooTest > test_1()
-test_1
-  File "_test_.py", line 16, in release_y
-    raise RuntimeError("*** release_y() ***")
-RuntimeError: *** release_y() ***
-----------------------------------------------------------------------
-[ERROR] FooTest > test_1()
-test_1
-  File "_test_.py", line 11, in _
-    raise RuntimeError("*** @at_end ***")
-RuntimeError: *** @at_end ***
-----------------------------------------------------------------------
-[ERROR] FooTest > test_1()
-test_1
-  File "_test_.py", line 6, in tearDown
-    raise RuntimeError("*** tearDown() ***")
-RuntimeError: *** tearDown() ***
-----------------------------------------------------------------------
-[ERROR] FooTest > test_2()
-test_2
-  File "_test_.py", line 16, in release_y
-    raise RuntimeError("*** release_y() ***")
-RuntimeError: *** release_y() ***
-----------------------------------------------------------------------
-[ERROR] FooTest > test_2()
-test_2
-  File "_test_.py", line 11, in _
-    raise RuntimeError("*** @at_end ***")
-RuntimeError: *** @at_end ***
-----------------------------------------------------------------------
-[ERROR] FooTest > test_2()
-test_2
-  File "_test_.py", line 6, in tearDown
-    raise RuntimeError("*** tearDown() ***")
-RuntimeError: *** tearDown() ***
-----------------------------------------------------------------------
-## total:2, passed:0, failed:0, error:2, skipped:0, todo:0  (0.000 sec)
-"""[1:]
+    class _MultipleErrorsTest(object):
+        def setUp(self):
+            pass
+        def tearDown(self):
+            raise RuntimeError("*** tearDown() ***")
         #
-        oktest.REPORTER = oktest.VerboseReporter
-        expected = r"""
-* FooTest
-  - [ERROR] test_1
-  - [ERROR] test_2
-"""[1:] + error_expected
-        self.do_test(desc, script, expected)
+        def provide_x(self):
+            @at_end
+            def _():
+                raise RuntimeError("*** @at_end ***")
+            return "X"
+        def provide_y(self):
+            return "Y"
+        #def release_y(self, value):
+        #    raise RuntimeError("*** release_y() ***")
+        #
+        @test("test_1")
+        def test_1(self, x, y):
+            assert False, '*** failed ***'
+        @test("test_2")
+        def test_2(self, x, y):
+            raise RuntimeError("*** test_2() ***")
+
+    def test_multiple_errors(self):
+        testclass = self._MultipleErrorsTest
+        reporter = oktest.Reporter()
+        runner = oktest.TestRunner(reporter)
+        tr = Tracer()
+        tr.trace_method(reporter, 'exit_testcase')
+        runner.run_class(testclass)
+        self.assertEqual(len(tr), 2)
+        #
+        self.assertEqual(tr[0].args[1], 'test_1')
+        self.assertEqual(tr[0].args[2], oktest.ST_FAILED)
+        exc_info_list = tr[0].args[3]
+        assert isinstance(exc_info_list, list)
+        exs = [ exc_info[1] for exc_info in exc_info_list ]
+        self.assertEqual(exs[0].args, ('*** failed ***',))
+        self.assertEqual(exs[1].args, ('*** @at_end ***',))
+        self.assertEqual(exs[2].args, ('*** tearDown() ***',))
+        self.assertEqual(len(exs), 3)
+        #
+        self.assertEqual(tr[1].args[1], 'test_2')
+        self.assertEqual(tr[1].args[2], oktest.ST_ERROR)
+        exc_info_list = tr[1].args[3]
+        assert isinstance(exc_info_list, list)
+        exs = [ exc_info[1] for exc_info in exc_info_list ]
+        self.assertEqual(exs[0].args, ('*** test_2() ***',))
+        self.assertEqual(exs[1].args, ('*** @at_end ***',))
+        self.assertEqual(exs[2].args, ('*** tearDown() ***',))
+        self.assertEqual(len(exs), 3)
 
 
     def test_run_without_args(self):
