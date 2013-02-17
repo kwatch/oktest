@@ -70,6 +70,10 @@ Release 0.12.0 (???)
     ## command-line
     bash$ python -m oktest test/example_test.py -f sid=bk201
 
+* [enhance] multiple errors are reported.
+  For example, if you got error on test method and tearDown(),
+  both errors are reported.
+
 * [bugfix] @todo decorator now supports unicode description.
   ex::
 
