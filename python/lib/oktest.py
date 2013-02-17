@@ -714,30 +714,34 @@ class TestRunner(object):
 
     def run_testcase(self, testcase, testname):
         self._enter_testcase(testcase, testname)
+        status = exc_info = None
+        exc_info_list = []
         try:
-            _, exc_info = self._invoke(testcase, 'before', 'setUp')
-            if exc_info:
-                status = ST_ERROR
+            _, exc_info_ = self._invoke(testcase, 'before', 'setUp')
+            if exc_info_:
+                exc_info_list.append(exc_info_)
             else:
                 try:
-                    status = None
-                    try:
-                        status, exc_info = self._run_testcase(testcase, testname)
-                    except:
-                        status, exc_info = ST_ERROR, sys.exc_info()
+                    status, exc_info = self._run_testcase(testcase, testname)
                 finally:
-                    errs = None
                     if hasattr(testcase, '_at_end_blocks'):
                         errs = self._run_blocks(testcase._at_end_blocks[::-1])
-                    _, ret = self._invoke(testcase, 'after', 'tearDown')
-                    if ret:
-                        status, exc_info = ST_ERROR, ret
-                    elif errs:
-                        status, exc_info = ST_ERROR, errs[0]
+                        if errs:
+                            exc_info_list.extend(errs)
+                    _, exc_info_ = self._invoke(testcase, 'after', 'tearDown')
+                    if exc_info_:
+                        exc_info_list.append(exc_info_)
                     #else:
                         #assert status is not None
         finally:
-            self._exit_testcase(testcase, testname, status, exc_info)
+            if exc_info_list:    # errors in setUp or tearDown
+                if status == ST_FAILED or status == ST_ERROR:
+                    exc_info_list.insert(0, exc_info)
+                else:
+                    status = ST_ERROR
+                self._exit_testcase(testcase, testname, status, exc_info_list)
+            else:
+                self._exit_testcase(testcase, testname, status, exc_info)
 
     def _run_testcase(self, testcase, testname):
         try:
