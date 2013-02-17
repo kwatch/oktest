@@ -191,15 +191,43 @@ class TestContext_TC(unittest.TestCase):
 
     def test_with_tags(self):
         testclass = self._ContextTagTest
-        self.assertEqual(testclass.test1._tags, {'tag': 'abc'})
+        test1 = testclass.test1
         for k in dir(testclass):
             if   re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
             elif re.match(r'^test_.*test3', k):  test3 = getattr(testclass, k)
             elif re.match(r'^test_.*test4', k):  test4 = getattr(testclass, k)
+        self.assertEqual(test1._tags, {'tag': 'abc'})
         self.assertEqual(test2._tags, {'tag': 'abc'})
         self.assertEqual(test3._tags, {'tag': 'abc', 'category': 'homhom'})
         self.assertEqual(test4._tags, {'tag': 'hom', 'category': 'homhom'})
 
+
+    class _NestedContextTagTest(unittest.TestCase):
+        x1 = situation('parent context', tag1='aaa', tag3='xxx')
+        x1.__enter__()
+        #
+        @test('test1')
+        def _(self):
+            pass
+        #
+        x2 = situation('child context', tag2='bbb', tag3='yyy')
+        x2.__enter__()
+        #
+        @test('test2')
+        def _(self):
+            pass
+        #
+        x2.__exit__()
+        #
+        x1.__exit__()
+
+    def test_nested_context_tags(self):
+        testclass = self._NestedContextTagTest
+        for k in dir(testclass):
+            if   re.match(r'^test_.*test1', k):  test1 = getattr(testclass, k)
+            elif re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
+        self.assertEqual(test1._tags, {'tag1': 'aaa',                'tag3': 'xxx'})
+        self.assertEqual(test2._tags, {'tag1': 'aaa', 'tag2': 'bbb', 'tag3': 'yyy'})
 
 
 

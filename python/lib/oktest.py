@@ -2083,13 +2083,13 @@ def context():
                     if not hasattr(func, '_test_context'):
                         func._test_context = self.desc
                         self.items.append((name, func))
-                        if self.tags:
-                            if not hasattr(func, '_tags'):
-                                func._tags = self.tags.copy()
-                            else:
-                                for k, v in self.tags.items():
-                                    if k not in func._tags:
-                                        func._tags[k] = v
+                    if self.tags:
+                        if not hasattr(func, '_tags'):
+                            func._tags = self.tags.copy()
+                        else:
+                            for k, v in self.tags.items():
+                                if k not in func._tags:
+                                    func._tags[k] = v
             self._sort_items(self.items)
             del self._f_locals
             del self._varnames
