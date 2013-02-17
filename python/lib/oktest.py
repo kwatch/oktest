@@ -1011,9 +1011,18 @@ class BaseReporter(Reporter):
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self.counts[status] = self.counts.setdefault(status, 0) + 1
-        if exc_info and status != ST_SKIPPED:
+        #if exc_info and status != ST_SKIPPED:
+        #    context = self._context_stack and self._context_stack[-1] or None
+        #    self._exceptions.append((testcase, testname, status, exc_info, context))
+        if exc_info:
+            def ignore_p(t):
+                return isinstance(t, tuple) and t[0] == SkipTest
             context = self._context_stack and self._context_stack[-1] or None
-            self._exceptions.append((testcase, testname, status, exc_info, context))
+            if isinstance(exc_info, list):
+                exc_info_list = [ t for t in exc_info if not ignore_p(t) ]
+                self._exceptions.append((testcase, testname, status, exc_info_list, context))
+            elif not ignore_p(exc_info):
+                self._exceptions.append((testcase, testname, status, exc_info, context))
 
     def enter_testcontext(self, context):
         self._context_stack.append(context)
