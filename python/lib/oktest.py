@@ -714,30 +714,34 @@ class TestRunner(object):
 
     def run_testcase(self, testcase, testname):
         self._enter_testcase(testcase, testname)
+        status = exc_info = None
+        exc_info_list = []
         try:
-            _, exc_info = self._invoke(testcase, 'before', 'setUp')
-            if exc_info:
-                status = ST_ERROR
+            _, exc_info_ = self._invoke(testcase, 'before', 'setUp')
+            if exc_info_:
+                exc_info_list.append(exc_info_)
             else:
                 try:
-                    status = None
-                    try:
-                        status, exc_info = self._run_testcase(testcase, testname)
-                    except:
-                        status, exc_info = ST_ERROR, sys.exc_info()
+                    status, exc_info = self._run_testcase(testcase, testname)
                 finally:
-                    errs = None
                     if hasattr(testcase, '_at_end_blocks'):
                         errs = self._run_blocks(testcase._at_end_blocks[::-1])
-                    _, ret = self._invoke(testcase, 'after', 'tearDown')
-                    if ret:
-                        status, exc_info = ST_ERROR, ret
-                    elif errs:
-                        status, exc_info = ST_ERROR, errs[0]
+                        if errs:
+                            exc_info_list.extend(errs)
+                    _, exc_info_ = self._invoke(testcase, 'after', 'tearDown')
+                    if exc_info_:
+                        exc_info_list.append(exc_info_)
                     #else:
                         #assert status is not None
         finally:
-            self._exit_testcase(testcase, testname, status, exc_info)
+            if exc_info_list:    # errors in setUp or tearDown
+                if status == ST_FAILED or status == ST_ERROR:
+                    exc_info_list.insert(0, exc_info)
+                else:
+                    status = ST_ERROR
+                self._exit_testcase(testcase, testname, status, exc_info_list)
+            else:
+                self._exit_testcase(testcase, testname, status, exc_info)
 
     def _run_testcase(self, testcase, testname):
         try:
@@ -1011,9 +1015,18 @@ class BaseReporter(Reporter):
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         self.counts[status] = self.counts.setdefault(status, 0) + 1
-        if exc_info and status != ST_SKIPPED:
+        #if exc_info and status != ST_SKIPPED:
+        #    context = self._context_stack and self._context_stack[-1] or None
+        #    self._exceptions.append((testcase, testname, status, exc_info, context))
+        if exc_info:
+            def ignore_p(t):
+                return isinstance(t, tuple) and t[0] == SkipTest
             context = self._context_stack and self._context_stack[-1] or None
-            self._exceptions.append((testcase, testname, status, exc_info, context))
+            if isinstance(exc_info, list):
+                exc_info_list = [ t for t in exc_info if not ignore_p(t) ]
+                self._exceptions.append((testcase, testname, status, exc_info_list, context))
+            elif not ignore_p(exc_info):
+                self._exceptions.append((testcase, testname, status, exc_info, context))
 
     def enter_testcontext(self, context):
         self._context_stack.append(context)
@@ -1036,13 +1049,17 @@ class BaseReporter(Reporter):
         meth = getattr(testcase, testname)
         return meth and meth.__doc__ and meth.__doc__ or testname
 
-    def report_exceptions(self, testcase, testname, status, exc_info, context):
-        if isinstance(exc_info, list):
-            specs = exc_info
+    def report_exceptions(self, testcase, testname, status, exc_info_list, context):
+        if not isinstance(exc_info_list, list):
+            exc_info = exc_info_list
+            self.report_exception(testcase, testname, status, exc_info, context)
+        elif isinstance(exc_info_list[0], Spec):
+            specs = exc_info_list
             for spec in specs:
                 self.report_spec_esception(testcase, testname, status, spec, context)
         else:
-            self.report_exception(testcase, testname, status, exc_info, context)
+            for exc_info in exc_info_list:
+                self.report_exception(testcase, testname, status, exc_info, context)
 
     def report_exception(self, testcase, testname, status, exc_info, context):
         self.report_exception_header(testcase, testname, status, exc_info, context)
