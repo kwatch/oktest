@@ -621,7 +621,7 @@ class TestRunner(object):
         #names.sort()
         #return names
         testnames = [ k for k in dir(klass) if k.startswith('test') and hasattr(getattr(klass, k), '__class__') ]
-        ## filter by test name or user-defined options
+        ## filter by test name or user-defined tags
         pattern, key, val = self._filter_test, self._filter_key, self._filter_val
         if pattern or key:
             testnames = [ s for s in testnames
@@ -811,7 +811,7 @@ def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|
             return False   # skip testcase
     if key:
         if not meth: meth = getattr(klass, tname)
-        d = getattr(meth, '_options', None)
+        d = getattr(meth, '_tags', None)
         if not (d and isinstance(d, dict) and fnmatch(str(d.get(key)), val)):
             return False   # skip testcase
     return True   # invoke testcase
@@ -1840,7 +1840,7 @@ def spec(desc):   # deprecated
 ## @test() decorator
 ##
 
-def test(description_text=None, **options):
+def test(description_text=None, **tags):
     frame = sys._getframe(1)
     localvars  = frame.f_locals
     globalvars = frame.f_globals
@@ -1848,7 +1848,7 @@ def test(description_text=None, **options):
     localvars['__n'] = n
     m = SPEC_ID_REXP.match(description_text or '')
     if m:
-        options['sid'] = m.group(1)
+        tags['sid'] = m.group(1)
     def deco(orig_func):
         if hasattr(orig_func, '_original_function'):
             orig_func_ = orig_func._original_function or orig_func
@@ -1858,12 +1858,12 @@ def test(description_text=None, **options):
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
             def newfunc(self):
-                self._options = options
+                self._tags = tags
                 self._description = description_text
                 return fixture_injector.invoke(self, orig_func, globalvars)
         else:
             def newfunc(self):
-                self._options = options
+                self._tags = tags
                 self._description = description_text
                 return orig_func(self)
         orig_name = orig_func.__name__
@@ -1876,7 +1876,7 @@ def test(description_text=None, **options):
             newfunc.__name__ = s
             localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = orig_func.__doc__ or description_text
-        newfunc._options = options
+        newfunc._tags = tags
         newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         return newfunc
     return deco
