@@ -168,6 +168,40 @@ class TestContext_TC(unittest.TestCase):
         ok (actual) == expected
 
 
+    class _ContextTagTest(unittest.TestCase):
+        x = situation('case when blablabla', tag='abc')
+        x.__enter__()
+        #
+        def test1(self):
+            pass
+        #
+        @test("test2")
+        def _(self):
+            pass
+        #
+        @test("test3", category='homhom')
+        def _(self):
+            pass
+        #
+        @test("test4", tag='hom', category='homhom')
+        def _(self):
+            pass
+        #
+        x.__exit__()
+
+    def test_with_tags(self):
+        testclass = self._ContextTagTest
+        self.assertEqual(testclass.test1._tags, {'tag': 'abc'})
+        for k in dir(testclass):
+            if   re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
+            elif re.match(r'^test_.*test3', k):  test3 = getattr(testclass, k)
+            elif re.match(r'^test_.*test4', k):  test4 = getattr(testclass, k)
+        self.assertEqual(test2._tags, {'tag': 'abc'})
+        self.assertEqual(test3._tags, {'tag': 'abc', 'category': 'homhom'})
+        self.assertEqual(test4._tags, {'tag': 'hom', 'category': 'homhom'})
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

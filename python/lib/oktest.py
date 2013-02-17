@@ -2048,8 +2048,9 @@ def context():
                         ...
         """
 
-        def __init__(self, desc, _lineno=None):
+        def __init__(self, desc, tags=None, _lineno=None):
             self.desc = desc
+            self.tags = tags
             self.items = []
             self.parent = None
             self._lineno = _lineno
@@ -2082,6 +2083,13 @@ def context():
                     if not hasattr(func, '_test_context'):
                         func._test_context = self.desc
                         self.items.append((name, func))
+                        if self.tags:
+                            if not hasattr(func, '_tags'):
+                                func._tags = self.tags.copy()
+                            else:
+                                for k, v in self.tags.items():
+                                    if k not in func._tags:
+                                        func._tags[k] = v
             self._sort_items(self.items)
             del self._f_locals
             del self._varnames
@@ -2117,10 +2125,10 @@ def context():
         lineno = sys._getframe(1).f_lineno
         return TestContext(desc, _lineno=lineno)
 
-    def situation(desc):
+    def situation(desc, **tags):
         """helper to group test methods by situation or condition"""
         lineno = sys._getframe(1).f_lineno
-        return TestContext(desc, _lineno=lineno)
+        return TestContext(desc, tags, _lineno=lineno)
 
 
     return locals()
