@@ -1036,13 +1036,17 @@ class BaseReporter(Reporter):
         meth = getattr(testcase, testname)
         return meth and meth.__doc__ and meth.__doc__ or testname
 
-    def report_exceptions(self, testcase, testname, status, exc_info, context):
-        if isinstance(exc_info, list):
-            specs = exc_info
+    def report_exceptions(self, testcase, testname, status, exc_info_list, context):
+        if not isinstance(exc_info_list, list):
+            exc_info = exc_info_list
+            self.report_exception(testcase, testname, status, exc_info, context)
+        elif isinstance(exc_info_list[0], Spec):
+            specs = exc_info_list
             for spec in specs:
                 self.report_spec_esception(testcase, testname, status, spec, context)
         else:
-            self.report_exception(testcase, testname, status, exc_info, context)
+            for exc_info in exc_info_list:
+                self.report_exception(testcase, testname, status, exc_info, context)
 
     def report_exception(self, testcase, testname, status, exc_info, context):
         self.report_exception_header(testcase, testname, status, exc_info, context)
