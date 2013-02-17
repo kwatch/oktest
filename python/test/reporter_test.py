@@ -140,6 +140,73 @@ OUTPUT_WITH_TEST_CONTEXT = r"""
 """[1:]
 
 
+INPUT_FOR_MULTIPLE_ERRORS = r"""
+from oktest import *
+class _Foo_TestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+    def tearDown(self):
+        raise RuntimeError("*** tearDown() ***")
+    #
+    def provide_x(self):
+        @at_end
+        def _():
+            raise RuntimeError("*** @at_end ***")
+        return "X"
+    def provide_y(self):
+        return "Y"
+    def release_y(self, value):
+        raise RuntimeError("*** release_y() ***")
+    #
+    @test("test_1")
+    def test_1(self, x, y):
+        assert False
+    @test("test_2")
+    def test_2(self, x, y):
+        raise RuntimeError("*** test_2() ***")
+"""[1:]
+
+EXPECTED_FOR_MULTIPLE_ERRORS = r"""
+----------------------------------------------------------------------
+[ERROR] _Foo_TestCase > test_1()
+test_1
+  File "_test_tmp.py", line 16, in release_y
+    raise RuntimeError("*** release_y() ***")
+RuntimeError: *** release_y() ***
+----------------------------------------------------------------------
+[ERROR] _Foo_TestCase > test_1()
+test_1
+  File "_test_tmp.py", line 11, in _
+    raise RuntimeError("*** @at_end ***")
+RuntimeError: *** @at_end ***
+----------------------------------------------------------------------
+[ERROR] _Foo_TestCase > test_1()
+test_1
+  File "_test_tmp.py", line 6, in tearDown
+    raise RuntimeError("*** tearDown() ***")
+RuntimeError: *** tearDown() ***
+----------------------------------------------------------------------
+[ERROR] _Foo_TestCase > test_2()
+test_2
+  File "_test_tmp.py", line 16, in release_y
+    raise RuntimeError("*** release_y() ***")
+RuntimeError: *** release_y() ***
+----------------------------------------------------------------------
+[ERROR] _Foo_TestCase > test_2()
+test_2
+  File "_test_tmp.py", line 11, in _
+    raise RuntimeError("*** @at_end ***")
+RuntimeError: *** @at_end ***
+----------------------------------------------------------------------
+[ERROR] _Foo_TestCase > test_2()
+test_2
+  File "_test_tmp.py", line 6, in tearDown
+    raise RuntimeError("*** tearDown() ***")
+RuntimeError: *** tearDown() ***
+----------------------------------------------------------------------
+## total:2, passed:0, failed:0, error:2, skipped:0, todo:0  (0.000 sec)
+"""[1:]
+
 
 class VerboseReporter_TC(unittest.TestCase):
 
@@ -177,6 +244,17 @@ class VerboseReporter_TC(unittest.TestCase):
         ok (actual) == _colorize(expected)
 
 
+    def test_when_multiple_errors(self):
+        input = INPUT_FOR_MULTIPLE_ERRORS
+        expected = r"""
+* _Foo_TestCase
+  - [ERROR] test_1
+  - [ERROR] test_2
+"""[1:] + EXPECTED_FOR_MULTIPLE_ERRORS
+        actual = _do_test(input, color=False, style="verbose")
+        ok (actual) == expected
+
+
 
 class SimpleReporter_TC(unittest.TestCase):
 
@@ -198,6 +276,14 @@ class SimpleReporter_TC(unittest.TestCase):
 """[1:]  + OUTPUT_WITH_TEST_CONTEXT
         actual = _do_test(input, color=True, style="simple")
         ok (actual) == _colorize(expected)
+
+    def test_when_multiple_errors(self):
+        input = INPUT_FOR_MULTIPLE_ERRORS
+        expected = r"""
+* _Foo_TestCase: EE
+"""[1:] + EXPECTED_FOR_MULTIPLE_ERRORS
+        actual = _do_test(input, color=False, style="simple")
+        ok (actual) == expected
 
 
 
@@ -223,6 +309,16 @@ class PlainReporter_TC(unittest.TestCase):
         expected = expected.replace("## total:", "\n## total:")     # necessary?
         actual = _do_test(input, color=True, style="plain")
         ok (actual) == _colorize(expected)
+
+
+    def test_when_multiple_errors(self):
+        input = INPUT_FOR_MULTIPLE_ERRORS
+        expected = r"""
+EE
+"""[1:] + EXPECTED_FOR_MULTIPLE_ERRORS
+        expected = expected.replace("\n## ", "\n\n## ")   # TODO
+        actual = _do_test(input, color=False, style="plain")
+        ok (actual) == expected
 
 
 
