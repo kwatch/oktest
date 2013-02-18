@@ -169,8 +169,8 @@ class TestContext_TC(unittest.TestCase):
 
 
     class _ContextTagTest(unittest.TestCase):
-        x = situation('case when blablabla', tag='abc')
-        x.__enter__()
+        x1 = subject('#foobar()', tag1='aaa', tag2='bbb')
+        x1.__enter__()
         #
         def test1(self):
             pass
@@ -179,55 +179,90 @@ class TestContext_TC(unittest.TestCase):
         def _(self):
             pass
         #
-        @test("test3", category='homhom')
+        @test("test3", tag1='ccc', tag3='ddd')
         def _(self):
             pass
         #
-        @test("test4", tag='hom', category='homhom')
+        x1.__exit__()
+        #
+        @test("test4")
         def _(self):
             pass
-        #
-        x.__exit__()
-
-    def test_with_tags(self):
-        testclass = self._ContextTagTest
-        test1 = testclass.test1
-        for k in dir(testclass):
-            if   re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
-            elif re.match(r'^test_.*test3', k):  test3 = getattr(testclass, k)
-            elif re.match(r'^test_.*test4', k):  test4 = getattr(testclass, k)
-        self.assertEqual(test1._tags, {'tag': 'abc'})
-        self.assertEqual(test2._tags, {'tag': 'abc'})
-        self.assertEqual(test3._tags, {'tag': 'abc', 'category': 'homhom'})
-        self.assertEqual(test4._tags, {'tag': 'hom', 'category': 'homhom'})
-
-
-    class _NestedContextTagTest(unittest.TestCase):
-        x1 = situation('parent context', tag1='aaa', tag3='xxx')
-        x1.__enter__()
-        #
-        @test('test1')
-        def _(self):
-            pass
-        #
-        x2 = situation('child context', tag2='bbb', tag3='yyy')
+        ####
+        x2 = situation('case when blablabla', tag1='eee', tag2='fff')
         x2.__enter__()
         #
-        @test('test2')
+        def test6(self):
+            pass
+        #
+        @test("test7")
+        def _(self):
+            pass
+        #
+        @test("test8", tag1='ggg', tag3='hhh')
         def _(self):
             pass
         #
         x2.__exit__()
         #
-        x1.__exit__()
+        @test("test9")
+        def _(self):
+            pass
+
+    def test_with_tags(self):
+        testclass = self._ContextTagTest
+        for k in dir(testclass):
+            if   re.match(r'.*test1', k):  test1 = getattr(testclass, k)
+            elif re.match(r'.*test2', k):  test2 = getattr(testclass, k)
+            elif re.match(r'.*test3', k):  test3 = getattr(testclass, k)
+            elif re.match(r'.*test4', k):  test4 = getattr(testclass, k)
+            elif re.match(r'.*test6', k):  test6 = getattr(testclass, k)
+            elif re.match(r'.*test7', k):  test7 = getattr(testclass, k)
+            elif re.match(r'.*test8', k):  test8 = getattr(testclass, k)
+            elif re.match(r'.*test9', k):  test9 = getattr(testclass, k)
+        #
+        self.assertEqual(test1._tags, {'tag1': 'aaa', 'tag2': 'bbb'})
+        self.assertEqual(test2._tags, {'tag1': 'aaa', 'tag2': 'bbb'})
+        self.assertEqual(test3._tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
+        self.assertEqual(test4._tags, {})
+        #
+        self.assertEqual(test6._tags, {'tag1': 'eee', 'tag2': 'fff'})
+        self.assertEqual(test7._tags, {'tag1': 'eee', 'tag2': 'fff'})
+        self.assertEqual(test8._tags, {'tag1': 'ggg', 'tag2': 'fff', 'tag3': 'hhh'})
+        self.assertEqual(test9._tags, {})
+
+
+    class _NestedContextTagTest(unittest.TestCase):
+        x1 = subject('parent context', tag1='aaa', tag2='bbb')
+        if x1.__enter__():
+            #
+            x2 = situation('parent context', tag1='ccc', tag3='ddd')
+            if x2.__enter__():
+                #
+                @test('test1')
+                def _(self):
+                    pass
+                #
+                x3 = situation('child context', tag1='eee', tag4='fff')
+                if x3.__enter__():
+                    #
+                    @test('test2')
+                    def _(self):
+                        pass
+                    #
+                    x3.__exit__()
+                #
+                x2.__exit__()
+            #
+            x1.__exit__()
 
     def test_nested_context_tags(self):
         testclass = self._NestedContextTagTest
         for k in dir(testclass):
             if   re.match(r'^test_.*test1', k):  test1 = getattr(testclass, k)
             elif re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
-        self.assertEqual(test1._tags, {'tag1': 'aaa',                'tag3': 'xxx'})
-        self.assertEqual(test2._tags, {'tag1': 'aaa', 'tag2': 'bbb', 'tag3': 'yyy'})
+        self.assertEqual(test1._tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
+        self.assertEqual(test2._tags, {'tag1': 'eee', 'tag2': 'bbb', 'tag3': 'ddd', 'tag4': 'fff'})
 
 
 

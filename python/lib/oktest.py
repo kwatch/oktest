@@ -2120,10 +2120,10 @@ def context():
             return "".join(buf)
 
 
-    def subject(desc):
+    def subject(desc, **tags):
         """helper to group test methods by subject"""
         lineno = sys._getframe(1).f_lineno
-        return TestContext(desc, _lineno=lineno)
+        return TestContext(desc, tags, _lineno=lineno)
 
     def situation(desc, **tags):
         """helper to group test methods by situation or condition"""
