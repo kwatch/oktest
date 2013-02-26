@@ -53,6 +53,16 @@ Release 0.12.0 (???)
       #def release_tmpfile(self, tmpfile):
       #  os.unlink(tmpfile)
 
+* [enhance] subject() and situation() now accept user-defined tags.
+  ex::
+
+    class FooTest(unitest.TestCase):
+      with subject('#method1()', category='basic'):
+        with situation('when argument is None', category='advanced'):
+          @test('returns True')
+          def _(self):
+	    ok (Foo().method1('')) == True
+
 * [enhance] @test decorator regards '[!xxx]' in description as spec id.
   ex::
 
