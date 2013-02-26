@@ -296,9 +296,9 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1819, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1868, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 526, in fn
+  File "/usr/local/lib/python/site-packages/oktest.py", line 536, in fn
     raise SkipTest(reason)
 oktest.SkipTest: REASON
 
@@ -306,7 +306,7 @@ oktest.SkipTest: REASON
 ERROR: not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 547, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 557, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
@@ -319,9 +319,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1819, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1868, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 550, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 560, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -370,7 +370,7 @@ ERROR: test_005: not yet (_sos_test.SosTest)
 not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 547, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 557, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
@@ -383,9 +383,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1819, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1868, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 550, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 560, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 

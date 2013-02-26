@@ -51,7 +51,11 @@ class TestDeco_TC(unittest.TestCase):
             m = re.search(r'^test_(\d+): ', name)
             assert m
             nums.append(m.group(1))
-        f = open(__file__); s = f.read(); f.close()
+        if python2:
+            kwargs = {}
+        if python3:
+            kwargs = {'encoding': 'utf-8'}
+        f = open(__file__, **kwargs); s = f.read(); f.close()
         m = re.compile(r'^class TestDeco.*?^(class|if) ', re.M | re.S).search(s)
         n = len(list(re.finditer(r'\n    @test\(', m.group(0))))
         self.assertEqual(n, len(nums))

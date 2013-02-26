@@ -152,7 +152,7 @@ class Todo_TC(unittest.TestCase):
   - [<R>Failed</R>] SPEC2
 <r>----------------------------------------------------------------------</r>
 [<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 003: SPEC3
-  File "test/todo_test.py", line 138, in _
+  File "test/todo_test.py", line 139, in _
     assert 1 == 0, "expected failure"
 <R>AssertionError: expected failure</R>
 <r>----------------------------------------------------------------------</r>
