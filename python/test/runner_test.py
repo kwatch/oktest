@@ -690,6 +690,52 @@ run(FooTest)
         self.do_test(desc, script, expected)
 
 
+    def test_diff_pformat(self):
+        ### diff (using pformat)
+        desc = "diff (using pformat)"
+        script = r"""
+from oktest import *
+import oktest
+class FooTest(object):
+    def test1(self):
+        expected = {
+          'members': [
+            {'name': 'Haruhi Suzumiya', 'gender': 'F', 'role': 'Leader of SOS Brigade'},
+            {'name': 'Mikuru Asahina',  'gender': 'F', 'role': 'Time Traveler'},
+            {'name': 'Yuki Nagato',     'gender': 'F', 'role': 'Humanoid Interface'},
+          ]
+        }
+        actual = {
+          'members': [
+            {'name': 'Haruhi Suzumiya', 'gender': 'F', 'role': 'Leader of SOS Brigade'},
+            {'name': 'Michiru Asahina', 'gender': 'F', 'role': 'Time Traveler'},
+            {'name': 'Yuki Nagato',     'gender': 'F', 'role': 'Just an ordinary girl'},
+          ]
+        }
+        ok (actual) == expected
+run(FooTest)
+"""[1:]
+        expected = r"""
+* FooTest.test1 ... [NG] {'members': [{'gender': 'F', 'role': 'Leader of SOS Brigade', 'name': 'Haruhi Su [truncated]... == {'members': [{'gender': 'F', 'role': 'Leader of SOS Brigade', 'name': 'Haruhi Su [truncated]... : failed.
+   _test_.py:19: ok (actual) == expected
+--- expected
++++ actual
+@@ -3,7 +3,7 @@
+               'role': 'Leader of SOS Brigade'},
+              {'gender': 'F',
+-              'name': 'Mikuru Asahina',
++              'name': 'Michiru Asahina',
+               'role': 'Time Traveler'},
+              {'gender': 'F',
+               'name': 'Yuki Nagato',
+-              'role': 'Humanoid Interface'}]}
+\ No newline at end of string
++              'role': 'Just an ordinary girl'}]}
+\ No newline at end of string
+"""[1:]
+        self.do_test(desc, script, expected)
+
+
 
 if __name__ == '__main__':
     unittest.main()
