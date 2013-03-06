@@ -416,6 +416,12 @@ def _f():
         self.failed('bool(%r) == True : failed.' % self.target)
 
     @assertion
+    def is_falsy(self):
+        boolean = not bool(self.target)
+        if boolean == self.boolean:  return self
+        self.failed('bool(%r) == False : failed.' % self.target)
+
+    @assertion
     def raises(self, exception_class, errmsg=None):
         return self._raise_or_not(exception_class, errmsg, self.boolean)
 

@@ -484,6 +484,25 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         def fn(): ok ({}).is_truthy()
 
 
+    def test_is_falsy(self):
+        ok (False).is_falsy()
+        ok (None).is_falsy()
+        ok (0).is_falsy()
+        ok ('').is_falsy()
+        ok ([]).is_falsy()
+        ok ({}).is_falsy()
+        @be_fail("bool(True) == False : failed.")
+        def fn(): ok (True).is_falsy()
+        @be_fail("bool(1) == False : failed.")
+        def fn(): ok (1).is_falsy()
+        @be_fail("bool('x') == False : failed.")
+        def fn(): ok ('x').is_falsy()
+        @be_fail("bool([1]) == False : failed.")
+        def fn(): ok ([1]).is_falsy()
+        @be_fail("bool({'x': 1}) == False : failed.")
+        def fn(): ok ({'x':1}).is_falsy()
+
+
     ## ------------------------------------------------------------
 
 
