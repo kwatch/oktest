@@ -79,6 +79,14 @@ Release 0.12.0 (???)
       #def release_tmpfile(self, tmpfile):
       #  os.unlink(tmpfile)
 
+* [enhance] ``ok(x).is_truthy()`` tests whether ``bool(x) == True``.
+  This is similar to ``ok(bool(x)) == True`` but reports ``x`` value
+  instead of True/False when assertion failed.
+
+* [enhance] ``ok(x).is_falsy()`` tests whether ``bool(x) == False``.
+  This is similar to ``ok(bool(x)) == False`` but reports ``x`` value
+  instead of True/False when assertion failed.
+
 * [enhance] subject() and situation() now accept user-defined tags.
   ex::
 

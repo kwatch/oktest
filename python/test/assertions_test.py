@@ -468,6 +468,41 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             os.rmdir(dname)
 
 
+    def test_is_truthy(self):
+        ok (True).is_truthy()
+        ok (1).is_truthy()
+        ok ([1]).is_truthy()
+        @be_fail("bool(False) == True : failed.")
+        def fn(): ok (False).is_truthy()
+        @be_fail("bool(None) == True : failed.")
+        def fn(): ok (None).is_truthy()
+        @be_fail("bool('') == True : failed.")
+        def fn(): ok ('').is_truthy()
+        @be_fail("bool([]) == True : failed.")
+        def fn(): ok ([]).is_truthy()
+        @be_fail("bool({}) == True : failed.")
+        def fn(): ok ({}).is_truthy()
+
+
+    def test_is_falsy(self):
+        ok (False).is_falsy()
+        ok (None).is_falsy()
+        ok (0).is_falsy()
+        ok ('').is_falsy()
+        ok ([]).is_falsy()
+        ok ({}).is_falsy()
+        @be_fail("bool(True) == False : failed.")
+        def fn(): ok (True).is_falsy()
+        @be_fail("bool(1) == False : failed.")
+        def fn(): ok (1).is_falsy()
+        @be_fail("bool('x') == False : failed.")
+        def fn(): ok ('x').is_falsy()
+        @be_fail("bool([1]) == False : failed.")
+        def fn(): ok ([1]).is_falsy()
+        @be_fail("bool({'x': 1}) == False : failed.")
+        def fn(): ok ({'x':1}).is_falsy()
+
+
     ## ------------------------------------------------------------
 
 
@@ -607,7 +642,7 @@ FAILED (failures=1)
         self.assertEqual(expected, output)
 
 
-    def test_checking_testd_or_not(self):
+    def test_checking_tested_or_not(self):
         ## checking tested or not
         desc = "checking tested or not"
         script = r"""
