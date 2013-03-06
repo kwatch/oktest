@@ -12,6 +12,7 @@ __all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', '
 __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
+pformat = None   # on-demand import
 
 ENCODING = 'utf-8'
 TERMINAL_WIDTH = 80
@@ -95,15 +96,28 @@ def _msg(target, op, other=None):
     msg += " : failed."
     return msg
 
-
 def _msg2(target, op, other=None):
-    diff_str = _diff_p(target, op, other) and _diff(target, other) or ''
+    diff_str = ''
+    if op == '==' and target != other and _pformat_p(target, other):
+        global pformat
+        if not pformat: from pprint import pformat
+        target_s = pformat(target, width=70)
+        other_s  = pformat(other,  width=70)
+        if _diff_p(target_s, op, other_s):
+            diff_str = _diff(target_s, other_s)
+    else:
+        if _diff_p(target, op, other):
+            diff_str = _diff(target, other)
     if diff_str:
         #msg = "actual %s expected : failed.\n" % (op,)
         msg = "%s == %s : failed." % (_truncated_repr(target), _truncated_repr(other))
         return (msg, diff_str)
     else:
         return _msg(target, op, other)
+
+def _pformat_p(target, other):
+    return  isinstance(target, (dict, list, tuple)) \
+        and isinstance(other,  (dict, list, tuple))
 
 
 DIFF = True
