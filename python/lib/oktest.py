@@ -410,6 +410,12 @@ def _f():
         self.failed('not os.path.exists(%r) : failed.' % self.target)
 
     @assertion
+    def is_truthy(self):
+        boolean = bool(self.target)
+        if boolean == self.boolean:  return self
+        self.failed('bool(%r) == True : failed.' % self.target)
+
+    @assertion
     def raises(self, exception_class, errmsg=None):
         return self._raise_or_not(exception_class, errmsg, self.boolean)
 

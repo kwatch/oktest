@@ -468,6 +468,22 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             os.rmdir(dname)
 
 
+    def test_is_truthy(self):
+        ok (True).is_truthy()
+        ok (1).is_truthy()
+        ok ([1]).is_truthy()
+        @be_fail("bool(False) == True : failed.")
+        def fn(): ok (False).is_truthy()
+        @be_fail("bool(None) == True : failed.")
+        def fn(): ok (None).is_truthy()
+        @be_fail("bool('') == True : failed.")
+        def fn(): ok ('').is_truthy()
+        @be_fail("bool([]) == True : failed.")
+        def fn(): ok ([]).is_truthy()
+        @be_fail("bool({}) == True : failed.")
+        def fn(): ok ({}).is_truthy()
+
+
     ## ------------------------------------------------------------
 
 
