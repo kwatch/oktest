@@ -607,7 +607,7 @@ FAILED (failures=1)
         self.assertEqual(expected, output)
 
 
-    def test_checking_testd_or_not(self):
+    def test_checking_tested_or_not(self):
         ## checking tested or not
         desc = "checking tested or not"
         script = r"""
