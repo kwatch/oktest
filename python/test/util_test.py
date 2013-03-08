@@ -242,8 +242,9 @@ class util_TC(unittest.TestCase):
 
     def test_from_here_1(self):
         old = sys.path[:]
-        expected = [os.path.join(os.getcwd(), 'foo')] + old
-        with from_here('foo/bar.py'):
+        currpath = os.path.join(os.getcwd(), 'foobar')
+        expected = [currpath] + old
+        with from_here('foobar'):
             ok (sys.path) == expected
         ok (sys.path) != expected
         ok (sys.path) == old

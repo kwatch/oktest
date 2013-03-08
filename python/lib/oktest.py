@@ -1640,7 +1640,7 @@ def _dummy():
                 rmtree(fname)
 
     @contextmanager
-    def from_here(__file__=None):
+    def from_here(dirpath=None):
         """
         Set current directory as the first element of sys.path temporarily.
 
@@ -1650,11 +1650,11 @@ def _dummy():
             import mymodule
         """
         depth = 2   # not 1, because using @contextlib
-        fpath = __file__ or sys._getframe(depth).f_globals.get('__file__')
-        if fpath:
-            currpath = os.path.dirname(os.path.abspath(fpath))
+        if dirpath:
+            currpath = os.path.abspath(dirpath)
         else:
-            currpath = os.path.abspath(os.getcwd())
+            filepath = sys._getframe(depth).f_globals.get('__file__')
+            currpath = os.path.dirname(os.path.abspath(filepath))
         sys.path.insert(0, currpath)
         yield
         if sys.path and sys.path[0] == currpath:
