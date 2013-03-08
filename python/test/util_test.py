@@ -4,13 +4,14 @@
 ### $Copyright: copyright(c) 2010-2012 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
+from __future__ import with_statement
 
 import sys, os, re, shutil
 import unittest
 import oktest
 from oktest import ok, NG, run
 from oktest import python2, python3
-from oktest.util import chdir, flatten, rm_rf, zenkaku_width, zenkaku_shorten
+from oktest.util import chdir, flatten, rm_rf, from_here, zenkaku_width, zenkaku_shorten
 
 
 available_with_statement = sys.version_info[0:2] > (2, 4)
@@ -237,6 +238,24 @@ class util_TC(unittest.TestCase):
             ok (fn).not_raise()
         finally:
             self._after_rm_rf()
+
+
+    def test_from_here_1(self):
+        old = sys.path[:]
+        expected = [os.path.join(os.getcwd(), 'foo')] + old
+        with from_here('foo/bar.py'):
+            ok (sys.path) == expected
+        ok (sys.path) != expected
+        ok (sys.path) == old
+
+    def test_from_here_2(self):
+        old = sys.path[:]
+        abspath = os.path.dirname(os.path.abspath(__file__))
+        expected = [abspath] + old
+        with from_here():
+            ok (sys.path) == expected
+        ok (sys.path) != expected
+        ok (sys.path) == old
 
 
     def _do_test(self, input):

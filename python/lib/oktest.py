@@ -12,6 +12,7 @@ __all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail', 'skip', '
 __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
+from contextlib import contextmanager
 pformat = None   # on-demand import
 
 ENCODING = 'utf-8'
@@ -1637,6 +1638,27 @@ def _dummy():
             elif os.path.isdir(fname):
                 from shutil import rmtree
                 rmtree(fname)
+
+    @contextmanager
+    def from_here(__file__=None):
+        """
+        Set current directory as the first element of sys.path temporarily.
+
+        usage:
+          from oktest.util import from_here
+          with from_here():
+            import mymodule
+        """
+        depth = 2   # not 1, because using @contextlib
+        fpath = __file__ or sys._getframe(depth).f_globals.get('__file__')
+        if fpath:
+            currpath = os.path.dirname(os.path.abspath(fpath))
+        else:
+            currpath = os.path.abspath(os.getcwd())
+        sys.path.insert(0, currpath)
+        yield
+        if sys.path and sys.path[0] == currpath:
+            sys.path.pop(0)
 
     def get_location(depth=0):
         frame = sys._getframe(depth+1)
