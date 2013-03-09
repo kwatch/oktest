@@ -242,7 +242,7 @@ class util_TC(unittest.TestCase):
 
     def test_from_here_1(self):
         old = sys.path[:]
-        currpath = os.path.join(os.getcwd(), 'foobar')
+        currpath = os.path.join(os.getcwd(), os.path.dirname(__file__), 'foobar')
         expected = [currpath] + old
         with from_here('foobar'):
             ok (sys.path) == expected
@@ -250,6 +250,15 @@ class util_TC(unittest.TestCase):
         ok (sys.path) == old
 
     def test_from_here_2(self):
+        old = sys.path[:]
+        currpath = os.path.join(os.getcwd(), os.path.dirname(__file__), '../foobar')
+        expected = [os.path.realpath(currpath)] + old
+        with from_here('../foobar'):
+            ok (sys.path) == expected
+        ok (sys.path) != expected
+        ok (sys.path) == old
+
+    def test_from_here_3(self):
         old = sys.path[:]
         abspath = os.path.dirname(os.path.abspath(__file__))
         expected = [abspath] + old

@@ -1651,7 +1651,11 @@ def _dummy():
         """
         depth = 2   # not 1, because using @contextlib
         if dirpath:
-            currpath = os.path.abspath(dirpath)
+            if os.path.isabs(dirpath):
+                currpath = dirpath
+            else:
+                filepath = sys._getframe(depth).f_globals.get('__file__')
+                currpath = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(filepath)), dirpath))
         else:
             filepath = sys._getframe(depth).f_globals.get('__file__')
             currpath = os.path.dirname(os.path.abspath(filepath))
