@@ -1650,15 +1650,13 @@ def _dummy():
             import mymodule
         """
         depth = 2   # not 1, because using @contextlib
+        filepath = sys._getframe(depth).f_globals.get('__file__')
+        currpath = os.path.dirname(os.path.abspath(filepath))
         if dirpath:
             if os.path.isabs(dirpath):
                 currpath = dirpath
             else:
-                filepath = sys._getframe(depth).f_globals.get('__file__')
-                currpath = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(filepath)), dirpath))
-        else:
-            filepath = sys._getframe(depth).f_globals.get('__file__')
-            currpath = os.path.dirname(os.path.abspath(filepath))
+                currpath = os.path.realpath(os.path.join(currpath, dirpath))
         sys.path.insert(0, currpath)
         yield
         if sys.path and sys.path[0] == currpath:
