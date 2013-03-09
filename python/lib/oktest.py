@@ -1649,14 +1649,15 @@ def _dummy():
           with from_here():
             import mymodule
         """
+        from os.path import dirname, abspath, isabs, realpath, join
         depth = 2   # not 1, because using @contextlib
         filepath = sys._getframe(depth).f_globals.get('__file__')
-        currpath = os.path.dirname(os.path.abspath(filepath))
+        currpath = dirname(abspath(filepath))
         if dirpath:
-            if os.path.isabs(dirpath):
+            if isabs(dirpath):
                 currpath = dirpath
             else:
-                currpath = os.path.realpath(os.path.join(currpath, dirpath))
+                currpath = realpath(join(currpath, dirpath))
         sys.path.insert(0, currpath)
         yield
         if sys.path and sys.path[0] == currpath:
