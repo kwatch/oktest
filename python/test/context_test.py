@@ -222,15 +222,15 @@ class TestContext_TC(unittest.TestCase):
             elif re.match(r'.*test8', k):  test8 = getattr(testclass, k)
             elif re.match(r'.*test9', k):  test9 = getattr(testclass, k)
         #
-        self.assertEqual(test1._okt_tags, {'tag1': 'aaa', 'tag2': 'bbb'})
-        self.assertEqual(test2._okt_tags, {'tag1': 'aaa', 'tag2': 'bbb'})
-        self.assertEqual(test3._okt_tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
-        self.assertEqual(test4._okt_tags, {})
+        self.assertEqual(test1._tags, {'tag1': 'aaa', 'tag2': 'bbb'})
+        self.assertEqual(test2._tags, {'tag1': 'aaa', 'tag2': 'bbb'})
+        self.assertEqual(test3._tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
+        self.assertEqual(test4._tags, {})
         #
-        self.assertEqual(test6._okt_tags, {'tag1': 'eee', 'tag2': 'fff'})
-        self.assertEqual(test7._okt_tags, {'tag1': 'eee', 'tag2': 'fff'})
-        self.assertEqual(test8._okt_tags, {'tag1': 'ggg', 'tag2': 'fff', 'tag3': 'hhh'})
-        self.assertEqual(test9._okt_tags, {})
+        self.assertEqual(test6._tags, {'tag1': 'eee', 'tag2': 'fff'})
+        self.assertEqual(test7._tags, {'tag1': 'eee', 'tag2': 'fff'})
+        self.assertEqual(test8._tags, {'tag1': 'ggg', 'tag2': 'fff', 'tag3': 'hhh'})
+        self.assertEqual(test9._tags, {})
 
 
     class _NestedContextTagTest(unittest.TestCase):
@@ -262,8 +262,8 @@ class TestContext_TC(unittest.TestCase):
         for k in dir(testclass):
             if   re.match(r'^test_.*test1', k):  test1 = getattr(testclass, k)
             elif re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
-        self.assertEqual(test1._okt_tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
-        self.assertEqual(test2._okt_tags, {'tag1': 'eee', 'tag2': 'bbb', 'tag3': 'ddd', 'tag4': 'fff'})
+        self.assertEqual(test1._tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
+        self.assertEqual(test2._tags, {'tag1': 'eee', 'tag2': 'bbb', 'tag3': 'ddd', 'tag4': 'fff'})
 
 
 

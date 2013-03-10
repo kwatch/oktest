@@ -93,7 +93,7 @@ class TestDeco_TC(unittest.TestCase):
         except:
             ex_class, ex = sys.exc_info()[:2]
             self.fail("Nothing should be raised but got %s: %s" % (ex_class.__name__, ex))
-        self.assertEqual({'tag': "test"}, test_foo._okt_tags)
+        self.assertEqual({'tag': "test"}, test_foo._tags)
 
     @test("not to override existing document of function.")
     def t(self):
@@ -113,8 +113,8 @@ class TestDeco_TC(unittest.TestCase):
         @test("[!abc123_-] description", tag='hom')
         def _(self):
             pass
-        self.assertEqual(_._okt_tags, {'sid': 'abc123_-', 'tag': 'hom'})
-        self.assertEqual(self._okt_tags, {'sid': 'xyz', 'tag': 'abc'})
+        self.assertEqual(_._tags, {'sid': 'abc123_-', 'tag': 'hom'})
+        self.assertEqual(self._tags, {'sid': 'xyz', 'tag': 'abc'})
 
     @test("日本語文字列をサポート")
     def _(self):
@@ -139,11 +139,11 @@ class TestDeco_TC(unittest.TestCase):
 
     @test("set tags to test object", name="Haruhi", team="SOS")
     def t(self):
-        assert self._okt_tags == {"name": "Haruhi", "team": "SOS"}
+        assert self._tags == {"name": "Haruhi", "team": "SOS"}
 
     @test("set tags even when fixtures are supplied", name="Sasaki", team="Tengai")
     def t(self, item1):
-        assert self._okt_tags == {"name": "Sasaki", "team": "Tengai"}
+        assert self._tags == {"name": "Sasaki", "team": "Tengai"}
 
     def provide_item1(self):
         return {"key": "ITEM1"}

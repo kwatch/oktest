@@ -842,7 +842,7 @@ def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|
             return False   # skip testcase
     if key:
         if not meth: meth = getattr(klass, tname)
-        d = getattr(meth, '_okt_tags', None)
+        d = getattr(meth, '_tags', None)
         if not (d and isinstance(d, dict) and fnmatch(str(d.get(key)), val)):
             return False   # skip testcase
     return True   # invoke testcase
@@ -1913,12 +1913,12 @@ def test(description_text=None, **tags):
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
             def newfunc(self):
-                self._okt_tags = tags
+                self._tags = tags
                 self._description = description_text
                 return fixture_injector.invoke(self, orig_func, globalvars)
         else:
             def newfunc(self):
-                self._okt_tags = tags
+                self._tags = tags
                 self._description = description_text
                 return orig_func(self)
         orig_name = orig_func.__name__
@@ -1931,7 +1931,7 @@ def test(description_text=None, **tags):
             newfunc.__name__ = s
             localvars[newfunc.__name__] = newfunc
         newfunc.__doc__  = orig_func.__doc__ or description_text
-        newfunc._okt_tags = tags
+        newfunc._tags = tags
         newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         return newfunc
     return deco
@@ -2139,12 +2139,12 @@ def context():
                         func._test_context = self.desc
                         self.items.append((name, func))
                     if self.tags:
-                        if not hasattr(func, '_okt_tags'):
-                            func._okt_tags = self.tags.copy()
+                        if not hasattr(func, '_tags'):
+                            func._tags = self.tags.copy()
                         else:
                             for k, v in self.tags.items():
-                                if k not in func._okt_tags:
-                                    func._okt_tags[k] = v
+                                if k not in func._tags:
+                                    func._tags[k] = v
             self._sort_items(self.items)
             del self._f_locals
             del self._varnames
