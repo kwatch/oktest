@@ -1200,6 +1200,20 @@ from_here(dirpath=None)
 	    with from_here('../lib'):
 	      import mymodule2       # import from ../lib
 
+randstr(n=8)
+	Return random number string which width is n (default 8).
+	This is useful when creating fixture data. ::
+	
+	    >>> from oktest.util import randstr
+	    >>> randstr(4)
+	    '7327'
+	    >>> randstr(4)
+	    '1598'
+	    >>> randstr(4)
+	    '0362'
+	    >>> randstr()
+	    '38127841'
+
 
 ``oktest.dummy`` module
 ------------------------
