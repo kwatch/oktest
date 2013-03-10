@@ -296,7 +296,7 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1923, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1929, in newfunc
     return orig_func(self)
   File "/usr/local/lib/python/site-packages/oktest.py", line 563, in fn
     raise SkipTest(reason)
@@ -319,7 +319,7 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1923, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1929, in newfunc
     return orig_func(self)
   File "/usr/local/lib/python/site-packages/oktest.py", line 587, in deco
     raise _ExpectedFailure(sys.exc_info())
@@ -383,7 +383,7 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1923, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1929, in newfunc
     return orig_func(self)
   File "/usr/local/lib/python/site-packages/oktest.py", line 587, in deco
     raise _ExpectedFailure(sys.exc_info())
