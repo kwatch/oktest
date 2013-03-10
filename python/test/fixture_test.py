@@ -357,6 +357,8 @@ class Feature_addCleanup_TC(unittest.TestCase):
             assert 1==1
 
     def test_addCleanup(self):
+        if not hasattr(unittest.TestCase, 'addCleanup'):
+            return
         expected = [
             '** @at_end: 2',
             '** @at_end: 1',
