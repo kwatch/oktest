@@ -196,6 +196,12 @@ ok (x).is_a(y)
 ok (x).is_not_a(y)
 	Raise AssertionError if isinstance(x, y).
 
+ok (x).is_truthy()
+	Raise AssertionError unless bool(x) == True.
+
+ok (x).is_falsy()
+	Raise AssertionError unless bool(x) == False.
+
 ok (x).has_attr(name)
 	Raise AssertionError unless hasattr(x, name).
 
@@ -515,6 +521,118 @@ The following is an example to use `Forge`_ as external fixture library::
 ..    _`Forge`:  https://github.com/mnoble/forge/
 
 
+@at_end() decorator
+===================
+
+``@at_end()`` registers callback function which is called at end of test case.
+You can use it as replacement of ``tearDown()`` or ``after()``. ::
+
+    import unittest
+    from oktest import ok, test, {{*at_end*}}
+    
+    class FooTest(unittest.TestCase):
+        @test("file.read() returns content of file.")
+        def _(self):
+            # create a dummy file
+            filename = "dummy.tmp"
+            with open(filename, 'w') as f:
+                f.write("homhom")
+            # register callback which is invoked at end of test case
+            {{*@at_end*}}
+            {{*def _():*}}
+                {{*import os*}}
+                {{*os.unlink(filename)  # remove dummy file*}}
+            # do assertion
+            with open(filename) as f:
+                content = f.read()
+            ok (content) == "homhom"
+    
+    #
+    if __name__ == "__main__":
+        import oktest
+        oktest.main()    # NOT unittest.main() !
+
+Notice tha you must call ``oktest.main()`` instead of ``unitetst.main``
+to use ``@at_end`` decorator.
+
+It is good idea to use ``@at_end`` instead of ``release_xxx()`` methods. ::
+
+    import unittest
+    from oktest import ok, test, {{*at_end*}}
+    
+    class FooTest(unittest.TestCase):
+    
+        _CONTENT = "homhom"
+    
+        def {{*provide_dummyfile*}}(self):
+            # create dummy file
+            filename = "dummy.tmp"
+            with open(filename, 'w') as f:
+                f.write(self._CONTENT)
+            # register callback which is invoked at end of test case
+            {{*@at_end*}}
+            {{*def _():*}}
+                {{*import os*}}
+                {{*os.unlink(filename)  # remove dummy file*}}
+            #
+            return filename
+    
+        @test("file.read() returns content of file.")
+        def _(self, {{*dummyfile*}}):
+            # do assertion
+            with open(dummyfile) as f:
+                content = f.read()
+            ok (content) == self._CONTENT
+    
+    if __name__ == '__main__':
+        import oktest
+        oktest.main()   # NOT unittest.main() !
+
+@at_end decorator is similar to unittest.TestCase#atCleanup(),
+but the former is called *before* tearDown() and the latter is called
+*after* tearDown().
+See the following example.::
+
+    import sys, unittest
+    from oktest import ok, test, at_end
+    
+    class HomTest(unittest.TestCase):
+    
+        def {{*tearDown*}}(self):
+            print({{*'** tearDown'*}})
+    
+        def test_ex1(self):
+            {{*@self.addCleanup*}}
+            def _(): print({{*'** addCleanup: #1'*}})
+            #
+            {{*@at_end*}}
+            def _(): print({{*'** at_end: #1'*}})
+            #
+            {{*@self.addCleanup*}}
+            def _(): print({{*'** addCleanup: #2'*}})
+            #
+            {{*@at_end*}}
+            def _(): print({{*'** at_end: #2'*}})
+            #
+            assert 1+1 == 2
+    
+    if __name__ == "__main__":
+        import oktest
+        oktest.main()
+
+Result::
+
+    $ py hom_test.py
+    * HomTest
+      - [      ] test_ex1{{*** at_end: #2*}}
+    {{*** at_end: #1*}}
+    {{*** tearDown*}}
+    {{*** addCleanup: #2*}}
+    {{*** addCleanup: #1*}}
+      - [passed] test_ex1
+    ## total:1, passed:1, failed:0, error:0, skipped:0, todo:0  (0.001 sec)
+
+
 Test Context
 ============
 
@@ -565,7 +683,7 @@ Unified Diff
 
 'ok(x) == y' prints unified diff (diff -u) if:
 
-* both x and y are str or unicode
+* both x and y are one of str, unicode, list, tuple, and dict
 * and x != y
 * and oktest.DIFF is True or 'repr'
 * and invoked with oktest.main() or oktest.run()
@@ -617,6 +735,53 @@ Output result::
     ----------------------------------------------------------------------
     Ran 1 test in 0.006s
 
+    FAILED (failures=1)
+
+When actual and expected values are list, tuple or dict, then ok() convert
+these values into string by ``pprint.pformat()`` before calculating unified
+diff output. For example::
+
+    ## json_test.py
+    import unittest
+    from oktest import ok
+    
+    class JsonTest(unittest.TestCase):
+        def test_ex1(self):
+            expected = { 'username': "Haruhi", 'gender': "Female",
+                         'email': "haruhi@sos-brigade.org", }
+            actual   = { 'username': "Haruhi", 'gender': "female",
+                         'email': "haruhi@sos-brigade.org", }
+            ok (actual) == expected
+    #
+    if __name__ == "__main__":
+        unittest.main()
+
+Result shows in unified diff format using ``pprint.pformat()``::
+
+    $ py json_test.py
+    F
+    ======================================================================
+    FAIL: test_ex1 (__main__.JsonTest)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "json_test.py", line 11, in test_ex1
+        ok (actual) == expected
+    AssertionError: {'username': 'Haruhi', 'gender': 'female', 'email': 'haruhi@sos
+    -brigade.org'} == {'username': 'Haruhi', 'gender': 'Female', 'email': 'haruhi@s
+    os-brigade.org'} : failed.
+    --- expected
+    +++ actual
+    @@ -1,3 +1,3 @@
+     {'email': 'haruhi@sos-brigade.org',
+    - 'gender': 'Female',
+    + 'gender': 'female',
+      'username': 'Haruhi'}
+    \ No newline at end of string
+    
+    
+    ----------------------------------------------------------------------
+    Ran 1 test in 0.001s
+    
     FAILED (failures=1)
 
 If you set ``oktest.DIFF`` to ``repr``, each line is preprocessed by ``repr()``.
@@ -1023,6 +1188,17 @@ chdir(dirname)
 
 rm_rf(filename, dirname, ...)
 	Remove file or directory recursively.
+
+from_here(dirpath=None)
+	Set current directory as the first element of sys.path temporarily.
+	This is useful very much when you want to import a certain module
+	from current directory or a specific directory. ::
+	
+	    from oktest.util import from_here
+	    with from_here():
+	      import mymodule1       # import from directory path of this file
+	    with from_here('../lib'):
+	      import mymodule2       # import from ../lib
 
 
 ``oktest.dummy`` module
