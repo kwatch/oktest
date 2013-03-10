@@ -103,6 +103,21 @@ Release 0.12.0 (???)
     with from_here('../lib'):
       import mymodule2       # import from ../lib
 
+* [enhance] 'oktest.util.randstr(n)' is defined which returns random
+  number string. Width of returned string is n (default 8).
+  This is very useful when creating fixture data.
+  ex::
+
+    >>> from oktest.util import randstr
+    >>> randstr(4)
+    '7327'
+    >>> randstr(4)
+    '1598'
+    >>> randstr(4)
+    '0362'
+    >>> randstr()
+    '38127841'
+
 * [enhance] subject() and situation() now accept user-defined tags.
   ex::
 
