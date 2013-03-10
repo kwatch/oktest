@@ -79,6 +79,10 @@ Release 0.12.0 (???)
       #def release_tmpfile(self, tmpfile):
       #  os.unlink(tmpfile)
 
+  @at_end decorator is similar to unittest.TestCase#atCleanup(),
+  but the former is called *before* tearDown() and the latter is called
+  *after* tearDown().
+
 * [enhance] ``ok(x).is_truthy()`` tests whether ``bool(x) == True``.
   This is similar to ``ok(bool(x)) == True`` but reports ``x`` value
   instead of True/False when assertion failed.

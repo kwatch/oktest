@@ -760,6 +760,10 @@ class TestRunner(object):
                         exc_info_list.append(exc_info_)
                     #else:
                         #assert status is not None
+                    if hasattr(testcase, '_cleanups'):
+                        errs = self._run_blocks(testcase._cleanups[::-1])
+                        if errs:
+                            exc_info_list.extend(errs)
         finally:
             if exc_info_list:    # errors in setUp or tearDown
                 if status == ST_FAILED or status == ST_ERROR:
