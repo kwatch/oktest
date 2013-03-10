@@ -318,6 +318,56 @@ class Feature_at_end_TC(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+_output = []
+
+class Feature_addCleanup_TC(unittest.TestCase):
+
+    def _run_test_class(self, testclass):
+        from oktest import TestRunner, PlainReporter
+        out = StringIO()
+        reporter = PlainReporter(out, color=False)
+        runner = TestRunner(reporter)
+        global _output
+        _output[:] = []
+        runner.run_class(testclass)
+        #return out.getvalue()
+        return _output
+
+    class Hom_TC(unittest.TestCase):
+        def tearDown(self):
+            _output.append('** tearDown()')
+        def test1(self):
+            #
+            @self.addCleanup
+            def _():
+                _output.append('** @addCleanup: 1')
+            #
+            @at_end
+            def _():
+                _output.append('** @at_end: 1')
+            #
+            @self.addCleanup
+            def _():
+                _output.append('** @addCleanup: 2')
+            #
+            @at_end
+            def _():
+                _output.append('** @at_end: 2')
+            #
+            assert 1==1
+
+    def test_addCleanup(self):
+        expected = [
+            '** @at_end: 2',
+            '** @at_end: 1',
+            '** tearDown()',
+            '** @addCleanup: 2',
+            '** @addCleanup: 1',
+        ]
+        actual = self._run_test_class(self.Hom_TC)
+        self.assertEqual(expected, actual)
+
+
 
 if __name__ == '__main__':
     unittest.main()
