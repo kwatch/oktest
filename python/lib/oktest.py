@@ -1667,6 +1667,12 @@ def _dummy():
         if sys.path and sys.path[0] == currpath:
             sys.path.pop(0)
 
+    def randstr(n=8):
+        """Returns n-width number string."""
+        from random import randint
+        format = '%0'+str(n)+'d'
+        return format % randint(0, 10**n-1)
+
     def get_location(depth=0):
         frame = sys._getframe(depth+1)
         return (frame.f_code.co_filename, frame.f_lineno)

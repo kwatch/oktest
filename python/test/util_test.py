@@ -7,11 +7,15 @@
 from __future__ import with_statement
 
 import sys, os, re, shutil
+try:
+    xrange
+except NameError:
+    xrange = range
 import unittest
 import oktest
 from oktest import ok, NG, run
 from oktest import python2, python3
-from oktest.util import chdir, flatten, rm_rf, from_here, zenkaku_width, zenkaku_shorten
+from oktest.util import chdir, flatten, rm_rf, from_here, randstr, zenkaku_width, zenkaku_shorten
 
 
 available_with_statement = sys.version_info[0:2] > (2, 4)
@@ -266,6 +270,22 @@ class util_TC(unittest.TestCase):
             ok (sys.path) == expected
         ok (sys.path) != expected
         ok (sys.path) == old
+
+
+    def test_randstr_1(self):
+        for _ in xrange(10):
+            s = randstr()
+            ok (s).is_a(str).length(8).matches(r'^\d+$')
+
+    def test_randstr_2(self):
+        n = 4
+        for _ in xrange(10):
+            s = randstr(n)
+            ok (s).is_a(str).length(n).matches(r'^\d+$')
+
+    def test_randstr_3(self):
+        arr = [ randstr() for _ in xrange(100) ]
+        ok (len(arr)) == len(set(arr))
 
 
     def _do_test(self, input):
