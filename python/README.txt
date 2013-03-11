@@ -80,9 +80,9 @@ of Python. ::
     if __name__ == '__main__':
         unittest.main()
 
-See `Assertion Reference`_ section for details about ok() and NG().
+See `Assertion Reference`_ section for details about ``ok()`` and ``NG()``.
 
-Using @test decorator, you can write test name in free text. ::
+Using ``@test`` decorator, you can write test name in free text. ::
 
     import unittest
     from oktest ok, {{*test*}}
@@ -100,7 +100,7 @@ Using @test decorator, you can write test name in free text. ::
     if __name__ == '__main__':
         unittest.main()
 
-See `@test Decorator`_ section for details about @test decorator.
+See `@test Decorator`_ section for details about ``@test`` decorator.
 
 Oktest is also available without unittest. See the folloing example. ::
 
@@ -295,14 +295,14 @@ Oktest allows you to define custom assertion functions.
 See `Tips`_ section.
 
 
-@test Decorator
-===============
+``@test`` Decorator
+===================
 
-Oktest provides @test decorator.
+Oktest provides ``@test()`` decorator.
 It is simple but very powerful.
 
-Using @test decorator, you can write test description in free text instead of
-test method::
+Using ``@test()`` decorator, you can write test description in free text instead
+of test method::
 
     import unittest
     {{*from oktest import test*}}
@@ -316,7 +316,7 @@ test method::
         {{*def _(self):*}}
             assert 1+1 == 2
 
-@test decorator changes test methods.
+``@test()`` decorator changes test methods.
 For example, the above code is same as the following::
 
     class FooTest(unittest.TestCase):
@@ -330,7 +330,7 @@ For example, the above code is same as the following::
         _.__name__ = "test_%03d: %s" % (__n, _.__doc__)
         locals()[_.__name__] = _
 
-Non-English language is available on @test()::
+Non-English language is available on ``@test()``::
 
     class FooTest(unittest.TestCase):
 
@@ -338,9 +338,9 @@ Non-English language is available on @test()::
         def _(self):
             assert 1+1 == 2
 
-@test decorator accepts user-defined options. You can specify any name and
-value as option. It is accessable by 'self._options' in setUp(), therefore
-you can change behaviour of setUp() according to options. ::
+``@test()`` decorator accepts user-defined options. You can specify any name and
+value as option. It is accessable by 'self._options' in ``setUp()``, therefore
+you can change behaviour of ``setUp()`` according to options. ::
 
     class FooTest(unittest.TestCase):
 
@@ -363,14 +363,14 @@ You can filter testcase by user-defined options in command-line. ::
 Fixture Injection
 =================
 
-@test decorator supports fixture injection.
+``@test()`` decorator supports fixture injection.
 
 * Arguments of test method are regarded as fixture names
-  and they are injected by @test decorator automatically.
-* Instance methods or global functions which name is 'provide_xxxx' are
-  regarded as fixture provider (or builder) for fixture 'xxxx'.
+  and they are injected by ``@test()`` decorator automatically.
+* Instance methods or global functions which name is ``provide_xxxx()`` are
+  regarded as fixture provider (or builder) for fixture ``xxxx``.
 * Similar to that, instance methods or global functions which name is
-  'release_xxxx' are regarded as fixture releaser (or destroyer).
+  ``release_xxxx()`` are regarded as fixture releaser (or destroyer).
   Notice that provider is mandatory but releaser is optional for fixture.
 
 ::
@@ -400,10 +400,10 @@ Fixture Injection
             ok (member1["name"]) == "Haruhi"
             ok (member2["name"]) == "Kyon"
 
-This feature is more flexible and useful than setUp() and tearDown().
+This feature is more flexible and useful than ``setUp()`` and ``tearDown()``.
 
 For example, the following code ensures that dummy files are removed
-automatically at the end of test without tearDown(). ::
+automatically at the end of test without ``tearDown()``. ::
 
     import os, shutil
 
@@ -487,7 +487,7 @@ imagine to apply dependency injection into fixtures. ::
         def _(self, {{*a*}}):
             assert a == ["B", "D", "C", "A"]
 
-Fixture injection is provided by @test decorator, and it is available
+Fixture injection is provided by ``@test()`` decorator, and it is available
 with existing test methods::
 
     {{*@test()*}}
@@ -521,10 +521,10 @@ The following is an example to use `Forge`_ as external fixture library::
 ..    _`Forge`:  https://github.com/mnoble/forge/
 
 
-@at_end() decorator
-===================
+``@at_end`` Decorator
+=======================
 
-``@at_end()`` registers callback function which is called at end of test case.
+``@at_end`` decorator registers callback function which is called at end of test case.
 You can use it as replacement of ``tearDown()`` or ``after()``. ::
 
     import unittest
@@ -588,9 +588,9 @@ It is good idea to use ``@at_end`` instead of ``release_xxx()`` methods. ::
         import oktest
         oktest.main()   # NOT unittest.main() !
 
-@at_end decorator is similar to unittest.TestCase#atCleanup(),
-but the former is called *before* tearDown() and the latter is called
-*after* tearDown().
+``@at_end`` decorator is similar to ``unittest.TestCase#atCleanup()``,
+but the former is called *before* ``tearDown()`` and the latter is called
+*after* ``tearDown()``.
 See the following example.::
 
     import sys, unittest
@@ -685,8 +685,8 @@ Unified Diff
 
 * both x and y are one of str, unicode, list, tuple, and dict
 * and x != y
-* and oktest.DIFF is True or 'repr'
-* and invoked with oktest.main() or oktest.run()
+* and ``oktest.DIFF`` is True or 'repr'
+* and invoked with ``oktest.main()`` or ``oktest.run()``
 
 For example::
 
@@ -737,7 +737,7 @@ Output result::
 
     FAILED (failures=1)
 
-When actual and expected values are list, tuple or dict, then ok() convert
+When actual and expected values are list, tuple or dict, then ``ok()`` converts
 these values into string by ``pprint.pformat()`` before calculating unified
 diff output. For example::
 
@@ -832,7 +832,7 @@ Result::
 
     FAILED (failures=1)
 
-If you set '``oktest.DIFF``' to False, unified diff is not displayed.
+If you set ``oktest.DIFF`` to False, unified diff is not displayed.
 
 
 Tracer
@@ -997,10 +997,10 @@ Notice that the following doesn't work correctly. ::
             ...
 
 
-@todo decorator
-===============
+``@todo`` Decorator
+===================
 
-@todo decorator represents that "this test will be failed expectedly
+``@todo`` decorator represents that "this test will be failed expectedly
 because feature is not implemented yet, therefore don't count
 this test as failed, please!".
 
@@ -1033,7 +1033,7 @@ Output Example::
       - [TODO] returns sum of arguments.
     ## total:1, passed:0, failed:0, error:0, skipped:0, todo:1   (0.000 sec)
 
-If test decoreated by @todo doesn't raise AssertionError, Oktest will report
+If test decoreated by ``@todo`` doesn't raise AssertionError, Oktest will report
 you that, for example::
 
     $ python test/add_test.py
@@ -1160,7 +1160,7 @@ test(desc)
 todo()
 	Represents that the test will be failed expectedly.
 	Equivarent to ``unittest.expectedFailure()``.
-	See `@todo decorator`_ section.
+	See `@todo Decorator`_ section.
 
 
 ``oktest.util`` module
@@ -1343,7 +1343,7 @@ Tips
     ## exit with status code 0 when no errors.
     sys.exit(run())
 
-* If you call ok() or NG() but forget to do assertion, oktest warns it. ::
+* If you call ``ok()`` or ``NG()`` but forget to do assertion, oktest warns it. ::
 
     import oktest
     from oktest import ok, NG
@@ -1355,7 +1355,7 @@ Tips
 
     oktest.run()   #=> warning: ok() is called but not tested.
 
-* $TEST environment variable is now obsolete.
+* ``$TEST`` environment variable is now obsolete.
   Use command-line option instead to filter testcase by name. ::
 
       ## filter testcase by name
