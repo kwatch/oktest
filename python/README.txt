@@ -629,8 +629,8 @@ Result::
     {{*** tearDown*}}
     {{*** addCleanup: #2*}}
     {{*** addCleanup: #1*}}
-      - [passed] test_ex1
-    ## total:1, passed:1, failed:0, error:0, skipped:0, todo:0  (0.001 sec)
+      - [pass] test_ex1
+    ## total:1, pass:1, fail:0, error:0, skip:0, todo:0  (0.001 sec)
 
 
 Test Context
@@ -669,11 +669,11 @@ Output example::
     * Sample
       + method1()
         + when condition:
-          - [passed] spec1
-          - [passed] spec2
+          - [pass] spec1
+          - [pass] spec2
         + else:
-          - [passed] spec3
-    ## total:3, passed:3, failed:0, error:0, skipped:0, todo:0   (0.000 sec)
+          - [pass] spec3
+    ## total:3, pass:3, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 
 (Notice that this feature is experimental and may be changed in the future.)
 
@@ -1031,19 +1031,19 @@ Output Example::
     $ python test/add_test.py
     * add()
       - [TODO] returns sum of arguments.
-    ## total:1, passed:0, failed:0, error:0, skipped:0, todo:1   (0.000 sec)
+    ## total:1, pass:0, fail:0, error:0, skip:0, todo:1  (0.000 sec)
 
 If test decoreated by ``@todo`` doesn't raise AssertionError, Oktest will report
 you that, for example::
 
     $ python test/add_test.py
     * add()
-      - [Failed] returns sum of arguments.
+      - [Fail] returns sum of arguments.
     ----------------------------------------------------------------------
-    [Failed] add() > 001: returns sum of arguments.
+    [Fail] add() > 001: returns sum of arguments.
     _UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.
     ----------------------------------------------------------------------
-    ## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
+    ## total:1, pass:0, fail:1, error:0, skip:0, todo:0  (0.000 sec)
 
 Notice that the following will not work::
 
