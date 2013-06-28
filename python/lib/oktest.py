@@ -1315,7 +1315,7 @@ class VerboseReporter(BaseReporter):
 
     def enter_testcase(self, testcase, testname):
         desc = self.get_testcase_desc(testcase, testname)
-        self._print_temporary_str("  " * self.depth + "- [      ] " + desc)
+        self._print_temporary_str("  " * self.depth + "- [    ] " + desc)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         s = ""
