@@ -610,7 +610,7 @@ except ImportError:
 
 
 
-ST_PASSED  = "passed"
+ST_PASSED  = "pass"
 ST_FAILED  = "failed"
 ST_ERROR   = "error"
 ST_SKIPPED = "skipped"
@@ -935,7 +935,7 @@ class Reporter(object):
 class BaseReporter(Reporter):
 
     INDICATOR = {
-        ST_PASSED:  "passed",          # or "ok" ?
+        ST_PASSED:  "pass",          # or "ok" ?
         ST_FAILED:  "Failed",
         ST_ERROR:   "ERROR",
         ST_SKIPPED: "skipped",
@@ -998,7 +998,7 @@ class BaseReporter(Reporter):
         }
 
     _counts2str_table = [
-        (ST_PASSED,     "passed",     True),
+        (ST_PASSED,     "pass",       True),
         (ST_FAILED,     "failed",     True),
         (ST_ERROR,      "error",      True),
         (ST_SKIPPED,    "skipped",    True),

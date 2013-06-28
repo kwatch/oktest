@@ -150,20 +150,20 @@ if py27 or py314 or py32:
 
 
 OUTPUT_FOOTER = r"""
-## total:7, <G>passed:2</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skipped:1</Y>, <Y>todo:1</Y>  (0.000 sec)
+## total:7, <G>pass:2</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skipped:1</Y>, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
 
 OUTPUT_VERBOSE_BASE = r"""
 * <b>SosTest</b>
-  - [<G>passed</G>] 1+1 should be 2
+  - [<G>pass</G>] 1+1 should be 2
   - [<R>Failed</R>] 1-1 should be 0
   - [<R>ERROR</R>] should raise NameError
   - [<Y>skipped</Y>] never done (reason: REASON)
   - [<Y>TODO</Y>] not yet
 """[1:] + OUTPUT_ERRORS1 + r"""
 * <b>Sos_TC</b>
-  - [<G>passed</G>] test_aaa
+  - [<G>pass</G>] test_aaa
   - [<R>Failed</R>] test_bbb
 """[1:] + OUTPUT_ERRORS2 + OUTPUT_FOOTER
 
@@ -612,7 +612,7 @@ mainapp_test.py: error: 'default': unknown report sytle (plain/simple/verbose, o
 
     def test_main__pattern(self):
         expected = r"""
-## total:0, passed:0, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+## total:0, pass:0, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
         #
         sout, serr, ex = self._run_app('-p', 'test_*.py', '--color=true')
@@ -648,10 +648,10 @@ mainapp_test.py: error: -p option requires an argument
     def test_main__filter__class(self):
         expected = r"""
 * <b>Sos_TC</b>
-  - [<G>passed</G>] test_aaa
+  - [<G>pass</G>] test_aaa
   - [<R>Failed</R>] test_bbb
 """[1:] + OUTPUT_ERRORS2 + r"""
-## total:2, <G>passed:1</G>, <R>failed:1</R>, error:0, skipped:0, todo:0  (0.000 sec)
+## total:2, <G>pass:1</G>, <R>failed:1</R>, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
@@ -663,8 +663,8 @@ mainapp_test.py: error: -p option requires an argument
         expected = r"""
 * <b>SosTest</b>
 * <b>Sos_TC</b>
-  - [<G>passed</G>] test_aaa
-## total:1, <G>passed:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+  - [<G>pass</G>] test_aaa
+## total:1, <G>pass:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
@@ -678,9 +678,9 @@ mainapp_test.py: error: -p option requires an argument
     def test_main__filter__tag(self):
         expected = r"""
 * <b>SosTest</b>
-  - [<G>passed</G>] 1+1 should be 2
+  - [<G>pass</G>] 1+1 should be 2
 * <b>Sos_TC</b>
-## total:1, <G>passed:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+## total:1, <G>pass:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
