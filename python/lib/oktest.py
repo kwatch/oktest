@@ -1009,7 +1009,7 @@ class BaseReporter(Reporter):
     def counts2str(self):
         buf = [None]; add = buf.append
         total = 0
-        for word, status, required in self._counts2str_table:
+        for status, word, required in self._counts2str_table:
             n = self.counts.get(status, 0)
             s = "%s:%s" % (word, n)
             if n: s = self.colorize(s, status)
