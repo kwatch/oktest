@@ -147,7 +147,9 @@ def assertion(func):
          @oktest.assertion
          def startswith(self, arg):
            boolean = self.target.startswith(arg)
-           if boolean != self.boolean:
+           if boolean == self.boolean:
+             return self
+           else:
              self.failed("%r.startswith(%r) : failed." % (self.target, arg))
          #
          ok ("Sasaki").startswith("Sas")
