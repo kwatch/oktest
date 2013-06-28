@@ -85,12 +85,12 @@ class Todo_TC(unittest.TestCase):
         expected = r"""
 * <b>_RunnerHandleExpectedFailureTest</b>
   - [<Y>TODO</Y>] test1
-  - [<R>Failed</R>] test2
+  - [<R>Fail</R>] test2
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _RunnerHandleExpectedFailureTest > test2()
+[<R>Fail</R>] _RunnerHandleExpectedFailureTest > test2()
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:2, pass:0, <R>failed:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
+## total:2, pass:0, <R>fail:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
         self._test_runner(expected, Todo_TC._RunnerHandleExpectedFailureTest, 1)
 
@@ -113,12 +113,12 @@ class Todo_TC(unittest.TestCase):
             expected = r"""
 * <b>_RunnerHandleUnittestExpectedFailure</b>
   - [<Y>TODO</Y>] test1
-  - [<R>Failed</R>] test2
+  - [<R>Fail</R>] test2
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _RunnerHandleUnittestExpectedFailure > test2()
+[<R>Fail</R>] _RunnerHandleUnittestExpectedFailure > test2()
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:2, pass:0, <R>failed:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
+## total:2, pass:0, <R>fail:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
             self._test_runner(expected, Todo_TC._RunnerHandleUnittestExpectedFailure, 1)
 
@@ -146,20 +146,20 @@ class Todo_TC(unittest.TestCase):
         def test_todo_is_avaialbe_with_test_decorator(self):
             expected = r"""
 * <b>_TodoIsAvailableWithTestDecorator</b>
-  - [<R>Failed</R>] SPEC3
+  - [<R>Fail</R>] SPEC3
   - [<G>pass</G>] SPEC4
   - [<Y>TODO</Y>] SPEC1
-  - [<R>Failed</R>] SPEC2
+  - [<R>Fail</R>] SPEC2
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 003: SPEC3
+[<R>Fail</R>] _TodoIsAvailableWithTestDecorator > 003: SPEC3
   File "test/todo_test.py", line 139, in _
     assert 1 == 0, "expected failure"
 <R>AssertionError: expected failure</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 002: SPEC2
+[<R>Fail</R>] _TodoIsAvailableWithTestDecorator > 002: SPEC2
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>pass:1</G>, <R>failed:2</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
+## total:4, <G>pass:1</G>, <R>fail:2</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
             self._test_runner(expected, Todo_TC._TodoIsAvailableWithTestDecorator, 2)
 
@@ -187,13 +187,13 @@ class Todo_TC(unittest.TestCase):
         def test_todo_is_avaialbe_with_fixture_arguments(self):
             expected = r"""
 * <b>_TodoIsAvailableWithFixtureArguments</b>
-  - [<R>Failed</R>] WILL FAIL BECAUSE PASSED UNEXPECTEDLY
+  - [<R>Fail</R>] WILL FAIL BECAUSE PASSED UNEXPECTEDLY
   - [<Y>TODO</Y>] WILL PASS BECAUSE FAILED EXPECTEDLY
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _TodoIsAvailableWithFixtureArguments > 001: WILL FAIL BECAUSE PASSED UNEXPECTEDLY
+[<R>Fail</R>] _TodoIsAvailableWithFixtureArguments > 001: WILL FAIL BECAUSE PASSED UNEXPECTEDLY
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:2, pass:0, <R>failed:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
+## total:2, pass:0, <R>fail:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
             self._test_runner(expected, Todo_TC._TodoIsAvailableWithFixtureArguments, 1)

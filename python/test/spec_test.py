@@ -229,27 +229,27 @@ oktest.run()
         expected1 = r"""
 * FooTest: f
 ----------------------------------------------------------------------
-[Failed] FooTest > test_1() > 1+1 should be 2.
+[Fail] FooTest > test_1() > 1+1 should be 2.
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
 AssertionError: 2 == 1 : failed.
 ----------------------------------------------------------------------
-[Failed] FooTest > test_1() > 1-1 should be 0.
+[Fail] FooTest > test_1() > 1-1 should be 0.
   File "__test_scenario1.py", line 10, in test_1
     ok (1-1) == 1
 AssertionError: 0 == 1 : failed.
 ----------------------------------------------------------------------
-## total:1, pass:0, failed:1, error:0, skip:0, todo:0  (0.000 sec)
+## total:1, pass:0, fail:1, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected2 = r"""
 * FooTest: f
 ----------------------------------------------------------------------
-[Failed] FooTest > test_1()
+[Fail] FooTest > test_1()
   File "__test_scenario1.py", line 8, in test_1
     ok (1+1) == 1
 AssertionError: 2 == 1 : failed.
 ----------------------------------------------------------------------
-## total:1, pass:0, failed:1, error:0, skip:0, todo:0  (0.000 sec)
+## total:1, pass:0, fail:1, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected1 = Color._colorize(expected1)
         expected2 = Color._colorize(expected2)
@@ -301,7 +301,7 @@ oktest.run()
         expected1 = r"""
 * FooTest: f
 ----------------------------------------------------------------------
-[Failed] FooTest > test1() > 1+1 is 2
+[Fail] FooTest > test1() > 1+1 is 2
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
@@ -310,7 +310,7 @@ oktest.run()
     ok (1+1) == 0
 AssertionError: 2 == 0 : failed.
 ----------------------------------------------------------------------
-[Failed] FooTest > test1() > 'KYON' starts with 'KY'
+[Fail] FooTest > test1() > 'KYON' starts with 'KY'
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
@@ -319,12 +319,12 @@ AssertionError: 2 == 0 : failed.
     ok ("KYON").starts_with("ky")
 AssertionError: 'KYON'.startswith('ky') : failed.
 ----------------------------------------------------------------------
-## total:1, pass:0, failed:1, error:0, skip:0, todo:0  (0.000 sec)
+## total:1, pass:0, fail:1, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected2 = r"""
 * FooTest: f
 ----------------------------------------------------------------------
-[Failed] FooTest > test1()
+[Fail] FooTest > test1()
   File "__test_scenario2.py", line 13, in test1
     self._m2()
   File "__test_scenario2.py", line 15, in _m2
@@ -333,7 +333,7 @@ AssertionError: 'KYON'.startswith('ky') : failed.
     ok (1+1) == 0
 AssertionError: 2 == 0 : failed.
 ----------------------------------------------------------------------
-## total:1, pass:0, failed:1, error:0, skip:0, todo:0  (0.000 sec)
+## total:1, pass:0, fail:1, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected1 = Color._colorize(expected1)
         expected2 = Color._colorize(expected2)
@@ -387,7 +387,7 @@ oktest.run()
     None.unknownattribute
 AttributeError: 'NoneType' object has no attribute 'unknownattribute'
 ----------------------------------------------------------------------
-## total:1, pass:0, failed:0, error:1, skip:0, todo:0  (0.000 sec)
+## total:1, pass:0, fail:0, error:1, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected2 = expected1
         expected1 = Color._colorize(expected1)

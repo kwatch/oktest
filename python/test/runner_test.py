@@ -469,7 +469,7 @@ run(FooTest)
         expected = r"""
 * <b>FooTest</b>: .<R>f</R><R>E</R><R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_failed()
+[<R>Fail</R>] FooTest > test_failed()
   File "_test_.py", line 9, in test_failed
     ok (1+1) == 3
 <R>AssertionError: 2 == 3 : failed.</R>
@@ -479,7 +479,7 @@ run(FooTest)
     ok (int('aaa')) == 0
 <R>ValueError: invalid literal for int() with base 10: 'aaa'</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] FooTest > test_nested()
+[<R>Fail</R>] FooTest > test_nested()
   File "_test_.py", line 13, in test_nested
     self._test1()
   File "_test_.py", line 15, in _test1
@@ -488,7 +488,7 @@ run(FooTest)
     ok (1+1) == 0
 <R>AssertionError: 2 == 0 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>pass:1</G>, <R>failed:2</R>, <R>error:1</R>, skip:0, todo:0  (0.000 sec)
+## total:4, <G>pass:1</G>, <R>fail:2</R>, <R>error:1</R>, skip:0, todo:0  (0.000 sec)
 """[1:]
         if python24:
             expected = expected.replace("int() with base 10: 'aaa'", 'int(): aaa')
@@ -523,24 +523,24 @@ run(BarTest)
         expected = r"""
 * <b>BarTest</b>: <R>f</R><R>f</R><R>f</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] BarTest > test_sample1()
+[<R>Fail</R>] BarTest > test_sample1()
 Sample Description 1
   File "_test_.py", line 9, in test_sample1
     ok (0) == 1
 <R>AssertionError: 0 == 1 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] BarTest > test_sample2()
+[<R>Fail</R>] BarTest > test_sample2()
 Sample Description 2
   File "_test_.py", line 13, in test_sample2
     ok (0) == 2
 <R>AssertionError: 0 == 2 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] BarTest > 002: Sample Description 3
+[<R>Fail</R>] BarTest > 002: Sample Description 3
   File "_test_.py", line 17, in _
     ok (0) == 3
 <R>AssertionError: 0 == 3 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:3, pass:0, <R>failed:3</R>, error:0, skip:0, todo:0  (0.000 sec)
+## total:3, pass:0, <R>fail:3</R>, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         os.environ['OKTEST_REPORTER'] = 'SimpleReporter'
         oktest.REPORTER = oktest.SimpleReporter

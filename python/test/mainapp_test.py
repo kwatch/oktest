@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
 OUTPUT_ERRORS1 = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] SosTest > 002: 1-1 should be 0
+[<R>Fail</R>] SosTest > 002: 1-1 should be 0
   File "_test.d/_sos_test.py", line 14, in _
     ok (1-1) == 2
 <R>AssertionError: 0 == 2 : failed.</R>
@@ -119,7 +119,7 @@ OUTPUT_ERRORS1 = r"""
 
 OUTPUT_ERRORS2 = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] Sos_TC > test_bbb()
+[<R>Fail</R>] Sos_TC > test_bbb()
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 <R>AssertionError: 'bbb' == 'aaa' : failed.</R>
@@ -134,7 +134,7 @@ OUTPUT_ERRORS2 = r"""
 if py27 or py314 or py32:
     OUTPUT_ERRORS2 = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] Sos_TC > test_bbb()
+[<R>Fail</R>] Sos_TC > test_bbb()
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 <R>AssertionError: 'bbb' == 'aaa' : failed.</R>
@@ -150,21 +150,21 @@ if py27 or py314 or py32:
 
 
 OUTPUT_FOOTER = r"""
-## total:7, <G>pass:2</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>  (0.000 sec)
+## total:7, <G>pass:2</G>, <R>fail:2</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
 
 OUTPUT_VERBOSE_BASE = r"""
 * <b>SosTest</b>
   - [<G>pass</G>] 1+1 should be 2
-  - [<R>Failed</R>] 1-1 should be 0
+  - [<R>Fail</R>] 1-1 should be 0
   - [<R>ERROR</R>] should raise NameError
   - [<Y>skip</Y>] never done (reason: REASON)
   - [<Y>TODO</Y>] not yet
 """[1:] + OUTPUT_ERRORS1 + r"""
 * <b>Sos_TC</b>
   - [<G>pass</G>] test_aaa
-  - [<R>Failed</R>] test_bbb
+  - [<R>Fail</R>] test_bbb
 """[1:] + OUTPUT_ERRORS2 + OUTPUT_FOOTER
 
 OUTPUT_SIMPLE_BASE = r"""
@@ -612,7 +612,7 @@ mainapp_test.py: error: 'default': unknown report sytle (plain/simple/verbose, o
 
     def test_main__pattern(self):
         expected = r"""
-## total:0, pass:0, failed:0, error:0, skip:0, todo:0  (0.000 sec)
+## total:0, pass:0, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         #
         sout, serr, ex = self._run_app('-p', 'test_*.py', '--color=true')
@@ -649,9 +649,9 @@ mainapp_test.py: error: -p option requires an argument
         expected = r"""
 * <b>Sos_TC</b>
   - [<G>pass</G>] test_aaa
-  - [<R>Failed</R>] test_bbb
+  - [<R>Fail</R>] test_bbb
 """[1:] + OUTPUT_ERRORS2 + r"""
-## total:2, <G>pass:1</G>, <R>failed:1</R>, error:0, skip:0, todo:0  (0.000 sec)
+## total:2, <G>pass:1</G>, <R>fail:1</R>, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
@@ -664,7 +664,7 @@ mainapp_test.py: error: -p option requires an argument
 * <b>SosTest</b>
 * <b>Sos_TC</b>
   - [<G>pass</G>] test_aaa
-## total:1, <G>pass:1</G>, failed:0, error:0, skip:0, todo:0  (0.000 sec)
+## total:1, <G>pass:1</G>, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
@@ -680,7 +680,7 @@ mainapp_test.py: error: -p option requires an argument
 * <b>SosTest</b>
   - [<G>pass</G>] 1+1 should be 2
 * <b>Sos_TC</b>
-## total:1, <G>pass:1</G>, failed:0, error:0, skip:0, todo:0  (0.000 sec)
+## total:1, <G>pass:1</G>, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
