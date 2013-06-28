@@ -90,7 +90,7 @@ class Todo_TC(unittest.TestCase):
 [<R>Failed</R>] _RunnerHandleExpectedFailureTest > test2()
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:2, pass:0, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>  (0.000 sec)
+## total:2, pass:0, <R>failed:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
         self._test_runner(expected, Todo_TC._RunnerHandleExpectedFailureTest, 1)
 
@@ -118,7 +118,7 @@ class Todo_TC(unittest.TestCase):
 [<R>Failed</R>] _RunnerHandleUnittestExpectedFailure > test2()
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:2, pass:0, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>  (0.000 sec)
+## total:2, pass:0, <R>failed:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
             self._test_runner(expected, Todo_TC._RunnerHandleUnittestExpectedFailure, 1)
 
@@ -159,7 +159,7 @@ class Todo_TC(unittest.TestCase):
 [<R>Failed</R>] _TodoIsAvailableWithTestDecorator > 002: SPEC2
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>pass:1</G>, <R>failed:2</R>, error:0, skipped:0, <Y>todo:1</Y>  (0.000 sec)
+## total:4, <G>pass:1</G>, <R>failed:2</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
             self._test_runner(expected, Todo_TC._TodoIsAvailableWithTestDecorator, 2)
 
@@ -193,7 +193,7 @@ class Todo_TC(unittest.TestCase):
 [<R>Failed</R>] _TodoIsAvailableWithFixtureArguments > 001: WILL FAIL BECAUSE PASSED UNEXPECTEDLY
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:2, pass:0, <R>failed:1</R>, error:0, skipped:0, <Y>todo:1</Y>  (0.000 sec)
+## total:2, pass:0, <R>failed:1</R>, error:0, skip:0, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
             self._test_runner(expected, Todo_TC._TodoIsAvailableWithFixtureArguments, 1)

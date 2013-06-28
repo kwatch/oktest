@@ -613,7 +613,7 @@ except ImportError:
 ST_PASSED  = "pass"
 ST_FAILED  = "failed"
 ST_ERROR   = "error"
-ST_SKIPPED = "skipped"
+ST_SKIPPED = "skip"
 ST_TODO    = "todo"
 #ST_UNEXPECTED = "unexpected"
 
@@ -938,7 +938,7 @@ class BaseReporter(Reporter):
         ST_PASSED:  "pass",          # or "ok" ?
         ST_FAILED:  "Failed",
         ST_ERROR:   "ERROR",
-        ST_SKIPPED: "skipped",
+        ST_SKIPPED: "skip",
         ST_TODO:    "TODO",
         #ST_UNEXPECTED: "Unexpected",
     }
@@ -1001,7 +1001,7 @@ class BaseReporter(Reporter):
         (ST_PASSED,     "pass",       True),
         (ST_FAILED,     "failed",     True),
         (ST_ERROR,      "error",      True),
-        (ST_SKIPPED,    "skipped",    True),
+        (ST_SKIPPED,    "skip",       True),
         (ST_TODO,       "todo",       True),
         #(ST_UNEXPECTED, "unexpected", False),
     ]
@@ -1484,7 +1484,7 @@ class OldStyleReporter(BaseReporter):
             for x in arr:
                 self.write(x)
         elif status == ST_SKIPPED:
-            self.write("[skipped]\n")
+            self.write("[skip]\n")
         elif status == ST_TODO:
             self.write("[TODO]\n")
         #elif status == ST_UNEXPECTED:
