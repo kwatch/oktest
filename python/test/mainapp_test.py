@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
 OUTPUT_ERRORS1 = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] SosTest > 002: 1-1 should be 0
+[<R>Fail</R>] SosTest > 002: 1-1 should be 0
   File "_test.d/_sos_test.py", line 14, in _
     ok (1-1) == 2
 <R>AssertionError: 0 == 2 : failed.</R>
@@ -119,7 +119,7 @@ OUTPUT_ERRORS1 = r"""
 
 OUTPUT_ERRORS2 = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] Sos_TC > test_bbb()
+[<R>Fail</R>] Sos_TC > test_bbb()
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 <R>AssertionError: 'bbb' == 'aaa' : failed.</R>
@@ -134,7 +134,7 @@ OUTPUT_ERRORS2 = r"""
 if py27 or py314 or py32:
     OUTPUT_ERRORS2 = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] Sos_TC > test_bbb()
+[<R>Fail</R>] Sos_TC > test_bbb()
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 <R>AssertionError: 'bbb' == 'aaa' : failed.</R>
@@ -150,21 +150,21 @@ if py27 or py314 or py32:
 
 
 OUTPUT_FOOTER = r"""
-## total:7, <G>passed:2</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skipped:1</Y>, <Y>todo:1</Y>  (0.000 sec)
+## total:7, <G>pass:2</G>, <R>fail:2</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
 
 OUTPUT_VERBOSE_BASE = r"""
 * <b>SosTest</b>
-  - [<G>passed</G>] 1+1 should be 2
-  - [<R>Failed</R>] 1-1 should be 0
+  - [<G>pass</G>] 1+1 should be 2
+  - [<R>Fail</R>] 1-1 should be 0
   - [<R>ERROR</R>] should raise NameError
-  - [<Y>skipped</Y>] never done (reason: REASON)
+  - [<Y>skip</Y>] never done (reason: REASON)
   - [<Y>TODO</Y>] not yet
 """[1:] + OUTPUT_ERRORS1 + r"""
 * <b>Sos_TC</b>
-  - [<G>passed</G>] test_aaa
-  - [<R>Failed</R>] test_bbb
+  - [<G>pass</G>] test_aaa
+  - [<R>Fail</R>] test_bbb
 """[1:] + OUTPUT_ERRORS2 + OUTPUT_FOOTER
 
 OUTPUT_SIMPLE_BASE = r"""
@@ -296,9 +296,9 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1929, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 563, in fn
+  File "/usr/local/lib/python/site-packages/oktest.py", line 565, in fn
     raise SkipTest(reason)
 oktest.SkipTest: REASON
 
@@ -306,11 +306,11 @@ oktest.SkipTest: REASON
 ERROR: not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 584, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 586, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 497, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 499, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -319,9 +319,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1929, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 587, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 589, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -370,11 +370,11 @@ ERROR: test_005: not yet (_sos_test.SosTest)
 not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 584, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 586, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 497, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 499, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -383,9 +383,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1929, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 587, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 589, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -612,7 +612,7 @@ mainapp_test.py: error: 'default': unknown report sytle (plain/simple/verbose, o
 
     def test_main__pattern(self):
         expected = r"""
-## total:0, passed:0, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+## total:0, pass:0, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         #
         sout, serr, ex = self._run_app('-p', 'test_*.py', '--color=true')
@@ -648,10 +648,10 @@ mainapp_test.py: error: -p option requires an argument
     def test_main__filter__class(self):
         expected = r"""
 * <b>Sos_TC</b>
-  - [<G>passed</G>] test_aaa
-  - [<R>Failed</R>] test_bbb
+  - [<G>pass</G>] test_aaa
+  - [<R>Fail</R>] test_bbb
 """[1:] + OUTPUT_ERRORS2 + r"""
-## total:2, <G>passed:1</G>, <R>failed:1</R>, error:0, skipped:0, todo:0  (0.000 sec)
+## total:2, <G>pass:1</G>, <R>fail:1</R>, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
@@ -663,8 +663,8 @@ mainapp_test.py: error: -p option requires an argument
         expected = r"""
 * <b>SosTest</b>
 * <b>Sos_TC</b>
-  - [<G>passed</G>] test_aaa
-## total:1, <G>passed:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+  - [<G>pass</G>] test_aaa
+## total:1, <G>pass:1</G>, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #
@@ -678,9 +678,9 @@ mainapp_test.py: error: -p option requires an argument
     def test_main__filter__tag(self):
         expected = r"""
 * <b>SosTest</b>
-  - [<G>passed</G>] 1+1 should be 2
+  - [<G>pass</G>] 1+1 should be 2
 * <b>Sos_TC</b>
-## total:1, <G>passed:1</G>, failed:0, error:0, skipped:0, todo:0  (0.000 sec)
+## total:1, <G>pass:1</G>, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
         expected = Color._colorize(expected)
         #

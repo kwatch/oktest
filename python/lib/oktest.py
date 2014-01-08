@@ -147,7 +147,9 @@ def assertion(func):
          @oktest.assertion
          def startswith(self, arg):
            boolean = self.target.startswith(arg)
-           if boolean != self.boolean:
+           if boolean == self.boolean:
+             return self
+           else:
              self.failed("%r.startswith(%r) : failed." % (self.target, arg))
          #
          ok ("Sasaki").startswith("Sas")
@@ -608,10 +610,10 @@ except ImportError:
 
 
 
-ST_PASSED  = "passed"
-ST_FAILED  = "failed"
+ST_PASSED  = "pass"
+ST_FAILED  = "fail"
 ST_ERROR   = "error"
-ST_SKIPPED = "skipped"
+ST_SKIPPED = "skip"
 ST_TODO    = "todo"
 #ST_UNEXPECTED = "unexpected"
 
@@ -933,10 +935,10 @@ class Reporter(object):
 class BaseReporter(Reporter):
 
     INDICATOR = {
-        ST_PASSED:  "passed",          # or "ok" ?
-        ST_FAILED:  "Failed",
+        ST_PASSED:  "pass",          # or "ok" ?
+        ST_FAILED:  "Fail",
         ST_ERROR:   "ERROR",
-        ST_SKIPPED: "skipped",
+        ST_SKIPPED: "skip",
         ST_TODO:    "TODO",
         #ST_UNEXPECTED: "Unexpected",
     }
@@ -996,10 +998,10 @@ class BaseReporter(Reporter):
         }
 
     _counts2str_table = [
-        (ST_PASSED,     "passed",     True),
-        (ST_FAILED,     "failed",     True),
+        (ST_PASSED,     "pass",       True),
+        (ST_FAILED,     "fail",       True),
         (ST_ERROR,      "error",      True),
-        (ST_SKIPPED,    "skipped",    True),
+        (ST_SKIPPED,    "skip",       True),
         (ST_TODO,       "todo",       True),
         #(ST_UNEXPECTED, "unexpected", False),
     ]
@@ -1007,7 +1009,7 @@ class BaseReporter(Reporter):
     def counts2str(self):
         buf = [None]; add = buf.append
         total = 0
-        for word, status, required in self._counts2str_table:
+        for status, word, required in self._counts2str_table:
             n = self.counts.get(status, 0)
             s = "%s:%s" % (word, n)
             if n: s = self.colorize(s, status)
@@ -1313,7 +1315,7 @@ class VerboseReporter(BaseReporter):
 
     def enter_testcase(self, testcase, testname):
         desc = self.get_testcase_desc(testcase, testname)
-        self._print_temporary_str("  " * self.depth + "- [      ] " + desc)
+        self._print_temporary_str("  " * self.depth + "- [    ] " + desc)
 
     def exit_testcase(self, testcase, testname, status, exc_info):
         s = ""
@@ -1482,7 +1484,7 @@ class OldStyleReporter(BaseReporter):
             for x in arr:
                 self.write(x)
         elif status == ST_SKIPPED:
-            self.write("[skipped]\n")
+            self.write("[skip]\n")
         elif status == ST_TODO:
             self.write("[TODO]\n")
         #elif status == ST_UNEXPECTED:

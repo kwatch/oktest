@@ -156,7 +156,7 @@ class Feature_FixtureInjection_TC(unittest.TestCase):
 [ERROR] DummyTestCase3 > 001: xxx
 NameError: Fixture provider for 'foo' not found.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:0, error:1, skipped:0, todo:0  (0.000 sec)
+## total:1, pass:0, fail:0, error:1, skip:0, todo:0  (0.000 sec)
 """[1:]
         output   = re.sub(r'\d\.\d\d\d sec', '0.000 sec', output)
         assert output == expected

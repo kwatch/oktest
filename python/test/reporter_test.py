@@ -93,7 +93,7 @@ class _Foo_TestCase(unittest.TestCase):
 
 OUTPUT_COMPREHENSIVE = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] class 'Foo' > 002: 1-1 should be 0
+[<R>Fail</R>] class 'Foo' > 002: 1-1 should be 0
   File "_test_tmp.py", line 13, in _
     ok (1-1) == 2
 <R>AssertionError: 0 == 2 : failed.</R>
@@ -103,10 +103,10 @@ OUTPUT_COMPREHENSIVE = r"""
     n = [].len
 <R>AttributeError: 'list' object has no attribute 'len'</R>
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] class 'Foo' > 006: unexpected success
+[<R>Fail</R>] class 'Foo' > 006: unexpected success
 <R>_UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.</R>
 <r>----------------------------------------------------------------------</r>
-## total:6, <G>passed:1</G>, <R>failed:2</R>, <R>error:1</R>, <Y>skipped:1</Y>, <Y>todo:1</Y>  (0.000 sec)
+## total:6, <G>pass:1</G>, <R>fail:2</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>  (0.000 sec)
 """[1:]
 
 
@@ -132,12 +132,12 @@ class _Foo_TestCase(unittest.TestCase):
 
 OUTPUT_WITH_TEST_CONTEXT = r"""
 <r>----------------------------------------------------------------------</r>
-[<R>Failed</R>] _Foo_TestCase > module hello > #method1 > when condition1: > 003: spec3
+[<R>Fail</R>] _Foo_TestCase > module hello > #method1 > when condition1: > 003: spec3
   File "_test_tmp.py", line 14, in _
     ok (3) == 0
 <R>AssertionError: 3 == 0 : failed.</R>
 <r>----------------------------------------------------------------------</r>
-## total:4, <G>passed:3</G>, <R>failed:1</R>, error:0, skipped:0, todo:0  (0.000 sec)
+## total:4, <G>pass:3</G>, <R>fail:1</R>, error:0, skip:0, todo:0  (0.000 sec)
 """[1:]
 
 
@@ -205,7 +205,7 @@ test_2
     raise RuntimeError("*** tearDown() ***")
 RuntimeError: *** tearDown() ***
 ----------------------------------------------------------------------
-## total:2, passed:0, failed:0, error:2, skipped:0, todo:0  (0.000 sec)
+## total:2, pass:0, fail:0, error:2, skip:0, todo:0  (0.000 sec)
 """[1:]
 
 
@@ -216,12 +216,12 @@ class VerboseReporter_TC(unittest.TestCase):
         input = INPUT_COMPREHENSIVE
         expected = r"""
 * <b>class 'Foo'</b>
-  - [<G>passed</G>] 1+1 should be 2
-  - [<R>Failed</R>] 1-1 should be 0
+  - [<G>pass</G>] 1+1 should be 2
+  - [<R>Fail</R>] 1-1 should be 0
   - [<R>ERROR</R>] length of empty list should be 0
-  - [<Y>skipped</Y>] should be skipped (reason: REASON)
+  - [<Y>skip</Y>] should be skipped (reason: REASON)
   - [<Y>TODO</Y>] expected failure
-  - [<R>Failed</R>] unexpected success
+  - [<R>Fail</R>] unexpected success
 """[1:] + OUTPUT_COMPREHENSIVE
         actual = _do_test(input, color=True, style="verbose")
         ok (actual) == _colorize(expected)
@@ -234,12 +234,12 @@ class VerboseReporter_TC(unittest.TestCase):
 * <b>_Foo_TestCase</b>
   + <b>module hello</b>
     + <b>#method1</b>
-      - [<G>passed</G>] spec1
+      - [<G>pass</G>] spec1
       + when condition1:
-        - [<G>passed</G>] spec2
-        - [<R>Failed</R>] spec3
+        - [<G>pass</G>] spec2
+        - [<R>Fail</R>] spec3
       + else:
-        - [<G>passed</G>] spec4
+        - [<G>pass</G>] spec4
 """[1:] + OUTPUT_WITH_TEST_CONTEXT
         actual = _do_test(input, color=True, style="verbose")
         ok (actual) == _colorize(expected)
