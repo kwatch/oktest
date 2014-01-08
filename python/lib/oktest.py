@@ -297,8 +297,8 @@ def _f():
         self.failed(_msg(other, 'in', self.target))
 
     @assertion
-    def not_contain(self, other):  # DEPRECATED
-        boolean = other in self.target
+    def not_contain(self, other):
+        boolean = other not in self.target
         if boolean == self.boolean:  return self
         self.failed(_msg(other, 'not in', self.target))
 

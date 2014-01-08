@@ -185,6 +185,21 @@ class Assertions_TC(unittest.TestCase):
         def fn(): ok (10).not_in(L)
 
 
+    def test_contains(self):
+        L = [10, 20, 30]
+        ok (L).contains(10)
+        ok (L).contains(20)
+        ok (L).contains(30)
+        @be_fail("11 in [10, 20, 30] : failed.")
+        def fn(): ok (L).contains(11)
+
+    def test_not_contain(self):
+        L = [10, 20, 30]
+        ok (L).not_contain(11)
+        @be_fail("10 not in [10, 20, 30] : failed.")
+        def fn(): ok (L).not_contain(10)
+
+
     global Val
     class Val(object):
         def __init__(self, val):
