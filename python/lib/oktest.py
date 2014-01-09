@@ -476,9 +476,13 @@ ASSERTION_OBJECT = AssertionObject
 
 
 ##
-## assertions for WebOb response object
+## (Undocumented) assertions for WebOb/Werkzeug response object
 ##
 class ResponseAssertionObject(AssertionObject):
+    """(experimental) AssertionObject enhancement for Response object.
+    ex.
+        ok (response).resp.status(200).json({"status": "OK"})
+    """
 
     @assertion
     def status(self, expected_status):
