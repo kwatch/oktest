@@ -487,8 +487,13 @@ class ResponseAssertionObject(AssertionObject):
         if isinstance(expected_status, int):
             if hasattr(response, 'status_int'):
                 actual_status = response.status_int    # WebOb
+                if python2:
+                    resp_body = response.body   # binary
+                if python3:
+                    resp_body = response.text   # unicode
             else:
                 actual_status = response.status_code   # Werkzeug
+                resp_body = response.data
         else:
             actual_status = response.status
         boolean = actual_status == expected_status
@@ -498,7 +503,7 @@ class ResponseAssertionObject(AssertionObject):
 Response status %r == %r: failed.
 --- response body ---
 %s
-"""[1:-1] % (actual_status, expected_status, response.body)
+"""[1:-1] % (actual_status, expected_status, resp_body)
         self.failed(msg)
 
     @assertion
@@ -515,8 +520,11 @@ Response status %r == %r: failed.
                         "%r" % (content_type,))
         ## parse response body
         import json
-        if hasattr(response, 'body'):
-            resp_body = response.body    # WebOb
+        if hasattr(response, 'body'):    # WebOb
+            if python2:
+                resp_body = response.body   # binary
+            elif python3:
+                resp_body = response.text   # unicode
         else:
             resp_body = response.data    # Werkzeug
         try:

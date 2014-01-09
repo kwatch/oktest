@@ -8,6 +8,9 @@
 import sys, os, re
 import unittest
 
+python2 = sys.version_info[0] == 2
+python3 = sys.version_info[0] == 3
+
 import oktest
 from oktest import ok
 
@@ -24,6 +27,13 @@ def be_failed(expected_errmsg):
         if passed:
             assert False, "assertion should be faile, but passed."
     return deco
+
+
+def to_binary(string):
+    if python2:
+        return str(string)
+    if python3:
+        return bytes(string, 'utf-8')
 
 
 class ResponseAssertionObject_TC(unittest.TestCase):
@@ -55,7 +65,7 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         from webob.exc import HTTPFound, HTTPNotFound
         #
         response = Response()
-        response.body = '{"status": "OK"}'
+        response.body = to_binary('{"status": "OK"}')
         expected_errmsg = r"""
 Response status 200 == 201: failed.
 --- response body ---
@@ -75,7 +85,7 @@ Response status 200 == 201: failed.
             'application/json; charset=UTF-8',
             'application/json;charset=UTF8',
         ]
-        response.body = '''{"status": "OK"}'''
+        response.body = to_binary('''{"status": "OK"}''')
         try:
             for cont_type in content_types:
                 response.content_type = cont_type
@@ -88,7 +98,7 @@ Response status 200 == 201: failed.
         from webob.response import Response
         response = Response()
         response.content_type = 'application/json'
-        response.body = '{"status": "OK"}'
+        response.body = to_binary('{"status": "OK"}')
         respobj = ok (response).resp
         assert respobj.json({"status": "OK"}) is respobj
 
@@ -96,7 +106,7 @@ Response status 200 == 201: failed.
         from webob.response import Response
         response = Response()
         response.headers['Content-Type'] = ""
-        response.body = '''{"status": "OK"}'''
+        response.body = to_binary('''{"status": "OK"}''')
         @be_failed("Content-Type is not set.")
         def _():
             ok (response).resp.json({"status": "OK"})
@@ -104,7 +114,7 @@ Response status 200 == 201: failed.
     def test_json_NG_when_content_type_is_not_json_type(self):
         from webob.response import Response
         response = Response()
-        response.body = '''{"status": "OK"}'''
+        response.body = to_binary('''{"status": "OK"}''')
         expected = ("Content-Type should be 'application/json' : failed.\n"
                     "--- content-type ---\n"
                     "'text/html; charset=UTF-8'")
@@ -116,7 +126,7 @@ Response status 200 == 201: failed.
         from webob.response import Response
         response = Response()
         response.content_type = 'application/json'
-        response.body = '''{"status": "OK"}'''
+        response.body = to_binary('''{"status": "OK"}''')
         expected = r"""
 Responsed JSON is different from expected data.
 --- expected
