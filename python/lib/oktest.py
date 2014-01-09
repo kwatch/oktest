@@ -501,6 +501,46 @@ Response status %r == %r: failed.
 """[1:-1] % (actual_status, expected_status, response.body)
         self.failed(msg)
 
+    @assertion
+    def json(self, expected_jdict):
+        """(experimental) Asserts JSON data of WebOb/Werkzeug response object."""
+        ## assert content type
+        response = self.target
+        content_type = response.headers['Content-Type']
+        if not content_type:
+            self.failed("Content-Type is not set.")
+        if not self.JSON_CONTENT_TYPE_REXP.match(content_type):
+            self.failed("Content-Type should be 'application/json' : failed.\n"
+                        "--- content-type ---\n"
+                        "%r" % (content_type,))
+        ## parse response body
+        import json
+        if hasattr(response, 'body'):
+            resp_body = response.body    # WebOb
+        else:
+            resp_body = response.data    # Werkzeug
+        try:
+            actual_jdict = json.loads(resp_body)
+        except:
+            self.failed("Response body should be JSON data : failed.\n"
+                        "--- response body ---\n"
+                        "%s" % (resp_body,))
+        ## assert json jdict
+        boolean = actual_jdict == expected_jdict
+        if boolean == self.boolean:
+            return self
+        ## show unified diff when assertion failed
+        from difflib import unified_diff
+        def _lines(jdict, json=json):
+            text = json.dumps(jdict, ensure_ascii=False, indent=2, sort_keys=True)
+            return text.splitlines(True)
+        diff_lines = unified_diff(_lines(expected_jdict), _lines(actual_jdict),
+                                  'expected', 'actual', n=2)
+        self.failed("Responsed JSON is different from expected data.\n"
+                    +"".join(diff_lines))
+
+    JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)$')
+
 
 def resp(self):
     """Change assertion object class.

@@ -59,6 +59,64 @@ Response status 200 == 201: failed.
         def _():
             ok (response).resp.status(201)
 
+    def test_json_ok(self):
+        from webob.response import Response
+        response = Response()
+        content_types = [
+            'application/json',
+            'application/json;charset=utf8',
+            'application/json; charset=utf-8',
+            'application/json; charset=UTF-8',
+            'application/json;charset=UTF8',
+        ]
+        response.body = '''{"status": "OK"}'''
+        try:
+            for cont_type in content_types:
+                response.content_type = cont_type
+                ok (response).resp.json({"status": "OK"})
+        except:
+            ex = sys.exc_info()[1]
+            assert False, "failed"
+
+    def test_json_NG_when_content_type_is_empty(self):
+        from webob.response import Response
+        response = Response()
+        response.headers['Content-Type'] = ""
+        response.body = '''{"status": "OK"}'''
+        @be_failed("Content-Type is not set.")
+        def _():
+            ok (response).resp.json({"status": "OK"})
+
+    def test_json_NG_when_content_type_is_not_json_type(self):
+        from webob.response import Response
+        response = Response()
+        response.body = '''{"status": "OK"}'''
+        expected = ("Content-Type should be 'application/json' : failed.\n"
+                    "--- content-type ---\n"
+                    "'text/html; charset=UTF-8'")
+        @be_failed(expected)
+        def _():
+            ok (response).resp.json({"status": "OK"})
+
+    def test_json_NG_when_json_data_is_different(self):
+        from webob.response import Response
+        response = Response()
+        response.content_type = 'application/json'
+        response.body = '''{"status": "OK"}'''
+        expected = r"""
+Responsed JSON is different from expected data.
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ {
+-  "status": "ok"
++  "status": "OK"
+ }
+"""[1:-1]
+        @be_failed(expected)
+        def _():
+            ok (response).resp.json({"status": "ok"})
+
 
 
 if __name__ == '__main__':
