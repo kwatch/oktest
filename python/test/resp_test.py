@@ -44,6 +44,12 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         except:
             assert False, "failed"
 
+    def test_status_ok_returns_self(self):
+        from webob.response import Response
+        from webob.exc import HTTPFound, HTTPNotFound
+        respobj = ok (Response()).resp
+        assert respobj.status(200) is respobj
+
     def test_status_NG(self):
         from webob.response import Response
         from webob.exc import HTTPFound, HTTPNotFound
@@ -77,6 +83,14 @@ Response status 200 == 201: failed.
         except:
             ex = sys.exc_info()[1]
             assert False, "failed"
+
+    def test_json_ok_returns_self(self):
+        from webob.response import Response
+        response = Response()
+        response.content_type = 'application/json'
+        response.body = '{"status": "OK"}'
+        respobj = ok (response).resp
+        assert respobj.json({"status": "OK"}) is respobj
 
     def test_json_NG_when_content_type_is_empty(self):
         from webob.response import Response
