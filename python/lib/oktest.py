@@ -482,10 +482,13 @@ class ResponseAssertionObject(AssertionObject):
 
     @assertion
     def status(self, expected_status):
-        """(experimental) Asserts status code of WebOb response object."""
+        """(experimental) Asserts status code of WebOb/Werkzeug response object."""
         response = self.target
         if isinstance(expected_status, int):
-            actual_status = response.status_int
+            if hasattr(response, 'status_int'):
+                actual_status = response.status_int    # WebOb
+            else:
+                actual_status = response.status_code   # Werkzeug
         else:
             actual_status = response.status
         boolean = actual_status == expected_status
