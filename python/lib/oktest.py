@@ -475,6 +475,28 @@ _rexp_type = type(re.compile('x'))
 ASSERTION_OBJECT = AssertionObject
 
 
+##
+## assertions for WebOb response object
+##
+class ResponseAssertionObject(AssertionObject):
+    pass
+
+def resp(self):
+    """Change assertion object class.
+    ex:
+       ok (value)        #=> AssertionObject
+       ok (value).resp   #=> ResponseAssertionObject
+    """
+    self.__class__ = ResponseAssertionObject
+    return self
+
+AssertionObject.resp = property(resp)
+
+
+##
+##
+##
+
 def ok(target):
     obj = ASSERTION_OBJECT(target, True)
     obj._location = util.get_location(1)
