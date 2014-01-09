@@ -36,6 +36,17 @@ def to_binary(string):
         return bytes(string, 'utf-8')
 
 
+def ignore_import_error(func):
+    def deco(self):
+        try:
+            func(self)
+        except ImportError:
+            pass
+    deco.__name__ = func.__name__
+    deco.__doc__  = func.__doc__
+    return deco
+
+
 class ResponseAssertionObject_TC(unittest.TestCase):
 
     def test_resp_property(self):
@@ -44,6 +55,7 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         assert not isinstance(obj, oktest.ResponseAssertionObject)
         assert isinstance(obj.resp, oktest.ResponseAssertionObject)
 
+    @ignore_import_error
     def test_status_ok(self):
         from webob.response import Response
         from webob.exc import HTTPFound, HTTPNotFound
@@ -54,12 +66,14 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         except:
             assert False, "failed"
 
+    @ignore_import_error
     def test_status_ok_returns_self(self):
         from webob.response import Response
         from webob.exc import HTTPFound, HTTPNotFound
         respobj = ok (Response()).resp
         assert respobj.status(200) is respobj
 
+    @ignore_import_error
     def test_status_NG(self):
         from webob.response import Response
         from webob.exc import HTTPFound, HTTPNotFound
@@ -75,6 +89,7 @@ Response status 200 == 201: failed.
         def _():
             ok (response).resp.status(201)
 
+    @ignore_import_error
     def test_json_ok(self):
         from webob.response import Response
         response = Response()
@@ -94,6 +109,7 @@ Response status 200 == 201: failed.
             ex = sys.exc_info()[1]
             assert False, "failed"
 
+    @ignore_import_error
     def test_json_ok_returns_self(self):
         from webob.response import Response
         response = Response()
@@ -102,6 +118,7 @@ Response status 200 == 201: failed.
         respobj = ok (response).resp
         assert respobj.json({"status": "OK"}) is respobj
 
+    @ignore_import_error
     def test_json_NG_when_content_type_is_empty(self):
         from webob.response import Response
         response = Response()
@@ -111,6 +128,7 @@ Response status 200 == 201: failed.
         def _():
             ok (response).resp.json({"status": "OK"})
 
+    @ignore_import_error
     def test_json_NG_when_content_type_is_not_json_type(self):
         from webob.response import Response
         response = Response()
@@ -122,6 +140,7 @@ Response status 200 == 201: failed.
         def _():
             ok (response).resp.json({"status": "OK"})
 
+    @ignore_import_error
     def test_json_NG_when_json_data_is_different(self):
         from webob.response import Response
         response = Response()
