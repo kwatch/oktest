@@ -12,6 +12,20 @@ import oktest
 from oktest import ok
 
 
+def be_failed(expected_errmsg):
+    def deco(func):
+        passed = False
+        try:
+            func()
+            passed = True
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            assert str(ex) == expected_errmsg, "%r != %r" % (str(ex), expected_errmsg)
+        if passed:
+            assert False, "assertion should be faile, but passed."
+    return deco
+
+
 class ResponseAssertionObject_TC(unittest.TestCase):
 
     def test_resp_property(self):
@@ -19,6 +33,31 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         assert isinstance(obj, oktest.AssertionObject)
         assert not isinstance(obj, oktest.ResponseAssertionObject)
         assert isinstance(obj.resp, oktest.ResponseAssertionObject)
+
+    def test_status_ok(self):
+        from webob.response import Response
+        from webob.exc import HTTPFound, HTTPNotFound
+        try:
+            ok (Response()).resp.status(200)
+            ok (HTTPFound()).resp.status(302)
+            ok (HTTPNotFound()).resp.status(404)
+        except:
+            assert False, "failed"
+
+    def test_status_NG(self):
+        from webob.response import Response
+        from webob.exc import HTTPFound, HTTPNotFound
+        #
+        response = Response()
+        response.body = '{"status": "OK"}'
+        expected_errmsg = r"""
+Response status 200 == 201: failed.
+--- response body ---
+{"status": "OK"}
+"""[1:-1]
+        @be_failed(expected_errmsg)
+        def _():
+            ok (response).resp.status(201)
 
 
 

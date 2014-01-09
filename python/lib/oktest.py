@@ -479,7 +479,25 @@ ASSERTION_OBJECT = AssertionObject
 ## assertions for WebOb response object
 ##
 class ResponseAssertionObject(AssertionObject):
-    pass
+
+    @assertion
+    def status(self, expected_status):
+        """(experimental) Asserts status code of WebOb response object."""
+        response = self.target
+        if isinstance(expected_status, int):
+            actual_status = response.status_int
+        else:
+            actual_status = response.status
+        boolean = actual_status == expected_status
+        if boolean == self.boolean:
+            return self
+        msg = r"""
+Response status %r == %r: failed.
+--- response body ---
+%s
+"""[1:-1] % (actual_status, expected_status, response.body)
+        self.failed(msg)
+
 
 def resp(self):
     """Change assertion object class.
