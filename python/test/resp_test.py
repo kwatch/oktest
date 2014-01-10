@@ -90,6 +90,43 @@ Response status 200 == 201: failed.
             ok (response).resp.status(201)
 
     @ignore_import_error
+    def test_header_ok(self):
+        from webob.response import Response
+        try:
+            ok (Response()).resp.header('Content-Type', 'text/html; charset=UTF-8')
+            ok (Response()).resp.header('Location', None)
+        except:
+            assert False, "failed"
+
+    @ignore_import_error
+    def test_header_ok_returns_self(self):
+        from webob.response import Response
+        respobj = ok (Response()).resp
+        assert respobj.header('Content-Type', 'text/html; charset=UTF-8') is respobj
+
+    @ignore_import_error
+    def test_header_NG(self):
+        from webob.response import Response
+        response = Response()
+        expected_errmsg = r"""
+Response header 'Content-Type' is unexpected value.
+  expected: 'text/html'
+  actual:   'text/html; charset=UTF-8'
+"""[1:-1]
+        @be_failed(expected_errmsg)
+        def _():
+            ok (response).resp.header('Content-Type', 'text/html')
+        #
+        response.headers['Location'] = '/'
+        expected_errmsg = r"""
+Response header 'Location' should not be set : failed.
+  header value: '/'
+"""[1:-1]
+        @be_failed(expected_errmsg)
+        def _():
+            ok (response).resp.header('Location', None)
+
+    @ignore_import_error
     def test_json_ok(self):
         from webob.response import Response
         response = Response()

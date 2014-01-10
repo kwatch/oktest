@@ -511,6 +511,21 @@ Response status %r == %r: failed.
         self.failed(msg)
 
     @assertion
+    def header(self, name, value):
+        """(experimental) Asserts header of WebOb/Werkzeug response object."""
+        response = self.target
+        if value is None:
+            if self.boolean != (name not in response.headers):
+                self.failed("Response header '%s' should not be set : failed.\n"
+                            "  header value: %r" % (name, response.headers[name],))
+        else:
+            if self.boolean != (response.headers[name] == value):
+                self.failed("Response header '%s' is unexpected value.\n"
+                            "  expected: %r\n"
+                            "  actual:   %r" % (name, value, response.headers[name],))
+        return self
+
+    @assertion
     def json(self, expected_jdict):
         """(experimental) Asserts JSON data of WebOb/Werkzeug response object."""
         ## assert content type
