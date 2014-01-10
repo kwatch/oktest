@@ -56,6 +56,29 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         assert isinstance(obj.resp, oktest.ResponseAssertionObject)
 
     @ignore_import_error
+    def test_is_response(self):
+        from webob.response import Response
+        response = Response()
+        #
+        ret = ok (response).is_response(200); ret != None
+        ok (ret).is_a(oktest.ResponseAssertionObject)
+        #
+        try:
+            ok (response).is_response(200)
+            ok (response).is_response('200 OK')
+        except:
+            assert False, "failed"
+        #
+        try:
+            ok (response).is_response(201)
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            assert str(ex) == ("Response status 200 == 201: failed.\n"
+                               "--- response body ---\n")
+        else:
+            assert False, "failed"
+
+    @ignore_import_error
     def test_status_ok(self):
         from webob.response import Response
         from webob.exc import HTTPFound, HTTPNotFound

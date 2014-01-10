@@ -578,7 +578,20 @@ def resp(self):
     self.__class__ = ResponseAssertionObject
     return self
 
+def is_response(self, status=None):
+    """Assert response status.
+    ex:
+       ok (response1).is_response(200).json({"status": "OK"})
+       ok (response2).is_response(302).header("Location", "/")
+    """
+    self.__class__ = ResponseAssertionObject
+    if status is not None:
+        self.status(status)
+    return self
+
 AssertionObject.resp = property(resp)
+AssertionObject.is_response = is_response
+del resp, is_response
 
 
 ##
