@@ -10,6 +10,12 @@ import unittest
 
 python2 = sys.version_info[0] == 2
 python3 = sys.version_info[0] == 3
+if python2:
+    _unicode = unicode
+    _binary  = str
+if python3:
+    _unicode = str
+    _binary  = bytes
 
 import oktest
 from oktest import ok
@@ -36,15 +42,23 @@ def to_binary(string):
         return bytes(string, 'utf-8')
 
 
-def ignore_import_error(func):
-    def deco(self):
-        try:
-            func(self)
-        except ImportError:
-            pass
-    deco.__name__ = func.__name__
-    deco.__doc__  = func.__doc__
-    return deco
+try:
+    from webob.response import Response as WebObResponse
+except ImportError:
+    class WebObResponse(object):
+        def __init__(self, status=200, headers=None, body=""):
+            if headers is None:
+                headers = {'Content-Type': 'text/html; charset=UTF-8'}
+            self.status_int = 200
+            self.status = "200 OK"
+            self.headers = headers
+            if isinstance(body, _unicode):
+                self.text = body
+                self.body = body.encode('utf-8')
+            else:
+                self.body = body
+                self.text = body.decode('utf-8')
+
 
 
 class ResponseAssertionObject_TC(unittest.TestCase):
@@ -55,11 +69,8 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         assert not isinstance(obj, oktest.ResponseAssertionObject)
         assert isinstance(obj.resp, oktest.ResponseAssertionObject)
 
-    @ignore_import_error
     def test_is_response(self):
-        from webob.response import Response
-        response = Response()
-        #
+        response = WebObResponse()
         ret = ok (response).is_response(200); ret != None
         ok (ret).is_a(oktest.ResponseAssertionObject)
         #
@@ -78,30 +89,19 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         else:
             assert False, "failed"
 
-    @ignore_import_error
     def test_status_ok(self):
-        from webob.response import Response
-        from webob.exc import HTTPFound, HTTPNotFound
         try:
-            ok (Response()).resp.status(200)
-            ok (HTTPFound()).resp.status(302)
-            ok (HTTPNotFound()).resp.status(404)
+            ok (WebObResponse()).resp.status(200)
+            ok (WebObResponse(status=302)).resp.status(302)
         except:
             assert False, "failed"
 
-    @ignore_import_error
     def test_status_ok_returns_self(self):
-        from webob.response import Response
-        from webob.exc import HTTPFound, HTTPNotFound
-        respobj = ok (Response()).resp
+        respobj = ok (WebObResponse()).resp
         assert respobj.status(200) is respobj
 
-    @ignore_import_error
     def test_status_NG(self):
-        from webob.response import Response
-        from webob.exc import HTTPFound, HTTPNotFound
-        #
-        response = Response()
+        response = WebObResponse()
         response.body = to_binary('{"status": "OK"}')
         expected_errmsg = r"""
 Response status 200 == 201: failed.
@@ -112,25 +112,19 @@ Response status 200 == 201: failed.
         def _():
             ok (response).resp.status(201)
 
-    @ignore_import_error
     def test_header_ok(self):
-        from webob.response import Response
         try:
-            ok (Response()).resp.header('Content-Type', 'text/html; charset=UTF-8')
-            ok (Response()).resp.header('Location', None)
+            ok (WebObResponse()).resp.header('Content-Type', 'text/html; charset=UTF-8')
+            ok (WebObResponse()).resp.header('Location', None)
         except:
             assert False, "failed"
 
-    @ignore_import_error
     def test_header_ok_returns_self(self):
-        from webob.response import Response
-        respobj = ok (Response()).resp
+        respobj = ok (WebObResponse()).resp
         assert respobj.header('Content-Type', 'text/html; charset=UTF-8') is respobj
 
-    @ignore_import_error
     def test_header_NG(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         expected_errmsg = r"""
 Response header 'Content-Type' is unexpected value.
   expected: 'text/html'
@@ -149,10 +143,8 @@ Response header 'Location' should not be set : failed.
         def _():
             ok (response).resp.header('Location', None)
 
-    @ignore_import_error
     def test_body_ok(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         response.body = to_binary('<h1>Hello</h1>')
         try:
             ok (response).resp.body('<h1>Hello</h1>')
@@ -162,10 +154,8 @@ Response header 'Location' should not be set : failed.
             ex = sys.exc_info()[1]
             assert False, "failed"
 
-    @ignore_import_error
     def test_body_NG(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         response.body = to_binary('<h1>Hello</h1>')
         #
         expected_msg = ("Response body is different from expected data.\n"
@@ -182,10 +172,8 @@ Response header 'Location' should not be set : failed.
         def _():
             ok (response).resp.body(re.compile(r'hello'))
 
-    @ignore_import_error
     def test_json_ok(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         content_types = [
             'application/json',
             'application/json;charset=utf8',
@@ -202,29 +190,23 @@ Response header 'Location' should not be set : failed.
             ex = sys.exc_info()[1]
             assert False, "failed"
 
-    @ignore_import_error
     def test_json_ok_returns_self(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         response.content_type = 'application/json'
         response.body = to_binary('{"status": "OK"}')
         respobj = ok (response).resp
         assert respobj.json({"status": "OK"}) is respobj
 
-    @ignore_import_error
     def test_json_NG_when_content_type_is_empty(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         response.headers['Content-Type'] = ""
         response.body = to_binary('''{"status": "OK"}''')
         @be_failed("Content-Type is not set.")
         def _():
             ok (response).resp.json({"status": "OK"})
 
-    @ignore_import_error
     def test_json_NG_when_content_type_is_not_json_type(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         response.body = to_binary('''{"status": "OK"}''')
         expected = ("Content-Type should be 'application/json' : failed.\n"
                     "--- content-type ---\n"
@@ -233,10 +215,8 @@ Response header 'Location' should not be set : failed.
         def _():
             ok (response).resp.json({"status": "OK"})
 
-    @ignore_import_error
     def test_json_NG_when_json_data_is_different(self):
-        from webob.response import Response
-        response = Response()
+        response = WebObResponse()
         response.content_type = 'application/json'
         response.body = to_binary('''{"status": "OK"}''')
         expected = r"""
