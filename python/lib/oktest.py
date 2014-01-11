@@ -598,7 +598,7 @@ Response status %r == %r: failed.
         diff_str = diff_str.replace('+++ actual ',   '+++ actual',   1)  # bug of difflib
         self.failed("Responsed JSON is different from expected data.\n"+diff_str)
 
-    JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)$')
+    JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
 
 
 def resp(self):
