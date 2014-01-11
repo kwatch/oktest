@@ -139,11 +139,19 @@ def _diff(target, other):
                 if not lines[-1].endswith("\n"):
                     lines[-1] += "\n\\ No newline at end of string\n"
     s = ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
-    # workaround to avoid bug of difflib
-    if s.startswith("--- expected \n"):  # extra space at end of line
-        s = s.replace('--- expected ', '--- expected', 1)
-        s = s.replace('+++ actual ',   '+++ actual',   1)
-    return s
+    return _tweak_diffstr(s)
+
+# workaround to avoid bug of difflib
+def _tweak_diffstr(diffstr):
+    global _difflib_has_bug
+    if _difflib_has_bug is None:
+        _difflib_has_bug = diffstr.startswith("--- expected \n")  # extra space at end of line
+    if _difflib_has_bug:
+        diffstr = diffstr.replace('--- expected ', '--- expected', 1)
+        diffstr = diffstr.replace('+++ actual ',   '+++ actual',   1)
+    return diffstr
+
+_difflib_has_bug = None
 
 
 def assertion(func):
