@@ -17,6 +17,18 @@ if python3:
     _unicode = str
     _binary  = bytes
 
+
+from difflib import unified_diff
+diff_lines = unified_diff(["foo\n"], ["bar\n"], 'expected', 'actual')
+_difflib_has_bug = 'expected ' in list(diff_lines)[0]
+del unified_diff, diff_lines
+def _fix_diffstr(string):
+    if _difflib_has_bug:
+        string = string.replace('--- expected', '--- expected ')
+        string = string.replace('+++ actual', '+++ actual ')
+        return string
+
+
 import oktest
 from oktest import ok
 
@@ -229,6 +241,7 @@ Responsed JSON is different from expected data.
 +  "status": "OK"
  }
 """[1:-1]
+        expected = _fix_diffstr(expected)
         @be_failed(expected)
         def _():
             ok (response).resp.json({"status": "ok"})
