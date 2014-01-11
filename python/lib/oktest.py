@@ -526,6 +526,36 @@ Response status %r == %r: failed.
         return self
 
     @assertion
+    def body(self, str_or_regexp):
+        """(experimental) Asserts response body of WebOb/Werkzeug response object."""
+        ## response body
+        response = self.target
+        if hasattr(response, 'body'):    # WebOb
+            if python2:
+                resp_body = response.body   # binary
+            elif python3:
+                resp_body = response.text   # unicode
+        else:
+            resp_body = response.data    # Werkzeug
+        ## when regular expression
+        if isinstance(str_or_regexp, _rexp_type):
+            rexp = str_or_regexp
+            m = rexp.search(resp_body)
+            if self.boolean != bool(m):
+                self.failed("Response body failed to match to expected pattern.\n"
+                            "  expected pattern: %r\n"
+                            "  response body:    %s" % (rexp.pattern, resp_body,))
+        ## when text string
+        else:
+            text = str_or_regexp
+            if self.boolean != (text == resp_body):
+                self.failed("Response body is different from expected data.\n"
+                            "  expected: %s\n"
+                            "  actual:   %s" % (text, resp_body,))
+        ##
+        return self
+
+    @assertion
     def json(self, expected_jdict):
         """(experimental) Asserts JSON data of WebOb/Werkzeug response object."""
         ## assert content type

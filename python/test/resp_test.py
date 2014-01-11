@@ -150,6 +150,39 @@ Response header 'Location' should not be set : failed.
             ok (response).resp.header('Location', None)
 
     @ignore_import_error
+    def test_body_ok(self):
+        from webob.response import Response
+        response = Response()
+        response.body = to_binary('<h1>Hello</h1>')
+        try:
+            ok (response).resp.body('<h1>Hello</h1>')
+            ok (response).resp.body(re.compile('<h1>.*</h1>'))
+            ok (response).resp.body(re.compile('hello', re.I))
+        except:
+            ex = sys.exc_info()[1]
+            assert False, "failed"
+
+    @ignore_import_error
+    def test_body_NG(self):
+        from webob.response import Response
+        response = Response()
+        response.body = to_binary('<h1>Hello</h1>')
+        #
+        expected_msg = ("Response body is different from expected data.\n"
+                        "  expected: <h1>Hello World!</h1>\n"
+                        "  actual:   <h1>Hello</h1>")
+        @be_failed(expected_msg)
+        def _():
+            ok (response).resp.body('<h1>Hello World!</h1>')
+        #
+        expected_msg = ("Response body failed to match to expected pattern.\n"
+                        "  expected pattern: 'hello'\n"
+                        "  response body:    <h1>Hello</h1>")
+        @be_failed(expected_msg)
+        def _():
+            ok (response).resp.body(re.compile(r'hello'))
+
+    @ignore_import_error
     def test_json_ok(self):
         from webob.response import Response
         response = Response()
