@@ -138,7 +138,12 @@ def _diff(target, other):
             for lines in (expected, actual):
                 if not lines[-1].endswith("\n"):
                     lines[-1] += "\n\\ No newline at end of string\n"
-    return ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
+    s = ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
+    # workaround to avoid bug of difflib
+    s = s.replace('--- expected ', '--- expected', 1)
+    s = s.replace('+++ actual ',   '+++ actual',   1)
+    return s
+
 
 
 def assertion(func):
@@ -589,8 +594,6 @@ Response status %r == %r: failed.
             return self
         ## show unified diff when assertion failed
         diff_str = _diff(self._json_dumps(actual_jdict), self._json_dumps(expected_jdict))
-        diff_str = diff_str.replace('--- expected ', '--- expected', 1)  # bug of difflib
-        diff_str = diff_str.replace('+++ actual ',   '+++ actual',   1)  # bug of difflib
         self.failed("Responsed JSON is different from expected data.\n"+diff_str)
 
     def _json_dumps(self, jdict):
