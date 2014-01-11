@@ -325,7 +325,8 @@ Responsed JSON is different from expected data.
 -  "status": "ok"
 +  "status": "OK"
  }
-"""[1:-1]
+\ No newline at end of string
+"""[1:]
         @be_failed(expected)
         def _():
             ok (response).resp.json({"status": "ok"})

@@ -588,16 +588,14 @@ Response status %r == %r: failed.
         if boolean == self.boolean:
             return self
         ## show unified diff when assertion failed
-        from difflib import unified_diff
-        def _lines(jdict, json=json):
-            text = json.dumps(jdict, ensure_ascii=False, indent=2, sort_keys=True)
-            return text.splitlines(True)
-        diff_lines = unified_diff(_lines(expected_jdict), _lines(actual_jdict),
-                                  'expected', 'actual', n=2)
-        diff_str = "".join(diff_lines)
+        diff_str = _diff(self._json_dumps(actual_jdict), self._json_dumps(expected_jdict))
         diff_str = diff_str.replace('--- expected ', '--- expected', 1)  # bug of difflib
         diff_str = diff_str.replace('+++ actual ',   '+++ actual',   1)  # bug of difflib
         self.failed("Responsed JSON is different from expected data.\n"+diff_str)
+
+    def _json_dumps(self, jdict):
+        import json
+        return json.dumps(jdict, ensure_ascii=False, indent=2, sort_keys=True)
 
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
 
