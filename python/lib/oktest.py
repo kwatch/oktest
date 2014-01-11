@@ -140,10 +140,10 @@ def _diff(target, other):
                     lines[-1] += "\n\\ No newline at end of string\n"
     s = ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
     # workaround to avoid bug of difflib
-    s = s.replace('--- expected ', '--- expected', 1)
-    s = s.replace('+++ actual ',   '+++ actual',   1)
+    if s.startswith("--- expected \n"):  # extra space at end of line
+        s = s.replace('--- expected ', '--- expected', 1)
+        s = s.replace('+++ actual ',   '+++ actual',   1)
     return s
-
 
 
 def assertion(func):
