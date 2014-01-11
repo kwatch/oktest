@@ -250,8 +250,11 @@ Response header 'Location' should not be set : failed.
         _set_body(response, to_binary('<h1>Hello</h1>'))
         #
         expected_msg = ("Response body is different from expected data.\n"
-                        "  expected: <h1>Hello World!</h1>\n"
-                        "  actual:   <h1>Hello</h1>")
+                        "--- expected\n"
+                        "+++ actual\n"
+                        "@@ -1,1 +1,1 @@\n"
+                        "-<h1>Hello World!</h1>\n"
+                        "+<h1>Hello</h1>\n")
         @be_failed(expected_msg)
         def _():
             ok (response).resp.body('<h1>Hello World!</h1>')

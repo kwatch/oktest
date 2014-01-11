@@ -557,11 +557,11 @@ Response status %r == %r: failed.
                             "  response body:    %s" % (rexp.pattern, resp_body,))
         ## when text string
         else:
-            text = str_or_regexp
-            if self.boolean != (text == resp_body):
-                self.failed("Response body is different from expected data.\n"
-                            "  expected: %s\n"
-                            "  actual:   %s" % (text, resp_body,))
+            expected = str_or_regexp
+            actual   = resp_body
+            if self.boolean != (expected == actual):
+                diff_str = _diff(actual, expected)
+                self.failed("Response body is different from expected data.\n"+diff_str)
         ##
         return self
 
