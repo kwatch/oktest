@@ -38,40 +38,108 @@ def be_failed(expected_errmsg):
 
 def to_binary(string):
     if python2:
-        return str(string)
+        if isinstance(string, unicode):
+            return string.encode('utf-8')
+        else:
+            return string
     if python3:
-        return bytes(string, 'utf-8')
+        if isinstance(string, bytes):
+            return string
+        else:
+            return string.encode('utf-8')
+
+def to_unicode(string):
+    if python2:
+        if isinstance(string, unicode):
+            return string
+        else:
+            return string.decode('utf-8')
+    if python3:
+        if isinstance(string, bytes):
+            return string.decode('utf-8')
+        else:
+            return string
 
 
 try:
     from webob.response import Response as WebObResponse
 except ImportError:
     class WebObResponse(object):
-        def __init__(self, status=200, headers=None, body=""):
+        def __init__(self, status=200, headers=None):
             if headers is None:
                 headers = {'Content-Type': 'text/html; charset=UTF-8'}
-            self.status_int = 200
-            self.status = "200 OK"
+            self.status_int = status
+            self.status = status == 200 and "200 OK" or None
             self.headers = headers
-            if isinstance(body, _unicode):
-                self.text = body
-                self.body = body.encode('utf-8')
-            else:
-                self.body = body
-                self.text = body.decode('utf-8')
+            self.body = to_binary("")
+            self.text = to_unicode("")
 
+try:
+    from werkzeug.wrappers import Response as WerkzeugResponse
+except (ImportError, SyntaxError):
+    class WerkzeugResponse(object):
+        def __init__(self, status=200, headers=None):
+            if headers is None:
+                headers = {'Content-Type': 'text/html; charset=UTF-8'}
+            self.status_code = status
+            self.status = status == 200 and "200 OK" or None
+            self.headers = headers
+            self.data = ""
+            self.mimetype = 'text/plain'
+        def get_data(self, as_text=False):
+            if as_text:
+                return to_unicode(self._data)
+            return self._data
+        def set_data(self, data):
+            self._data = to_binary(data)
+        data = property(get_data, set_data)
+
+
+def _set_body(response, body):
+    if hasattr(response, 'body'):
+        response.body = to_binary(body)
+    else:
+        response.data = body
+
+def _set_ctype(response, content_type):
+    if hasattr(response, 'content_type'):
+        response.content_type = content_type
+    elif hasattr(response, 'mimetype'):
+        response.mimetype = content_type
+    else:
+        response.headers['Content-Type'] = content_type
+
+def _get_ctype(response):
+    if hasattr(response, 'content_type'):
+        return response.content_type
+    elif hasattr(response, 'mimetype'):
+        return response.mimetype
+    else:
+        return response.headers['Content-Type']
+
+def with_response_class(func):
+    def newfunc(self):
+        #for klass in [WebObResponse]:
+        #for klass in [WerkzeugResponse]:
+        for klass in [WebObResponse, WerkzeugResponse]:
+            func(self, klass)
+    newfunc.__name__ = func.__name__
+    newfunc.__doc__  = func.__doc__
+    return newfunc
 
 
 class ResponseAssertionObject_TC(unittest.TestCase):
 
-    def test_resp_property(self):
+    @with_response_class
+    def test_resp_property(self, Response):
         obj = ok (""); obj == ""
         assert isinstance(obj, oktest.AssertionObject)
         assert not isinstance(obj, oktest.ResponseAssertionObject)
         assert isinstance(obj.resp, oktest.ResponseAssertionObject)
 
-    def test_is_response(self):
-        response = WebObResponse()
+    @with_response_class
+    def test_is_response(self, Response):
+        response = Response()
         ret = ok (response).is_response(200); ret != None
         ok (ret).is_a(oktest.ResponseAssertionObject)
         #
@@ -85,79 +153,101 @@ class ResponseAssertionObject_TC(unittest.TestCase):
             ok (response).is_response(201)
         except AssertionError:
             ex = sys.exc_info()[1]
-            assert str(ex) == ("Response status 200 == 201: failed.\n"
-                               "--- response body ---\n")
+            expected_errmsg = ("Response status 200 == 201: failed.\n"
+                               "--- response body ---\n"
+                               "b''")
+            if python2:
+                expected_errmsg = expected_errmsg.replace("b''", "")
+            assert str(ex) == (expected_errmsg)
         else:
             assert False, "failed"
 
-    def test_status_ok(self):
+    @with_response_class
+    def test_status_ok(self, Response):
         try:
-            ok (WebObResponse()).resp.status(200)
-            ok (WebObResponse(status=302)).resp.status(302)
+            ok (Response()).resp.status(200)
+            ok (Response(status=302)).resp.status(302)
         except:
             assert False, "failed"
 
-    def test_status_ok_returns_self(self):
-        respobj = ok (WebObResponse()).resp
+    @with_response_class
+    def test_status_ok_returns_self(self, Response):
+        respobj = ok (Response()).resp
         assert respobj.status(200) is respobj
 
-    def test_status_NG(self):
-        response = WebObResponse()
-        response.body = to_binary('{"status": "OK"}')
+    @with_response_class
+    def test_status_NG(self, Response):
+        response = Response()
+        _set_body(response, to_binary('{"status": "OK"}'))
         expected_errmsg = r"""
 Response status 200 == 201: failed.
 --- response body ---
-{"status": "OK"}
+b'{"status": "OK"}'
 """[1:-1]
+        if python2:
+            expected_errmsg = re.sub(r"b'({.*?})'", r"\1", expected_errmsg)
         @be_failed(expected_errmsg)
         def _():
             ok (response).resp.status(201)
 
-    def test_header_ok(self):
+    @with_response_class
+    def test_header_ok(self, Response):
+        response = Response()
+        response.headers['Location'] = '/'
         try:
-            ok (WebObResponse()).resp.header('Content-Type', 'text/html; charset=UTF-8')
-            ok (WebObResponse()).resp.header('Location', None)
+            ok (response).resp.header('Location', '/')
+            ok (response).resp.header('Last-Modified', None)
         except:
             assert False, "failed"
 
-    def test_header_ok_returns_self(self):
-        respobj = ok (WebObResponse()).resp
-        assert respobj.header('Content-Type', 'text/html; charset=UTF-8') is respobj
+    @with_response_class
+    def test_header_ok_returns_self(self, Response):
+        response = Response()
+        response.headers['Location'] = '/'
+        respobj = ok (response).resp
+        assert respobj.header('Location', '/') is respobj
 
-    def test_header_NG(self):
-        response = WebObResponse()
+    @with_response_class
+    def test_header_NG(self, Response):
+        response = Response()
+        response.headers['Location'] = '/'
         expected_errmsg = r"""
-Response header 'Content-Type' is unexpected value.
-  expected: 'text/html'
-  actual:   'text/html; charset=UTF-8'
+Response header 'Location' is unexpected value.
+  expected: '/index'
+  actual:   u'/'
 """[1:-1]
+        if python3 or (python2 and isinstance(response.headers['Location'], str)):
+            expected_errmsg = expected_errmsg.replace("u'/'", "'/'")
         @be_failed(expected_errmsg)
         def _():
-            ok (response).resp.header('Content-Type', 'text/html')
+            ok (response).resp.header('Location', '/index')
         #
         response.headers['Location'] = '/'
         expected_errmsg = r"""
 Response header 'Location' should not be set : failed.
-  header value: '/'
+  header value: u'/'
 """[1:-1]
+        if python3 or (python2 and isinstance(response.headers['Location'], str)):
+            expected_errmsg = expected_errmsg.replace("u'/'", "'/'")
         @be_failed(expected_errmsg)
         def _():
             ok (response).resp.header('Location', None)
 
-    def test_body_ok(self):
-        response = WebObResponse()
-        response.body = to_binary('<h1>Hello</h1>')
+    @with_response_class
+    def test_body_ok(self, Response):
+        response = Response()
+        _set_body(response, '<h1>Hello</h1>')
         try:
             ok (response).resp.body('<h1>Hello</h1>')
             ok (response).resp.body(re.compile('<h1>.*</h1>'))
             ok (response).resp.body(re.compile('hello', re.I))
         except:
-            ex = sys.exc_info()[1]
             assert False, "failed"
 
-    def test_body_NG(self):
-        response = WebObResponse()
-        response.body = to_binary('<h1>Hello</h1>')
+    @with_response_class
+    def test_body_NG(self, Response):
+        response = Response()
+        _set_body(response, to_binary('<h1>Hello</h1>'))
         #
         expected_msg = ("Response body is different from expected data.\n"
                         "  expected: <h1>Hello World!</h1>\n"
@@ -173,8 +263,9 @@ Response header 'Location' should not be set : failed.
         def _():
             ok (response).resp.body(re.compile(r'hello'))
 
-    def test_json_ok(self):
-        response = WebObResponse()
+    @with_response_class
+    def test_json_ok(self, Response):
+        response = Response()
         content_types = [
             'application/json',
             'application/json;charset=utf8',
@@ -182,44 +273,49 @@ Response header 'Location' should not be set : failed.
             'application/json; charset=UTF-8',
             'application/json;charset=UTF8',
         ]
-        response.body = to_binary('''{"status": "OK"}''')
+        _set_body(response, to_binary('''{"status": "OK"}'''))
         try:
             for cont_type in content_types:
-                response.content_type = cont_type
+                _set_ctype(response, cont_type)
                 ok (response).resp.json({"status": "OK"})
         except:
             ex = sys.exc_info()[1]
+            sys.stderr.write("\033[0;31m*** debug: ex=%r\033[0m\n" % (ex, ))
             assert False, "failed"
 
-    def test_json_ok_returns_self(self):
-        response = WebObResponse()
-        response.content_type = 'application/json'
-        response.body = to_binary('{"status": "OK"}')
+    @with_response_class
+    def test_json_ok_returns_self(self, Response):
+        response = Response()
+        _set_ctype(response, 'application/json')
+        _set_body(response, to_binary('{"status": "OK"}'))
         respobj = ok (response).resp
         assert respobj.json({"status": "OK"}) is respobj
 
-    def test_json_NG_when_content_type_is_empty(self):
-        response = WebObResponse()
-        response.headers['Content-Type'] = ""
-        response.body = to_binary('''{"status": "OK"}''')
+    @with_response_class
+    def test_json_NG_when_content_type_is_empty(self, Response):
+        response = Response()
+        _set_body(response, to_binary('{"status": "OK"}'))
+        _set_ctype(response, '')
         @be_failed("Content-Type is not set.")
         def _():
             ok (response).resp.json({"status": "OK"})
 
-    def test_json_NG_when_content_type_is_not_json_type(self):
-        response = WebObResponse()
-        response.body = to_binary('''{"status": "OK"}''')
+    @with_response_class
+    def test_json_NG_when_content_type_is_not_json_type(self, Response):
+        response = Response()
+        _set_body(response, to_binary('''{"status": "OK"}'''))
+        _set_ctype(response, 'text/html; charset=UTF-8')
         expected = ("Content-Type should be 'application/json' : failed.\n"
-                    "--- content-type ---\n"
-                    "'text/html; charset=UTF-8'")
+                    "--- content-type ---\n" + repr(_get_ctype(response)))
         @be_failed(expected)
         def _():
             ok (response).resp.json({"status": "OK"})
 
-    def test_json_NG_when_json_data_is_different(self):
-        response = WebObResponse()
-        response.content_type = 'application/json'
-        response.body = to_binary('''{"status": "OK"}''')
+    @with_response_class
+    def test_json_NG_when_json_data_is_different(self, Response):
+        response = Response()
+        _set_body(response, to_binary('''{"status": "OK"}'''))
+        _set_ctype(response, 'application/json')
         expected = r"""
 Responsed JSON is different from expected data.
 --- expected

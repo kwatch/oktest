@@ -488,18 +488,18 @@ class ResponseAssertionObject(AssertionObject):
     def status(self, expected_status):
         """(experimental) Asserts status code of WebOb/Werkzeug response object."""
         response = self.target
+        if hasattr(response, 'status_int'):    # WebOb
+            resp_code = response.status_int
+            resp_stat = response.status
+            resp_body = response.body
+        else:                                  # Werkzeug
+            resp_code = response.status_code
+            resp_stat = response.status
+            resp_body = response.data
         if isinstance(expected_status, int):
-            if hasattr(response, 'status_int'):
-                actual_status = response.status_int    # WebOb
-                if python2:
-                    resp_body = response.body   # binary
-                if python3:
-                    resp_body = response.text   # unicode
-            else:
-                actual_status = response.status_code   # Werkzeug
-                resp_body = response.data
+            actual_status = resp_code
         else:
-            actual_status = response.status
+            actual_status = resp_stat
         boolean = actual_status == expected_status
         if boolean == self.boolean:
             return self
@@ -531,12 +531,9 @@ Response status %r == %r: failed.
         ## response body
         response = self.target
         if hasattr(response, 'body'):    # WebOb
-            if python2:
-                resp_body = response.body   # binary
-            elif python3:
-                resp_body = response.text   # unicode
+            resp_body = response.text
         else:
-            resp_body = response.data    # Werkzeug
+            resp_body = response.data.decode('utf-8')    # Werkzeug
         ## when regular expression
         if isinstance(str_or_regexp, _rexp_type):
             rexp = str_or_regexp
@@ -560,7 +557,12 @@ Response status %r == %r: failed.
         """(experimental) Asserts JSON data of WebOb/Werkzeug response object."""
         ## assert content type
         response = self.target
-        content_type = response.headers['Content-Type']
+        if hasattr(response, 'content_type'):
+            content_type = response.content_type
+        elif hasattr(response, 'mimetype'):
+            content_type = response.mimetype
+        else:
+            content_type = response.headers['Content-Type']
         if not content_type:
             self.failed("Content-Type is not set.")
         if not self.JSON_CONTENT_TYPE_REXP.match(content_type):
@@ -570,14 +572,13 @@ Response status %r == %r: failed.
         ## parse response body
         import json
         if hasattr(response, 'body'):    # WebOb
-            if python2:
-                resp_body = response.body   # binary
-            elif python3:
-                resp_body = response.text   # unicode
-        else:
-            resp_body = response.data    # Werkzeug
+            resp_body = response.text
+        else:                            # Werkzeug
+            resp_body = response.get_data(as_text=True)
         try:
             actual_jdict = json.loads(resp_body)
+        except TypeError:
+            raise
         except:
             self.failed("Response body should be JSON data : failed.\n"
                         "--- response body ---\n"
