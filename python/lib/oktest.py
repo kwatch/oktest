@@ -593,8 +593,10 @@ Response status %r == %r: failed.
             return text.splitlines(True)
         diff_lines = unified_diff(_lines(expected_jdict), _lines(actual_jdict),
                                   'expected', 'actual', n=2)
-        self.failed("Responsed JSON is different from expected data.\n"
-                    +"".join(diff_lines))
+        diff_str = "".join(diff_lines)
+        diff_str = diff_str.replace('--- expected ', '--- expected', 1)  # bug of difflib
+        diff_str = diff_str.replace('+++ actual ',   '+++ actual',   1)  # bug of difflib
+        self.failed("Responsed JSON is different from expected data.\n"+diff_str)
 
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)$')
 
