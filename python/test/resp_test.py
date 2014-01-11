@@ -282,8 +282,6 @@ Response header 'Location' should not be set : failed.
                 _set_ctype(response, cont_type)
                 ok (response).resp.json({"status": "OK"})
         except:
-            ex = sys.exc_info()[1]
-            sys.stderr.write("\033[0;31m*** debug: ex=%r\033[0m\n" % (ex, ))
             assert False, "failed"
 
     @with_response_class
