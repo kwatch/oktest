@@ -4,7 +4,7 @@
 ### oktest.py -- new style test utility
 ###
 ### $Release: $
-### $Copyright: copyright(c) 2010-2013 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2010-2014 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 

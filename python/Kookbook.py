@@ -2,7 +2,7 @@
 
 ###
 ### $Release: $
-### $Copyright: copyright(c) 2010-2013 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2010-2014 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 
@@ -21,7 +21,7 @@ from kook.utils import read_file, write_file
 
 package   = prop('package', 'Oktest')
 release   = prop('release', '0.11.1')
-copyright = prop('copyright', "copyright(c) 2010-2013 kuwata-lab.com all rights reserved")
+copyright = prop('copyright', "copyright(c) 2010-2014 kuwata-lab.com all rights reserved")
 license   = "MIT License"
 python    = prop('python', sys.executable)
 basename  = "%s-%s" % (package, release)
