@@ -17,6 +17,7 @@ py27 = major == 2 and minor == 7
 py30 = major == 3 and minor == 0
 py31 = major == 3 and minor == 1
 py32 = major == 3 and minor >= 2
+py33 = major == 3 and minor >= 3
 #
 py271 = major == 2 and minor == 7 and teeny <= 1
 py314 = major == 3 and minor == 1 and teeny >= 4
@@ -123,8 +124,8 @@ OUTPUT_ERRORS2 = r"""
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 <R>AssertionError: 'bbb' == 'aaa' : failed.</R>
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -223,8 +224,8 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -296,9 +297,9 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2175, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 565, in fn
+  File "/usr/local/lib/python/site-packages/oktest.py", line 809, in fn
     raise SkipTest(reason)
 oktest.SkipTest: REASON
 
@@ -306,11 +307,11 @@ oktest.SkipTest: REASON
 ERROR: not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 586, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 830, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 499, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 743, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -319,9 +320,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2175, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 589, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 833, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -340,8 +341,8 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -370,11 +371,11 @@ ERROR: test_005: not yet (_sos_test.SosTest)
 not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 586, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 830, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 499, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 743, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -383,9 +384,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2175, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 589, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 833, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -405,8 +406,8 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -498,6 +499,9 @@ class OktestMainApp_TC(unittest.TestCase):
         expected = expected.replace('mainapp_test.py', basename)
         if py24:
             expected = expected.replace('Usage:', 'usage:')
+        if py33:
+            expected = expected.replace('option requires an argument',
+                                        'option requires 1 argument')
         return expected
 
 

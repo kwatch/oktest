@@ -186,8 +186,8 @@ b''
             expected_errmsg = r"""
 Unexpected content-type value.
   expected: 'text/plain'
-  actual:   'text/html'
-"""[1:-1]
+  actual:   %r
+"""[1:-1] % _get_ctype(response)
             assert str(ex) == expected_errmsg
         #
         try:
@@ -264,8 +264,8 @@ b'{"status": "OK"}'
         expected_errmsg = r"""
 Unexpected content-type value.
   expected: 'image/png'
-  actual:   'image/jpeg'
-"""[1:-1]
+  actual:   %r
+"""[1:-1] % _get_ctype(resp)
         @be_failed(expected_errmsg)
         def _():
             ok (resp)._resp.cont_type('image/png')
@@ -273,8 +273,8 @@ Unexpected content-type value.
         expected_errmsg = r"""
 Unexpected content-type value (not matched to pattern).
   expected: re.compile('^image/(jpg|png|gif)$')
-  actual:   'image/jpeg'
-"""[1:-1]
+  actual:   %r
+"""[1:-1] % _get_ctype(resp)
         @be_failed(expected_errmsg)
         def _():
             ok (resp)._resp.cont_type(re.compile(r'^image/(jpg|png|gif)$'))
