@@ -2863,7 +2863,7 @@ def _dummy():
             #parser.add_option("-x", dest="exclude", metavar="PAT[,PAT2,..]", help="exclue file pattern")
             parser.add_option("-U", dest="unittest", action="store_true",    help="run testcases with unittest.main instead of oktest.run")
             parser.add_option("-D", dest="debug",   action="store_true",     help="debug mode")
-            parser.add_option("-f", dest="filter",  metavar="FILTER",        help="filter (class=xxx/test=xxx/useroption=xxx)")
+            parser.add_option("-f", dest="filter",  metavar="FILTER",        help="filter (class=xxx/test=xxx/sid=xxx/useroption=xxx)")
             return parser
 
         def _load_modules(self, filepaths, pattern=None):
