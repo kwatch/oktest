@@ -66,7 +66,7 @@ def to_unicode(string):
 
 try:
     from webob.response import Response as WebObResponse
-except ImportError:
+except (ImportError, SyntaxError):
     class WebObResponse(object):
         def __init__(self, status=200, headers=None):
             if headers is None:
