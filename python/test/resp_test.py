@@ -21,6 +21,9 @@ if python3:
 import oktest
 from oktest import ok
 
+_diff_has_column_num = '1,1' in oktest._diff("foo\n", "bar\n")
+
+
 
 def be_failed(expected_errmsg):
     def deco(func):
@@ -255,6 +258,8 @@ Response header 'Location' should not be set : failed.
                         "@@ -1,1 +1,1 @@\n"
                         "-<h1>Hello World!</h1>\n"
                         "+<h1>Hello</h1>\n")
+        if not _diff_has_column_num:
+            expected_msg = expected_msg.replace('1,1', '1')
         @be_failed(expected_msg)
         def _():
             ok (response).resp.body('<h1>Hello World!</h1>')
