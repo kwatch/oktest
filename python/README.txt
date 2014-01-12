@@ -78,7 +78,7 @@ of Python. ::
             {{*ok ("foo 123 bar").matches(r"\d+")*}}
 
     if __name__ == '__main__':
-        unittest.main()
+        unittest.main()   # or: oktest.main()
 
 See `Assertion Reference`_ section for details about ``ok()`` and ``NG()``.
 
@@ -98,7 +98,7 @@ Using ``@test`` decorator, you can write test name in free text. ::
             ok ("foo 123 bar").matches(r"\d+")
 
     if __name__ == '__main__':
-        unittest.main()
+        unittest.main()   # or: oktest.main()
 
 See `@test Decorator`_ section for details about ``@test`` decorator.
 
@@ -149,6 +149,14 @@ Oktest is also available without unittest. See the folloing example. ::
         #{{*oktest.run(Example1Test, Example2Test)*}}
 
 Both ``Oktest.main()`` and ``Oktest.run()`` accept unittest.TestCase and other class.
+
+How to run test script::
+
+    bash$ python -m oktest tests/foobar_test.py       # verbose mode
+    bash$ python -m oktest tests/foobar_test.py -sv   # verbose mode
+    bash$ python -m oktest tests/foobar_test.py -ss   # simple mode
+    bash$ python -m oktest tests/foobar_test.py -sp   # plain mode
+    bash$ python -m oktest tests    # run all test scripts (*_test.py)
 
 
 Assertion Reference
