@@ -549,15 +549,11 @@ class ResponseAssertionObject(AssertionObject):
             actual_status = self._resp_code(response)
         else:
             actual_status = self._resp_status(response)
-        boolean = actual_status == expected_status
-        if boolean == self.boolean:
-            return self
-        msg = r"""
-Response status %r == %r: failed.
---- response body ---
-%s
-"""[1:-1] % (actual_status, expected_status, self._resp_body(response))
-        self.failed(msg)
+        if self.boolean != (actual_status == expected_status):
+            self.failed("Response status %r == %r: failed.\n"
+                        "--- response body ---\n"
+                        "%s" % (actual_status, expected_status, self._resp_body(response)))
+        return self
 
     @assertion
     def header(self, name, value):
@@ -618,19 +614,16 @@ Response status %r == %r: failed.
         resp_text = self._resp_text(response)
         try:
             actual_jdict = json.loads(resp_text)
-        except TypeError:
-            raise
-        except:
+        except ValueError:
             self.failed("Response body should be JSON data : failed.\n"
                         "--- response body ---\n"
                         "%s" % (resp_text,))
         ## assert json jdict
-        boolean = actual_jdict == expected_jdict
-        if boolean == self.boolean:
-            return self
-        ## show unified diff when assertion failed
-        diff_str = _diff(self._json_dumps(actual_jdict), self._json_dumps(expected_jdict))
-        self.failed("Responsed JSON is different from expected data.\n"+diff_str)
+        if self.boolean != (actual_jdict == expected_jdict):
+            diff_str = _diff(self._json_dumps(actual_jdict), self._json_dumps(expected_jdict))
+            self.failed("Responsed JSON is different from expected data.\n"+diff_str)
+        ##
+        return self
 
     def _json_dumps(self, jdict):
         import json
