@@ -265,6 +265,19 @@ ok (value).should_not
 	For example, ``ok (string).should_not.startswith('foo')`` is same as
 	to ``ok (string.startswith('foo')) == False``.
 
+ok (response).is_response(status).header(name, value).body(str_or_rexp).json(dict)
+	(experimental) Assertions for WebOb or Werkzeug response object. ::
+
+	    ok (response).is_response(200)                          # status code
+	    ok (response).is_response((302, 303))                   # status code
+	    ok (response).is_response('200 OK')                     # status line
+	    ok (response).is_response(200, 'image/jpeg')            # content-type
+	    ok (response).is_response(200, re.compile(r'^image/(jpeg|png|gif)$'))
+	    ok (response).is_response(302).header("Location", "/")  # header
+	    ok (response).is_response(200).json({"status": "OK"})   # json data
+	    ok (response).is_response(200).body("<h1>Hello</h1>")   # response body
+	    ok (response).is_response(200).body(re.compile("<h1>.*?</h1>"))
+
 NG (x)
 	Opposite of ok(x). For example, 'NG ("foo").matches(r"[0-9]+")' is True. ::
 

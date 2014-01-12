@@ -14,6 +14,7 @@ __version__ = "$Release: 0.0.0 $".split()[1]
 import sys, os, re, types, traceback, time, linecache
 from contextlib import contextmanager
 pformat = None   # on-demand import
+json = None      # on-demant import
 
 ENCODING = 'utf-8'
 TERMINAL_WIDTH = 80
@@ -138,7 +139,20 @@ def _diff(target, other):
             for lines in (expected, actual):
                 if not lines[-1].endswith("\n"):
                     lines[-1] += "\n\\ No newline at end of string\n"
-    return ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
+    s = ''.join(unified_diff(expected, actual, 'expected', 'actual', n=2))
+    return _tweak_diffstr(s)
+
+# workaround to avoid bug of difflib
+def _tweak_diffstr(diffstr):
+    global _difflib_has_bug
+    if _difflib_has_bug is None:
+        _difflib_has_bug = diffstr.startswith("--- expected \n")  # extra space at end of line
+    if _difflib_has_bug:
+        diffstr = diffstr.replace('--- expected ', '--- expected', 1)
+        diffstr = diffstr.replace('+++ actual ',   '+++ actual',   1)
+    return diffstr
+
+_difflib_has_bug = None
 
 
 def assertion(func):
@@ -474,6 +488,236 @@ _rexp_type = type(re.compile('x'))
 
 ASSERTION_OBJECT = AssertionObject
 
+
+##
+## (Undocumented) assertions for WebOb/Werkzeug response object
+##
+class ResponseAssertionObject(AssertionObject):
+    """(experimental) AssertionObject enhancement for Response object.
+    ex.
+        ok (response).resp.status(200).json({"status": "OK"})
+    """
+
+    @staticmethod
+    def _resp_code(resp):
+        if hasattr(resp, 'status_int'):    # WebOb
+            return resp.status_int
+        if hasattr(resp, 'status_code'):   # Werkzeug
+            return resp.status_code
+        raise UnsupportedResponseObjectError()
+
+    @staticmethod
+    def _resp_status(resp):
+        if hasattr(resp, 'status'):        # WebOb, Werkzeug
+            return resp.status
+        raise UnsupportedResponseObjectError()
+
+    @staticmethod
+    def _resp_header(resp, name):
+        if hasattr(resp, 'headers'):       # WebOb, Werkzeug
+            return resp.headers.get(name)
+        raise UnsupportedResponseObjectError()
+
+    @staticmethod
+    def _resp_body(resp):
+        if hasattr(resp, 'body'):          # WebOb
+            return resp.body
+        if hasattr(resp, 'data'):          # Werkzeug
+            return resp.data
+        raise UnsupportedResponseObjectError()
+
+    @staticmethod
+    def _resp_text(resp):
+        if hasattr(resp, 'text'):          # WebOb
+            return resp.text
+        if hasattr(resp, 'get_data'):      # Werkzeug
+            return resp.get_data(as_text=True)
+        raise UnsupportedResponseObjectError()
+
+    @staticmethod
+    def _resp_ctype(resp):
+        if hasattr(resp, 'content_type'):  # WebOb
+            return resp.content_type
+        if hasattr(resp, 'mimetype'):      # Werkzeug
+            return resp.mimetype
+        return resp.headers['Content-Type']
+
+    @assertion
+    def status(self, expected_status):
+        """(experimental) Asserts status code of WebOb/Werkzeug response object."""
+        response = self.target
+        errmsg = None
+        if isinstance(expected_status, int):         # ex. 200
+            actual = self._resp_code(response)
+            boolean = (actual == expected_status)
+            op = '=='
+        elif isinstance(expected_status, tuple):     # ex. (200, 201)
+            actual = self._resp_code(response)
+            boolean = (actual in expected_status)
+            op = 'in'
+        else:                                        # ex. '200 OK'
+            actual = self._resp_status(response)
+            boolean = (actual == expected_status)
+            op = '=='
+        if self.boolean != boolean:
+            self.failed("Response status %r %s %r: failed.\n"
+                        "--- response body ---\n"
+                        "%s" % (actual, op, expected_status, self._resp_body(response),))
+        return self
+
+    @assertion
+    def cont_type(self, str_or_regexp):
+        """(experimental) Asserts content-type of WebOb/Werkzeug response object."""
+        response = self.target
+        cont_type = self._resp_ctype(response)
+        ## when regular expression
+        if isinstance(str_or_regexp, _rexp_type):
+            rexp = str_or_regexp
+            m = rexp.search(cont_type)
+            if self.boolean != bool(m):
+                self.failed("Unexpected content-type value (not matched to pattern).\n"
+                            "  expected: re.compile(%r)\n"
+                            "  actual:   %r" % (rexp.pattern, cont_type,))
+        ## when string
+        else:
+            text = str_or_regexp
+            if self.boolean != (cont_type == text):
+                self.failed("Unexpected content-type value.\n"
+                            "  expected: %r\n"
+                            "  actual:   %r" % (text, cont_type,))
+        ##
+        return self
+
+    @assertion
+    def header(self, name, value):
+        """(experimental) Asserts header of WebOb/Werkzeug response object."""
+        response = self.target
+        actual = self._resp_header(response, name)
+        if value is None:
+            if self.boolean != (actual is None):
+                self.failed("Response header '%s' should not be set : failed.\n"
+                            "  header value: %r" % (name, actual,))
+        else:
+            if self.boolean != (actual == value):
+                self.failed("Response header '%s' is unexpected value.\n"
+                            "  expected: %r\n"
+                            "  actual:   %r" % (name, value, actual,))
+        return self
+
+    @assertion
+    def body(self, str_or_regexp):
+        """(experimental) Asserts response body of WebOb/Werkzeug response object."""
+        response = self.target
+        ## when regular expression
+        if isinstance(str_or_regexp, _rexp_type):
+            rexp = str_or_regexp
+            actual = self._resp_text(response)
+            m = rexp.search(actual)
+            if self.boolean != bool(m):
+                self.failed("Response body failed to match to expected pattern.\n"
+                            "  expected pattern: %r\n"
+                            "  response body:    %s" % (rexp.pattern, actual,))
+        ## when text string
+        else:
+            expected = str_or_regexp
+            if isinstance(expected, _unicode):
+                actual = self._resp_text(response)
+            else:
+                actual = self._resp_body(response)
+            if self.boolean != (expected == actual):
+                diff_str = _diff(actual, expected)
+                self.failed("Response body is different from expected data.\n"+diff_str)
+        ##
+        return self
+
+    @assertion
+    def json(self, expected_jdict):
+        """(experimental) Asserts JSON data of WebOb/Werkzeug response object."""
+        ## assert content type
+        response = self.target
+        content_type = self._resp_ctype(response)
+        if not content_type:
+            self.failed("Content-Type is not set.")
+        if not self.JSON_CONTENT_TYPE_REXP.match(content_type):
+            self.failed("Content-Type should be 'application/json' : failed.\n"
+                        "--- content-type ---\n"
+                        "%r" % (content_type,))
+        ## parse response body
+        global json
+        if json is None: import json
+        resp_text = self._resp_text(response)
+        try:
+            actual_jdict = json.loads(resp_text)
+        except ValueError:
+            self.failed("Response body should be JSON data : failed.\n"
+                        "--- response body ---\n"
+                        "%s" % (resp_text,))
+        ## assert json jdict
+        if self.boolean != (actual_jdict == expected_jdict):
+            diff_str = _diff(self._json_dumps(actual_jdict), self._json_dumps(expected_jdict))
+            self.failed("Responsed JSON is different from expected data.\n"+diff_str)
+        ##
+        return self
+
+    def _json_dumps(self, jdict):
+        global json
+        if json is None: import json
+        return json.dumps(jdict, ensure_ascii=False, indent=2, sort_keys=True)
+
+    JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
+
+
+class UnsupportedResponseObjectError(Exception):
+    pass
+
+def _resp(self):
+    """(experimental) Change assertion object class.
+    ex:
+       ok (value)         #=> AssertionObject
+       ok (value)._resp   #=> ResponseAssertionObject
+    """
+    self.__class__ = ResponseAssertionObject
+    return self
+
+AssertionObject._resp = property(_resp)
+del _resp
+
+def is_response(self, status=None, content_type=None):
+    """(experimental) Assert response status.
+    ex:
+       ok (response).is_response(200)
+       ok (response).is_response((200, 201))
+       ok (response).is_response('200 OK')
+       ok (response).is_response(200, 'image/jpeg')
+       ok (response).is_response(200, re.compile('^image/(jpeg|png|gif)$')
+       #
+       ok (response).is_response(302).header("Location", "/")
+       ok (response).is_response(200).json({"status": "OK"})
+       ok (response).is_response(200).body("<h1>Hello</h1>")
+       ok (response).is_response(200).body(re.compile("<h1>.*?</h1>"))
+
+    Notice that is_response() changes __class__ attribute.
+    ex:
+       ok (response).__class__       #=> AssertionObject
+       ok (response).is_response()   #=> ResponseAssertionObject
+    """
+    if self.boolean != True:
+        self._tested = True   # supress warning
+        raise TypeError("is_response(): not available with NOT() nor NG().")
+    self.__class__ = ResponseAssertionObject
+    if status is not None:
+        self.status(status)
+    if content_type is not None:
+        self.cont_type(content_type)
+    return self
+
+AssertionObject.is_response = is_response
+del is_response
+
+
+##
+##
+##
 
 def ok(target):
     obj = ASSERTION_OBJECT(target, True)
