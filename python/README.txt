@@ -192,6 +192,9 @@ ok (x).not_in(y)
 ok (x).contains(y)
 	Raise AssertionError unless y in x. This is opposite of in_().
 
+ok (x).not_contain(y)
+	Raise AssertionError if y in x. This is opposite of not_in().
+
 ok (x).is_(y)
 	Raise AssertionError unless x is y.
 
@@ -1417,7 +1420,7 @@ Tips
             #ok (1+1) == 2
             ok (1+1)         # missing assertion
 
-    oktest.run()   #=> warning: ok() is called but not tested.
+    oktest.main()   #=> warning: ok() is called but not tested.
 
 * ``$TEST`` environment variable is now obsolete.
   Use command-line option instead to filter testcase by name. ::
