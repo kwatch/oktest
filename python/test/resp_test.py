@@ -141,7 +141,7 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         obj = ok (""); obj == ""
         assert isinstance(obj, oktest.AssertionObject)
         assert not isinstance(obj, oktest.ResponseAssertionObject)
-        assert isinstance(obj.resp, oktest.ResponseAssertionObject)
+        assert isinstance(obj._resp, oktest.ResponseAssertionObject)
 
     @with_response_class
     def test_is_response(self, Response):
@@ -173,14 +173,14 @@ b''
     @with_response_class
     def test_status_ok(self, Response):
         try:
-            ok (Response()).resp.status(200)
-            ok (Response(status=302)).resp.status(302)
+            ok (Response())._resp.status(200)
+            ok (Response(status=302))._resp.status(302)
         except:
             assert False, "failed"
 
     @with_response_class
     def test_status_ok_returns_self(self, Response):
-        respobj = ok (Response()).resp
+        respobj = ok (Response())._resp
         assert respobj.status(200) is respobj
 
     @with_response_class
@@ -196,15 +196,15 @@ b'{"status": "OK"}'
             expected_errmsg = re.sub(r"b'({.*?})'", r"\1", expected_errmsg)
         @be_failed(expected_errmsg)
         def _():
-            ok (response).resp.status(201)
+            ok (response)._resp.status(201)
 
     @with_response_class
     def test_header_ok(self, Response):
         response = Response()
         response.headers['Location'] = '/'
         try:
-            ok (response).resp.header('Location', '/')
-            ok (response).resp.header('Last-Modified', None)
+            ok (response)._resp.header('Location', '/')
+            ok (response)._resp.header('Last-Modified', None)
         except:
             assert False, "failed"
 
@@ -212,7 +212,7 @@ b'{"status": "OK"}'
     def test_header_ok_returns_self(self, Response):
         response = Response()
         response.headers['Location'] = '/'
-        respobj = ok (response).resp
+        respobj = ok (response)._resp
         assert respobj.header('Location', '/') is respobj
 
     @with_response_class
@@ -228,7 +228,7 @@ Response header 'Location' is unexpected value.
             expected_errmsg = expected_errmsg.replace("u'/'", "'/'")
         @be_failed(expected_errmsg)
         def _():
-            ok (response).resp.header('Location', '/index')
+            ok (response)._resp.header('Location', '/index')
         #
         response.headers['Location'] = '/'
         expected_errmsg = r"""
@@ -239,16 +239,16 @@ Response header 'Location' should not be set : failed.
             expected_errmsg = expected_errmsg.replace("u'/'", "'/'")
         @be_failed(expected_errmsg)
         def _():
-            ok (response).resp.header('Location', None)
+            ok (response)._resp.header('Location', None)
 
     @with_response_class
     def test_body_ok(self, Response):
         response = Response()
         _set_body(response, '<h1>Hello</h1>')
         try:
-            ok (response).resp.body('<h1>Hello</h1>')
-            ok (response).resp.body(re.compile('<h1>.*</h1>'))
-            ok (response).resp.body(re.compile('hello', re.I))
+            ok (response)._resp.body('<h1>Hello</h1>')
+            ok (response)._resp.body(re.compile('<h1>.*</h1>'))
+            ok (response)._resp.body(re.compile('hello', re.I))
         except:
             assert False, "failed"
 
@@ -269,7 +269,7 @@ Response body is different from expected data.
             expected_msg = expected_msg.replace('1,1', '1')
         @be_failed(expected_msg)
         def _():
-            ok (response).resp.body('<h1>Hello World!</h1>')
+            ok (response)._resp.body('<h1>Hello World!</h1>')
         #
         expected_msg = r"""
 Response body failed to match to expected pattern.
@@ -278,7 +278,7 @@ Response body failed to match to expected pattern.
 """[1:-1]
         @be_failed(expected_msg)
         def _():
-            ok (response).resp.body(re.compile(r'hello'))
+            ok (response)._resp.body(re.compile(r'hello'))
 
     @with_response_class
     def test_json_ok(self, Response):
@@ -294,7 +294,7 @@ Response body failed to match to expected pattern.
         try:
             for cont_type in content_types:
                 _set_ctype(response, cont_type)
-                ok (response).resp.json({"status": "OK"})
+                ok (response)._resp.json({"status": "OK"})
         except:
             assert False, "failed"
 
@@ -303,7 +303,7 @@ Response body failed to match to expected pattern.
         response = Response()
         _set_ctype(response, 'application/json')
         _set_body(response, to_binary('{"status": "OK"}'))
-        respobj = ok (response).resp
+        respobj = ok (response)._resp
         assert respobj.json({"status": "OK"}) is respobj
 
     @with_response_class
@@ -313,7 +313,7 @@ Response body failed to match to expected pattern.
         _set_ctype(response, '')
         @be_failed("Content-Type is not set.")
         def _():
-            ok (response).resp.json({"status": "OK"})
+            ok (response)._resp.json({"status": "OK"})
 
     @with_response_class
     def test_json_NG_when_content_type_is_not_json_type(self, Response):
@@ -324,7 +324,7 @@ Response body failed to match to expected pattern.
                     "--- content-type ---\n" + repr(_get_ctype(response)))
         @be_failed(expected)
         def _():
-            ok (response).resp.json({"status": "OK"})
+            ok (response)._resp.json({"status": "OK"})
 
     @with_response_class
     def test_json_NG_when_json_data_is_different(self, Response):
@@ -344,7 +344,7 @@ Responsed JSON is different from expected data.
 """[1:]
         @be_failed(expected)
         def _():
-            ok (response).resp.json({"status": "ok"})
+            ok (response)._resp.json({"status": "ok"})
 
 
 

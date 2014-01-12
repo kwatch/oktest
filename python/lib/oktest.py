@@ -642,7 +642,7 @@ Response status %r == %r: failed.
 class UnsupportedResponseObjectError(Exception):
     pass
 
-def resp(self):
+def _resp(self):
     """Change assertion object class.
     ex:
        ok (value)        #=> AssertionObject
@@ -650,6 +650,9 @@ def resp(self):
     """
     self.__class__ = ResponseAssertionObject
     return self
+
+AssertionObject._resp = property(_resp)
+del _resp
 
 def is_response(self, status=None):
     """Assert response status.
@@ -671,9 +674,8 @@ def is_response(self, status=None):
         self.status(status)
     return self
 
-AssertionObject.resp = property(resp)
 AssertionObject.is_response = is_response
-del resp, is_response
+del is_response
 
 
 ##
