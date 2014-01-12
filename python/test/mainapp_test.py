@@ -297,9 +297,9 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2175, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 565, in fn
+  File "/usr/local/lib/python/site-packages/oktest.py", line 809, in fn
     raise SkipTest(reason)
 oktest.SkipTest: REASON
 
@@ -307,11 +307,11 @@ oktest.SkipTest: REASON
 ERROR: not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 586, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 830, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 499, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 743, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -320,9 +320,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 1931, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2175, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 589, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 833, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
