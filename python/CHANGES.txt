@@ -6,21 +6,6 @@ CHANGES
 Release 0.12.0 (???)
 --------------------
 
-* [change] '[passed]', '[Failed]', and '[skipped]' are renamed to
-  '[pass]', '[Fail]', '[skip]' respectively.
-
-  Previous output::
-
-    - [passed] 1+1 should be 2.
-    - [Failed] 1-1 should be 0.
-    ## total:1, passed:0, failed:0, error:0, skipped:0, todo:1  (0.000 sec)
-
-  New version output::
-
-    - [pass] 1+1 should be 2.
-    - [Fail] 1-1 should be 0.
-    ## total:1, pass:0, fail:0, error:0, skip:0, todo:1  (0.000 sec)
-
 * [enhance] `ok (actual) == expected' now prints difference between
   actual and expected values with `pprint.pformat()' when values are
   one of list, tuple, or dict.
@@ -98,6 +83,20 @@ Release 0.12.0 (???)
   but the former is called *before* tearDown() and the latter is called
   *after* tearDown().
 
+* [enhance] (experimental) New assertion ``ok(response).is_response()``
+  to assert WebOb or Werkzeug resonse object.
+  ex::
+
+    ok (response).is_response(200)                          # status code
+    ok (response).is_response((302, 303))                   # status code
+    ok (response).is_response('200 OK')                     # status line
+    ok (response).is_response(200, 'image/jpeg')            # content-type
+    ok (response).is_response(200, re.compile(r'^image/(jpeg|png|gif)$'))
+    ok (response).is_response(302).header("Location", "/")  # header
+    ok (response).is_response(200).json({"status": "OK"})   # json data
+    ok (response).is_response(200).body("<h1>Hello</h1>")   # response body
+    ok (response).is_response(200).body(re.compile("<h1>.*?</h1>"))
+
 * [enhance] ``ok(x).is_truthy()`` tests whether ``bool(x) == True``.
   This is similar to ``ok(bool(x)) == True`` but reports ``x`` value
   instead of True/False when assertion failed.
@@ -163,6 +162,21 @@ Release 0.12.0 (???)
 * [enhance] multiple errors are reported.
   For example, if you got error on test method and tearDown(),
   both errors are reported.
+
+* [change] '[passed]', '[Failed]', and '[skipped]' are renamed to
+  '[pass]', '[Fail]', '[skip]' respectively.
+
+  Previous output::
+
+    - [passed] 1+1 should be 2.
+    - [Failed] 1-1 should be 0.
+    ## total:1, passed:0, failed:0, error:0, skipped:0, todo:1  (0.000 sec)
+
+  New version output::
+
+    - [pass] 1+1 should be 2.
+    - [Fail] 1-1 should be 0.
+    ## total:1, pass:0, fail:0, error:0, skip:0, todo:1  (0.000 sec)
 
 * [bugfix] @todo decorator now supports unicode description.
   ex::
