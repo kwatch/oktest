@@ -3,8 +3,8 @@
 CHANGES
 =======
 
-Release 0.12.0 (???)
---------------------
+Release 0.12.0 (2014-01-12)
+---------------------------
 
 * [enhance] `ok (actual) == expected' now prints difference between
   actual and expected values with `pprint.pformat()' when values are
