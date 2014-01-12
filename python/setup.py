@@ -30,11 +30,11 @@ def fn():
     author_email     = 'kwa@kuwata-lab.com'
     #maintainer       = author
     #maintainer_email = author_email
-    url              = 'http://packages.python.org/Oktest/'
-    #url              = 'http://www.kuwata-lab.com/oktest/'
+    #url              = 'http://packages.python.org/Oktest/'
+    url              = 'http://www.kuwata-lab.com/oktest/'
     description      = 'a new-style testing library'
     long_description = r"""
-Oktest is a new-style testing library for Python. ::
+Oktest.py is a new-style testing library for Python. ::
 
     from oktest import test, ok, NG
 
@@ -87,6 +87,7 @@ See `User's Guide`_ and `CHANGES.txt`_ for details.
         'Programming Language :: Python :: 3.0',
         'Programming Language :: Python :: 3.1',
         'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Testing'
     ]
