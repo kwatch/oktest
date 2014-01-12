@@ -441,7 +441,6 @@ You can filter testcase by user-defined options in command-line. ::
     $ python -m oktest.py {{*-f tag=experimental*}} test/*_test.py
 
 
-
 Fixture Injection
 =================
 
@@ -1421,6 +1420,22 @@ Tips
             ok (1+1)         # missing assertion
 
     oktest.main()   #=> warning: ok() is called but not tested.
+
+* It is possible to embed spec id into test description with '[!xxxxx]' format. ::
+
+    ## python
+    class HomhomTest(unittest.TestCase):
+        @test('[!bk201] 1+1 should be 2')    # spec id is 'bk201'
+        def _(self):
+            ok (1+1) == 2
+        @test('[!nov11] 1-1 should be 0')    # spec id is 'nov11'
+        def _(self):
+            ok (1-1) == 0
+
+  You can filter tests by spec id (sid).
+
+    ## filter by spec id
+    $ python -m oktest test/example_test.py -f sid=bk201
 
 * ``$TEST`` environment variable is now obsolete.
   Use command-line option instead to filter testcase by name. ::
