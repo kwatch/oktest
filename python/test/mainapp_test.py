@@ -123,8 +123,8 @@ OUTPUT_ERRORS2 = r"""
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 <R>AssertionError: 'bbb' == 'aaa' : failed.</R>
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -223,8 +223,8 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -340,8 +340,8 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
@@ -405,8 +405,8 @@ Traceback (most recent call last):
   File "_test.d/_sos_test.py", line 34, in test_bbb
     ok ("bbb") == "aaa"
 AssertionError: 'bbb' == 'aaa' : failed.
---- expected 
-+++ actual 
+--- expected
++++ actual
 @@ -1,1 +1,1 @@
 -aaa
 +bbb
