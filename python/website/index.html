@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.9: http://docutils.sourceforge.net/" />
 <title>Oktest - a new style testing library -</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
@@ -10,7 +10,7 @@
 <div class="document" id="oktest-readme">
 <h1 class="title">Oktest - a new style testing library -</h1>
 
-<p>Release: 0.11.0</p>
+<p>Release: 0.12.0</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
@@ -18,24 +18,26 @@
 <li><a class="reference internal" href="#download" id="id2">Download</a></li>
 <li><a class="reference internal" href="#example" id="id3">Example</a></li>
 <li><a class="reference internal" href="#assertion-reference" id="id4">Assertion Reference</a></li>
-<li><a class="reference internal" href="#test-decorator" id="id5">&#64;test Decorator</a></li>
-<li><a class="reference internal" href="#fixture-injection" id="id6">Fixture Injection</a></li>
-<li><a class="reference internal" href="#test-context" id="id7">Test Context</a></li>
-<li><a class="reference internal" href="#unified-diff" id="id8">Unified Diff</a></li>
-<li><a class="reference internal" href="#tracer" id="id9">Tracer</a></li>
-<li><a class="reference internal" href="#skip-test" id="id10">Skip Test</a></li>
-<li><a class="reference internal" href="#todo-decorator" id="id11">&#64;todo decorator</a></li>
-<li><a class="reference internal" href="#command-line-interface" id="id12">Command-line Interface</a></li>
-<li><a class="reference internal" href="#helpers-reference" id="id13">Helpers Reference</a><ul>
-<li><a class="reference internal" href="#oktest-module" id="id14"><tt class="docutils literal">oktest</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-util-module" id="id15"><tt class="docutils literal">oktest.util</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-dummy-module" id="id16"><tt class="docutils literal">oktest.dummy</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-tracer-module" id="id17"><tt class="docutils literal">oktest.tracer</tt> module</a></li>
+<li><a class="reference internal" href="#custom-assertion" id="id5">Custom Assertion</a></li>
+<li><a class="reference internal" href="#test-decorator" id="id6"><tt class="docutils literal">&#64;test</tt> Decorator</a></li>
+<li><a class="reference internal" href="#fixture-injection" id="id7">Fixture Injection</a></li>
+<li><a class="reference internal" href="#at-end-decorator" id="id8"><tt class="docutils literal">&#64;at_end</tt> Decorator</a></li>
+<li><a class="reference internal" href="#test-context" id="id9">Test Context</a></li>
+<li><a class="reference internal" href="#unified-diff" id="id10">Unified Diff</a></li>
+<li><a class="reference internal" href="#tracer" id="id11">Tracer</a></li>
+<li><a class="reference internal" href="#skip-test" id="id12">Skip Test</a></li>
+<li><a class="reference internal" href="#todo-decorator" id="id13"><tt class="docutils literal">&#64;todo</tt> Decorator</a></li>
+<li><a class="reference internal" href="#command-line-interface" id="id14">Command-line Interface</a></li>
+<li><a class="reference internal" href="#helpers-reference" id="id15">Helpers Reference</a><ul>
+<li><a class="reference internal" href="#oktest-module" id="id16"><tt class="docutils literal">oktest</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-util-module" id="id17"><tt class="docutils literal">oktest.util</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-dummy-module" id="id18"><tt class="docutils literal">oktest.dummy</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-tracer-module" id="id19"><tt class="docutils literal">oktest.tracer</tt> module</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tips" id="id18">Tips</a></li>
-<li><a class="reference internal" href="#license" id="id19">License</a></li>
-<li><a class="reference internal" href="#copyright" id="id20">Copyright</a></li>
+<li><a class="reference internal" href="#tips" id="id20">Tips</a></li>
+<li><a class="reference internal" href="#license" id="id21">License</a></li>
+<li><a class="reference internal" href="#copyright" id="id22">Copyright</a></li>
 </ul>
 </div>
 <div class="section" id="overview">
@@ -81,10 +83,10 @@ class FooTest(unittest.TestCase):
 <pre class="literal-block">
 ## if you have installed easy_install:
 $ sudo easy_install Oktest
-## or download Oktest-0.11.0.tar.gz and install it
-$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.11.0.tar.gz
-$ tar xzf Oktest-0.11.0.tar.gz
-$ cd Oktest-0.11.0/
+## or download Oktest-0.12.0.tar.gz and install it
+$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.12.0.tar.gz
+$ tar xzf Oktest-0.12.0.tar.gz
+$ cd Oktest-0.12.0/
 $ sudo python setup.py install
 </pre>
 </div>
@@ -106,10 +108,10 @@ class FooTest(unittest.TestCase):
         <strong>ok (&quot;foo 123 bar&quot;).matches(r&quot;\d+&quot;)</strong>
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()   # or: oktest.main()
 </pre>
-<p>See <a class="reference internal" href="#assertion-reference">Assertion Reference</a> section for details about ok() and NG().</p>
-<p>Using &#64;test decorator, you can write test name in free text.</p>
+<p>See <a class="reference internal" href="#assertion-reference">Assertion Reference</a> section for details about <tt class="docutils literal">ok()</tt> and <tt class="docutils literal">NG()</tt>.</p>
+<p>Using <tt class="docutils literal">&#64;test</tt> decorator, you can write test name in free text.</p>
 <pre class="literal-block">
 import unittest
 from oktest ok, <strong>test</strong>
@@ -125,9 +127,9 @@ class FooTest(unittest.TestCase):
         ok (&quot;foo 123 bar&quot;).matches(r&quot;\d+&quot;)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()   # or: oktest.main()
 </pre>
-<p>See <a class="reference internal" href="#test-decorator">&#64;test Decorator</a> section for details about &#64;test decorator.</p>
+<p>See <a class="reference internal" href="#test-decorator">&#64;test Decorator</a> section for details about <tt class="docutils literal">&#64;test</tt> decorator.</p>
 <p>Oktest is also available without unittest. See the folloing example.</p>
 <pre class="literal-block">
 import sys, os
@@ -175,6 +177,14 @@ if __name__ == '__main__':
     #<strong>oktest.run(Example1Test, Example2Test)</strong>
 </pre>
 <p>Both <tt class="docutils literal">Oktest.main()</tt> and <tt class="docutils literal">Oktest.run()</tt> accept unittest.TestCase and other class.</p>
+<p>How to run test script:</p>
+<pre class="literal-block">
+bash$ python -m oktest tests/foobar_test.py       # verbose mode
+bash$ python -m oktest tests/foobar_test.py -sv   # verbose mode
+bash$ python -m oktest tests/foobar_test.py -ss   # simple mode
+bash$ python -m oktest tests/foobar_test.py -sp   # plain mode
+bash$ python -m oktest tests    # run all test scripts (*_test.py)
+</pre>
 </div>
 <div class="section" id="assertion-reference">
 
@@ -200,6 +210,8 @@ if __name__ == '__main__':
 <dd>Raise AssertionError if x in y.</dd>
 <dt>ok (x).contains(y)</dt>
 <dd>Raise AssertionError unless y in x. This is opposite of in_().</dd>
+<dt>ok (x).not_contain(y)</dt>
+<dd>Raise AssertionError if y in x. This is opposite of not_in().</dd>
 <dt>ok (x).is_(y)</dt>
 <dd>Raise AssertionError unless x is y.</dd>
 <dt>ok (x).is_not(y)</dt>
@@ -208,6 +220,10 @@ if __name__ == '__main__':
 <dd>Raise AssertionError unless isinstance(x, y).</dd>
 <dt>ok (x).is_not_a(y)</dt>
 <dd>Raise AssertionError if isinstance(x, y).</dd>
+<dt>ok (x).is_truthy()</dt>
+<dd>Raise AssertionError unless bool(x) == True.</dd>
+<dt>ok (x).is_falsy()</dt>
+<dd>Raise AssertionError unless bool(x) == False.</dd>
 <dt>ok (x).has_attr(name)</dt>
 <dd>Raise AssertionError unless hasattr(x, name).</dd>
 <dt>ok (x).attr(name, value)</dt>
@@ -258,6 +274,20 @@ to <tt class="docutils literal">ok <span class="pre">(string.startswith('foo'))<
 <dd>Special property to test boolean method.
 For example, <tt class="docutils literal">ok <span class="pre">(string).should_not.startswith('foo')</span></tt> is same as
 to <tt class="docutils literal">ok <span class="pre">(string.startswith('foo'))</span> == False</tt>.</dd>
+<dt>ok (response).is_response(status).header(name, value).body(str_or_rexp).json(dict)</dt>
+<dd><p class="first">(experimental) Assertions for WebOb or Werkzeug response object.</p>
+<pre class="last literal-block">
+ok (response).is_response(200)                          # status code
+ok (response).is_response((302, 303))                   # status code
+ok (response).is_response('200 OK')                     # status line
+ok (response).is_response(200, 'image/jpeg')            # content-type
+ok (response).is_response(200, re.compile(r'^image/(jpeg|png|gif)$'))
+ok (response).is_response(302).header(&quot;Location&quot;, &quot;/&quot;)  # header
+ok (response).is_response(200).json({&quot;status&quot;: &quot;OK&quot;})   # json data
+ok (response).is_response(200).body(&quot;&lt;h1&gt;Hello&lt;/h1&gt;&quot;)   # response body
+ok (response).is_response(200).body(re.compile(&quot;&lt;h1&gt;.*?&lt;/h1&gt;&quot;))
+</pre>
+</dd>
 <dt>NG (x)</dt>
 <dd><p class="first">Opposite of ok(x). For example, 'NG (&quot;foo&quot;).matches(r&quot;[0-9]+&quot;)' is True.</p>
 <pre class="last literal-block">
@@ -283,15 +313,71 @@ d = datetime.date(2000, 12, 31)
 ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
 </pre>
 <p>Oktest allows you to define custom assertion functions.
-See <a class="reference internal" href="#tips">Tips</a> section.</p>
+See next section.</p>
+</div>
+<div class="section" id="custom-assertion">
+
+<h2><a class="toc-backref" href="#id5">Custom Assertion</a></h2>
+<p>You can define your own custom assertion function.</p>
+<p>Simple example:</p>
+<pre class="literal-block">
+## define custom assertion function
+import oktest
+<strong>&#64;oktest.assertion</strong>
+def startswith(self, arg):
+    boolean = <strong>self.target</strong>.startswith(arg)
+    if boolean != <strong>self.boolean</strong>:
+        <strong>self.failed</strong>(&quot;%r.startswith(%r) : failed.&quot; % (self.target, arg))
+    return self
+
+## how to use
+from oktest import ok
+ok (&quot;Sasaki&quot;).startswith(&quot;Sas&quot;)
+</pre>
+<p>More complex example:</p>
+<pre class="literal-block">
+## define custom assertion function
+import re
+import oktest
+<strong>&#64;oktest.assertion</strong>
+def json(self, jdict):
+    if self.boolean != True:
+        raise TypeError(&quot;json() is not available with NOT() nor NG().&quot;)
+    # response object
+    response = <strong>self.target</strong>
+    # assert content-type
+    rexp = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
+    if not rexp.match(response.content_type):
+        <strong>self.failed</strong>(&quot;Unepected content-type.\n&quot;
+                    &quot;  actual: %r&quot; % (response.content_type,))
+    # assert response body
+    import json
+    actual_jdict = json.loads(response.text)
+    if actual_jdict != jdict:
+        <strong>self.failed</strong>(&quot;Unexpected JSON data.\n&quot;
+                    &quot;  expected: %r\n&quot;
+                    &quot;  actual:   %r&quot; % (jdict, actual_jdict))
+    #
+    return self
+
+## how to use
+from webob.response import Response
+response = Response()
+response.content_type = &quot;application/json&quot;
+response.text = u'''{&quot;status&quot;: &quot;OK&quot;}'''
+#
+from oktest import ok
+ok (response).json({'status': 'ok'})
+</pre>
+<p>(Notice that Oktest.py already provides <tt class="docutils literal"><span class="pre">ok().is_response().json(jdict)</span></tt>.)</p>
 </div>
 <div class="section" id="test-decorator">
 
-<h2><a class="toc-backref" href="#id5">&#64;test Decorator</a></h2>
-<p>Oktest provides &#64;test decorator.
+<h2><a class="toc-backref" href="#id6"><tt class="docutils literal">&#64;test</tt> Decorator</a></h2>
+<p>Oktest provides <tt class="docutils literal">&#64;test()</tt> decorator.
 It is simple but very powerful.</p>
-<p>Using &#64;test decorator, you can write test description in free text instead of
-test method:</p>
+<p>Using <tt class="docutils literal">&#64;test()</tt> decorator, you can write test description in free text instead
+of test method:</p>
 <pre class="literal-block">
 import unittest
 <strong>from oktest import test</strong>
@@ -305,7 +391,7 @@ class FooTest(unittest.TestCase):
     <strong>def _(self):</strong>
         assert 1+1 == 2
 </pre>
-<p>&#64;test decorator changes test methods.
+<p><tt class="docutils literal">&#64;test()</tt> decorator changes test methods.
 For example, the above code is same as the following:</p>
 <pre class="literal-block">
 class FooTest(unittest.TestCase):
@@ -319,7 +405,7 @@ class FooTest(unittest.TestCase):
     _.__name__ = &quot;test_%03d: %s&quot; % (__n, _.__doc__)
     locals()[_.__name__] = _
 </pre>
-<p>Non-English language is available on &#64;test():</p>
+<p>Non-English language is available on <tt class="docutils literal">&#64;test()</tt>:</p>
 <pre class="literal-block">
 class FooTest(unittest.TestCase):
 
@@ -327,9 +413,9 @@ class FooTest(unittest.TestCase):
     def _(self):
         assert 1+1 == 2
 </pre>
-<p>&#64;test decorator accepts user-defined options. You can specify any name and
-value as option. It is accessable by 'self._options' in setUp(), therefore
-you can change behaviour of setUp() according to options.</p>
+<p><tt class="docutils literal">&#64;test()</tt> decorator accepts user-defined options. You can specify any name and
+value as option. It is accessable by 'self._options' in <tt class="docutils literal">setUp()</tt>, therefore
+you can change behaviour of <tt class="docutils literal">setUp()</tt> according to options.</p>
 <pre class="literal-block">
 class FooTest(unittest.TestCase):
 
@@ -350,15 +436,15 @@ $ python -m oktest.py <strong>-f tag=experimental</strong> test/*_test.py
 </div>
 <div class="section" id="fixture-injection">
 
-<h2><a class="toc-backref" href="#id6">Fixture Injection</a></h2>
-<p>&#64;test decorator supports fixture injection.</p>
+<h2><a class="toc-backref" href="#id7">Fixture Injection</a></h2>
+<p><tt class="docutils literal">&#64;test()</tt> decorator supports fixture injection.</p>
 <ul class="simple">
 <li>Arguments of test method are regarded as fixture names
-and they are injected by &#64;test decorator automatically.</li>
-<li>Instance methods or global functions which name is 'provide_xxxx' are
-regarded as fixture provider (or builder) for fixture 'xxxx'.</li>
+and they are injected by <tt class="docutils literal">&#64;test()</tt> decorator automatically.</li>
+<li>Instance methods or global functions which name is <tt class="docutils literal">provide_xxxx()</tt> are
+regarded as fixture provider (or builder) for fixture <tt class="docutils literal">xxxx</tt>.</li>
 <li>Similar to that, instance methods or global functions which name is
-'release_xxxx' are regarded as fixture releaser (or destroyer).
+<tt class="docutils literal">release_xxxx()</tt> are regarded as fixture releaser (or destroyer).
 Notice that provider is mandatory but releaser is optional for fixture.</li>
 </ul>
 <pre class="literal-block">
@@ -387,9 +473,9 @@ class SosTest(unittest.TestCase):
         ok (member1[&quot;name&quot;]) == &quot;Haruhi&quot;
         ok (member2[&quot;name&quot;]) == &quot;Kyon&quot;
 </pre>
-<p>This feature is more flexible and useful than setUp() and tearDown().</p>
+<p>This feature is more flexible and useful than <tt class="docutils literal">setUp()</tt> and <tt class="docutils literal">tearDown()</tt>.</p>
 <p>For example, the following code ensures that dummy files are removed
-automatically at the end of test without tearDown().</p>
+automatically at the end of test without <tt class="docutils literal">tearDown()</tt>.</p>
 <pre class="literal-block">
 import os, shutil
 
@@ -473,7 +559,7 @@ class BarTest(unittest.TestCase):
     def _(self, <strong>a</strong>):
         assert a == [&quot;B&quot;, &quot;D&quot;, &quot;C&quot;, &quot;A&quot;]
 </pre>
-<p>Fixture injection is provided by &#64;test decorator, and it is available
+<p>Fixture injection is provided by <tt class="docutils literal">&#64;test()</tt> decorator, and it is available
 with existing test methods:</p>
 <pre class="literal-block">
 <strong>&#64;test()</strong>
@@ -502,9 +588,120 @@ class ForgeFixtureManager(object):
 <strong>oktest.fixture_manager =</strong> ForgeFixtureManager()
 </pre>
 </div>
+<div class="section" id="at-end-decorator">
+
+<h2><a class="toc-backref" href="#id8"><tt class="docutils literal">&#64;at_end</tt> Decorator</a></h2>
+<p><tt class="docutils literal">&#64;at_end</tt> decorator registers callback function which is called at end of test case.
+You can use it as replacement of <tt class="docutils literal">tearDown()</tt> or <tt class="docutils literal">after()</tt>.</p>
+<pre class="literal-block">
+import unittest
+from oktest import ok, test, <strong>at_end</strong>
+
+class FooTest(unittest.TestCase):
+    &#64;test(&quot;file.read() returns content of file.&quot;)
+    def _(self):
+        # create a dummy file
+        filename = &quot;dummy.tmp&quot;
+        with open(filename, 'w') as f:
+            f.write(&quot;homhom&quot;)
+        # register callback which is invoked at end of test case
+        <strong>&#64;at_end</strong>
+        <strong>def _():</strong>
+            <strong>import os</strong>
+            <strong>os.unlink(filename)  # remove dummy file</strong>
+        # do assertion
+        with open(filename) as f:
+            content = f.read()
+        ok (content) == &quot;homhom&quot;
+
+#
+if __name__ == &quot;__main__&quot;:
+    import oktest
+    oktest.main()    # NOT unittest.main() !
+</pre>
+<p>Notice tha you must call <tt class="docutils literal">oktest.main()</tt> instead of <tt class="docutils literal">unitetst.main</tt>
+to use <tt class="docutils literal">&#64;at_end</tt> decorator.</p>
+<p>It is good idea to use <tt class="docutils literal">&#64;at_end</tt> instead of <tt class="docutils literal">release_xxx()</tt> methods.</p>
+<pre class="literal-block">
+import unittest
+from oktest import ok, test, <strong>at_end</strong>
+
+class FooTest(unittest.TestCase):
+
+    _CONTENT = &quot;homhom&quot;
+
+    def <strong>provide_dummyfile</strong>(self):
+        # create dummy file
+        filename = &quot;dummy.tmp&quot;
+        with open(filename, 'w') as f:
+            f.write(self._CONTENT)
+        # register callback which is invoked at end of test case
+        <strong>&#64;at_end</strong>
+        <strong>def _():</strong>
+            <strong>import os</strong>
+            <strong>os.unlink(filename)  # remove dummy file</strong>
+        #
+        return filename
+
+    &#64;test(&quot;file.read() returns content of file.&quot;)
+    def _(self, <strong>dummyfile</strong>):
+        # do assertion
+        with open(dummyfile) as f:
+            content = f.read()
+        ok (content) == self._CONTENT
+
+if __name__ == '__main__':
+    import oktest
+    oktest.main()   # NOT unittest.main() !
+</pre>
+<p><tt class="docutils literal">&#64;at_end</tt> decorator is similar to <tt class="docutils literal">unittest.TestCase#atCleanup()</tt>,
+but the former is called <em>before</em> <tt class="docutils literal">tearDown()</tt> and the latter is called
+<em>after</em> <tt class="docutils literal">tearDown()</tt>.
+See the following example.:</p>
+<pre class="literal-block">
+import sys, unittest
+from oktest import ok, test, at_end
+
+class HomTest(unittest.TestCase):
+
+    def <strong>tearDown</strong>(self):
+        print(<strong>'** tearDown'</strong>)
+
+    def test_ex1(self):
+        <strong>&#64;self.addCleanup</strong>
+        def _(): print(<strong>'** addCleanup: #1'</strong>)
+        #
+        <strong>&#64;at_end</strong>
+        def _(): print(<strong>'** at_end: #1'</strong>)
+        #
+        <strong>&#64;self.addCleanup</strong>
+        def _(): print(<strong>'** addCleanup: #2'</strong>)
+        #
+        <strong>&#64;at_end</strong>
+        def _(): print(<strong>'** at_end: #2'</strong>)
+        #
+        assert 1+1 == 2
+
+if __name__ == &quot;__main__&quot;:
+    import oktest
+    oktest.main()
+</pre>
+<p>Result:</p>
+<pre class="literal-block">
+$ py hom_test.py
+* HomTest
+  - [      ] test_ex1<strong>** at_end: #2</strong>
+<strong>** at_end: #1</strong>
+<strong>** tearDown</strong>
+<strong>** addCleanup: #2</strong>
+<strong>** addCleanup: #1</strong>
+  - [pass] test_ex1
+## total:1, pass:1, fail:0, error:0, skip:0, todo:0  (0.001 sec)
+</pre>
+</div>
 <div class="section" id="test-context">
 
-<h2><a class="toc-backref" href="#id7">Test Context</a></h2>
+<h2><a class="toc-backref" href="#id9">Test Context</a></h2>
 <p><strong>(Experimental)</strong></p>
 <p>Oktest provides helper functions to describe test methods in structural style.</p>
 <pre class="literal-block">
@@ -537,23 +734,23 @@ class SampleTestCase(unittest.TestCase):
 * Sample
   + method1()
     + when condition:
-      - [passed] spec1
-      - [passed] spec2
+      - [pass] spec1
+      - [pass] spec2
     + else:
-      - [passed] spec3
-## total:3, passed:3, failed:0, error:0, skipped:0, todo:0   (0.000 sec)
+      - [pass] spec3
+## total:3, pass:3, fail:0, error:0, skip:0, todo:0  (0.000 sec)
 </pre>
 <p>(Notice that this feature is experimental and may be changed in the future.)</p>
 </div>
 <div class="section" id="unified-diff">
 
-<h2><a class="toc-backref" href="#id8">Unified Diff</a></h2>
+<h2><a class="toc-backref" href="#id10">Unified Diff</a></h2>
 <p>'ok(x) == y' prints unified diff (diff -u) if:</p>
 <ul class="simple">
-<li>both x and y are str or unicode</li>
+<li>both x and y are one of str, unicode, list, tuple, and dict</li>
 <li>and x != y</li>
-<li>and oktest.DIFF is True or 'repr'</li>
-<li>and invoked with oktest.main() or oktest.run()</li>
+<li>and <tt class="docutils literal">oktest.DIFF</tt> is True or 'repr'</li>
+<li>and invoked with <tt class="docutils literal">oktest.main()</tt> or <tt class="docutils literal">oktest.run()</tt></li>
 </ul>
 <p>For example:</p>
 <pre class="literal-block">
@@ -600,6 +797,53 @@ AssertionError: 'AAA\nBBB\nCCC\n' == 'AAA\nCCC\nDDD\n' : failed.
 
 ----------------------------------------------------------------------
 Ran 1 test in 0.006s
+
+FAILED (failures=1)
+</pre>
+<p>When actual and expected values are list, tuple or dict, then <tt class="docutils literal">ok()</tt> converts
+these values into string by <tt class="docutils literal">pprint.pformat()</tt> before calculating unified
+diff output. For example:</p>
+<pre class="literal-block">
+## json_test.py
+import unittest
+from oktest import ok
+
+class JsonTest(unittest.TestCase):
+    def test_ex1(self):
+        expected = { 'username': &quot;Haruhi&quot;, 'gender': &quot;Female&quot;,
+                     'email': &quot;haruhi&#64;sos-brigade.org&quot;, }
+        actual   = { 'username': &quot;Haruhi&quot;, 'gender': &quot;female&quot;,
+                     'email': &quot;haruhi&#64;sos-brigade.org&quot;, }
+        ok (actual) == expected
+#
+if __name__ == &quot;__main__&quot;:
+    unittest.main()
+</pre>
+<p>Result shows in unified diff format using <tt class="docutils literal">pprint.pformat()</tt>:</p>
+<pre class="literal-block">
+$ py json_test.py
+F
+======================================================================
+FAIL: test_ex1 (__main__.JsonTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;json_test.py&quot;, line 11, in test_ex1
+    ok (actual) == expected
+AssertionError: {'username': 'Haruhi', 'gender': 'female', 'email': 'haruhi&#64;sos
+-brigade.org'} == {'username': 'Haruhi', 'gender': 'Female', 'email': 'haruhi&#64;s
+os-brigade.org'} : failed.
+--- expected
++++ actual
+&#64;&#64; -1,3 +1,3 &#64;&#64;
+ {'email': 'haruhi&#64;sos-brigade.org',
+- 'gender': 'Female',
++ 'gender': 'female',
+  'username': 'Haruhi'}
+\ No newline at end of string
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
 
 FAILED (failures=1)
 </pre>
@@ -651,11 +895,11 @@ Ran 1 test in 0.011s
 
 FAILED (failures=1)
 </pre>
-<p>If you set '<tt class="docutils literal">oktest.DIFF</tt>' to False, unified diff is not displayed.</p>
+<p>If you set <tt class="docutils literal">oktest.DIFF</tt> to False, unified diff is not displayed.</p>
 </div>
 <div class="section" id="tracer">
 
-<h2><a class="toc-backref" href="#id9">Tracer</a></h2>
+<h2><a class="toc-backref" href="#id11">Tracer</a></h2>
 <p>Oktest provides <tt class="docutils literal">Tracer</tt> class which can be stub or mock object.
 <tt class="docutils literal">Tracer</tt> class can:</p>
 <ul class="simple">
@@ -774,7 +1018,7 @@ ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 </div>
 <div class="section" id="skip-test">
 
-<h2><a class="toc-backref" href="#id10">Skip Test</a></h2>
+<h2><a class="toc-backref" href="#id12">Skip Test</a></h2>
 <p><strong>(Experimental)</strong></p>
 <p>It is possible to skip tests according to a certain condition.</p>
 <pre class="literal-block">
@@ -815,8 +1059,8 @@ def _(self):
 </div>
 <div class="section" id="todo-decorator">
 
-<h2><a class="toc-backref" href="#id11">&#64;todo decorator</a></h2>
-<p>&#64;todo decorator represents that &quot;this test will be failed expectedly
+<h2><a class="toc-backref" href="#id13"><tt class="docutils literal">&#64;todo</tt> Decorator</a></h2>
+<p><tt class="docutils literal">&#64;todo</tt> decorator represents that &quot;this test will be failed expectedly
 because feature is not implemented yet, therefore don't count
 this test as failed, please!&quot;.</p>
 <p>Code Example:</p>
@@ -846,19 +1090,19 @@ if __name__ == '__main__':
 $ python test/add_test.py
 * add()
   - [TODO] returns sum of arguments.
-## total:1, passed:0, failed:0, error:0, skipped:0, todo:1   (0.000 sec)
+## total:1, pass:0, fail:0, error:0, skip:0, todo:1  (0.000 sec)
 </pre>
-<p>If test decoreated by &#64;todo doesn't raise AssertionError, Oktest will report
+<p>If test decoreated by <tt class="docutils literal">&#64;todo</tt> doesn't raise AssertionError, Oktest will report
 you that, for example:</p>
 <pre class="literal-block">
 $ python test/add_test.py
 * add()
-  - [Failed] returns sum of arguments.
+  - [Fail] returns sum of arguments.
 ----------------------------------------------------------------------
-[Failed] add() &gt; 001: returns sum of arguments.
+[Fail] add() &gt; 001: returns sum of arguments.
 _UnexpectedSuccess: test should be failed (because not implemented yet), but passed unexpectedly.
 ----------------------------------------------------------------------
-## total:1, passed:0, failed:1, error:0, skipped:0, todo:0   (0.000 sec)
+## total:1, pass:0, fail:1, error:0, skip:0, todo:0  (0.000 sec)
 </pre>
 <p>Notice that the following will not work:</p>
 <pre class="literal-block">
@@ -870,7 +1114,7 @@ def _(self): ...
 </div>
 <div class="section" id="command-line-interface">
 
-<h2><a class="toc-backref" href="#id12">Command-line Interface</a></h2>
+<h2><a class="toc-backref" href="#id14">Command-line Interface</a></h2>
 <p>Oktest now supports command-line interface to execute test scripts.</p>
 <pre class="literal-block">
 ## run test scripts except foo_*.py
@@ -895,10 +1139,10 @@ $ python test/foobar_test.py <strong>-sp -f test='*keyword*'</strong>
 </div>
 <div class="section" id="helpers-reference">
 
-<h2><a class="toc-backref" href="#id13">Helpers Reference</a></h2>
+<h2><a class="toc-backref" href="#id15">Helpers Reference</a></h2>
 <div class="section" id="oktest-module">
 
-<h3><a class="toc-backref" href="#id14"><tt class="docutils literal">oktest</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id16"><tt class="docutils literal">oktest</tt> module</a></h3>
 <dl class="docutils">
 <dt>fail(message)</dt>
 <dd>Raises AssertionError exception with message.</dd>
@@ -966,12 +1210,12 @@ See <a class="reference internal" href="#test-decorator">&#64;test Decorator</a>
 <dt>todo()</dt>
 <dd>Represents that the test will be failed expectedly.
 Equivarent to <tt class="docutils literal">unittest.expectedFailure()</tt>.
-See <a class="reference internal" href="#todo-decorator">&#64;todo decorator</a> section.</dd>
+See <a class="reference internal" href="#todo-decorator">&#64;todo Decorator</a> section.</dd>
 </dl>
 </div>
 <div class="section" id="oktest-util-module">
 
-<h3><a class="toc-backref" href="#id15"><tt class="docutils literal">oktest.util</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id17"><tt class="docutils literal">oktest.util</tt> module</a></h3>
 <p>Since 0.10.0, <tt class="docutils literal">oktest.helper</tt> is renamed to <tt class="docutils literal">oktest.util</tt>, but
 <tt class="docutils literal">oktest.helper</tt> is still available for backward compatibility.</p>
 <dl class="docutils">
@@ -994,11 +1238,38 @@ def fn():
 </dd>
 <dt>rm_rf(filename, dirname, ...)</dt>
 <dd>Remove file or directory recursively.</dd>
+<dt>from_here(dirpath=None)</dt>
+<dd><p class="first">Set current directory as the first element of sys.path temporarily.
+This is useful very much when you want to import a certain module
+from current directory or a specific directory.</p>
+<pre class="last literal-block">
+from oktest.util import from_here
+with from_here():
+  import mymodule1       # import from directory path of this file
+with from_here('../lib'):
+  import mymodule2       # import from ../lib
+</pre>
+</dd>
+<dt>randstr(n=8)</dt>
+<dd><p class="first">Return random number string which width is n (default 8).
+This is useful when creating fixture data.</p>
+<pre class="last literal-block">
+&gt;&gt;&gt; from oktest.util import randstr
+&gt;&gt;&gt; randstr(4)
+'7327'
+&gt;&gt;&gt; randstr(4)
+'1598'
+&gt;&gt;&gt; randstr(4)
+'0362'
+&gt;&gt;&gt; randstr()
+'38127841'
+</pre>
+</dd>
 </dl>
 </div>
 <div class="section" id="oktest-dummy-module">
 
-<h3><a class="toc-backref" href="#id16"><tt class="docutils literal">oktest.dummy</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id18"><tt class="docutils literal">oktest.dummy</tt> module</a></h3>
 <dl class="docutils">
 <dt>dummy_file(filename, content)</dt>
 <dd><p class="first">Create dummy file with specified content.</p>
@@ -1096,7 +1367,7 @@ assert serr == &quot;&quot;
 </div>
 <div class="section" id="oktest-tracer-module">
 
-<h3><a class="toc-backref" href="#id17"><tt class="docutils literal">oktest.tracer</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id19"><tt class="docutils literal">oktest.tracer</tt> module</a></h3>
 <dl class="docutils">
 <dt>Tracer:</dt>
 <dd>Tracer class. See <a class="reference internal" href="#tracer">Tracer</a> section for details.</dd>
@@ -1105,24 +1376,8 @@ assert serr == &quot;&quot;
 </div>
 <div class="section" id="tips">
 
-<h2><a class="toc-backref" href="#id18">Tips</a></h2>
+<h2><a class="toc-backref" href="#id20">Tips</a></h2>
 <ul>
-<li><p class="first">You can define your own custom assertion function.</p>
-<pre class="literal-block">
-## define custom assertion function
-import oktest
-<strong>&#64;oktest.assertion</strong>
-def startswith(self, arg):
-    boolean = <strong>self.target</strong>.startswith(arg)
-    if boolean == <strong>self.boolean</strong>:
-        return True
-    <strong>self.failed</strong>(&quot;%r.startswith(%r) : failed.&quot; % (self.target, arg))
-
-## how to use
-from oktest import ok
-ok (&quot;Sasaki&quot;).startswith(&quot;Sas&quot;)
-</pre>
-</li>
 <li><p class="first">It is possible to chain assertion methods.</p>
 <pre class="literal-block">
 ## chain assertion methods
@@ -1137,7 +1392,7 @@ ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
 sys.exit(run())
 </pre>
 </li>
-<li><p class="first">If you call ok() or NG() but forget to do assertion, oktest warns it.</p>
+<li><p class="first">If you call <tt class="docutils literal">ok()</tt> or <tt class="docutils literal">NG()</tt> but forget to do assertion, oktest warns it.</p>
 <pre class="literal-block">
 import oktest
 from oktest import ok, NG
@@ -1147,10 +1402,27 @@ class FooTest(object):
         #ok (1+1) == 2
         ok (1+1)         # missing assertion
 
-oktest.run()   #=&gt; warning: ok() is called but not tested.
+oktest.main()   #=&gt; warning: ok() is called but not tested.
 </pre>
 </li>
-<li><p class="first">$TEST environment variable is now obsolete.
+<li><p class="first">It is possible to embed spec id into test description with '[!xxxxx]' format.</p>
+<pre class="literal-block">
+## python
+class HomhomTest(unittest.TestCase):
+    &#64;test('[!bk201] 1+1 should be 2')    # spec id is 'bk201'
+    def _(self):
+        ok (1+1) == 2
+    &#64;test('[!nov11] 1-1 should be 0')    # spec id is 'nov11'
+    def _(self):
+        ok (1-1) == 0
+</pre>
+<p>You can filter tests by spec id (sid).</p>
+<blockquote>
+<p>## filter by spec id
+$ python -m oktest test/example_test.py -f sid=bk201</p>
+</blockquote>
+</li>
+<li><p class="first"><tt class="docutils literal">$TEST</tt> environment variable is now obsolete.
 Use command-line option instead to filter testcase by name.</p>
 <pre class="literal-block">
 ## filter testcase by name
@@ -1161,12 +1433,12 @@ $ python -m oktest -f test='*foobar*' test/foo_test.py
 </div>
 <div class="section" id="license">
 
-<h2><a class="toc-backref" href="#id19">License</a></h2>
+<h2><a class="toc-backref" href="#id21">License</a></h2>
 <p>$License: MIT License $</p>
 </div>
 <div class="section" id="copyright">
 
-<h2><a class="toc-backref" href="#id20">Copyright</a></h2>
+<h2><a class="toc-backref" href="#id22">Copyright</a></h2>
 <p>$Copyright: copyright(c) 2010-2014 kuwata-lab.com all rights reserved $</p>
 </div>
 </div>
