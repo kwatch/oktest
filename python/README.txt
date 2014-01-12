@@ -305,7 +305,65 @@ It is possible to chain assertions. ::
     ok (d).attr('year', 2000).attr('month', 12).attr('day', 31)
 
 Oktest allows you to define custom assertion functions.
-See `Tips`_ section.
+See next section.
+
+
+Custom Assertion
+================
+
+You can define your own custom assertion function.
+
+Simple example::
+
+    ## define custom assertion function
+    import oktest
+    {{*@oktest.assertion*}}
+    def startswith(self, arg):
+        boolean = {{*self.target*}}.startswith(arg)
+        if boolean != {{*self.boolean*}}:
+            {{*self.failed*}}("%r.startswith(%r) : failed." % (self.target, arg))
+        return self
+
+    ## how to use
+    from oktest import ok
+    ok ("Sasaki").startswith("Sas")
+
+More complex example::
+
+    ## define custom assertion function
+    import re
+    import oktest
+    {{*@oktest.assertion*}}
+    def json(self, jdict):
+        if self.boolean != True:
+            raise TypeError("json() is not available with NOT() nor NG().")
+        # response object
+        response = {{*self.target*}}
+        # assert content-type
+        rexp = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
+        if not rexp.match(response.content_type):
+            {{*self.failed*}}("Unepected content-type.\n"
+                        "  actual: %r" % (response.content_type,))
+        # assert response body
+        import json
+        actual_jdict = json.loads(response.text)
+        if actual_jdict != jdict:
+            {{*self.failed*}}("Unexpected JSON data.\n"
+                        "  expected: %r\n"
+                        "  actual:   %r" % (jdict, actual_jdict))
+        #
+        return self
+
+    ## how to use
+    from webob.response import Response
+    response = Response()
+    response.content_type = "application/json"
+    response.text = u'''{"status": "OK"}'''
+    #
+    from oktest import ok
+    ok (response).json({'status': 'ok'})
+
+(Notice that Oktest.py already provides ``ok().is_response().json(jdict)``.)
 
 
 ``@test`` Decorator
@@ -1328,21 +1386,6 @@ Tracer:
 
 Tips
 ====
-
-* You can define your own custom assertion function. ::
-
-    ## define custom assertion function
-    import oktest
-    {{*@oktest.assertion*}}
-    def startswith(self, arg):
-        boolean = {{*self.target*}}.startswith(arg)
-        if boolean == {{*self.boolean*}}:
-            return True
-        {{*self.failed*}}("%r.startswith(%r) : failed." % (self.target, arg))
-
-    ## how to use
-    from oktest import ok
-    ok ("Sasaki").startswith("Sas")
 
 * It is possible to chain assertion methods. ::
 
