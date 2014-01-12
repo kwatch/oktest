@@ -159,9 +159,11 @@ class ResponseAssertionObject_TC(unittest.TestCase):
             ok (response).is_response(201)
         except AssertionError:
             ex = sys.exc_info()[1]
-            expected_errmsg = ("Response status 200 == 201: failed.\n"
-                               "--- response body ---\n"
-                               "b''")
+            expected_errmsg = r"""
+Response status 200 == 201: failed.
+--- response body ---
+b''
+"""[1:-1]
             if python2:
                 expected_errmsg = expected_errmsg.replace("b''", "")
             assert str(ex) == (expected_errmsg)
@@ -255,21 +257,25 @@ Response header 'Location' should not be set : failed.
         response = Response()
         _set_body(response, to_binary('<h1>Hello</h1>'))
         #
-        expected_msg = ("Response body is different from expected data.\n"
-                        "--- expected\n"
-                        "+++ actual\n"
-                        "@@ -1,1 +1,1 @@\n"
-                        "-<h1>Hello World!</h1>\n"
-                        "+<h1>Hello</h1>\n")
+        expected_msg = r"""
+Response body is different from expected data.
+--- expected
++++ actual
+@@ -1,1 +1,1 @@
+-<h1>Hello World!</h1>
++<h1>Hello</h1>
+"""[1:]
         if not _diff_has_column_num:
             expected_msg = expected_msg.replace('1,1', '1')
         @be_failed(expected_msg)
         def _():
             ok (response).resp.body('<h1>Hello World!</h1>')
         #
-        expected_msg = ("Response body failed to match to expected pattern.\n"
-                        "  expected pattern: 'hello'\n"
-                        "  response body:    <h1>Hello</h1>")
+        expected_msg = r"""
+Response body failed to match to expected pattern.
+  expected pattern: 'hello'
+  response body:    <h1>Hello</h1>
+"""[1:-1]
         @be_failed(expected_msg)
         def _():
             ok (response).resp.body(re.compile(r'hello'))
