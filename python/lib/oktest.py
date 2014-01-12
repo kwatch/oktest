@@ -682,12 +682,15 @@ def _resp(self):
 AssertionObject._resp = property(_resp)
 del _resp
 
-def is_response(self, status=None):
+def is_response(self, status=None, content_type=None):
     """(experimental) Assert response status.
     ex:
        ok (response).is_response(200)
        ok (response).is_response((200, 201))
        ok (response).is_response('200 OK')
+       ok (response).is_response(200, 'image/jpeg')
+       ok (response).is_response(200, re.compile('^image/(jpeg|png|gif)$')
+       #
        ok (response).is_response(302).header("Location", "/")
        ok (response).is_response(200).json({"status": "OK"})
        ok (response).is_response(200).body("<h1>Hello</h1>")
@@ -704,6 +707,8 @@ def is_response(self, status=None):
     self.__class__ = ResponseAssertionObject
     if status is not None:
         self.status(status)
+    if content_type is not None:
+        self.cont_type(content_type)
     return self
 
 AssertionObject.is_response = is_response

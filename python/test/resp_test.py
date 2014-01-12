@@ -156,6 +156,13 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         except:
             assert False, "failed"
         #
+        _set_ctype(response, 'text/html')
+        try:
+            ok (response).is_response(200, 'text/html')
+            ok (response).is_response(200, re.compile(r'^text/(html|plain)$'))
+        except:
+            assert False, "failed"
+        #
         try:
             ok (response).is_response(201)
         except AssertionError:
@@ -170,6 +177,18 @@ b''
             assert str(ex) == (expected_errmsg)
         else:
             assert False, "failed"
+        #
+        _set_ctype(response, 'text/html')
+        try:
+            ok (response).is_response(200, 'text/plain')
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            expected_errmsg = r"""
+Unexpected content-type value.
+  expected: 'text/plain'
+  actual:   'text/html'
+"""[1:-1]
+            assert str(ex) == expected_errmsg
         #
         try:
             NOT (response).is_response(200)
