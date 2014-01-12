@@ -152,6 +152,7 @@ class ResponseAssertionObject_TC(unittest.TestCase):
         try:
             ok (response).is_response(200)
             ok (response).is_response('200 OK')
+            ok (response).is_response((200, 201))
         except:
             assert False, "failed"
         #
@@ -183,6 +184,7 @@ b''
         try:
             ok (Response())._resp.status(200)
             ok (Response(status=302))._resp.status(302)
+            ok (Response(status=302))._resp.status((301, 302))
         except:
             assert False, "failed"
 
@@ -205,6 +207,17 @@ b'{"status": "OK"}'
         @be_failed(expected_errmsg)
         def _():
             ok (response)._resp.status(201)
+        #
+        expected_errmsg = r"""
+Response status 200 in (301, 302): failed.
+--- response body ---
+b'{"status": "OK"}'
+"""[1:-1]
+        if python2:
+            expected_errmsg = re.sub(r"b'({.*?})'", r"\1", expected_errmsg)
+        @be_failed(expected_errmsg)
+        def _():
+            ok (response)._resp.status((301, 302))
 
     @with_response_class
     def test_header_ok(self, Response):

@@ -546,14 +546,23 @@ class ResponseAssertionObject(AssertionObject):
     def status(self, expected_status):
         """(experimental) Asserts status code of WebOb/Werkzeug response object."""
         response = self.target
-        if isinstance(expected_status, int):
-            actual_status = self._resp_code(response)
-        else:
-            actual_status = self._resp_status(response)
-        if self.boolean != (actual_status == expected_status):
-            self.failed("Response status %r == %r: failed.\n"
+        errmsg = None
+        if isinstance(expected_status, int):         # ex. 200
+            actual = self._resp_code(response)
+            boolean = (actual == expected_status)
+            op = '=='
+        elif isinstance(expected_status, tuple):     # ex. (200, 201)
+            actual = self._resp_code(response)
+            boolean = (actual in expected_status)
+            op = 'in'
+        else:                                        # ex. '200 OK'
+            actual = self._resp_status(response)
+            boolean = (actual == expected_status)
+            op = '=='
+        if self.boolean != boolean:
+            self.failed("Response status %r %s %r: failed.\n"
                         "--- response body ---\n"
-                        "%s" % (actual_status, expected_status, self._resp_body(response)))
+                        "%s" % (actual, op, expected_status, self._resp_body(response),))
         return self
 
     @assertion
@@ -654,6 +663,7 @@ def is_response(self, status=None):
     """(experimental) Assert response status.
     ex:
        ok (response).is_response(200)
+       ok (response).is_response((200, 201))
        ok (response).is_response('200 OK')
        ok (response).is_response(302).header("Location", "/")
        ok (response).is_response(200).json({"status": "OK"})

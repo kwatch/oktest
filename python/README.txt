@@ -269,6 +269,7 @@ ok (response).is_response(status).header(name, value).body(str_or_rexp).json(dic
 	(experimental) Assertions for WebOb or Werkzeug response object. ::
 
 	    ok (response).is_response(200)                          # status code
+	    ok (response).is_response((302, 303))                   # status code
 	    ok (response).is_response('200 OK')                     # status line
 	    ok (response).is_response(302).header("Location", "/")  # header
 	    ok (response).is_response(200).json({"status": "OK"})   # json data
