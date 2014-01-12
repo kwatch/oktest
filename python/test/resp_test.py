@@ -220,6 +220,47 @@ b'{"status": "OK"}'
             ok (response)._resp.status((301, 302))
 
     @with_response_class
+    def test_cont_type_ok(self, Response):
+        resp = Response()
+        _set_ctype(resp, 'image/jpeg')
+        try:
+            ok (resp)._resp.cont_type('image/jpeg')
+            ok (resp)._resp.cont_type(re.compile('^image/(jpeg|png|gif)$'))
+        except:
+            assert False, "failed"
+
+    @with_response_class
+    def test_cont_type_ok_returns_self(self, Response):
+        resp = Response()
+        _set_ctype(resp, 'image/jpeg')
+        respobj = ok (resp)._resp
+        assert respobj.cont_type('image/jpeg') is respobj
+        assert respobj.cont_type(re.compile('^image/(jpeg|png|gif)$')) is respobj
+
+    @with_response_class
+    def test_cont_type_NG(self, Response):
+        resp = Response()
+        #
+        _set_ctype(resp, 'image/jpeg')
+        expected_errmsg = r"""
+Unexpected content-type value.
+  expected: 'image/png'
+  actual:   'image/jpeg'
+"""[1:-1]
+        @be_failed(expected_errmsg)
+        def _():
+            ok (resp)._resp.cont_type('image/png')
+        #
+        expected_errmsg = r"""
+Unexpected content-type value (not matched to pattern).
+  expected: re.compile('^image/(jpg|png|gif)$')
+  actual:   'image/jpeg'
+"""[1:-1]
+        @be_failed(expected_errmsg)
+        def _():
+            ok (resp)._resp.cont_type(re.compile(r'^image/(jpg|png|gif)$'))
+
+    @with_response_class
     def test_header_ok(self, Response):
         response = Response()
         response.headers['Location'] = '/'

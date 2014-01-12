@@ -566,6 +566,29 @@ class ResponseAssertionObject(AssertionObject):
         return self
 
     @assertion
+    def cont_type(self, str_or_regexp):
+        """(experimental) Asserts content-type of WebOb/Werkzeug response object."""
+        response = self.target
+        cont_type = self._resp_ctype(response)
+        ## when regular expression
+        if isinstance(str_or_regexp, _rexp_type):
+            rexp = str_or_regexp
+            m = rexp.search(cont_type)
+            if self.boolean != bool(m):
+                self.failed("Unexpected content-type value (not matched to pattern).\n"
+                            "  expected: re.compile(%r)\n"
+                            "  actual:   %r" % (rexp.pattern, cont_type,))
+        ## when string
+        else:
+            text = str_or_regexp
+            if self.boolean != (cont_type == text):
+                self.failed("Unexpected content-type value.\n"
+                            "  expected: %r\n"
+                            "  actual:   %r" % (text, cont_type,))
+        ##
+        return self
+
+    @assertion
     def header(self, name, value):
         """(experimental) Asserts header of WebOb/Werkzeug response object."""
         response = self.target
