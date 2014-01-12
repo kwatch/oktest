@@ -14,6 +14,7 @@ __version__ = "$Release: 0.0.0 $".split()[1]
 import sys, os, re, types, traceback, time, linecache
 from contextlib import contextmanager
 pformat = None   # on-demand import
+json = None      # on-demant import
 
 ENCODING = 'utf-8'
 TERMINAL_WIDTH = 80
@@ -610,7 +611,8 @@ class ResponseAssertionObject(AssertionObject):
                         "--- content-type ---\n"
                         "%r" % (content_type,))
         ## parse response body
-        import json
+        global json
+        if json is None: import json
         resp_text = self._resp_text(response)
         try:
             actual_jdict = json.loads(resp_text)
@@ -626,7 +628,8 @@ class ResponseAssertionObject(AssertionObject):
         return self
 
     def _json_dumps(self, jdict):
-        import json
+        global json
+        if json is None: import json
         return json.dumps(jdict, ensure_ascii=False, indent=2, sort_keys=True)
 
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
