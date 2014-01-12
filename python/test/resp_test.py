@@ -101,8 +101,11 @@ except (ImportError, SyntaxError):
 def _set_body(response, body):
     if hasattr(response, 'body'):
         response.body = to_binary(body)
-    else:
+        response.text = to_unicode(body)
+    elif hasattr(response, 'data'):
         response.data = body
+    else:
+        raise Error
 
 def _set_ctype(response, content_type):
     if hasattr(response, 'content_type'):
