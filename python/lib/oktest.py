@@ -654,8 +654,17 @@ def resp(self):
 def is_response(self, status=None):
     """Assert response status.
     ex:
-       ok (response1).is_response(200).json({"status": "OK"})
-       ok (response2).is_response(302).header("Location", "/")
+       ok (response).is_response(200)
+       ok (response).is_response('200 OK')
+       ok (response).is_response(302).header("Location", "/")
+       ok (response).is_response(200).json({"status": "OK"})
+       ok (response).is_response(200).body("<h1>Hello</h1>")
+       ok (response).is_response(200).body(re.compile("<h1>.*?</h1>"))
+
+    Notice that is_response() changes __class__ attribute.
+    ex:
+       ok (response).__class__       #=> AssertionObject
+       ok (response).is_response()   #=> ResponseAssertionObject
     """
     self.__class__ = ResponseAssertionObject
     if status is not None:
