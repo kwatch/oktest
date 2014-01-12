@@ -669,6 +669,9 @@ def is_response(self, status=None):
        ok (response).__class__       #=> AssertionObject
        ok (response).is_response()   #=> ResponseAssertionObject
     """
+    if self.boolean != True:
+        self._tested = True   # supress warning
+        raise TypeError("is_response(): not available with NOT() nor NG().")
     self.__class__ = ResponseAssertionObject
     if status is not None:
         self.status(status)

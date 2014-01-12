@@ -19,7 +19,7 @@ if python3:
 
 
 import oktest
-from oktest import ok
+from oktest import ok, NOT
 
 _diff_has_column_num = '1,1' in oktest._diff("foo\n", "bar\n")
 
@@ -169,6 +169,14 @@ b''
             assert str(ex) == (expected_errmsg)
         else:
             assert False, "failed"
+        #
+        try:
+            NOT (response).is_response(200)
+        except TypeError:
+            ex = sys.exc_info()[1]
+            assert str(ex) == "is_response(): not available with NOT() nor NG()."
+        else:
+            assert false, "failed"
 
     @with_response_class
     def test_status_ok(self, Response):
