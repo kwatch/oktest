@@ -17,6 +17,7 @@ py27 = major == 2 and minor == 7
 py30 = major == 3 and minor == 0
 py31 = major == 3 and minor == 1
 py32 = major == 3 and minor >= 2
+py33 = major == 3 and minor >= 3
 #
 py271 = major == 2 and minor == 7 and teeny <= 1
 py314 = major == 3 and minor == 1 and teeny >= 4
@@ -498,6 +499,9 @@ class OktestMainApp_TC(unittest.TestCase):
         expected = expected.replace('mainapp_test.py', basename)
         if py24:
             expected = expected.replace('Usage:', 'usage:')
+        if py33:
+            expected = expected.replace('option requires an argument',
+                                        'option requires 1 argument')
         return expected
 
 
