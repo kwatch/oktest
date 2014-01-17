@@ -666,6 +666,11 @@ class ResponseAssertionObject(AssertionObject):
 
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
 
+del AssertionObject.status
+del AssertionObject.cont_type
+del AssertionObject.header
+del AssertionObject.body
+del AssertionObject.json
 
 class UnsupportedResponseObjectError(Exception):
     pass
