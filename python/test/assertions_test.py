@@ -573,7 +573,7 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
 
 
     def test_should(self):
-        ok ("foobar").should.startswith("foob")
+        ok ("foobar").should.startswith("foob").endswith("bar")
         @be_fail("'foobar'.startswith('aaa') : failed.")
         def fn(): ok ("foobar").should.startswith("aaa")
         #

@@ -789,6 +789,7 @@ class Should(object):
                 if self.boolean is False:
                     msg = "not " + msg
                 ass.failed(msg)
+            return self
         return f
 
 
