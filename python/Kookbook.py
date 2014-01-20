@@ -281,6 +281,14 @@ class pkg(Category):
         #    rm_f('MANIFEST')
         #    system(c%'$(python) setup.py sdist --force-manifest')
 
+    @recipe
+    def upload(c, *args, **kwargs):
+        """upload new version to pypi"""
+        dir = c%"dist/$(basename)"
+        with chdir(dir):
+            system(c%"python setup.py register")
+            system(c%"python setup.py sdist upload")
+
 
 kookbook.load('@kook/books/clean.py')
 CLEAN.extend(('**/*.pyc', '**/__pycache__', 'lib/*.egg-info', '%s.zip' % package))
