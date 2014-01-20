@@ -2194,6 +2194,8 @@ def test(description_text=None, **tags):
         return newfunc
     return deco
 
+test.__test__ = False    # for 'nosetests' command
+
 SPEC_ID_REXP = re.compile(r'^\[\!([-\w]+)\]')
 
 
