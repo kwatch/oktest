@@ -3,6 +3,23 @@
 CHANGES
 =======
 
+
+Release 0.12.1 (2014-01-20)
+---------------------------
+
+* [bugfix] `ok()' object now doesn't have http response assertions.
+  You must call `ok().is_response()' at first to assert response object. ::
+
+      hasattr(ok(response).is_response(), 'json')   # True
+      hasattr(ok(response), 'json')   # True on 0.12.0, False on 0.12.1
+
+* [bugfix] `ok().should' now allows method chain.
+  ex::
+
+      ok ("image001.jpg").should.startswith('image').endswith(('.jpg', '.png'))
+
+
+
 Release 0.12.0 (2014-01-12)
 ---------------------------
 
