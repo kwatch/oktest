@@ -48,7 +48,7 @@ Usage: python -m oktest [options] file_or_directory...
   -p PAT[,PAT2,..]    test script pattern (default '*_test.py,test_*.py')
   -U                  run testcases with unittest.main instead of oktest.run
   -D                  debug mode
-  -f FILTER           filter (class=xxx/test=xxx/useroption=xxx)
+  -f FILTER           filter (class=xxx/test=xxx/sid=xxx/useroption=xxx)
 Example:
    ## run test scripts in plain format
    $ python -m oktest -sp tests/*_test.py

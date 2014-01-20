@@ -3,6 +3,23 @@
 CHANGES
 =======
 
+
+Release 0.12.1 (2014-01-20)
+---------------------------
+
+* [bugfix] `ok()' object now doesn't have http response assertions.
+  You must call `ok().is_response()' at first to assert response object. ::
+
+      hasattr(ok(response).is_response(), 'json')   # True
+      hasattr(ok(response), 'json')   # True on 0.12.0, False on 0.12.1
+
+* [bugfix] `ok().should' now allows method chain.
+  ex::
+
+      ok ("image001.jpg").should.startswith('image').endswith(('.jpg', '.png'))
+
+
+
 Release 0.12.0 (2014-01-12)
 ---------------------------
 
@@ -178,7 +195,7 @@ Release 0.12.0 (2014-01-12)
     - [Fail] 1-1 should be 0.
     ## total:1, pass:0, fail:0, error:0, skip:0, todo:1  (0.000 sec)
 
-* [bugfix] @todo decorator now supports unicode description.
+* [bugfix] @test decorator now supports unicode description.
   ex::
 
     @test(u"日本語")    # error on previous version but not in this release
