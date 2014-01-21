@@ -33,6 +33,11 @@ if python3:
     _bytes   = bytes
     from io import StringIO
 
+def _B(val, encoding='utf-8'):
+    if isinstance(val, _unicode):
+        return val.encode(encoding)
+    return val
+
 
 def _new_module(name, local_vars, util=None):
     mod = type(sys)(name)
@@ -2849,7 +2854,8 @@ class WSGITest(object):
             if python2:
                 from cStringIO import StringIO as _StringIO
             if python3:
-                from io import StringIO as _StringIO
+                #from io import StringIO as _StringIO
+                from io import BytesIO as _StringIO
         global _wsgiref_util
         if not _wsgiref_util:
             import wsgiref.util as _wsgiref_util
@@ -2860,14 +2866,16 @@ class WSGITest(object):
             env['QUERY_STRING'] = s
         if form is not None:
             s = self._build_paramstr(form) if isinstance(form, dict) else str(form)
-            env['wsgi.input']     = _StringIO(s)
+            b = _B(s)
+            env['wsgi.input']     = _StringIO(b)
             env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded'
-            env['CONTENT_LENGTH'] = str(len(s))
+            env['CONTENT_LENGTH'] = str(len(b))
         if json is not None:
             s = self._build_jsonstr(json) if isinstance(json, dict) else str(json)
-            env['wsgi.input']     = _StringIO(s)
+            b = _B(s)
+            env['wsgi.input']     = _StringIO(b)
             env['CONTENT_TYPE']   = 'application/json'
-            env['CONTENT_LENGTH'] = str(len(s))
+            env['CONTENT_LENGTH'] = str(len(b))
         if headers:
             env.update(headers)
         #
@@ -2998,7 +3006,7 @@ class WSGIResponse(object):
                     else:
                         raise ValueError("Unexpected response body data type: %r (%r)" % (type(x), x))
                 add(x)
-            self.body = "".join(buf)
+            self.body = _B("").join(buf)
             self.text = self.body.decode(self.encoding)
         finally:
             if hasattr(iterable, 'close'):

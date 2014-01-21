@@ -8,9 +8,18 @@ python3 = sys.version_info[0] == 3
 if python2:
     _binary = str
     _unicode = unicode
+    python30 = False
+    python31 = False
 elif python3:
     _binary = bytes
     _unicode = str
+    python30 = sys.version_info[1] == 0
+    python31 = sys.version_info[1] == 1
+
+def _B(val):
+    return val.encode('utf-8') if isinstance(val, _unicode) else val
+def _U(val):
+    return val.decode('utf-8') if isinstance(val, _binary) else val
 
 import unittest
 import oktest
@@ -24,7 +33,15 @@ def _app(environ, start_response):
     input = environ['wsgi.input']
     content = "OK"
     if input:
-        content += " <input=%r>" % (input.read(),)
+        buf = []
+        while True:
+            s = input.read(1024)
+            if not s: break
+            buf.append(s)
+        empty = _B("")
+        content += " <input=%r>" % empty.join(buf)
+    if isinstance(content, _unicode):
+        content = content.encode('utf-8')
     start_response("201 Created", [('Content-Type', 'image/jpeg')])
     return [content]
 
@@ -44,27 +61,45 @@ class WSGITest_TC(unittest.TestCase):
         assert isinstance(resp, WSGIResponse)
         assert resp.status  == "201 Created"
         assert resp.headers['Content-Type'] == 'image/jpeg'
-        assert resp.body    == "OK <input=''>"
+        if python2:
+            assert resp.body == "OK <input=''>"
+            assert resp.text == "OK <input=''>"
+        elif python3:
+            assert resp.body == _B("OK <input=b''>")
+            assert resp.text == _U("OK <input=b''>")
 
     def test__call___query(self):
         resp = self.http.POST('/hello', query={'q':"SOS", 'page':'1'})
-        assert resp.body == "OK <input=''>"
+        if python2:
+            assert resp.body == "OK <input=''>"
+            assert resp.text == "OK <input=''>"
+        elif python3:
+            assert resp.body == _B("OK <input=b''>")
+            assert resp.text == _U("OK <input=b''>")
         assert resp._environ['QUERY_STRING'] in ("q=SOS&page=1", "page=1&q=SOS")
         assert 'CONTENT_TYPE' not in resp._environ
         assert 'CONTENT_LENGTH' not in resp._environ
 
     def test__call___form(self):
         resp = self.http.POST('/hello', form={'q':"SOS", 'page':'1'})
-        assert resp.body in ("OK <input='q=SOS&page=1'>",
-                             "OK <input='page=1&q=SOS'>",)
+        if python2:
+            assert resp.body in ("OK <input='q=SOS&page=1'>",
+                                 "OK <input='page=1&q=SOS'>",)
+        elif python3:
+            assert resp.body in (_B("OK <input=b'q=SOS&page=1'>"),
+                                 _B("OK <input=b'page=1&q=SOS'>"),)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
         assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
 
     def test__call___json(self):
         resp = self.http.POST('/hello', json={'q':"SOS", 'page':1})
-        assert resp.body in ("""OK <input='{"q":"SOS","page":1}'>""",
-                             """OK <input='{"page":1,"q":"SOS"}'>""",)
+        if python2:
+            assert resp.body in ("""OK <input='{"q":"SOS","page":1}'>""",
+                                 """OK <input='{"page":1,"q":"SOS"}'>""",)
+        elif python3:
+            assert resp.body in (_B("""OK <input=b'{"q":"SOS","page":1}'>"""),
+                                 _B("""OK <input=b'{"page":1,"q":"SOS"}'>"""),)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/json'
         assert resp._environ['CONTENT_LENGTH'] == str(len('{"page":1,"q":"SOS"}'))
@@ -136,45 +171,75 @@ class WSGIResponse_TC(unittest.TestCase):
         resp = http.GET('/foo')
         assert resp.status == '201 Created'
         assert resp.headers['Content-Type'] == 'image/jpeg'
-        assert resp.body == "OK <input=''>"
-        assert resp.text == "OK <input=''>"
+        if python2:
+            assert resp.body == "OK <input=''>"
+            assert resp.text == "OK <input=''>"
+        elif python3:
+            assert resp.body == _B("OK <input=b''>")
+            assert resp.text == _U("OK <input=b''>")
         assert isinstance(resp.body, _binary)
         assert isinstance(resp.text, _unicode)
 
     def test_warning_when_response_body_contains_unicode(self):
         def app(env, callback):
             callback('200 OK', [('Content-Type', 'text/plain')])
-            return [u"Hello"]
+            return [_U("Hello")]
         #
-        called = []
-        def warn(*args, **kwargs):
-            called.append(args)
-            called.append(kwargs)
-        import warnings
-        _original = warnings.warn
-        warnings.warn = warn
-        #
-        try:
-            http = WSGIHttpTest(app)
-            resp = http.GET('/foo')
-            resp.body == "Hello"
-            assert called[0] == ("response body should be binary, but got unicode data: u'Hello'\n", oktest.wsgi.OktestWSGIWarning, )
-            assert called[1] == {}
-        finally:
-            warnings.warn = _original
+        if python2 or python30 or python31:
+            called = []
+            def warn(*args, **kwargs):
+                called.append(args)
+                called.append(kwargs)
+            import warnings
+            _original = warnings.warn
+            warnings.warn = warn
+            try:
+                http = WSGIHttpTest(app)
+                resp = http.GET('/foo')
+                resp.body == "Hello"
+                errmsg = "response body should be binary, but got unicode data: u'Hello'\n"
+                if python3:
+                    errmsg = errmsg.replace("u'", "'")
+                assert called[0] == (errmsg, oktest.wsgi.OktestWSGIWarning, )
+                assert called[1] == {}
+            finally:
+                warnings.warn = _original
+        elif python3:
+            try:
+                http = WSGIHttpTest(app)
+                resp = http.GET('/foo')
+            except AssertionError:
+                ex = sys.exc_info()[1]
+                assert str(ex) == "Iterator yielded non-bytestring ('Hello')"
+            else:
+                assert False, "assertion error expected but not raised."
 
     def test_error_when_response_body_contains_non_string_data(self):
         def app(env, callback):
             callback('200 OK', [('Content-Type', 'text/plain')])
-            return ["Hello", None]
+            return [_B("Hello"), None]
         #
         http = WSGIHttpTest(app)
-        try:
-            http.GET('/foo')
-            assert False, "ValueError expected, but not raised."
-        except ValueError:
-            ex = sys.exc_info()[1]
-            assert str(ex) == "Unexpected response body data type: <type 'NoneType'> (None)"
+        if python2 or python30 or python31:
+            try:
+                http.GET('/foo')
+            except ValueError:
+                ex = sys.exc_info()[1]
+                errmsg = "Unexpected response body data type: <type 'NoneType'> (None)"
+                if python30 or python31:
+                    errmsg = errmsg.replace('<type', '<class')
+                assert str(ex) == errmsg
+            else:
+                assert False, "ValueError expected, but not raised."
+        elif python3:
+            try:
+                http.GET('/foo')
+            except AssertionError:
+                ex = sys.exc_info()[1]
+                assert str(ex) == "Iterator yielded non-bytestring (None)"
+            else:
+                assert False, "assertion error expected, but not raised."
+
 
 
 if __name__ == '__main__':
