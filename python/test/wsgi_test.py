@@ -1,0 +1,181 @@
+# -*- coding: utf-8 -*-
+
+import sys
+import wsgiref.util
+
+python2 = sys.version_info[0] == 2
+python3 = sys.version_info[0] == 3
+if python2:
+    _binary = str
+    _unicode = unicode
+elif python3:
+    _binary = bytes
+    _unicode = str
+
+import unittest
+import oktest
+from oktest.wsgi import (
+    WSGITest, WSGIHttpTest, WSGIHttpsTest, WSGIStartResponse, WSGIResponse,
+)
+from oktest.tracer import Tracer
+
+
+def _app(environ, start_response):
+    input = environ['wsgi.input']
+    content = "OK"
+    if input:
+        content += " <input=%r>" % (input.read(),)
+    start_response("201 Created", [('Content-Type', 'image/jpeg')])
+    return [content]
+
+
+
+class WSGITest_TC(unittest.TestCase):
+
+    def setUp(self):
+        self.http = WSGITest(_app)
+
+    def test___init__(self):
+        http = WSGITest(_app)
+        assert http._app is _app
+
+    def test___call__(self):
+        resp = self.http()
+        assert isinstance(resp, WSGIResponse)
+        assert resp.status  == "201 Created"
+        assert resp.headers['Content-Type'] == 'image/jpeg'
+        assert resp.body    == "OK <input=''>"
+
+    def test__call___query(self):
+        resp = self.http.POST('/hello', query={'q':"SOS", 'page':'1'})
+        assert resp.body == "OK <input=''>"
+        assert resp._environ['QUERY_STRING'] in ("q=SOS&page=1", "page=1&q=SOS")
+        assert 'CONTENT_TYPE' not in resp._environ
+        assert 'CONTENT_LENGTH' not in resp._environ
+
+    def test__call___form(self):
+        resp = self.http.POST('/hello', form={'q':"SOS", 'page':'1'})
+        assert resp.body in ("OK <input='q=SOS&page=1'>",
+                             "OK <input='page=1&q=SOS'>",)
+        assert resp._environ['QUERY_STRING'] == ""
+        assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
+        assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
+
+    def test__call___json(self):
+        resp = self.http.POST('/hello', json={'q':"SOS", 'page':1})
+        assert resp.body in ("""OK <input='{"q":"SOS","page":1}'>""",
+                             """OK <input='{"page":1,"q":"SOS"}'>""",)
+        assert resp._environ['QUERY_STRING'] == ""
+        assert resp._environ['CONTENT_TYPE'] == 'application/json'
+        assert resp._environ['CONTENT_LENGTH'] == str(len('{"page":1,"q":"SOS"}'))
+
+    def test_GET(self):
+        resp = self.http.GET('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'GET'
+
+    def test_POST(self):
+        resp = self.http.POST('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'POST'
+
+    def test_PUT(self):
+        resp = self.http.PUT('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'PUT'
+
+    def test_DELETE(self):
+        resp = self.http.DELETE('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'DELETE'
+
+    def test_PATCH(self):
+        resp = self.http.PATCH('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'PATCH'
+
+    def test_OPTIONS(self):
+        resp = self.http.OPTIONS('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'OPTIONS'
+
+    def test_TRACE(self):
+        resp = self.http.TRACE('/hello')
+        assert resp._environ['REQUEST_METHOD'] == 'TRACE'
+
+
+class WSGIHttpTest_TC(unittest.TestCase):
+
+    def test__base_env(self):
+        http = WSGIHttpTest(_app)
+        resp = http('GET', '/hello')
+        assert resp._environ['wsgi.url_scheme'] == 'http'
+        full_url = wsgiref.util.request_uri(resp._environ)
+        assert full_url == "http://127.0.0.1/hello"
+
+
+class WSGIHttpsTest_TC(unittest.TestCase):
+
+    def test__base_env(self):
+        http = WSGIHttpsTest(_app)
+        resp = http('GET', '/hello')
+        assert resp._environ['wsgi.url_scheme'] == 'https'
+        full_url = wsgiref.util.request_uri(resp._environ)
+        assert full_url == "https://127.0.0.1/hello"
+
+
+class WSGIStartResponse_TC(unittest.TestCase):
+
+    def test___call__(self):
+        status = '201 Created'
+        headers = [('Content-Type', 'image/png')]
+        callback = WSGIStartResponse()
+        callback(status, headers)
+        assert callback.status is status
+        assert callback.headers is headers
+
+
+class WSGIResponse_TC(unittest.TestCase):
+
+    def test_attributes(self):
+        http = WSGIHttpTest(_app)
+        resp = http.GET('/foo')
+        assert resp.status == '201 Created'
+        assert resp.headers['Content-Type'] == 'image/jpeg'
+        assert resp.body == "OK <input=''>"
+        assert resp.text == "OK <input=''>"
+        assert isinstance(resp.body, _binary)
+        assert isinstance(resp.text, _unicode)
+
+    def test_warning_when_response_body_contains_unicode(self):
+        def app(env, callback):
+            callback('200 OK', [('Content-Type', 'text/plain')])
+            return [u"Hello"]
+        #
+        called = []
+        def warn(*args, **kwargs):
+            called.append(args)
+            called.append(kwargs)
+        import warnings
+        _original = warnings.warn
+        warnings.warn = warn
+        #
+        try:
+            http = WSGIHttpTest(app)
+            resp = http.GET('/foo')
+            resp.body == "Hello"
+            assert called[0] == ("response body should be binary, but got unicode data: u'Hello'\n", oktest.wsgi.OktestWSGIWarning, )
+            assert called[1] == {}
+        finally:
+            warnings.warn = _original
+
+    def test_error_when_response_body_contains_non_string_data(self):
+        def app(env, callback):
+            callback('200 OK', [('Content-Type', 'text/plain')])
+            return ["Hello", None]
+        #
+        http = WSGIHttpTest(app)
+        try:
+            http.GET('/foo')
+            assert False, "ValueError expected, but not raised."
+        except ValueError:
+            ex = sys.exc_info()[1]
+            assert str(ex) == "Unexpected response body data type: <type 'NoneType'> (None)"
+
+
+if __name__ == '__main__':
+    unittest.main()
