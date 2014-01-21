@@ -13,6 +13,7 @@ __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
 from contextlib import contextmanager
+import warnings
 pformat = None   # on-demand import
 json = None      # on-demant import
 
@@ -2797,6 +2798,224 @@ def _dummy():
 
 tracer = _new_module('oktest.tracer', _dummy(), util)
 del _dummy
+
+
+
+##
+## wsgi
+##
+wsgi = type(sys)('oktest.wsgi')
+sys.modules[wsgi.__name__] = wsgi
+wsgi.__file__ = __file__
+
+_StringIO   = None          # on-demand import
+_quote_plus = None          # on-demand import
+_json       = None          # on-demand import
+
+_wsgiref_util      = None   # on-demand import
+_wsgiref_validate  = None   # on-demand import
+_wsgiref_headers   = None   # on-demand import
+
+
+class WSGITest(object):
+    __slots__ = ('_app',)
+
+    def __init__(self, app):
+        self._app = app
+
+    def __call__(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        global _wsgiref_validate
+        if not _wsgiref_validate:
+            import wsgiref.validate as _wsgiref_validate
+        env = self._new_env(method, urlpath, form=form, query=query, json=json, headers=headers)
+        start_resp = wsgi.WSGIStartResponse()
+        iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
+        resp = wsgi.WSGIResponse(start_resp.status, start_resp.headers, iterable)
+        resp._environ = env
+        return resp
+
+    def _base_env(self, method, urlpath):
+        env = {
+            'REQUEST_METHOD': method,
+            'PATH_INFO':      urlpath,
+            'SCRIPT_NAME':    '',
+            'QUERY_STRING':   '',
+        }
+        return env
+
+    def _new_env(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        global _StringIO
+        if _StringIO is None:
+            if python2:
+                from cStringIO import StringIO as _StringIO
+            if python3:
+                from io import StringIO as _StringIO
+        global _wsgiref_util
+        if not _wsgiref_util:
+            import wsgiref.util as _wsgiref_util
+        #
+        env = self._base_env(method, urlpath)
+        if query is not None:
+            s = self._build_paramstr(query) if isinstance(query, dict) else str(query)
+            env['QUERY_STRING'] = s
+        if form is not None:
+            s = self._build_paramstr(form) if isinstance(form, dict) else str(form)
+            env['wsgi.input']     = _StringIO(s)
+            env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded'
+            env['CONTENT_LENGTH'] = str(len(s))
+        if json is not None:
+            s = self._build_jsonstr(json) if isinstance(json, dict) else str(json)
+            env['wsgi.input']     = _StringIO(s)
+            env['CONTENT_TYPE']   = 'application/json'
+            env['CONTENT_LENGTH'] = str(len(s))
+        if headers:
+            env.update(headers)
+        #
+        _wsgiref_util.setup_testing_defaults(env)
+        return env
+
+    def _build_paramstr(self, param_dict):
+        global _quote_plus
+        if _quote_plus is None:
+            if python2:
+                from urllib import quote_plus as _quote_plus
+            if python3:
+                from urllib.parse import quote_plus as _quote_plus
+        #
+        q = _quote_plus
+        arr = []; add = arr.append
+        for k in param_dict:
+            v = param_dict[k] or ''
+            if isinstance(v, (list, tuple)):
+                vs = v
+                for v in vs:
+                    s = '' if v is None else str(v)
+                    add("%s=%s" % (q(k), q(s)))
+            else:
+                s = '' if v is None else str(v)
+                add("%s=%s" % (q(k), q(s)))
+        return '&'.join(arr)
+
+    def _build_jsonstr(self, jdict):
+        global _json
+        if _json is None:
+            import json as _json
+        #
+        return _json.dumps(jdict, ensure_ascii=False, separators=(',', ':'))
+
+
+    ###
+
+    #def define(meth, localvars=locals()):
+    #    def fn(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+    #        return self.__call__(meth, urlpath, form=form, query=query, json=json, headers=headers)
+    #    fn.__name__ = meth
+    #    localvars[meth] = fn
+    #    return fn
+    #for meth in "GET POST PUT DELETE PATCH HEAD OPTIONS TRACE".split():
+    #    define(meth)
+    #del define
+
+    def GET(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('GET', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def POST(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('POST', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def PUT(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('PUT', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def DELETE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('DELETE', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def PATCH(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('PATCH', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def HEAD(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('HEAD', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def OPTIONS(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('OPTIONS', urlpath, form=form, query=query, json=json, headers=headers)
+
+    def TRACE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+        return self.__call__('TRACE', urlpath, form=form, query=query, json=json, headers=headers)
+
+
+class WSGIHttpTest(WSGITest):
+    __slots__ = ('_app',)
+
+    def _base_env(self, method, urlpath):
+        env = wsgi.WSGITest._base_env(self, method, urlpath)
+        env['wsgi.url_scheme'] = 'http'
+        return env
+
+
+class WSGIHttpsTest(WSGITest):
+    __slots__ = ('_app',)
+
+    def _base_env(self, method, urlpath):
+        env = wsgi.WSGITest._base_env(self, method, urlpath)
+        env['wsgi.url_scheme'] = 'https'
+        return env
+
+
+class WSGIStartResponse(object):
+    __slots__ = ('status', 'headers')
+
+    def __call__(self, status, headers):
+        self.status  = status
+        self.headers = headers
+
+
+class WSGIResponse(object):
+    __slots__ = ('status', 'status_code', 'headers', 'iterable', 'body', 'text', '_environ')
+
+    encoding = 'utf-8'
+
+    def __init__(self, status, headers, iterable):
+        global _wsgiref_headers
+        if _wsgiref_headers is None:
+            import wsgiref.headers as _wsgiref_headers
+        self.status = status
+        if status and re.match(r'^\d+ ', status):
+            self.status_code = int(status.split()[0])
+        else:
+            self.status_code = None
+        self.headers = _wsgiref_headers.Headers(headers)
+        self.iterable = iterable
+        self._set_body_and_text(self.iterable)
+
+    def _set_body_and_text(self, iterable):
+        buf = []; add = buf.append
+        try:
+            for x in iterable:
+                if not isinstance(x, _bytes):
+                    if isinstance(x, _unicode):
+                        msg = "response body should be binary, but got unicode data: %r\n" % \
+                            (x if len(x) < 30 else x[:30]+"...")
+                        warnings.warn(msg, wsgi.OktestWSGIWarning)
+                        x = x.encode(self.encoding)
+                    else:
+                        raise ValueError("Unexpected response body data type: %r (%r)" % (type(x), x))
+                add(x)
+            self.body = "".join(buf)
+            self.text = self.body.decode(self.encoding)
+        finally:
+            if hasattr(iterable, 'close'):
+                iterable.close()
+
+
+class OktestWSGIWarning(Warning):
+    pass
+
+
+wsgi.WSGITest          = WSGITest
+wsgi.WSGIHttpTest      = WSGIHttpTest
+wsgi.WSGIHttpsTest     = WSGIHttpsTest
+wsgi.WSGIStartResponse = WSGIStartResponse
+wsgi.WSGIResponse      = WSGIResponse
+wsgi.OktestWSGIWarning = OktestWSGIWarning
+del WSGITest, WSGIHttpTest, WSGIHttpsTest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
 
 
 
