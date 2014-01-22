@@ -2813,7 +2813,7 @@ wsgi = type(sys)('oktest.wsgi')
 sys.modules[wsgi.__name__] = wsgi
 wsgi.__file__ = __file__
 
-_StringIO   = None          # on-demand import
+_BytesIO    = None          # on-demand import
 _quote_plus = None          # on-demand import
 _json       = None          # on-demand import
 _types      = None          # on-demand import
@@ -2853,13 +2853,13 @@ class WSGITest(object):
         return env
 
     def _new_env(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        global _StringIO
-        if _StringIO is None:
+        global _BytesIO
+        if _BytesIO is None:
             if python2:
-                from cStringIO import StringIO as _StringIO
+                from cStringIO import StringIO as _BytesIO
             if python3:
-                #from io import StringIO as _StringIO
-                from io import BytesIO as _StringIO
+                #from io import StringIO as _BytesIO
+                from io import BytesIO as _BytesIO
         global _wsgiref_util
         if not _wsgiref_util:
             import wsgiref.util as _wsgiref_util
@@ -2871,13 +2871,13 @@ class WSGITest(object):
         if form is not None:
             s = self._build_paramstr(form) if isinstance(form, dict) else str(form)
             b = _B(s)
-            env['wsgi.input']     = _StringIO(b)
+            env['wsgi.input']     = _BytesIO(b)
             env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded'
             env['CONTENT_LENGTH'] = str(len(b))
         if json is not None:
             s = self._build_jsonstr(json) if isinstance(json, dict) else str(json)
             b = _B(s)
-            env['wsgi.input']     = _StringIO(b)
+            env['wsgi.input']     = _BytesIO(b)
             env['CONTENT_TYPE']   = 'application/json'
             env['CONTENT_LENGTH'] = str(len(b))
         if headers:
