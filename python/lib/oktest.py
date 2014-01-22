@@ -546,7 +546,6 @@ class ResponseAssertionObject(AssertionObject):
             return resp.get_data(as_text=True)
         if hasattr(resp, 'body_unicode'):  # oktest.web.WSGIResponse
             return resp.body_unicode
-        sys.stderr.write("\033[0;31m*** debug: dir(resp)=%r\033[0m\n" % (dir(resp), ))
         raise UnsupportedResponseObjectError(resp, 'response text body')
 
     @staticmethod
