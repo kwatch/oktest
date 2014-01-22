@@ -2974,7 +2974,7 @@ class WSGIStartResponse(object):
 
 class WSGIResponse(object):
     __slots__ = ('status', 'status_code', 'headers_list', 'headers',
-                 'iterable', '_body', '_text', '_environ')
+                 'body_iterable', '_body_binary', '_body_unicode', '_environ')
 
     encoding = 'utf-8'
 
@@ -2989,22 +2989,24 @@ class WSGIResponse(object):
             self.status_code = None
         self.headers_list = headers
         self.headers = _wsgiref_headers.Headers(headers)
-        self.iterable = iterable
-        #self._set_body_and_text(self.iterable)
-        self._body = None
-        self._text = None
+        self.body_iterable = iterable
+        self._body_binary  = None
+        self._body_unicode = None
 
     @property
-    def body(self):
-        if self._body == None:
-            self._set_body_and_text(self.iterable)
-        return self._body
+    def body_binary(self):
+        if self._body_binary == None:
+            self._set_body_and_text(self.body_iterable)
+        return self._body_binary
 
     @property
-    def text(self):
-        if self._text == None:
-            self._set_body_and_text(self.iterable)
-        return self._text
+    def body_unicode(self):
+        if self._body_unicode == None:
+            self._set_body_and_text(self.body_iterable)
+        return self._body_unicode
+
+    body = body_binary
+    text = body_unicode
 
     def _set_body_and_text(self, iterable):
         buf = []; add = buf.append
@@ -3019,8 +3021,8 @@ class WSGIResponse(object):
                     else:
                         raise ValueError("Unexpected response body data type: %r (%r)" % (type(x), x))
                 add(x)
-            self._body = _B("").join(buf)
-            self._text = self.body.decode(self.encoding)
+            self._body_binary  = _B("").join(buf)
+            self._body_unicode = self._body_binary.decode(self.encoding)
         finally:
             if hasattr(iterable, 'close'):
                 iterable.close()
@@ -3028,9 +3030,9 @@ class WSGIResponse(object):
     def __iter__(self):
         status = self.status
         headers = self.headers_list
-        iterable = self.iterable
+        iterable = self.body_iterable
         if hasattr(iterable, 'original_iterator'):
-            iterable = iterable.original_iterator   # original iterable
+            iterable = iterable.original_iterator
         return iter((status, headers, iterable))
 
 
