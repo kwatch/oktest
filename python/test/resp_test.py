@@ -498,27 +498,27 @@ Responsed JSON is different from expected data.
 
     def test_raises_UnsupportedResponseObjectError(self):
         if python2:
-            errmsg = "<type 'str'>: unsupported response class in oktest."
+            errmsg = "'foo': failed to get response %s; <type 'str'> is unsupported response class in oktest."
         else:
-            errmsg = "<class 'str'>: unsupported response class in oktest."
+            errmsg = "'foo': failed to get response %s; <class 'str'> is unsupported response class in oktest."
         #
         def fn(): ok ("foo").is_response(200)
-        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
+        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg % 'status code')
         #
         def fn(): ok ("foo")._resp.status(200)
-        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
+        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg % 'status code')
         #
         def fn(): ok ("foo")._resp.cont_type('text/plain')
-        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
+        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg % 'content type')
         #
         def fn(): ok ("foo")._resp.header('Content-Type', 'text/plain')
-        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
+        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg % 'header')
         #
         def fn(): ok ("foo")._resp.body(["hello!"])
-        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
+        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg % 'binary body')
         #
         def fn(): ok ("foo")._resp.json({"status":"OK"})
-        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
+        ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg % 'content type')
 
 
 
