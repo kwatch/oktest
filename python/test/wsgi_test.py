@@ -23,9 +23,7 @@ def _U(val):
 
 import unittest
 import oktest
-from oktest.wsgi import (
-    WSGITest, WSGIHttpTest, WSGIHttpsTest, WSGIStartResponse, WSGIResponse,
-)
+from oktest.wsgi import WSGITest, WSGIStartResponse, WSGIResponse
 from oktest.tracer import Tracer
 
 
@@ -55,12 +53,18 @@ class WSGITest_TC(unittest.TestCase):
     def test___init__(self):
         http = WSGITest(_app)
         assert http._app is _app
-        resp = http.GET('/')
+        #
+        http = WSGITest(_app)
+        resp = http.GET('/hello')
         assert resp._environ['wsgi.url_scheme'] == 'http'
+        full_url = wsgiref.util.request_uri(resp._environ)
+        assert full_url == "http://127.0.0.1/hello"
         #
         http = WSGITest(_app, {'HTTPS':'on'})
-        resp = http.GET('/')
+        resp = http.GET('/hello')
         assert resp._environ['wsgi.url_scheme'] == 'https'
+        full_url = wsgiref.util.request_uri(resp._environ)
+        assert full_url == "https://127.0.0.1/hello"
 
     def test___call__(self):
         resp = self.http()
@@ -139,26 +143,6 @@ class WSGITest_TC(unittest.TestCase):
         assert resp._environ['REQUEST_METHOD'] == 'TRACE'
 
 
-class WSGIHttpTest_TC(unittest.TestCase):
-
-    def test__base_env(self):
-        http = WSGIHttpTest(_app)
-        resp = http('GET', '/hello')
-        assert resp._environ['wsgi.url_scheme'] == 'http'
-        full_url = wsgiref.util.request_uri(resp._environ)
-        assert full_url == "http://127.0.0.1/hello"
-
-
-class WSGIHttpsTest_TC(unittest.TestCase):
-
-    def test__base_env(self):
-        http = WSGIHttpsTest(_app)
-        resp = http('GET', '/hello')
-        assert resp._environ['wsgi.url_scheme'] == 'https'
-        full_url = wsgiref.util.request_uri(resp._environ)
-        assert full_url == "https://127.0.0.1/hello"
-
-
 class WSGIStartResponse_TC(unittest.TestCase):
 
     def test___call__(self):
@@ -173,7 +157,7 @@ class WSGIStartResponse_TC(unittest.TestCase):
 class WSGIResponse_TC(unittest.TestCase):
 
     def test_attributes(self):
-        http = WSGIHttpTest(_app)
+        http = WSGITest(_app)
         resp = http.GET('/foo')
         assert resp.status == '201 Created'
         assert resp.headers['Content-Type'] == 'image/jpeg'
@@ -200,7 +184,7 @@ class WSGIResponse_TC(unittest.TestCase):
             _original = warnings.warn
             warnings.warn = warn
             try:
-                http = WSGIHttpTest(app)
+                http = WSGITest(app)
                 resp = http.GET('/foo')
                 resp.body == "Hello"
                 errmsg = "response body should be binary, but got unicode data: u'Hello'\n"
@@ -212,7 +196,7 @@ class WSGIResponse_TC(unittest.TestCase):
                 warnings.warn = _original
         elif python3:
             try:
-                http = WSGIHttpTest(app)
+                http = WSGITest(app)
                 resp = http.GET('/foo')
             except AssertionError:
                 ex = sys.exc_info()[1]
@@ -225,7 +209,7 @@ class WSGIResponse_TC(unittest.TestCase):
             callback('200 OK', [('Content-Type', 'text/plain')])
             return [_B("Hello"), None]
         #
-        http = WSGIHttpTest(app)
+        http = WSGITest(app)
         if python2 or python30 or python31:
             try:
                 http.GET('/foo')

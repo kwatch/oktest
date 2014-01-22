@@ -2951,24 +2951,6 @@ class WSGITest(object):
         return self.__call__('TRACE', urlpath, form=form, query=query, json=json, headers=headers)
 
 
-class WSGIHttpTest(WSGITest):
-    __slots__ = ('_app',)
-
-    def _base_env(self, method, urlpath):
-        env = wsgi.WSGITest._base_env(self, method, urlpath)
-        env['wsgi.url_scheme'] = 'http'
-        return env
-
-
-class WSGIHttpsTest(WSGITest):
-    __slots__ = ('_app',)
-
-    def _base_env(self, method, urlpath):
-        env = wsgi.WSGITest._base_env(self, method, urlpath)
-        env['wsgi.url_scheme'] = 'https'
-        return env
-
-
 class WSGIStartResponse(object):
     __slots__ = ('status', 'headers')
 
@@ -3020,12 +3002,10 @@ class OktestWSGIWarning(Warning):
 
 
 wsgi.WSGITest          = WSGITest
-wsgi.WSGIHttpTest      = WSGIHttpTest
-wsgi.WSGIHttpsTest     = WSGIHttpsTest
 wsgi.WSGIStartResponse = WSGIStartResponse
 wsgi.WSGIResponse      = WSGIResponse
 wsgi.OktestWSGIWarning = OktestWSGIWarning
-del WSGITest, WSGIHttpTest, WSGIHttpsTest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
+del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
 
 
 
