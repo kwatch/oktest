@@ -55,6 +55,12 @@ class WSGITest_TC(unittest.TestCase):
     def test___init__(self):
         http = WSGITest(_app)
         assert http._app is _app
+        resp = http.GET('/')
+        assert resp._environ['wsgi.url_scheme'] == 'http'
+        #
+        http = WSGITest(_app, {'HTTPS':'on'})
+        resp = http.GET('/')
+        assert resp._environ['wsgi.url_scheme'] == 'https'
 
     def test___call__(self):
         resp = self.http()

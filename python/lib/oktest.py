@@ -2823,10 +2823,11 @@ _wsgiref_headers   = None   # on-demand import
 
 
 class WSGITest(object):
-    __slots__ = ('_app',)
+    __slots__ = ('_app', '_environ')
 
-    def __init__(self, app):
+    def __init__(self, app, environ={}):
         self._app = app
+        self._environ = environ
 
     def __call__(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
         global _wsgiref_validate
@@ -2846,6 +2847,7 @@ class WSGITest(object):
             'SCRIPT_NAME':    '',
             'QUERY_STRING':   '',
         }
+        env.update(self._environ)
         return env
 
     def _new_env(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
