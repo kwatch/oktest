@@ -2978,7 +2978,7 @@ class WSGIResponse(object):
 
     encoding = 'utf-8'
 
-    def __init__(self, status, headers, iterable):
+    def __init__(self, status='200 OK', headers=[], iterable=[]):
         global _wsgiref_headers
         if _wsgiref_headers is None:
             import wsgiref.headers as _wsgiref_headers
