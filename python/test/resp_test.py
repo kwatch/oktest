@@ -130,7 +130,7 @@ finally:
     RequestsResponse._setUp = _setUp
     del _setUp
 
-from oktest.wsgi import WSGIResponse as OktestWSGIResponse
+from oktest.web import WSGIResponse as OktestWSGIResponse
 
 
 def _set_body(response, body):

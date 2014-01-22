@@ -23,7 +23,7 @@ def _U(val):
 
 import unittest
 import oktest
-from oktest.wsgi import WSGITest, WSGIStartResponse, WSGIResponse
+from oktest.web import WSGITest, WSGIStartResponse, WSGIResponse
 from oktest.tracer import Tracer
 
 
@@ -190,7 +190,7 @@ class WSGIResponse_TC(unittest.TestCase):
                 errmsg = "response body should be binary, but got unicode data: u'Hello'\n"
                 if python3:
                     errmsg = errmsg.replace("u'", "'")
-                assert called[0] == (errmsg, oktest.wsgi.OktestWSGIWarning, )
+                assert called[0] == (errmsg, oktest.web.OktestWSGIWarning, )
                 assert called[1] == {}
             finally:
                 warnings.warn = _original
