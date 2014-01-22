@@ -921,16 +921,15 @@ Testing WSGI Application
 
 Oktest.py provides testing helpers for WSGI Application.
 
-``oktest.wsgi.WSGITest``
-	simpulates HTTP request.
+oktest.wsgi.WSGITest
+	simpulates HTTP request for WSGI application.
 
 Example::
 
     ## create WSGI application
     class App(object):
         def __call__(self, environ, start_response):
-            start_response('200 OK',
-                           [('Content-Type', 'text/plain')])
+            start_response('200 OK', [('Content-Type', 'text/plain')])
             if environ['PATH_INFO'] == '/':
                 return [b"Home"]            # use bytes, not unicode
             else:
@@ -973,20 +972,20 @@ It is possible to pass query string, form parameter, or JSON body by
     http.GET('/', {{*form*}}={'offset':"0", 'limit':"30"})   # dict
     http.GET('/', {{*form*}}="offset=0&limit=30")            # str
     http.GET('/', {{*json*}}={'offset':"0", 'limit':"30"})   # dict
-    http.GET('/', {{*json*}}='{"offset":0,"limit":30}')      # str
+    http.GET('/', {{*json*}}='''{"offset":0,"limit":30}''')  # str
 
 And also possible to specify environ dict. ::
 
     environ = {
-        'HTTPS': 'on',                  # simulates https
-        'HTTP_USER_AGENT': 'Mozilla',   # simulates browser
+        'HTTPS': 'on',                     # simulates https
+        'HTTP_USER_AGENT': 'Mozilla/5.0',  # simulates browser
     }
 
     ## specify on WSGITest
     http = WSGITest(app, {{*environ*}})
 
     ## or on http.GET(), http.POST(), ...
-    http.GET('/', {{*environ=environ*}})
+    response = http.GET('/', {{*environ=environ*}})
 
 
 Tracer
