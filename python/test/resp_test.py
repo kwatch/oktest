@@ -206,10 +206,14 @@ Unexpected content-type value.
 
     @with_response_class
     def test_status_ok(self, Response):
+        if Response is OktestWSGIResponse:
+            status = '302 Found'
+        else:
+            status = 302
         try:
             ok (Response())._resp.status(200)
-            ok (Response(status='302 Found'))._resp.status(302)
-            ok (Response(status='302 Found'))._resp.status((301, 302))
+            ok (Response(status=status))._resp.status(302)
+            ok (Response(status=status))._resp.status((301, 302))
         except:
             assert False, "failed"
 
