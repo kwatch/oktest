@@ -929,11 +929,11 @@ Example::
     ## create WSGI application
     class App(object):
         def __call__(self, environ, start_response):
-            start_response('200 OK', [('Content-Type', 'text/plain')])
-            if environ['PATH_INFO'] == '/':
-                return [b"Home"]            # use bytes, not unicode
-            else:
-                return [b"Hello World!"]    # use bytes, not unicode
+            status  = '200 OK'
+            headers = [('Content-Type', 'application/json')]
+            body    = [b'''{"message":"Hello!"}''']  # bytes, not unicode
+            start_response(status, headers)
+            return body
 
     app = App()
 
@@ -943,23 +943,22 @@ Example::
     from oktest import test, ok, subject
     {{*from oktest.wsgi import WSGITest*}}
 
-    {{*http = WSGITest(app)*}}
+    {{*http  = WSGITest(app)*}}
+    {{*https = WSGITest(app, {'HTTPS': 'on'})*}}
 
     class AppTest(unittest.TestCase):
 
         with subject('GET /'):
 
-            @test("Returns 'Home'.")
+            @test("Returns JSON containing message.")
             def _(self):
-                resp = {{*http.GET('/')*}}       # or http('GET', '/')
-                ok (resp).is_response(200, "text/plain").body("Home")
-
-        with subject('GET /hello'):
-
-            @test("Returns greeting message.")
-            def _(self):
-                resp = {{*http.GET('/hello')*}}  # or http('GET', '/hello')
-                ok (resp).is_response(200).body("Hello World!")
+                {{*resp = http.GET('/')*}}     # or http('GET', '/')
+                ok (resp).is_response(200).json({"message": "Hello!"})
+                ## or
+                {{*status, headers, body = http.GET('/')*}}
+                ok (status)  == '200 OK'
+                ok (headers) == [('Content-Type', 'application/json')]
+                ok (body)    == [b'''{"message":"Hello!"}''']
 
     if __name__ == '__main__':
         oktest.main()
