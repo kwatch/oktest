@@ -14,7 +14,7 @@ Release 0.13.0 (????-??-??)
       resp = requests.get('http://www.example.com/')
       ok (resp).is_response(200, 'text/html')
 
-* [enhance] Add 'oktest.wsgi' module to help WSGI Application testing.
+* [enhance] (Experimental) Add 'oktest.web' module to help WSGI app testing.
   Example::
 
       ## create WSGI application
@@ -32,7 +32,7 @@ Release 0.13.0 (????-??-??)
       import unittest
       import oktest
       from oktest import test, ok, subject
-      from oktest.wsgi import WSGITest          # !!!!!
+      from oktest.web import WSGITest           # !!!!!
 
       http  = WSGITest(app)                     # !!!!!
       https = WSGITest(app, {'HTTPS': 'on'})    # !!!!!
