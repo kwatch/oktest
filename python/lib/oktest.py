@@ -3009,8 +3009,8 @@ class WSGIResponse(object):
             self._set_body_and_text(self.body_iterable)
         return self._body_unicode
 
-    body = body_binary
-    text = body_unicode
+    #body = body_binary
+    #text = body_unicode
 
     def _set_body_and_text(self, iterable):
         buf = []; add = buf.append

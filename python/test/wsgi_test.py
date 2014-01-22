@@ -72,20 +72,20 @@ class WSGITest_TC(unittest.TestCase):
         assert resp.status  == "201 Created"
         assert resp.headers['Content-Type'] == 'image/jpeg'
         if python2:
-            assert resp.body == "OK <input=''>"
-            assert resp.text == "OK <input=''>"
+            assert resp.body_binary  == _B("OK <input=''>")
+            assert resp.body_unicode == _U("OK <input=''>")
         elif python3:
-            assert resp.body == _B("OK <input=b''>")
-            assert resp.text == _U("OK <input=b''>")
+            assert resp.body_binary  == _B("OK <input=b''>")
+            assert resp.body_unicode == _U("OK <input=b''>")
 
     def test__call___query(self):
         resp = self.http.POST('/hello', query={'q':"SOS", 'page':'1'})
         if python2:
-            assert resp.body == "OK <input=''>"
-            assert resp.text == "OK <input=''>"
+            assert resp.body_binary  == _B("OK <input=''>")
+            assert resp.body_unicode == _U("OK <input=''>")
         elif python3:
-            assert resp.body == _B("OK <input=b''>")
-            assert resp.text == _U("OK <input=b''>")
+            assert resp.body_binary  == _B("OK <input=b''>")
+            assert resp.body_unicode == _U("OK <input=b''>")
         assert resp._environ['QUERY_STRING'] in ("q=SOS&page=1", "page=1&q=SOS")
         assert 'CONTENT_TYPE' not in resp._environ
         assert 'CONTENT_LENGTH' not in resp._environ
@@ -93,11 +93,11 @@ class WSGITest_TC(unittest.TestCase):
     def test__call___form(self):
         resp = self.http.POST('/hello', form={'q':"SOS", 'page':'1'})
         if python2:
-            assert resp.body in ("OK <input='q=SOS&page=1'>",
-                                 "OK <input='page=1&q=SOS'>",)
+            assert resp.body_binary in ("OK <input='q=SOS&page=1'>",
+                                        "OK <input='page=1&q=SOS'>",)
         elif python3:
-            assert resp.body in (_B("OK <input=b'q=SOS&page=1'>"),
-                                 _B("OK <input=b'page=1&q=SOS'>"),)
+            assert resp.body_binary in (_B("OK <input=b'q=SOS&page=1'>"),
+                                        _B("OK <input=b'page=1&q=SOS'>"),)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
         assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
@@ -105,11 +105,11 @@ class WSGITest_TC(unittest.TestCase):
     def test__call___json(self):
         resp = self.http.POST('/hello', json={'q':"SOS", 'page':1})
         if python2:
-            assert resp.body in ("""OK <input='{"q":"SOS","page":1}'>""",
-                                 """OK <input='{"page":1,"q":"SOS"}'>""",)
+            assert resp.body_binary in ("""OK <input='{"q":"SOS","page":1}'>""",
+                                        """OK <input='{"page":1,"q":"SOS"}'>""",)
         elif python3:
-            assert resp.body in (_B("""OK <input=b'{"q":"SOS","page":1}'>"""),
-                                 _B("""OK <input=b'{"page":1,"q":"SOS"}'>"""),)
+            assert resp.body_binary in (_B("""OK <input=b'{"q":"SOS","page":1}'>"""),
+                                        _B("""OK <input=b'{"page":1,"q":"SOS"}'>"""),)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/json'
         assert resp._environ['CONTENT_LENGTH'] == str(len('{"page":1,"q":"SOS"}'))
@@ -162,13 +162,13 @@ class WSGIResponse_TC(unittest.TestCase):
         assert resp.status == '201 Created'
         assert resp.headers['Content-Type'] == 'image/jpeg'
         if python2:
-            assert resp.body == "OK <input=''>"
-            assert resp.text == "OK <input=''>"
+            assert resp.body_binary  == _B("OK <input=''>")
+            assert resp.body_unicode == _U("OK <input=''>")
         elif python3:
-            assert resp.body == _B("OK <input=b''>")
-            assert resp.text == _U("OK <input=b''>")
-        assert isinstance(resp.body, _binary)
-        assert isinstance(resp.text, _unicode)
+            assert resp.body_binary  == _B("OK <input=b''>")
+            assert resp.body_unicode == _U("OK <input=b''>")
+        assert isinstance(resp.body_binary,  _binary)
+        assert isinstance(resp.body_unicode, _unicode)
 
     def test_warning_when_response_body_contains_unicode(self):
         def app(env, callback):
@@ -186,7 +186,7 @@ class WSGIResponse_TC(unittest.TestCase):
             try:
                 http = WSGITest(app)
                 resp = http.GET('/foo')
-                resp.body
+                resp.body_binary
                 errmsg = "response body should be binary, but got unicode data: u'Hello'\n"
                 if python3:
                     errmsg = errmsg.replace("u'", "'")
@@ -198,7 +198,7 @@ class WSGIResponse_TC(unittest.TestCase):
             try:
                 http = WSGITest(app)
                 resp = http.GET('/foo')
-                resp.body
+                resp.body_binary
             except AssertionError:
                 ex = sys.exc_info()[1]
                 assert str(ex) == "Iterator yielded non-bytestring ('Hello')"
@@ -214,7 +214,7 @@ class WSGIResponse_TC(unittest.TestCase):
         if python2 or python30 or python31:
             try:
                 resp = http.GET('/foo')
-                resp.body
+                resp.body_binary
             except ValueError:
                 ex = sys.exc_info()[1]
                 errmsg = "Unexpected response body data type: <type 'NoneType'> (None)"
@@ -226,7 +226,7 @@ class WSGIResponse_TC(unittest.TestCase):
         elif python3:
             try:
                 resp = http.GET('/foo')
-                resp.body
+                resp.body_binary
             except AssertionError:
                 ex = sys.exc_info()[1]
                 assert str(ex) == "Iterator yielded non-bytestring (None)"
