@@ -510,19 +510,19 @@ class ResponseAssertionObject(AssertionObject):
             return resp.status_int
         if hasattr(resp, 'status_code'):   # Werkzeug
             return resp.status_code
-        raise UnsupportedResponseObjectError()
+        raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_status(resp):
         if hasattr(resp, 'status'):        # WebOb, Werkzeug
             return resp.status
-        raise UnsupportedResponseObjectError()
+        raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_header(resp, name):
         if hasattr(resp, 'headers'):       # WebOb, Werkzeug
             return resp.headers.get(name)
-        raise UnsupportedResponseObjectError()
+        raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_body(resp):
@@ -532,7 +532,7 @@ class ResponseAssertionObject(AssertionObject):
             return resp.data
         if hasattr(resp, 'body_binary'):   # oktest.wsgi.WSGIResponse
             return resp.body_binary
-        raise UnsupportedResponseObjectError()
+        raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_text(resp):
@@ -542,7 +542,7 @@ class ResponseAssertionObject(AssertionObject):
             return resp.get_data(as_text=True)
         if hasattr(resp, 'body_unicode'):  # oktest.wsgi.WSGIResponse
             return resp.body_unicode
-        raise UnsupportedResponseObjectError()
+        raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_ctype(resp):
@@ -550,7 +550,9 @@ class ResponseAssertionObject(AssertionObject):
             return resp.content_type
         if hasattr(resp, 'mimetype'):      # Werkzeug
             return resp.mimetype
-        return resp.headers['Content-Type']
+        if hasattr(resp, 'headers'):
+            return resp.headers['Content-Type']
+        raise UnsupportedResponseObjectError(type(resp))
 
     @assertion
     def status(self, expected_status):
@@ -683,7 +685,9 @@ del AssertionObject.body
 del AssertionObject.json
 
 class UnsupportedResponseObjectError(Exception):
-    pass
+    def __init__(self, response_class):
+        msg = "%r: unsupported response class in oktest." % (response_class,)
+        Exception.__init__(self, msg)
 
 def _resp(self):
     """(experimental) Change assertion object class.
