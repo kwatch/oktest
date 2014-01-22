@@ -233,6 +233,18 @@ class WSGIResponse_TC(unittest.TestCase):
             else:
                 assert False, "assertion error expected, but not raised."
 
+    def test___iter__(self):
+        http = WSGITest(_app)
+        status, headers, body = http.GET('/hello')
+        assert status == '201 Created'
+        assert type(status) is str
+        assert headers == [('Content-Type', 'image/jpeg')]
+        assert type(headers) is list
+        if python2:
+            assert body == [_B("OK <input=''>")]
+        elif python3:
+            assert body == [_B("OK <input=b''>")]
+
 
 
 if __name__ == '__main__':

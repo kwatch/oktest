@@ -3023,6 +3023,16 @@ class WSGIResponse(object):
             if hasattr(iterable, 'close'):
                 iterable.close()
 
+    def __iter__(self):
+        status = self.status
+        headers = self.headers
+        if hasattr(headers, '_headers'):
+            headers = headers._headers              # original headers
+        iterable = self.iterable
+        if hasattr(iterable, 'original_iterator'):
+            iterable = iterable.original_iterator   # original iterable
+        return iter((status, headers, iterable))
+
 
 class OktestWSGIWarning(Warning):
     pass
