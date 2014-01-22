@@ -530,6 +530,8 @@ class ResponseAssertionObject(AssertionObject):
             return resp.body
         if hasattr(resp, 'data'):          # Werkzeug
             return resp.data
+        if hasattr(resp, 'body_binary'):   # oktest.wsgi.WSGIResponse
+            return resp.body_binary
         raise UnsupportedResponseObjectError()
 
     @staticmethod
@@ -538,6 +540,8 @@ class ResponseAssertionObject(AssertionObject):
             return resp.text
         if hasattr(resp, 'get_data'):      # Werkzeug
             return resp.get_data(as_text=True)
+        if hasattr(resp, 'body_unicode'):  # oktest.wsgi.WSGIResponse
+            return resp.body_unicode
         raise UnsupportedResponseObjectError()
 
     @staticmethod
