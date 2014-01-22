@@ -508,13 +508,13 @@ class ResponseAssertionObject(AssertionObject):
     def _resp_code(resp):
         if hasattr(resp, 'status_int'):    # WebOb
             return resp.status_int
-        if hasattr(resp, 'status_code'):   # Werkzeug, Requests, oktest.wsgi.WSGIObject
+        if hasattr(resp, 'status_code'):   # Werkzeug, Requests, oktest.web.WSGIObject
             return resp.status_code
         raise UnsupportedResponseObjectError(resp, 'response status code')
 
     @staticmethod
     def _resp_status(resp):
-        if hasattr(resp, 'status'):        # WebOb, Werkzeug, oktest.wsgi.WSGIObject
+        if hasattr(resp, 'status'):        # WebOb, Werkzeug, oktest.web.WSGIObject
             return resp.status
         if hasattr(resp, 'status_code') and hasattr(resp, 'reason'):  # Requests
             return "%s %s" % (resp.status_code, resp.reason)
@@ -522,7 +522,7 @@ class ResponseAssertionObject(AssertionObject):
 
     @staticmethod
     def _resp_header(resp, name):
-        if hasattr(resp, 'headers'):       # WebOb, Werkzeug, Requests, oktest.wsgi.WSGIResponse
+        if hasattr(resp, 'headers'):       # WebOb, Werkzeug, Requests, oktest.web.WSGIResponse
             return resp.headers.get(name)
         raise UnsupportedResponseObjectError(resp, 'response header')
 
@@ -534,7 +534,7 @@ class ResponseAssertionObject(AssertionObject):
             return resp.data
         if hasattr(resp, 'content'):       # Requests
             return resp.content
-        if hasattr(resp, 'body_binary'):   # oktest.wsgi.WSGIResponse
+        if hasattr(resp, 'body_binary'):   # oktest.web.WSGIResponse
             return resp.body_binary
         raise UnsupportedResponseObjectError(resp, 'response binary body')
 
@@ -544,7 +544,7 @@ class ResponseAssertionObject(AssertionObject):
             return resp.text
         if hasattr(resp, 'get_data'):      # Werkzeug
             return resp.get_data(as_text=True)
-        if hasattr(resp, 'body_unicode'):  # oktest.wsgi.WSGIResponse
+        if hasattr(resp, 'body_unicode'):  # oktest.web.WSGIResponse
             return resp.body_unicode
         sys.stderr.write("\033[0;31m*** debug: dir(resp)=%r\033[0m\n" % (dir(resp), ))
         raise UnsupportedResponseObjectError(resp, 'response text body')
@@ -555,7 +555,7 @@ class ResponseAssertionObject(AssertionObject):
             return resp.content_type
         if hasattr(resp, 'mimetype'):      # Werkzeug
             return resp.mimetype
-        if hasattr(resp, 'headers'):       # Requests, oktest.wsgi.WSGIResponse
+        if hasattr(resp, 'headers'):       # Requests, oktest.web.WSGIResponse
             return resp.headers['Content-Type']
         raise UnsupportedResponseObjectError(resp, 'response content type')
 
@@ -2823,9 +2823,9 @@ del _dummy
 ##
 ## wsgi
 ##
-wsgi = type(sys)('oktest.wsgi')
-sys.modules[wsgi.__name__] = wsgi
-wsgi.__file__ = __file__
+web = type(sys)('oktest.web')
+sys.modules[web.__name__] = web
+web.__file__ = __file__
 
 _BytesIO    = None          # on-demand import
 _quote_plus = None          # on-demand import
@@ -2849,10 +2849,10 @@ class WSGITest(object):
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
         env = self._new_env(method, urlpath, form=form, query=query, json=json, headers=headers)
-        start_resp = wsgi.WSGIStartResponse()
+        start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
-        resp = wsgi.WSGIResponse(start_resp.status, start_resp.headers, iterable)
+        resp = web.WSGIResponse(start_resp.status, start_resp.headers, iterable)
         resp._environ = env
         return resp
 
@@ -3030,7 +3030,7 @@ class WSGIResponse(object):
                     if isinstance(x, _unicode):
                         msg = "response body should be binary, but got unicode data: %r\n" % \
                             (x if len(x) < 30 else x[:30]+"...")
-                        warnings.warn(msg, wsgi.OktestWSGIWarning)
+                        warnings.warn(msg, web.OktestWSGIWarning)
                         x = x.encode(self.encoding)
                     else:
                         raise ValueError("Unexpected response body data type: %r (%r)" % (type(x), x))
@@ -3054,10 +3054,10 @@ class OktestWSGIWarning(Warning):
     pass
 
 
-wsgi.WSGITest          = WSGITest
-wsgi.WSGIStartResponse = WSGIStartResponse
-wsgi.WSGIResponse      = WSGIResponse
-wsgi.OktestWSGIWarning = OktestWSGIWarning
+web.WSGITest          = WSGITest
+web.WSGIStartResponse = WSGIStartResponse
+web.WSGIResponse      = WSGIResponse
+web.OktestWSGIWarning = OktestWSGIWarning
 del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
 
 

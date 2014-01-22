@@ -921,7 +921,7 @@ Testing WSGI Application
 
 Oktest.py provides testing helpers for WSGI Application.
 
-oktest.wsgi.WSGITest
+oktest.web.WSGITest
 	simpulates HTTP request for WSGI application.
 
 Example::
@@ -941,7 +941,7 @@ Example::
     import unittest
     import oktest
     from oktest import test, ok, subject
-    {{*from oktest.wsgi import WSGITest*}}
+    {{*from oktest.web import WSGITest*}}
 
     {{*http  = WSGITest(app)*}}
     {{*https = WSGITest(app, {'HTTPS': 'on'})*}}
@@ -1465,7 +1465,7 @@ Tracer:
 	Tracer class. See `Tracer`_ section for details.
 
 
-``oktest.wsgi`` module
+``oktest.web`` module
 ------------------------
 
 WSGITest:
