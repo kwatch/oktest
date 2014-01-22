@@ -4,6 +4,52 @@ CHANGES
 =======
 
 
+Release 0.12.1 (????-??-??)
+---------------------------
+
+* [enhance] New helper classes to test WSGI Application.
+  Example::
+
+      ## create WSGI application
+      class App(object):
+          def __call__(self, environ, start_response):
+              start_response('200 OK', [('Content-Type', 'text/plain')])
+              if environ['PATH_INFO'] == '/':
+                  return [b"Home"]           # bytes, not unicode
+              else:
+                  return [b"Hello World!"]   # bytes, not unicode
+
+      app = App()
+
+      ## test for app
+      import unittest
+      import oktest
+      from oktest import test, ok, subject
+      from oktest.wsgi import WSGITest       # !!!!!
+
+      http = WSGITest(app)                   # !!!!!
+
+      class AppTest(unittest.TestCase):
+
+          with subject('GET /'):
+
+              @test("Returns 'Home'.")
+              def _(self):
+                  resp = http.GET('/')       # or http('GET', '/')
+                  ok (resp).is_response(200, "text/plain").body("Home")
+
+          with subject('GET /hello'):
+
+              @test("Returns greeting message.")
+              def _(self):
+                  resp = http.GET('/hello')  # or http('GET', '/hello')
+                  ok (resp).is_response(200).body("Hello World!")
+
+      if __name__ == '__main__':
+          oktest.main()
+
+
+
 Release 0.12.1 (2014-01-20)
 ---------------------------
 
