@@ -10,7 +10,7 @@
 <div class="document" id="oktest-readme">
 <h1 class="title">Oktest - a new style testing library -</h1>
 
-<p>Release: 0.12.0</p>
+<p>Release: 0.13.0</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
@@ -24,20 +24,22 @@
 <li><a class="reference internal" href="#at-end-decorator" id="id8"><tt class="docutils literal">&#64;at_end</tt> Decorator</a></li>
 <li><a class="reference internal" href="#test-context" id="id9">Test Context</a></li>
 <li><a class="reference internal" href="#unified-diff" id="id10">Unified Diff</a></li>
-<li><a class="reference internal" href="#tracer" id="id11">Tracer</a></li>
-<li><a class="reference internal" href="#skip-test" id="id12">Skip Test</a></li>
-<li><a class="reference internal" href="#todo-decorator" id="id13"><tt class="docutils literal">&#64;todo</tt> Decorator</a></li>
-<li><a class="reference internal" href="#command-line-interface" id="id14">Command-line Interface</a></li>
-<li><a class="reference internal" href="#helpers-reference" id="id15">Helpers Reference</a><ul>
-<li><a class="reference internal" href="#oktest-module" id="id16"><tt class="docutils literal">oktest</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-util-module" id="id17"><tt class="docutils literal">oktest.util</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-dummy-module" id="id18"><tt class="docutils literal">oktest.dummy</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-tracer-module" id="id19"><tt class="docutils literal">oktest.tracer</tt> module</a></li>
+<li><a class="reference internal" href="#testing-wsgi-application" id="id11">Testing WSGI Application</a></li>
+<li><a class="reference internal" href="#tracer" id="id12">Tracer</a></li>
+<li><a class="reference internal" href="#skip-test" id="id13">Skip Test</a></li>
+<li><a class="reference internal" href="#todo-decorator" id="id14"><tt class="docutils literal">&#64;todo</tt> Decorator</a></li>
+<li><a class="reference internal" href="#command-line-interface" id="id15">Command-line Interface</a></li>
+<li><a class="reference internal" href="#helpers-reference" id="id16">Helpers Reference</a><ul>
+<li><a class="reference internal" href="#oktest-module" id="id17"><tt class="docutils literal">oktest</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-util-module" id="id18"><tt class="docutils literal">oktest.util</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-dummy-module" id="id19"><tt class="docutils literal">oktest.dummy</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-tracer-module" id="id20"><tt class="docutils literal">oktest.tracer</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-web-module" id="id21"><tt class="docutils literal">oktest.web</tt> module</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tips" id="id20">Tips</a></li>
-<li><a class="reference internal" href="#license" id="id21">License</a></li>
-<li><a class="reference internal" href="#copyright" id="id22">Copyright</a></li>
+<li><a class="reference internal" href="#tips" id="id22">Tips</a></li>
+<li><a class="reference internal" href="#license" id="id23">License</a></li>
+<li><a class="reference internal" href="#copyright" id="id24">Copyright</a></li>
 </ul>
 </div>
 <div class="section" id="overview">
@@ -71,6 +73,7 @@ class FooTest(unittest.TestCase):
 <li><a class="reference internal" href="#fixture-injection">Fixture Injection</a> support.</li>
 <li><a class="reference internal" href="#tracer">Tracer</a> class is provided which can be used as mock or stub.</li>
 <li>Text diff (diff -u) is displayed when texts are different.</li>
+<li>Helping WSGI application test.</li>
 </ul>
 <p>Oktest requires Python 2.4 or later (3.x is supported).</p>
 <p>See <a href="CHANGES.txt">CHANGES.txt</a> for changes.</p>
@@ -83,10 +86,10 @@ class FooTest(unittest.TestCase):
 <pre class="literal-block">
 ## if you have installed easy_install:
 $ sudo easy_install Oktest
-## or download Oktest-0.12.0.tar.gz and install it
-$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.12.0.tar.gz
-$ tar xzf Oktest-0.12.0.tar.gz
-$ cd Oktest-0.12.0/
+## or download Oktest-0.13.0.tar.gz and install it
+$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.13.0.tar.gz
+$ tar xzf Oktest-0.13.0.tar.gz
+$ cd Oktest-0.13.0/
 $ sudo python setup.py install
 </pre>
 </div>
@@ -275,7 +278,7 @@ to <tt class="docutils literal">ok <span class="pre">(string.startswith('foo'))<
 For example, <tt class="docutils literal">ok <span class="pre">(string).should_not.startswith('foo')</span></tt> is same as
 to <tt class="docutils literal">ok <span class="pre">(string.startswith('foo'))</span> == False</tt>.</dd>
 <dt>ok (response).is_response(status).header(name, value).body(str_or_rexp).json(dict)</dt>
-<dd><p class="first">(experimental) Assertions for WebOb or Werkzeug response object.</p>
+<dd><p class="first">(experimental) Assertions for WebOb, Werkzeug or Requests response object.</p>
 <pre class="last literal-block">
 ok (response).is_response(200)                          # status code
 ok (response).is_response((302, 303))                   # status code
@@ -897,9 +900,80 @@ FAILED (failures=1)
 </pre>
 <p>If you set <tt class="docutils literal">oktest.DIFF</tt> to False, unified diff is not displayed.</p>
 </div>
+<div class="section" id="testing-wsgi-application">
+
+<h2><a class="toc-backref" href="#id11">Testing WSGI Application</a></h2>
+<p>Oktest.py provides testing helpers for WSGI Application.</p>
+<dl class="docutils">
+<dt>oktest.web.WSGITest</dt>
+<dd>simpulates HTTP request for WSGI application.</dd>
+</dl>
+<p>Example:</p>
+<pre class="literal-block">
+## create WSGI application
+class App(object):
+    def __call__(self, environ, start_response):
+        status  = '200 OK'
+        headers = [('Content-Type', 'application/json')]
+        body    = [b'''{&quot;message&quot;:&quot;Hello!&quot;}''']  # bytes, not unicode
+        start_response(status, headers)
+        return body
+
+app = App()
+
+## test for app
+import unittest
+import oktest
+from oktest import test, ok, subject
+<strong>from oktest.web import WSGITest</strong>
+
+<strong>http  = WSGITest(app)</strong>
+<strong>https = WSGITest(app, {'HTTPS': 'on'})</strong>
+
+class AppTest(unittest.TestCase):
+
+    with subject('GET /'):
+
+        &#64;test(&quot;Returns JSON containing message.&quot;)
+        def _(self):
+            <strong>resp = http.GET('/')</strong>     # or http('GET', '/')
+            ok (resp).is_response(200).json({&quot;message&quot;: &quot;Hello!&quot;})
+            ## or
+            <strong>status, headers, body = http.GET('/')</strong>
+            ok (status)  == '200 OK'
+            ok (headers) == [('Content-Type', 'application/json')]
+            ok (body)    == [b'''{&quot;message&quot;:&quot;Hello!&quot;}''']
+
+if __name__ == '__main__':
+    oktest.main()
+</pre>
+<p>It is possible to pass query string, form parameter, or JSON body by
+<tt class="docutils literal">form</tt>, <tt class="docutils literal">query</tt>, or <tt class="docutils literal">json</tt> keyword argument respectively.</p>
+<pre class="literal-block">
+http.GET('/', <strong>query</strong>={'offset':&quot;0&quot;, 'limit':&quot;30&quot;})  # dict
+http.GET('/', <strong>query</strong>=&quot;offset=0&amp;limit=30&quot;)           # str
+http.GET('/', <strong>form</strong>={'offset':&quot;0&quot;, 'limit':&quot;30&quot;})   # dict
+http.GET('/', <strong>form</strong>=&quot;offset=0&amp;limit=30&quot;)            # str
+http.GET('/', <strong>json</strong>={'offset':&quot;0&quot;, 'limit':&quot;30&quot;})   # dict
+http.GET('/', <strong>json</strong>='''{&quot;offset&quot;:0,&quot;limit&quot;:30}''')  # str
+</pre>
+<p>And also possible to specify environ dict.</p>
+<pre class="literal-block">
+environ = {
+    'HTTPS': 'on',                     # simulates https
+    'HTTP_USER_AGENT': 'Mozilla/5.0',  # simulates browser
+}
+
+## specify on WSGITest
+http = WSGITest(app, <strong>environ</strong>)
+
+## or on http.GET(), http.POST(), ...
+response = http.GET('/', <strong>environ=environ</strong>)
+</pre>
+</div>
 <div class="section" id="tracer">
 
-<h2><a class="toc-backref" href="#id11">Tracer</a></h2>
+<h2><a class="toc-backref" href="#id12">Tracer</a></h2>
 <p>Oktest provides <tt class="docutils literal">Tracer</tt> class which can be stub or mock object.
 <tt class="docutils literal">Tracer</tt> class can:</p>
 <ul class="simple">
@@ -1018,7 +1092,7 @@ ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 </div>
 <div class="section" id="skip-test">
 
-<h2><a class="toc-backref" href="#id12">Skip Test</a></h2>
+<h2><a class="toc-backref" href="#id13">Skip Test</a></h2>
 <p><strong>(Experimental)</strong></p>
 <p>It is possible to skip tests according to a certain condition.</p>
 <pre class="literal-block">
@@ -1059,7 +1133,7 @@ def _(self):
 </div>
 <div class="section" id="todo-decorator">
 
-<h2><a class="toc-backref" href="#id13"><tt class="docutils literal">&#64;todo</tt> Decorator</a></h2>
+<h2><a class="toc-backref" href="#id14"><tt class="docutils literal">&#64;todo</tt> Decorator</a></h2>
 <p><tt class="docutils literal">&#64;todo</tt> decorator represents that &quot;this test will be failed expectedly
 because feature is not implemented yet, therefore don't count
 this test as failed, please!&quot;.</p>
@@ -1114,7 +1188,7 @@ def _(self): ...
 </div>
 <div class="section" id="command-line-interface">
 
-<h2><a class="toc-backref" href="#id14">Command-line Interface</a></h2>
+<h2><a class="toc-backref" href="#id15">Command-line Interface</a></h2>
 <p>Oktest now supports command-line interface to execute test scripts.</p>
 <pre class="literal-block">
 ## run test scripts except foo_*.py
@@ -1139,10 +1213,10 @@ $ python test/foobar_test.py <strong>-sp -f test='*keyword*'</strong>
 </div>
 <div class="section" id="helpers-reference">
 
-<h2><a class="toc-backref" href="#id15">Helpers Reference</a></h2>
+<h2><a class="toc-backref" href="#id16">Helpers Reference</a></h2>
 <div class="section" id="oktest-module">
 
-<h3><a class="toc-backref" href="#id16"><tt class="docutils literal">oktest</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id17"><tt class="docutils literal">oktest</tt> module</a></h3>
 <dl class="docutils">
 <dt>fail(message)</dt>
 <dd>Raises AssertionError exception with message.</dd>
@@ -1215,7 +1289,7 @@ See <a class="reference internal" href="#todo-decorator">&#64;todo Decorator</a>
 </div>
 <div class="section" id="oktest-util-module">
 
-<h3><a class="toc-backref" href="#id17"><tt class="docutils literal">oktest.util</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id18"><tt class="docutils literal">oktest.util</tt> module</a></h3>
 <p>Since 0.10.0, <tt class="docutils literal">oktest.helper</tt> is renamed to <tt class="docutils literal">oktest.util</tt>, but
 <tt class="docutils literal">oktest.helper</tt> is still available for backward compatibility.</p>
 <dl class="docutils">
@@ -1269,7 +1343,7 @@ This is useful when creating fixture data.</p>
 </div>
 <div class="section" id="oktest-dummy-module">
 
-<h3><a class="toc-backref" href="#id18"><tt class="docutils literal">oktest.dummy</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id19"><tt class="docutils literal">oktest.dummy</tt> module</a></h3>
 <dl class="docutils">
 <dt>dummy_file(filename, content)</dt>
 <dd><p class="first">Create dummy file with specified content.</p>
@@ -1367,16 +1441,25 @@ assert serr == &quot;&quot;
 </div>
 <div class="section" id="oktest-tracer-module">
 
-<h3><a class="toc-backref" href="#id19"><tt class="docutils literal">oktest.tracer</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id20"><tt class="docutils literal">oktest.tracer</tt> module</a></h3>
 <dl class="docutils">
 <dt>Tracer:</dt>
 <dd>Tracer class. See <a class="reference internal" href="#tracer">Tracer</a> section for details.</dd>
 </dl>
 </div>
+<div class="section" id="oktest-web-module">
+
+<h3><a class="toc-backref" href="#id21"><tt class="docutils literal">oktest.web</tt> module</a></h3>
+<dl class="docutils">
+<dt>WSGITest:</dt>
+<dd>Helper class to simulate http request for WSGI Application.
+See <a class="reference internal" href="#testing-wsgi-application">Testing WSGI Application</a> section for details.</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="tips">
 
-<h2><a class="toc-backref" href="#id20">Tips</a></h2>
+<h2><a class="toc-backref" href="#id22">Tips</a></h2>
 <ul>
 <li><p class="first">It is possible to chain assertion methods.</p>
 <pre class="literal-block">
@@ -1433,12 +1516,12 @@ $ python -m oktest -f test='*foobar*' test/foo_test.py
 </div>
 <div class="section" id="license">
 
-<h2><a class="toc-backref" href="#id21">License</a></h2>
+<h2><a class="toc-backref" href="#id23">License</a></h2>
 <p>$License: MIT License $</p>
 </div>
 <div class="section" id="copyright">
 
-<h2><a class="toc-backref" href="#id22">Copyright</a></h2>
+<h2><a class="toc-backref" href="#id24">Copyright</a></h2>
 <p>$Copyright: copyright(c) 2010-2014 kuwata-lab.com all rights reserved $</p>
 </div>
 </div>
