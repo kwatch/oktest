@@ -2816,6 +2816,7 @@ wsgi.__file__ = __file__
 _StringIO   = None          # on-demand import
 _quote_plus = None          # on-demand import
 _json       = None          # on-demand import
+_types      = None          # on-demand import
 
 _wsgiref_util      = None   # on-demand import
 _wsgiref_validate  = None   # on-demand import
@@ -2836,6 +2837,7 @@ class WSGITest(object):
         env = self._new_env(method, urlpath, form=form, query=query, json=json, headers=headers)
         start_resp = wsgi.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
+        self._remove_destructor(iterable)
         resp = wsgi.WSGIResponse(start_resp.status, start_resp.headers, iterable)
         resp._environ = env
         return resp
@@ -2883,6 +2885,17 @@ class WSGITest(object):
         #
         _wsgiref_util.setup_testing_defaults(env)
         return env
+
+    if python2:
+        def _remove_destructor(self, obj, __del__=lambda self: None):
+            global _types
+            if _types is None: import types as _types
+            obj.__del__ = _types.MethodType(__del__, obj, obj.__class__)
+    elif python3:
+        def _remove_destructor(self, obj, __del__=lambda self: None):
+            global _types
+            if _types is None: import types as _types
+            obj.__del__ = _types.MethodType(__del__, obj)
 
     def _build_paramstr(self, param_dict):
         global _quote_plus
