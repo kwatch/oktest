@@ -38,6 +38,7 @@ Features:
 * `Fixture Injection`_ support.
 * `Tracer`_ class is provided which can be used as mock or stub.
 * Text diff (diff -u) is displayed when texts are different.
+* Helping WSGI application test.
 
 Oktest requires Python 2.4 or later (3.x is supported).
 
