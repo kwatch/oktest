@@ -2973,7 +2973,7 @@ class WSGIStartResponse(object):
 
 
 class WSGIResponse(object):
-    __slots__ = ('status', 'status_code', 'headers', 'iterable', 'body', 'text', '_environ')
+    __slots__ = ('status', 'status_code', 'headers', 'iterable', '_body', '_text', '_environ')
 
     encoding = 'utf-8'
 
@@ -2988,7 +2988,21 @@ class WSGIResponse(object):
             self.status_code = None
         self.headers = _wsgiref_headers.Headers(headers)
         self.iterable = iterable
-        self._set_body_and_text(self.iterable)
+        #self._set_body_and_text(self.iterable)
+        self._body = None
+        self._text = None
+
+    @property
+    def body(self):
+        if self._body == None:
+            self._set_body_and_text(self.iterable)
+        return self._body
+
+    @property
+    def text(self):
+        if self._text == None:
+            self._set_body_and_text(self.iterable)
+        return self._text
 
     def _set_body_and_text(self, iterable):
         buf = []; add = buf.append
@@ -3003,8 +3017,8 @@ class WSGIResponse(object):
                     else:
                         raise ValueError("Unexpected response body data type: %r (%r)" % (type(x), x))
                 add(x)
-            self.body = _B("").join(buf)
-            self.text = self.body.decode(self.encoding)
+            self._body = _B("").join(buf)
+            self._text = self.body.decode(self.encoding)
         finally:
             if hasattr(iterable, 'close'):
                 iterable.close()

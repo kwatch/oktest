@@ -186,7 +186,7 @@ class WSGIResponse_TC(unittest.TestCase):
             try:
                 http = WSGITest(app)
                 resp = http.GET('/foo')
-                resp.body == "Hello"
+                resp.body
                 errmsg = "response body should be binary, but got unicode data: u'Hello'\n"
                 if python3:
                     errmsg = errmsg.replace("u'", "'")
@@ -198,6 +198,7 @@ class WSGIResponse_TC(unittest.TestCase):
             try:
                 http = WSGITest(app)
                 resp = http.GET('/foo')
+                resp.body
             except AssertionError:
                 ex = sys.exc_info()[1]
                 assert str(ex) == "Iterator yielded non-bytestring ('Hello')"
@@ -212,7 +213,8 @@ class WSGIResponse_TC(unittest.TestCase):
         http = WSGITest(app)
         if python2 or python30 or python31:
             try:
-                http.GET('/foo')
+                resp = http.GET('/foo')
+                resp.body
             except ValueError:
                 ex = sys.exc_info()[1]
                 errmsg = "Unexpected response body data type: <type 'NoneType'> (None)"
@@ -223,7 +225,8 @@ class WSGIResponse_TC(unittest.TestCase):
                 assert False, "ValueError expected, but not raised."
         elif python3:
             try:
-                http.GET('/foo')
+                resp = http.GET('/foo')
+                resp.body
             except AssertionError:
                 ex = sys.exc_info()[1]
                 assert str(ex) == "Iterator yielded non-bytestring (None)"
