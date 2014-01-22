@@ -508,19 +508,21 @@ class ResponseAssertionObject(AssertionObject):
     def _resp_code(resp):
         if hasattr(resp, 'status_int'):    # WebOb
             return resp.status_int
-        if hasattr(resp, 'status_code'):   # Werkzeug
+        if hasattr(resp, 'status_code'):   # Werkzeug, Requests, oktest.wsgi.WSGIObject
             return resp.status_code
         raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_status(resp):
-        if hasattr(resp, 'status'):        # WebOb, Werkzeug
+        if hasattr(resp, 'status'):        # WebOb, Werkzeug, oktest.wsgi.WSGIObject
             return resp.status
+        if hasattr(resp, 'status_code') and hasattr(resp, 'reason'):  # Requests
+            return "%s %s" % (resp.status_code, resp.reason)
         raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_header(resp, name):
-        if hasattr(resp, 'headers'):       # WebOb, Werkzeug
+        if hasattr(resp, 'headers'):       # WebOb, Werkzeug, Requests, oktest.wsgi.WSGIResponse
             return resp.headers.get(name)
         raise UnsupportedResponseObjectError(type(resp))
 
@@ -530,18 +532,21 @@ class ResponseAssertionObject(AssertionObject):
             return resp.body
         if hasattr(resp, 'data'):          # Werkzeug
             return resp.data
+        if hasattr(resp, 'content'):       # Requests
+            return resp.content
         if hasattr(resp, 'body_binary'):   # oktest.wsgi.WSGIResponse
             return resp.body_binary
         raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
     def _resp_text(resp):
-        if hasattr(resp, 'text'):          # WebOb
+        if hasattr(resp, 'text'):          # WebOb, Requests
             return resp.text
         if hasattr(resp, 'get_data'):      # Werkzeug
             return resp.get_data(as_text=True)
         if hasattr(resp, 'body_unicode'):  # oktest.wsgi.WSGIResponse
             return resp.body_unicode
+        sys.stderr.write("\033[0;31m*** debug: dir(resp)=%r\033[0m\n" % (dir(resp), ))
         raise UnsupportedResponseObjectError(type(resp))
 
     @staticmethod
@@ -550,7 +555,7 @@ class ResponseAssertionObject(AssertionObject):
             return resp.content_type
         if hasattr(resp, 'mimetype'):      # Werkzeug
             return resp.mimetype
-        if hasattr(resp, 'headers'):
+        if hasattr(resp, 'headers'):       # Requests, oktest.wsgi.WSGIResponse
             return resp.headers['Content-Type']
         raise UnsupportedResponseObjectError(type(resp))
 
