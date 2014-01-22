@@ -497,7 +497,10 @@ Responsed JSON is different from expected data.
             ok (response)._resp.json({"status": "ok"})
 
     def test_raises_UnsupportedResponseObjectError(self):
-        errmsg = "<class 'str'>: unsupported response class in oktest."
+        if python2:
+            errmsg = "<type 'str'>: unsupported response class in oktest."
+        else:
+            errmsg = "<class 'str'>: unsupported response class in oktest."
         #
         def fn(): ok ("foo").is_response(200)
         ok (fn).raises(oktest.UnsupportedResponseObjectError, errmsg)
