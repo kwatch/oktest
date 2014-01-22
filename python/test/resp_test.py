@@ -97,6 +97,8 @@ except (ImportError, SyntaxError):
             self._data = to_binary(data)
         data = property(get_data, set_data)
 
+from oktest.wsgi import WSGIResponse as OktestWSGIResponse
+
 
 def _set_body(response, body):
     if hasattr(response, 'body'):
@@ -104,6 +106,9 @@ def _set_body(response, body):
         response.text = to_unicode(body)
     elif hasattr(response, 'data'):
         response.data = body
+    elif hasattr(response, 'body_binary'):
+        response._body_binary  = to_binary(body)
+        response._body_unicode = to_unicode(body)
     else:
         raise Error
 
@@ -127,7 +132,8 @@ def with_response_class(func):
     def newfunc(self):
         #for klass in [WebObResponse]:
         #for klass in [WerkzeugResponse]:
-        for klass in [WebObResponse, WerkzeugResponse]:
+        #for klass in [OktestWSGIResponse]:
+        for klass in [WebObResponse, WerkzeugResponse, OktestWSGIResponse]:
             func(self, klass)
     newfunc.__name__ = func.__name__
     newfunc.__doc__  = func.__doc__
@@ -200,10 +206,14 @@ Unexpected content-type value.
 
     @with_response_class
     def test_status_ok(self, Response):
+        if Response is OktestWSGIResponse:
+            status = '302 Found'
+        else:
+            status = 302
         try:
             ok (Response())._resp.status(200)
-            ok (Response(status=302))._resp.status(302)
-            ok (Response(status=302))._resp.status((301, 302))
+            ok (Response(status=status))._resp.status(302)
+            ok (Response(status=status))._resp.status((301, 302))
         except:
             assert False, "failed"
 
