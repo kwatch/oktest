@@ -4,7 +4,7 @@ CHANGES
 =======
 
 
-Release 0.13.0 (????-??-??)
+Release 0.13.0 (2014-01-23)
 ---------------------------
 
 * [enhance] `ok().is_response()' now supports Requests.
