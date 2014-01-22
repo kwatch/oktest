@@ -916,6 +916,79 @@ Result::
 If you set ``oktest.DIFF`` to False, unified diff is not displayed.
 
 
+Testing WSGI Application
+========================
+
+Oktest.py provides testing helpers for WSGI Application.
+
+``oktest.wsgi.WSGITest``
+	simpulates HTTP request.
+
+Example::
+
+    ## create WSGI application
+    class App(object):
+        def __call__(self, environ, start_response):
+            start_response('200 OK',
+                           [('Content-Type', 'text/plain')])
+            if environ['PATH_INFO'] == '/':
+                return [b"Home"]            # use bytes, not unicode
+            else:
+                return [b"Hello World!"]    # use bytes, not unicode
+
+    app = App()
+
+    ## test for app
+    import unittest
+    import oktest
+    from oktest import test, ok, subject
+    {{*from oktest.wsgi import WSGITest*}}
+
+    {{*http = WSGITest(app)*}}
+
+    class AppTest(unittest.TestCase):
+
+        with subject('GET /'):
+
+            @test("Returns 'Home'.")
+            def _(self):
+                resp = {{*http.GET('/')*}}       # or http('GET', '/')
+                ok (resp).is_response(200, "text/plain").body("Home")
+
+        with subject('GET /hello'):
+
+            @test("Returns greeting message.")
+            def _(self):
+                resp = {{*http.GET('/hello')*}}  # or http('GET', '/hello')
+                ok (resp).is_response(200).body("Hello World!")
+
+    if __name__ == '__main__':
+        oktest.main()
+
+It is possible to pass query string, form parameter, or JSON body by
+``form``, ``query``, or ``json`` keyword argument respectively. ::
+
+    http.GET('/', {{*query*}}={'offset':"0", 'limit':"30"})  # dict
+    http.GET('/', {{*query*}}="offset=0&limit=30")           # str
+    http.GET('/', {{*form*}}={'offset':"0", 'limit':"30"})   # dict
+    http.GET('/', {{*form*}}="offset=0&limit=30")            # str
+    http.GET('/', {{*json*}}={'offset':"0", 'limit':"30"})   # dict
+    http.GET('/', {{*json*}}='{"offset":0,"limit":30}')      # str
+
+And also possible to specify environ dict. ::
+
+    environ = {
+        'HTTPS': 'on',                  # simulates https
+        'HTTP_USER_AGENT': 'Mozilla',   # simulates browser
+    }
+
+    ## specify on WSGITest
+    http = WSGITest(app, {{*environ*}})
+
+    ## or on http.GET(), http.POST(), ...
+    http.GET('/', {{*environ=environ*}})
+
+
 Tracer
 ======
 
@@ -1392,6 +1465,14 @@ dummy_io(stdin_content=None, func=None):
 
 Tracer:
 	Tracer class. See `Tracer`_ section for details.
+
+
+``oktest.wsgi`` module
+------------------------
+
+WSGITest:
+	Helper class to simulate http request for WSGI Application.
+	See `Testing WSGI Application`_ section for details.
 
 
 Tips
