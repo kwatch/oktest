@@ -2973,7 +2973,8 @@ class WSGIStartResponse(object):
 
 
 class WSGIResponse(object):
-    __slots__ = ('status', 'status_code', 'headers', 'iterable', '_body', '_text', '_environ')
+    __slots__ = ('status', 'status_code', 'headers_list', 'headers',
+                 'iterable', '_body', '_text', '_environ')
 
     encoding = 'utf-8'
 
@@ -2986,6 +2987,7 @@ class WSGIResponse(object):
             self.status_code = int(status.split()[0])
         else:
             self.status_code = None
+        self.headers_list = headers
         self.headers = _wsgiref_headers.Headers(headers)
         self.iterable = iterable
         #self._set_body_and_text(self.iterable)
@@ -3025,9 +3027,7 @@ class WSGIResponse(object):
 
     def __iter__(self):
         status = self.status
-        headers = self.headers
-        if hasattr(headers, '_headers'):
-            headers = headers._headers              # original headers
+        headers = self.headers_list
         iterable = self.iterable
         if hasattr(iterable, 'original_iterator'):
             iterable = iterable.original_iterator   # original iterable
