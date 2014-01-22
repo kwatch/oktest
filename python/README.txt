@@ -277,7 +277,7 @@ ok (value).should_not
 	to ``ok (string.startswith('foo')) == False``.
 
 ok (response).is_response(status).header(name, value).body(str_or_rexp).json(dict)
-	(experimental) Assertions for WebOb or Werkzeug response object. ::
+	(experimental) Assertions for WebOb, Werkzeug or Requests response object. ::
 
 	    ok (response).is_response(200)                          # status code
 	    ok (response).is_response((302, 303))                   # status code

@@ -97,6 +97,39 @@ except (ImportError, SyntaxError):
             self._data = to_binary(data)
         data = property(get_data, set_data)
 
+try:
+    from requests.models import Response as RequestsResponse
+except (ImportError, SyntaxError):
+    class RequestsResponse(object):
+        def __int__(self):
+            self.status_code = None
+            self.reason = None
+            self.headers = {}
+            self._content = None
+        @property
+        def content(self):
+            return self._content
+        @property
+        def text(self):
+            return self._content.decode('utf-8')
+finally:
+    def _setUp(self, status=200, headers=None):
+        if isinstance(status, int):
+            self.status_code = status
+            self.reason = {200:'OK', 201:'Created', 301: 'Moved Permanently', 302:'Found'}.get(status)
+        elif isinstance(status, str):
+            code, msg = str.split(' ', 1)
+            self.status_code = code
+            self.reason = msg
+        else:
+            raise TypeError
+        self.headers = headers or {}
+        self._content = to_binary("")
+        return self
+    assert not hasattr(RequestsResponse, '_setUp')
+    RequestsResponse._setUp = _setUp
+    del _setUp
+
 from oktest.wsgi import WSGIResponse as OktestWSGIResponse
 
 
@@ -106,11 +139,13 @@ def _set_body(response, body):
         response.text = to_unicode(body)
     elif hasattr(response, 'data'):
         response.data = body
+    elif hasattr(response, '_content'):
+        response._content = to_binary(body)
     elif hasattr(response, 'body_binary'):
         response._body_binary  = to_binary(body)
         response._body_unicode = to_unicode(body)
     else:
-        raise Error
+        raise Exception
 
 def _set_ctype(response, content_type):
     if hasattr(response, 'content_type'):
@@ -132,8 +167,9 @@ def with_response_class(func):
     def newfunc(self):
         #for klass in [WebObResponse]:
         #for klass in [WerkzeugResponse]:
+        #for klass in [RequestsResponse]:
         #for klass in [OktestWSGIResponse]:
-        for klass in [WebObResponse, WerkzeugResponse, OktestWSGIResponse]:
+        for klass in [WebObResponse, WerkzeugResponse, RequestsResponse, OktestWSGIResponse]:
             func(self, klass)
     newfunc.__name__ = func.__name__
     newfunc.__doc__  = func.__doc__
@@ -152,13 +188,14 @@ class ResponseAssertionObject_TC(unittest.TestCase):
     @with_response_class
     def test_is_response(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         ret = ok (response).is_response(200); ret != None
         ok (ret).is_a(oktest.ResponseAssertionObject)
         #
         try:
             ok (response).is_response(200)
-            ok (response).is_response('200 OK')
-            ok (response).is_response((200, 201))
+            #ok (response).is_response('200 OK')
+            #ok (response).is_response((200, 201))
         except:
             assert False, "failed"
         #
@@ -211,20 +248,29 @@ Unexpected content-type value.
         else:
             status = 302
         try:
-            ok (Response())._resp.status(200)
-            ok (Response(status=status))._resp.status(302)
-            ok (Response(status=status))._resp.status((301, 302))
+            if hasattr(Response, '_setUp'):
+                ok (Response()._setUp())._resp.status(200)
+                ok (Response()._setUp(status))._resp.status(302)
+                ok (Response()._setUp(status))._resp.status((301, 302))
+                pass
+            else:
+                ok (Response())._resp.status(200)
+                ok (Response(status=status))._resp.status(302)
+                ok (Response(status=status))._resp.status((301, 302))
         except:
             assert False, "failed"
 
     @with_response_class
     def test_status_ok_returns_self(self, Response):
-        respobj = ok (Response())._resp
-        assert respobj.status(200) is respobj
+        resp = Response()
+        if hasattr(resp, '_setUp'): resp._setUp()
+        ret = ok (resp)._resp
+        assert ret.status(200) is ret
 
     @with_response_class
     def test_status_NG(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_body(response, to_binary('{"status": "OK"}'))
         expected_errmsg = r"""
 Response status 200 == 201: failed.
@@ -251,6 +297,7 @@ b'{"status": "OK"}'
     @with_response_class
     def test_cont_type_ok(self, Response):
         resp = Response()
+        if hasattr(resp, '_setUp'): resp._setUp()
         _set_ctype(resp, 'image/jpeg')
         try:
             ok (resp)._resp.cont_type('image/jpeg')
@@ -261,6 +308,7 @@ b'{"status": "OK"}'
     @with_response_class
     def test_cont_type_ok_returns_self(self, Response):
         resp = Response()
+        if hasattr(resp, '_setUp'): resp._setUp()
         _set_ctype(resp, 'image/jpeg')
         respobj = ok (resp)._resp
         assert respobj.cont_type('image/jpeg') is respobj
@@ -269,6 +317,7 @@ b'{"status": "OK"}'
     @with_response_class
     def test_cont_type_NG(self, Response):
         resp = Response()
+        if hasattr(resp, '_setUp'): resp._setUp()
         #
         _set_ctype(resp, 'image/jpeg')
         expected_errmsg = r"""
@@ -292,6 +341,7 @@ Unexpected content-type value (not matched to pattern).
     @with_response_class
     def test_header_ok(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         response.headers['Location'] = '/'
         try:
             ok (response)._resp.header('Location', '/')
@@ -302,6 +352,7 @@ Unexpected content-type value (not matched to pattern).
     @with_response_class
     def test_header_ok_returns_self(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         response.headers['Location'] = '/'
         respobj = ok (response)._resp
         assert respobj.header('Location', '/') is respobj
@@ -309,6 +360,7 @@ Unexpected content-type value (not matched to pattern).
     @with_response_class
     def test_header_NG(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         response.headers['Location'] = '/'
         expected_errmsg = r"""
 Response header 'Location' is unexpected value.
@@ -335,6 +387,7 @@ Response header 'Location' should not be set : failed.
     @with_response_class
     def test_body_ok(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_body(response, '<h1>Hello</h1>')
         try:
             ok (response)._resp.body('<h1>Hello</h1>')
@@ -346,6 +399,7 @@ Response header 'Location' should not be set : failed.
     @with_response_class
     def test_body_NG(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_body(response, to_binary('<h1>Hello</h1>'))
         #
         expected_msg = r"""
@@ -374,6 +428,7 @@ Response body failed to match to expected pattern.
     @with_response_class
     def test_json_ok(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         content_types = [
             'application/json',
             'application/json;charset=utf8',
@@ -392,6 +447,7 @@ Response body failed to match to expected pattern.
     @with_response_class
     def test_json_ok_returns_self(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_ctype(response, 'application/json')
         _set_body(response, to_binary('{"status": "OK"}'))
         respobj = ok (response)._resp
@@ -400,6 +456,7 @@ Response body failed to match to expected pattern.
     @with_response_class
     def test_json_NG_when_content_type_is_empty(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_body(response, to_binary('{"status": "OK"}'))
         _set_ctype(response, '')
         @be_failed("Content-Type is not set.")
@@ -409,6 +466,7 @@ Response body failed to match to expected pattern.
     @with_response_class
     def test_json_NG_when_content_type_is_not_json_type(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_body(response, to_binary('''{"status": "OK"}'''))
         _set_ctype(response, 'text/html; charset=UTF-8')
         expected = ("Content-Type should be 'application/json' : failed.\n"
@@ -420,6 +478,7 @@ Response body failed to match to expected pattern.
     @with_response_class
     def test_json_NG_when_json_data_is_different(self, Response):
         response = Response()
+        if hasattr(response, '_setUp'): response._setUp()
         _set_body(response, to_binary('''{"status": "OK"}'''))
         _set_ctype(response, 'application/json')
         expected = r"""
