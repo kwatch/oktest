@@ -496,7 +496,7 @@ ASSERTION_OBJECT = AssertionObject
 
 
 ##
-## (Undocumented) assertions for WebOb/Werkzeug response object
+## (Undocumented) assertions for WebOb/Werkzeug/Requests response object
 ##
 class ResponseAssertionObject(AssertionObject):
     """(experimental) AssertionObject enhancement for Response object.
@@ -584,7 +584,7 @@ class ResponseAssertionObject(AssertionObject):
 
     @assertion
     def cont_type(self, str_or_regexp):
-        """(experimental) Asserts content-type of WebOb/Werkzeug response object."""
+        """(experimental) Asserts content-type of WebOb/Werkzeug/Requests response object."""
         response = self.target
         cont_type = self._resp_ctype(response)
         ## when regular expression
@@ -607,7 +607,7 @@ class ResponseAssertionObject(AssertionObject):
 
     @assertion
     def header(self, name, value):
-        """(experimental) Asserts header of WebOb/Werkzeug response object."""
+        """(experimental) Asserts header of WebOb/Werkzeug/Requests response object."""
         response = self.target
         actual = self._resp_header(response, name)
         if value is None:
@@ -623,7 +623,7 @@ class ResponseAssertionObject(AssertionObject):
 
     @assertion
     def body(self, str_or_regexp):
-        """(experimental) Asserts response body of WebOb/Werkzeug response object."""
+        """(experimental) Asserts response body of WebOb/Werkzeug/Requests response object."""
         response = self.target
         ## when regular expression
         if isinstance(str_or_regexp, _rexp_type):
@@ -649,7 +649,7 @@ class ResponseAssertionObject(AssertionObject):
 
     @assertion
     def json(self, expected_jdict):
-        """(experimental) Asserts JSON data of WebOb/Werkzeug response object."""
+        """(experimental) Asserts JSON data of WebOb/Werkzeug/Requests response object."""
         ## assert content type
         response = self.target
         content_type = self._resp_ctype(response)
