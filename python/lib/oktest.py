@@ -2205,13 +2205,15 @@ def test(description_text=None, **tags):
         newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         if orig_name.startswith('test'):
             newfunc.__name__ = orig_name
+            return newfunc
         else:
             s = "test_%03d: %s" % (n, description_text)
             if python2 and isinstance(s, unicode):
                 s = s.encode('utf-8')
             newfunc.__name__ = s
             localvars[newfunc.__name__] = newfunc
-        return newfunc
+            #return None  # for 'nosetests' command
+            return newfunc
     return deco
 
 test.__test__ = False    # for 'nosetests' command
