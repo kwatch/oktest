@@ -2839,6 +2839,7 @@ _wsgiref_headers   = None   # on-demand import
 
 class WSGITest(object):
     __slots__ = ('_app', '_environ')
+    __test__  = None    # for 'nosetests' command
 
     def __init__(self, app, environ={}):
         self._app = app
