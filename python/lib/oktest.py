@@ -2200,6 +2200,9 @@ def test(description_text=None, **tags):
                 self._description = description_text
                 return orig_func(self)
         orig_name = orig_func.__name__
+        newfunc.__doc__  = orig_func.__doc__ or description_text
+        newfunc._tags = tags
+        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         if orig_name.startswith('test'):
             newfunc.__name__ = orig_name
         else:
@@ -2208,9 +2211,6 @@ def test(description_text=None, **tags):
                 s = s.encode('utf-8')
             newfunc.__name__ = s
             localvars[newfunc.__name__] = newfunc
-        newfunc.__doc__  = orig_func.__doc__ or description_text
-        newfunc._tags = tags
-        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         return newfunc
     return deco
 
