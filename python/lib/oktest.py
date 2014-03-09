@@ -2200,18 +2200,20 @@ def test(description_text=None, **tags):
                 self._description = description_text
                 return orig_func(self)
         orig_name = orig_func.__name__
+        newfunc.__doc__  = orig_func.__doc__ or description_text
+        newfunc._tags = tags
+        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         if orig_name.startswith('test'):
             newfunc.__name__ = orig_name
+            return newfunc
         else:
             s = "test_%03d: %s" % (n, description_text)
             if python2 and isinstance(s, unicode):
                 s = s.encode('utf-8')
             newfunc.__name__ = s
             localvars[newfunc.__name__] = newfunc
-        newfunc.__doc__  = orig_func.__doc__ or description_text
-        newfunc._tags = tags
-        newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
-        return newfunc
+            #return None  # for 'nosetests' command
+            return newfunc
     return deco
 
 test.__test__ = False    # for 'nosetests' command
@@ -2839,6 +2841,7 @@ _wsgiref_headers   = None   # on-demand import
 
 class WSGITest(object):
     __slots__ = ('_app', '_environ')
+    __test__  = None    # for 'nosetests' command
 
     def __init__(self, app, environ={}):
         self._app = app
