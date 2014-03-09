@@ -2987,7 +2987,9 @@ class WSGIStartResponse(object):
 
 class WSGIResponse(object):
     __slots__ = ('status', 'status_code', 'headers_list', 'headers',
-                 'body_iterable', '_body_binary', '_body_unicode', '_environ')
+                 'body_iterable', '_body_binary', '_body_unicode', '_body_json',
+                 '_environ',
+                 )
 
     encoding = 'utf-8'
 
@@ -3005,6 +3007,7 @@ class WSGIResponse(object):
         self.body_iterable = iterable
         self._body_binary  = None
         self._body_unicode = None
+        self._body_json    = None
 
     @property
     def body_binary(self):
@@ -3017,6 +3020,14 @@ class WSGIResponse(object):
         if self._body_unicode == None:
             self._set_body_and_text(self.body_iterable)
         return self._body_unicode
+
+    @property
+    def body_json(self):
+        global json
+        if json is None: import json
+        if self._body_json == None:
+            self._body_json = json.loads(self.body_unicode)
+        return self._body_json
 
     #body = body_binary
     #text = body_unicode

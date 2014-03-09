@@ -170,6 +170,14 @@ class WSGIResponse_TC(unittest.TestCase):
         assert isinstance(resp.body_binary,  _binary)
         assert isinstance(resp.body_unicode, _unicode)
 
+    def test_body_json(self):
+        def app(environ, start_response):
+            start_response('200 OK', [('Content-Type', 'application/json')])
+            return ['''{"status": "OK"}''']
+        http = WSGITest(app)
+        resp = http.GET('/')
+        self.assertEqual(resp.body_json, {"status":"OK"})
+
     def test_warning_when_response_body_contains_unicode(self):
         def app(env, callback):
             callback('200 OK', [('Content-Type', 'text/plain')])
