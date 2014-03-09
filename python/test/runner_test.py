@@ -22,6 +22,7 @@ import oktest.config
 echo = sys.stdout.write
 python_command = os.environ.get('PYTHON', 'python')
 python24 = sys.version_info[0:2] <= (2, 4)
+python33 = sys.version_info[0:2] == (3, 3)
 def withstmt_not_available():
     if python24:
         sys.stderr.write("*** skip because with-statment is not supported\n")
@@ -57,7 +58,7 @@ class RunnerTestHelper(object):
         if os.path.exists(self.filename):
             os.unlink(self.filename)
 
-    def do_test(self, desc, script, expected,  _pat=re.compile(r'0\.00[\d]s')):
+    def do_test(self, desc, script, expected, callback=None, _pat=re.compile(r'0\.00[\d]s')):
         f = open(self.filename, 'w'); f.write(script); f.close()
         gvars = {}
         code = compile(script, self.filename, "exec")
@@ -66,6 +67,8 @@ class RunnerTestHelper(object):
         #
         if isinstance(output, str):
             output = re.sub(r' at 0x[0-9a-f]{6,9}', '', output)
+        if callback:
+            output = callback(output)
         if python24:
             expected = expected.replace("failed, got ValueError('errmsg1',)", "failed, got <exceptions.ValueError instance>")
         if output == expected:
@@ -733,7 +736,15 @@ run(FooTest)
 +              'role': 'Just an ordinary girl'}]}
 \ No newline at end of string
 """[1:]
-        self.do_test(desc, script, expected)
+        #
+        callback = None
+        if python33:
+            pat = r'^\* FooTest\.test1 ... \[NG\].*\n'
+            expected = re.sub(pat, '', expected)
+            def callback(output):
+                return re.sub(pat, '', output)
+        #
+        self.do_test(desc, script, expected, callback=callback)
 
 
 
