@@ -52,8 +52,8 @@ class Validator_TC(unittest.TestCase):
         @should_raise(errmsg)
         def _(): 'C' == v
 
-    def test_range(self):
-        v = Validator('test', range=(10, 20))
+    def test_between(self):
+        v = Validator('test', between=(10, 20))
         @not_raise
         def _(): 10 == v
         @not_raise

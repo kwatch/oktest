@@ -3094,11 +3094,11 @@ validator.__file__ = __file__
 
 class Validator(object):
 
-    def __init__(self, name, _=None, type=None, enum=None, range=None,
+    def __init__(self, name, _=None, type=None, enum=None, between=None,
                  length=None, pattern=None, func=None):
-        if range is not None:
-            if not isinstance(range, tuple) or len(range) != 2:
-                raise TypeError("'range' should be a tuple of two values, but got:%r" % (range,))
+        if between is not None:
+            if not isinstance(between, tuple) or len(between) != 2:
+                raise TypeError("'between' should be a tuple of two values, but got:%r" % (between,))
         if length is not None:
             if not isinstance(length, (int, tuple)):
                 raise TypeError("'length' should be an integer or tuple of min/max length, but got:%r" % (length,))
@@ -3116,7 +3116,7 @@ class Validator(object):
         self._name     = name
         self._type     = type
         self._enum     = enum
-        self._range    = range
+        self._between  = between
         self._length   = length
         self._pattern  = pattern
         self._rexp     = rexp
@@ -3140,8 +3140,8 @@ class Validator(object):
             if actual not in self._enum:
                 raise self._err("$actual in %r: failed.\n"
                                 "  $actual: %r" % (self._enum, actual))
-        if self._range is not None:
-            min, max = self._range
+        if self._between is not None:
+            min, max = self._between
             if min is not None and not (min <= actual):
                 #raise self._err("%r <= %r: failed." % (min, actual))
                 raise self._err("$actual >= %r: failed.\n"
