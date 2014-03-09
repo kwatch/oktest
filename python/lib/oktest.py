@@ -3084,6 +3084,188 @@ del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
 
 
 ##
+## validator
+##
+
+validator = type(sys)('oktest.validator')
+sys.modules[validator.__name__] = validator
+validator.__file__ = __file__
+
+
+class Validator(object):
+
+    @classmethod
+    def register(self, name, validator_op):
+        self._validator_ops[name] = validator_op
+
+    _validator_ops = {}
+
+    def __init__(self, name, **validations):
+        self.name = name
+        self._validations = validations
+        validator_ops = self._validator_ops
+        for k in validations:
+            if k not in validator_ops:
+                raise TypeError("%s: unknown validator name." % (k,))
+            validator_ops[k].init(self, validations[k])
+
+    def __eq__(self, actual):
+        validator_ops = self._validator_ops
+        for k in self._validations:
+            validator_op = validator_ops.get(k)
+            if not validator_op:
+                raise TypeError("%s: unknown validator name." % (k,))
+            validator_op.validate(self, actual)
+
+    def __req__(self, actual):
+        return self.__eq__(actual)
+
+
+class ValidatorOp(object):
+
+    def init(self, vali, arg):
+        raise NotImplementedError("%s.init(): not implemented yet." % self.__class__.__name__)
+
+    def validate(self, vali, actual):
+        raise NotImplementedError("%s.validate(): not implemented yet." % self.__class__.__name__)
+
+
+class TypeValidatorOp(ValidatorOp):
+
+    def init(self, vali, arg):
+        vali._type = arg
+
+    def validate(self, vali, actual):
+        if not isinstance(actual, vali._type):
+            raise AssertionError(
+                "Validator(%r):  isinstance($actual, %s): failed.\n"
+                "  $actual: %r" % (vali.name, vali._type, actual)
+            )
+
+
+class EnumValidatorOp(ValidatorOp):
+
+    def init(self, vali, arg):
+        vali._enum = arg
+
+    def validate(self, vali, actual):
+        if actual not in vali._enum:
+            raise AssertionError(
+                "Validator(%r):  $actual in %r: failed.\n"
+                "  $actual: %r" % (vali.name, vali._enum, actual)
+            )
+
+
+class BetweenValidatorOp(ValidatorOp):
+
+    def init(self, vali, arg):
+        if not isinstance(arg, tuple) or len(arg) != 2:
+            raise TypeError("'between' should be a tuple of two values, but got:%r" % (arg,))
+        vali._between = arg
+
+    def validate(self, vali, actual):
+        min, max = vali._between
+        if min is not None and not (min <= actual):
+            raise AssertionError(
+                "Validator(%r):  $actual >= %r: failed.\n"
+                "  $actual: %r" % (vali.name, min, actual)
+            )
+        if max is not None and not (actual <= max):
+            raise AssertionError(
+                "Validator(%r):  $actual <= %r: failed.\n"
+                "  $actual: %r" % (vali.name, max, actual)
+            )
+
+
+class LengthValidatorOp(ValidatorOp):
+
+    def init(self, vali, arg):
+        if not isinstance(arg, (int, tuple)):
+            raise TypeError("'length' should be an integer or tuple of min/max length, but got:%r" % (arg,))
+        vali._length = arg
+
+    def validate(self, vali, actual):
+        length = vali._length
+        if isinstance(length, int):
+            if len(actual) != length:
+                raise AssertionError(
+                    "Validator(%r):  len($actual) == %r: failed.\n"
+                    "  len($actual): %r\n"
+                    "  $actual     : %r" % (vali.name, length, len(actual), actual)
+                )
+        elif isinstance(length, tuple):
+            minlen, maxlen = length
+            if minlen is not None and not (minlen <= len(actual)):
+                raise AssertionError(
+                    "Validator(%r):  len($actual) >= %r: failed.\n"
+                    "  len($actual): %r\n"
+                    "  $actual     : %r" % (vali.name, minlen, len(actual), actual)
+                )
+            if maxlen is not None and not (len(actual) <= maxlen):
+                raise AssertionError(
+                    "Validator(%r):  len($actual) <= %r: failed.\n"
+                    "  len($actual): %r\n"
+                    "  $actual     : %r" % (vali.name, maxlen, len(actual), actual)
+                )
+
+
+class PatternValidatorOp(ValidatorOp):
+
+    def init(self, vali, arg):
+        vali._pattern = pattern = arg
+        if pattern is None:
+            vali._rexp = None
+        elif isinstance(pattern, str):
+            vali._rexp = re.compile(pattern)
+        elif isinstance(pattern, _rexp_type):
+            vali._rexp = pattern
+        elif isinstance(pattern, tuple):
+            vali._rexp = re.compile(*pattern)
+        else:
+            raise TypeError("'pattern' should be a string or %r object, but got:%r" % (_rexp_type, pattern))
+
+    def validate(self, vali, actual):
+        rexp = vali._rexp
+        if not rexp.search(actual):
+            raise AssertionError(
+                "Validator(%r):  re.search($actual, %r): failed.\n"
+                "  $actual: %r" % (vali.name, rexp.pattern, actual)
+            )
+
+
+class FuncValidatorOp(ValidatorOp):
+
+    def init(self, vali, arg):
+        vali._func = arg
+
+    def validate(self, vali, actual):
+        errmsg = vali._func(actual)
+        if errmsg:
+            raise AssertionError("Validator(%r):  %s" % (vali.name, errmsg))
+
+
+Validator.register('type',     TypeValidatorOp())
+Validator.register('enum',     EnumValidatorOp())
+Validator.register('between',  BetweenValidatorOp())
+Validator.register('length',   LengthValidatorOp())
+Validator.register('pattern',  PatternValidatorOp())
+Validator.register('func',     FuncValidatorOp())
+
+
+validator.Validator = Validator
+validator.TypeValidatorOp      = TypeValidatorOp
+validator.EnumValidatorOp      = EnumValidatorOp
+validator.BetweenValidatorOp   = BetweenValidatorOp
+validator.LengthValidatorOp    = LengthValidatorOp
+validator.PatternValidatorOp   = PatternValidatorOp
+validator.FuncValidatorOp  = FuncValidatorOp
+del Validator
+del TypeValidatorOp, EnumValidatorOp, BetweenValidatorOp, LengthValidatorOp
+del PatternValidatorOp, FuncValidatorOp
+
+
+
+##
 ## mainapp
 ##
 import unittest
