@@ -126,6 +126,9 @@ class WSGITest_TC(unittest.TestCase):
         expected = ["HTTP_COOKIE: 'name=val'",
                     "HTTP_X_REQUESTED_WITH: 'XMLHttpRequest'"]
         self.assertEqual(list(resp.body_iterable), expected)
+        #
+        resp = http.GET('/', headers={'HTTP_COOKIE': 'name=val', 'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+        self.assertEqual(list(resp.body_iterable), expected)
 
     def test__call___environ(self):
         def app(environ, start_response):

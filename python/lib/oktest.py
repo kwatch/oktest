@@ -2944,7 +2944,10 @@ class WSGITest(object):
     def _update_http_headers(self, env, headers):
         if headers:
             for k in headers:
-                name = 'HTTP_'+(k.upper().replace('-', '_'))
+                if re.match(r'^HTTP_[A-Z_]+$', k):
+                    name = k
+                else:
+                    name = 'HTTP_'+(k.upper().replace('-', '_'))
                 env[name] = headers[k]
 
 
