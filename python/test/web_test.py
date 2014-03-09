@@ -114,6 +114,19 @@ class WSGITest_TC(unittest.TestCase):
         assert resp._environ['CONTENT_TYPE'] == 'application/json'
         assert resp._environ['CONTENT_LENGTH'] == str(len('{"page":1,"q":"SOS"}'))
 
+    def test__call___headers(self):
+        def app(environ, start_response):
+            start_response('200 OK', [('Content-Type', 'text/plain')])
+            return [
+                "HTTP_COOKIE: %r"           % environ['HTTP_COOKIE'],
+                "HTTP_X_REQUESTED_WITH: %r" % environ['HTTP_X_REQUESTED_WITH'],
+            ]
+        http = WSGITest(app)
+        resp = http.GET('/', headers={'Cookie': 'name=val', 'X-Requested-With': 'XMLHttpRequest'})
+        expected = ["HTTP_COOKIE: 'name=val'",
+                    "HTTP_X_REQUESTED_WITH: 'XMLHttpRequest'"]
+        self.assertEqual(list(resp.body_iterable), expected)
+
     def test_GET(self):
         resp = self.http.GET('/hello')
         assert resp._environ['REQUEST_METHOD'] == 'GET'

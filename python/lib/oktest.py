@@ -2894,7 +2894,7 @@ class WSGITest(object):
             env['CONTENT_TYPE']   = 'application/json'
             env['CONTENT_LENGTH'] = str(len(b))
         if headers:
-            env.update(headers)
+            self._update_http_headers(env, headers)
         #
         _wsgiref_util.setup_testing_defaults(env)
         return env
@@ -2938,6 +2938,12 @@ class WSGITest(object):
             import json as _json
         #
         return _json.dumps(jdict, ensure_ascii=False, separators=(',', ':'))
+
+    def _update_http_headers(self, env, headers):
+        if headers:
+            for k in headers:
+                name = 'HTTP_'+(k.upper().replace('-', '_'))
+                env[name] = headers[k]
 
 
     ###
