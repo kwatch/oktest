@@ -11,6 +11,7 @@ import unittest
 
 from oktest.validator import Validator
 from oktest import ok, test
+from oktest import python2, python3
 
 
 def not_raise(fn):
@@ -36,8 +37,12 @@ class Validator_TC(unittest.TestCase):
 
     def test_type(self):
         v = Validator('test', type=int)
-        errmsg = ("Validator('test'):  isinstance($actual, <type 'int'>): failed.\n"
-                  "  $actual: '123'")
+        if python2:
+            s = 'type'
+        elif python3:
+            s = 'class'
+        errmsg = ("Validator('test'):  isinstance($actual, <%s 'int'>): failed.\n"
+                  "  $actual: '123'" % (s,))
         @not_raise
         def _(): 123 == v
         @should_raise(errmsg)
