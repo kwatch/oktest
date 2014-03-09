@@ -2843,11 +2843,11 @@ class WSGITest(object):
         self._app = app
         self._environ = environ
 
-    def __call__(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+    def __call__(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
-        env = self._new_env(method, urlpath, form=form, query=query, json=json, headers=headers)
+        env = self._new_env(method, urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -2865,7 +2865,7 @@ class WSGITest(object):
         env.update(self._environ)
         return env
 
-    def _new_env(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None):
+    def _new_env(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
         global _BytesIO
         if _BytesIO is None:
             if python2:
@@ -2878,6 +2878,8 @@ class WSGITest(object):
             import wsgiref.util as _wsgiref_util
         #
         env = self._base_env(method, urlpath)
+        if environ:
+            env.update(environ)
         if query is not None:
             s = self._build_paramstr(query) if isinstance(query, dict) else str(query)
             env['QUERY_STRING'] = s

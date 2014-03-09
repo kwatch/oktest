@@ -127,6 +127,15 @@ class WSGITest_TC(unittest.TestCase):
                     "HTTP_X_REQUESTED_WITH: 'XMLHttpRequest'"]
         self.assertEqual(list(resp.body_iterable), expected)
 
+    def test__call___environ(self):
+        def app(environ, start_response):
+            start_response('200 OK', [('Content-Type', 'text/plain')])
+            return [environ['REQUEST_METHOD'], environ['REMOTE_ADDR']]
+        http = WSGITest(app)
+        resp = http.GET('/', environ={'REQUEST_METHOD': 'PATCH', 'REMOTE_ADDR': '192.168.0.1'})
+        expected = ['PATCH', '192.168.0.1']
+        self.assertEqual(list(resp.body_iterable), expected)
+
     def test_GET(self):
         resp = self.http.GET('/hello')
         assert resp._environ['REQUEST_METHOD'] == 'GET'
