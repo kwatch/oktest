@@ -202,6 +202,19 @@ class WSGIResponse_TC(unittest.TestCase):
         http = WSGITest(app)
         resp = http.GET('/')
         self.assertEqual(resp.body_json, {"status":"OK"})
+        #
+        def app(environ, start_response):
+            start_response('200 OK', [('Content-Type', 'text/javascript')])
+            return [_B('''{"status": "OK"}''')]
+        http = WSGITest(app)
+        resp = http.GET('/')
+        try:
+            resp.body_json
+        except AssertionError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "Content-Type is expected 'application/json' but got 'text/javascript'")
+        else:
+            raise AssertionFailed("assertion expected but not raised")
 
     def test_warning_when_response_body_contains_unicode(self):
         def app(env, callback):

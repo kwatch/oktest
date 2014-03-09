@@ -3037,6 +3037,7 @@ class WSGIResponse(object):
     def body_json(self):
         global json
         if json is None: import json
+        self._validate_json_content_type()
         if self._body_json == None:
             self._body_json = json.loads(self.body_unicode)
         return self._body_json
@@ -3062,6 +3063,13 @@ class WSGIResponse(object):
         finally:
             if hasattr(iterable, 'close'):
                 iterable.close()
+
+    def _validate_json_content_type(self):
+        cont_type = self.headers.get('Content-Type')
+        if not cont_type:
+            raise AssertionError("Content-Type is expected 'applicaiton/json' but empty.")
+        if not re.match(r'^application/json(?:; *charset=(?:utf|UTF)-?8)?$', cont_type):
+            raise AssertionError("Content-Type is expected 'application/json' but got %r" % (cont_type,))
 
     def __iter__(self):
         status = self.status
