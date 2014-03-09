@@ -3084,6 +3084,110 @@ del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
 
 
 ##
+## validator
+##
+
+validator = type(sys)('oktest.validator')
+sys.modules[validator.__name__] = validator
+validator.__file__ = __file__
+
+
+class Validator(object):
+
+    def __init__(self, name, _=None, type=None, enum=None, range=None,
+                 length=None, pattern=None, func=None):
+        if range is not None:
+            if not isinstance(range, tuple) or len(range) != 2:
+                raise TypeError("'range' should be a tuple of two values, but got:%r" % (range,))
+        if length is not None:
+            if not isinstance(length, (int, tuple)):
+                raise TypeError("'length' should be an integer or tuple of min/max length, but got:%r" % (length,))
+        if pattern is None:
+            rexp = None
+        elif isinstance(pattern, str):
+            rexp = re.compile(pattern)
+        elif isinstance(pattern, _rexp_type):
+            rexp = pattern
+        elif isinstance(pattern, tuple):
+            rexp = re.compile(*pattern)
+        else:
+            raise TypeError("'pattern' should be a string or %r object, but got:%r" % (_rexp_type, pattern))
+        #
+        self._name     = name
+        self._type     = type
+        self._enum     = enum
+        self._range    = range
+        self._length   = length
+        self._pattern  = pattern
+        self._rexp     = rexp
+        self._func     = func
+        #
+
+    @property
+    def _prefix(self):
+        return "Validator(%r):  " % (self._name,)
+
+    def _err(self, errmsg):
+        return AssertionError(self._prefix + errmsg)
+
+    def __eq__(self, actual):
+        if self._type is not None:
+            if not isinstance(actual, self._type):
+                #raise self._err("isinstance(%r, %r): failed." % (actual, self._type))
+                raise self._err("isinstance($actual, %s): failed.\n"
+                                "  $actual: %r" % (self._type, actual))
+        if self._enum is not None:
+            if actual not in self._enum:
+                raise self._err("$actual in %r: failed.\n"
+                                "  $actual: %r" % (self._enum, actual))
+        if self._range is not None:
+            min, max = self._range
+            if min is not None and not (min <= actual):
+                #raise self._err("%r <= %r: failed." % (min, actual))
+                raise self._err("$actual >= %r: failed.\n"
+                                "  $actual: %r" % (min, actual))
+            if max is not None and not (actual <= max):
+                #raise self._err("%r <= %r: failed." % (actual, max))
+                raise self._err("$actual <= %r: failed.\n"
+                                "  $actual: %r" % (max, actual))
+        if self._length is not None:
+            if isinstance(self._length, int):
+                if len(actual) != self._length:
+                    #raise self._err("len(%r) == %r: failed." % (actual, self._length))
+                    raise self._err("len($actual) == %r: failed.\n"
+                                    "  len($actual): %r\n"
+                                    "  $actual     : %r" % (self._length, len(actual), actual))
+            elif isinstance(self._length, tuple):
+                minlen, maxlen = self._length
+                if minlen is not None and not (minlen <= len(actual)):
+                    #raise self._err("%r <= len(%r): failed." % (minlen, actual))
+                    raise self._err("len($actual) >= %r: failed.\n"
+                                    "  len($actual): %r\n"
+                                    "  $actual     : %r" % (minlen, len(actual), actual))
+                if maxlen is not None and not (len(actual) <= maxlen):
+                    #raise self._err("len(%r) <= %r: failed." % (actual, maxlen))
+                    raise self._err("len($actual) <= %r: failed.\n"
+                                    "  len($actual): %r\n"
+                                    "  $actual     : %r" % (maxlen, len(actual), actual))
+        if self._rexp is not None:
+            if not self._rexp.search(actual):
+                raise self._err("re.search($actual, %r): failed.\n"
+                                "  $actual: %r" % (self._rexp.pattern, actual))
+        if self._func is not None:
+            errmsg = self._func(actual)
+            if errmsg:
+                raise self._err(errmsg)
+        return True
+
+    def __req__(self, actual):
+        return self.__eq__(actual)
+
+validator.Validator = Validator
+del Validator
+
+
+
+##
 ## mainapp
 ##
 import unittest
