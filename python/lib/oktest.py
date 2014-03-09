@@ -2951,8 +2951,8 @@ class WSGITest(object):
     ###
 
     #def define(meth, localvars=locals()):
-    #    def fn(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-    #        return self.__call__(meth, urlpath, form=form, query=query, json=json, headers=headers)
+    #    def fn(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+    #        return self.__call__(meth, urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
     #    fn.__name__ = meth
     #    localvars[meth] = fn
     #    return fn
@@ -2960,29 +2960,29 @@ class WSGITest(object):
     #    define(meth)
     #del define
 
-    def GET(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('GET', urlpath, form=form, query=query, json=json, headers=headers)
+    def GET(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('GET', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def POST(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('POST', urlpath, form=form, query=query, json=json, headers=headers)
+    def POST(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('POST', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def PUT(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('PUT', urlpath, form=form, query=query, json=json, headers=headers)
+    def PUT(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('PUT', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def DELETE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('DELETE', urlpath, form=form, query=query, json=json, headers=headers)
+    def DELETE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('DELETE', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def PATCH(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('PATCH', urlpath, form=form, query=query, json=json, headers=headers)
+    def PATCH(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('PATCH', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def HEAD(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('HEAD', urlpath, form=form, query=query, json=json, headers=headers)
+    def HEAD(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('HEAD', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def OPTIONS(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('OPTIONS', urlpath, form=form, query=query, json=json, headers=headers)
+    def OPTIONS(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('OPTIONS', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def TRACE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None):
-        return self.__call__('TRACE', urlpath, form=form, query=query, json=json, headers=headers)
+    def TRACE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('TRACE', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
 
 
 class WSGIStartResponse(object):
