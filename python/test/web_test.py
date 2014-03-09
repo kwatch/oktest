@@ -118,13 +118,13 @@ class WSGITest_TC(unittest.TestCase):
         def app(environ, start_response):
             start_response('200 OK', [('Content-Type', 'text/plain')])
             return [
-                "HTTP_COOKIE: %r"           % environ['HTTP_COOKIE'],
-                "HTTP_X_REQUESTED_WITH: %r" % environ['HTTP_X_REQUESTED_WITH'],
+                _B("HTTP_COOKIE: %r"           % environ['HTTP_COOKIE']),
+                _B("HTTP_X_REQUESTED_WITH: %r" % environ['HTTP_X_REQUESTED_WITH']),
             ]
         http = WSGITest(app)
         resp = http.GET('/', headers={'Cookie': 'name=val', 'X-Requested-With': 'XMLHttpRequest'})
-        expected = ["HTTP_COOKIE: 'name=val'",
-                    "HTTP_X_REQUESTED_WITH: 'XMLHttpRequest'"]
+        expected = [_B("HTTP_COOKIE: 'name=val'"),
+                    _B("HTTP_X_REQUESTED_WITH: 'XMLHttpRequest'")]
         self.assertEqual(list(resp.body_iterable), expected)
         #
         resp = http.GET('/', headers={'HTTP_COOKIE': 'name=val', 'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
@@ -133,10 +133,10 @@ class WSGITest_TC(unittest.TestCase):
     def test__call___environ(self):
         def app(environ, start_response):
             start_response('200 OK', [('Content-Type', 'text/plain')])
-            return [environ['REQUEST_METHOD'], environ['REMOTE_ADDR']]
+            return [_B(environ['REQUEST_METHOD']), _B(environ['REMOTE_ADDR'])]
         http = WSGITest(app)
         resp = http.GET('/', environ={'REQUEST_METHOD': 'PATCH', 'REMOTE_ADDR': '192.168.0.1'})
-        expected = ['PATCH', '192.168.0.1']
+        expected = [_B('PATCH'), _B('192.168.0.1')]
         self.assertEqual(list(resp.body_iterable), expected)
 
     def test_GET(self):
@@ -198,7 +198,7 @@ class WSGIResponse_TC(unittest.TestCase):
     def test_body_json(self):
         def app(environ, start_response):
             start_response('200 OK', [('Content-Type', 'application/json')])
-            return ['''{"status": "OK"}''']
+            return [_B('''{"status": "OK"}''')]
         http = WSGITest(app)
         resp = http.GET('/')
         self.assertEqual(resp.body_json, {"status":"OK"})
