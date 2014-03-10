@@ -3105,6 +3105,51 @@ validator.__file__ = __file__
 
 
 class Validator(object):
+    """
+    (Experimental) Utility class for validation.
+    Example::
+
+      from oktest.validator import Validator as V
+      ok (json_data) == {
+          "status": "OK",
+          "member": {
+              "id":       1,
+              "name":     "Haruhi",
+              "gender":   V('gender', enum=('M', 'F')),
+              "age":      V('age', type=int),
+              "birthday": V('birthday', pattern=r'^\d\d\d\d-\d\d-\d\d$'),
+          }
+      }
+
+    Constructor::
+
+      Validator(name, type=None, enum=None, between=None, length=None,
+                pattern=None, func=None, **validations):
+
+    Parameters:
+
+    * name: arbitrary name to distinguish others on assertion error.
+    * type: type such as int, float, str, and so on.
+          Validator(name, type=int)
+          Validator(name, type=(int, long, float))
+    * enum: expected values of that actual value should be member
+          Validator(name, enum=('jpg', 'png', 'gif'))
+    * between: tuple of min and max value
+          Validator(name, between(0, 100))
+    * length: int of length, or tuple of min and max length.
+          Validator(name, 255)
+          Validator(name, (1, 255))
+    * pattern: regular expression string or pattern object or tuple of pattern and option
+          Validator(name, r'^[a-f0-9]+$')
+          Validator(name, (r'^[a-f0-9]+$', re.I))
+          Validator(name, re.pattern(r'^[a-f0-9]+$', re.I))
+    * func: callback function which returns error message when validation failed
+          Validator(name, func=lambda actual: \
+                               "Even number expected" if actual % 2 != 0 else None)
+
+    You can extend Validator class by yourself.
+    See source code of Validator class.
+    """
 
     @classmethod
     def register(self, name, validator_op):
