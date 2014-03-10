@@ -10,7 +10,7 @@
 <div class="document" id="oktest-readme">
 <h1 class="title">Oktest - a new style testing library -</h1>
 
-<p>Release: 0.13.0</p>
+<p>Release: 0.0.0</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
@@ -25,21 +25,22 @@
 <li><a class="reference internal" href="#test-context" id="id9">Test Context</a></li>
 <li><a class="reference internal" href="#unified-diff" id="id10">Unified Diff</a></li>
 <li><a class="reference internal" href="#testing-wsgi-application" id="id11">Testing WSGI Application</a></li>
-<li><a class="reference internal" href="#tracer" id="id12">Tracer</a></li>
-<li><a class="reference internal" href="#skip-test" id="id13">Skip Test</a></li>
-<li><a class="reference internal" href="#todo-decorator" id="id14"><tt class="docutils literal">&#64;todo</tt> Decorator</a></li>
-<li><a class="reference internal" href="#command-line-interface" id="id15">Command-line Interface</a></li>
-<li><a class="reference internal" href="#helpers-reference" id="id16">Helpers Reference</a><ul>
-<li><a class="reference internal" href="#oktest-module" id="id17"><tt class="docutils literal">oktest</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-util-module" id="id18"><tt class="docutils literal">oktest.util</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-dummy-module" id="id19"><tt class="docutils literal">oktest.dummy</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-tracer-module" id="id20"><tt class="docutils literal">oktest.tracer</tt> module</a></li>
-<li><a class="reference internal" href="#oktest-web-module" id="id21"><tt class="docutils literal">oktest.web</tt> module</a></li>
+<li><a class="reference internal" href="#validator" id="id12">Validator</a></li>
+<li><a class="reference internal" href="#tracer" id="id13">Tracer</a></li>
+<li><a class="reference internal" href="#skip-test" id="id14">Skip Test</a></li>
+<li><a class="reference internal" href="#todo-decorator" id="id15"><tt class="docutils literal">&#64;todo</tt> Decorator</a></li>
+<li><a class="reference internal" href="#command-line-interface" id="id16">Command-line Interface</a></li>
+<li><a class="reference internal" href="#helpers-reference" id="id17">Helpers Reference</a><ul>
+<li><a class="reference internal" href="#oktest-module" id="id18"><tt class="docutils literal">oktest</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-util-module" id="id19"><tt class="docutils literal">oktest.util</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-dummy-module" id="id20"><tt class="docutils literal">oktest.dummy</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-tracer-module" id="id21"><tt class="docutils literal">oktest.tracer</tt> module</a></li>
+<li><a class="reference internal" href="#oktest-web-module" id="id22"><tt class="docutils literal">oktest.web</tt> module</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tips" id="id22">Tips</a></li>
-<li><a class="reference internal" href="#license" id="id23">License</a></li>
-<li><a class="reference internal" href="#copyright" id="id24">Copyright</a></li>
+<li><a class="reference internal" href="#tips" id="id23">Tips</a></li>
+<li><a class="reference internal" href="#license" id="id24">License</a></li>
+<li><a class="reference internal" href="#copyright" id="id25">Copyright</a></li>
 </ul>
 </div>
 <div class="section" id="overview">
@@ -86,10 +87,10 @@ class FooTest(unittest.TestCase):
 <pre class="literal-block">
 ## if you have installed easy_install:
 $ sudo easy_install Oktest
-## or download Oktest-0.13.0.tar.gz and install it
-$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.13.0.tar.gz
-$ tar xzf Oktest-0.13.0.tar.gz
-$ cd Oktest-0.13.0/
+## or download Oktest-0.0.0.tar.gz and install it
+$ wget http://pypi.python.org/packages/source/O/Oktest/Oktest-0.0.0.tar.gz
+$ tar xzf Oktest-0.0.0.tar.gz
+$ cd Oktest-0.0.0/
 $ sudo python setup.py install
 </pre>
 </div>
@@ -957,6 +958,10 @@ http.GET('/', <strong>form</strong>=&quot;offset=0&amp;limit=30&quot;)          
 http.GET('/', <strong>json</strong>={'offset':&quot;0&quot;, 'limit':&quot;30&quot;})   # dict
 http.GET('/', <strong>json</strong>='''{&quot;offset&quot;:0,&quot;limit&quot;:30}''')  # str
 </pre>
+<p>Possible to specify HTTP headers:</p>
+<pre class="literal-block">
+http.GET('/', <strong>headers</strong>={'Cookie': 'name=val'})
+</pre>
 <p>And also possible to specify environ dict.</p>
 <pre class="literal-block">
 environ = {
@@ -971,9 +976,90 @@ http = WSGITest(app, <strong>environ</strong>)
 response = http.GET('/', <strong>environ=environ</strong>)
 </pre>
 </div>
+<div class="section" id="validator">
+
+<h2><a class="toc-backref" href="#id12">Validator</a></h2>
+<p><strong>(Experimental)</strong></p>
+<p><tt class="docutils literal">oktest.validator.Validator</tt> is very useful to test
+complicated data structure such as JSON.</p>
+<p>Example:</p>
+<pre class="literal-block">
+<strong>from oktest.validator import Validator as V</strong>
+
+ok (json_data) == {
+    &quot;status&quot;: &quot;OK&quot;,
+    &quot;member&quot;: {
+        &quot;id&quot;:       1,
+        &quot;name&quot;:     &quot;Haruhi&quot;,
+        &quot;gender&quot;:   <strong>V('gender', enum=('M', 'F'))</strong>,
+        &quot;age&quot;:      <strong>V('age', type=int)</strong>,
+        &quot;birthday&quot;: <strong>V('birthday', pattern=r'^\d\d\d\d-\d\d-\d\d$')</strong>,
+    }
+}
+</pre>
+<p>Usage:</p>
+<pre class="literal-block">
+## Raises AssertionError when actual data failed to validation.
+actual == Validator(name, type=type, enum=enum, between=between,
+                    length=length, pattern=pattern, func=func)
+</pre>
+<p>Parameters:</p>
+<dl class="docutils">
+<dt>name:</dt>
+<dd>Arbitrary name to distinguish others on assertion error.</dd>
+<dt>type:</dt>
+<dd><p class="first">Type such as int, float, str, and so on.
+ex:</p>
+<pre class="last literal-block">
+Validator(name, type=int)
+Validator(name, type=(int, long, float))
+</pre>
+</dd>
+<dt>enum:</dt>
+<dd><p class="first">Expected values of that actual value should be member.
+ex:</p>
+<pre class="last literal-block">
+Validator(name, enum=('jpg', 'png', 'gif'))
+</pre>
+</dd>
+<dt>between:</dt>
+<dd><p class="first">Tuple of min and max value.
+ex:</p>
+<pre class="last literal-block">
+Validator(name, between(0, 100))
+</pre>
+</dd>
+<dt>length:</dt>
+<dd><p class="first">Int of length, or tuple of min and max length.
+ex:</p>
+<pre class="last literal-block">
+Validator(name, 255)
+Validator(name, (1, 255))
+</pre>
+</dd>
+<dt>pattern:</dt>
+<dd><p class="first">Regular expression string or pattern object or tuple of pattern and option
+ex:</p>
+<pre class="last literal-block">
+Validator(name, r'^[a-f0-9]+$')
+Validator(name, (r'^[a-f0-9]+$', re.I))
+Validator(name, re.pattern(r'^[a-f0-9]+$', re.I))
+</pre>
+</dd>
+<dt>func:</dt>
+<dd><p class="first">Callback function which returns error message when validation failed.
+ex:</p>
+<pre class="last literal-block">
+Validator(name, func=lambda actual: \
+    &quot;Even number expected&quot; if actual % 2 != 0 else None)
+</pre>
+</dd>
+</dl>
+<p>It is possible to add your own validator options. See source code for details.</p>
+</div>
 <div class="section" id="tracer">
 
-<h2><a class="toc-backref" href="#id12">Tracer</a></h2>
+<h2><a class="toc-backref" href="#id13">Tracer</a></h2>
 <p>Oktest provides <tt class="docutils literal">Tracer</tt> class which can be stub or mock object.
 <tt class="docutils literal">Tracer</tt> class can:</p>
 <ul class="simple">
@@ -1092,7 +1178,7 @@ ok (tr[0]) == [None, 'f', (3,), {}, 'x=3']
 </div>
 <div class="section" id="skip-test">
 
-<h2><a class="toc-backref" href="#id13">Skip Test</a></h2>
+<h2><a class="toc-backref" href="#id14">Skip Test</a></h2>
 <p><strong>(Experimental)</strong></p>
 <p>It is possible to skip tests according to a certain condition.</p>
 <pre class="literal-block">
@@ -1133,7 +1219,7 @@ def _(self):
 </div>
 <div class="section" id="todo-decorator">
 
-<h2><a class="toc-backref" href="#id14"><tt class="docutils literal">&#64;todo</tt> Decorator</a></h2>
+<h2><a class="toc-backref" href="#id15"><tt class="docutils literal">&#64;todo</tt> Decorator</a></h2>
 <p><tt class="docutils literal">&#64;todo</tt> decorator represents that &quot;this test will be failed expectedly
 because feature is not implemented yet, therefore don't count
 this test as failed, please!&quot;.</p>
@@ -1188,7 +1274,7 @@ def _(self): ...
 </div>
 <div class="section" id="command-line-interface">
 
-<h2><a class="toc-backref" href="#id15">Command-line Interface</a></h2>
+<h2><a class="toc-backref" href="#id16">Command-line Interface</a></h2>
 <p>Oktest now supports command-line interface to execute test scripts.</p>
 <pre class="literal-block">
 ## run test scripts except foo_*.py
@@ -1213,10 +1299,10 @@ $ python test/foobar_test.py <strong>-sp -f test='*keyword*'</strong>
 </div>
 <div class="section" id="helpers-reference">
 
-<h2><a class="toc-backref" href="#id16">Helpers Reference</a></h2>
+<h2><a class="toc-backref" href="#id17">Helpers Reference</a></h2>
 <div class="section" id="oktest-module">
 
-<h3><a class="toc-backref" href="#id17"><tt class="docutils literal">oktest</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id18"><tt class="docutils literal">oktest</tt> module</a></h3>
 <dl class="docutils">
 <dt>fail(message)</dt>
 <dd>Raises AssertionError exception with message.</dd>
@@ -1289,7 +1375,7 @@ See <a class="reference internal" href="#todo-decorator">&#64;todo Decorator</a>
 </div>
 <div class="section" id="oktest-util-module">
 
-<h3><a class="toc-backref" href="#id18"><tt class="docutils literal">oktest.util</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id19"><tt class="docutils literal">oktest.util</tt> module</a></h3>
 <p>Since 0.10.0, <tt class="docutils literal">oktest.helper</tt> is renamed to <tt class="docutils literal">oktest.util</tt>, but
 <tt class="docutils literal">oktest.helper</tt> is still available for backward compatibility.</p>
 <dl class="docutils">
@@ -1343,7 +1429,7 @@ This is useful when creating fixture data.</p>
 </div>
 <div class="section" id="oktest-dummy-module">
 
-<h3><a class="toc-backref" href="#id19"><tt class="docutils literal">oktest.dummy</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id20"><tt class="docutils literal">oktest.dummy</tt> module</a></h3>
 <dl class="docutils">
 <dt>dummy_file(filename, content)</dt>
 <dd><p class="first">Create dummy file with specified content.</p>
@@ -1441,7 +1527,7 @@ assert serr == &quot;&quot;
 </div>
 <div class="section" id="oktest-tracer-module">
 
-<h3><a class="toc-backref" href="#id20"><tt class="docutils literal">oktest.tracer</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id21"><tt class="docutils literal">oktest.tracer</tt> module</a></h3>
 <dl class="docutils">
 <dt>Tracer:</dt>
 <dd>Tracer class. See <a class="reference internal" href="#tracer">Tracer</a> section for details.</dd>
@@ -1449,7 +1535,7 @@ assert serr == &quot;&quot;
 </div>
 <div class="section" id="oktest-web-module">
 
-<h3><a class="toc-backref" href="#id21"><tt class="docutils literal">oktest.web</tt> module</a></h3>
+<h3><a class="toc-backref" href="#id22"><tt class="docutils literal">oktest.web</tt> module</a></h3>
 <dl class="docutils">
 <dt>WSGITest:</dt>
 <dd>Helper class to simulate http request for WSGI Application.
@@ -1459,7 +1545,7 @@ See <a class="reference internal" href="#testing-wsgi-application">Testing WSGI 
 </div>
 <div class="section" id="tips">
 
-<h2><a class="toc-backref" href="#id22">Tips</a></h2>
+<h2><a class="toc-backref" href="#id23">Tips</a></h2>
 <ul>
 <li><p class="first">It is possible to chain assertion methods.</p>
 <pre class="literal-block">
@@ -1516,12 +1602,12 @@ $ python -m oktest -f test='*foobar*' test/foo_test.py
 </div>
 <div class="section" id="license">
 
-<h2><a class="toc-backref" href="#id23">License</a></h2>
+<h2><a class="toc-backref" href="#id24">License</a></h2>
 <p>$License: MIT License $</p>
 </div>
 <div class="section" id="copyright">
 
-<h2><a class="toc-backref" href="#id24">Copyright</a></h2>
+<h2><a class="toc-backref" href="#id25">Copyright</a></h2>
 <p>$Copyright: copyright(c) 2010-2014 kuwata-lab.com all rights reserved $</p>
 </div>
 </div>
