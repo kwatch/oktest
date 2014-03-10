@@ -42,7 +42,9 @@ Release 0.14.0 (2014-03-10)
         }
       }
 
-  See users gude for details.
+  See users guide for details.
+  http://www.kuwata-lab.com/oktest/oktest-py_users-guide.html#validator
+
 
 
 Release 0.13.0 (2014-01-23)
