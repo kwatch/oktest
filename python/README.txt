@@ -974,6 +974,10 @@ It is possible to pass query string, form parameter, or JSON body by
     http.GET('/', {{*json*}}={'offset':"0", 'limit':"30"})   # dict
     http.GET('/', {{*json*}}='''{"offset":0,"limit":30}''')  # str
 
+Possible to specify HTTP headers::
+
+    http.GET('/', {{*headers*}}={'Cookie': 'name=val'})
+
 And also possible to specify environ dict. ::
 
     environ = {
