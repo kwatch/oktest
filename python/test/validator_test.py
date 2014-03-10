@@ -140,6 +140,26 @@ class Validator_TC(unittest.TestCase):
         def _(): "abcd1234" == v
         assert ("ABCD1234" == v) == True
 
+    def test___str__(self):
+        if python2:
+            s = 'type'
+        elif python3:
+            s = 'class'
+        v = Validator('test', type=int)
+        self.assertEqual(str(v), "<Validator(test): type=<%s 'int'>>" % s)
+        v = Validator('test', pattern=r'^\d+$')
+        self.assertEqual(str(v), "<Validator(test): pattern='^\\\\d+$'>")
+
+    def test___repr__(self):
+        if python2:
+            s = 'type'
+        elif python3:
+            s = 'class'
+        v = Validator('test', type=int)
+        self.assertEqual(repr(v), "<Validator(test): type=<%s 'int'>>" % s)
+        v = Validator('test', pattern=r'^\d+$')
+        self.assertEqual(repr(v), "<Validator(test): pattern='^\\\\d+$'>")
+
 
 
 if __name__ == '__main__':

@@ -3133,6 +3133,17 @@ class Validator(object):
     def __req__(self, actual):
         return self.__eq__(actual)
 
+    def __str__(self):
+        buf = []; add = buf.append
+        add("<Validator(%s):" % self.name)
+        for k in self._validations:
+            add(" %s=%r" % (k, self._validations[k]))
+        add(">")
+        return "".join(buf)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class ValidatorOp(object):
 
