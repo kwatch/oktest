@@ -988,6 +988,84 @@ And also possible to specify environ dict. ::
     response = http.GET('/', {{*environ=environ*}})
 
 
+Validator
+=========
+
+**(Experimental)**
+
+``oktest.validator.Validator`` is very useful to test
+complicated data structure such as JSON.
+
+Example::
+
+    {{*from oktest.validator import Validator as V*}}
+
+    ok (json_data) == {
+        "status": "OK",
+        "member": {
+            "id":       1,
+            "name":     "Haruhi",
+            "gender":   {{*V('gender', enum=('M', 'F'))*}},
+            "age":      {{*V('age', type=int)*}},
+            "birthday": {{*V('birthday', pattern=r'^\d\d\d\d-\d\d-\d\d$')*}},
+        }
+    }
+
+Usage::
+
+    ## Raises AssertionError when actual data failed to validation.
+    actual == Validator(name, type=type, enum=enum, between=between,
+                        length=length, pattern=pattern, func=func)
+
+Parameters:
+
+name:
+	Arbitrary name to distinguish others on assertion error.
+
+type:
+	Type such as int, float, str, and so on.
+	ex::
+
+	    Validator(name, type=int)
+	    Validator(name, type=(int, long, float))
+
+enum:
+	Expected values of that actual value should be member.
+	ex::
+
+	    Validator(name, enum=('jpg', 'png', 'gif'))
+
+between:
+	Tuple of min and max value.
+	ex::
+
+	    Validator(name, between(0, 100))
+
+length:
+	Int of length, or tuple of min and max length.
+	ex::
+
+	    Validator(name, 255)
+	    Validator(name, (1, 255))
+
+pattern:
+	Regular expression string or pattern object or tuple of pattern and option
+	ex::
+
+	    Validator(name, r'^[a-f0-9]+$')
+	    Validator(name, (r'^[a-f0-9]+$', re.I))
+	    Validator(name, re.pattern(r'^[a-f0-9]+$', re.I))
+
+func:
+	Callback function which returns error message when validation failed.
+	ex::
+
+	    Validator(name, func=lambda actual: \
+	        "Even number expected" if actual % 2 != 0 else None)
+
+It is possible to add your own validator options. See source code for details.
+
+
 Tracer
 ======
 
