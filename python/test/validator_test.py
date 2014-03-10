@@ -47,6 +47,7 @@ class Validator_TC(unittest.TestCase):
         def _(): 123 == v
         @should_raise(errmsg)
         def _(): '123' == v
+        assert (123 == v) == True
 
     def test_enum(self):
         v = Validator('test', enum=('A', 'B', 'O', 'AB'))
@@ -56,6 +57,7 @@ class Validator_TC(unittest.TestCase):
         def _(): 'B' == v
         @should_raise(errmsg)
         def _(): 'C' == v
+        assert ('B' == v) == True
 
     def test_between(self):
         v = Validator('test', between=(10, 20))
@@ -67,6 +69,7 @@ class Validator_TC(unittest.TestCase):
         def _(): 9 == v
         @should_raise("Validator('test'):  $actual <= 20: failed.\n  $actual: 21")
         def _(): 21 == v
+        assert (10 == v) == True
 
     def test_length(self):
         v = Validator('test', length=(6, 7))
@@ -82,6 +85,7 @@ class Validator_TC(unittest.TestCase):
                       "  len($actual): 8\n"
                       "  $actual     : 'suzumiya'")
         def _(): "suzumiya" == v
+        assert ("haruhi" == v) == True
         #
         v = Validator('test', length=6)
         @not_raise
@@ -90,6 +94,7 @@ class Validator_TC(unittest.TestCase):
                       "  len($actual): 5\n"
                       "  $actual     : 'kyonn'")
         def _(): "kyonn" == v
+        assert ("haruhi" == v) == True
 
     def test_pattern(self):
         v = Validator('test', pattern=r'^\d+$')
@@ -98,6 +103,7 @@ class Validator_TC(unittest.TestCase):
         @should_raise(r"Validator('test'):  re.search($actual, '^\\d+$'): failed."
                       "\n  $actual: '123e'")
         def _(): "123e" == v
+        assert ("123" == v) == True
         #
         v = Validator('test', pattern=re.compile(r'^[a-z]+$', re.M|re.I))
         @not_raise
@@ -105,6 +111,7 @@ class Validator_TC(unittest.TestCase):
         @should_raise(r"Validator('test'):  re.search($actual, '^[a-z]+$'): failed."
                       "\n  $actual: '2\\n3\\n4\\n'")
         def _(): "2\n3\n4\n" == v
+        assert ("2\nB\n3\n" == v) == True
         #
         v = Validator('test', pattern=(r'^[a-z]+$', re.M|re.I))
         @not_raise
@@ -112,6 +119,7 @@ class Validator_TC(unittest.TestCase):
         @should_raise(r"Validator('test'):  re.search($actual, '^[a-z]+$'): failed."
                       "\n  $actual: '2\\n3\\n4\\n'")
         def _(): "2\n3\n4\n" == v
+        assert ("2\nB\n3\n" == v) == True
         #
         try:
             Validator('test', pattern=True)
@@ -130,6 +138,7 @@ class Validator_TC(unittest.TestCase):
         def _(): "ABCD1234" == v
         @should_raise(errmsg)
         def _(): "abcd1234" == v
+        assert ("ABCD1234" == v) == True
 
 
 

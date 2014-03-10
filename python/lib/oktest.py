@@ -3127,7 +3127,8 @@ class Validator(object):
             validator_op = validator_ops.get(k)
             if not validator_op:
                 raise TypeError("%s: unknown validator name." % (k,))
-            validator_op.validate(self, actual)
+            validator_op.validate(self, actual)   # may raise AssertionError
+        return True    # passed all assertions
 
     def __req__(self, actual):
         return self.__eq__(actual)
