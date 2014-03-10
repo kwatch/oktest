@@ -3,6 +3,47 @@
 CHANGES
 =======
 
+Release 0.14.0 (2014-03-10)
+---------------------------
+
+* [enhance] Response object returned by `WSGITest#GET()' or '#POST()' now
+  supports `body_json' property.
+  Example::
+
+      from oktest.web import WSGITest
+      http = WSGITest(app)
+      resp = http.GET('/')
+      print(resp.body_json)
+
+* [change] `headers` argument of `WSGITest#GET()' (or '#POST()' and so on)
+  now means HTTP headers, not environ values.
+  Example::
+
+      ## version <= 0.13
+      http.GET('/', headers={'HTTP_COOKIE': 'name=val'})
+
+      ## version >= 0.14
+      http.GET('/', headers={'Cookie': 'name=val'})
+      ## or
+      http.GET('/', environ={'HTTP_COOKIE': 'name=val'})
+
+* [enhance] (Experimental) `oktest.validator.Validator' class is added.
+  It is convenient to test complex data structure.
+  Example::
+
+      from oktest.validator import Validator as V
+      ok (resp.body_json) == {
+        "status": "OK",
+        "member": {
+          "name":     "Haruhi",
+          "gender":   V('gender', enum=('F', 'M')),
+          "age":      V('age', type=int, between=(15, 18)),
+          "birthday": V('created_at', pattern=r'^\d\d\d\d-\d\d-\d\d$')
+        }
+      }
+
+  See users gude for details.
+
 
 Release 0.13.0 (2014-01-23)
 ---------------------------
