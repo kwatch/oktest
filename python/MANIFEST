@@ -22,4 +22,5 @@ test/testdeco_test.py
 test/todo_test.py
 test/tracer_test.py
 test/util_test.py
+test/validator_test.py
 test/web_test.py
