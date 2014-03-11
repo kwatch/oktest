@@ -1064,7 +1064,7 @@ pattern:
 
 	    Validator(name, r'^[a-f0-9]+$')
 	    Validator(name, (r'^[a-f0-9]+$', re.I))
-	    Validator(name, re.pattern(r'^[a-f0-9]+$', re.I))
+	    Validator(name, re.compile(r'^[a-f0-9]+$', re.I))
 
 func:
 	Callback function which returns error message when validation failed.
