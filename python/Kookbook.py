@@ -20,7 +20,7 @@ from glob import glob
 from kook.utils import read_file, write_file
 
 package   = prop('package', 'Oktest')
-release   = prop('release', '0.14.0')
+release   = prop('release', '0.14.1')
 copyright = prop('copyright', "copyright(c) 2010-2014 kuwata-lab.com all rights reserved")
 license   = "MIT License"
 python    = prop('python', sys.executable)
