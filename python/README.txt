@@ -974,6 +974,12 @@ It is possible to pass query string, form parameter, or JSON body by
     http.GET('/', {{*json*}}={'offset':"0", 'limit':"30"})   # dict
     http.GET('/', {{*json*}}='''{"offset":0,"limit":30}''')  # str
 
+``params`` is recognized as ``query`` (for GET or HEAD) or ``query``
+(for POST, PUT, DELETE, or PATCH). ::
+
+    http.GET('/', {{*params*}}={'x':'1'})   # same as http.GET('/', query={'x':'1'})
+    http.POST('/', {{*params*}}={'x':'1'})  # same as http.POST('/', form={'x':'1'})
+
 Possible to specify HTTP headers::
 
     http.GET('/', {{*headers*}}={'Cookie': 'name=val'})
