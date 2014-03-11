@@ -2847,11 +2847,11 @@ class WSGITest(object):
         self._app = app
         self._environ = environ
 
-    def __call__(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+    def __call__(self, method='GET', urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
-        env = self._new_env(method, urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+        env = self._new_env(method, urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -2869,7 +2869,7 @@ class WSGITest(object):
         env.update(self._environ)
         return env
 
-    def _new_env(self, method='GET', urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
+    def _new_env(self, method='GET', urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
         global _BytesIO
         if _BytesIO is None:
             if python2:
@@ -2880,6 +2880,18 @@ class WSGITest(object):
         global _wsgiref_util
         if not _wsgiref_util:
             import wsgiref.util as _wsgiref_util
+        #
+        if params is not None:
+            if method in ('GET', 'HEAD'):
+                if query is not None:
+                    raise TypeError("Both `params' and `query' are specified for %s method." % method)
+                query = params
+            elif method in ('POST', 'PUT', 'DELETE', 'PATCH'):
+                if form is not None:
+                    raise TypeError("Both `params' and `form' are specified for %s method." % method)
+                form = params
+            else:
+                raise TypeError("%s: unexpected method (expected GET, POST, PUT, DELETE, PATCH, or HEAD)." % method)
         #
         env = self._base_env(method, urlpath)
         if environ:
@@ -2958,8 +2970,8 @@ class WSGITest(object):
     ###
 
     #def define(meth, localvars=locals()):
-    #    def fn(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-    #        return self.__call__(meth, urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    #    def fn(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+    #        return self.__call__(meth, urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
     #    fn.__name__ = meth
     #    localvars[meth] = fn
     #    return fn
@@ -2967,29 +2979,29 @@ class WSGITest(object):
     #    define(meth)
     #del define
 
-    def GET(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('GET', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def GET(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('GET', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def POST(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('POST', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def POST(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('POST', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def PUT(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('PUT', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def PUT(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('PUT', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def DELETE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('DELETE', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def DELETE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('DELETE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def PATCH(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('PATCH', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def PATCH(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('PATCH', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def HEAD(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('HEAD', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def HEAD(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('HEAD', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def OPTIONS(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('OPTIONS', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def OPTIONS(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('OPTIONS', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
-    def TRACE(self, urlpath='/', _=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('TRACE', urlpath, form=form, query=query, json=json, headers=headers, environ=environ)
+    def TRACE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
+        return self.__call__('TRACE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
 
 
 class WSGIStartResponse(object):

@@ -102,6 +102,45 @@ class WSGITest_TC(unittest.TestCase):
         assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
         assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
 
+    def test__call___params(self):
+        resp = self.http.GET('/hello', params={'q':"SOS", 'page':'1'})
+        if python2:
+            assert resp.body_binary  == _B("OK <input=''>")
+            assert resp.body_unicode == _U("OK <input=''>")
+        elif python3:
+            assert resp.body_binary  == _B("OK <input=b''>")
+            assert resp.body_unicode == _U("OK <input=b''>")
+        assert resp._environ['QUERY_STRING'] in ("q=SOS&page=1", "page=1&q=SOS")
+        assert 'CONTENT_TYPE' not in resp._environ
+        assert 'CONTENT_LENGTH' not in resp._environ
+        #
+        resp = self.http.POST('/hello', params={'q':"SOS", 'page':'1'})
+        if python2:
+            assert resp.body_binary in ("OK <input='q=SOS&page=1'>",
+                                        "OK <input='page=1&q=SOS'>",)
+        elif python3:
+            assert resp.body_binary in (_B("OK <input=b'q=SOS&page=1'>"),
+                                        _B("OK <input=b'page=1&q=SOS'>"),)
+        assert resp._environ['QUERY_STRING'] == ""
+        assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
+        assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
+        #
+        try:
+            self.http.GET('/hello', params={}, query={})
+        except TypeError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "Both `params' and `query' are specified for GET method.")
+        else:
+            self.fail("TypeError should be raised, but not.")
+        #
+        try:
+            self.http.POST('/hello', params={}, form={})
+        except TypeError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "Both `params' and `form' are specified for POST method.")
+        else:
+            self.fail("TypeError should be raised, but not.")
+
     def test__call___json(self):
         resp = self.http.POST('/hello', json={'q':"SOS", 'page':1})
         if python2:
