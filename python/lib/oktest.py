@@ -2849,12 +2849,12 @@ class WSGITest(object):
 
     def __call__(self, method='GET', urlpath='/', _=None,
                  params=None, form=None, query=None, json=None,
-                 headers=None, environ=None, cookie=None):
+                 headers=None, environ=None, cookies=None):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
         env = self._new_env(method, urlpath, params=params, form=form, query=query,
-                            json=json, headers=headers, environ=environ)
+                            json=json, headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -2874,7 +2874,7 @@ class WSGITest(object):
 
     def _new_env(self, method='GET', urlpath='/', _=None,
                  params=None, form=None, query=None, json=None,
-                 headers=None, environ=None):
+                 headers=None, environ=None, cookies=None):
         global _BytesIO
         if _BytesIO is None:
             if python2:
@@ -2918,6 +2918,11 @@ class WSGITest(object):
             env['CONTENT_LENGTH'] = str(len(b))
         if headers:
             self._update_http_headers(env, headers)
+        if cookies:
+            if isinstance(cookies, dict):
+                env['HTTP_COOKIE'] = "; ".join( "%s=%s" % (k, v) for k, v in cookies.items() )
+            else:
+                env['HTTP_COOKIE'] = str(cookies)
         #
         _wsgiref_util.setup_testing_defaults(env)
         return env
