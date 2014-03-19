@@ -2968,15 +2968,8 @@ class WSGITest(object):
         return _json.dumps(jdict, ensure_ascii=False, separators=(',', ':'))
 
     def _build_cookie_str(self, dct):
-        if python2:
-            from Cookie import SimpleCookie
-        elif python3:
-            from http.cookies import SimpleCookie
-        def fn(k, v, SimpleCookie=SimpleCookie):
-            c = SimpleCookie()
-            c[k] = v
-            return str(c).split(' ', 1)[1]
-        return "; ".join( fn(k, v) for k, v in dct.items() )
+        ## should I use SimpleCookie?
+        return "; ".join( "%s=%s" % (k, v) for k, v in dct.items() )
 
     def _update_http_headers(self, env, headers):
         if headers:
