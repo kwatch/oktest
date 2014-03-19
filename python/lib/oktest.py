@@ -2920,7 +2920,7 @@ class WSGITest(object):
             self._update_http_headers(env, headers)
         if cookies:
             if isinstance(cookies, dict):
-                env['HTTP_COOKIE'] = "; ".join( "%s=%s" % (k, v) for k, v in cookies.items() )
+                env['HTTP_COOKIE'] = self._build_cookie_str(cookies)
             else:
                 env['HTTP_COOKIE'] = str(cookies)
         #
@@ -2966,6 +2966,9 @@ class WSGITest(object):
             import json as _json
         #
         return _json.dumps(jdict, ensure_ascii=False, separators=(',', ':'))
+
+    def _build_cookie_str(self, dct):
+        return "; ".join( "%s=%s" % (k, v) for k, v in dct.items() )
 
     def _update_http_headers(self, env, headers):
         if headers:
