@@ -3626,7 +3626,8 @@ def _dummy():
             if 'out' not in kwargs:
                 if opts.encoding:
                     kwargs['out'] = self._get_output_writer(opts.encoding)
-                elif not hasattr(sys.stdout, 'encoding') or sys.stdout.encoding == 'US-ASCII':
+                elif not hasattr(sys.stdout, 'encoding') or \
+                        sys.stdout.encoding in ('US-ASCII', 'ISO-8859-1', 'ANSI_X3.4-1968'):
                     kwargs['out'] = self._get_output_writer('utf-8')
             #
             pattern = opts.pattern or '*_test.py,test_*.py'
