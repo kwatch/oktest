@@ -3,6 +3,13 @@
 CHANGES
 =======
 
+Release 0.14.2 (2014-03-20)
+---------------------------
+
+* [bugfix] Avoids unicode error on environments that sys.stdout.encoding
+  is 'ISO-8859-1' or 'ANSI_X3.4-1968'.
+
+
 Release 0.14.1 (2014-03-11)
 ---------------------------
 
