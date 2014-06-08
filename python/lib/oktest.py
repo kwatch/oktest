@@ -2838,6 +2838,8 @@ _wsgiref_util      = None   # on-demand import
 _wsgiref_validate  = None   # on-demand import
 _wsgiref_headers   = None   # on-demand import
 
+_cookie_quote      = None   # on-demand import
+
 
 class WSGITest(object):
     __slots__ = ('_app', '_environ')
@@ -2968,11 +2970,13 @@ class WSGITest(object):
         return _json.dumps(jdict, ensure_ascii=False, separators=(',', ':'))
 
     def _build_cookie_str(self, dct):
-        if python2:
-            from Cookie import _quote
-        elif python3:
-            from http.cookies import _quote
-        return "; ".join( "%s=%s" % (k, _quote(str(v))) for k, v in dct.items() )
+        global _cookie_quote
+        if not _cookie_quote:
+            if python2:
+                from Cookie import _quote as _cookie_quote
+            elif python3:
+                from http.cookies import _quote as _cookie_quote
+        return "; ".join( "%s=%s" % (k, _cookie_quote(str(v))) for k, v in dct.items() )
 
     def _update_http_headers(self, env, headers):
         if headers:
