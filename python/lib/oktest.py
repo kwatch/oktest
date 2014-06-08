@@ -2865,6 +2865,8 @@ class WSGITest(object):
         return resp
 
     def _base_env(self, method, urlpath):
+        if python3:
+            urlpath = urlpath.encode('utf-8').decode('latin-1')
         env = {
             'REQUEST_METHOD': method,
             'PATH_INFO':      urlpath,
