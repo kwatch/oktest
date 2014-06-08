@@ -215,6 +215,12 @@ class WSGITest_TC(unittest.TestCase):
         resp = self.http.TRACE('/hello')
         assert resp._environ['REQUEST_METHOD'] == 'TRACE'
 
+    def test_nonascii_chars_in_urlpath(self):
+        urlpath  = '/wiki/トップ_1-1.html'                               # native string
+        pathinfo = '/wiki/\xe3\x83\x88\xe3\x83\x83\xe3\x83\x97_1-1.html' # native string
+        resp = self.http.GET(urlpath)
+        self.assertEqual(resp._environ['PATH_INFO'], pathinfo)
+
 
 class WSGIStartResponse_TC(unittest.TestCase):
 
