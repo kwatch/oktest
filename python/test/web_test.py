@@ -178,6 +178,15 @@ class WSGITest_TC(unittest.TestCase):
         expected = [_B('PATCH'), _B('192.168.0.1')]
         self.assertEqual(list(resp.body_iterable), expected)
 
+    def test__call___cookies(self):
+        def app(environ, start_response):
+            start_response('200 OK', [('Content-Type', 'text/plain')])
+            return [_B(environ['HTTP_COOKIE'])]
+        http = WSGITest(app)
+        resp = http.GET('/', cookies={'x': '1', 'y':'2'})
+        body = list(resp.body_iterable)
+        assert body == [_B('x=1; y=2')] or body == [_B('y=2; x=1')]
+
     def test_GET(self):
         resp = self.http.GET('/hello')
         assert resp._environ['REQUEST_METHOD'] == 'GET'

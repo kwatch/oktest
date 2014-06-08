@@ -2838,6 +2838,8 @@ _wsgiref_util      = None   # on-demand import
 _wsgiref_validate  = None   # on-demand import
 _wsgiref_headers   = None   # on-demand import
 
+_cookie_quote      = None   # on-demand import
+
 
 class WSGITest(object):
     __slots__ = ('_app', '_environ')
@@ -2849,12 +2851,12 @@ class WSGITest(object):
 
     def __call__(self, method='GET', urlpath='/', _=None,
                  params=None, form=None, query=None, json=None,
-                 headers=None, environ=None, cookie=None):
+                 headers=None, environ=None, cookies=None):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
         env = self._new_env(method, urlpath, params=params, form=form, query=query,
-                            json=json, headers=headers, environ=environ)
+                            json=json, headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -2874,7 +2876,7 @@ class WSGITest(object):
 
     def _new_env(self, method='GET', urlpath='/', _=None,
                  params=None, form=None, query=None, json=None,
-                 headers=None, environ=None):
+                 headers=None, environ=None, cookies=None):
         global _BytesIO
         if _BytesIO is None:
             if python2:
@@ -2918,6 +2920,11 @@ class WSGITest(object):
             env['CONTENT_LENGTH'] = str(len(b))
         if headers:
             self._update_http_headers(env, headers)
+        if cookies:
+            if isinstance(cookies, dict):
+                env['HTTP_COOKIE'] = self._build_cookie_str(cookies)
+            else:
+                env['HTTP_COOKIE'] = str(cookies)
         #
         _wsgiref_util.setup_testing_defaults(env)
         return env
@@ -2962,6 +2969,15 @@ class WSGITest(object):
         #
         return _json.dumps(jdict, ensure_ascii=False, separators=(',', ':'))
 
+    def _build_cookie_str(self, dct):
+        global _cookie_quote
+        if not _cookie_quote:
+            if python2:
+                from Cookie import _quote as _cookie_quote
+            elif python3:
+                from http.cookies import _quote as _cookie_quote
+        return "; ".join( "%s=%s" % (k, _cookie_quote(str(v))) for k, v in dct.items() )
+
     def _update_http_headers(self, env, headers):
         if headers:
             for k in headers:
@@ -2975,8 +2991,8 @@ class WSGITest(object):
     ###
 
     #def define(meth, localvars=locals()):
-    #    def fn(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-    #        return self.__call__(meth, urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    #    def fn(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+    #        return self.__call__(meth, urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
     #    fn.__name__ = meth
     #    localvars[meth] = fn
     #    return fn
@@ -2984,29 +3000,29 @@ class WSGITest(object):
     #    define(meth)
     #del define
 
-    def GET(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('GET', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def GET(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('GET', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def POST(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('POST', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def POST(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('POST', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def PUT(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('PUT', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def PUT(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('PUT', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def DELETE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('DELETE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def DELETE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('DELETE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def PATCH(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('PATCH', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def PATCH(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('PATCH', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def HEAD(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('HEAD', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def HEAD(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('HEAD', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def OPTIONS(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('OPTIONS', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def OPTIONS(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('OPTIONS', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
-    def TRACE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None):
-        return self.__call__('TRACE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ)
+    def TRACE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
+        return self.__call__('TRACE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
 
 
 class WSGIStartResponse(object):
