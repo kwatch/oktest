@@ -34,10 +34,20 @@ if python3:
     _bytes   = bytes
     from io import StringIO
 
-def _B(val, encoding='utf-8'):
-    if isinstance(val, _unicode):
-        return val.encode(encoding)
-    return val
+if python2:
+    def _B(val, encoding='utf-8'):
+        return val.encode(encoding) if isinstance(val, unicode) else val
+    def _U(val, encoding='utf-8'):
+        return val.decode(encoding) if isinstance(val, str) else val
+    def _S(val, encoding='utf-8'):
+        return val.encode(encoding) if isinstance(val, unicode) else val
+elif python3:
+    def _B(val, encoding='utf-8'):
+        return val.encode(encoding) if isinstance(val, str) else val
+    def _U(val, encoding='utf-8'):
+        return val.decode(encoding) if isinstance(val, bytes) else val
+    def _S(val, encoding='utf-8'):
+        return val.decode(encoding) if isinstance(val, bytes) else val
 
 
 def _new_module(name, local_vars, util=None):
