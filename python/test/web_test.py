@@ -137,7 +137,7 @@ class WSGITest_TC(unittest.TestCase):
         assert form['name1'].value    == "val1"
         assert form['name1'].filename == None
         assert form['name1'].type     == "text/plain"
-        assert form['name2'].value    == "xyz"
+        assert form['name2'].value    == _B("xyz")
         assert form['name2'].filename == "ex.tmp"
         assert form['name2'].type     == "application/text"
         #
@@ -182,7 +182,7 @@ class WSGITest_TC(unittest.TestCase):
         self.assertEqual(form['name1'].value   , "val1")
         self.assertEqual(form['name1'].filename, None)
         self.assertEqual(form['name1'].type    , "text/plain")
-        self.assertEqual(form['name2'].value   , "xyz")
+        self.assertEqual(form['name2'].value   , _B("xyz"))
         self.assertEqual(form['name2'].filename, "ex.tmp")
         self.assertEqual(form['name2'].type    , "application/text")
 
@@ -399,11 +399,11 @@ class MultiPart_TC(unittest.TestCase):
         mp = MultiPart()
         ## can add string value
         mp.add("name1", "val1")
-        self.assertEqual(mp._data, [("name1", "val1", None, None)])
+        self.assertEqual(mp._data, [(_B("name1"), _B("val1"), None, None)])
         ## can add file value
         mp.add("name2", "val2", "ex.jpg", "image/jpeg")
-        self.assertEqual(mp._data, [("name1", "val1", None, None),
-                                    ("name2", "val2", "ex.jpg", "image/jpeg")])
+        self.assertEqual(mp._data, [(_B("name1"), _B("val1"), None, None),
+                                    (_B("name2"), _B("val2"), _B("ex.jpg"), _B("image/jpeg"))])
 
     def test_content_type(self):
         mp = MultiPart("abcdef")
