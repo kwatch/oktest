@@ -2850,6 +2850,17 @@ _wsgiref_headers   = None   # on-demand import
 
 _cookie_quote      = None   # on-demand import
 
+def _fix_InputWrapper_readline():
+    """monkey patch to fix wsgiref.validate.InputWrapper#readline()"""
+    global _wsgiref_validate
+    assert _wsgiref_validate is not None
+    def readline(self, *args):
+        _wsgiref_validate.assert_(len(args) <= 1)
+        v = self.input.readline(*args)
+        _wsgiref_validate.assert_(type(v) is _bytes)
+        return v
+    _wsgiref_validate.InputWrapper.readline = readline
+
 
 class WSGITest(object):
     __slots__ = ('_app', '_environ')
@@ -2865,6 +2876,7 @@ class WSGITest(object):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
+            _fix_InputWrapper_readline()
         env = self._new_env(method, urlpath, params=params, form=form, query=query,
                             json=json, headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
