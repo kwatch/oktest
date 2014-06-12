@@ -126,6 +126,21 @@ class WSGITest_TC(unittest.TestCase):
         assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
         assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
         #
+        mp = MultiPart("qwerty")
+        mp.add("name1", "val1")
+        mp.add("name2", "xyz", "ex.tmp", "application/text")
+        resp = self.http.POST('/hello', params=mp)
+        assert resp._environ['QUERY_STRING'] == ""
+        assert resp._environ['CONTENT_TYPE'] == 'multipart/form-data; boundary=qwerty'
+        import cgi
+        form = cgi.FieldStorage(resp._environ['wsgi.input'], environ=resp._environ)
+        assert form['name1'].value    == "val1"
+        assert form['name1'].filename == None
+        assert form['name1'].type     == "text/plain"
+        assert form['name2'].value    == "xyz"
+        assert form['name2'].filename == "ex.tmp"
+        assert form['name2'].type     == "application/text"
+        #
         try:
             self.http.GET('/hello', params={}, query={})
         except TypeError:

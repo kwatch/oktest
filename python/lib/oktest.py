@@ -2922,7 +2922,10 @@ class WSGITest(object):
                     raise TypeError("Both `params' and `form' are specified for %s method." % method)
                 if multipart is not None:
                     raise TypeError("Both `params' and `multipart' are specified for %s method." % method)
-                form = params
+                if isinstance(params, web.MultiPart):
+                    multipart = params
+                else:
+                    form = params
             else:
                 raise TypeError("%s: unexpected method (expected GET, POST, PUT, DELETE, PATCH, or HEAD)." % method)
         #
