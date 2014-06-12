@@ -2871,14 +2871,14 @@ class WSGITest(object):
         self._environ = environ
 
     def __call__(self, method='GET', urlpath='/', _=None,
-                 params=None, form=None, query=None, json=None,
+                 params=None, form=None, query=None, json=None, multipart=None,
                  headers=None, environ=None, cookies=None):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
             _fix_InputWrapper_readline()
         env = self._new_env(method, urlpath, params=params, form=form, query=query,
-                            json=json, headers=headers, environ=environ, cookies=cookies)
+                            json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -2899,7 +2899,7 @@ class WSGITest(object):
         return env
 
     def _new_env(self, method='GET', urlpath='/', _=None,
-                 params=None, form=None, query=None, json=None,
+                 params=None, form=None, query=None, json=None, multipart=None,
                  headers=None, environ=None, cookies=None):
         global _BytesIO
         if _BytesIO is None:
@@ -2920,6 +2920,8 @@ class WSGITest(object):
             elif method in ('POST', 'PUT', 'DELETE', 'PATCH'):
                 if form is not None:
                     raise TypeError("Both `params' and `form' are specified for %s method." % method)
+                if multipart is not None:
+                    raise TypeError("Both `params' and `multipart' are specified for %s method." % method)
                 form = params
             else:
                 raise TypeError("%s: unexpected method (expected GET, POST, PUT, DELETE, PATCH, or HEAD)." % method)
@@ -2941,6 +2943,19 @@ class WSGITest(object):
             b = _B(s)
             env['wsgi.input']     = _BytesIO(b)
             env['CONTENT_TYPE']   = 'application/json'
+            env['CONTENT_LENGTH'] = str(len(b))
+        if multipart is not None:
+            if _BytesIO is None:
+                if python2:
+                    from cStringIO import StringIO as _BytesIO
+                if python3:
+                    from io import BytesIO as _BytesIO
+            if not isinstance(multipart, web.MultiPart):
+                raise TypeError("'mutipart' should be oktest.web.MultiPart object, but got:%s" % (type(multipart), ))
+            b = multipart.build_body()
+            assert isinstance(b, _bytes)
+            env['wsgi.input']     = _BytesIO(b)
+            env['CONTENT_TYPE']   = multipart.content_type
             env['CONTENT_LENGTH'] = str(len(b))
         if headers:
             self._update_http_headers(env, headers)
