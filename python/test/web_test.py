@@ -23,7 +23,7 @@ def _U(val):
 
 import unittest
 import oktest
-from oktest.web import WSGITest, WSGIStartResponse, WSGIResponse
+from oktest.web import WSGITest, WSGIStartResponse, WSGIResponse, MultiPart
 from oktest.tracer import Tracer
 
 
@@ -344,6 +344,66 @@ class WSGIResponse_TC(unittest.TestCase):
             assert body == [_B("OK <input=''>")]
         elif python3:
             assert body == [_B("OK <input=b''>")]
+
+
+class MultiPart_TC(unittest.TestCase):
+
+    def test___init__(self):
+        ## can take boundary
+        boundary = "---abcdef"
+        assert MultiPart(boundary).boundary == boundary
+        ## generates boundary when not specified
+        mp = MultiPart()
+        assert isinstance(mp.boundary, "".__class__)
+        assert len(mp.boundary) > 30
+        ## boundary should be random value
+        d = {}
+        for _ in range(100):
+            d[MultiPart().boundary] = True
+        assert len(d) == 100
+
+    def test_add(self):
+        mp = MultiPart()
+        ## can add string value
+        mp.add("name1", "val1")
+        self.assertEqual(mp._data, [("name1", "val1", None, None)])
+        ## can add file value
+        mp.add("name2", "val2", "ex.jpg", "image/jpeg")
+        self.assertEqual(mp._data, [("name1", "val1", None, None),
+                                    ("name2", "val2", "ex.jpg", "image/jpeg")])
+
+    def test_content_type(self):
+        mp = MultiPart("abcdef")
+        ## returns content type string
+        self.assertEqual(mp.content_type, "multipart/form-data; boundary=abcdef")
+
+    def test_build_body(self):
+        mp = MultiPart("abcdef")
+        ## returns multipart form data as binary data
+        mp.add("name1", "value1")     # add string value
+        mp.add("file1", "XYZ", "ex.jpg", "image/jpeg")  # add file
+        expected = (
+            '--abcdef\r\n'
+            'Content-Disposition: form-data; name="name1"\r\n'
+            '\r\n'
+            'value1\r\n'
+            '--abcdef\r\n'
+            'Content-Disposition: form-data; name="file1"; filename="ex.jpg"\r\n'
+            'Content-Type: image/jpeg\r\n'
+            '\r\n'
+            'XYZ\r\n'
+            '--abcdef--\r\n'
+        )
+        if python3:
+            binary = bytes
+            expected = expected.encode('latin-1')
+        self.assertEqual(mp.build_body(), expected)
+        ## should return binary data
+        if python2:
+            binary = str
+        elif python3:
+            binary = bytes
+        assert isinstance(mp.build_body(), binary)
 
 
 

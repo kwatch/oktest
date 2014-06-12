@@ -3132,11 +3132,92 @@ class OktestWSGIWarning(Warning):
     pass
 
 
+class MultiPart(object):
+    """
+    Builds multipart form data.
+
+    ex:
+        from oktest.web import MultiPart
+        mp = MultiPart()              # generate boundary automatically
+        #mp = MultiPart("abcdefg")    # specify boundary explicitly
+        mp.add("name1", "value1")     # add string value
+        with open("photo.jpg", 'rb') as f:
+            mp.add("file1", f.read(), "photo.jpg", "image/jpeg")  # add file
+        #
+        print(mp.boundary)
+        print(mp.content_type)
+        print(mp.build_body())
+        #
+        import wsgiref.util
+        import webob.request
+        try:
+            from cStringIO import StringIO as BytesIO
+        except LoadError:
+            from io import BytesIO
+        environ = {
+            'REQUEST_METHOD': 'POST',
+            'CONTENT_TYPE':   mp.content_type,
+            'wsgi.input':     BytesIO(mp.build_body()),
+        }
+        wsgiref.util.setup_testing_defaults(environ)
+        request = webob.request.Request(environ)
+        print("request.POST=%r" % request.POST)
+    """
+
+    def __init__(self, boundary=None):
+        self.boundary = boundary or self.new_boundary()
+        self._data = []
+
+    @staticmethod
+    def new_boundary():
+        from random import random
+        from time import time
+        import hashlib, base64
+        s = "%s%s" % (random(), time())
+        b = hashlib.sha256(_B(s)).digest()
+        b = base64.urlsafe_b64encode(b)
+        return _S(b).rstrip('=')
+
+    def add(self, name, value, filename=None, content_type=None):
+        if '"' in name:
+            raise ValueError("'\"' is not available as parameter name.")
+        if filename and '"' in filename:
+            raise ValueError("'\"' is not available as filename.")
+        self._data.append((_B(name), _B(value), _B(filename), _B(content_type), ))
+
+    @property
+    def content_type(self):
+        return "multipart/form-data; boundary="+self.boundary
+
+    def build_body(self):
+        buf = []; extend = buf.extend
+        boundary = _B('--') + _B(self.boundary)
+        #
+        for name, value, filename, content_type in self._data:
+            assert isinstance(name, _bytes)
+            assert isinstance(value, _bytes)
+            assert filename is None or isinstance(filename, _bytes)
+            assert content_type is None or isinstance(content_type, _bytes)
+            #
+            extend((boundary, _B('\r\n'), ))
+            if filename:
+                extend((_B('Content-Disposition: form-data; name="'), name, _B('"; filename="'), filename, _B('"\r\n'), ))
+            else:
+                extend((_B('Content-Disposition: form-data; name="'), name, _B('"\r\n'), ))
+            if content_type:
+                extend((_B('Content-Type: '), content_type, _B('\r\n'), ))
+            extend((_B('\r\n'), value, _B('\r\n'), ))
+        #
+        extend((boundary, _B('--\r\n'), ))
+        return _B('').join(buf)
+
+
 web.WSGITest          = WSGITest
 web.WSGIStartResponse = WSGIStartResponse
 web.WSGIResponse      = WSGIResponse
 web.OktestWSGIWarning = OktestWSGIWarning
-del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
+web.MultiPart         = MultiPart
+del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning, MultiPart
 
 
 
