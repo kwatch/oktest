@@ -30,7 +30,8 @@ from oktest.tracer import Tracer
 def _app(environ, start_response):
     input = environ['wsgi.input']
     content = "OK"
-    if input:
+    is_multipart = environ.get('CONTENT_TYPE', '').startswith('multipart/form-data')
+    if input and not is_multipart:
         buf = []
         while True:
             s = input.read(1024)
@@ -152,6 +153,23 @@ class WSGITest_TC(unittest.TestCase):
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/json'
         assert resp._environ['CONTENT_LENGTH'] == str(len('{"page":1,"q":"SOS"}'))
+
+    def test__call___multipart(self):
+        mp = MultiPart("qwerty")
+        mp.add("name1", "val1")
+        mp.add("name2", "xyz", "ex.tmp", "application/text")
+        resp = self.http.POST('/hello', multipart=mp)
+        self.assertEqual(resp._environ['QUERY_STRING'], "")
+        self.assertEqual(resp._environ['CONTENT_TYPE'], 'multipart/form-data; boundary=qwerty')
+        stdin = resp._environ['wsgi.input']
+        import cgi
+        form = cgi.FieldStorage(stdin, environ=resp._environ)
+        self.assertEqual(form['name1'].value   , "val1")
+        self.assertEqual(form['name1'].filename, None)
+        self.assertEqual(form['name1'].type    , "text/plain")
+        self.assertEqual(form['name2'].value   , "xyz")
+        self.assertEqual(form['name2'].filename, "ex.tmp")
+        self.assertEqual(form['name2'].type    , "application/text")
 
     def test__call___headers(self):
         def app(environ, start_response):
