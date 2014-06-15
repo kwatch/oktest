@@ -3049,7 +3049,7 @@ class WSGITest(object):
     def OPTIONS(self, urlpath='/', **kw): return self.__call__('OPTIONS', urlpath, **kw)
     def TRACE  (self, urlpath='/', **kw): return self.__call__('TRACE',   urlpath, **kw)
 
-    def define(method):
+    def _define(method):
         def fn(self, urlpath='/', _=None,
                params=None, form=None, query=None, json=None, multipart=None,
                headers=None, environ=None, cookies=None):
@@ -3058,10 +3058,10 @@ class WSGITest(object):
                                  headers=headers, environ=environ, cookies=cookies)
         fn.__name__ = method
         return fn
-    localvars = locals()
-    for method in "GET POST PUT DELETE PATCH HEAD OPTIONS TRACE".split():
-        localvars[method] = define(method)
-    del define, localvars, method
+    _localvars = locals()
+    for _meth in "GET POST PUT DELETE PATCH HEAD OPTIONS TRACE".split():
+        _localvars[_meth] = _define(_meth)
+    del _define, _localvars, _meth
 
 
 class WSGIStartResponse(object):
