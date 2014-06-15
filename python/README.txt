@@ -1003,20 +1003,20 @@ which builds multipart form data.
     from oktest.web import MultiPart
     mp = MultiPart()    # or boundary='abcdef'; mp = MutliPart(boundary)
     print(mp.boundary)
-        #=> C42pwi4FJs4czr-zMTPjCCDPJEZ_acT0dU45FePh8kM
+        #=> 0dC42pwi4FJs4czr-zMTPjCCDPJEZ_acT
     print(mp.content_type)
-        #=> multipart/form-data; boundary=C42pwi4FJs4czr-zMTPjCCDPJEZ_acT0dU45FePh8kM
+        #=> multipart/form-data; boundary=0dC42pwi4FJs4czr-zMTPjCCDPJEZ_acT
 
-    mp.add("name1", b"value1")         # add string value
-    with open('logo.png', 'wb') as f:  # add file value
-        mp.add("file1", f.read(), 'logo.png', 'image/png')
-    print(mp.build_body())
+    mp.add("name1", "value1")          # add string value
+    with open("logo.png", 'wb') as f:  # add file value
+        mp.add("file1", f.read(), "logo.png", "image/png")
+    print(mp.build())
 
 How to test with multipart form data::
 
-    resp = http.POST('/upload', multipart=mp)
+    resp = http.POST('/upload', {{*multipart=mp*}})
     ## or
-    resp = http.POST('/upload', params=mp)
+    resp = http.POST('/upload', {{*params=mp*}})
 
 
 Validator
