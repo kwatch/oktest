@@ -2867,6 +2867,13 @@ def _fix_InputWrapper_readline():
     if '3.0' <= sys.version < '3.2':
         _wsgiref_validate.InputWrapper.read = read
     _wsgiref_validate.InputWrapper.readline = readline
+    #
+    def __del__(self):
+        if not getattr(self, '_skip_destructor', None):
+            self.__original_del__()
+    IteratorWrapper = _wsgiref_validate.IteratorWrapper
+    IteratorWrapper.__original_del__ = IteratorWrapper.__del__
+    IteratorWrapper.__del__ = __del__
 
 
 class WSGITest(object):
@@ -2979,18 +2986,8 @@ class WSGITest(object):
         _wsgiref_util.setup_testing_defaults(env)
         return env
 
-    if python2:
-        def _remove_destructor(self, obj, __del__=lambda self: None):
-            global _types
-            if _types is None: import types as _types
-            obj.__del__ = _types.MethodType(__del__, obj, obj.__class__)
-    elif python3:
-        def _remove_destructor(self, obj, __del__=lambda self: None):
-            global _types
-            if _types is None: import types as _types
-            obj.__del__ = _types.MethodType(__del__, obj)
-            if sys.version >= '3.4':             ## dirty hack
-                obj.__class__.__del__ = __del__
+    def _remove_destructor(self, obj):
+        obj._skip_destructor = True
 
     def _build_paramstr(self, param_dict):
         global _quote_plus
