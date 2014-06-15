@@ -2884,8 +2884,9 @@ class WSGITest(object):
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
             _fix_InputWrapper_readline()
-        env = self._new_env(method, urlpath, params=params, form=form, query=query,
-                            json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+        env = self._new_env(method, urlpath, params=params,
+                            form=form, query=query, json=json, multipart=multipart,
+                            headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -3039,39 +3040,75 @@ class WSGITest(object):
 
     ###
 
-    #def define(meth, localvars=locals()):
-    #    def fn(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-    #        return self.__call__(meth, urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
-    #    fn.__name__ = meth
-    #    localvars[meth] = fn
+    #def define(method, localvars=locals()):
+    #    def fn(self, urlpath='/', _=None,
+    #           params=None, form=None, query=None, json=None, multipart=None,
+    #           headers=None, environ=None, cookies=None):
+    #        return self.__call__(method, urlpath, params=params,
+    #                             form=form, query=query, json=json, multipart=multipart,
+    #                             headers=headers, environ=environ, cookies=cookies)
+    #    fn.__name__ = method
+    #    localvars[method] = fn
     #    return fn
-    #for meth in "GET POST PUT DELETE PATCH HEAD OPTIONS TRACE".split():
-    #    define(meth)
-    #del define
+    #for method in "GET POST PUT DELETE PATCH HEAD OPTIONS TRACE".split():
+    #    define(method)
+    #del define, method
 
-    def GET(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('GET', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def GET(self, urlpath='/', _=None,
+            params=None, form=None, query=None, json=None, multipart=None,
+            headers=None, environ=None, cookies=None):
+        return self.__call__('GET', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def POST(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('POST', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def POST(self, urlpath='/', _=None,
+             params=None, form=None, query=None, json=None, multipart=None,
+             headers=None, environ=None, cookies=None):
+        return self.__call__('POST', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def PUT(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('PUT', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def PUT(self, urlpath='/', _=None,
+            params=None, form=None, query=None, json=None, multipart=None,
+            headers=None, environ=None, cookies=None):
+        return self.__call__('PUT', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def DELETE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('DELETE', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def DELETE(self, urlpath='/', _=None,
+               params=None, form=None, query=None, json=None, multipart=None,
+               headers=None, environ=None, cookies=None):
+        return self.__call__('DELETE', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def PATCH(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('PATCH', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def PATCH(self, urlpath='/', _=None,
+              params=None, form=None, query=None, json=None, multipart=None,
+              headers=None, environ=None, cookies=None):
+        return self.__call__('PATCH', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def HEAD(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('HEAD', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def HEAD(self, urlpath='/', _=None,
+             params=None, form=None, query=None, json=None, multipart=None,
+             headers=None, environ=None, cookies=None):
+        return self.__call__('HEAD', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def OPTIONS(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('OPTIONS', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def OPTIONS(self, urlpath='/', _=None,
+                params=None, form=None, query=None, json=None, multipart=None,
+                headers=None, environ=None, cookies=None):
+        return self.__call__('OPTIONS', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
-    def TRACE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
-        return self.__call__('TRACE', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
+    def TRACE(self, urlpath='/', _=None,
+              params=None, form=None, query=None, json=None, multipart=None,
+              headers=None, environ=None, cookies=None):
+        return self.__call__('TRACE', urlpath, params=params,
+                             form=form, query=query, json=json, multipart=multipart,
+                             headers=headers, environ=environ, cookies=cookies)
 
 
 class WSGIStartResponse(object):
