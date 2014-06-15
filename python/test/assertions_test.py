@@ -518,6 +518,22 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         def fn(): ok ({'x':1}).is_falsy()
 
 
+    def test_all(self):
+        ok ([1,2,3]).all(lambda x: isinstance(x, int))
+        #
+        @be_fail("$actual.all(lambda) : failed at index 2.\n"
+                 "  $actual[2]: None")
+        def fn(): ok ([1,2,None]).all(lambda x: isinstance(x, int))
+        #
+        try:
+            NG ([1,2,3]).all(lambda x: isinstance(x, int))
+        except TypeError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "all() should be called with ok(), not NG() or NOT().")
+        else:
+            assert False, "TypeError expected but not raised"
+
+
     ## ------------------------------------------------------------
 
 

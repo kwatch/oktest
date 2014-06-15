@@ -456,6 +456,16 @@ def _f():
         self.failed('bool(%r) == False : failed.' % self.target)
 
     @assertion
+    def all(self, func):
+        if not self.boolean:
+            raise TypeError("all() should be called with ok(), not NG() or NOT().")
+        for i, x in enumerate(self.target):
+            if not func(x):
+                self.failed('$actual.all(lambda) : failed at index %s.\n'
+                            '  $actual[%s]: %r' % (i, i, x))
+        return self
+
+    @assertion
     def raises(self, exception_class, errmsg=None):
         return self._raise_or_not(exception_class, errmsg, self.boolean)
 
