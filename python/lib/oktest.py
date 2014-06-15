@@ -3053,6 +3053,8 @@ class WSGITest(object):
         def fn(self, urlpath='/', _=None, _method=method,
                params=None, form=None, query=None, json=None, multipart=None,
                headers=None, environ=None, cookies=None):
+            if _ is not None:
+                raise TypeError("%s(): keyword argument expected but got:%r" % (method, _))
             return self.__call__(_method, urlpath, params=params,
                                  form=form, query=query, json=json, multipart=multipart,
                                  headers=headers, environ=environ, cookies=cookies)
