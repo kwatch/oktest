@@ -2869,11 +2869,21 @@ def _monkey_patch_for_wsgiref_validate():
         InputWrapper.read = read
     InputWrapper.readline = readline
     ## patch to wsgiref.validate.IteratorWrapper class
+    def __next__(self):
+        self._started = True
+        return self._original__next__()
     def __del__(self):
-        if not getattr(self, '_skip_destructor', None):
-            self.__original_del__()
+        if getattr(self, '_started', None) and hasattr(self.iterator, 'close'):
+            self._original__del__()
     IteratorWrapper = _wsgiref_validate.IteratorWrapper
-    IteratorWrapper.__original_del__ = IteratorWrapper.__del__
+    if python2:
+        IteratorWrapper._original__next__ = IteratorWrapper.next
+        IteratorWrapper.next = __next__
+        __next__.__name__ = 'next'
+    elif python3:
+        IteratorWrapper._original__next__ = IteratorWrapper.__next__
+        IteratorWrapper.__next__ = __next__
+    IteratorWrapper._original__del__  = IteratorWrapper.__del__
     IteratorWrapper.__del__ = __del__
 
 
@@ -2897,7 +2907,6 @@ class WSGITest(object):
                             headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
-        self._remove_destructor(iterable)
         resp = web.WSGIResponse(start_resp.status, start_resp.headers, iterable)
         resp._environ = env
         return resp
@@ -2986,9 +2995,6 @@ class WSGITest(object):
         #
         _wsgiref_util.setup_testing_defaults(env)
         return env
-
-    def _remove_destructor(self, obj):
-        obj._skip_destructor = True
 
     def _build_paramstr(self, param_dict):
         global _quote_plus
