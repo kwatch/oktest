@@ -412,7 +412,7 @@ class MultiPart_TC(unittest.TestCase):
         ## returns content type string
         self.assertEqual(mp.content_type, "multipart/form-data; boundary=abcdef")
 
-    def test_build_body(self):
+    def test_build(self):
         mp = MultiPart("abcdef")
         ## returns multipart form data as binary data
         mp.add("name1", "value1")     # add string value
@@ -432,13 +432,13 @@ class MultiPart_TC(unittest.TestCase):
         if python3:
             binary = bytes
             expected = expected.encode('latin-1')
-        self.assertEqual(mp.build_body(), expected)
+        self.assertEqual(mp.build(), expected)
         ## should return binary data
         if python2:
             binary = str
         elif python3:
             binary = bytes
-        assert isinstance(mp.build_body(), binary)
+        assert isinstance(mp.build(), binary)
 
 
 

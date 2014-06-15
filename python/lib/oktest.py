@@ -2955,7 +2955,7 @@ class WSGITest(object):
                     from io import BytesIO as _BytesIO
             if not isinstance(multipart, web.MultiPart):
                 raise TypeError("'mutipart' should be oktest.web.MultiPart object, but got:%s" % (type(multipart), ))
-            b = multipart.build_body()
+            b = multipart.build()
             assert isinstance(b, _bytes)
             env['wsgi.input']     = _BytesIO(b)
             env['CONTENT_TYPE']   = multipart.content_type
@@ -3176,7 +3176,7 @@ class MultiPart(object):
         #
         print(mp.boundary)
         print(mp.content_type)
-        print(mp.build_body())
+        print(mp.build())
         #
         import wsgiref.util
         import webob.request
@@ -3187,7 +3187,7 @@ class MultiPart(object):
         environ = {
             'REQUEST_METHOD': 'POST',
             'CONTENT_TYPE':   mp.content_type,
-            'wsgi.input':     BytesIO(mp.build_body()),
+            'wsgi.input':     BytesIO(mp.build()),
         }
         wsgiref.util.setup_testing_defaults(environ)
         request = webob.request.Request(environ)
@@ -3220,7 +3220,7 @@ class MultiPart(object):
     def content_type(self):
         return "multipart/form-data; boundary="+self.boundary
 
-    def build_body(self):
+    def build(self):
         buf = []; extend = buf.extend
         boundary = _B('--') + _B(self.boundary)
         #
