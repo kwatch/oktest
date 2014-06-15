@@ -2989,6 +2989,8 @@ class WSGITest(object):
             global _types
             if _types is None: import types as _types
             obj.__del__ = _types.MethodType(__del__, obj)
+            if sys.version >= '3.4':             ## dirty hack
+                obj.__class__.__del__ = __del__
 
     def _build_paramstr(self, param_dict):
         global _quote_plus
