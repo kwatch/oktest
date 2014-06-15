@@ -997,6 +997,27 @@ And also possible to specify environ dict. ::
     ## or on http.GET(), http.POST(), ...
     response = http.GET('/', {{*environ=environ*}})
 
+Since release 0.15, Oktest.py provides ``oktest.web.MultiPart`` class
+which builds multipart form data.
+
+    from oktest.web import MultiPart
+    mp = MultiPart()    # or boundary='abcdef'; mp = MutliPart(boundary)
+    print(mp.boundary)
+        #=> C42pwi4FJs4czr-zMTPjCCDPJEZ_acT0dU45FePh8kM
+    print(mp.content_type)
+        #=> multipart/form-data; boundary=C42pwi4FJs4czr-zMTPjCCDPJEZ_acT0dU45FePh8kM
+
+    mp.add("name1", b"value1")         # add string value
+    with open('logo.png', 'wb') as f:  # add file value
+        mp.add("file1", f.read(), 'logo.png', 'image/png')
+    print(mp.build_body())
+
+How to test with multipart form data::
+
+    resp = http.POST('/upload', multipart=mp)
+    ## or
+    resp = http.POST('/upload', params=mp)
+
 
 Validator
 =========
