@@ -533,6 +533,21 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         else:
             assert False, "TypeError expected but not raised"
 
+    def test_any(self):
+        ok ([1,2,3]).any(lambda x: x % 2 == 0)
+        #
+        @be_fail("$actual.any(lambda) : failed.\n"
+                 "  $actual: [1, 3, 5]")
+        def fn(): ok ([1,3,5]).any(lambda x: x % 2 == 0)
+        #
+        try:
+            NG ([1,2,3]).any(lambda x: x % 2 == 0)
+        except TypeError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "any() should be called with ok(), not NG() or NOT().")
+        else:
+            assert False, "TypeError expected but not raised"
+
 
     ## ------------------------------------------------------------
 

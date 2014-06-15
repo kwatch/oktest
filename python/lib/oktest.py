@@ -466,6 +466,18 @@ def _f():
         return self
 
     @assertion
+    def any(self, func):
+        if not self.boolean:
+            raise TypeError("any() should be called with ok(), not NG() or NOT().")
+        for x in self.target:
+            if func(x):
+                break
+        else:
+            self.failed('$actual.any(lambda) : failed.\n'
+                        '  $actual: %r' % self.target)
+        return self
+
+    @assertion
     def raises(self, exception_class, errmsg=None):
         return self._raise_or_not(exception_class, errmsg, self.boolean)
 
