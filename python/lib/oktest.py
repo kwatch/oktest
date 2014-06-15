@@ -2850,6 +2850,17 @@ _wsgiref_headers   = None   # on-demand import
 
 _cookie_quote      = None   # on-demand import
 
+def _fix_InputWrapper_readline():
+    """monkey patch to fix wsgiref.validate.InputWrapper#readline()"""
+    global _wsgiref_validate
+    assert _wsgiref_validate is not None
+    def readline(self, *args):
+        _wsgiref_validate.assert_(len(args) <= 1)
+        v = self.input.readline(*args)
+        _wsgiref_validate.assert_(type(v) is _bytes)
+        return v
+    _wsgiref_validate.InputWrapper.readline = readline
+
 
 class WSGITest(object):
     __slots__ = ('_app', '_environ')
@@ -2860,13 +2871,14 @@ class WSGITest(object):
         self._environ = environ
 
     def __call__(self, method='GET', urlpath='/', _=None,
-                 params=None, form=None, query=None, json=None,
+                 params=None, form=None, query=None, json=None, multipart=None,
                  headers=None, environ=None, cookies=None):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
+            _fix_InputWrapper_readline()
         env = self._new_env(method, urlpath, params=params, form=form, query=query,
-                            json=json, headers=headers, environ=environ, cookies=cookies)
+                            json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
         self._remove_destructor(iterable)
@@ -2887,7 +2899,7 @@ class WSGITest(object):
         return env
 
     def _new_env(self, method='GET', urlpath='/', _=None,
-                 params=None, form=None, query=None, json=None,
+                 params=None, form=None, query=None, json=None, multipart=None,
                  headers=None, environ=None, cookies=None):
         global _BytesIO
         if _BytesIO is None:
@@ -2908,7 +2920,12 @@ class WSGITest(object):
             elif method in ('POST', 'PUT', 'DELETE', 'PATCH'):
                 if form is not None:
                     raise TypeError("Both `params' and `form' are specified for %s method." % method)
-                form = params
+                if multipart is not None:
+                    raise TypeError("Both `params' and `multipart' are specified for %s method." % method)
+                if isinstance(params, web.MultiPart):
+                    multipart = params
+                else:
+                    form = params
             else:
                 raise TypeError("%s: unexpected method (expected GET, POST, PUT, DELETE, PATCH, or HEAD)." % method)
         #
@@ -2929,6 +2946,19 @@ class WSGITest(object):
             b = _B(s)
             env['wsgi.input']     = _BytesIO(b)
             env['CONTENT_TYPE']   = 'application/json'
+            env['CONTENT_LENGTH'] = str(len(b))
+        if multipart is not None:
+            if _BytesIO is None:
+                if python2:
+                    from cStringIO import StringIO as _BytesIO
+                if python3:
+                    from io import BytesIO as _BytesIO
+            if not isinstance(multipart, web.MultiPart):
+                raise TypeError("'mutipart' should be oktest.web.MultiPart object, but got:%s" % (type(multipart), ))
+            b = multipart.build()
+            assert isinstance(b, _bytes)
+            env['wsgi.input']     = _BytesIO(b)
+            env['CONTENT_TYPE']   = multipart.content_type
             env['CONTENT_LENGTH'] = str(len(b))
         if headers:
             self._update_http_headers(env, headers)
@@ -3003,8 +3033,8 @@ class WSGITest(object):
     ###
 
     #def define(meth, localvars=locals()):
-    #    def fn(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-    #        return self.__call__(meth, urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    #    def fn(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+    #        return self.__call__(meth, urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
     #    fn.__name__ = meth
     #    localvars[meth] = fn
     #    return fn
@@ -3012,29 +3042,29 @@ class WSGITest(object):
     #    define(meth)
     #del define
 
-    def GET(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('GET', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def GET(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('GET', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def POST(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('POST', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def POST(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('POST', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def PUT(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('PUT', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def PUT(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('PUT', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def DELETE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('DELETE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def DELETE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('DELETE', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def PATCH(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('PATCH', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def PATCH(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('PATCH', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def HEAD(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('HEAD', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def HEAD(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('HEAD', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def OPTIONS(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('OPTIONS', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def OPTIONS(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('OPTIONS', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
-    def TRACE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, headers=None, environ=None, cookies=None):
-        return self.__call__('TRACE', urlpath, params=params, form=form, query=query, json=json, headers=headers, environ=environ, cookies=cookies)
+    def TRACE(self, urlpath='/', _=None, params=None, form=None, query=None, json=None, multipart=None, headers=None, environ=None, cookies=None):
+        return self.__call__('TRACE', urlpath, params=params, form=form, query=query, json=json, multipart=multipart, headers=headers, environ=environ, cookies=cookies)
 
 
 class WSGIStartResponse(object):
@@ -3132,11 +3162,93 @@ class OktestWSGIWarning(Warning):
     pass
 
 
+class MultiPart(object):
+    """
+    Builds multipart form data.
+
+    ex:
+        from oktest.web import MultiPart
+        mp = MultiPart()              # generate boundary automatically
+        #mp = MultiPart("abcdefg")    # specify boundary explicitly
+        mp.add("name1", "value1")     # add string value
+        with open("photo.jpg", 'rb') as f:
+            mp.add("file1", f.read(), "photo.jpg", "image/jpeg")  # add file
+        #
+        print(mp.boundary)
+        print(mp.content_type)
+        print(mp.build())
+        #
+        import wsgiref.util
+        import webob.request
+        try:
+            from cStringIO import StringIO as BytesIO
+        except LoadError:
+            from io import BytesIO
+        environ = {
+            'REQUEST_METHOD': 'POST',
+            'CONTENT_TYPE':   mp.content_type,
+            'wsgi.input':     BytesIO(mp.build()),
+        }
+        wsgiref.util.setup_testing_defaults(environ)
+        request = webob.request.Request(environ)
+        print("request.POST=%r" % request.POST)
+    """
+
+    def __init__(self, boundary=None):
+        self.boundary = boundary or self.new_boundary()
+        self._data = []
+
+    @staticmethod
+    def new_boundary():
+        from random import random
+        from time import time
+        import hashlib, base64
+        s = "%s%s" % (random(), time())
+        b = hashlib.sha256(_B(s)).digest()
+        b = base64.urlsafe_b64encode(b)
+        return _S(b).rstrip('=')
+
+    def add(self, name, value, filename=None, content_type=None):
+        if '"' in name:
+            raise ValueError("'\"' is not available as parameter name.")
+        if filename and '"' in filename:
+            raise ValueError("'\"' is not available as filename.")
+        self._data.append((_B(name), _B(value), _B(filename), _B(content_type), ))
+        return self
+
+    @property
+    def content_type(self):
+        return "multipart/form-data; boundary="+self.boundary
+
+    def build(self):
+        buf = []; extend = buf.extend
+        boundary = _B('--') + _B(self.boundary)
+        #
+        for name, value, filename, content_type in self._data:
+            assert isinstance(name, _bytes)
+            assert isinstance(value, _bytes)
+            assert filename is None or isinstance(filename, _bytes)
+            assert content_type is None or isinstance(content_type, _bytes)
+            #
+            extend((boundary, _B('\r\n'), ))
+            if filename:
+                extend((_B('Content-Disposition: form-data; name="'), name, _B('"; filename="'), filename, _B('"\r\n'), ))
+            else:
+                extend((_B('Content-Disposition: form-data; name="'), name, _B('"\r\n'), ))
+            if content_type:
+                extend((_B('Content-Type: '), content_type, _B('\r\n'), ))
+            extend((_B('\r\n'), value, _B('\r\n'), ))
+        #
+        extend((boundary, _B('--\r\n'), ))
+        return _B('').join(buf)
+
+
 web.WSGITest          = WSGITest
 web.WSGIStartResponse = WSGIStartResponse
 web.WSGIResponse      = WSGIResponse
 web.OktestWSGIWarning = OktestWSGIWarning
-del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning
+web.MultiPart         = MultiPart
+del WSGITest, WSGIStartResponse, WSGIResponse, OktestWSGIWarning, MultiPart
 
 
 
