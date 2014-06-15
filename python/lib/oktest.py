@@ -3054,61 +3054,14 @@ class WSGITest(object):
     #    define(method)
     #del define, method
 
-    def GET(self, urlpath='/', _=None,
-            params=None, form=None, query=None, json=None, multipart=None,
-            headers=None, environ=None, cookies=None):
-        return self.__call__('GET', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def POST(self, urlpath='/', _=None,
-             params=None, form=None, query=None, json=None, multipart=None,
-             headers=None, environ=None, cookies=None):
-        return self.__call__('POST', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def PUT(self, urlpath='/', _=None,
-            params=None, form=None, query=None, json=None, multipart=None,
-            headers=None, environ=None, cookies=None):
-        return self.__call__('PUT', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def DELETE(self, urlpath='/', _=None,
-               params=None, form=None, query=None, json=None, multipart=None,
-               headers=None, environ=None, cookies=None):
-        return self.__call__('DELETE', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def PATCH(self, urlpath='/', _=None,
-              params=None, form=None, query=None, json=None, multipart=None,
-              headers=None, environ=None, cookies=None):
-        return self.__call__('PATCH', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def HEAD(self, urlpath='/', _=None,
-             params=None, form=None, query=None, json=None, multipart=None,
-             headers=None, environ=None, cookies=None):
-        return self.__call__('HEAD', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def OPTIONS(self, urlpath='/', _=None,
-                params=None, form=None, query=None, json=None, multipart=None,
-                headers=None, environ=None, cookies=None):
-        return self.__call__('OPTIONS', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
-
-    def TRACE(self, urlpath='/', _=None,
-              params=None, form=None, query=None, json=None, multipart=None,
-              headers=None, environ=None, cookies=None):
-        return self.__call__('TRACE', urlpath, params=params,
-                             form=form, query=query, json=json, multipart=multipart,
-                             headers=headers, environ=environ, cookies=cookies)
+    def GET    (self, urlpath='/', **kw): return self.__call__('GET',     urlpath, **kw)
+    def POST   (self, urlpath='/', **kw): return self.__call__('POST',    urlpath, **kw)
+    def PUT    (self, urlpath='/', **kw): return self.__call__('PUT',     urlpath, **kw)
+    def DELETE (self, urlpath='/', **kw): return self.__call__('DELETE',  urlpath, **kw)
+    def PATCH  (self, urlpath='/', **kw): return self.__call__('PATCH',   urlpath, **kw)
+    def HEAD   (self, urlpath='/', **kw): return self.__call__('HEAD',    urlpath, **kw)
+    def OPTIONS(self, urlpath='/', **kw): return self.__call__('OPTIONS', urlpath, **kw)
+    def TRACE  (self, urlpath='/', **kw): return self.__call__('TRACE',   urlpath, **kw)
 
 
 class WSGIStartResponse(object):
