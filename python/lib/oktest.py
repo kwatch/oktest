@@ -3040,6 +3040,15 @@ class WSGITest(object):
 
     ###
 
+    def GET    (self, urlpath='/', **kw): return self.__call__('GET',     urlpath, **kw)
+    def POST   (self, urlpath='/', **kw): return self.__call__('POST',    urlpath, **kw)
+    def PUT    (self, urlpath='/', **kw): return self.__call__('PUT',     urlpath, **kw)
+    def DELETE (self, urlpath='/', **kw): return self.__call__('DELETE',  urlpath, **kw)
+    def PATCH  (self, urlpath='/', **kw): return self.__call__('PATCH',   urlpath, **kw)
+    def HEAD   (self, urlpath='/', **kw): return self.__call__('HEAD',    urlpath, **kw)
+    def OPTIONS(self, urlpath='/', **kw): return self.__call__('OPTIONS', urlpath, **kw)
+    def TRACE  (self, urlpath='/', **kw): return self.__call__('TRACE',   urlpath, **kw)
+
     #def define(method, localvars=locals()):
     #    def fn(self, urlpath='/', _=None,
     #           params=None, form=None, query=None, json=None, multipart=None,
@@ -3053,15 +3062,6 @@ class WSGITest(object):
     #for method in "GET POST PUT DELETE PATCH HEAD OPTIONS TRACE".split():
     #    define(method)
     #del define, method
-
-    def GET    (self, urlpath='/', **kw): return self.__call__('GET',     urlpath, **kw)
-    def POST   (self, urlpath='/', **kw): return self.__call__('POST',    urlpath, **kw)
-    def PUT    (self, urlpath='/', **kw): return self.__call__('PUT',     urlpath, **kw)
-    def DELETE (self, urlpath='/', **kw): return self.__call__('DELETE',  urlpath, **kw)
-    def PATCH  (self, urlpath='/', **kw): return self.__call__('PATCH',   urlpath, **kw)
-    def HEAD   (self, urlpath='/', **kw): return self.__call__('HEAD',    urlpath, **kw)
-    def OPTIONS(self, urlpath='/', **kw): return self.__call__('OPTIONS', urlpath, **kw)
-    def TRACE  (self, urlpath='/', **kw): return self.__call__('TRACE',   urlpath, **kw)
 
 
 class WSGIStartResponse(object):
