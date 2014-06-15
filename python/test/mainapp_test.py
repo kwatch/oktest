@@ -18,6 +18,7 @@ py30 = major == 3 and minor == 0
 py31 = major == 3 and minor == 1
 py32 = major == 3 and minor >= 2
 py33 = major == 3 and minor >= 3
+py34 = major == 3 and minor >= 4
 #
 py271 = major == 2 and minor == 7 and teeny <= 1
 py314 = major == 3 and minor == 1 and teeny >= 4
@@ -297,9 +298,9 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2201, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2211, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 835, in fn
+  File "/usr/local/lib/python/site-packages/oktest.py", line 845, in fn
     raise SkipTest(reason)
 oktest.SkipTest: REASON
 
@@ -307,11 +308,11 @@ oktest.SkipTest: REASON
 ERROR: not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 856, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 866, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 768, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 778, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -320,9 +321,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2201, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2211, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 859, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 869, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -354,7 +355,7 @@ Ran 7 tests in 0.000s
 FAILED (failures=2, errors=3)
 """[1:]
 
-if py31:
+if py31 or py34:
     OUTPUT_UNITTEST = r"""
 .FEsE.F
 ======================================================================
@@ -371,11 +372,11 @@ ERROR: test_005: not yet (_sos_test.SosTest)
 not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 856, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 866, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 768, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 778, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -384,9 +385,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2201, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2211, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 859, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 869, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -423,7 +424,14 @@ FAILED (failures=2, errors=2, skipped=1)
         OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('--- expected ', '--- expected')
         OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('+++ actual ', '+++ actual')
         OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(' line 480,', ' line 483,')
-
+    if py34:
+        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
+        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(
+            ('  File "/usr/local/lib/python/unittest.py", line 480, in run\n'),
+            ('  File "/usr/local/lib/python/unittest/case.py", line 57, in testPartExecutor\n'
+             '    yield\n'
+             '  File "/usr/local/lib/python/unittest/case.py", line 574, in run\n'),
+        )
 
 
 class OktestMainApp_TC(unittest.TestCase):
@@ -473,12 +481,12 @@ class OktestMainApp_TC(unittest.TestCase):
         sout, serr, ex = actuals
         sout = re.sub(r'\(\d\.\d\d\d sec\)', '(0.000 sec)', sout) # for oktest
         serr = re.sub(r' in \d\.\d\d\ds', ' in 0.000s', serr)     # for unittest
-        unittest_py_path = '/usr/local/lib/python/unittest.py'
+        unittest_py_path = '/usr/local/lib/python/unittest\\1.py'
         oktest_py_path   = '/usr/local/lib/python/site-packages/oktest.py'
         #sout = re.sub(r'File ".*/oktest.py", line',   'File "%s", line' % oktest_py_path, sout)
-        sout = re.sub(r'File ".*/unittest\.py", line', 'File "%s", line' % unittest_py_path, sout)
+        sout = re.sub(r'File ".*/unittest(/\w+)?\.py", line', 'File "%s", line' % unittest_py_path, sout)
         serr = re.sub(r'File ".*/oktest\.py", line',   'File "%s", line' % oktest_py_path, serr)
-        serr = re.sub(r'File ".*/unittest\.py", line', 'File "%s", line' % unittest_py_path, serr)
+        serr = re.sub(r'File ".*/unittest((/\w+)?)\.py", line', 'File "%s", line' % unittest_py_path, serr)
         self.maxDiff = None
         if hasattr(self, 'assertMultiLineEqual'):
             self.assertMultiLineEqual(expected_serr, serr)
@@ -645,7 +653,7 @@ mainapp_test.py: error: -p option requires an argument
         expected_sout = ""
         #
         sout, serr, ex = self._run_app('-U')
-        n = (py27 and 3) or (py31 and 4) or (py32 and 3) or 5
+        n = (py27 and 3) or (py34 and 4) or (py31 and 4) or (py32 and 3) or 5
         self._chk((expected_sout, expected_serr, n), (sout, serr, ex))
 
 
