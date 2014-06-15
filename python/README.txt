@@ -980,9 +980,10 @@ It is possible to pass query string, form parameter, or JSON body by
     http.GET('/', {{*params*}}={'x':'1'})   # same as http.GET('/', query={'x':'1'})
     http.POST('/', {{*params*}}={'x':'1'})  # same as http.POST('/', form={'x':'1'})
 
-Possible to specify HTTP headers::
+Possible to specify HTTP headers and cookies::
 
     http.GET('/', {{*headers*}}={'Cookie': 'name=val'})
+    http.GET('/', {{*cookies*}}='name=val')   # or {'name':'val'}
 
 And also possible to specify environ dict. ::
 
