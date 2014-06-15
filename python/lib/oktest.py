@@ -3050,10 +3050,10 @@ class WSGITest(object):
     def TRACE  (self, urlpath='/', **kw): return self.__call__('TRACE',   urlpath, **kw)
 
     def _define(method):
-        def fn(self, urlpath='/', _=None,
+        def fn(self, urlpath='/', _=None, _method=method,
                params=None, form=None, query=None, json=None, multipart=None,
                headers=None, environ=None, cookies=None):
-            return self.__call__(method, urlpath, params=params,
+            return self.__call__(_method, urlpath, params=params,
                                  form=form, query=query, json=json, multipart=multipart,
                                  headers=headers, environ=environ, cookies=cookies)
         fn.__name__ = method
