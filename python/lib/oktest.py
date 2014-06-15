@@ -3214,6 +3214,7 @@ class MultiPart(object):
         if filename and '"' in filename:
             raise ValueError("'\"' is not available as filename.")
         self._data.append((_B(name), _B(value), _B(filename), _B(content_type), ))
+        return self
 
     @property
     def content_type(self):

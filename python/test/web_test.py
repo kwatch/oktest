@@ -404,6 +404,8 @@ class MultiPart_TC(unittest.TestCase):
         mp.add("name2", "val2", "ex.jpg", "image/jpeg")
         self.assertEqual(mp._data, [(_B("name1"), _B("val1"), None, None),
                                     (_B("name2"), _B("val2"), _B("ex.jpg"), _B("image/jpeg"))])
+        ## returns self
+        assert mp.add("name3", "val3") is mp
 
     def test_content_type(self):
         mp = MultiPart("abcdef")
