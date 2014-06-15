@@ -2854,11 +2854,18 @@ def _fix_InputWrapper_readline():
     """monkey patch to fix wsgiref.validate.InputWrapper#readline()"""
     global _wsgiref_validate
     assert _wsgiref_validate is not None
+    def read(self, *args):
+        _wsgiref_validate.assert_(len(args) <= 1)
+        v = self.input.read(*args)
+        _wsgiref_validate.assert_(type(v) is _bytes)
+        return v
     def readline(self, *args):
         _wsgiref_validate.assert_(len(args) <= 1)
         v = self.input.readline(*args)
         _wsgiref_validate.assert_(type(v) is _bytes)
         return v
+    if '3.0' <= sys.version < '3.2':
+        _wsgiref_validate.InputWrapper.read = read
     _wsgiref_validate.InputWrapper.readline = readline
 
 
