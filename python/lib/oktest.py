@@ -2850,10 +2850,10 @@ _wsgiref_headers   = None   # on-demand import
 
 _cookie_quote      = None   # on-demand import
 
-def _fix_InputWrapper_readline():
-    """monkey patch to fix wsgiref.validate.InputWrapper#readline()"""
+def _monkey_patch_for_wsgiref_validate():
     global _wsgiref_validate
     assert _wsgiref_validate is not None
+    ## patch to wsgiref.validate.InputWrapper class
     def read(self, *args):
         _wsgiref_validate.assert_(len(args) <= 1)
         v = self.input.read(*args)
@@ -2864,10 +2864,11 @@ def _fix_InputWrapper_readline():
         v = self.input.readline(*args)
         _wsgiref_validate.assert_(type(v) is _bytes)
         return v
+    InputWrapper = _wsgiref_validate.InputWrapper
     if '3.0' <= sys.version < '3.2':
-        _wsgiref_validate.InputWrapper.read = read
-    _wsgiref_validate.InputWrapper.readline = readline
-    #
+        InputWrapper.read = read
+    InputWrapper.readline = readline
+    ## patch to wsgiref.validate.IteratorWrapper class
     def __del__(self):
         if not getattr(self, '_skip_destructor', None):
             self.__original_del__()
@@ -2890,7 +2891,7 @@ class WSGITest(object):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
-            _fix_InputWrapper_readline()
+            _monkey_patch_for_wsgiref_validate()
         env = self._new_env(method, urlpath, params=params,
                             form=form, query=query, json=json, multipart=multipart,
                             headers=headers, environ=environ, cookies=cookies)
