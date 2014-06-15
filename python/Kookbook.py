@@ -44,6 +44,8 @@ python_binaries = [
     ('3.0', '/opt/lang/python/3.0.1/bin/python'),
     ('3.1', '/opt/lang/python/3.1.4/bin/python'),
     ('3.2', '/opt/lang/python/3.2.0/bin/python'),
+    ('3.3', '/opt/lang/python/3.3.3/bin/python'),
+    ('3.4', '/opt/lang/python/3.4.0/bin/python'),
 ]
 
 
