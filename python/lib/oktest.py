@@ -364,6 +364,25 @@ def _f():
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
     @assertion
+    def has_key(self, key):
+        try:
+            self.target[key]
+        except KeyError:
+            boolean = False
+        else:
+            boolean = True
+        if boolean != self.boolean:
+            if self.boolean:
+                msg = ("$actual[%r]: key not exist.\n"
+                       "  $actual:  %r" % (key, self.target))
+            else:
+                msg = ("$actual[%r]: key exists unexpectedly.\n"
+                       "  $actual[%r]:  %r\n"
+                       "  $actual:  %r" % (key, key, self.target[key], self.target))
+            self.failed(msg, boolean=True)
+        return self
+
+    @assertion
     def attr(self, name, expected):
         if not hasattr(self.target, name):
             self.failed("hasattr(%r, %r) : failed." % (self.target, name), boolean=True)

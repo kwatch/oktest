@@ -228,6 +228,21 @@ class Assertions_TC(unittest.TestCase):
         def fn(): ok ("s").hasattr("xxxxx")
 
 
+    def test_has_key(self):
+        d = {"a": 1}
+        #
+        ok (d).has_key("a")
+        @be_fail("$actual['b']: key not exist.\n"
+                 "  $actual:  {'a': 1}")
+        def fn(): ok (d).has_key("b")
+        #
+        NG (d).has_key("b")
+        @be_fail("$actual['a']: key exists unexpectedly.\n"
+                 "  $actual['a']:  1\n"
+                 "  $actual:  {'a': 1}")
+        def fn(): NG (d).has_key('a')
+
+
     def test_attr(self):
         import datetime
         d = datetime.date(2000, 12, 31)
