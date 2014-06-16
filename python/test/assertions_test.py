@@ -406,6 +406,15 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         @be_fail("len((1, 2, 3)) == 4 : failed.")
         def fn(): ok ((1,2,3)).is_a(tuple).length(4)
 
+    def test_length2(self):
+        ok ("foo").length([0, 3])
+        ok ("foo").length([3, 999])
+        ok ([]).length([0, 3])
+        @be_fail("4 <= len($actual) <= 5: failed.\n"
+                 "  len($actual): 3\n"
+                 "  $actual: 'foo'")
+        def fn(): ok ("foo").length([4,5])
+
 
     def test_is_file(self):
         fname = '__foobar.txt'
