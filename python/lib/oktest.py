@@ -294,6 +294,21 @@ def _f():
         self.failed(_msg(self.target, '<=', other))
 
     @assertion
+    def between(self, min, max):
+        boolean = (min <= self.target <= max)
+        if boolean != self.boolean:
+            if self.boolean:
+                s = (" (too small)" if self.target < min else
+                     " (too large)" if max < self.target else '')
+                self.failed("%r <= $actual <= %r: failed%s.\n"
+                            "  $actual:  %r" % (min, max, s, self.target), boolean=True)
+            else:
+                s = ''
+                self.failed("not (%r <= $actual <= %r): failed%s.\n"
+                            "  $actual:  %r" % (min, max, s, self.target), boolean=True)
+        return self
+
+    @assertion
     def in_delta(self, other, delta):
         boolean = self.target > other - delta
         if boolean != self.boolean:

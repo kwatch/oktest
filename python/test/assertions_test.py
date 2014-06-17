@@ -137,6 +137,31 @@ class Assertions_TC(unittest.TestCase):
         def fn(): NG (2) >= 2
 
 
+    def test_between(self):
+        ok (3).between(2, 4)
+        ok (3).between(3, 4)
+        ok (3).between(2, 3)
+        ok (3).between(3, 3)
+        @be_fail("1 <= $actual <= 2: failed (too large).\n"
+                 "  $actual:  3")
+        def _(): ok (3).between(1, 2)
+        @be_fail("4 <= $actual <= 5: failed (too small).\n"
+                 "  $actual:  3")
+        def _(): ok (3).between(4, 5)
+        #
+        NG (3).between(1,2)
+        NG (3).between(4,5)
+        @be_fail("not (2 <= $actual <= 4): failed.\n"
+                 "  $actual:  3")
+        def _(): NG (3).between(2, 4)
+        @be_fail("not (3 <= $actual <= 4): failed.\n"
+                 "  $actual:  3")
+        def _(): NG (3).between(3, 4)
+        @be_fail("not (2 <= $actual <= 3): failed.\n"
+                 "  $actual:  3")
+        def _(): NG (3).between(2, 3)
+
+
     def test_in_delta(self):
         ok (3.14159).in_delta(3.1415, 0.0001)
         @be_fail(None)
