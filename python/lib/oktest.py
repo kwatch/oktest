@@ -2850,10 +2850,10 @@ _wsgiref_headers   = None   # on-demand import
 
 _cookie_quote      = None   # on-demand import
 
-def _fix_InputWrapper_readline():
-    """monkey patch to fix wsgiref.validate.InputWrapper#readline()"""
+def _monkey_patch_for_wsgiref_validate():
     global _wsgiref_validate
     assert _wsgiref_validate is not None
+    ## patch to wsgiref.validate.InputWrapper class
     def read(self, *args):
         _wsgiref_validate.assert_(len(args) <= 1)
         v = self.input.read(*args)
@@ -2864,9 +2864,27 @@ def _fix_InputWrapper_readline():
         v = self.input.readline(*args)
         _wsgiref_validate.assert_(type(v) is _bytes)
         return v
+    InputWrapper = _wsgiref_validate.InputWrapper
     if '3.0' <= sys.version < '3.2':
-        _wsgiref_validate.InputWrapper.read = read
-    _wsgiref_validate.InputWrapper.readline = readline
+        InputWrapper.read = read
+    InputWrapper.readline = readline
+    ## patch to wsgiref.validate.IteratorWrapper class
+    def __next__(self):
+        self._started = True
+        return self._original__next__()
+    def __del__(self):
+        if getattr(self, '_started', None) and hasattr(self.iterator, 'close'):
+            self._original__del__()
+    IteratorWrapper = _wsgiref_validate.IteratorWrapper
+    if python2:
+        IteratorWrapper._original__next__ = IteratorWrapper.next
+        IteratorWrapper.next = __next__
+        __next__.__name__ = 'next'
+    elif python3:
+        IteratorWrapper._original__next__ = IteratorWrapper.__next__
+        IteratorWrapper.__next__ = __next__
+    IteratorWrapper._original__del__  = IteratorWrapper.__del__
+    IteratorWrapper.__del__ = __del__
 
 
 class WSGITest(object):
@@ -2883,13 +2901,12 @@ class WSGITest(object):
         global _wsgiref_validate
         if not _wsgiref_validate:
             import wsgiref.validate as _wsgiref_validate
-            _fix_InputWrapper_readline()
+            _monkey_patch_for_wsgiref_validate()
         env = self._new_env(method, urlpath, params=params,
                             form=form, query=query, json=json, multipart=multipart,
                             headers=headers, environ=environ, cookies=cookies)
         start_resp = web.WSGIStartResponse()
         iterable = _wsgiref_validate.validator(self._app)(env, start_resp)
-        self._remove_destructor(iterable)
         resp = web.WSGIResponse(start_resp.status, start_resp.headers, iterable)
         resp._environ = env
         return resp
@@ -2978,17 +2995,6 @@ class WSGITest(object):
         #
         _wsgiref_util.setup_testing_defaults(env)
         return env
-
-    if python2:
-        def _remove_destructor(self, obj, __del__=lambda self: None):
-            global _types
-            if _types is None: import types as _types
-            obj.__del__ = _types.MethodType(__del__, obj, obj.__class__)
-    elif python3:
-        def _remove_destructor(self, obj, __del__=lambda self: None):
-            global _types
-            if _types is None: import types as _types
-            obj.__del__ = _types.MethodType(__del__, obj)
 
     def _build_paramstr(self, param_dict):
         global _quote_plus
