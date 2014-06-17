@@ -383,6 +383,28 @@ def _f():
         return self
 
     @assertion
+    def has_item(self, key, val):
+        try:
+            actual = self.target[key]
+        except KeyError:
+            msg = ("$actual[%r]: key not exist.\n"
+                   "  $actual:  %r" % (key, self.target))
+            self.failed(msg, boolean=True)
+        op = None
+        if self.boolean:
+            if not (actual == val):
+                op = '=='
+        else:
+            if not (actual != val):
+                op = '!='
+        if op:
+            msg = ("$actual[%r] %s $expected: failed.\n"
+                   "  $actual[%r]:  %r\n"
+                   "  $expected:  %r" % (key, op, key, actual, val))
+            self.failed(msg, boolean=True)
+        return self
+
+    @assertion
     def attr(self, name, expected):
         if not hasattr(self.target, name):
             self.failed("hasattr(%r, %r) : failed." % (self.target, name), boolean=True)
