@@ -383,7 +383,7 @@ def _f():
         return self
 
     @assertion
-    def has_item(self, key, val):
+    def has_keyval(self, key, val):
         try:
             actual = self.target[key]
         except KeyError:
