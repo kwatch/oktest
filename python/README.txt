@@ -181,6 +181,9 @@ ok (x) < y
 ok (x) <= y
 	Raise AssertionError unless x <= y.
 
+ok (x).between(min, max)
+	Raise AssertionError unless min <= x <= max.
+
 ok (x).in_delta(y, delta)
 	Raise AssertionError unless y-delta < x < y+delta.
 
@@ -214,6 +217,18 @@ ok (x).is_truthy()
 ok (x).is_falsy()
 	Raise AssertionError unless bool(x) == False.
 
+ok (xs).all(lambda)
+	Raise AssertionError unless all items in xs satisfy lambda.
+
+ok (xs).any(lambda)
+	Raise AssertionError unless there is any item in xs which satisfies lambda.
+
+ok (dict).has_key(key)
+	Raise AssertionError unless dict.has_key(key) or key in dict.
+
+ok (dict).has_item(key, val)
+	Raise AssertionError unless dict[key] == val.
+
 ok (x).has_attr(name)
 	Raise AssertionError unless hasattr(x, name).
 
@@ -234,6 +249,9 @@ ok (x).length(n):
 	Raise AssertionError unless len(x) == n.
 	This is same as ``ok (len(x)) == n``, but it is useful to chain
 	assertions, like ``ok (x).is_a(tuple).length(n)``.
+
+ok (x).length([min, max]):
+	Raise AssertionError unless min <= len(x) <= max.
 
 ok (path).is_file()
 	Raise AssertionError unless os.path.isfile(path).
