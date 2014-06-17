@@ -137,6 +137,31 @@ class Assertions_TC(unittest.TestCase):
         def fn(): NG (2) >= 2
 
 
+    def test_between(self):
+        ok (3).between(2, 4)
+        ok (3).between(3, 4)
+        ok (3).between(2, 3)
+        ok (3).between(3, 3)
+        @be_fail("1 <= $actual <= 2: failed (too large).\n"
+                 "  $actual:  3")
+        def _(): ok (3).between(1, 2)
+        @be_fail("4 <= $actual <= 5: failed (too small).\n"
+                 "  $actual:  3")
+        def _(): ok (3).between(4, 5)
+        #
+        NG (3).between(1,2)
+        NG (3).between(4,5)
+        @be_fail("not (2 <= $actual <= 4): failed.\n"
+                 "  $actual:  3")
+        def _(): NG (3).between(2, 4)
+        @be_fail("not (3 <= $actual <= 4): failed.\n"
+                 "  $actual:  3")
+        def _(): NG (3).between(3, 4)
+        @be_fail("not (2 <= $actual <= 3): failed.\n"
+                 "  $actual:  3")
+        def _(): NG (3).between(2, 3)
+
+
     def test_in_delta(self):
         ok (3.14159).in_delta(3.1415, 0.0001)
         @be_fail(None)
@@ -226,6 +251,43 @@ class Assertions_TC(unittest.TestCase):
         ok ("s").hasattr("__class__")
         @be_fail("hasattr('s', 'xxxxx') : failed.")
         def fn(): ok ("s").hasattr("xxxxx")
+
+
+    def test_has_key(self):
+        d = {"a": 1}
+        #
+        ok (d).has_key("a")
+        @be_fail("$actual['b']: key not exist.\n"
+                 "  $actual:  {'a': 1}")
+        def fn(): ok (d).has_key("b")
+        #
+        NG (d).has_key("b")
+        @be_fail("$actual['a']: key exists unexpectedly.\n"
+                 "  $actual['a']:  1\n"
+                 "  $actual:  {'a': 1}")
+        def fn(): NG (d).has_key('a')
+
+
+    def test_has_item(self):
+        d = {"a": 1}
+        #
+        ok (d).has_item("a", 1)
+        @be_fail("$actual['b']: key not exist.\n"
+                 "  $actual:  {'a': 1}")
+        def fn(): ok (d).has_item("b", 1)
+        @be_fail("$actual['a'] == $expected: failed.\n"
+                 "  $actual['a']:  1\n"
+                 "  $expected:  2")
+        def fn(): ok (d).has_item("a", 2)
+        #
+        NG (d).has_item("a", 2)
+        @be_fail("$actual['b']: key not exist.\n"
+                 "  $actual:  {'a': 1}")
+        def fn(): ok (d).has_item("b", 1)
+        @be_fail("$actual['a'] != $expected: failed.\n"
+                 "  $actual['a']:  1\n"
+                 "  $expected:  1")
+        def fn(): NG (d).has_item('a', 1)
 
 
     def test_attr(self):
@@ -406,6 +468,15 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         @be_fail("len((1, 2, 3)) == 4 : failed.")
         def fn(): ok ((1,2,3)).is_a(tuple).length(4)
 
+    def test_length2(self):
+        ok ("foo").length([0, 3])
+        ok ("foo").length([3, 999])
+        ok ([]).length([0, 3])
+        @be_fail("4 <= len($actual) <= 5: failed.\n"
+                 "  len($actual): 3\n"
+                 "  $actual: 'foo'")
+        def fn(): ok ("foo").length([4,5])
+
 
     def test_is_file(self):
         fname = '__foobar.txt'
@@ -516,6 +587,37 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
         def fn(): ok ([1]).is_falsy()
         @be_fail("bool({'x': 1}) == False : failed.")
         def fn(): ok ({'x':1}).is_falsy()
+
+
+    def test_all(self):
+        ok ([1,2,3]).all(lambda x: isinstance(x, int))
+        #
+        @be_fail("$actual.all(lambda) : failed at index 2.\n"
+                 "  $actual[2]: None")
+        def fn(): ok ([1,2,None]).all(lambda x: isinstance(x, int))
+        #
+        try:
+            NG ([1,2,3]).all(lambda x: isinstance(x, int))
+        except TypeError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "all() should be called with ok(), not NG() or NOT().")
+        else:
+            assert False, "TypeError expected but not raised"
+
+    def test_any(self):
+        ok ([1,2,3]).any(lambda x: x % 2 == 0)
+        #
+        @be_fail("$actual.any(lambda) : failed.\n"
+                 "  $actual: [1, 3, 5]")
+        def fn(): ok ([1,3,5]).any(lambda x: x % 2 == 0)
+        #
+        try:
+            NG ([1,2,3]).any(lambda x: x % 2 == 0)
+        except TypeError:
+            ex = sys.exc_info()[1]
+            self.assertEqual(str(ex), "any() should be called with ok(), not NG() or NOT().")
+        else:
+            assert False, "TypeError expected but not raised"
 
 
     ## ------------------------------------------------------------

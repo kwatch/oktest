@@ -294,6 +294,21 @@ def _f():
         self.failed(_msg(self.target, '<=', other))
 
     @assertion
+    def between(self, min, max):
+        boolean = (min <= self.target <= max)
+        if boolean != self.boolean:
+            if self.boolean:
+                s = (" (too small)" if self.target < min else
+                     " (too large)" if max < self.target else '')
+                self.failed("%r <= $actual <= %r: failed%s.\n"
+                            "  $actual:  %r" % (min, max, s, self.target), boolean=True)
+            else:
+                s = ''
+                self.failed("not (%r <= $actual <= %r): failed%s.\n"
+                            "  $actual:  %r" % (min, max, s, self.target), boolean=True)
+        return self
+
+    @assertion
     def in_delta(self, other, delta):
         boolean = self.target > other - delta
         if boolean != self.boolean:
@@ -364,6 +379,47 @@ def _f():
         self.failed("hasattr(%r, %r) : failed." % (self.target, name))
 
     @assertion
+    def has_key(self, key):
+        try:
+            self.target[key]
+        except KeyError:
+            boolean = False
+        else:
+            boolean = True
+        if boolean != self.boolean:
+            if self.boolean:
+                msg = ("$actual[%r]: key not exist.\n"
+                       "  $actual:  %r" % (key, self.target))
+            else:
+                msg = ("$actual[%r]: key exists unexpectedly.\n"
+                       "  $actual[%r]:  %r\n"
+                       "  $actual:  %r" % (key, key, self.target[key], self.target))
+            self.failed(msg, boolean=True)
+        return self
+
+    @assertion
+    def has_item(self, key, val):
+        try:
+            actual = self.target[key]
+        except KeyError:
+            msg = ("$actual[%r]: key not exist.\n"
+                   "  $actual:  %r" % (key, self.target))
+            self.failed(msg, boolean=True)
+        op = None
+        if self.boolean:
+            if not (actual == val):
+                op = '=='
+        else:
+            if not (actual != val):
+                op = '!='
+        if op:
+            msg = ("$actual[%r] %s $expected: failed.\n"
+                   "  $actual[%r]:  %r\n"
+                   "  $expected:  %r" % (key, op, key, actual, val))
+            self.failed(msg, boolean=True)
+        return self
+
+    @assertion
     def attr(self, name, expected):
         if not hasattr(self.target, name):
             self.failed("hasattr(%r, %r) : failed." % (self.target, name), boolean=True)
@@ -403,9 +459,17 @@ def _f():
 
     @assertion
     def length(self, n):
-        boolean = len(self.target) == n
-        if boolean == self.boolean:  return self
-        self.failed("len(%r) == %r : failed." % (self.target, n))
+        if isinstance(n, list):
+            min, max = n
+            boolean = (min <= len(self.target) <= max)
+            if boolean == self.boolean:  return self
+            self.failed("%s <= len($actual) <= %s: failed.\n"
+                        "  len($actual): %s\n"
+                        "  $actual: %r" % (min, max, len(self.target), self.target))
+        else:
+            boolean = len(self.target) == n
+            if boolean == self.boolean:  return self
+            self.failed("len(%r) == %r : failed." % (self.target, n))
 
     @assertion
     def is_file(self):
@@ -454,6 +518,28 @@ def _f():
         boolean = not bool(self.target)
         if boolean == self.boolean:  return self
         self.failed('bool(%r) == False : failed.' % self.target)
+
+    @assertion
+    def all(self, func):
+        if not self.boolean:
+            raise TypeError("all() should be called with ok(), not NG() or NOT().")
+        for i, x in enumerate(self.target):
+            if not func(x):
+                self.failed('$actual.all(lambda) : failed at index %s.\n'
+                            '  $actual[%s]: %r' % (i, i, x))
+        return self
+
+    @assertion
+    def any(self, func):
+        if not self.boolean:
+            raise TypeError("any() should be called with ok(), not NG() or NOT().")
+        for x in self.target:
+            if func(x):
+                break
+        else:
+            self.failed('$actual.any(lambda) : failed.\n'
+                        '  $actual: %r' % self.target)
+        return self
 
     @assertion
     def raises(self, exception_class, errmsg=None):
