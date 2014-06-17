@@ -496,6 +496,38 @@ Responsed JSON is different from expected data.
         def _():
             ok (response)._resp.json({"status": "ok"})
 
+
+    @with_response_class
+    def test_cookie_ok(self, Response):
+        response = Response()
+        response.headers['Set-Cookie'] = 'name1=val1'
+        try:
+            ok (response)._resp.cookie('name1', 'val1')
+        except:
+            assert False, "failed"
+
+    @with_response_class
+    def test_cookie_fail_when_no_set_cookie_header(self, Response):
+        response = Response()
+        @be_failed("'Set-Cookie' header is empty or not provided in response.")
+        def _():
+            ok (response)._resp.cookie('name1', 'val1')
+        response.headers['Set-Cookie'] = ''
+        @be_failed("'Set-Cookie' header is empty or not provided in response.")
+        def _():
+            ok (response)._resp.cookie('name1', 'val1')
+
+    @with_response_class
+    def test_cookie_fail_when_unexpected_value(self, Response):
+        response = Response()
+        response.headers['Set-Cookie'] = 'name1=val1'
+        @be_failed("Cookie 'name1': $actual == $expected: failed.\n"
+                   "  $actual:   'val1'\n"
+                   "  $expected: 'foobar'")
+        def _():
+            ok (response)._resp.cookie('name1', 'foobar')
+
+
     def test_raises_UnsupportedResponseObjectError(self):
         if python2:
             errmsg = "'foo': failed to get response %s; <type 'str'> is unsupported response class in oktest."

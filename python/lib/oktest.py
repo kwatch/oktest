@@ -779,6 +779,32 @@ class ResponseAssertionObject(AssertionObject):
 
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
 
+    @assertion
+    def cookie(self, name, val):
+        if python2:
+            from Cookie import SimpleCookie
+        elif python3:
+            from http.cookies import SimpleCookie
+        #
+        response = self.target
+        cookie_str = self._resp_header(response, 'Set-Cookie')
+        if not cookie_str:
+            self.failed("'Set-Cookie' header is empty or not provided in response.")
+        #
+        c = SimpleCookie(cookie_str)
+        if not c[name]:
+            self.failed("Cookie %r is not set.\n"
+                        "  Set-Cookie: %s" % (name, cookie_str))
+        #
+        actual = c[name].value
+        expected = val
+        if actual != expected:
+            self.failed("Cookie %r: $actual == $expected: failed.\n"
+                        "  $actual:   %r\n"
+                        "  $expected: %r" % (name, actual, expected))
+        #
+        return self
+
 del AssertionObject.status
 del AssertionObject.cont_type
 del AssertionObject.header
