@@ -185,9 +185,9 @@ def assertion(func):
          #
          ok ("Sasaki").startswith("Sas")
     """
-    def deco(self, *args):
+    def deco(self, *args, **kwargs):
         self._tested = True
-        return func(self, *args)
+        return func(self, *args, **kwargs)
     deco.__name__ = func.__name__
     deco.__doc__ = func.__doc__
     setattr(AssertionObject, func.__name__, deco)
