@@ -243,26 +243,26 @@ class Assertions_TC(unittest.TestCase):
         def fn(): NG (d).has_key('a')
 
 
-    def test_has_keyval(self):
+    def test_has_item(self):
         d = {"a": 1}
         #
-        ok (d).has_keyval("a", 1)
+        ok (d).has_item("a", 1)
         @be_fail("$actual['b']: key not exist.\n"
                  "  $actual:  {'a': 1}")
-        def fn(): ok (d).has_keyval("b", 1)
+        def fn(): ok (d).has_item("b", 1)
         @be_fail("$actual['a'] == $expected: failed.\n"
                  "  $actual['a']:  1\n"
                  "  $expected:  2")
-        def fn(): ok (d).has_keyval("a", 2)
+        def fn(): ok (d).has_item("a", 2)
         #
-        NG (d).has_keyval("a", 2)
+        NG (d).has_item("a", 2)
         @be_fail("$actual['b']: key not exist.\n"
                  "  $actual:  {'a': 1}")
-        def fn(): ok (d).has_keyval("b", 1)
+        def fn(): ok (d).has_item("b", 1)
         @be_fail("$actual['a'] != $expected: failed.\n"
                  "  $actual['a']:  1\n"
                  "  $expected:  1")
-        def fn(): NG (d).has_keyval('a', 1)
+        def fn(): NG (d).has_item('a', 1)
 
 
     def test_attr(self):
