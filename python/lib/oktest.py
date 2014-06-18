@@ -780,7 +780,7 @@ class ResponseAssertionObject(AssertionObject):
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
 
     @assertion
-    def cookie(self, name, val):
+    def cookie(self, name, val, domain=None, path=None, expires=None, max_age=None, secure=None, httponly=None, comment=None, version=None):
         if python2:
             from Cookie import SimpleCookie
         elif python3:
@@ -802,6 +802,25 @@ class ResponseAssertionObject(AssertionObject):
             self.failed("Cookie %r: $actual == $expected: failed.\n"
                         "  $actual:   %r\n"
                         "  $expected: %r" % (name, actual, expected))
+        #
+        pairs = [
+            ('domain',   domain),
+            ('path',     path),
+            ('expires',  expires),
+            ('max-age',  max_age),
+            ('secure',   secure),
+            ('httponly', httponly),
+            ('comment',  comment),
+            ('version',  version),
+        ]
+        for attr, expected in pairs:
+            if expected is None: continue
+            actual = c[name][attr]
+            if actual != expected:
+                arg = (name, attr, attr, expected, attr, actual)
+                self.failed("Cookie %r: unexpected %s.\n"
+                            "  expected %s:  %r\n"
+                            "  actual %s:    %r" % arg)
         #
         return self
 

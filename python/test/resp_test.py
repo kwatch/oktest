@@ -507,6 +507,26 @@ Responsed JSON is different from expected data.
             assert False, "failed"
 
     @with_response_class
+    def test_cookie_ok_attributes(self, Response):
+        # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
+        trueval = (sys.version >= '3.3.3' or None)
+        #
+        response = Response()
+        cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
+        response.headers['Set-Cookie'] = cookie_str % 'Wed, 01-Jan-2020 12:34:56 GMT'
+        try:
+            ok (response)._resp.cookie('name3', 'val3',
+                                       domain   = 'www.example.com',
+                                       path     = '/cgi',
+                                       expires  = 'Wed, 01-Jan-2020 12:34:56 GMT',
+                                       max_age  = '120',
+                                       secure   = trueval,
+                                       httponly = trueval,
+                                       )
+        except:
+            assert False, "failed"
+
+    @with_response_class
     def test_cookie_fail_when_no_set_cookie_header(self, Response):
         response = Response()
         @be_failed("'Set-Cookie' header is empty or not provided in response.")
@@ -526,6 +546,45 @@ Responsed JSON is different from expected data.
                    "  $expected: 'foobar'")
         def _():
             ok (response)._resp.cookie('name1', 'foobar')
+
+    @with_response_class
+    def test_cookie_fail_when_unexpected_attributes(self, Response):
+        # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
+        trueval = (sys.version >= '3.3.3' or None)
+        #
+        response = Response()
+        cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
+        response.headers['Set-Cookie'] = cookie_str % 'Wed, 01-Jan-2020 12:34:56 GMT'
+        #
+        @be_failed("Cookie 'name3': unexpected domain.\n"
+                   "  expected domain:  'example.com'\n"
+                   "  actual domain:    'www.example.com'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', domain='example.com')
+        #
+        @be_failed("Cookie 'name3': unexpected path.\n"
+                   "  expected path:  '/'\n"
+                   "  actual path:    '/cgi'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', path='/')
+        #
+        @be_failed("Cookie 'name3': unexpected expires.\n"
+                   "  expected expires:  'Wed, 01-Jan-2020 12:34:56'\n"
+                   "  actual expires:    'Wed, 01-Jan-2020 12:34:56 GMT'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', expires='Wed, 01-Jan-2020 12:34:56')
+        #
+        @be_failed("Cookie 'name3': unexpected max-age.\n"
+                   "  expected max-age:  0\n"
+                   "  actual max-age:    '120'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', max_age=0)
+        #
+        @be_failed("Cookie 'name3': unexpected httponly.\n"
+                   "  expected httponly:  False\n"
+                   "  actual httponly:    True")
+        def _(): ok (response)._resp.cookie('name3', 'val3', httponly=False)
+        #
+        @be_failed("Cookie 'name3': unexpected secure.\n"
+                   "  expected secure:  False\n"
+                   "  actual secure:    True")
+        def _(): ok (response)._resp.cookie('name3', 'val3', secure=False)
 
 
     def test_raises_UnsupportedResponseObjectError(self):
