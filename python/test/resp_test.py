@@ -101,7 +101,7 @@ try:
     from requests.models import Response as RequestsResponse
 except (ImportError, SyntaxError):
     class RequestsResponse(object):
-        def __int__(self):
+        def __init__(self):
             self.status_code = None
             self.reason = None
             self.headers = {}
