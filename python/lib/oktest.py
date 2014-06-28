@@ -784,9 +784,25 @@ class ResponseAssertionObject(AssertionObject):
         global _SimpleCookie
         if _SimpleCookie is None:
             if python2:
-                from Cookie import SimpleCookie as _SimpleCookie
+                from Cookie import SimpleCookie
             elif python3:
-                from http.cookies import SimpleCookie as _SimpleCookie
+                from http.cookies import SimpleCookie
+            if sys.version >= '3.3.3':
+                _SimpleCookie = SimpleCookie
+            else:
+                ## hack to avoid a bug in standard cookie lib (see http://bugs.python.org/issue16611)
+                class _SimpleCookie(SimpleCookie):
+                    def load(self, rawdata):
+                        for line in re.split(r'\r?\n', rawdata):
+                            keys1 = set(self.keys())
+                            super(_SimpleCookie, self).load(line)
+                            keys2 = set(self.keys())
+                            cookie_name = list(keys2 - keys1)[0]
+                            morsel = self[cookie_name]
+                            for x in line.split(';'):
+                                x = x.strip().lower()
+                                if x == 'secure' or x == 'httponly':
+                                    morsel[x] = True
         #
         response = self.target
         cookie_str = self._resp_header(response, 'Set-Cookie')

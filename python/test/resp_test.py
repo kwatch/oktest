@@ -510,8 +510,6 @@ Responsed JSON is different from expected data.
     def test_cookie_ok_attributes(self, Response):
         if sys.version.startswith('3.0'):
             return   # cookie lib of Python3.0 has a bug
-        # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
-        trueval = (sys.version >= '3.3.3' or None)
         #
         response = Response()
         cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
@@ -522,8 +520,8 @@ Responsed JSON is different from expected data.
                                        path     = '/cgi',
                                        expires  = 'Wed, 01-Jan-2020 12:34:56 GMT',
                                        max_age  = '120',
-                                       secure   = trueval,
-                                       httponly = trueval,
+                                       secure   = True,
+                                       httponly = True,
                                        )
         except:
             assert False, "failed"
@@ -553,8 +551,6 @@ Responsed JSON is different from expected data.
     def test_cookie_fail_when_unexpected_attributes(self, Response):
         if sys.version.startswith('3.0'):
             return   # cookie lib of Python3.0 has a bug
-        # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
-        trueval = (sys.version >= '3.3.3' or '')
         #
         response = Response()
         cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
@@ -582,12 +578,12 @@ Responsed JSON is different from expected data.
         #
         @be_failed("Cookie 'name3': unexpected httponly.\n"
                    "  expected httponly:  False\n"
-                   "  actual httponly:    %r" % trueval)
+                   "  actual httponly:    True")
         def _(): ok (response)._resp.cookie('name3', 'val3', httponly=False)
         #
         @be_failed("Cookie 'name3': unexpected secure.\n"
                    "  expected secure:  False\n"
-                   "  actual secure:    %r" % trueval)
+                   "  actual secure:    True")
         def _(): ok (response)._resp.cookie('name3', 'val3', secure=False)
 
 
