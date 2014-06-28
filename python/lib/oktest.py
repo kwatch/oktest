@@ -781,17 +781,19 @@ class ResponseAssertionObject(AssertionObject):
 
     @assertion
     def cookie(self, name, val, domain=None, path=None, expires=None, max_age=None, secure=None, httponly=None, comment=None, version=None):
-        if python2:
-            from Cookie import SimpleCookie
-        elif python3:
-            from http.cookies import SimpleCookie
+        global _SimpleCookie
+        if _SimpleCookie is None:
+            if python2:
+                from Cookie import SimpleCookie as _SimpleCookie
+            elif python3:
+                from http.cookies import SimpleCookie as _SimpleCookie
         #
         response = self.target
         cookie_str = self._resp_header(response, 'Set-Cookie')
         if not cookie_str:
             self.failed("'Set-Cookie' header is empty or not provided in response.")
         #
-        c = SimpleCookie(cookie_str)
+        c = _SimpleCookie(cookie_str)
         if not c[name]:
             self.failed("Cookie %r is not set.\n"
                         "  Set-Cookie: %s" % (name, cookie_str))
@@ -823,6 +825,8 @@ class ResponseAssertionObject(AssertionObject):
                             "  actual %s:    %r" % arg)
         #
         return self
+
+_SimpleCookie = None      # lazy import
 
 del AssertionObject.status
 del AssertionObject.cont_type
