@@ -508,6 +508,8 @@ Responsed JSON is different from expected data.
 
     @with_response_class
     def test_cookie_ok_attributes(self, Response):
+        if sys.version.startswith('3.0'):
+            return   # cookie lib of Python3.0 has a bug
         # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
         trueval = (sys.version >= '3.3.3' or None)
         #
@@ -549,6 +551,8 @@ Responsed JSON is different from expected data.
 
     @with_response_class
     def test_cookie_fail_when_unexpected_attributes(self, Response):
+        if sys.version.startswith('3.0'):
+            return   # cookie lib of Python3.0 has a bug
         # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
         trueval = (sys.version >= '3.3.3' or '')
         #
