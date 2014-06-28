@@ -23,6 +23,7 @@ py34 = major == 3 and minor >= 4
 py271 = major == 2 and minor == 7 and teeny <= 1
 py314 = major == 3 and minor == 1 and teeny >= 4
 py320 = major == 3 and minor == 2 and teeny <= 0
+py340 = major == 3 and minor == 4 and teeny <= 0
 #
 import unittest
 
@@ -298,9 +299,9 @@ ERROR: never done
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2211, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2363, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 845, in fn
+  File "/usr/local/lib/python/site-packages/oktest.py", line 997, in fn
     raise SkipTest(reason)
 oktest.SkipTest: REASON
 
@@ -308,11 +309,11 @@ oktest.SkipTest: REASON
 ERROR: not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 866, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1018, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 778, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 930, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -321,9 +322,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2211, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2363, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 869, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1021, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -372,11 +373,11 @@ ERROR: test_005: not yet (_sos_test.SosTest)
 not yet
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/usr/local/lib/python/site-packages/oktest.py", line 866, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1018, in deco
     func(*args, **kwargs)
   File "_test.d/_sos_test.py", line 28, in _
     fail("msg")
-  File "/usr/local/lib/python/site-packages/oktest.py", line 778, in fail
+  File "/usr/local/lib/python/site-packages/oktest.py", line 930, in fail
     raise AssertionError(desc)
 AssertionError: msg
 
@@ -385,9 +386,9 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2211, in newfunc
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2363, in newfunc
     return orig_func(self)
-  File "/usr/local/lib/python/site-packages/oktest.py", line 869, in deco
+  File "/usr/local/lib/python/site-packages/oktest.py", line 1021, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
 
@@ -426,12 +427,20 @@ FAILED (failures=2, errors=2, skipped=1)
         OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(' line 480,', ' line 483,')
     if py34:
         OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace('@@ -1,1 +1,1 @@', '@@ -1 +1 @@')
-        OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(
-            ('  File "/usr/local/lib/python/unittest.py", line 480, in run\n'),
-            ('  File "/usr/local/lib/python/unittest/case.py", line 57, in testPartExecutor\n'
-             '    yield\n'
-             '  File "/usr/local/lib/python/unittest/case.py", line 574, in run\n'),
-        )
+        if py340:
+            OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(
+                ('  File "/usr/local/lib/python/unittest.py", line 480, in run\n'),
+                ('  File "/usr/local/lib/python/unittest/case.py", line 57, in testPartExecutor\n'
+                 '    yield\n'
+                 '  File "/usr/local/lib/python/unittest/case.py", line 574, in run\n'),
+            )
+        else:
+            OUTPUT_UNITTEST = OUTPUT_UNITTEST.replace(
+                ('  File "/usr/local/lib/python/unittest.py", line 480, in run\n'),
+                ('  File "/usr/local/lib/python/unittest/case.py", line 58, in testPartExecutor\n'
+                 '    yield\n'
+                 '  File "/usr/local/lib/python/unittest/case.py", line 577, in run\n'),
+            )
 
 
 class OktestMainApp_TC(unittest.TestCase):
