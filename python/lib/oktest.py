@@ -792,6 +792,7 @@ class ResponseAssertionObject(AssertionObject):
         cookie_str = self._resp_header(response, 'Set-Cookie')
         if not cookie_str:
             self.failed("'Set-Cookie' header is empty or not provided in response.")
+        cookie_str = _S(cookie_str)        # Werkzeug returns unicode object!!!
         #
         c = _SimpleCookie(cookie_str)
         if not c[name]:
