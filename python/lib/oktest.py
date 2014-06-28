@@ -2077,6 +2077,25 @@ def _dummy():
                 from shutil import rmtree
                 rmtree(fname)
 
+    def repr_rexp(rexp):
+        flags = rexp.flags
+        if python3:
+            flags = flags ^ re.U
+        if flags:
+            arr = []
+            if re.T & flags: arr.append('re.T')
+            if re.I & flags: arr.append('re.I')
+            if re.L & flags: arr.append('re.L')
+            if re.M & flags: arr.append('re.M')
+            if re.S & flags: arr.append('re.S')
+            if re.U & flags: arr.append('re.U')
+            if re.X & flags: arr.append('re.X')
+            if python3:
+                if re.A & flags: arr.append('re.A')
+            return "re.compile(%r, %s)" % (rexp.pattern, '|'.join(arr))
+        else:
+            return "re.compile(%r)" % (rexp.pattern,)
+
     @contextmanager
     def from_here(dirpath=None):
         """
