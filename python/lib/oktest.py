@@ -849,10 +849,10 @@ class ResponseAssertionObject(AssertionObject):
                                 "  actual:    %r" % args)
             else:
                 if actual != expected:
-                    arg = (name, attr, attr, expected, attr, actual)
+                    arg = (name, attr, expected, actual)
                     self.failed("Cookie %r: unexpected %s.\n"
-                                "  expected %s:  %r\n"
-                                "  actual %s:    %r" % arg)
+                                "  expected:  %r\n"
+                                "  actual:    %r" % arg)
         #
         return self
 

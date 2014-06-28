@@ -565,8 +565,8 @@ Responsed JSON is different from expected data.
         response.headers['Set-Cookie'] = cookie_str % 'Wed, 01-Jan-2020 12:34:56 GMT'
         #
         @be_failed("Cookie 'name3': unexpected domain.\n"
-                   "  expected domain:  'example.com'\n"
-                   "  actual domain:    'www.example.com'")
+                   "  expected:  'example.com'\n"
+                   "  actual:    'www.example.com'")
         def _(): ok (response)._resp.cookie('name3', 'val3', domain='example.com')
         @be_failed("Cookie 'name3': unexpected domain.\n"
                    "  expected:  re.compile('^\\\\w+\\\\.com$')\n"
@@ -574,8 +574,8 @@ Responsed JSON is different from expected data.
         def _(): ok (response)._resp.cookie('name3', 'val3', domain=re.compile(r'^\w+\.com$'))
         #
         @be_failed("Cookie 'name3': unexpected path.\n"
-                   "  expected path:  '/'\n"
-                   "  actual path:    '/cgi'")
+                   "  expected:  '/'\n"
+                   "  actual:    '/cgi'")
         def _(): ok (response)._resp.cookie('name3', 'val3', path='/')
         @be_failed("Cookie 'name3': unexpected path.\n"
                    "  expected:  re.compile('/$')\n"
@@ -583,8 +583,8 @@ Responsed JSON is different from expected data.
         def _(): ok (response)._resp.cookie('name3', 'val3', path=re.compile(r'/$'))
         #
         @be_failed("Cookie 'name3': unexpected expires.\n"
-                   "  expected expires:  'Wed, 01-Jan-2020 12:34:56'\n"
-                   "  actual expires:    'Wed, 01-Jan-2020 12:34:56 GMT'")
+                   "  expected:  'Wed, 01-Jan-2020 12:34:56'\n"
+                   "  actual:    'Wed, 01-Jan-2020 12:34:56 GMT'")
         def _(): ok (response)._resp.cookie('name3', 'val3', expires='Wed, 01-Jan-2020 12:34:56')
         @be_failed("Cookie 'name3': unexpected expires.\n"
                    r"  expected:  re.compile('^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d$')" "\n"
@@ -592,8 +592,8 @@ Responsed JSON is different from expected data.
         def _(): ok (response)._resp.cookie('name3', 'val3', expires=re.compile(r'^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$'))
         #
         @be_failed("Cookie 'name3': unexpected max-age.\n"
-                   "  expected max-age:  0\n"
-                   "  actual max-age:    '120'")
+                   "  expected:  0\n"
+                   "  actual:    '120'")
         def _(): ok (response)._resp.cookie('name3', 'val3', max_age=0)
         @be_failed("Cookie 'name3': unexpected max-age.\n"
                    r"  expected:  re.compile('\\d+\\.\\d+')" "\n"
@@ -601,13 +601,13 @@ Responsed JSON is different from expected data.
         def _(): ok (response)._resp.cookie('name3', 'val3', max_age=re.compile(r'\d+\.\d+'))
         #
         @be_failed("Cookie 'name3': unexpected httponly.\n"
-                   "  expected httponly:  False\n"
-                   "  actual httponly:    True")
+                   "  expected:  False\n"
+                   "  actual:    True")
         def _(): ok (response)._resp.cookie('name3', 'val3', httponly=False)
         #
         @be_failed("Cookie 'name3': unexpected secure.\n"
-                   "  expected secure:  False\n"
-                   "  actual secure:    True")
+                   "  expected:  False\n"
+                   "  actual:    True")
         def _(): ok (response)._resp.cookie('name3', 'val3', secure=False)
 
 
