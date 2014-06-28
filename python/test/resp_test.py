@@ -550,7 +550,7 @@ Responsed JSON is different from expected data.
         def _():
             ok (response)._resp.cookie('name1', 'foobar')
         @be_failed("Cookie 'name1': $expected.search($actual): failed.\n"
-                   "  $expected: re.compile('^\\\\d+$', re.I|re.M|re.S)\n"
+                   r"  $expected: re.compile(r'^\d+$', re.I|re.M|re.S)" "\n"
                    "  $actual:   'val1'")
         def _():
             ok (response)._resp.cookie('name1', re.compile(r'^\d+$', re.I|re.S|re.M))
@@ -569,7 +569,7 @@ Responsed JSON is different from expected data.
                    "  actual:    'www.example.com'")
         def _(): ok (response)._resp.cookie('name3', 'val3', domain='example.com')
         @be_failed("Cookie 'name3': unexpected domain.\n"
-                   "  expected:  re.compile('^\\\\w+\\\\.com$')\n"
+                   r"  expected:  re.compile(r'^\w+\.com$')" "\n"
                    "  actual:    'www.example.com'")
         def _(): ok (response)._resp.cookie('name3', 'val3', domain=re.compile(r'^\w+\.com$'))
         #
@@ -578,7 +578,7 @@ Responsed JSON is different from expected data.
                    "  actual:    '/cgi'")
         def _(): ok (response)._resp.cookie('name3', 'val3', path='/')
         @be_failed("Cookie 'name3': unexpected path.\n"
-                   "  expected:  re.compile('/$')\n"
+                   r"  expected:  re.compile(r'/$')" "\n"
                    "  actual:    '/cgi'")
         def _(): ok (response)._resp.cookie('name3', 'val3', path=re.compile(r'/$'))
         #
@@ -587,7 +587,7 @@ Responsed JSON is different from expected data.
                    "  actual:    'Wed, 01-Jan-2020 12:34:56 GMT'")
         def _(): ok (response)._resp.cookie('name3', 'val3', expires='Wed, 01-Jan-2020 12:34:56')
         @be_failed("Cookie 'name3': unexpected expires.\n"
-                   r"  expected:  re.compile('^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d$')" "\n"
+                   r"  expected:  re.compile(r'^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$')" "\n"
                    "  actual:    'Wed, 01-Jan-2020 12:34:56 GMT'")
         def _(): ok (response)._resp.cookie('name3', 'val3', expires=re.compile(r'^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$'))
         #
@@ -596,7 +596,7 @@ Responsed JSON is different from expected data.
                    "  actual:    '120'")
         def _(): ok (response)._resp.cookie('name3', 'val3', max_age=0)
         @be_failed("Cookie 'name3': unexpected max-age.\n"
-                   r"  expected:  re.compile('\\d+\\.\\d+')" "\n"
+                   r"  expected:  re.compile(r'\d+\.\d+')" "\n"
                    "  actual:    '120'")
         def _(): ok (response)._resp.cookie('name3', 'val3', max_age=re.compile(r'\d+\.\d+'))
         #
