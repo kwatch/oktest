@@ -246,11 +246,11 @@ class util_TC(unittest.TestCase):
 
     def test_repr_rexp_1(self):
         x = repr_rexp(re.compile('\w{40}'))
-        ok (x) == r"re.compile('\\w{40}')"
+        ok (x) == r"re.compile(r'\w{40}')"
 
     def test_repr_rexp_2(self):
         x = repr_rexp(re.compile('\w{40}', re.I|re.S|re.M))
-        ok (x) == r"re.compile('\\w{40}', re.I|re.M|re.S)"
+        ok (x) == r"re.compile(r'\w{40}', re.I|re.M|re.S)"
 
 
     def test_from_here_1(self):

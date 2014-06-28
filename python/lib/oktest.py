@@ -2090,6 +2090,7 @@ def _dummy():
                 rmtree(fname)
 
     def repr_rexp(rexp):
+        pattern = ("r%r" % rexp.pattern).replace(r'\\', '\\')
         flags = rexp.flags
         if python3:
             flags = flags ^ re.U
@@ -2104,9 +2105,9 @@ def _dummy():
             if re.X & flags: arr.append('re.X')
             if python3:
                 if re.A & flags: arr.append('re.A')
-            return "re.compile(%r, %s)" % (rexp.pattern, '|'.join(arr))
+            return "re.compile(%s, %s)" % (pattern, '|'.join(arr))
         else:
-            return "re.compile(%r)" % (rexp.pattern,)
+            return "re.compile(%s)" % (pattern,)
 
     @contextmanager
     def from_here(dirpath=None):
