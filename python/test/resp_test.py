@@ -550,7 +550,7 @@ Responsed JSON is different from expected data.
     @with_response_class
     def test_cookie_fail_when_unexpected_attributes(self, Response):
         # hack to avoid bug of Cookie.py (see http://bugs.python.org/issue16611 )
-        trueval = (sys.version >= '3.3.3' or None)
+        trueval = (sys.version >= '3.3.3' or '')
         #
         response = Response()
         cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
@@ -578,12 +578,12 @@ Responsed JSON is different from expected data.
         #
         @be_failed("Cookie 'name3': unexpected httponly.\n"
                    "  expected httponly:  False\n"
-                   "  actual httponly:    True")
+                   "  actual httponly:    %r" % trueval)
         def _(): ok (response)._resp.cookie('name3', 'val3', httponly=False)
         #
         @be_failed("Cookie 'name3': unexpected secure.\n"
                    "  expected secure:  False\n"
-                   "  actual secure:    True")
+                   "  actual secure:    %r" % trueval)
         def _(): ok (response)._resp.cookie('name3', 'val3', secure=False)
 
 
