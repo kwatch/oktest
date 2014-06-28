@@ -817,10 +817,16 @@ class ResponseAssertionObject(AssertionObject):
         #
         actual = c[name].value
         expected = val
-        if actual != expected:
-            self.failed("Cookie %r: $actual == $expected: failed.\n"
-                        "  $actual:   %r\n"
-                        "  $expected: %r" % (name, actual, expected))
+        if isinstance(expected, _rexp_type):
+            if not expected.search(actual):
+                self.failed("Cookie %r: $expected.search($actual): failed.\n"
+                            "  $expected: %s\n"
+                            "  $actual:   %r" % (name, util.repr_rexp(expected), actual))
+        else:
+            if actual != expected:
+                self.failed("Cookie %r: $actual == $expected: failed.\n"
+                            "  $actual:   %r\n"
+                            "  $expected: %r" % (name, actual, expected))
         #
         pairs = [
             ('domain',   domain),
@@ -835,11 +841,18 @@ class ResponseAssertionObject(AssertionObject):
         for attr, expected in pairs:
             if expected is None: continue
             actual = c[name][attr]
-            if actual != expected:
-                arg = (name, attr, attr, expected, attr, actual)
-                self.failed("Cookie %r: unexpected %s.\n"
-                            "  expected %s:  %r\n"
-                            "  actual %s:    %r" % arg)
+            if isinstance(expected, _rexp_type):
+                if not expected.search(actual):
+                    args = (name, attr, util.repr_rexp(expected), actual)
+                    self.failed("Cookie %r: unexpected %s.\n"
+                                "  expected:  %s\n"
+                                "  actual:    %r" % args)
+            else:
+                if actual != expected:
+                    arg = (name, attr, attr, expected, attr, actual)
+                    self.failed("Cookie %r: unexpected %s.\n"
+                                "  expected %s:  %r\n"
+                                "  actual %s:    %r" % arg)
         #
         return self
 
