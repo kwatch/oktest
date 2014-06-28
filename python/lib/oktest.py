@@ -841,18 +841,17 @@ class ResponseAssertionObject(AssertionObject):
         for attr, expected in pairs:
             if expected is None: continue
             actual = c[name][attr]
+            args = None
             if isinstance(expected, _rexp_type):
                 if not expected.search(actual):
-                    args = (name, attr, util.repr_rexp(expected), actual)
-                    self.failed("Cookie %r: unexpected %s.\n"
-                                "  expected:  %s\n"
-                                "  actual:    %r" % args)
+                    args = (name, attr, util.repr_rexp(expected), repr(actual))
             else:
                 if actual != expected:
-                    arg = (name, attr, expected, actual)
-                    self.failed("Cookie %r: unexpected %s.\n"
-                                "  expected:  %r\n"
-                                "  actual:    %r" % arg)
+                    args = (name, attr, repr(expected), repr(actual))
+            if args:
+                self.failed("Cookie %r: unexpected %s.\n"
+                            "  expected:  %s\n"
+                            "  actual:    %s" % args)
         #
         return self
 
