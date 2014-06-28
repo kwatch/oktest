@@ -132,6 +132,11 @@ class WSGITest_TC(unittest.TestCase):
         resp = self.http.POST('/hello', params=mp)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'multipart/form-data; boundary=qwerty'
+        ##---
+        if sys.version.startswith(('3.0', '3.1')):
+            sys.stderr.write("\033[0;31m*** skip due to bug of cgi.py\033[0m\n")
+            return
+        ##---
         import cgi
         form = cgi.FieldStorage(resp._environ['wsgi.input'], environ=resp._environ)
         assert form['name1'].value    == "val1"
@@ -176,6 +181,11 @@ class WSGITest_TC(unittest.TestCase):
         resp = self.http.POST('/hello', multipart=mp)
         self.assertEqual(resp._environ['QUERY_STRING'], "")
         self.assertEqual(resp._environ['CONTENT_TYPE'], 'multipart/form-data; boundary=qwerty')
+        ##---
+        if sys.version.startswith(('3.0', '3.1')):
+            sys.stderr.write("\033[0;31m*** skip due to bug of cgi.py\033[0m\n")
+            return
+        ##---
         stdin = resp._environ['wsgi.input']
         import cgi
         form = cgi.FieldStorage(stdin, environ=resp._environ)
