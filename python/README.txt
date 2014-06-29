@@ -307,6 +307,14 @@ ok (response).is_response(status).header(name, value).body(str_or_rexp).json(dic
 	    ok (response).is_response(200).json({"status": "OK"})   # json data
 	    ok (response).is_response(200).body("<h1>Hello</h1>")   # response body
 	    ok (response).is_response(200).body(re.compile("<h1>.*?</h1>"))
+	    ok (response).is_response(200).cookie('name', 'value')  # cookie
+	    ok (response).is_response(200).cookie('name', re.compile(r'^value$'),
+	                                          domain='www.example.com',
+	                                          path='/cgi'
+	                                          expires='Wed, 01-Jan-2020 12:34:56 GMT',
+	                                          max_age='1200',
+	                                          secure=True,
+	                                          httponly=True)
 
 NG (x)
 	Opposite of ok(x). For example, 'NG ("foo").matches(r"[0-9]+")' is True. ::

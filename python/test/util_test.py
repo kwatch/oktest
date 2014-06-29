@@ -15,7 +15,7 @@ import unittest
 import oktest
 from oktest import ok, NG, run
 from oktest import python2, python3
-from oktest.util import chdir, flatten, rm_rf, from_here, randstr, zenkaku_width, zenkaku_shorten
+from oktest.util import chdir, flatten, rm_rf, repr_rexp, from_here, randstr, zenkaku_width, zenkaku_shorten
 
 
 available_with_statement = sys.version_info[0:2] > (2, 4)
@@ -242,6 +242,15 @@ class util_TC(unittest.TestCase):
             ok (fn).not_raise()
         finally:
             self._after_rm_rf()
+
+
+    def test_repr_rexp_1(self):
+        x = repr_rexp(re.compile('\w{40}'))
+        ok (x) == r"re.compile(r'\w{40}')"
+
+    def test_repr_rexp_2(self):
+        x = repr_rexp(re.compile('\w{40}', re.I|re.S|re.M))
+        ok (x) == r"re.compile(r'\w{40}', re.I|re.M|re.S)"
 
 
     def test_from_here_1(self):

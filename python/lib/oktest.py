@@ -185,9 +185,9 @@ def assertion(func):
          #
          ok ("Sasaki").startswith("Sas")
     """
-    def deco(self, *args):
+    def deco(self, *args, **kwargs):
         self._tested = True
-        return func(self, *args)
+        return func(self, *args, **kwargs)
     deco.__name__ = func.__name__
     deco.__doc__ = func.__doc__
     setattr(AssertionObject, func.__name__, deco)
@@ -778,6 +778,84 @@ class ResponseAssertionObject(AssertionObject):
         return json.dumps(jdict, ensure_ascii=False, indent=2, sort_keys=True)
 
     JSON_CONTENT_TYPE_REXP = re.compile(r'^application/json(; ?charset=(utf|UTF)-?8)?$')
+
+    @assertion
+    def cookie(self, name, val, domain=None, path=None, expires=None, max_age=None, secure=None, httponly=None, comment=None, version=None):
+        global _SimpleCookie
+        if _SimpleCookie is None:
+            if python2:
+                from Cookie import SimpleCookie
+            elif python3:
+                from http.cookies import SimpleCookie
+            if sys.version >= '3.3.3':
+                _SimpleCookie = SimpleCookie
+            else:
+                ## hack to avoid a bug in standard cookie lib (see http://bugs.python.org/issue16611)
+                class _SimpleCookie(SimpleCookie):
+                    def load(self, rawdata):
+                        for line in re.split(r'\r?\n', rawdata):
+                            keys1 = set(self.keys())
+                            super(_SimpleCookie, self).load(line)
+                            keys2 = set(self.keys())
+                            cookie_name = list(keys2 - keys1)[0]
+                            morsel = self[cookie_name]
+                            for x in line.split(';'):
+                                x = x.strip().lower()
+                                if x == 'secure' or x == 'httponly':
+                                    morsel[x] = True
+        #
+        response = self.target
+        cookie_str = self._resp_header(response, 'Set-Cookie')
+        if not cookie_str:
+            self.failed("'Set-Cookie' header is empty or not provided in response.")
+        cookie_str = _S(cookie_str)        # Werkzeug returns unicode object!!!
+        #
+        c = _SimpleCookie(cookie_str)
+        if not c[name]:
+            self.failed("Cookie %r is not set.\n"
+                        "  Set-Cookie: %s" % (name, cookie_str))
+        #
+        actual = c[name].value
+        expected = val
+        if isinstance(expected, _rexp_type):
+            if not expected.search(actual):
+                self.failed("Cookie %r: $expected.search($actual): failed.\n"
+                            "  $expected: %s\n"
+                            "  $actual:   %r" % (name, util.repr_rexp(expected), actual))
+        else:
+            if actual != expected:
+                self.failed("Cookie %r: $actual == $expected: failed.\n"
+                            "  $actual:   %r\n"
+                            "  $expected: %r" % (name, actual, expected))
+        #
+        pairs = [
+            ('domain',   domain),
+            ('path',     path),
+            ('expires',  expires),
+            ('max-age',  max_age),
+            ('secure',   secure),
+            ('httponly', httponly),
+            ('comment',  comment),
+            ('version',  version),
+        ]
+        for attr, expected in pairs:
+            if expected is None: continue
+            actual = c[name][attr]
+            args = None
+            if isinstance(expected, _rexp_type):
+                if not expected.search(actual):
+                    args = (name, attr, util.repr_rexp(expected), repr(actual))
+            else:
+                if actual != expected:
+                    args = (name, attr, repr(expected), repr(actual))
+            if args:
+                self.failed("Cookie %r: unexpected %s.\n"
+                            "  expected:  %s\n"
+                            "  actual:    %s" % args)
+        #
+        return self
+
+_SimpleCookie = None      # lazy import
 
 del AssertionObject.status
 del AssertionObject.cont_type
@@ -2010,6 +2088,26 @@ def _dummy():
             elif os.path.isdir(fname):
                 from shutil import rmtree
                 rmtree(fname)
+
+    def repr_rexp(rexp):
+        pattern = ("r%r" % rexp.pattern).replace(r'\\', '\\')
+        flags = rexp.flags
+        if python3:
+            flags = flags ^ re.U
+        if flags:
+            arr = []
+            if re.T & flags: arr.append('re.T')
+            if re.I & flags: arr.append('re.I')
+            if re.L & flags: arr.append('re.L')
+            if re.M & flags: arr.append('re.M')
+            if re.S & flags: arr.append('re.S')
+            if re.U & flags: arr.append('re.U')
+            if re.X & flags: arr.append('re.X')
+            if python3:
+                if re.A & flags: arr.append('re.A')
+            return "re.compile(%s, %s)" % (pattern, '|'.join(arr))
+        else:
+            return "re.compile(%s)" % (pattern,)
 
     @contextmanager
     def from_here(dirpath=None):

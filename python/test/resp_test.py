@@ -101,7 +101,7 @@ try:
     from requests.models import Response as RequestsResponse
 except (ImportError, SyntaxError):
     class RequestsResponse(object):
-        def __int__(self):
+        def __init__(self):
             self.status_code = None
             self.reason = None
             self.headers = {}
@@ -495,6 +495,121 @@ Responsed JSON is different from expected data.
         @be_failed(expected)
         def _():
             ok (response)._resp.json({"status": "ok"})
+
+
+    @with_response_class
+    def test_cookie_ok(self, Response):
+        response = Response()
+        response.headers['Set-Cookie'] = 'name1=val1'
+        ok (response)._resp.cookie('name1', 'val1')
+        ok (response)._resp.cookie('name1', re.compile(r'^VAL\d$', re.I))
+
+    @with_response_class
+    def test_cookie_ok_attributes(self, Response):
+        if sys.version.startswith('3.0'):
+            return   # cookie lib of Python3.0 has a bug
+        #
+        response = Response()
+        cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
+        response.headers['Set-Cookie'] = cookie_str % 'Wed, 01-Jan-2020 12:34:56 GMT'
+        ok (response)._resp.cookie('name3', 'val3',
+                                   domain   = 'www.example.com',
+                                   path     = '/cgi',
+                                   expires  = 'Wed, 01-Jan-2020 12:34:56 GMT',
+                                   max_age  = '120',
+                                   secure   = True,
+                                   httponly = True,
+                                   )
+        ok (response)._resp.cookie('name3', re.compile(r'^val3$'),
+                                   domain   = re.compile(r'^www\.example\.(com|net|org)$'),
+                                   path     = re.compile(r'^/'),
+                                   expires  = re.compile(r'^\w{3}, \d\d?-\w{3}-\d{4} \d\d:\d\d:\d\d GMT$'),
+                                   max_age  = re.compile(r'^\d+$'),
+                                   secure   = True,
+                                   httponly = True,
+                                   )
+
+    @with_response_class
+    def test_cookie_fail_when_no_set_cookie_header(self, Response):
+        response = Response()
+        @be_failed("'Set-Cookie' header is empty or not provided in response.")
+        def _():
+            ok (response)._resp.cookie('name1', 'val1')
+        response.headers['Set-Cookie'] = ''
+        @be_failed("'Set-Cookie' header is empty or not provided in response.")
+        def _():
+            ok (response)._resp.cookie('name1', 'val1')
+
+    @with_response_class
+    def test_cookie_fail_when_unexpected_value(self, Response):
+        response = Response()
+        response.headers['Set-Cookie'] = 'name1=val1'
+        @be_failed("Cookie 'name1': $actual == $expected: failed.\n"
+                   "  $actual:   'val1'\n"
+                   "  $expected: 'foobar'")
+        def _():
+            ok (response)._resp.cookie('name1', 'foobar')
+        @be_failed("Cookie 'name1': $expected.search($actual): failed.\n"
+                   r"  $expected: re.compile(r'^\d+$', re.I|re.M|re.S)" "\n"
+                   "  $actual:   'val1'")
+        def _():
+            ok (response)._resp.cookie('name1', re.compile(r'^\d+$', re.I|re.S|re.M))
+
+    @with_response_class
+    def test_cookie_fail_when_unexpected_attributes(self, Response):
+        if sys.version.startswith('3.0'):
+            return   # cookie lib of Python3.0 has a bug
+        #
+        response = Response()
+        cookie_str = 'name3=val3; domain=www.example.com; Path=/cgi; Expires=%s; Max-Age=120; Httponly; Secure'
+        response.headers['Set-Cookie'] = cookie_str % 'Wed, 01-Jan-2020 12:34:56 GMT'
+        #
+        @be_failed("Cookie 'name3': unexpected domain.\n"
+                   "  expected:  'example.com'\n"
+                   "  actual:    'www.example.com'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', domain='example.com')
+        @be_failed("Cookie 'name3': unexpected domain.\n"
+                   r"  expected:  re.compile(r'^\w+\.com$')" "\n"
+                   "  actual:    'www.example.com'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', domain=re.compile(r'^\w+\.com$'))
+        #
+        @be_failed("Cookie 'name3': unexpected path.\n"
+                   "  expected:  '/'\n"
+                   "  actual:    '/cgi'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', path='/')
+        @be_failed("Cookie 'name3': unexpected path.\n"
+                   r"  expected:  re.compile(r'/$')" "\n"
+                   "  actual:    '/cgi'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', path=re.compile(r'/$'))
+        #
+        @be_failed("Cookie 'name3': unexpected expires.\n"
+                   "  expected:  'Wed, 01-Jan-2020 12:34:56'\n"
+                   "  actual:    'Wed, 01-Jan-2020 12:34:56 GMT'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', expires='Wed, 01-Jan-2020 12:34:56')
+        @be_failed("Cookie 'name3': unexpected expires.\n"
+                   r"  expected:  re.compile(r'^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$')" "\n"
+                   "  actual:    'Wed, 01-Jan-2020 12:34:56 GMT'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', expires=re.compile(r'^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$'))
+        #
+        @be_failed("Cookie 'name3': unexpected max-age.\n"
+                   "  expected:  0\n"
+                   "  actual:    '120'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', max_age=0)
+        @be_failed("Cookie 'name3': unexpected max-age.\n"
+                   r"  expected:  re.compile(r'\d+\.\d+')" "\n"
+                   "  actual:    '120'")
+        def _(): ok (response)._resp.cookie('name3', 'val3', max_age=re.compile(r'\d+\.\d+'))
+        #
+        @be_failed("Cookie 'name3': unexpected httponly.\n"
+                   "  expected:  False\n"
+                   "  actual:    True")
+        def _(): ok (response)._resp.cookie('name3', 'val3', httponly=False)
+        #
+        @be_failed("Cookie 'name3': unexpected secure.\n"
+                   "  expected:  False\n"
+                   "  actual:    True")
+        def _(): ok (response)._resp.cookie('name3', 'val3', secure=False)
+
 
     def test_raises_UnsupportedResponseObjectError(self):
         if python2:
