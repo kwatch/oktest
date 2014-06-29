@@ -3,6 +3,53 @@
 CHANGES
 =======
 
+Release 0.15.0 (???)
+---------------------------
+
+* [enhance] oktest.web.WSGITest class supports multipart form data.
+
+    ## build multipart data
+    from oktest.web import MultiPart
+    mp = MultiPart()    # or boundary='abcdef'; mp = MutliPart(boundary)
+    mp.add("name1", "value1")          # add string value
+    with open("logo.png", 'wb') as f:  # add file value
+        mp.add("file1", f.read(), "logo.png", "image/png")
+    ## test with multipart data
+    from oktest.web import WSGITest
+    http = WSGITest(wsgi_app)
+    resp = http.POST('/upload', multipart=mp)  # or params=mp
+    ok (resp).is_response(200)
+
+* [enhance] oktest.web.WSGITest class supports 'Cookie' and 'Set-Cookie'.
+
+    from oktest.web import WSGITest
+    http = WSGITest(wsgi_app)
+    ## request: 'Cookie' header
+    resp = http.GET('/', cookies='name=value')  # or cookies={'name':'value'}
+    ## response: 'Set-Cookie' header
+    ok (resp).is_response(200).cookie('name', 'value')
+    ok (resp).is_response(200).cookie('name', re.compile(r'^value$'),
+                                      domain='www.example.com',
+                                      path='/cgi'
+                                      expires='Wed, 01-Jan-2020 12:34:56 GMT',
+                                      max_age='1200',
+                                      secure=True,
+                                      httponly=True)
+
+* [enhance] New assertion methods.
+
+    ok (xs).all(lambda x: x is None)       # ok when all items in xs are None
+    ok (xs).any(lambda x: x is None)       # ok when there is None in xs
+    ok (x).between(minval, maxval)         # ok when minval <= x <= maxval
+    ok (xs).length([minlen, maxlen])       # ok when minlen <= len(xs) <= maxlen
+    ok (dictionary).has_key('key')         # ok when dictinary has key
+    ok (dictionary).has_item('key','val')  # ok when dictionary has key an val
+
+* [bugfix] oktest.web.WSGITest now works on Python 3.4.
+
+* [bugfix] fix oktest.web.WSGITest class to encode urlpath when multibyte.
+
+
 Release 0.14.2 (2014-03-20)
 ---------------------------
 
