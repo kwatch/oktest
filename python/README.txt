@@ -447,25 +447,29 @@ Non-English language is available on ``@test()``::
         def _(self):
             assert 1+1 == 2
 
-``@test()`` decorator accepts user-defined options. You can specify any name and
-value as option. It is accessable by 'self._options' in ``setUp()``, therefore
-you can change behaviour of ``setUp()`` according to options. ::
+``@test()`` decorator accepts user-defined tags. You can specify any name and
+value as tags, and access to them by 'tags_of(self)' in both ``setUp()`` and
+test method. Therefore you can change behaviour of ``setUp()`` according to tags. ::
+
+    import unittest
+    from oktest import ok, test, {{*tags_of*}}
 
     class FooTest(unittest.TestCase):
 
         def setUp(self):
-            tag = {{*self._options.get("tag")*}}
-            if tag == "experimental":
+            tags = {{*tags_of(self)*}}
+            ## change setUp() behaviour according to tag value
+            if tags.get('tag1') == "experimental":
                 ....
 
-        @test("1 + 1 should be 2", {{*tag="experimental"*}})
+        @test("1 + 1 should be 2", {{*tag1="experimental", tag2=123*}})
         def _(self):
-            assert 1+1 == 2
+            assert {{*tags_of(self)*}} == {'tag1': "experimental", 'tag2': 123}
 
-You can filter testcase by user-defined options in command-line. ::
+You can filter testcase by user-defined tags in command-line. ::
 
     ## do test only tagged as 'experimental'
-    $ python -m oktest.py {{*-f tag=experimental*}} test/*_test.py
+    $ python -m oktest.py {{*-f tag1=experimental*}} test/*_test.py
 
 
 Fixture Injection
