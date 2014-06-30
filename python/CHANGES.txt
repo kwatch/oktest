@@ -45,6 +45,24 @@ Release 0.15.0 (???)
     ok (dictionary).has_key('key')         # ok when dictinary has key
     ok (dictionary).has_item('key','val')  # ok when dictionary has key an val
 
+* [enhance] New utility function 'options_of()' to get user-defined options.
+  ex:
+
+    import unittest
+    from oktest import ok, test, options_of
+
+    class FooTest(unittest.TestCase):
+
+        def setUp(self):
+            ## change setUp() behaviour according to tag
+            dictionary = options_of(self)
+            if dictionary.get('tag') == "experimental":
+                ....
+
+        @test("example", tag="experimental", num=123)
+        def _(self):
+            assert options_of(self) == {'tag': "experimental", 'num': 123}
+
 * [bugfix] oktest.web.WSGITest now works on Python 3.4.
 
 * [bugfix] fix oktest.web.WSGITest class to encode urlpath when multibyte.
