@@ -3,7 +3,7 @@
 CHANGES
 =======
 
-Release 0.15.0 (???)
+Release 0.15.0 (2014-07-01)
 ---------------------------
 
 * [enhance] oktest.web.WSGITest class supports multipart form data.
