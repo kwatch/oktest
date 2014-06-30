@@ -73,7 +73,7 @@ assert set(TEST_NAMES) == set(test_names)
 
 
 @recipe
-@spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
+@spices("-a: do with python from 2.4 to 3.4", "[testnames...]")
 def task_test(c, *args, **kwargs):
     """do test by oktest"""
     #optstr = " -m oktest"
@@ -87,7 +87,7 @@ def task_test(c, *args, **kwargs):
 
 @recipe
 @ingreds('test/doc_test.py')
-@spices("-a: do with python from 2.4 to 3.2", "[testnames...]")
+@spices("-a: do with python from 2.4 to 3.4", "[testnames...]")
 def task_unittest(c, *args, **kwargs):
     """do test by unittest module"""
     flag_all = bool(kwargs.get('a'))
