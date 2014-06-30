@@ -9,7 +9,7 @@
 ###
 
 __all__ = ('ok', 'NOT', 'NG', 'not_ok', 'run', 'spec', 'test', 'fail',
-           'skip', 'todo', 'at_end', 'subject', 'situation', 'main')
+           'skip', 'todo', 'tags_of', 'at_end', 'subject', 'situation', 'main')
 __version__ = "$Release: 0.0.0 $".split()[1]
 
 import sys, os, re, types, traceback, time, linecache
@@ -1051,6 +1051,23 @@ try:
 except ImportError:
     if python2:
         sys.exc_clear()
+
+
+def tags_of(self):
+    """returns tags of current test case.
+    ex.
+        class FooTestCase(unittest.TestCase):
+            def setUp(self):
+                print(repr(tags_of(self)))   #=> {'tag1': 'val1', 'tag2': 123}
+
+            @test("example", tag1='val1', tag2=123)
+            def _(self):
+                print(repr(tags_of(self)))   #=> {'tag1': 'val1', 'tag2': 123}
+    """
+    if not hasattr(self, '_testMethodName'):
+        raise TypeError("tags_of(): argument should be a test case, but got:%r" % (self,))
+    fn = self.__class__.__dict__[self._testMethodName]
+    return getattr(fn, '_tags')
 
 
 
