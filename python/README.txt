@@ -447,27 +447,26 @@ Non-English language is available on ``@test()``::
         def _(self):
             assert 1+1 == 2
 
-``@test()`` decorator accepts user-defined options. It is called as {{*spices*}}.
-Spice is an option passed to ``@test()`` decorator.
-You can specify any name and value as spice, and access to them by
-``spices_of(self)`` in both ``setUp()`` and test method.
+``@test()`` decorator accepts user-defined options. You can specify any
+name and value as options, and access to them by ``options_of(self)``
+in both ``setUp()`` and test method.
 
     import unittest
-    from oktest import ok, test, {{*spices_of*}}
+    from oktest import ok, test, {{*options_of*}}
 
     class FooTest(unittest.TestCase):
 
         def setUp(self):
-            dictionary = {{*spices_of(self)*}}
-            ## change setUp() behaviour according to spice
+            dictionary = {{*options_of(self)*}}
+            ## change setUp() behaviour according to tag
             if dictionary.get('tag') == "experimental":
                 ....
 
         @test("1 + 1 should be 2", {{*tag="experimental", num=123*}})
         def _(self):
-            assert {{*spices_of(self)*}} == {'tag': "experimental", 'num': 123}
+            assert {{*options_of(self)*}} == {'tag': "experimental", 'num': 123}
 
-You can filter testcase by spice in command-line. ::
+You can filter testcase by user-defined options in command-line. ::
 
     ## do test only tagged as 'experimental'
     $ python -m oktest.py {{*-f tag=experimental*}} test/*_test.py
