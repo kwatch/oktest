@@ -449,7 +449,7 @@ Non-English language is available on ``@test()``::
 
 ``@test()`` decorator accepts user-defined options. You can specify any
 name and value as options, and access to them by ``options_of(self)``
-in both ``setUp()`` and test method.
+in both ``setUp()`` and test method. ::
 
     import unittest
     from oktest import ok, test, {{*options_of*}}
@@ -1029,7 +1029,7 @@ And also possible to specify environ dict. ::
     response = http.GET('/', {{*environ=environ*}})
 
 Since release 0.15, Oktest.py provides ``oktest.web.MultiPart`` class
-which builds multipart form data.
+which builds multipart form data. ::
 
     from oktest.web import MultiPart
     mp = MultiPart()    # or boundary='abcdef'; mp = MutliPart(boundary)
