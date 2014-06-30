@@ -210,7 +210,7 @@ class TestContext_TC(unittest.TestCase):
         def _(self):
             pass
 
-    def test_with_tags(self):
+    def test_with_options(self):
         testclass = self._ContextTagTest
         for k in dir(testclass):
             if   re.match(r'.*test1', k):  test1 = getattr(testclass, k)
@@ -222,15 +222,15 @@ class TestContext_TC(unittest.TestCase):
             elif re.match(r'.*test8', k):  test8 = getattr(testclass, k)
             elif re.match(r'.*test9', k):  test9 = getattr(testclass, k)
         #
-        self.assertEqual(test1._tags, {'tag1': 'aaa', 'tag2': 'bbb'})
-        self.assertEqual(test2._tags, {'tag1': 'aaa', 'tag2': 'bbb'})
-        self.assertEqual(test3._tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
-        self.assertEqual(test4._tags, {})
+        self.assertEqual(test1._options, {'tag1': 'aaa', 'tag2': 'bbb'})
+        self.assertEqual(test2._options, {'tag1': 'aaa', 'tag2': 'bbb'})
+        self.assertEqual(test3._options, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
+        self.assertEqual(test4._options, {})
         #
-        self.assertEqual(test6._tags, {'tag1': 'eee', 'tag2': 'fff'})
-        self.assertEqual(test7._tags, {'tag1': 'eee', 'tag2': 'fff'})
-        self.assertEqual(test8._tags, {'tag1': 'ggg', 'tag2': 'fff', 'tag3': 'hhh'})
-        self.assertEqual(test9._tags, {})
+        self.assertEqual(test6._options, {'tag1': 'eee', 'tag2': 'fff'})
+        self.assertEqual(test7._options, {'tag1': 'eee', 'tag2': 'fff'})
+        self.assertEqual(test8._options, {'tag1': 'ggg', 'tag2': 'fff', 'tag3': 'hhh'})
+        self.assertEqual(test9._options, {})
 
 
     class _NestedContextTagTest(unittest.TestCase):
@@ -257,13 +257,13 @@ class TestContext_TC(unittest.TestCase):
             #
             x1.__exit__()
 
-    def test_nested_context_tags(self):
+    def test_nested_context_options(self):
         testclass = self._NestedContextTagTest
         for k in dir(testclass):
             if   re.match(r'^test_.*test1', k):  test1 = getattr(testclass, k)
             elif re.match(r'^test_.*test2', k):  test2 = getattr(testclass, k)
-        self.assertEqual(test1._tags, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
-        self.assertEqual(test2._tags, {'tag1': 'eee', 'tag2': 'bbb', 'tag3': 'ddd', 'tag4': 'fff'})
+        self.assertEqual(test1._options, {'tag1': 'ccc', 'tag2': 'bbb', 'tag3': 'ddd'})
+        self.assertEqual(test2._options, {'tag1': 'eee', 'tag2': 'bbb', 'tag3': 'ddd', 'tag4': 'fff'})
 
 
 

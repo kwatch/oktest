@@ -1067,7 +1067,7 @@ def options_of(self):
     if not hasattr(self, '_testMethodName'):
         raise TypeError("options_of(): argument should be a test case, but got:%r" % (self,))
     fn = self.__class__.__dict__[self._testMethodName]
-    return getattr(fn, '_tags')
+    return getattr(fn, '_options')
 
 
 
@@ -1111,7 +1111,7 @@ class TestRunner(object):
         #names.sort()
         #return names
         testnames = [ k for k in dir(klass) if k.startswith('test') and hasattr(getattr(klass, k), '__class__') ]
-        ## filter by test name or user-defined tags
+        ## filter by test name or user-defined options
         pattern, key, val = self._filter_test, self._filter_key, self._filter_val
         if pattern or key:
             testnames = [ s for s in testnames
@@ -1305,7 +1305,7 @@ def _filtered(klass, meth, tname, pattern, key, val, _rexp=re.compile(r'^test(_|
             return False   # skip testcase
     if key:
         if not meth: meth = getattr(klass, tname)
-        d = getattr(meth, '_tags', None)
+        d = getattr(meth, '_options', None)
         if not (d and isinstance(d, dict) and fnmatch(str(d.get(key)), val)):
             return False   # skip testcase
     return True   # invoke testcase
@@ -2384,7 +2384,7 @@ def spec(desc):   # deprecated
 ## @test() decorator
 ##
 
-def test(description_text=None, **tags):
+def test(description_text=None, **options):
     frame = sys._getframe(1)
     localvars  = frame.f_locals
     globalvars = frame.f_globals
@@ -2392,7 +2392,7 @@ def test(description_text=None, **tags):
     localvars['__n'] = n
     m = SPEC_ID_REXP.match(description_text or '')
     if m:
-        tags['sid'] = m.group(1)
+        options['sid'] = m.group(1)
     def deco(orig_func):
         if hasattr(orig_func, '_original_function'):
             orig_func_ = orig_func._original_function or orig_func
@@ -2402,17 +2402,17 @@ def test(description_text=None, **tags):
         fixture_names = argnames[1:]   # except 'self'
         if fixture_names:
             def newfunc(self):
-                self._tags = tags
+                self._options = options
                 self._description = description_text
                 return fixture_injector.invoke(self, orig_func, globalvars)
         else:
             def newfunc(self):
-                self._tags = tags
+                self._options = options
                 self._description = description_text
                 return orig_func(self)
         orig_name = orig_func.__name__
         newfunc.__doc__  = orig_func.__doc__ or description_text
-        newfunc._tags = tags
+        newfunc._options = options
         newfunc._firstlineno = getattr(orig_func, '_firstlineno', None) or util._func_firstlineno(orig_func)
         if orig_name.startswith('test'):
             newfunc.__name__ = orig_name
@@ -2596,9 +2596,9 @@ def context():
                         ...
         """
 
-        def __init__(self, desc, tags=None, _lineno=None):
+        def __init__(self, desc, options=None, _lineno=None):
             self.desc = desc
-            self.tags = tags
+            self.options = options
             self.items = []
             self.parent = None
             self._lineno = _lineno
@@ -2631,13 +2631,13 @@ def context():
                     if not hasattr(func, '_test_context'):
                         func._test_context = self.desc
                         self.items.append((name, func))
-                    if self.tags:
-                        if not hasattr(func, '_tags'):
-                            func._tags = self.tags.copy()
+                    if self.options:
+                        if not hasattr(func, '_options'):
+                            func._options = self.options.copy()
                         else:
-                            for k, v in self.tags.items():
-                                if k not in func._tags:
-                                    func._tags[k] = v
+                            for k, v in self.options.items():
+                                if k not in func._options:
+                                    func._options[k] = v
             self._sort_items(self.items)
             del self._f_locals
             del self._varnames
@@ -2668,15 +2668,15 @@ def context():
             return "".join(buf)
 
 
-    def subject(desc, **tags):
+    def subject(desc, **options):
         """helper to group test methods by subject"""
         lineno = sys._getframe(1).f_lineno
-        return TestContext(desc, tags, _lineno=lineno)
+        return TestContext(desc, options, _lineno=lineno)
 
-    def situation(desc, **tags):
+    def situation(desc, **options):
         """helper to group test methods by situation or condition"""
         lineno = sys._getframe(1).f_lineno
-        return TestContext(desc, tags, _lineno=lineno)
+        return TestContext(desc, options, _lineno=lineno)
 
 
     return locals()
