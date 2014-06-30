@@ -457,12 +457,12 @@ in both ``setUp()`` and test method.
     class FooTest(unittest.TestCase):
 
         def setUp(self):
-            dictionary = {{*options_of(self)*}}
             ## change setUp() behaviour according to tag
+            dictionary = {{*options_of(self)*}}
             if dictionary.get('tag') == "experimental":
                 ....
 
-        @test("1 + 1 should be 2", {{*tag="experimental", num=123*}})
+        @test("example", {{*tag="experimental", num=123*}})
         def _(self):
             assert {{*options_of(self)*}} == {'tag': "experimental", 'num': 123}
 
