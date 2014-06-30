@@ -13,6 +13,7 @@ test/doc_test.py
 test/dummy_test.py
 test/fixture_test.py
 test/mainapp_test.py
+test/options_test.py
 test/reporter_test.py
 test/resp_test.py
 test/runner_test.py
