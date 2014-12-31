@@ -80,51 +80,51 @@ class WSGITest_TC(unittest.TestCase):
             assert resp.body_unicode == _U("OK <input=b''>")
 
     def test__call___query(self):
-        resp = self.http.POST('/hello', query={'q':"SOS", 'page':'1'})
+        resp = self.http.POST('/hello', query={'q':"SOS", 'page':0})
         if python2:
             assert resp.body_binary  == _B("OK <input=''>")
             assert resp.body_unicode == _U("OK <input=''>")
         elif python3:
             assert resp.body_binary  == _B("OK <input=b''>")
             assert resp.body_unicode == _U("OK <input=b''>")
-        assert resp._environ['QUERY_STRING'] in ("q=SOS&page=1", "page=1&q=SOS")
+        assert resp._environ['QUERY_STRING'] in ("q=SOS&page=0", "page=0&q=SOS")
         assert 'CONTENT_TYPE' not in resp._environ
         assert 'CONTENT_LENGTH' not in resp._environ
 
     def test__call___form(self):
-        resp = self.http.POST('/hello', form={'q':"SOS", 'page':'1'})
+        resp = self.http.POST('/hello', form={'q':"SOS", 'page':0})
         if python2:
-            assert resp.body_binary in ("OK <input='q=SOS&page=1'>",
-                                        "OK <input='page=1&q=SOS'>",)
+            assert resp.body_binary in ("OK <input='q=SOS&page=0'>",
+                                        "OK <input='page=0&q=SOS'>",)
         elif python3:
-            assert resp.body_binary in (_B("OK <input=b'q=SOS&page=1'>"),
-                                        _B("OK <input=b'page=1&q=SOS'>"),)
+            assert resp.body_binary in (_B("OK <input=b'q=SOS&page=0'>"),
+                                        _B("OK <input=b'page=0&q=SOS'>"),)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
+        assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=0'))
 
     def test__call___params(self):
-        resp = self.http.GET('/hello', params={'q':"SOS", 'page':'1'})
+        resp = self.http.GET('/hello', params={'q':"SOS", 'page':0})
         if python2:
             assert resp.body_binary  == _B("OK <input=''>")
             assert resp.body_unicode == _U("OK <input=''>")
         elif python3:
             assert resp.body_binary  == _B("OK <input=b''>")
             assert resp.body_unicode == _U("OK <input=b''>")
-        assert resp._environ['QUERY_STRING'] in ("q=SOS&page=1", "page=1&q=SOS")
+        assert resp._environ['QUERY_STRING'] in ("q=SOS&page=0", "page=0&q=SOS")
         assert 'CONTENT_TYPE' not in resp._environ
         assert 'CONTENT_LENGTH' not in resp._environ
         #
-        resp = self.http.POST('/hello', params={'q':"SOS", 'page':'1'})
+        resp = self.http.POST('/hello', params={'q':"SOS", 'page':0})
         if python2:
-            assert resp.body_binary in ("OK <input='q=SOS&page=1'>",
-                                        "OK <input='page=1&q=SOS'>",)
+            assert resp.body_binary in ("OK <input='q=SOS&page=0'>",
+                                        "OK <input='page=0&q=SOS'>",)
         elif python3:
-            assert resp.body_binary in (_B("OK <input=b'q=SOS&page=1'>"),
-                                        _B("OK <input=b'page=1&q=SOS'>"),)
+            assert resp.body_binary in (_B("OK <input=b'q=SOS&page=0'>"),
+                                        _B("OK <input=b'page=0&q=SOS'>"),)
         assert resp._environ['QUERY_STRING'] == ""
         assert resp._environ['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=1'))
+        assert resp._environ['CONTENT_LENGTH'] == str(len('q=SOS&page=0'))
         #
         mp = MultiPart("qwerty")
         mp.add("name1", "val1")

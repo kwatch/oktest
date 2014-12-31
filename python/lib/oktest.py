@@ -3208,7 +3208,7 @@ class WSGITest(object):
         q = _quote_plus
         arr = []; add = arr.append
         for k in param_dict:
-            v = param_dict[k] or ''
+            v = param_dict[k]
             if isinstance(v, (list, tuple)):
                 vs = v
                 for v in vs:
