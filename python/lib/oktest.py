@@ -783,26 +783,7 @@ class ResponseAssertionObject(AssertionObject):
     def cookie(self, name, val, domain=None, path=None, expires=None, max_age=None, secure=None, httponly=None, comment=None, version=None):
         global _SimpleCookie
         if _SimpleCookie is None:
-            if python2:
-                from Cookie import SimpleCookie
-            elif python3:
-                from http.cookies import SimpleCookie
-            if sys.version >= '3.3.3':
-                _SimpleCookie = SimpleCookie
-            else:
-                ## hack to avoid a bug in standard cookie lib (see http://bugs.python.org/issue16611)
-                class _SimpleCookie(SimpleCookie):
-                    def load(self, rawdata):
-                        for line in re.split(r'\r?\n', rawdata):
-                            keys1 = set(self.keys())
-                            super(_SimpleCookie, self).load(line)
-                            keys2 = set(self.keys())
-                            cookie_name = list(keys2 - keys1)[0]
-                            morsel = self[cookie_name]
-                            for x in line.split(';'):
-                                x = x.strip().lower()
-                                if x == 'secure' or x == 'httponly':
-                                    morsel[x] = True
+            _load_SimpleCookie_class()
         #
         response = self.target
         cookie_str = self._resp_header(response, 'Set-Cookie')
@@ -856,6 +837,30 @@ class ResponseAssertionObject(AssertionObject):
         return self
 
 _SimpleCookie = None      # lazy import
+def _load_SimpleCookie_class():
+    global _SimpleCookie
+    if _SimpleCookie:
+        return
+    if python2:
+        from Cookie import SimpleCookie
+    elif python3:
+        from http.cookies import SimpleCookie
+    if sys.version >= '3.3.3':
+        _SimpleCookie = SimpleCookie
+    else:
+        ## hack to avoid a bug in standard cookie lib (see http://bugs.python.org/issue16611)
+        class _SimpleCookie(SimpleCookie):
+            def load(self, rawdata):
+                for line in re.split(r'\r?\n', rawdata):
+                    keys1 = set(self.keys())
+                    super(_SimpleCookie, self).load(line)
+                    keys2 = set(self.keys())
+                    cookie_name = list(keys2 - keys1)[0]
+                    morsel = self[cookie_name]
+                    for x in line.split(';'):
+                        x = x.strip().lower()
+                        if x == 'secure' or x == 'httponly':
+                            morsel[x] = True
 
 del AssertionObject.status
 del AssertionObject.cont_type
