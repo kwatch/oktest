@@ -1039,7 +1039,7 @@ which builds multipart form data. ::
         #=> multipart/form-data; boundary=0dC42pwi4FJs4czr-zMTPjCCDPJEZ_acT
 
     mp.add("name1", "value1")          # add string value
-    with open("logo.png", 'wb') as f:  # add file value
+    with open("logo.png", 'rb') as f:  # add file value
         mp.add("file1", f.read(), "logo.png", "image/png")
     print(mp.build())
 
@@ -1101,22 +1101,22 @@ between:
 	Tuple of min and max value.
 	ex::
 
-	    Validator(name, between(0, 100))
+	    Validator(name, between=(0, 100))
 
 length:
 	Int of length, or tuple of min and max length.
 	ex::
 
-	    Validator(name, 255)
-	    Validator(name, (1, 255))
+	    Validator(name, length=255)
+	    Validator(name, length=(1, 255))
 
 pattern:
 	Regular expression string or pattern object or tuple of pattern and option
 	ex::
 
-	    Validator(name, r'^[a-f0-9]+$')
-	    Validator(name, (r'^[a-f0-9]+$', re.I))
-	    Validator(name, re.compile(r'^[a-f0-9]+$', re.I))
+	    Validator(name, pattern=r'^[a-f0-9]+$')
+	    Validator(name, pattern=(r'^[a-f0-9]+$', re.I))
+	    Validator(name, pattern=re.compile(r'^[a-f0-9]+$', re.I))
 
 func:
 	Callback function which returns error message when validation failed.
