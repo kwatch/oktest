@@ -3334,6 +3334,16 @@ class WSGIResponse(object):
     #body = body_binary
     #text = body_unicode
 
+    @property
+    def cookies(self):
+        if _SimpleCookie is None:
+            _load_SimpleCookie_class()
+        cookie = _SimpleCookie()
+        for k, v in self.headers.items():
+            if k == 'Set-Cookie' or k.lower() == 'set-cookie':
+                cookie.load(v)
+        return cookie
+
     def _set_body_and_text(self, iterable):
         buf = []; add = buf.append
         try:

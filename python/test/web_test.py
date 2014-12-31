@@ -313,6 +313,39 @@ class WSGIResponse_TC(unittest.TestCase):
         else:
             raise AssertionFailed("assertion expected but not raised")
 
+    def test_cookies(self):
+        def app(environ, start_response):
+            resp_headers = [
+                ('Content-Type', "application/json"),
+                ('Set-Cookie', "key1=value1"),
+                ('set-cookie', "key2=value2; expires=Mon, 01-Jan-1990 00:00:00 GMT; HttpOnly; Secure"),
+            ]
+            start_response('200 OK', resp_headers)
+            return [_B('''{"status": "OK"}''')]
+        http = WSGITest(app)
+        resp = http.GET('/')
+        cookie1 = resp.cookies['key1']
+        self.assertEqual(cookie1.value,       "value1")
+        self.assertEqual(cookie1['expires'],  "")
+        self.assertEqual(cookie1['httponly'], "")
+        self.assertEqual(cookie1['secure'],   "")
+        cookie2 = resp.cookies['key2']
+        self.assertEqual(cookie2.value,       "value2")
+        self.assertEqual(cookie2['expires'],  "Mon, 01-Jan-1990 00:00:00 GMT")
+        self.assertEqual(cookie2['httponly'], True)
+        self.assertEqual(cookie2['secure'],   True)
+        #
+        def app(environ, start_response):
+            resp_headers = [
+                ('Content-Type', 'application/json'),
+                #('Set-Cookie', 'key1=value1'),
+            ]
+            start_response('200 OK', resp_headers)
+            return [_B('''{"status": "OK"}''')]
+        http = WSGITest(app)
+        resp = http.GET('/')
+        assert resp.cookies != None
+
     def test_warning_when_response_body_contains_unicode(self):
         def app(env, callback):
             callback('200 OK', [('Content-Type', 'text/plain')])
