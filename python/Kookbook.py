@@ -33,19 +33,20 @@ kookbook.default = 'test'
 ### test
 ###
 
+vs_home = os.environ.get('VS_HOME')  or '/opt/vs'
 python_binaries = [
-    ('2.4', '/opt/local/bin/python2.4'),
+    #('2.4', '/opt/local/bin/python2.4'),
     #('2.5', '/opt/local/bin/python2.5'),
     #('2.6', '/opt/local/bin/python2.6'),
     #('2.7', '/opt/local/bin/python2.7'),
-    ('2.5', '/opt/lang/python/2.5.5/bin/python'),
-    ('2.6', '/opt/lang/python/2.6.7/bin/python'),
-    ('2.7', '/opt/lang/python/2.7.2/bin/python'),
-    ('3.0', '/opt/lang/python/3.0.1/bin/python'),
-    ('3.1', '/opt/lang/python/3.1.4/bin/python'),
-    ('3.2', '/opt/lang/python/3.2.0/bin/python'),
-    ('3.3', '/opt/lang/python/3.3.3/bin/python'),
-    ('3.4', '/opt/lang/python/3.4.0/bin/python'),
+    #('2.5', vs_home+'/python/2.5.5/bin/python'),
+    ('2.6', vs_home+'/python/2.6.9/bin/python'),
+    ('2.7', vs_home+'/python/2.7.7/bin/python'),
+    #('3.0', vs_home+'/python/3.0.1/bin/python'),
+    ('3.1', vs_home+'/python/3.1.5/bin/python'),
+    ('3.2', vs_home+'/python/3.2.6/bin/python'),
+    ('3.3', vs_home+'/python/3.3.6/bin/python'),
+    ('3.4', vs_home+'/python/3.4.1/bin/python'),
 ]
 
 
