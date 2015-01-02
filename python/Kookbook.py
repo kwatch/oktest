@@ -77,12 +77,21 @@ assert set(TEST_NAMES) == set(test_names)
 @spices("-a: do with python from 2.4 to 3.4", "[testnames...]")
 def task_test(c, *args, **kwargs):
     """do test by oktest"""
+    def _set_hashseed(ver):
+        if isinstance(ver, str):
+            ver = tuple( int(x) for x in ver.split('.') )
+        if ver >= (3, 4):
+            os.environ['PYTHONHASHSEED'] = '20'
     #optstr = " -m oktest"
     optstr = " -m oktest -sp test"
     if kwargs.get('a'):
         for ver, execpath in python_binaries:
+            _set_hashseed(ver)
             system_f(execpath + optstr)
     else:
+        if sys.version_info[0:2] >= (3, 4):
+            os.environ['PYTHONHASHSEED'] = '20'
+        _set_hashseed(sys.version_info[0:2])
         system(sys.executable + optstr)
 
 
