@@ -3,6 +3,19 @@
 CHANGES
 =======
 
+
+Release 0.15.1 (2015-01-02)
+---------------------------
+
+* [bugfix] fix 'oktest.web.WSGITest' class to handle 'params={"x":0}' correctly::
+
+      http = WSGITest(app)
+      resp = http.GET('/urlpath', params={'x': 0})
+             # 'GET /urlpath?x=0' expected, but query param was ignored. Now fixed.
+
+* [bugfix] fix 'README.txt' document.
+
+
 Release 0.15.0 (2014-07-01)
 ---------------------------
 
