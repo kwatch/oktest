@@ -2453,6 +2453,7 @@ fixture_manager = FixtureManager()
 
 
 class FixtureTransaction(object):
+    __slots__ = ('_injector', '_self_obj', '_opts', '_resolved', '_releasers')
 
     def __init__(self, injector, self_obj, *opts):
         self._injector = injector
