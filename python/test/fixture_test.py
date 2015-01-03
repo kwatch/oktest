@@ -371,5 +371,94 @@ class Feature_addCleanup_TC(unittest.TestCase):
 
 
 
+class FixtureTransaction_TC(unittest.TestCase):
+
+    def test_transaction(self):
+        self_obj = object()
+        globalvars = globals()
+        tx = oktest.fixture_injector.transaction(self_obj, globalvars)
+        assert isinstance(tx, oktest.FixtureTransaction)
+
+    def test_context(self):
+        self_obj = object()
+        globalvars = globals()
+        tx = oktest.fixture_injector.transaction(self_obj, globalvars)
+        #
+        tx.__enter__()
+        assert tx._resolved == {"self": self_obj}
+        assert tx._releasers == {"self": None}
+        #
+        tx.__exit__(*sys.exc_info())
+        assert tx._resolved == {}
+        assert tx._releasers == {}
+
+    def test_invoke__fixtures(self):
+        class FooTest(object):
+            def provide_x(self):
+                return 3
+            def provide_y(self, x):
+                return x+10
+            def provide_arr(self, val, _arr=[]):
+                _arr.append(val)
+                return _arr
+            def test1(self, g1, x, y, z=100):
+                self._actual_test1 = (g1, x, y, z)
+        #
+        self_obj = FooTest()
+        globalvars = globals()
+        tx = oktest.fixture_injector.transaction(self_obj, globalvars)
+        #
+        tx.__enter__()
+        assert tx._resolved == {"self": self_obj}
+        assert tx._releasers == {"self": None}
+        #
+        tx.invoke(self_obj.test1)
+        assert self_obj._actual_test1 == ({"key": "G1"}, 3, 13, 100)
+        assert tx._resolved == {"self": self_obj,
+                                "g1": {"key": "G1"}, "x": 3, "y": 13, "z": 100}
+        #
+        def testfunc(self, x, z=101):
+            self._actual_testfunc = (x, z)
+        tx.invoke(testfunc)
+        assert self_obj._actual_testfunc == (3, 101)
+        assert tx._resolved == {"self": self_obj,
+                                "g1": {"key": "G1"}, "x": 3, "y": 13, "z": 101}
+        #
+        tx.__exit__(*sys.exc_info())
+        assert tx._resolved == {}
+        assert tx._releasers == {}
+
+    def test_invoke__transaction(self):
+        class BarTest(object):
+            def provide_arr(self, val, _arr=[]):
+                _arr.append(val)
+                return _arr
+            def test2(self, arr, val="A"):
+                self._actual_test2 = arr
+            def test3(self, arr, val="B"):
+                self._actual_test3 = arr
+        #
+        self_obj = BarTest()
+        globalvars = globals()
+        tx = oktest.fixture_injector.transaction(self_obj, globalvars)
+        #
+        tx.__enter__()
+        assert tx._resolved == {"self": self_obj}
+        assert tx._releasers == {"self": None}
+        #
+        tx.invoke(self_obj.test2)
+        assert self_obj._actual_test2 == ["A"]
+        tx.invoke(self_obj.test3)
+        assert self_obj._actual_test3 != ["B"]
+        assert self_obj._actual_test3 == ["A"]
+        assert tx._resolved == {"self": self_obj,
+                                "arr": ["A"], "val": "B"}
+        #
+        tx.__exit__(*sys.exc_info())
+        assert tx._resolved == {}
+        assert tx._releasers == {}
+
+
+
 if __name__ == '__main__':
     unittest.main()
