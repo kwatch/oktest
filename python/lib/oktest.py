@@ -2452,6 +2452,27 @@ class FixtureManager(object):
 fixture_manager = FixtureManager()
 
 
+class FixtureTransaction(object):
+
+    def __init__(self, injector, self_obj, *opts):
+        self._injector = injector
+        self._self_obj = self_obj
+        self._opts     = opts
+
+    def __enter__(self):
+        self._resolved  = {"self": self._self_obj}  # {"arg_name": arg_value}
+        self._releasers = {"self": None}       # {"arg_name": releaser_func()}
+
+    def __exit__(self, *args):
+        self._injector._release_fixtures(self._resolved, self._releasers)
+        self._releasers.clear()
+        self._resolved.clear()
+
+    def invoke(self, func):   # func can be an method object
+        arguments = self._injector._provide_fixtures(func, self._resolved, self._releasers, *self._opts)
+        return func(*arguments)
+
+
 class FixtureInjector(object):
 
     def invoke(self, object, func, *opts):
