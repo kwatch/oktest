@@ -2475,10 +2475,20 @@ class FixtureTransaction(object):
 
 class FixtureInjector(object):
 
-    def invoke(self, object, func, *opts):
+    def transaction(self, self_obj, *opts):
+        return FixtureTransaction(self, self_obj, *opts)
+
+    def invoke(self, self_obj, func, *opts):
+        tx = self.transaction(self_obj, *opts)
+        tx.__enter__()
+        try:
+            return tx.invoke(func)
+        finally:
+            tx.__exit__(*sys.exc_info())
+
+    def _provide_fixtures(self, func, resolved, releasers, *opts):
         """invoke function with fixtures."""
-        releasers = {"self": None}     # {"arg_name": releaser_func()}
-        resolved  = {"self": object}   # {"arg_name": arg_value}
+        object = resolved['self']
         in_progress = []
         ##
         if hasattr(func, '_original_function'):
@@ -2528,11 +2538,7 @@ class FixtureInjector(object):
         ##
         arguments = [ _resolve(aname) for aname in arg_names ]
         assert not in_progress
-        try:
-            #return func(object, *arguments)
-            return func(*arguments)
-        finally:
-            self._release_fixtures(resolved, releasers)
+        return arguments
 
     def _release_fixtures(self, resolved, releasers):
         for name in resolved:
