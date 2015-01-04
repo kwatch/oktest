@@ -2405,20 +2405,17 @@ def test(description_text=None, **options):
             orig_func_ = orig_func
         argnames = util.func_argnames(orig_func_)
         has_fixture_names = len(argnames) > 1   # except 'self'
-        if has_fixture_names:
-            def newfunc(self):
-                self._options = options
-                self._description = description_text
+        def newfunc(self):
+            self._options = options
+            self._description = description_text
+            if has_fixture_names:
                 ctx = fixture_injector.context(self, globalvars)
                 ctx.__enter__()
                 try:
                     return ctx.invoke(orig_func)
                 finally:
                     ctx.__exit__(*sys.exc_info())
-        else:
-            def newfunc(self):
-                self._options = options
-                self._description = description_text
+            else:
                 return orig_func(self)
         orig_name = orig_func.__name__
         newfunc.__doc__  = orig_func.__doc__ or description_text
