@@ -2411,17 +2411,17 @@ def test(description_text=None, **options):
         def newfunc(self):
             self._options = options
             self._description = description_text
-            before = getattr(self, 'before', None)
-            after  = getattr(self, 'after', None)
-            if has_fixture_names or before or after:
+            if has_fixture_names or hasattr(self, 'before') or hasattr(self, 'after'):
                 ctx = fixture_injector.context(self, globalvars)
                 ctx.__enter__()
                 try:
                     try:
-                        if before: ctx.invoke(before)
+                        if hasattr(self, 'before'):
+                            ctx.invoke(self.before)
                         return ctx.invoke(orig_func)
                     finally:
-                        if after: ctx.invoke(after)
+                        if hasattr(self, 'after'):
+                            ctx.invoke(self.after)
                 finally:
                     ctx.__exit__(*sys.exc_info())
             else:
