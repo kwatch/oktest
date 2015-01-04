@@ -1146,34 +1146,47 @@ class TestRunner(object):
         except Exception:
             return meth.__name__, sys.exc_info()
 
+    def _invoke_with_ctx(self, ctx, method):
+        try:
+            ctx.invoke(method)
+            return None, None
+        except KeyboardInterrupt:
+            raise
+        except Exception:
+            return method.__name__, sys.exc_info()
+
     def run_class(self, klass, testnames=None):
+        meth_name1 = meth_name2 = meth_name3 = meth_name4 = None
+        exc_info1 = exc_info2 = exc_info3 = exc_info4 = None
         self._enter_testclass(klass)
         try:
-            method_name, exc_info = self._invoke(klass, '', 'setUpClass')
-            if not exc_info:
+            meth_name1, exc_info1 = self._invoke(klass, '', 'setUpClass')
+            if not exc_info1:
                 try:
                     before_all = getattr(klass, 'before_all', None)
-                    after_all  = getattr(klass, 'after_all', None)
+                    after_all  = getattr(klass, 'after_all',  None)
                     if before_all or after_all:
                         globalvars = (before_all or after_all).im_func.__globals__
                         ctx = fixture_injector.context(klass, globalvars)
                         ctx.__enter__()
                         try:
                             if before_all:
-                                ctx.invoke(before_all)
-                            try:
-                                self.run_testcases(klass, testnames)
-                            finally:
-                                if after_all:
-                                    ctx.invoke(after_all)
+                                meth_name2, exc_info2 = self._invoke_with_ctx(ctx, before_all)
+                            if not exc_info2:
+                                try:
+                                    self.run_testcases(klass, testnames)
+                                finally:
+                                    if after_all:
+                                        meth_name3, exc_info3 = self._invoke_with_ctx(ctx, after_all)
                         finally:
                             ctx.__exit__(*sys.exc_info())
                     else:
                         self.run_testcases(klass, testnames)
                 finally:
-                    method_name, exc_info = self._invoke(klass, '', 'tearDownClass')
+                    meth_name4, exc_info4 = self._invoke(klass, '', 'tearDownClass')
         finally:
-            if not exc_info: method_name = None
+            method_name = meth_name1 or meth_name2 or meth_name3 or meth_name4
+            exc_info    = exc_info1  or exc_info2  or exc_info3  or exc_info4
             self._exit_testclass(klass, method_name, exc_info)
 
     def run_testcases(self, klass, testnames=None):
