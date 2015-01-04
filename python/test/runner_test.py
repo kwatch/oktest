@@ -173,17 +173,23 @@ run('.*TestCase$')
         self.do_test(desc, script, expected)
 
 
-    def test_before_after(self):
-        desc = "before_all/before_each/after_each/after_all"
+    def test_before_all_after_all(self):
+        desc = "setUpClass -> before_all -> after_all -> tearDownClass"
         script = r"""
 from oktest import *
 class FooTest(object):
+    @classmethod
+    def setUpClass(cls):
+        print('setUpClass() called.')
+    @classmethod
+    def tearDownClass(cls):
+        print('tearDownClass() called.')
+    @classmethod
     def before_all(cls):
         print('before_all() called.')
-    before_all = classmethod(before_all)
+    @classmethod
     def after_all(cls):
         print('after_all() called.')
-    after_all  = classmethod(after_all)
     def before(self):               # not called
         print('before() called.')
     def after(self):                # not called
@@ -201,16 +207,18 @@ class FooTest(object):
 run('FooTest')
 """[1:]
         expected = r"""
+setUpClass() called.
 before_all() called.
 * FooTest.test_1 ... test_1() called.
 [ok]
 * FooTest.test_2 ... test_2() called.
 [NG] 2 == 3 : failed.
-   _test_.py:19: ok (1+1) == 3
+   _test_.py:25: ok (1+1) == 3
 * FooTest.test_3 ... test_3() called.
 [ERROR] ValueError: invalid literal for int() with base 10: 'abc'
-  - _test_.py:22:  int('abc')
+  - _test_.py:28:  int('abc')
 after_all() called.
+tearDownClass() called.
 """[1:]
         if python24:
             expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
