@@ -378,12 +378,9 @@ class FixtureContext_TC(unittest.TestCase):
         return oktest.fixture_injector.context(self_obj, globalvars)
 
     def test_context(self):
-        tx = self._new_tx(object())
-        assert isinstance(tx, oktest.FixtureContext)
-
-    def test_context(self):
         self_obj = object()
         tx = self._new_tx(self_obj)
+        assert isinstance(tx, oktest.FixtureContext)
         #
         tx.__enter__()
         assert tx._resolved  == {"self": self_obj}
