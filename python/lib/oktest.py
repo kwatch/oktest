@@ -1166,7 +1166,10 @@ class TestRunner(object):
                     before_all = getattr(klass, 'before_all', None)
                     after_all  = getattr(klass, 'after_all',  None)
                     if before_all or after_all:
-                        globalvars = (before_all or after_all).im_func.__globals__
+                        if python2:
+                            globalvars = (before_all or after_all).im_func.__globals__
+                        elif python3:
+                            globalvars = (before_all or after_all).__globals__
                         ctx = fixture_injector.context(klass, globalvars)
                         ctx.__enter__()
                         try:
