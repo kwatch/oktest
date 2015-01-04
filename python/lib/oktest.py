@@ -1171,7 +1171,7 @@ class TestRunner(object):
                               cmeth.im_func.__globals__  if python2 else
                               cmeth.__globals__          if python3 else
                               None)
-                ctx = fixture_injector.context(klass, globalvars)
+                ctx = fixture_injector.context(object(), globalvars)
                 ctx.__enter__()
                 try:
                     if before_all:

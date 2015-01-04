@@ -224,6 +224,48 @@ tearDownClass() called.
             expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
         self.do_test(desc, script, expected)
 
+    def test_fixture_injection_for_before_all_after_all(self):
+        desc = "fixture injection for before_all()/after_all()"
+        script = r"""
+from oktest import *
+def provide_x(self):
+    return 3
+def provide_y(self, x):
+    return x+10
+class FooTest(object):
+    @classmethod
+    def before_all(cls, x, y):
+        print('before_all() called.')
+        ok (x) == 3
+        ok (y) == 13
+    @classmethod
+    def after_all(cls, x, y):
+        print('after_all() called.')
+        ok (x) == 3
+        ok (y) == 13
+    #
+    def provide_x(self):
+        return 777
+    def provide_y(self):
+        return 999
+    #
+    @test("fixture test")
+    def test_1(self, x, y):
+        print('test_1() called.')
+        ok (x) == 777
+        ok (y) == 999
+run('FooTest')
+"""[1:]
+        expected = r"""
+before_all() called.
+* FooTest.test_1 ... test_1() called.
+[ok]
+after_all() called.
+"""[1:]
+        if python24:
+            expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
+        self.do_test(desc, script, expected)
+
 
     def test_when_error_raised_on_before_all(self):
         desc = "when error raised on before_all"
