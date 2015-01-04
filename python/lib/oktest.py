@@ -1135,16 +1135,16 @@ class TestRunner(object):
         testnames.sort(key=fn)
         return testnames
 
-    def _invoke(self, obj, method1, method2):
-        meth = getattr(obj, method1, None) or getattr(obj, method2, None)
+    def _invoke(self, obj, method_name):
+        meth = getattr(obj, method_name, None)
         if not meth: return None, None
         try:
             meth()
-            return meth, None
+            return method_name, None
         except KeyboardInterrupt:
             raise
         except Exception:
-            return meth.__name__, sys.exc_info()
+            return method_name, sys.exc_info()
 
     def _invoke_with_ctx(self, ctx, method):
         try:
@@ -1160,7 +1160,7 @@ class TestRunner(object):
         exc_info1 = exc_info2 = exc_info3 = exc_info4 = None
         self._enter_testclass(klass)
         try:
-            meth_name1, exc_info1 = self._invoke(klass, '', 'setUpClass')
+            meth_name1, exc_info1 = self._invoke(klass, 'setUpClass')
             if exc_info1:
                 return
             try:
@@ -1186,7 +1186,7 @@ class TestRunner(object):
                 finally:
                     ctx.__exit__(*sys.exc_info())
             finally:
-                meth_name4, exc_info4 = self._invoke(klass, '', 'tearDownClass')
+                meth_name4, exc_info4 = self._invoke(klass, 'tearDownClass')
         finally:
             method_name = meth_name1 or meth_name2 or meth_name3 or meth_name4
             exc_info    = exc_info1  or exc_info2  or exc_info3  or exc_info4
@@ -1245,7 +1245,7 @@ class TestRunner(object):
         status = exc_info = None
         exc_info_list = []
         try:
-            _, exc_info_ = self._invoke(testcase, '', 'setUp')
+            _, exc_info_ = self._invoke(testcase, 'setUp')
             if exc_info_:
                 exc_info_list.append(exc_info_)
             else:
@@ -1256,7 +1256,7 @@ class TestRunner(object):
                         errs = self._run_blocks(testcase._at_end_blocks[::-1])
                         if errs:
                             exc_info_list.extend(errs)
-                    _, exc_info_ = self._invoke(testcase, '', 'tearDown')
+                    _, exc_info_ = self._invoke(testcase, 'tearDown')
                     if exc_info_:
                         exc_info_list.append(exc_info_)
                     #else:
