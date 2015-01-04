@@ -2409,7 +2409,12 @@ def test(description_text=None, **options):
             def newfunc(self):
                 self._options = options
                 self._description = description_text
-                return fixture_injector.invoke(self, orig_func, globalvars)
+                ctx = fixture_injector.context(self, globalvars)
+                ctx.__enter__()
+                try:
+                    return ctx.invoke(orig_func)
+                finally:
+                    ctx.__exit__(*sys.exc_info())
         else:
             def newfunc(self):
                 self._options = options
