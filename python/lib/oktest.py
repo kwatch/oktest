@@ -2415,9 +2415,9 @@ def test(description_text=None, **options):
                 ctx = fixture_injector.context(self, globalvars)
                 ctx.__enter__()
                 try:
+                    if hasattr(self, 'before'):
+                        ctx.invoke(self.before)
                     try:
-                        if hasattr(self, 'before'):
-                            ctx.invoke(self.before)
                         return ctx.invoke(orig_func)
                     finally:
                         if hasattr(self, 'after'):
