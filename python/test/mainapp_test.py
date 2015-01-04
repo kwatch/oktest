@@ -322,8 +322,10 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 254, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2417, in newfunc
-    return orig_func(self)
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2449, in newfunc
+     return ctx.invoke(orig_func)
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2511, in invoke
+     return func(*arguments)
   File "/usr/local/lib/python/site-packages/oktest.py", line 1038, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
@@ -386,8 +388,10 @@ During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "/usr/local/lib/python/unittest.py", line 480, in run
     testMethod()
-  File "/usr/local/lib/python/site-packages/oktest.py", line 2417, in newfunc
-    return orig_func(self)
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2449, in newfunc
+    return ctx.invoke(orig_func)
+  File "/usr/local/lib/python/site-packages/oktest.py", line 2511, in invoke
+    return func(*arguments)
   File "/usr/local/lib/python/site-packages/oktest.py", line 1038, in deco
     raise _ExpectedFailure(sys.exc_info())
 oktest._ExpectedFailure: expected failure
