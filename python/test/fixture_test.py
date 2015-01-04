@@ -371,15 +371,15 @@ class Feature_addCleanup_TC(unittest.TestCase):
 
 
 
-class FixtureTransaction_TC(unittest.TestCase):
+class FixtureContext_TC(unittest.TestCase):
 
     def _new_tx(self, self_obj):
         globalvars = globals()
-        return oktest.fixture_injector.transaction(self_obj, globalvars)
+        return oktest.fixture_injector.context(self_obj, globalvars)
 
-    def test_transaction(self):
+    def test_context(self):
         tx = self._new_tx(object())
-        assert isinstance(tx, oktest.FixtureTransaction)
+        assert isinstance(tx, oktest.FixtureContext)
 
     def test_context(self):
         self_obj = object()
@@ -428,7 +428,7 @@ class FixtureTransaction_TC(unittest.TestCase):
         assert tx._resolved  == {}
         assert tx._releasers == {}
 
-    def test_invoke__transaction(self):
+    def test_invoke__context(self):
         class BarTest(object):
             def provide_arr(self, val, _arr=[]):
                 _arr.append(val)

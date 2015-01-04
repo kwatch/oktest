@@ -2452,7 +2452,7 @@ class FixtureManager(object):
 fixture_manager = FixtureManager()
 
 
-class FixtureTransaction(object):
+class FixtureContext(object):
     __slots__ = ('_injector', '_self_obj', '_opts', '_resolved', '_releasers')
 
     def __init__(self, injector, self_obj, *opts):
@@ -2476,11 +2476,11 @@ class FixtureTransaction(object):
 
 class FixtureInjector(object):
 
-    def transaction(self, self_obj, *opts):
-        return FixtureTransaction(self, self_obj, *opts)
+    def context(self, self_obj, *opts):
+        return FixtureContext(self, self_obj, *opts)
 
     def invoke(self, self_obj, func, *opts):
-        tx = self.transaction(self_obj, *opts)
+        tx = self.context(self_obj, *opts)
         tx.__enter__()
         try:
             return tx.invoke(func)
