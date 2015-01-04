@@ -1149,12 +1149,29 @@ class TestRunner(object):
     def run_class(self, klass, testnames=None):
         self._enter_testclass(klass)
         try:
-            method_name, exc_info = self._invoke(klass, 'before_all', 'setUpClass')
+            method_name, exc_info = self._invoke(klass, '', 'setUpClass')
             if not exc_info:
                 try:
-                    self.run_testcases(klass, testnames)
+                    before_all = getattr(klass, 'before_all', None)
+                    after_all  = getattr(klass, 'after_all', None)
+                    if before_all or after_all:
+                        globalvars = (before_all or after_all).im_func.__globals__
+                        ctx = fixture_injector.context(klass, globalvars)
+                        ctx.__enter__()
+                        try:
+                            if before_all:
+                                ctx.invoke(before_all)
+                            try:
+                                self.run_testcases(klass, testnames)
+                            finally:
+                                if after_all:
+                                    ctx.invoke(after_all)
+                        finally:
+                            ctx.__exit__(*sys.exc_info())
+                    else:
+                        self.run_testcases(klass, testnames)
                 finally:
-                    method_name, exc_info = self._invoke(klass, 'after_all', 'tearDownClass')
+                    method_name, exc_info = self._invoke(klass, '', 'tearDownClass')
         finally:
             if not exc_info: method_name = None
             self._exit_testclass(klass, method_name, exc_info)
