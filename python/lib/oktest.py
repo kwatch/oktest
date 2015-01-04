@@ -1168,9 +1168,8 @@ class TestRunner(object):
                 after_all  = getattr(klass, 'after_all',  None)
                 cmeth = before_all or after_all
                 if not cmeth:
-                    self.run_testcases(klass, testnames)
-                    return
-                if python2:
+                    globalvars = None
+                elif python2:
                     globalvars = cmeth.im_func.__globals__
                 elif python3:
                     globalvars = cmeth.__globals__
