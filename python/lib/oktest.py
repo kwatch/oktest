@@ -2399,10 +2399,7 @@ def test(description_text=None, **options):
     if m:
         options['sid'] = m.group(1)
     def deco(orig_func):
-        if hasattr(orig_func, '_original_function'):
-            orig_func_ = orig_func._original_function or orig_func
-        else:
-            orig_func_ = orig_func
+        orig_func_ = getattr(orig_func, '_original_function', None) or orig_func
         def newfunc(self):
             self._options = options
             self._description = description_text
