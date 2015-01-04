@@ -173,20 +173,26 @@ run('.*TestCase$')
         self.do_test(desc, script, expected)
 
 
-    def test_before_after(self):
-        desc = "before_all/before_each/after_each/after_all"
+    def test_before_all_after_all(self):
+        desc = "setUpClass -> before_all -> after_all -> tearDownClass"
         script = r"""
 from oktest import *
 class FooTest(object):
+    @classmethod
+    def setUpClass(cls):
+        print('setUpClass() called.')
+    @classmethod
+    def tearDownClass(cls):
+        print('tearDownClass() called.')
+    @classmethod
     def before_all(cls):
         print('before_all() called.')
-    before_all = classmethod(before_all)
+    @classmethod
     def after_all(cls):
         print('after_all() called.')
-    after_all  = classmethod(after_all)
-    def before(self):
+    def before(self):               # not called
         print('before() called.')
-    def after(self):
+    def after(self):                # not called
         print('after() called.')
     #
     def test_1(self):
@@ -201,21 +207,59 @@ class FooTest(object):
 run('FooTest')
 """[1:]
         expected = r"""
+setUpClass() called.
 before_all() called.
-* FooTest.test_1 ... before() called.
-test_1() called.
-after() called.
+* FooTest.test_1 ... test_1() called.
 [ok]
-* FooTest.test_2 ... before() called.
-test_2() called.
-after() called.
+* FooTest.test_2 ... test_2() called.
 [NG] 2 == 3 : failed.
-   _test_.py:19: ok (1+1) == 3
-* FooTest.test_3 ... before() called.
-test_3() called.
-after() called.
+   _test_.py:25: ok (1+1) == 3
+* FooTest.test_3 ... test_3() called.
 [ERROR] ValueError: invalid literal for int() with base 10: 'abc'
-  - _test_.py:22:  int('abc')
+  - _test_.py:28:  int('abc')
+after_all() called.
+tearDownClass() called.
+"""[1:]
+        if python24:
+            expected = expected.replace("int() with base 10: 'abc'", 'int(): abc')
+        self.do_test(desc, script, expected)
+
+    def test_fixture_injection_for_before_all_after_all(self):
+        desc = "fixture injection for before_all()/after_all()"
+        script = r"""
+from oktest import *
+def provide_x(self):
+    return 3
+def provide_y(self, x):
+    return x+10
+class FooTest(object):
+    @classmethod
+    def before_all(cls, x, y):
+        print('before_all() called.')
+        ok (x) == 3
+        ok (y) == 13
+    @classmethod
+    def after_all(cls, x, y):
+        print('after_all() called.')
+        ok (x) == 3
+        ok (y) == 13
+    #
+    def provide_x(self):
+        return 777
+    def provide_y(self):
+        return 999
+    #
+    @test("fixture test")
+    def test_1(self, x, y):
+        print('test_1() called.')
+        ok (x) == 777
+        ok (y) == 999
+run('FooTest')
+"""[1:]
+        expected = r"""
+before_all() called.
+* FooTest.test_1 ... test_1() called.
+[ok]
 after_all() called.
 """[1:]
         if python24:

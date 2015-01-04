@@ -167,8 +167,91 @@ class TestDeco2_TC(unittest.TestCase):
 
 
 
+class TestDeco3_TC(unittest.TestCase):
+
+    def setUp(self):
+        self._before_called = False
+        self._after_called  = False
+
+    def tearDown(self):
+        assert self._before_called == True
+        assert self._after_called  == True
+
+    def before(self):
+        self._before_called = True
+
+    def after(self):
+        self._after_called = True
+
+    @test("[!8qkjr] decorated method calls before() and/or after() when exist.")
+    def _(self):
+        pass
+
+    @test("[!271gt] decorated method calls after() even when error raised.")
+    def _(self):
+        @test("")
+        def test1(self):
+            1/0
+        assert self._after_called == False
+        try:
+            test1(self)
+        except ZeroDivisionError:
+            pass
+        assert self._after_called == True      # !!!
+
+    @test("[!el8wi] decorated method skips after() when before() raised error.")
+    def _(self):
+        self._before_called = False
+        def before():
+            self._before_called = True
+            1/0
+        self.before = before
+        #
+        @test("")
+        def test2(self):
+            self._body_called = True
+        self._body_called   = False
+        #
+        assert self._before_called == False
+        assert self._body_called   == False
+        assert self._after_called  == False
+        try:
+            test2(self)
+        except ZeroDivisionError:
+            pass
+        assert self._before_called == True       # !!!
+        assert self._body_called   == False
+        assert self._after_called  == False      # !!!
+
+
+
+class TestDeco4_TC(unittest.TestCase):
+
+    def before(self, x, y, z=100):
+        self._fixtures = (x, y, z)
+
+    def after(self, x, y, z):
+        assert x == 3
+        assert y == 13
+        assert z == 100
+
+    def provide_x(self):
+        return 3
+
+    def provide_y(self, x):
+        return x+10
+
+    @test("[!0npfi] decorated method provides/releases fixtures.")
+    def _(self, x, y):
+        assert x == 3
+        assert y == 13
+        assert self._fixtures == (3, 13, 100)
+
+
+
 if __name__ == '__main__':
     #unittest.main()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeco_TC)
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDeco2_TC))
+    for cls in (TestDeco2_TC, TestDeco3_TC, TestDeco4_TC):
+        suite.addTests(unittest.TestLoader().loadTestsFromTestCase(cls))
     unittest.TextTestRunner(verbosity=2).run(suite)

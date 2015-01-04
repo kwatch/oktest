@@ -1135,28 +1135,61 @@ class TestRunner(object):
         testnames.sort(key=fn)
         return testnames
 
-    def _invoke(self, obj, method1, method2):
-        meth = getattr(obj, method1, None) or getattr(obj, method2, None)
+    def _invoke(self, obj, method_name):
+        meth = getattr(obj, method_name, None)
         if not meth: return None, None
         try:
             meth()
-            return meth, None
+            return method_name, None
         except KeyboardInterrupt:
             raise
         except Exception:
-            return meth.__name__, sys.exc_info()
+            return method_name, sys.exc_info()
+
+    def _invoke_with_ctx(self, ctx, method):
+        try:
+            ctx.invoke(method)
+            return None, None
+        except KeyboardInterrupt:
+            raise
+        except Exception:
+            return method.__name__, sys.exc_info()
 
     def run_class(self, klass, testnames=None):
+        meth_name1 = meth_name2 = meth_name3 = meth_name4 = None
+        exc_info1 = exc_info2 = exc_info3 = exc_info4 = None
         self._enter_testclass(klass)
         try:
-            method_name, exc_info = self._invoke(klass, 'before_all', 'setUpClass')
-            if not exc_info:
+            meth_name1, exc_info1 = self._invoke(klass, 'setUpClass')
+            if exc_info1:
+                return
+            try:
+                before_all = getattr(klass, 'before_all', None)
+                after_all  = getattr(klass, 'after_all',  None)
+                cmeth = before_all or after_all
+                globalvars = (None                       if not cmeth else
+                              cmeth.im_func.__globals__  if python2 else
+                              cmeth.__globals__          if python3 else
+                              None)
+                ctx = fixture_injector.context(object(), globalvars)
+                ctx.__enter__()
                 try:
-                    self.run_testcases(klass, testnames)
+                    if before_all:
+                        meth_name2, exc_info2 = self._invoke_with_ctx(ctx, before_all)
+                    if exc_info2:
+                        return
+                    try:
+                        self.run_testcases(klass, testnames)
+                    finally:
+                        if after_all:
+                            meth_name3, exc_info3 = self._invoke_with_ctx(ctx, after_all)
                 finally:
-                    method_name, exc_info = self._invoke(klass, 'after_all', 'tearDownClass')
+                    ctx.__exit__(*sys.exc_info())
+            finally:
+                meth_name4, exc_info4 = self._invoke(klass, 'tearDownClass')
         finally:
-            if not exc_info: method_name = None
+            method_name = meth_name1 or meth_name2 or meth_name3 or meth_name4
+            exc_info    = exc_info1  or exc_info2  or exc_info3  or exc_info4
             self._exit_testclass(klass, method_name, exc_info)
 
     def run_testcases(self, klass, testnames=None):
@@ -1212,7 +1245,7 @@ class TestRunner(object):
         status = exc_info = None
         exc_info_list = []
         try:
-            _, exc_info_ = self._invoke(testcase, 'before', 'setUp')
+            _, exc_info_ = self._invoke(testcase, 'setUp')
             if exc_info_:
                 exc_info_list.append(exc_info_)
             else:
@@ -1223,7 +1256,7 @@ class TestRunner(object):
                         errs = self._run_blocks(testcase._at_end_blocks[::-1])
                         if errs:
                             exc_info_list.extend(errs)
-                    _, exc_info_ = self._invoke(testcase, 'after', 'tearDown')
+                    _, exc_info_ = self._invoke(testcase, 'tearDown')
                     if exc_info_:
                         exc_info_list.append(exc_info_)
                     #else:
@@ -2399,22 +2432,26 @@ def test(description_text=None, **options):
     if m:
         options['sid'] = m.group(1)
     def deco(orig_func):
-        if hasattr(orig_func, '_original_function'):
-            orig_func_ = orig_func._original_function or orig_func
-        else:
-            orig_func_ = orig_func
-        argnames = util.func_argnames(orig_func_)
-        fixture_names = argnames[1:]   # except 'self'
-        if fixture_names:
-            def newfunc(self):
-                self._options = options
-                self._description = description_text
-                return fixture_injector.invoke(self, orig_func, globalvars)
-        else:
-            def newfunc(self):
-                self._options = options
-                self._description = description_text
-                return orig_func(self)
+        orig_func_ = getattr(orig_func, '_original_function', None) or orig_func
+        def newfunc(self):
+            self._options = options
+            self._description = description_text
+            #; [!0npfi] decorated method provides/releases fixtures.
+            ctx = fixture_injector.context(self, globalvars)
+            ctx.__enter__()
+            try:
+                #; [!8qkjr] decorated method calls before() and/or after() when exist.
+                #; [!271gt] decorated method calls after() even when error raised.
+                #; [!el8wi] decorated method skips after() when before() raised error.
+                if hasattr(self, 'before'):
+                    ctx.invoke(self.before)
+                try:
+                    return ctx.invoke(orig_func)
+                finally:
+                    if hasattr(self, 'after'):
+                        ctx.invoke(self.after)
+            finally:
+                ctx.__exit__(*sys.exc_info())
         orig_name = orig_func.__name__
         newfunc.__doc__  = orig_func.__doc__ or description_text
         newfunc._options = options
@@ -2452,12 +2489,44 @@ class FixtureManager(object):
 fixture_manager = FixtureManager()
 
 
+class FixtureContext(object):
+    __slots__ = ('_injector', '_self_obj', '_opts', '_resolved', '_releasers')
+
+    def __init__(self, injector, self_obj, *opts):
+        self._injector = injector
+        self._self_obj = self_obj
+        self._opts     = opts
+
+    def __enter__(self):
+        self._resolved  = {"self": self._self_obj}  # {"arg_name": arg_value}
+        self._releasers = {"self": None}       # {"arg_name": releaser_func()}
+
+    def __exit__(self, *args):
+        self._injector._release_fixtures(self._resolved, self._releasers)
+        self._releasers.clear()
+        self._resolved.clear()
+
+    def invoke(self, func):   # func can be an method object
+        arguments = self._injector._provide_fixtures(func, self._resolved, self._releasers, *self._opts)
+        return func(*arguments)
+
+
 class FixtureInjector(object):
 
-    def invoke(self, object, func, *opts):
+    def context(self, self_obj, *opts):
+        return FixtureContext(self, self_obj, *opts)
+
+    def invoke(self, self_obj, func, *opts):
+        tx = self.context(self_obj, *opts)
+        tx.__enter__()
+        try:
+            return tx.invoke(func)
+        finally:
+            tx.__exit__(*sys.exc_info())
+
+    def _provide_fixtures(self, func, resolved, releasers, *opts):
         """invoke function with fixtures."""
-        releasers = {"self": None}     # {"arg_name": releaser_func()}
-        resolved  = {"self": object}   # {"arg_name": arg_value}
+        object = resolved['self']
         in_progress = []
         ##
         if hasattr(func, '_original_function'):
@@ -2507,11 +2576,7 @@ class FixtureInjector(object):
         ##
         arguments = [ _resolve(aname) for aname in arg_names ]
         assert not in_progress
-        try:
-            #return func(object, *arguments)
-            return func(*arguments)
-        finally:
-            self._release_fixtures(resolved, releasers)
+        return arguments
 
     def _release_fixtures(self, resolved, releasers):
         for name in resolved:
