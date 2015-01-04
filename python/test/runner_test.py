@@ -184,9 +184,9 @@ class FooTest(object):
     def after_all(cls):
         print('after_all() called.')
     after_all  = classmethod(after_all)
-    def before(self):
+    def before(self):               # not called
         print('before() called.')
-    def after(self):
+    def after(self):                # not called
         print('after() called.')
     #
     def test_1(self):
@@ -202,18 +202,12 @@ run('FooTest')
 """[1:]
         expected = r"""
 before_all() called.
-* FooTest.test_1 ... before() called.
-test_1() called.
-after() called.
+* FooTest.test_1 ... test_1() called.
 [ok]
-* FooTest.test_2 ... before() called.
-test_2() called.
-after() called.
+* FooTest.test_2 ... test_2() called.
 [NG] 2 == 3 : failed.
    _test_.py:19: ok (1+1) == 3
-* FooTest.test_3 ... before() called.
-test_3() called.
-after() called.
+* FooTest.test_3 ... test_3() called.
 [ERROR] ValueError: invalid literal for int() with base 10: 'abc'
   - _test_.py:22:  int('abc')
 after_all() called.

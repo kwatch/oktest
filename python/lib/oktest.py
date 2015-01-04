@@ -1212,7 +1212,7 @@ class TestRunner(object):
         status = exc_info = None
         exc_info_list = []
         try:
-            _, exc_info_ = self._invoke(testcase, 'before', 'setUp')
+            _, exc_info_ = self._invoke(testcase, '', 'setUp')
             if exc_info_:
                 exc_info_list.append(exc_info_)
             else:
@@ -1223,7 +1223,7 @@ class TestRunner(object):
                         errs = self._run_blocks(testcase._at_end_blocks[::-1])
                         if errs:
                             exc_info_list.extend(errs)
-                    _, exc_info_ = self._invoke(testcase, 'after', 'tearDown')
+                    _, exc_info_ = self._invoke(testcase, '', 'tearDown')
                     if exc_info_:
                         exc_info_list.append(exc_info_)
                     #else:
