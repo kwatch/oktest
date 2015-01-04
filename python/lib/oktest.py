@@ -1166,13 +1166,14 @@ class TestRunner(object):
             try:
                 before_all = getattr(klass, 'before_all', None)
                 after_all  = getattr(klass, 'after_all',  None)
-                if not before_all and not after_all:
+                cmeth = before_all or after_all
+                if not cmeth:
                     self.run_testcases(klass, testnames)
                     return
                 if python2:
-                    globalvars = (before_all or after_all).im_func.__globals__
+                    globalvars = cmeth.im_func.__globals__
                 elif python3:
-                    globalvars = (before_all or after_all).__globals__
+                    globalvars = cmeth.__globals__
                 ctx = fixture_injector.context(klass, globalvars)
                 ctx.__enter__()
                 try:
