@@ -2403,33 +2403,25 @@ def test(description_text=None, **options):
             orig_func_ = orig_func._original_function or orig_func
         else:
             orig_func_ = orig_func
-        argnames = util.func_argnames(orig_func_)
-        if len(argnames) > 0 and argnames[0] == 'self':
-            has_fixture_names = len(argnames) > 1  # except 'self'
-        else:
-            has_fixture_names = len(argnames) > 0
         def newfunc(self):
             self._options = options
             self._description = description_text
-            if has_fixture_names or hasattr(self, 'before') or hasattr(self, 'after'):
-                #; [!0npfi] decorated method provides/releases fixtures.
-                ctx = fixture_injector.context(self, globalvars)
-                ctx.__enter__()
+            #; [!0npfi] decorated method provides/releases fixtures.
+            ctx = fixture_injector.context(self, globalvars)
+            ctx.__enter__()
+            try:
+                #; [!8qkjr] decorated method calls before() and/or after() when exist.
+                #; [!271gt] decorated method calls after() even when error raised.
+                #; [!el8wi] decorated method skips after() when before() raised error.
+                if hasattr(self, 'before'):
+                    ctx.invoke(self.before)
                 try:
-                    #; [!8qkjr] decorated method calls before() and/or after() when exist.
-                    #; [!271gt] decorated method calls after() even when error raised.
-                    #; [!el8wi] decorated method skips after() when before() raised error.
-                    if hasattr(self, 'before'):
-                        ctx.invoke(self.before)
-                    try:
-                        return ctx.invoke(orig_func)
-                    finally:
-                        if hasattr(self, 'after'):
-                            ctx.invoke(self.after)
+                    return ctx.invoke(orig_func)
                 finally:
-                    ctx.__exit__(*sys.exc_info())
-            else:
-                return orig_func(self)
+                    if hasattr(self, 'after'):
+                        ctx.invoke(self.after)
+            finally:
+                ctx.__exit__(*sys.exc_info())
         orig_name = orig_func.__name__
         newfunc.__doc__  = orig_func.__doc__ or description_text
         newfunc._options = options
