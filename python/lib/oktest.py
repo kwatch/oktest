@@ -2412,9 +2412,13 @@ def test(description_text=None, **options):
             self._options = options
             self._description = description_text
             if has_fixture_names or hasattr(self, 'before') or hasattr(self, 'after'):
+                #; [!0npfi] decorated method provides/releases fixtures.
                 ctx = fixture_injector.context(self, globalvars)
                 ctx.__enter__()
                 try:
+                    #; [!8qkjr] decorated method calls before() and/or after() when exist.
+                    #; [!271gt] decorated method calls after() even when error raised.
+                    #; [!el8wi] decorated method skips after() when before() raised error.
                     if hasattr(self, 'before'):
                         ctx.invoke(self.before)
                     try:
