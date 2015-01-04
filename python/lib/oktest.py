@@ -2404,7 +2404,10 @@ def test(description_text=None, **options):
         else:
             orig_func_ = orig_func
         argnames = util.func_argnames(orig_func_)
-        has_fixture_names = len(argnames) > 1   # except 'self'
+        if len(argnames) > 0 and argnames[0] == 'self':
+            has_fixture_names = len(argnames) > 1  # except 'self'
+        else:
+            has_fixture_names = len(argnames) > 0
         def newfunc(self):
             self._options = options
             self._description = description_text
