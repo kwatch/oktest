@@ -4,6 +4,16 @@ CHANGES
 =======
 
 
+Release 0.15.2 (2015-10-20)
+---------------------------
+
+* [bugfix] fix 'ok().raises()' to catch AssertionError only when
+  it is specified as target exception class::
+
+      def fn(): assert 1+1 == 3
+      ok (fn).raises(AssertionError)   # old: don't catch, now: catch
+
+
 Release 0.15.1 (2015-01-02)
 ---------------------------
 
