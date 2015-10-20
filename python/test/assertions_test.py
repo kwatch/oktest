@@ -457,6 +457,19 @@ attr('val'): 'aaa\nbbb\nccc\n' == 'aaa\nbbbb\nccc\n' : failed.
             assert Failse, "AssertionError expected"
 
 
+    def test_raises3(self):  # should catch AssertionError when specified it explicitly
+        def f():
+            assert 1 == 2, '1==2'            # assertion failed
+        try:
+            # ok().raises() should catch it when AssertionError class specified
+            ok (f).raises(AssertionError, '1==2')
+        except AssertionError:
+            assert False, "NG - should catch AssertionError when specified explicitly"
+        except Exception:
+            assert Failse, "AssertionError expected"
+        else:
+            assert str(f.exception) == '1==2'
+
     def test_length(self):
         ok ("foo").length(3)
         ok ([]).length(0)
