@@ -555,8 +555,11 @@ def _f():
             self.target()
         except:
             ex = sys.exc_info()[1]
+            ## should not catch AssertionError, except it is specified as exception_class
             if isinstance(ex, AssertionError) and not hasattr(ex, '_raised_by_oktest'):
-                raise
+                if exception_class != AssertionError:
+                    raise
+            #
             self.target.exception = ex
             if flag_raise:
                 if not isinstance(ex, exception_class):
