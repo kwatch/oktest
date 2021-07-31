@@ -157,7 +157,7 @@ class VerboseReporter_TC < Reporter_TC
   it "reports topic name and spec desc." do
     sout, serr = capture do
       load(@filename)
-      Oktest::main()
+      Oktest::MainApp.main(["-sv"])
     end
     assert_eq edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
     assert_eq serr, ""
@@ -171,7 +171,7 @@ class SimpleReporter_TC < Reporter_TC
   it "reports filename." do
     sout, serr = capture do
       load(@filename)
-      Oktest::main(["-ss"])
+      Oktest::MainApp.main(["-ss"])
     end
     assert_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
     assert_eq serr, ""
@@ -185,7 +185,7 @@ class PlainReporter_TC < Reporter_TC
   it "reports resuls only." do
     sout, serr = capture do
       load(@filename)
-      Oktest::main(["-sp"])
+      Oktest::MainApp.main(["-sp"])
     end
     assert_eq edit_actual(sout), edit_expected(PLAIN_OUTPUT)
     assert_eq serr, ""

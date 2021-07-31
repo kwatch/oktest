@@ -1369,23 +1369,25 @@ END
 
   class MainApp
 
-    def main(args=nil)
+    def self.main(argv=nil)
+      argv ||= ARGV
       require 'optparse'
       begin
-        status = run(args)
-        exit(status) if Config.system_exit && status
+        status = self.new.run(*argv)
         return status || 0
-      rescue OptionParser::InvalidOption => ex
+      #rescue OptionParser::InvalidOption => ex
+      rescue => ex
+        ok1 = defined?(OptionParser::InvalidOption) && ex.is_a?(OptionParser::InvalidOption)
+        ok2 = defined?(Section9::Cmdopt::ParseError) && ex.is_a?(Section9::Cmdopt::ParseError)
+        raise unless ok1 || ok2
         command ||= File.basename($0)
         $stderr.write("#{command}: #{ex}\n")
-        exit(1) if Config.system_exit
         return 1
       end
     end
 
-    def run(args=nil)
+    def run(*args)
       ## parse command-line options
-      args = ARGV.dup if args.nil?
       #opts = Options.new
       #parser = option_parser(opts)
       #filenames = parser.parse(args)
@@ -1402,20 +1404,18 @@ END
         return 0
       end
       ## fix not to load this file twice.
-      $" << __FILE__ unless $".include?(__FILE__)
-      ##
+      $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__)
+      ## generate test code from source code
       if opts.generate
-        ## generate test code from source code
-        generate(filenames)
-        exit()
-      else
-        ## load and run
-        load_files(filenames)
-        Oktest::Config.auto_run = false
-        n_errors = Oktest.run(:style=>opts.style)
-        AssertionObject.report_not_yet()
-        return n_errors
+        print generate(filenames)
+        return 0
       end
+      ## load and run
+      load_files(filenames)
+      Oktest::Config.auto_run = false
+      n_errors = Oktest.run(:style=>opts.style)
+      AssertionObject.report_not_yet()
+      return n_errors
     end
 
     private
@@ -1428,7 +1428,7 @@ END
     #  require 'optparse'
     #  parser = OptionParser.new
     #  parser.on('-h', '--help')    {|val| opts.help = val }
-    #  parser.on('-v', '--version') {|val| opts.version = val }
+    #  parser.on(      '--version') {|val| opts.version = val }
     #  parser.on('-s STYLE') {|val|
     #    REPORTER_CLASSES.key?(val)  or
     #      raise OptionParser::InvalidOption.new("-s #{val}: unknown style.")
@@ -1440,7 +1440,7 @@ END
       require 'section9/cmdopt'
       cmdopt = Section9::Cmdopt.new
       cmdopt.option("-h, --help",        "show help")
-      cmdopt.option("-v, --version",     "print version")
+      cmdopt.option("    --version",     "print version")
       cmdopt.option("-s STYLE  #style",  "report style (verbose/simple/plain, or v/s/p)")\
             .validation {|val| "unknown style." unless REPORTER_CLASSES.key?(val) }
       cmdopt.option("-g, --generate",    "genearte test code from source file")
@@ -1449,9 +1449,9 @@ END
 
     def help_message(command=nil)
       command ||= File.basename($0)
-      buf = "Usage: #{command} [options] [file or directory...]\n"
+      buf = "Usage: #{command} [<options>] [<file-or-directory>...]\n"
       buf << "  -h, --help    : show help\n"
-      buf << "  -v, --version : print version\n"
+      buf << "      --version : print version\n"
       buf << "  -s STYLE      : report style (verbose/simple/plain, or v/s/p)\n"
       buf << "  -g, --generate: generate test code from source file\n"
       return buf
@@ -1470,31 +1470,29 @@ END
     end
 
     def load_dir(dir, pattern=/^(test_.*|.*_test)\.rb$/)
-      Dir.glob("#{dir}/*").each do |path|
-        if File.directory?(path)
-          load_dir(path)
-        elsif File.file?(path)
-          load(path) if File.basename(path) =~ pattern
-        else
-          raise ArgumentError.new("#{path}: not a file nor directory.")
-        end
+      Dir.glob("#{dir}/**/*").each do |path|
+        next unless File.file?(path)
+        load(path) if File.basename(path) =~ pattern
       end
     end
 
     def generate(filenames)
+      buf = []
       filenames.each do |fname|
         generator = TestGenerator.new
         File.open(fname) do |f|
-          print generator.generate(f)
+          buf << generator.generate(f)
         end
       end
+      return buf.join()
     end
 
   end
 
 
-  def self.main(args=nil)
-    return MainApp.new.main(args)
+  def self.main(argv=nil)
+    status = MainApp.main(argv)
+    exit(status)
   end
 
 
@@ -1528,5 +1526,8 @@ end
 
 
 if __FILE__ == $0
+  ## prevent to load oktest.rb twice
+  $LOADED_FEATURES << File.expand_path(__FILE__)
+  ## run test scripts
   Oktest.main()
 end
