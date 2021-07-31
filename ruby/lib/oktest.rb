@@ -1405,19 +1405,17 @@ END
       end
       ## fix not to load this file twice.
       $" << __FILE__ unless $".include?(__FILE__)
-      ##
+      ## generate test code from source code
       if opts.generate
-        ## generate test code from source code
         generate(filenames)
         return 0
-      else
-        ## load and run
-        load_files(filenames)
-        Oktest::Config.auto_run = false
-        n_errors = Oktest.run(:style=>opts.style)
-        AssertionObject.report_not_yet()
-        return n_errors
       end
+      ## load and run
+      load_files(filenames)
+      Oktest::Config.auto_run = false
+      n_errors = Oktest.run(:style=>opts.style)
+      AssertionObject.report_not_yet()
+      return n_errors
     end
 
     private
