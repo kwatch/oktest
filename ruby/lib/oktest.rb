@@ -1369,23 +1369,25 @@ END
 
   class MainApp
 
-    def main(args=nil)
+    def self.main(argv=nil)
+      argv ||= ARGV
       require 'optparse'
       begin
-        status = run(args)
-        exit(status) if Config.system_exit && status
+        status = self.new.run(*argv)
         return status || 0
-      rescue OptionParser::InvalidOption => ex
+      #rescue OptionParser::InvalidOption => ex
+      rescue => ex
+        ok1 = defined?(OptionParser::InvalidOption) && ex.is_a?(OptionParser::InvalidOption)
+        ok2 = defined?(Section9::Cmdopt::ParseError) && ex.is_a?(Section9::Cmdopt::ParseError)
+        raise unless ok1 || ok2
         command ||= File.basename($0)
         $stderr.write("#{command}: #{ex}\n")
-        exit(1) if Config.system_exit
         return 1
       end
     end
 
-    def run(args=nil)
+    def run(*args)
       ## parse command-line options
-      args = ARGV.dup if args.nil?
       #opts = Options.new
       #parser = option_parser(opts)
       #filenames = parser.parse(args)
@@ -1493,8 +1495,9 @@ END
   end
 
 
-  def self.main(args=nil)
-    return MainApp.new.main(args)
+  def self.main(argv=nil)
+    status = MainApp.main(argv)
+    exit(status)
   end
 
 
