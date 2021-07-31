@@ -1374,17 +1374,15 @@ END
       begin
         status = self.new.run(*argv)
         return status || 0
-      rescue OptionParser::InvalidOption => ex
-        $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: unknown option.\n")
-        return 1
-      rescue OptionParser::InvalidArgument => ex
-        $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: invalid argument.\n")
-        return 1
-      rescue OptionParser::MissingArgument => ex
-        $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: argument required.\n")
-        return 1
       rescue OptionParser::ParseError => ex
-        $stderr.write("#{File.basename($0)}: #{ex.message}\n")
+        case ex
+        when OptionParser::InvalidOption   ; s = "unknown option."
+        when OptionParser::InvalidArgument ; s = "invalid argument."
+        when OptionParser::MissingArgument ; s = "argument required."
+        else                               ; s = nil
+        end
+        msg = s ? "#{ex.args.join(' ')}: #{s}" : ex.message
+        $stderr.puts("#{File.basename($0)}: #{msg}")
         return 1
       end
     end
