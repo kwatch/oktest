@@ -905,7 +905,7 @@ module Oktest
 
     def exit_spec(spec, depth, status, ex, parent)
       @counts[status] += 1
-      @exceptions << [spec, status, ex, parent] if ex # status == :FAIL || status == :ERROR
+      @exceptions << [spec, status, ex, parent] if status == :FAIL || status == :ERROR
     end
 
     protected
@@ -1024,7 +1024,9 @@ module Oktest
         $stdout.flush
       end
       label = Color.status(status, LABELS[status] || '???')
-      puts "#{'  ' * depth}- [#{label}] #{spec.desc}"
+      msg = "#{'  ' * depth}- [#{label}] #{spec.desc}"
+      msg << " " << Color.reason("(reason: #{error.message})") if status == :SKIP
+      puts msg
     end
 
   end
@@ -1276,6 +1278,7 @@ module Oktest
     def error(s); Config.color_enabled ? red(s)    : s; end
     def skip (s); Config.color_enabled ? yellow(s) : s; end
     def todo (s); Config.color_enabled ? yellow(s) : s; end
+    def reason(s); Config.color_enabled ? yellow(s) : s; end
     def status(status, s); __send__(status.to_s.downcase, s); end
 
   end
