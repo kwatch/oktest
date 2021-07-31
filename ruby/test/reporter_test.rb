@@ -1,6 +1,6 @@
 ###
 ### $Release: $
-### $Copyright: copyright(c) 2011 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 

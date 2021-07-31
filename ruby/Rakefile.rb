@@ -1,12 +1,12 @@
 ###
 ### $Release: $
-### $Copyright: copyright(c) 2010 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 
 $project   = "oktest"
 $release   = ENV['RELEASE'] || "0.0.0"
-$copyright = "copyright(c) 2011 kuwata-lab.com all rights reserved"
+$copyright = "copyright(c) 2011-2021 kuwata-lab.com all rights reserved"
 $license   = "MIT License"
 
 require 'rake/clean'
