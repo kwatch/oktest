@@ -257,26 +257,26 @@ END
     it "enables to handle boolean methods." do
       should_return_self { ok {""}.empty?  }
       should_return_self { ok {nil}.nil?  }
-      should_return_self { ok {1}.is_a?(Fixnum)  }
+      should_return_self { ok {1}.is_a?(Integer)  }
     end
     it "fails when boolean method failed returned false." do
       errmsg = "$actual.empty?: failed.\n    $actual:   \"SOS\""
       should_be_failed(errmsg) { ok {"SOS"}.empty? }
       errmsg = "$actual.nil?: failed.\n    $actual:   \"\""
       should_be_failed(errmsg) { ok {""}.nil? }
-      errmsg = "$actual.is_a?(Fixnum): failed.\n    $actual:   3.14"
-      should_be_failed(errmsg) { ok {3.14}.is_a?(Fixnum) }
+      errmsg = "$actual.is_a?(Integer): failed.\n    $actual:   3.14"
+      should_be_failed(errmsg) { ok {3.14}.is_a?(Integer) }
     end
     it "is available with NOT." do
       ok {"SOS"}.NOT.empty?
       ok {"SOS"}.NOT.nil?
-      ok {"SOS"}.NOT.is_a?(Fixnum)
+      ok {"SOS"}.NOT.is_a?(Integer)
       errmsg = "$actual.empty? == false: failed.\n    $actual:   \"\""
       should_be_failed(errmsg) { ok {""}.NOT.empty? }
       errmsg = "$actual.nil? == false: failed.\n    $actual:   nil"
       should_be_failed(errmsg) { ok {nil}.NOT.nil? }
-      errmsg = "$actual.is_a?(Fixnum) == false: failed.\n    $actual:   1"
-      should_be_failed(errmsg) { ok {1}.NOT.is_a?(Fixnum) }
+      errmsg = "$actual.is_a?(Integer) == false: failed.\n    $actual:   1"
+      should_be_failed(errmsg) { ok {1}.NOT.is_a?(Integer) }
     end
     it "raises TypeError when boolean method returned non-boolean value." do
       errmsg = "$actual.empty?: failed.\n    $actual:   \"SOS\""
