@@ -1409,7 +1409,7 @@ END
       if opts.generate
         ## generate test code from source code
         generate(filenames)
-        exit()
+        return 0
       else
         ## load and run
         load_files(filenames)
