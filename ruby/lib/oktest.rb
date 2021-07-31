@@ -1407,7 +1407,7 @@ END
       $" << __FILE__ unless $".include?(__FILE__)
       ## generate test code from source code
       if opts.generate
-        generate(filenames)
+        print generate(filenames)
         return 0
       end
       ## load and run
@@ -1477,12 +1477,14 @@ END
     end
 
     def generate(filenames)
+      buf = []
       filenames.each do |fname|
         generator = TestGenerator.new
         File.open(fname) do |f|
-          print generator.generate(f)
+          buf << generator.generate(f)
         end
       end
+      return buf.join()
     end
 
   end
