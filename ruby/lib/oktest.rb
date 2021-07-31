@@ -1377,6 +1377,9 @@ END
       rescue OptionParser::InvalidOption => ex
         $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: unknown option.\n")
         return 1
+      rescue OptionParser::InvalidArgument => ex
+        $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: invalid argument.\n")
+        return 1
       rescue OptionParser::MissingArgument => ex
         $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: argument required.\n")
         return 1
@@ -1428,7 +1431,7 @@ END
       parser.on(      '--version') {|val| opts.version = val }
       parser.on('-s STYLE') {|val|
         REPORTER_CLASSES.key?(val)  or
-          raise OptionParser::InvalidOption.new("-s #{val}: unknown style.")
+          raise OptionParser::InvalidArgument.new(val)
         opts.style = val
       }
       parser.on('-g', '--generate') {|val| opts.generate = val }
