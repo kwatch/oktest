@@ -1377,6 +1377,12 @@ END
       rescue OptionParser::InvalidOption => ex
         $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: unknown option.\n")
         return 1
+      rescue OptionParser::MissingArgument => ex
+        $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: argument required.\n")
+        return 1
+      rescue OptionParser::ParseError => ex
+        $stderr.write("#{File.basename($0)}: #{ex.message}\n")
+        return 1
       end
     end
 
