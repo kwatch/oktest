@@ -266,6 +266,8 @@ module Oktest
           ex.is_a?(expected)  or
             __assert(false) { "Expected #{expected.inspect} to be raised but got #{ex.class}." }
         end
+        (class << proc_obj; self; end).class_eval { attr_accessor :exception }
+        proc_obj.exception = ex
         __assert(! ex.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
         case errmsg
         when nil;     # do nothing

@@ -317,6 +317,14 @@ END
       errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `sos' for \"SOS\":String>."
       should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
     end
+    it "sets exceptio object into '#exception' attribute." do
+      pr = proc { "SOS".foobar }
+      assert !pr.respond_to?(:exception)
+      ok {pr}.raise?(NoMethodError)
+      assert pr.respond_to?(:exception)
+      assert pr.exception.is_a?(NoMethodError)
+      assert_eq pr.exception.message, "undefined method `foobar' for \"SOS\":String"
+    end
   end
 
   describe "#in?" do
