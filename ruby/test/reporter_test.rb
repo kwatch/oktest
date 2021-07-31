@@ -4,9 +4,7 @@
 ### $License: MIT License $
 ###
 
-File.class_eval do
-  require join(dirname(expand_path(__FILE__)), 'initialize')
-end
+require_relative './initialize'
 
 
 class Reporter_TC < TC
@@ -114,8 +112,9 @@ END
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 
-  def edit_output(output)
+  def edit_actual(output)
     bkup = output.dup
+    output = output.gsub(/^.*\r/, '')
     output = output.gsub(/^    .*(_test\.tmp:\d+)/, '    \1')
     output = output.gsub(/^    .*test.reporter_test\.rb:.*\n(    .*\n)*/, "%%%\n")
     output = output.sub(/\(in \d+\.\d\d\ds\)/, '(in 0.000s)')
@@ -131,17 +130,27 @@ END
   def default_test
   end
 
+  def setup
+    @filename = "_test.tmp"
+    File.write(@filename, INPUT)
+  end
+
+  def teardown
+    File.unlink(@filename) if @filename && File.exist?(@filename)
+  end
+
 end
 
 
 class VerboseReporter_TC < Reporter_TC
 
   it "reports topic name and spec desc." do
-    tmp.stdout
-    filename = tmp.file "_test.tmp", INPUT
-    load(filename)
-    Oktest::main()
-    ok {edit_output($stdout.string)} == edit_expected(VERBOSE_OUTPUT)
+    sout, serr = capture do
+      load(@filename)
+      Oktest::main()
+    end
+    assert_eq edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
+    assert_eq serr, ""
   end
 
 end
@@ -150,11 +159,12 @@ end
 class SimpleReporter_TC < Reporter_TC
 
   it "reports filename." do
-    tmp.stdout
-    filename = tmp.file "_test.tmp", INPUT
-    load(filename)
-    Oktest::main(["-ss"])
-    ok {edit_output($stdout.string)} == edit_expected(SIMPLE_OUTPUT)
+    sout, serr = capture do
+      load(@filename)
+      Oktest::main(["-ss"])
+    end
+    assert_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
+    assert_eq serr, ""
   end
 
 end
@@ -163,11 +173,12 @@ end
 class PlainReporter_TC < Reporter_TC
 
   it "reports resuls only." do
-    tmp.stdout
-    filename = tmp.file "_test.tmp", INPUT
-    load(filename)
-    Oktest::main(["-sp"])
-    ok {edit_output($stdout.string)} == edit_expected(PLAIN_OUTPUT)
+    sout, serr = capture do
+      load(@filename)
+      Oktest::main(["-sp"])
+    end
+    assert_eq edit_actual(sout), edit_expected(PLAIN_OUTPUT)
+    assert_eq serr, ""
   end
 
 end

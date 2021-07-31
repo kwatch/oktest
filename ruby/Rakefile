@@ -8,11 +8,7 @@ task :default => :test
 
 desc "do test"
 task :test do
-  Dir.glob("test/*").each do |fpath|
-    #sh "ruby -I lib #{fpath}"
-    puts "## load(#{fpath.inspect})"
-    load(fpath)
-  end
+  ruby "test/run_all.rb"
 end
 
 desc "retrieve scripts from README.txt"
