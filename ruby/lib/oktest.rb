@@ -1375,12 +1375,7 @@ END
         status = self.new.run(*argv)
         return status || 0
       rescue OptionParser::InvalidOption => ex
-        command ||= File.basename($0)
-        if ex.reason == "invalid option"
-          $stderr.write("#{command}: #{ex.args.join(' ')}: unknown option.\n")
-        else
-          $stderr.write("#{command}: #{ex}\n")
-        end
+        $stderr.write("#{File.basename($0)}: #{ex.args.join(' ')}: unknown option.\n")
         return 1
       end
     end
