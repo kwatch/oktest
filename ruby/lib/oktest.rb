@@ -1403,12 +1403,19 @@ END
       end
       ## fix not to load this file twice.
       $" << __FILE__ unless $".include?(__FILE__)
-      ## load and run
-      load_files(filenames)
-      Oktest::Config.auto_run = false
-      n_errors = Oktest.run(:style=>opts.style)
-      AssertionObject.report_not_yet()
-      return n_errors
+      ##
+      if opts.generate
+        ## generate test code from source code
+        generate(filenames)
+        exit()
+      else
+        ## load and run
+        load_files(filenames)
+        Oktest::Config.auto_run = false
+        n_errors = Oktest.run(:style=>opts.style)
+        AssertionObject.report_not_yet()
+        return n_errors
+      end
     end
 
     private
@@ -1436,6 +1443,7 @@ END
       cmdopt.option("-v, --version",     "print version")
       cmdopt.option("-s STYLE  #style",  "report style (verbose/simple/plain, or v/s/p)")\
             .validation {|val| "unknown style." unless REPORTER_CLASSES.key?(val) }
+      cmdopt.option("-g, --generate",    "genearte test code from source file")
       return cmdopt
     end
 
@@ -1445,6 +1453,7 @@ END
       buf << "  -h, --help    : show help\n"
       buf << "  -v, --version : print version\n"
       buf << "  -s STYLE      : report style (verbose/simple/plain, or v/s/p)\n"
+      buf << "  -g, --generate: generate test code from source file\n"
       return buf
     end
 
@@ -1468,6 +1477,15 @@ END
           load(path) if File.basename(path) =~ pattern
         else
           raise ArgumentError.new("#{path}: not a file nor directory.")
+        end
+      end
+    end
+
+    def generate(filenames)
+      filenames.each do |fname|
+        generator = TestGenerator.new
+        File.open(fname) do |f|
+          print generator.generate(f)
         end
       end
     end
