@@ -1284,6 +1284,89 @@ module Oktest
   end
 
 
+  class TestGenerator
+
+    def parse(io)
+      tree = _parse(io, [], nil)
+      return tree
+    end
+
+    def _parse(io, tree, end_indent)
+      while (line = io.gets())
+        case line
+        when /^([ \t]*)end\b/
+          return tree if $1 == end_indent
+        when /^([ \t]*)(module|class|def) +(\w+[.:\w]*)/
+          indent, keyword, topic = $1, $2, $3
+          next if line =~ /\bend$/
+          if keyword == 'def'
+            topic = topic =~ /^self\./ ? ".#{$'}" : "\##{topic}"
+          end
+          newtree = []
+          _parse(io, newtree, indent)
+          tree << [indent, keyword, topic, newtree]
+        when /^([ \t]*)\#[:;] (.*)/
+          indent, keyword, spec = $1, 'spec', $2
+          tree << [indent, keyword, spec]
+        end
+      end
+      end_indent == nil  or
+        raise "parse error: end_indent=#{end_indent.inspect}"
+      return tree
+    end
+    private :_parse
+
+    def transform(tree, depth=0)
+      buf = []
+      tree.each do |tuple|
+        _transform(tuple, depth, buf)
+      end
+      buf.pop() if buf[-1] == "\n"
+      return buf.join()
+    end
+
+    def _transform(tuple, depth, buf)
+      indent = '  ' * depth
+      keyword = tuple[1]
+      if keyword == 'spec'
+        _, _, spec = tuple
+        escaped = spec.gsub(/"/, '\\\"')
+        buf << "#{indent}spec \"#{escaped}\"\n"
+      else
+        _, _, topic, children = tuple
+        buf << "\n"
+        buf << "#{indent}topic '#{topic}' do\n"     if keyword == 'def'
+        buf << "#{indent}topic #{topic} do\n"   unless keyword == 'def'
+        buf << "\n" unless keyword == 'def'
+        children.each do |child_tuple|
+          _transform(child_tuple, depth+1, buf)
+        end
+        buf << "\n" unless buf[-1].end_with?("\"\n")
+        buf << "#{indent}end\n"                if keyword == 'def'
+        buf << "#{indent}end # #{topic}\n" unless keyword == 'def'
+        buf << "\n"
+      end
+    end
+    private :_transform
+
+    def generate(io)
+      tree = parse(io)
+      return <<END
+# coding: utf-8
+
+require 'oktest'
+
+Oktest.scope do
+
+#{transform(tree, 1)}
+
+end
+END
+    end
+
+  end
+
+
   class MainApp
 
     def main(args=nil)
@@ -1320,12 +1403,19 @@ module Oktest
       end
       ## fix not to load this file twice.
       $" << __FILE__ unless $".include?(__FILE__)
-      ## load and run
-      load_files(filenames)
-      Oktest::Config.auto_run = false
-      n_errors = Oktest.run(:style=>opts.style)
-      AssertionObject.report_not_yet()
-      return n_errors
+      ##
+      if opts.generate
+        ## generate test code from source code
+        generate(filenames)
+        exit()
+      else
+        ## load and run
+        load_files(filenames)
+        Oktest::Config.auto_run = false
+        n_errors = Oktest.run(:style=>opts.style)
+        AssertionObject.report_not_yet()
+        return n_errors
+      end
     end
 
     private
@@ -1353,6 +1443,7 @@ module Oktest
       cmdopt.option("-v, --version",     "print version")
       cmdopt.option("-s STYLE  #style",  "report style (verbose/simple/plain, or v/s/p)")\
             .validation {|val| "unknown style." unless REPORTER_CLASSES.key?(val) }
+      cmdopt.option("-g, --generate",    "genearte test code from source file")
       return cmdopt
     end
 
@@ -1362,6 +1453,7 @@ module Oktest
       buf << "  -h, --help    : show help\n"
       buf << "  -v, --version : print version\n"
       buf << "  -s STYLE      : report style (verbose/simple/plain, or v/s/p)\n"
+      buf << "  -g, --generate: generate test code from source file\n"
       return buf
     end
 
@@ -1385,6 +1477,15 @@ module Oktest
           load(path) if File.basename(path) =~ pattern
         else
           raise ArgumentError.new("#{path}: not a file nor directory.")
+        end
+      end
+    end
+
+    def generate(filenames)
+      filenames.each do |fname|
+        generator = TestGenerator.new
+        File.open(fname) do |f|
+          print generator.generate(f)
         end
       end
     end
