@@ -1430,7 +1430,7 @@ END
     #  require 'optparse'
     #  parser = OptionParser.new
     #  parser.on('-h', '--help')    {|val| opts.help = val }
-    #  parser.on('-v', '--version') {|val| opts.version = val }
+    #  parser.on(      '--version') {|val| opts.version = val }
     #  parser.on('-s STYLE') {|val|
     #    REPORTER_CLASSES.key?(val)  or
     #      raise OptionParser::InvalidOption.new("-s #{val}: unknown style.")
@@ -1442,7 +1442,7 @@ END
       require 'section9/cmdopt'
       cmdopt = Section9::Cmdopt.new
       cmdopt.option("-h, --help",        "show help")
-      cmdopt.option("-v, --version",     "print version")
+      cmdopt.option("    --version",     "print version")
       cmdopt.option("-s STYLE  #style",  "report style (verbose/simple/plain, or v/s/p)")\
             .validation {|val| "unknown style." unless REPORTER_CLASSES.key?(val) }
       cmdopt.option("-g, --generate",    "genearte test code from source file")
@@ -1451,9 +1451,9 @@ END
 
     def help_message(command=nil)
       command ||= File.basename($0)
-      buf = "Usage: #{command} [options] [file or directory...]\n"
+      buf = "Usage: #{command} [<options>] [<file-or-directory>...]\n"
       buf << "  -h, --help    : show help\n"
-      buf << "  -v, --version : print version\n"
+      buf << "      --version : print version\n"
       buf << "  -s STYLE      : report style (verbose/simple/plain, or v/s/p)\n"
       buf << "  -g, --generate: generate test code from source file\n"
       return buf
