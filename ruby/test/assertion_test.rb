@@ -4,9 +4,7 @@
 ### $License: MIT License $
 ###
 
-File.class_eval do
-  require join(dirname(expand_path(__FILE__)), 'initialize')
-end
+require_relative './initialize'
 
 
 class TestUnitTestCase_TC < TC
