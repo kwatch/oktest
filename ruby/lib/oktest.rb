@@ -1526,5 +1526,8 @@ end
 
 
 if __FILE__ == $0
+  ## prevent to load oktest.rb twice
+  $LOADED_FEATURES << File.expand_path(__FILE__)
+  ## run test scripts
   Oktest.main()
 end
