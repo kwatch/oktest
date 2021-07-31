@@ -1371,29 +1371,27 @@ END
 
     def self.main(argv=nil)
       argv ||= ARGV
-      require 'optparse'
       begin
         status = self.new.run(*argv)
         return status || 0
-      #rescue OptionParser::InvalidOption => ex
-      rescue => ex
-        ok1 = defined?(OptionParser::InvalidOption) && ex.is_a?(OptionParser::InvalidOption)
-        ok2 = defined?(Section9::Cmdopt::ParseError) && ex.is_a?(Section9::Cmdopt::ParseError)
-        raise unless ok1 || ok2
-        command ||= File.basename($0)
-        $stderr.write("#{command}: #{ex}\n")
+      rescue OptionParser::ParseError => ex
+        case ex
+        when OptionParser::InvalidOption   ; s = "unknown option."
+        when OptionParser::InvalidArgument ; s = "invalid argument."
+        when OptionParser::MissingArgument ; s = "argument required."
+        else                               ; s = nil
+        end
+        msg = s ? "#{ex.args.join(' ')}: #{s}" : ex.message
+        $stderr.puts("#{File.basename($0)}: #{msg}")
         return 1
       end
     end
 
     def run(*args)
       ## parse command-line options
-      #opts = Options.new
-      #parser = option_parser(opts)
-      #filenames = parser.parse(args)
-      cmdopt = option_parser()
-      opts = cmdopt.parse(args)
-      filenames = args
+      opts = Options.new
+      parser = option_parser(opts)
+      filenames = parser.parse(args)
       ## help, version
       if opts.help
         puts help_message()
@@ -1421,30 +1419,21 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style
+      attr_accessor :help, :version, :style, :generate
     end
 
-    #def option_parser(opts)
-    #  require 'optparse'
-    #  parser = OptionParser.new
-    #  parser.on('-h', '--help')    {|val| opts.help = val }
-    #  parser.on(      '--version') {|val| opts.version = val }
-    #  parser.on('-s STYLE') {|val|
-    #    REPORTER_CLASSES.key?(val)  or
-    #      raise OptionParser::InvalidOption.new("-s #{val}: unknown style.")
-    #    opts.style = val
-    #  }
-    #  return parser
-    #end
-    def option_parser()
-      require 'section9/cmdopt'
-      cmdopt = Section9::Cmdopt.new
-      cmdopt.option("-h, --help",        "show help")
-      cmdopt.option("    --version",     "print version")
-      cmdopt.option("-s STYLE  #style",  "report style (verbose/simple/plain, or v/s/p)")\
-            .validation {|val| "unknown style." unless REPORTER_CLASSES.key?(val) }
-      cmdopt.option("-g, --generate",    "genearte test code from source file")
-      return cmdopt
+    def option_parser(opts)
+      require 'optparse' unless defined?(OptionParser)
+      parser = OptionParser.new
+      parser.on('-h', '--help')    {|val| opts.help = val }
+      parser.on(      '--version') {|val| opts.version = val }
+      parser.on('-s STYLE') {|val|
+        REPORTER_CLASSES.key?(val)  or
+          raise OptionParser::InvalidArgument.new(val)
+        opts.style = val
+      }
+      parser.on('-g', '--generate') {|val| opts.generate = val }
+      return parser
     end
 
     def help_message(command=nil)

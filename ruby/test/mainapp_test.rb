@@ -97,22 +97,46 @@ END
 
   describe '.main()' do
 
-    it "returns 0 when no errors raised." do
+    def main(argv)
       ret = nil
       sout, serr = capture do
-        ret = Oktest::MainApp.main(["-h"])
+        ret = Oktest::MainApp.main(argv)
       end
+      return ret, sout, serr
+    end
+
+    it "returns 0 when no errors raised." do
+      ret, sout, serr = main(["-h"])
       assert_eq ret, 0
       assert_eq serr, ""
     end
 
     it "returns 1 when a certain error raised." do
-      ret = nil
-      sout, serr = capture do
-        ret = Oktest::MainApp.main(["-U"])
-      end
+      ret, sout, serr = main(["-U"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -U: unknown option.\n"
+    end
+
+    it "reports error when unknown option specified." do
+      ret, sout, serr = main(["-X"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: -X: unknown option.\n"
+      #
+      ret, sout, serr = main(["--foobar"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: --foobar: unknown option.\n"
+    end
+
+    it "reports error when required argument is missing." do
+      ret, sout, serr = main(["-s"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: -s: argument required.\n"
+    end
+
+    it "reports error when argument is invalid." do
+      ret, sout, serr = main(["-s", "foobar"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: -s foobar: invalid argument.\n"
     end
 
   end
