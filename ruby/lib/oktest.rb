@@ -1404,7 +1404,7 @@ END
         return 0
       end
       ## fix not to load this file twice.
-      $" << __FILE__ unless $".include?(__FILE__)
+      $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__)
       ## generate test code from source code
       if opts.generate
         print generate(filenames)
