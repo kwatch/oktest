@@ -1472,14 +1472,9 @@ END
     end
 
     def load_dir(dir, pattern=/^(test_.*|.*_test)\.rb$/)
-      Dir.glob("#{dir}/*").each do |path|
-        if File.directory?(path)
-          load_dir(path)
-        elsif File.file?(path)
-          load(path) if File.basename(path) =~ pattern
-        else
-          raise ArgumentError.new("#{path}: not a file nor directory.")
-        end
+      Dir.glob("#{dir}/**/*").each do |path|
+        next unless File.file?(path)
+        load(path) if File.basename(path) =~ pattern
       end
     end
 
