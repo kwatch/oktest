@@ -10,6 +10,7 @@ end
 
 
 class TestUnitTestCase_TC < TC
+  include Test::Unit::Assertions
 
   describe "#ok()" do
     it "availables in Test::Unit::TestCase." do
@@ -23,6 +24,7 @@ end
 
 
 class AssertionObject_TC < TC
+  include Test::Unit::Assertions
 
   def should_be_failed(errmsg, &block)
     ex = assert_raise Oktest::FAIL_EXCEPTION do
@@ -69,7 +71,7 @@ $actual == $expected: failed.
 +Michiru
  Yuki
 END
-      errmsg.gsub!(/1,4/, '1,3') if RUBY_VERSION < "1.9.2"
+      errmsg.gsub!(/1,4/, '1,3') #if RUBY_VERSION < "1.9.2"
       should_be_failed(errmsg) { ok {actual} == expected }
     end
   end

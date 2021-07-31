@@ -57,7 +57,7 @@ class Runner_TC < TC
       end
     }
     it "runs topics and specs." do
-      stdout = tmp.stdout do
+      sout, serr = capture do
         build_topics.call
         Oktest::Runner.new(DummyReporter.new).run_all()
       end
@@ -71,16 +71,17 @@ topic: "Parent"
 /topic
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
     it "clears filescopes list." do
-      verify_(Oktest::FILESCOPES).empty?
-      stdout = tmp.stdout do
+      assert Oktest::FILESCOPES.empty?, "Oktest::FILESCOPES should NOT be empty #1"
+      sout, serr = capture do
         build_topics.call
-        verify_(Oktest::FILESCOPES).NOT.empty?
+        assert !Oktest::FILESCOPES.empty?, "Oktest::FILESCOPES should be empty"
         Oktest::Runner.new(DummyReporter.new).run_all()
       end
-      verify_(Oktest::FILESCOPES).empty?
+      assert Oktest::FILESCOPES.empty?, "Oktest::FILESCOPES should NOT be empty #2"
     end
   end
 
@@ -99,7 +100,7 @@ END
           end
         end
       end
-      stdout = tmp.stdout do
+      sout, serr = capture do
         runner = Oktest::Runner.new(DummyReporter.new).run_all()
       end
       expected = <<'END'
@@ -126,8 +127,8 @@ topic: "Parent"
 /topic
 /file
 END
-      ok {stdout.string} == expected
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
     it "runs spec block with context object which allows to call methods defined in topics." do
       Oktest.scope do
@@ -144,7 +145,7 @@ END
           end
         end
       end
-      stdout = tmp.stdout do
+      sout, serr = capture do
         runner = Oktest::Runner.new(DummyReporter.new).run_all()
       end
       expected = <<'END'
@@ -160,10 +161,11 @@ topic: "Parent"
 /topic
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
     it "calls 'before' and 'after' blocks with context object as self." do
-      stdout = tmp.stdout do
+      sout, serr = capture do
         Oktest.scope do
           before     { @x ||= 1; puts "      [all] before: @x=#{@x}" }
           after      {           puts "      [all] after:  @x=#{@x}" }
@@ -226,10 +228,11 @@ topic: "Parent"
 /topic
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
     it "calls 'after' blocks even when exception raised." do
-      stdout = tmp.stdout do
+      sout, serr = capture do
         Oktest.scope do
           after { puts "[all] after" }
           topic "Parent" do
@@ -257,10 +260,11 @@ topic: "Parent"
 /topic
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
     it "calls 'at_end' blocks, even when exception raised." do
-      stdout = tmp.stdout do
+      sout, serr = capture do
         Oktest.scope do
           topic "topic#A" do
             spec("spec#1") { at_end { puts "  - at_end A1" } }
@@ -281,13 +285,14 @@ topic: "topic#A"
 /topic
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
   end
 
   describe "#run_topic()" do
     it "calls 'before_all' and 'after_all' blocks." do
-      stdout = tmp.stdout do
+      sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all" }
           after_all  { puts "[all] after_all" }
@@ -332,13 +337,14 @@ topic: "Parent"
 [all] after_all
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
   end
 
   describe "#run_filescope()" do
     it "calls before_all and after_all blocks." do
-      stdout = tmp.stdout do
+      sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all#1" }
           after_all  { puts "[all] after_all#1" }
@@ -359,7 +365,8 @@ file: "test/runner_test.rb"
 [all] after_all#2
 /file
 END
-      verify_(stdout.string) == expected
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
   end
 

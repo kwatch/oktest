@@ -30,12 +30,12 @@ class FixtureManager_TC < TC
         end
       end
     end
-    tmp.block do
-      tmp.stdout
+    sout, serr = capture do
       Oktest::Runner.new(Oktest::Reporter.new).run_all()
-      expected = "[10, 20, 30]\n"
-      verify_($stdout.string) == expected
     end
+    expected = "[10, 20, 30]\n"
+    assert_eq sout, expected
+    assert_eq serr, ""
   end
 
   it "resolves fixture dependencies." do
@@ -55,15 +55,15 @@ class FixtureManager_TC < TC
         end
       end
     end
-    tmp.block do
-      tmp.stdout
+    sout, serr = capture do
       Oktest::Runner.new(Oktest::Reporter.new).run_all()
-      expected = <<'END'
+    end
+    expected = <<'END'
 ["A", "B", "C", "D"]
 ["A", "B", "C", "D"]
 END
-      verify_($stdout.string) == expected
-    end
+    assert_eq sout, expected
+    assert_eq serr, ""
   end
 
   it "calls fixture block with context object as self." do
@@ -73,14 +73,14 @@ END
         spec("spec#1") {|x| p @x }
       end
     end
-    tmp.block do
-      tmp.stdout
+    sout, serr = capture do
       Oktest::Runner.new(Oktest::Reporter.new).run_all()
-      expected = <<'END'
+    end
+    expected = <<'END'
 10
 END
-      verify_($stdout.string) == expected
-    end
+    assert_eq sout, expected
+    assert_eq serr, ""
   end
 
   it "caches fixture value to call fixture block only once per spec." do
@@ -95,16 +95,16 @@ END
         }
       end
     end
-    tmp.block do
-      tmp.stdout
+    sout, serr = capture do
       Oktest::Runner.new(Oktest::Reporter.new).run_all()
-      expected = <<'END'
+    end
+    expected = <<'END'
 ** x called.
 11
 12
 END
-      verify_($stdout.string) == expected
-    end
+    assert_eq sout, expected
+    assert_eq serr, ""
   end
 
   it "raises error when fixture not found." do
@@ -116,12 +116,12 @@ END
         end
       end
     end
-    tmp.block do
-      tmp.stdout
+    sout, serr = capture do
       Oktest::Runner.new(DummyReporter2.new).run_all()
-      expected = "#<Oktest::FixtureNotFoundError: y: fixture not found. (spec: spec#1)>\n"
-      verify_($stdout.string) == expected
     end
+    expected = "#<Oktest::FixtureNotFoundError: y: fixture not found. (spec: spec#1)>\n"
+    assert_eq sout, expected
+    assert_eq serr, ""
   end
 
   it "raises error when loop exists in dependency." do
@@ -136,12 +136,12 @@ END
         end
       end
     end
-    tmp.block do
-      tmp.stdout
+    sout, serr = capture do
       Oktest::Runner.new(DummyReporter2.new).run_all()
-      expected = "\#<Oktest::LoopedDependencyError: fixture dependency is looped: a->b=>c=>d=>b>\n"
-      verify_($stdout.string) == expected
     end
+    expected = "\#<Oktest::LoopedDependencyError: fixture dependency is looped: a->b=>c=>d=>b>\n"
+    assert_eq sout, expected
+    assert_eq serr, ""
   end
 
 end
