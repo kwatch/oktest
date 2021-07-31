@@ -27,23 +27,23 @@ class TC
 
   def self.it(spec, &b)
     t = @curr_target
-    print "[#{self.name}#{t ? ' > ' : ''}#{t}] #{spec} ... "
+    print "[#{self.name}#{t ? ' > ' : ''}#{t}] #{spec} ... " unless ENV['TC_QUIET']
     obj = self.new
     obj.setup()
     begin
       obj.instance_eval(&b)
     rescue => ex
       if ex.is_a?(AssertionFailed)
-        puts "FAILED!"; COUNTS[:fail]  += 1
+        COUNTS[:fail]  += 1; puts "FAILED!" unless ENV['TC_QUIET']
       else
-        puts "ERROR!" ; COUNTS[:error] += 1
+        COUNTS[:error] += 1; puts "ERROR!"  unless ENV['TC_QUIET']
       end
       puts "  #{ex.class.name}: #{ex.message}"
       ex.backtrace.each do |bt|
         puts "    #{bt}" if bt.index(__FILE__) == nil
       end
     else
-      puts "ok."; COUNTS[:ok] += 1
+      COUNTS[:ok] += 1; puts "ok." unless ENV['TC_QUIET']
     ensure
       obj.teardown()
     end
