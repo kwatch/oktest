@@ -132,16 +132,50 @@ task :publish do
   end
 end
 
-desc "retrieve scripts from README.txt"
-task :retrieve do
-  mkdir 'tmp' unless File.directory?('tmp')
-  mkdir 'tmp/readme.d' unless File.directory?('tmp/readme.d')
-  sh "retrieve -d tmp/readme.d README.txt"
-end
 
-desc "retrieve test scripts and execute them"
-task :test2 => :retrieve do
-  Dir.glob('tmp/readme.d/*').each do |fpath|
-    sh "ruby -I lib #{fpath}"
+namespace :readme do
+
+  desc "retrieve scripts from README.txt"
+  task :retrieve do
+    dir = "tmp/test"
+    rm_rf dir if File.exist?(dir)
+    mkdir_p dir
+    #sh "retrieve -d #{dir} README.txt"
+    s = File.read('README.md', encoding: 'utf-8')
+    filename = nil
+    buf = nil
+    s.each_line do |line|
+      case line
+      when /test\/(.*_test\.rb):/
+        filename = $1
+        next
+      when /^```ruby/
+        if filename
+          buf = []
+        end
+        next
+      when /^```/
+        if filename && buf
+          File.write("#{dir}/#{filename}", buf.join, encoding: 'utf-8')
+          puts "[retrieve] #{dir}/#{filename}"
+        end
+        filename = nil
+        buf = nil
+        next
+      end
+      #
+      if buf
+        buf << line
+      end
+    end
   end
+
+  desc "retrieve test scripts and execute them"
+  task :test => :retrieve do
+    Dir.glob('tmp/test/*').sort.each do |fpath|
+      puts "========================================"
+      sh "ruby -I lib #{fpath}" do end
+    end
+  end
+
 end
