@@ -47,6 +47,7 @@ Oktest.scope do
       spec "skip example" do
         skip_when true, "a certain condition"
       end
+      spec "todo example"
     end
 
     case_when "x is negative" do
@@ -88,7 +89,7 @@ ZeroDivisionError: divided by 0
 END
 
   FOOTER = <<'END'
-## total:7, <G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, todo:0  (in 0.000s)
+## total:8, <G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>  (in 0.000s)
 END
 
   VERBOSE_PART = <<'END'
@@ -103,6 +104,7 @@ END
   VERBOSE_PART2 = <<'END'
   * <b>Child3</b>
     - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
+    - [<Y>TODO</Y>] todo example
   - <b>When x is negative</b>
     - [<G>pass</G>] x*x is positive.
   - <b>Else</b>
@@ -111,12 +113,12 @@ END
   VERBOSE_OUTPUT = VERBOSE_PART + ERROR_PART + VERBOSE_PART2 + FOOTER
 
   SIMPLE_PART = <<'END'
-_test.tmp: <G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><G>.</G><G>.</G>
+_test.tmp: <G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><Y>t</Y><G>.</G><G>.</G>
 END
   SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + FOOTER
 
   PLAIN_PART = <<'END'
-<G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><G>.</G><G>.</G>
+<G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><Y>t</Y><G>.</G><G>.</G>
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 
