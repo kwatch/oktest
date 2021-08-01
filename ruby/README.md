@@ -7,6 +7,7 @@ Oktest.rb is a new-style testing library.
 * `ok {actual} == expected` style assertion.
 * **Fixture injection** inspired by dependency injection.
 * Structured test specifications.
+* Adopts blue/red color instead of green/red for accesability.
 
 ```ruby
 ### Oktest                           ### Test::Unit
