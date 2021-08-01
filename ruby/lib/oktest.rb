@@ -431,11 +431,17 @@ module Oktest
 
     def exist?
       _done()
-      __assert(@bool == File.exist?(@actual)) {
-        eq = @bool ? '' : ' == false'
-        "File.exist?($actual)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
-      }
+      if @actual.respond_to?(:exist?)
+        __assert(@bool == @actual.exist?) {
+          "$actual.exist?#{@bool ? '' : ' == false'}: failed.\n"\
+          "    $actual:   #{@actual.inspect}"
+        }
+      else
+        __assert(@bool == File.exist?(@actual)) {
+          "File.exist?($actual)#{@bool ? '' : ' == false'}: failed.\n"\
+          "    $actual:   #{@actual.inspect}"
+        }
+      end
       self
     end
 

@@ -553,6 +553,12 @@ END
                "    $actual:   \".\""
       should_be_failed(errmsg) { ok {'.'}.NOT.exist? }
     end
+    it "supports Pathname object." do
+      require 'pathname'
+      should_return_self { ok {Pathname(__FILE__)}.exist? }
+      should_return_self { ok {Pathname('.')}.exist? }
+      should_return_self { ok {Pathname('...')}.NOT.exist? }
+    end
   end
 
 end
