@@ -1250,6 +1250,15 @@ module Oktest
       return str
     end if RUBY_VERSION >= '1.9'
 
+    def seconds2hhmmss(n)
+      h, n = n.divmod(60*60)
+      m, s = n.divmod(60)
+      return "%d:%02d:%04.1f" % [h, m, s] if h > 0
+      return "%d:%04.1f" % [m, s]         if m > 0
+      return "%.1f" % s                   if s >= 10
+      return "%.2f" % s                   if s >= 1
+      return "%.3f" % s
+    end
 
     def chain_errors(*errors)
     end
