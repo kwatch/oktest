@@ -364,6 +364,12 @@ module Oktest
       self
     end
 
+    def keyvals(keyvals={})
+      _done()
+      keyvals.each {|name, expected| keyval(name, expected) }
+      self
+    end
+
     def length(n)
       _done()
       __assert(@bool == (@actual.length == n)) {

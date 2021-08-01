@@ -456,6 +456,28 @@ END
     end
   end
 
+  describe "#keyvals()" do
+    it "returns self when passed." do
+      d = {'a'=>1, 'b'=>2}
+      should_return_self { ok {d}.keyvals('a'=>1, 'b'=>2) }
+    end
+    it "raises assertion error when failed." do
+      d = {'a'=>1, 'b'=>2}
+      errmsg = "$<actual>[\"a\"] == $<expected>: failed.\n"\
+               "    $<actual>[\"a\"]: 1\n"\
+               "    $<expected>: \"1\""
+      should_be_failed(errmsg) { ok {d}.keyvals('a'=>'1', 'b'=>2) }
+    end
+    it "is available with NOT." do
+      d = {'a'=>1, 'b'=>2}
+      should_return_self { ok {d}.NOT.keyvals('a'=>'1') }
+      errmsg = "$<actual>[\"a\"] != $<expected>: failed.\n"\
+               "    $<actual>[\"a\"]: 1\n"\
+               "    $<expected>: 1"
+      should_be_failed(errmsg) { ok {d}.NOT.keyvals('a'=>1) }
+    end
+  end
+
   describe "#length" do
     it "returns self when passed." do
       should_return_self { ok {"SOS"}.length(3) }
