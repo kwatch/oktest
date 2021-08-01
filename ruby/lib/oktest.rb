@@ -395,47 +395,37 @@ module Oktest
       self
     end
 
-    def file?
-      _done()
-      if @actual.respond_to?(:file?)
-        bool = @actual.file?       ; s = "$actual.file?"
-      else
-        bool = File.file?(@actual) ; s = "File.file?($actual)"
-      end
+    def __assert2(bool, s)
       __assert(@bool == bool) {
         "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
         "    $actual:   #{@actual.inspect}"
       }
+    end
+    private :__assert2
+
+    def file?
+      _done()
+      @actual.respond_to?(:file?) \
+      ? __assert2(@actual.file?       , "$actual.file?") \
+      : __assert2(File.file?(@actual) , "File.file?($actual)")
       self
     end
     alias file_exist? file?       # for backward compatibilify
 
     def directory?
       _done()
-      if @actual.respond_to?(:directory?)
-        bool = @actual.directory?       ; s = "$actual.directory?"
-      else
-        bool = File.directory?(@actual) ; s = "File.directory?($actual)"
-      end
-      __assert(@bool == bool) {
-        "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
-      }
+      @actual.respond_to?(:directory?) \
+      ? __assert2(@actual.directory?       , "$actual.directory?") \
+      : __assert2(File.directory?(@actual) , "File.directory?($actual)")
       self
     end
     alias dir_exist? directory?   # for backward compatibilify
 
     def exist?
       _done()
-      if @actual.respond_to?(:exist?)
-        bool = @actual.exist?       ; s = "$actual.exist?"
-      else
-        bool = File.exist?(@actual) ; s = "File.exist?($actual)"
-      end
-      __assert(@bool == bool) {
-        "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
-      }
+      @actual.respond_to?(:exist?) \
+      ? __assert2(@actual.exist?       , "$actual.exist?") \
+      : __assert2(File.exist?(@actual) , "File.exist?($actual)")
       self
     end
 
