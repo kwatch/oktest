@@ -638,9 +638,9 @@ module Oktest
       $stdin, $stdout, $stderr = bkup
     end
 
-    def recorder
-      require 'section9/recorder' unless defined?(Section9::Recorder)
-      return Section9::Recorder.new
+    def recorder()
+      require 'benry/recorder' unless defined?(Benry::Recorder)
+      return Benry::Recorder.new
     end
 
   end
