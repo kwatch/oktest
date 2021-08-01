@@ -154,7 +154,7 @@ END
 
     it "runs test scripts." do
       expected = <<'END'
-## total:8 (<G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       ret, sout, serr = run(@testfile)
       assert_eq ret, 2
@@ -163,7 +163,7 @@ END
 
     it "finds test scripts in directory and runs them." do
       expected = <<'END'
-## total:8 (<G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       dir = "_tmpdir.d"
       dirs = [dir, "#{dir}/d1", "#{dir}/d1/d2"]
@@ -214,8 +214,8 @@ END
       expected = <<END
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<G>pass</G>] 1+1 should be 2
-    - [<G>pass</G>] 1-1 should be 0
+    - [<B>pass</B>] 1+1 should be 2
+    - [<B>pass</B>] 1-1 should be 0
   * <b>Child2</b>
     - [<R>Fail</R>] 1*1 should be 1
     - [<R>ERROR</R>] 1/1 should be 1
@@ -235,7 +235,7 @@ END
 
     it "'-s simple' or '-ss' option prints test results in simple mode." do
       expected = <<END
-#{@testfile}: <G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><Y>t</Y><G>.</G><G>.</G>
+#{@testfile}: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 ----------------------------------------------------------------------
 END
       #
@@ -252,7 +252,7 @@ END
 
     it "'-s plain' or '-sp' option prints test results in plain mode." do
       expected = <<END
-<G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><Y>t</Y><G>.</G><G>.</G>
+<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 ----------------------------------------------------------------------
 END
       #
