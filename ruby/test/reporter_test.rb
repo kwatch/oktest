@@ -76,9 +76,9 @@ END
     _test.tmp:18:in `block (4 levels) in <top (required)>'
         ok {1*1} == 2
 %%%
-$actual == $expected: failed.
-    $actual:   1
-    $expected: 2
+$<actual> == $<expected>: failed.
+    $<actual>:   1
+    $<expected>: 2
 ----------------------------------------------------------------------
 [<R>ERROR</R>] <b>Parent > Child2 > 1/1 should be 1</b>
     _test.tmp:21:in `/'
