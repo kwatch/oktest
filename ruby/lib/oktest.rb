@@ -641,6 +641,22 @@ module Oktest
 
     attr_accessor :_TODO, :_at_end_blocks
 
+    def ok
+      location = caller(1).first
+      actual = yield
+      ass = Oktest::AssertionObject.new(actual, true, location)
+      Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
+      return ass
+    end
+
+    def not_ok
+      location = caller(1).first
+      actual = yield
+      ass = Oktest::AssertionObject.new(actual, false, location)
+      Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
+      return ass
+    end
+
     def skip_when(condition, reason)
       raise SkipException.new(reason) if condition
     end
@@ -1607,25 +1623,6 @@ END
   end
 
 
-end
-
-
-#Test::Unit::Assertions.module_eval do
-Oktest::SpecHelper.module_eval do
-  def ok
-    location = caller(1).first
-    actual = yield
-    ass = Oktest::AssertionObject.new(actual, true, location)
-    Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
-    return ass
-  end
-  def not_ok
-    location = caller(1).first
-    actual = yield
-    ass = Oktest::AssertionObject.new(actual, false, location)
-    Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
-    return ass
-  end
 end
 
 
