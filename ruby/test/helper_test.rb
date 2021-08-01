@@ -280,4 +280,43 @@ class SpecHelper_TC < TC
     end
   end
 
+  describe '#dummy_ivars()' do
+    it "changes instance variables temporarily." do
+      obj = DummyUser.new(123, "alice")
+      dummy_ivars(obj, :id=>999, :name=>"bob")
+      assert_eq obj.instance_variable_get('@id'), 999
+      assert_eq obj.instance_variable_get('@name'), "bob"
+    end
+    it "recovers instance variables." do
+      obj = DummyUser.new(123, "alice")
+      dummy_ivars(obj, :id=>999, :name=>"bob")
+      assert_eq obj.instance_variable_get('@id'), 999
+      assert_eq obj.instance_variable_get('@name'), "bob"
+      #
+      assert_eq @_at_end_blocks.length, 1
+      pr = @_at_end_blocks.pop()
+      pr.call()
+      assert_eq obj.instance_variable_get('@id'), 123
+      assert_eq obj.instance_variable_get('@name'), "alice"
+    end
+    it "returns keyvals." do
+      obj = DummyUser.new(123, "alice")
+      ret = dummy_ivars(obj, :id=>789, :name=>"charlie")
+      assert_eq ret, {:id=>789, :name=>"charlie"}
+    end
+    it "can take block argument." do
+      obj = DummyUser.new(123, "alice")
+      ret = dummy_attrs(obj, :id=>888, :name=>"dave") do |kvs|
+        assert_eq obj.instance_variable_get('@id'), 888
+        assert_eq obj.instance_variable_get('@name'), "dave"
+        assert_eq kvs, {:id=>888, :name=>"dave"}
+        4567
+      end
+      assert_eq ret, 4567
+      assert_eq obj.id, 123
+      assert_eq obj.name, "alice"
+      assert_eq @_at_end_blocks, nil
+    end
+  end
+
 end
