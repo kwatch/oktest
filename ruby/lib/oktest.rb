@@ -130,13 +130,6 @@ module Oktest
       self
     end
 
-    #--
-    #def >  expected; _done(); assert_operator(@actual, @bool ? :> : :<=, expected); self end
-    def >= expected; _done(); assert_operator(@actual, @bool ? :>= : :<, expected); self end
-    def <  expected; _done(); assert_operator(@actual, @bool ? :< : :>=, expected); self end
-    def <= expected; _done(); assert_operator(@actual, @bool ? :<= : :>, expected); self end
-    #++
-
     def >(expected)
       _done()
       __assert(@bool == (@actual > expected)) {
@@ -249,16 +242,6 @@ module Oktest
       self
     end
 
-    #--
-    #def same?         expected ; _done(); assert_same        expected, @actual; self; end
-    #def not_same?     expected ; _done(); assert_not_same    expected, @actual; self; end
-    #def is_a?         expected ; _done(); assert_kind_of     expected, @actual; self; end
-    #def instance_of?  expected ; _done(); assert_instance_of expected, @actual; self; end
-    #def respond_to?   expected ; _done(); assert_respond_to  expected, @actual; self; end
-    #def nil?     ; _done(); assert_nil     @actual; self; end
-    #def not_nil? ; _done(); assert_not_nil @actual; self; end
-    #++
-
     def raise?(expected=Exception, errmsg=nil)
       _done()
       proc_obj = @actual
@@ -299,17 +282,6 @@ module Oktest
       end
       self
     end
-
-    #--
-    #def not_raise?
-    #  _done()
-    #  ! @bool  or
-    #    StandardError.new("ok().not_raise? is not available with '.NOT'.")
-    #  proc_obj = @actual
-    #  assert_nothing_raised(&proc_obj)
-    #  self
-    #end
-    #++
 
     def in?(expected)
       _done()
@@ -381,13 +353,6 @@ module Oktest
       }
       self
     end
-
-    #--
-    #def empty?;     _done(); @actual.empty?       or flunk "#{@actual}.empty?: failed.";      self; end
-    #def not_empty?; _done(); ! @actual.empty?     or flunk "! #{@actual}.empty?: failed.";    self; end
-    #def truthy?;    _done(); !! @actual == true   or flunk "!! #{@actual} == true: failed.";  self; end
-    #def falsy?;     _done(); !! @actual == false  or flunk "!! #{@actual} == false: failed."; self; end
-    #++
 
     def truthy?
       _done()
@@ -1209,18 +1174,6 @@ module Oktest
   }
 
 
-  #def self.run(*topics)
-  #  opts = topics[-1].is_a?(Hash) ? topics.pop() : {}
-  #  topics = TOPICS if topics.empty?
-  #  return if topics.empty?
-  #  klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
-  #    raise ArgumentError.new("#{opts[:style].inspect}: unknown style.")
-  #  reporter = klass.new
-  #  runner = Runner.new(reporter)
-  #  runner.run_all(*topics)
-  #  counts = reporter.counts
-  #  return counts[:FAIL] + counts[:ERROR]
-  #end
   def self.run(opts={})
     return if FILESCOPES.empty?
     klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
@@ -1307,10 +1260,6 @@ module Oktest
       return "%.2f" % s                   if s >= 1
       return "%.3f" % s
     end
-
-    def chain_errors(*errors)
-    end
-
 
     def _text2lines(text, no_newline_msg=nil)
       lines = []
