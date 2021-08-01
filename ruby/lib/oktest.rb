@@ -1622,15 +1622,16 @@ END
     exit(status)
   end
 
+  def self.on_exit()     # :nodoc:
+    Oktest.main() if self.auto_run?()
+  end
 
-  def self.on_exit()
-    unless Oktest::FILESCOPES.empty?
-      ex = $!
-      if (! ex || ex.is_a?(SystemExit)) && Oktest::Config.auto_run
-        Oktest.main()
-        raise ex if ex
-      end
-    end
+  def self.auto_run?()   # :nodoc:
+    return false if Oktest::FILESCOPES.empty?
+    return false if ! Oktest::Config.auto_run
+    exc = $!
+    return false if exc.nil? || exc.is_a?(SystemExit)
+    return true
   end
 
 
