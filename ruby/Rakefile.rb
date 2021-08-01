@@ -10,8 +10,9 @@ $copyright = "copyright(c) 2011-2021 kuwata-lab.com all rights reserved"
 $license   = "MIT License"
 
 require 'rake/clean'
-CLEAN << "build"
+CLEAN << "build" << "README.html"
 CLOBBER << Dir.glob("#{$project}-*.gem")
+CLEAN.concat Dir.glob("#{$project}-*.gem").collect {|x| x.sub(/\.gem$/, '') }
 
 
 task :default => :help
@@ -115,6 +116,22 @@ task :package do
     sh "gem build #{$project}.gemspec"
   end
   mv "#{dir}/#{$project}-#{$release}.gem", "."
+end
+
+desc "extract latest gem file"
+task :'package:extract' do
+  gemfile = Dir.glob("#{$project}-*.gem").sort_by {|x| File.mtime(x) }.last
+  dir = gemfile.sub(/\.gem$/, '')
+  rm_rf dir if File.exist?(dir)
+  mkdir dir
+  mkdir "#{dir}/data"
+  cd dir do
+    sh "tar xvf ../#{gemfile}"
+    sh "gunzip *.gz"
+    cd "data" do
+      sh "tar xvf ../data.tar"
+    end
+  end
 end
 
 desc "upload gem file to rubygems.org"
