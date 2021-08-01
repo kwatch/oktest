@@ -318,13 +318,24 @@ ok {a}.same?(e)          # fail unless a.equal?(e)
 ok {a}.include?(e)       # fail unless a.include?(e)
 ok {a}.in?(e)            # fail unless e.include?(a)
 ok {a}.in_delta?(e, x)   # fail unless e-x < a < e+x
+ok {a}.truthy?           # fail unless !!a == true
+ok {a}.falsy?            # fail unless !!a == false
 
-ok {a}.exist?            # fail unless File.exist?(x)
-ok {a}.file_exist?       # fail unless File.exist?(x)
-ok {a}.dir_exist?        # fail unless File.exist?(x)
+ok {a}.exist?            # fail unless File.exist?(a)
+ok {a}.file?             # fail unless File.file?(a)
+ok {a}.directory?        # fail unless File.directory?(a)
+ok {a}.symlink?          # fail unless File.symlink?(a)
 
-ok {a}.attr(key, val)    # fail unless a.__send__(key) == val
+ok {a}.attr(name, e)     # fail unless a.__send__(name) == e
+ok {a}.keyval(key, e)    # fail unless a[key] == e
 ok {a}.length(e)         # fail unless a.length == e
+```
+
+It is possible to chan method call of `.attr()` and `.keyval()`.
+
+```ruby
+ok {a}.attr(:name1, 'val1').attr(:name2, 'val2').attr(:name3, 'val3')
+ok {a}.keyval(:key1, 'val1').keyval(:key2, 'val2').keyval(:key3, 'val3')
 ```
 
 
@@ -338,6 +349,20 @@ ok {a}.empty?            # same as ok {a.empty?} == true
 ok {a}.key?(e)           # same as ok {a.key?(e)} == true
 ok {a}.is_a?(e)          # same as ok {a.is_a?(e)} == true
 ok {a}.between?(x, y)    # same as ok {a.between?(x, y)} == true
+```
+
+`Pathname()` is a good example of predicate methods.
+See [pathname.rb](https://ruby-doc.org/stdlib-2.7.0/libdoc/pathname/rdoc/Pathname.html)
+document for details about `Pathname()`.
+
+```ruby
+require 'pathname'      # !!!!!
+
+ok {Pathname(a)}.owned?      # same as ok {Pathname(a).owned?} == true
+ok {Pathname(a)}.readable?   # same as ok {Pathname(a).readable?} == true
+ok {Pathname(a)}.writable?   # same as ok {Pathname(a).writable?} == true
+ok {Pathname(a)}.absolute?   # same as ok {Pathname(a).absolute?} == true
+ok {Pathname(a)}.relative?   # same as ok {Pathname(a).relative?} == true
 ```
 
 
