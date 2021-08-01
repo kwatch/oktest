@@ -1054,15 +1054,13 @@ module Oktest
     end
 
     def footer(elapsed)
-      total = 0; @counts.each {|k, v| total += v }
-      buf = "## total:#{total}"
-      STATUSES.each do |st|
+      total = 0; @counts.each {|_, v| total += v }
+      arr = STATUSES.collect {|st|
         s = "#{st.to_s.downcase}:#{@counts[st]}"
-        s = Color.status(st, s) if @counts[st] > 0
-        buf << ", " << s
-      end
-      buf << "  (in %.3fs)" % elapsed
-      return buf
+        @counts[st] == 0 ? s : Color.status(st, s)
+      }
+      sec = "%.3f" % elapsed
+      return "## total:#{total}, #{arr.join(', ')}  (in #{sec}s)"
     end
 
     def spec_path(spec, topic)
