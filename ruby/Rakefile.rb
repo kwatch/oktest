@@ -197,7 +197,8 @@ namespace :readme do
 
   desc "builds table of contents"
   task :toc do
-    url = "https://gist.github.com/kwatch/76f770cf75a1b3b474d76bf3910fdbe1"
+    url = ENV['README_URL']  or
+      raise "$README_URL required."
     htmlfile = "README.html"
     sh "curl -s -o #{htmlfile} #{url}"
     rexp = /<h(\d)><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
