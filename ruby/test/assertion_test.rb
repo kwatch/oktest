@@ -512,20 +512,25 @@ END
     end
   end
 
-  describe "#dir_exist?" do
+  describe "#directory?" do
     it "returns self when passed." do
-      should_return_self { ok {'.'}.dir_exist? }
+      should_return_self { ok {'.'}.directory? }
     end
     it "raises assertion error when failed." do
       errmsg = "File.directory?($actual): failed.\n"\
                "    $actual:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.dir_exist? }
+      should_be_failed(errmsg) { ok {__FILE__}.directory? }
     end
     it "is available with NOT." do
-      should_return_self { ok {__FILE__}.NOT.dir_exist? }
+      should_return_self { ok {__FILE__}.NOT.directory? }
       errmsg = "File.directory?($actual) == false: failed.\n"\
                "    $actual:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.NOT.dir_exist? }
+      should_be_failed(errmsg) { ok {'.'}.NOT.directory? }
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      should_return_self { ok {Pathname('.')}.directory? }
+      should_return_self { ok {Pathname(__FILE__)}.NOT.directory? }
     end
   end
 

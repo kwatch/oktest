@@ -412,15 +412,22 @@ module Oktest
     end
     alias file_exist? file?
 
-    def dir_exist?
+    def directory?
       _done()
-      __assert(@bool == File.directory?(@actual)) {
-        eq = @bool ? '' : ' == false'
-        "File.directory?($actual)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
-      }
+      if @actual.respond_to?(:directory?)
+        __assert(@bool == @actual.directory?) {
+          "$actual.directory?#{@bool ? '' : ' == false'}: failed.\n"\
+          "    $actual:   #{@actual.inspect}"
+        }
+      else
+        __assert(@bool == File.directory?(@actual)) {
+          "File.directory?($actual)#{@bool ? '' : ' == false'}: failed.\n"\
+          "    $actual:   #{@actual.inspect}"
+        }
+      end
       self
     end
+    alias dir_exist? directory?
 
     def exist?
       _done()
