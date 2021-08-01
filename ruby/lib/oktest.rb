@@ -1060,7 +1060,7 @@ module Oktest
         @counts[st] == 0 ? s : Color.status(st, s)
       }
       sec = "%.3f" % elapsed
-      return "## total:#{total}, #{arr.join(', ')}  (in #{sec}s)"
+      return "## total:#{total} (#{arr.join(', ')}) in #{sec}s"
     end
 
     def spec_path(spec, topic)
