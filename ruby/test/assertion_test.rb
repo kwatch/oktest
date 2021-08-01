@@ -490,20 +490,25 @@ END
     end
   end
 
-  describe "#file_exist?" do
+  describe "#file?" do
     it "returns self when passed." do
-      should_return_self { ok {__FILE__}.file_exist? }
+      should_return_self { ok {__FILE__}.file? }
     end
     it "raises assertion error when failed." do
       errmsg = "File.file?($actual): failed.\n"\
                "    $actual:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.file_exist? }
+      should_be_failed(errmsg) { ok {'.'}.file? }
     end
     it "is available with NOT." do
-      should_return_self { ok {'.'}.NOT.file_exist? }
+      should_return_self { ok {'.'}.NOT.file? }
       errmsg = "File.file?($actual) == false: failed.\n"\
                "    $actual:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.NOT.file_exist? }
+      should_be_failed(errmsg) { ok {__FILE__}.NOT.file? }
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      should_return_self { ok {Pathname(__FILE__)}.file? }
+      should_return_self { ok {Pathname('.')}.NOT.file? }
     end
   end
 
