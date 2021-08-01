@@ -1623,18 +1623,21 @@ END
   end
 
 
-end
-
-
-at_exit do
-  unless Oktest::FILESCOPES.empty?
-    ex = $!
-    if (! ex || ex.is_a?(SystemExit)) && Oktest::Config.auto_run
-      Oktest.main()
-      raise ex if ex
+  def self.on_exit()
+    unless Oktest::FILESCOPES.empty?
+      ex = $!
+      if (! ex || ex.is_a?(SystemExit)) && Oktest::Config.auto_run
+        Oktest.main()
+        raise ex if ex
+      end
     end
   end
+
+
 end
+
+
+at_exit { Oktest.on_exit() }
 
 
 if __FILE__ == $0
