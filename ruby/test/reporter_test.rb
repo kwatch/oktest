@@ -89,14 +89,14 @@ ZeroDivisionError: divided by 0
 END
 
   FOOTER = <<'END'
-## total:8 (<G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
 
   VERBOSE_PART = <<'END'
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<G>pass</G>] 1+1 should be 2
-    - [<G>pass</G>] 1-1 should be 0
+    - [<B>pass</B>] 1+1 should be 2
+    - [<B>pass</B>] 1-1 should be 0
   * <b>Child2</b>
     - [<R>Fail</R>] 1*1 should be 1
     - [<R>ERROR</R>] 1/1 should be 1
@@ -106,19 +106,19 @@ END
     - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
     - [<Y>TODO</Y>] todo example
   - <b>When x is negative</b>
-    - [<G>pass</G>] x*x is positive.
+    - [<B>pass</B>] x*x is positive.
   - <b>Else</b>
-    - [<G>pass</G>] x*x is also positive.
+    - [<B>pass</B>] x*x is also positive.
 END
   VERBOSE_OUTPUT = VERBOSE_PART + ERROR_PART + VERBOSE_PART2 + FOOTER
 
   SIMPLE_PART = <<'END'
-_test.tmp: <G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><Y>t</Y><G>.</G><G>.</G>
+_test.tmp: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 END
   SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + FOOTER
 
   PLAIN_PART = <<'END'
-<G>.</G><G>.</G><R>f</R><R>E</R><Y>s</Y><Y>t</Y><G>.</G><G>.</G>
+<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 
