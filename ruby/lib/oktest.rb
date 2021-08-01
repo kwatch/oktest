@@ -1512,14 +1512,14 @@ END
     def option_parser(opts)
       require 'optparse' unless defined?(OptionParser)
       parser = OptionParser.new
-      parser.on('-h', '--help')    {|val| opts.help = val }
-      parser.on(      '--version') {|val| opts.version = val }
+      parser.on('-h', '--help')    { opts.help    = true }
+      parser.on(      '--version') { opts.version = true }
       parser.on('-s STYLE') {|val|
         REPORTER_CLASSES.key?(val)  or
           raise OptionParser::InvalidArgument.new(val)
         opts.style = val
       }
-      parser.on('-g', '--generate') {|val| opts.generate = val }
+      parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
 
