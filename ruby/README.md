@@ -328,6 +328,7 @@ ok {a}.not_exist?        # fail unless ! File.exist?(a)
 
 ok {a}.attr(name, e)     # fail unless a.__send__(name) == e
 ok {a}.keyval(key, e)    # fail unless a[key] == e
+ok {a}.item(key, e)      # alias of `ok {a}.keyval(key, e)`
 ok {a}.length(e)         # fail unless a.length == e
 ```
 
