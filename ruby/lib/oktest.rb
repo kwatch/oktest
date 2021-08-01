@@ -4,15 +4,6 @@
 ### $License: MIT License $
 ###
 
-require 'test/unit'
-class Test::Unit::Runner
-  @@stop_auto_run = true
-end if defined?(Test::Unit::Runner)
-class Test::Unit::AutoRunner
-  @@need_auto_run = false
-end if defined?(Test::Unit::AutoRunner)
-
-
 
 module Oktest
 
@@ -20,19 +11,24 @@ module Oktest
   VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
+  class AssertionFailed < Exception
+  end
+
   class SkipException < Exception
   end
 
   class TodoException < Exception
   end
 
-  FAIL_EXCEPTION = defined?(MiniTest) ? MiniTest::Assertion : Test::Unit::AssertionFailedError  # :nodoc:
+  #FAIL_EXCEPTION = (defined?(MiniTest)   ? MiniTest::Assertion :
+  #                  defined?(Test::Unit) ? Test::Unit::AssertionFailedError : AssertionFailed)
+  FAIL_EXCEPTION = AssertionFailed
   SKIP_EXCEPTION = SkipException
   TODO_EXCEPTION = TodoException
 
 
   class AssertionObject
-    include Test::Unit::Assertions
+    #include Test::Unit::Assertions
 
     self.instance_methods.grep(/\?\z/).each do |k|
       undef_method k unless k.to_s == 'equal?' || k.to_s =~ /^assert/
@@ -65,25 +61,28 @@ module Oktest
     end
     private :_not
 
-    if defined?(MiniTest)
-      def __assert result
-        if result
-          assert true
-        else
-          #assert_block(yield) { false }
-          #flunk yield
-          assert false, yield
-        end
-      end
-    else
-      def __assert result
-        if result
-          assert true
-        else
-          assert_block(yield) { false }
-        end
-      end
+    def __assert result
+      raise FAIL_EXCEPTION, yield unless result
     end
+    #if defined?(MiniTest)
+    #  def __assert result
+    #    if result
+    #      assert true
+    #    else
+    #      #assert_block(yield) { false }
+    #      #flunk yield
+    #      assert false, yield
+    #    end
+    #  end
+    #elsif defined?(Test::Unit)
+    #  def __assert result
+    #    if result
+    #      assert true
+    #    else
+    #      assert_block(yield) { false }
+    #    end
+    #  end
+    #end
 
     def NOT
       @bool = ! @bool
@@ -549,7 +548,7 @@ module Oktest
       klass = Class.new(self)
       klass.class_eval do
         extend ScopeClassMethods
-        include Test::Unit::Assertions
+        #include Test::Unit::Assertions
         include SpecHelper
         @_scope = topic
       end
@@ -641,6 +640,22 @@ module Oktest
   module SpecHelper
 
     attr_accessor :_TODO, :_at_end_blocks
+
+    def ok
+      location = caller(1).first
+      actual = yield
+      ass = Oktest::AssertionObject.new(actual, true, location)
+      Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
+      return ass
+    end
+
+    def not_ok
+      location = caller(1).first
+      actual = yield
+      ass = Oktest::AssertionObject.new(actual, false, location)
+      Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
+      return ass
+    end
 
     def skip_when(condition, reason)
       raise SkipException.new(reason) if condition
@@ -1611,30 +1626,8 @@ END
 end
 
 
-Test::Unit::Assertions.module_eval do
-  def ok
-    location = caller(1).first
-    actual = yield
-    ass = Oktest::AssertionObject.new(actual, true, location)
-    Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
-    return ass
-  end
-  def not_ok
-    location = caller(1).first
-    actual = yield
-    ass = Oktest::AssertionObject.new(actual, false, location)
-    Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
-    return ass
-  end
-end
-
-
 at_exit do
-  if Oktest::FILESCOPES.empty?
-    if defined?(Test::Unit::Runner)
-      Test::Unit::Runner.class_variable_set(:@@stop_auto_run, false)
-    end
-  else
+  unless Oktest::FILESCOPES.empty?
     ex = $!
     if (! ex || ex.is_a?(SystemExit)) && Oktest::Config.auto_run
       Oktest.main()

@@ -7,31 +7,36 @@
 require_relative './initialize'
 
 
-class TestUnitTestCase_TC < TC
-  include Test::Unit::Assertions
-
-  describe "#ok()" do
-    it "availables in Test::Unit::TestCase." do
-      assert_nothing_raised do
-        ok {1+1} == 2
-      end
-    end
-  end
-
-end
+#class TestUnitTestCase_TC < TC
+#  include Test::Unit::Assertions
+#
+#  describe "#ok()" do
+#    it "availables in Test::Unit::TestCase." do
+#      assert_nothing_raised do
+#        ok {1+1} == 2
+#      end
+#    end
+#  end
+#
+#end
 
 
 class AssertionObject_TC < TC
-  include Test::Unit::Assertions
+  #include Test::Unit::Assertions
+  include Oktest::SpecHelper
 
   def should_be_failed(errmsg, &block)
-    ex = assert_raise Oktest::FAIL_EXCEPTION do
+    exc = nil
+    begin
       block.call
+    rescue Oktest::FAIL_EXCEPTION => exc_
+      exc = exc_
+    else
+      assert false, "expected to be failed, but succeeded unexpectedly."
     end
-    case errmsg
-    when Regexp;  assert_match errmsg, ex.message
-    else;         assert_equal errmsg, ex.message
-    end
+    #
+    assert errmsg === exc.message,
+           "expected error message: #{errmsg}, actual error message: #{exc.message}"
   end
 
   def should_return_self
@@ -69,7 +74,8 @@ $<actual> == $<expected>: failed.
 +Michiru
  Yuki
 END
-      errmsg.gsub!(/1,4/, '1,3') #if RUBY_VERSION < "1.9.2"
+      #errmsg.gsub!(/1,4/, '1,3') if RUBY_VERSION < "1.9.2"
+      errmsg.gsub!(/1,4/, '1,3') unless defined?(Diff::LCS)
       should_be_failed(errmsg) { ok {actual} == expected }
     end
   end
@@ -311,13 +317,18 @@ END
     end
     it "raises TypeError when boolean method returned non-boolean value." do
       errmsg = "$<actual>.empty?: failed.\n    $<actual>:   \"SOS\""
-      ex = assert_raise(TypeError) {
+      exc = nil
+      begin
         s = "SOS"
         def s.sos?; return 1; end
         ok {s}.sos?
-      }
+      rescue TypeError => exc_
+        exc = exc_
+      else
+        assert false, "TypeError expected but nothing raised."
+      end
       errmsg = "ok(): String#sos?() expected to return true or false, but got 1."
-      assert_equal errmsg, ex.message
+      assert_eq exc.message, errmsg
     end
   end
 
