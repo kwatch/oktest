@@ -534,6 +534,47 @@ END
     end
   end
 
+  describe "#symlink?" do
+    def with_symlink
+      linkname = "_sym_#{rand().to_s[2...7]}"
+      File.symlink(__FILE__, linkname)
+      yield linkname
+    ensure
+      File.unlink(linkname)
+    end
+    it "returns self when passed." do
+      with_symlink do |linkname|
+        should_return_self { ok {linkname}.symlink? }
+      end
+    end
+    it "raises assertion error when failed." do
+      with_symlink do |linkname|
+        errmsg = "File.symlink?($actual): failed.\n"\
+                 "    $actual:   \"_not_exist\""
+        should_be_failed(errmsg) { ok {'_not_exist'}.symlink? }
+        errmsg = "File.symlink?($actual): failed.\n"\
+                 "    $actual:   \".\""
+        should_be_failed(errmsg) { ok {'.'}.symlink? }
+      end
+    end
+    it "is available with NOT." do
+      with_symlink do |linkname|
+        should_return_self { ok {'_not_exist'}.NOT.symlink? }
+        should_return_self { ok {'.'}.NOT.symlink? }
+        errmsg = "File.symlink?($actual) == false: failed.\n"\
+                 "    $actual:   \"#{linkname}\""
+        should_be_failed(errmsg) { ok {linkname}.NOT.symlink? }
+      end
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      with_symlink do |linkname|
+        should_return_self { ok {Pathname(linkname)}.symlink? }
+        should_return_self { ok {Pathname('.')}.NOT.symlink? }
+      end
+    end
+  end
+
   describe "#exist?" do
     it "returns self when passed." do
       should_return_self { ok {__FILE__}.exist? }

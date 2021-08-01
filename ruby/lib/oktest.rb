@@ -421,6 +421,14 @@ module Oktest
     end
     alias dir_exist? directory?   # for backward compatibilify
 
+    def symlink?
+      _done()
+      @actual.respond_to?(:symlink?) \
+      ? __assert2(@actual.symlink?       , "$actual.symlink?") \
+      : __assert2(File.symlink?(@actual) , "File.symlink?($actual)")
+      self
+    end
+
     def exist?
       _done()
       @actual.respond_to?(:exist?) \
