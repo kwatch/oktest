@@ -5,8 +5,8 @@
 Oktest.rb is a new-style testing library.
 
 * `ok {actual} == expected` style assertion.
-* fixture injection inspired by dependency injection
-* structured test specifications.
+* **Fixture injection** inspired by dependency injection.
+* Structured test specifications.
 
 ```ruby
 ### Oktest                           ### Test::Unit
@@ -41,6 +41,38 @@ end                                  #
 ```
 
 Oktest.rb requires Ruby 2.4 or later.
+
+
+## Table of Contents
+
+<!-- TOC -->
+
+  * <a href="#quick-tutorial">Quick Tutorial</a>
+    * <a href="#install">Install</a>
+    * <a href="#basic-example">Basic Example</a>
+    * <a href="#assertion-failure-and-error">Assertion Failure, and Error</a>
+    * <a href="#skip-and-todo">Skip, and Todo</a>
+    * <a href="#reporting-style">Reporting Style</a>
+    * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
+  * <a href="#assertions">Assertions</a>
+    * <a href="#basic-assertions">Basic Assertions</a>
+    * <a href="#predicate-assertions">Predicate Assertions</a>
+    * <a href="#negative-assertion">Negative Assertion</a>
+    * <a href="#exception-assertion">Exception Assertion</a>
+    * <a href="#custom-assertion">Custom Assertion</a>
+  * <a href="#fixtures">Fixtures</a>
+    * <a href="#setup-and-teardown">Setup and Teardown</a>
+    * <a href="#at_end-crean-up-handler"><code>at_end()</code>: Crean-up Handler</a>
+    * <a href="#fixture-injection">Fixture Injection</a>
+  * <a href="#helpers">Helpers</a>
+    * <a href="#capture_sio"><code>capture_sio()</code></a>
+    * <a href="#dummy_file"><code>dummy_file()</code></a>
+    * <a href="#dummy_dir"><code>dummy_dir()</code></a>
+    * <a href="#dummy_values"><code>dummy_values()</code></a>
+    * <a href="#dummy_attrs"><code>dummy_attrs()</code></a>
+    * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
+
+<!-- /TOC -->
 
 
 
