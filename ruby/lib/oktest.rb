@@ -1525,12 +1525,13 @@ END
 
     def help_message(command=nil)
       command ||= File.basename($0)
-      buf = "Usage: #{command} [<options>] [<file-or-directory>...]\n"
-      buf << "  -h, --help    : show help\n"
-      buf << "      --version : print version\n"
-      buf << "  -s STYLE      : report style (verbose/simple/plain, or v/s/p)\n"
-      buf << "  -g, --generate: generate test code from source file\n"
-      return buf
+      return <<END
+Usage: #{command} [<options>] [<file-or-directory>...]
+  -h, --help    : show help
+      --version : print version
+  -s STYLE      : report style (verbose/simple/plain, or v/s/p)
+  -g, --generate: generate test code from source file
+END
     end
 
     def load_files(filenames)
