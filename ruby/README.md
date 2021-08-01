@@ -181,9 +181,9 @@ $ ruby test/example02_test.rb
 [Fail] other examples > example of assertion failure
     tmp/test/example02_test.rb:9:in `block (3 levels) in <main>'
         ok {1+1} == 0     # FAIL
-$actual == $expected: failed.
-    $actual:   2
-    $expected: 0
+$<actual> == $<expected>: failed.
+    $<actual>:   2
+    $<expected>: 0
 ----------------------------------------------------------------------
 [ERROR] other examples > example of something error
     tmp/test/example02_test.rb:13:in `block (3 levels) in <main>'
@@ -274,9 +274,9 @@ tmp/test/example02_test.rb: fE
     tmp/test/example02_test.rb:9:in `block (3 levels) in <top (required)>'
         ok {1+1} == 0     # FAIL
     -e:1:in `<main>'
-$actual == $expected: failed.
-    $actual:   2
-    $expected: 0
+$<actual> == $<expected>: failed.
+    $<actual>:   2
+    $<expected>: 0
 ----------------------------------------------------------------------
 [ERROR] other examples > example of something error
     tmp/test/example02_test.rb:13:in `block (3 levels) in <top (required)>'
@@ -490,7 +490,7 @@ $ ruby test/example21_test.rb
 ** after() called
 .* after_all() called
 
-## total:2, pass:2, fail:0, error:0, skip:0, todo:0  (in 0.000s)
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
 
 

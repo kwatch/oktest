@@ -108,9 +108,9 @@ topic: "Parent"
     spec: "spec#1"
     /spec: status=:PASS
     spec: "spec#2"
-    /spec: status=:FAIL, error=#<ASSERTION: $actual == $expected: failed.
-    $actual:   2
-    $expected: 1>
+    /spec: status=:FAIL, error=#<ASSERTION: $<actual> == $<expected>: failed.
+    $<actual>:   2
+    $<expected>: 1>
     spec: "spec#3"
     /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for "":String>
     spec: "spec#4"
@@ -251,9 +251,9 @@ topic: "Parent"
 [Child] after
 [Parent] after
 [all] after
-    /spec: status=:FAIL, error=#<ASSERTION: $actual == $expected: failed.
-    $actual:   2
-    $expected: 1>
+    /spec: status=:FAIL, error=#<ASSERTION: $<actual> == $<expected>: failed.
+    $<actual>:   2
+    $<expected>: 1>
   /topic
 /topic
 /file

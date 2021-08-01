@@ -95,13 +95,13 @@ module Oktest
         if @bool && ! (@actual == expected) \
           && @actual.is_a?(String) && expected.is_a?(String) \
           && (@actual =~ /\n/ || expected =~ /\n/)
-          diff = Util.unified_diff(expected, @actual, "--- $expected\n+++ $actual\n")
-          "$actual == $expected: failed.\n#{diff}"
+          diff = Util.unified_diff(expected, @actual, "--- $<expected>\n+++ $<actual>\n")
+          "$<actual> == $<expected>: failed.\n#{diff}"
         else
           op = @bool ? '==' : '!='
-          "$actual #{op} $expected: failed.\n"\
-          "    $actual:   #{@actual.inspect}\n"\
-          "    $expected: #{expected.inspect}"
+          "$<actual> #{op} $<expected>: failed.\n"\
+          "    $<actual>:   #{@actual.inspect}\n"\
+          "    $<expected>: #{expected.inspect}"
         end
       }
       self
@@ -111,9 +111,9 @@ module Oktest
       _done()
       __assert(@bool == (@actual != expected)) {
         op = @bool ? '!=' : '=='
-        "$actual #{op} $expected: failed.\n"\
-        "    $actual:   #{@actual.inspect}\n"\
-        "    $expected: #{expected.inspect}"
+        "$<actual> #{op} $<expected>: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}"
       }
       self
     end
@@ -121,11 +121,11 @@ module Oktest
     def ===(expected)
       _done()
       __assert(@bool == (@actual === expected)) {
-        s = "$actual === $expected"
+        s = "$<actual> === $<expected>"
         s = "!(#{s})" unless @bool
         "#{s}: failed.\n"\
-        "    $actual:   #{@actual.inspect}\n"\
-        "    $expected: #{expected.inspect}"
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}"
       }
       self
     end
@@ -174,12 +174,12 @@ module Oktest
       #@bool ? assert_match(expected, @actual) : assert_no_match(expected, @actual)
       __assert(@bool == !!(@actual =~ expected)) {
         op = @bool ? '=~' : '!~'
-        msg = "$actual #{op} $expected: failed.\n"\
-              "    $expected: #{expected.inspect}\n"
+        msg = "$<actual> #{op} $<expected>: failed.\n"\
+              "    $<expected>: #{expected.inspect}\n"
         if @actual =~ /\n\z/
-          msg << "    $actual:   <<'END'\n#{@actual}END\n"
+          msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
         else
-          msg << "    $actual:   #{@actual.inspect}\n"
+          msg << "    $<actual>:   #{@actual.inspect}\n"
         end
       }
       self
@@ -190,12 +190,12 @@ module Oktest
       #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
       __assert(@bool == !!(@actual !~ expected)) {
         op = @bool ? '!~' : '=~'
-        msg = "$actual #{op} $expected: failed.\n"\
-              "    $expected: #{expected.inspect}\n"
+        msg = "$<actual> #{op} $<expected>: failed.\n"\
+              "    $<expected>: #{expected.inspect}\n"
         if @actual =~ /\n\z/
-          msg << "    $actual:   <<'END'\n#{@actual}END\n"
+          msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
         else
-          msg << "    $actual:   #{@actual.inspect}\n"
+          msg << "    $<actual>:   #{@actual.inspect}\n"
         end
       }
       self
@@ -205,10 +205,10 @@ module Oktest
       _done()
       __assert(@bool == !!((@actual - expected).abs < delta)) {
         eq = @bool ? '' : ' == false'
-        "($actual - $expected).abs < #{delta}#{eq}: failed.\n"\
-                "    $actual:   #{@actual.inspect}\n"\
-                "    $expected: #{expected.inspect}\n"\
-                "    ($actual - $expected).abs: #{(@actual - expected).abs.inspect}"
+        "($<actual> - $<expected>).abs < #{delta}#{eq}: failed.\n"\
+                "    $<actual>:   #{@actual.inspect}\n"\
+                "    $<expected>: #{expected.inspect}\n"\
+                "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
       }
       self
     end
@@ -219,9 +219,9 @@ module Oktest
       #      : assert_not_same(expected, @actual)
       __assert(@bool == !! @actual.equal?(expected)) {
         eq = @bool ? '' : ' == false'
-        "$actual.equal?($expected)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}\n"\
-        "    $expected: #{expected.inspect}\n"
+        "$<actual>.equal?($<expected>)#{eq}: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}\n"
       }
       self
     end
@@ -240,8 +240,8 @@ module Oktest
         __assert(@bool == ret) {
           args = args.empty? ? '' : "(#{args.collect {|x| x.inspect }.join(', ')})"
           eq = @bool ? '' : ' == false'
-          "$actual.#{method_name}#{args}#{eq}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
+          "$<actual>.#{method_name}#{args}#{eq}: failed.\n"\
+          "    $<actual>:   #{@actual.inspect}"
         }
       else
         raise TypeError.new("ok(): #{@actual.class}##{method_name}() expected to return true or false, but got #{ret.inspect}.")
@@ -315,9 +315,9 @@ module Oktest
       _done()
       __assert(@bool == !! expected.include?(@actual)) {
         eq = @bool ? '' : ' == false'
-        "$expected.include?($actual)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}\n"\
-        "    $expected: #{expected.inspect}"
+        "$<expected>.include?($<actual>)#{eq}: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}"
       }
       self
     end
@@ -326,9 +326,9 @@ module Oktest
       _done()
       __assert(@bool == !! @actual.include?(expected)) {
         eq = @bool ? '' : ' == false'
-        "$actual.include?($expected)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}\n"\
-        "    $expected: #{expected.inspect}"
+        "$<actual>.include?($<expected>)#{eq}: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}"
       }
       self
     end
@@ -338,9 +338,9 @@ module Oktest
       val = @actual.__send__(name)
       __assert(@bool == (expected == val)) {
         op = @bool ? '==' : '!='
-        "$actual.#{name} #{op} $expected: failed.\n"\
-        "    $actual.#{name}: #{val.inspect}\n"\
-        "    $expected: #{expected.inspect}"\
+        "$<actual>.#{name} #{op} $<expected>: failed.\n"\
+        "    $<actual>.#{name}: #{val.inspect}\n"\
+        "    $<expected>: #{expected.inspect}"\
       }
       self
     end
@@ -350,9 +350,9 @@ module Oktest
       val = @actual[key]
       __assert(@bool == (expected == val)) {
         op = @bool ? '==' : '!='
-        "$actual[#{key.inspect}] #{op} $expected: failed.\n"\
-        "    $actual[#{key.inspect}]: #{val.inspect}\n"\
-        "    $expected: #{expected.inspect}"\
+        "$<actual>[#{key.inspect}] #{op} $<expected>: failed.\n"\
+        "    $<actual>[#{key.inspect}]: #{val.inspect}\n"\
+        "    $<expected>: #{expected.inspect}"\
       }
       self
     end
@@ -361,9 +361,9 @@ module Oktest
       _done()
       __assert(@bool == (@actual.length == n)) {
         op = @bool ? '==' : '!='
-        "$actual.length #{op} #{n}: failed.\n"\
-        "    $actual.length: #{@actual.length}\n"\
-        "    $actual:   #{actual.inspect}"
+        "$<actual>.length #{op} #{n}: failed.\n"\
+        "    $<actual>.length: #{@actual.length}\n"\
+        "    $<actual>:   #{actual.inspect}"
       }
       self
     end
@@ -379,8 +379,8 @@ module Oktest
       _done()
       __assert(@bool == (!!@actual == true)) {
         op = @bool ? '==' : '!='
-        "!!$actual #{op} true: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
+        "!!$<actual> #{op} true: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}"
       }
       self
     end
@@ -389,8 +389,8 @@ module Oktest
       _done()
       __assert(@bool == (!!@actual == false)) {
         op = @bool ? '==' : '!='
-        "!!$actual #{op} false: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
+        "!!$<actual> #{op} false: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}"
       }
       self
     end
@@ -398,7 +398,7 @@ module Oktest
     def __assert2(bool, s)
       __assert(@bool == bool) {
         "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
+        "    $<actual>:   #{@actual.inspect}"
       }
     end
     private :__assert2
@@ -406,8 +406,8 @@ module Oktest
     def file?
       _done()
       @actual.respond_to?(:file?) \
-      ? __assert2(@actual.file?       , "$actual.file?") \
-      : __assert2(File.file?(@actual) , "File.file?($actual)")
+      ? __assert2(@actual.file?       , "$<actual>.file?") \
+      : __assert2(File.file?(@actual) , "File.file?($<actual>)")
       self
     end
     alias file_exist? file?       # for backward compatibilify
@@ -415,8 +415,8 @@ module Oktest
     def directory?
       _done()
       @actual.respond_to?(:directory?) \
-      ? __assert2(@actual.directory?       , "$actual.directory?") \
-      : __assert2(File.directory?(@actual) , "File.directory?($actual)")
+      ? __assert2(@actual.directory?       , "$<actual>.directory?") \
+      : __assert2(File.directory?(@actual) , "File.directory?($<actual>)")
       self
     end
     alias dir_exist? directory?   # for backward compatibilify
@@ -424,16 +424,16 @@ module Oktest
     def symlink?
       _done()
       @actual.respond_to?(:symlink?) \
-      ? __assert2(@actual.symlink?       , "$actual.symlink?") \
-      : __assert2(File.symlink?(@actual) , "File.symlink?($actual)")
+      ? __assert2(@actual.symlink?       , "$<actual>.symlink?") \
+      : __assert2(File.symlink?(@actual) , "File.symlink?($<actual>)")
       self
     end
 
     def exist?
       _done()
       @actual.respond_to?(:exist?) \
-      ? __assert2(@actual.exist?       , "$actual.exist?") \
-      : __assert2(File.exist?(@actual) , "File.exist?($actual)")
+      ? __assert2(@actual.exist?       , "$<actual>.exist?") \
+      : __assert2(File.exist?(@actual) , "File.exist?($<actual>)")
       self
     end
 
