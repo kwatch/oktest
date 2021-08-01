@@ -348,6 +348,18 @@ module Oktest
       self
     end
 
+    def keyval(key, expected)
+      _done()
+      val = @actual[key]
+      __assert(@bool == (expected == val)) {
+        op = @bool ? '==' : '!='
+        "$actual[#{key.inspect}] #{op} $expected: failed.\n"\
+        "    $actual[#{key.inspect}]: #{val.inspect}\n"\
+        "    $expected: #{expected.inspect}"\
+      }
+      self
+    end
+
     def length(n)
       _done()
       __assert(@bool == (@actual.length == n)) {
