@@ -8,6 +8,9 @@ require 'test/unit'
 class Test::Unit::Runner
   @@stop_auto_run = true
 end if defined?(Test::Unit::Runner)
+class Test::Unit::AutoRunner
+  @@need_auto_run = false
+end if defined?(Test::Unit::AutoRunner)
 
 #require 'section/tmp'
 #require 'section/recorder'
