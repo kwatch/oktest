@@ -404,37 +404,30 @@ module Oktest
     end
     private :__assert2
 
-    def file?
+    def file_exist?
       _done()
-      @actual.respond_to?(:file?) \
-      ? __assert2(@actual.file?       , "$<actual>.file?") \
-      : __assert2(File.file?(@actual) , "File.file?($<actual>)")
-      self
-    end
-    alias file_exist? file?       # for backward compatibilify
-
-    def directory?
-      _done()
-      @actual.respond_to?(:directory?) \
-      ? __assert2(@actual.directory?       , "$<actual>.directory?") \
-      : __assert2(File.directory?(@actual) , "File.directory?($<actual>)")
-      self
-    end
-    alias dir_exist? directory?   # for backward compatibilify
-
-    def symlink?
-      _done()
-      @actual.respond_to?(:symlink?) \
-      ? __assert2(@actual.symlink?       , "$<actual>.symlink?") \
-      : __assert2(File.symlink?(@actual) , "File.symlink?($<actual>)")
+      __assert2(File.file?(@actual) , "File.file?($<actual>)")
       self
     end
 
-    def exist?
+    def dir_exist?
       _done()
-      @actual.respond_to?(:exist?) \
-      ? __assert2(@actual.exist?       , "$<actual>.exist?") \
-      : __assert2(File.exist?(@actual) , "File.exist?($<actual>)")
+      __assert2(File.directory?(@actual), "File.directory?($<actual>)")
+      self
+    end
+
+    def symlink_exist?
+      _done()
+      __assert2(File.symlink?(@actual), "File.symlink?($<actual>)")
+      self
+    end
+
+    def not_exist?
+      _done()
+      __assert(@bool == ! File.exist?(@actual)) {
+        "File.exist?($<actual>)#{@bool ? ' == false' : ''}: failed.\n"\
+        "    $<actual>:   #{@actual.inspect}"
+      }
       self
     end
 

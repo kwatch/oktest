@@ -28,9 +28,9 @@ Oketst.scope do                      #
       ok {'aaa'}.is_a?(String)       #      assert_kind_of String, 'aaa'
       ok {'123'} =~ (/\d+/)          #      assert_match /\d+/, '123'
       ok {:sym}.same?(:sym)          #      assert_same? :sym, :sym
-      ok {'README.md'}.exist?        #      assert File.exist?('README.md')
       ok {'README.md'}.file_exist?   #      assert File.file?('README.md')
       ok {'/tmp'}.dir_exist?         #      assert File.directory?('/tmp')
+      ok {'/blabla'}.not_exist?      #      assert !File.exist?('/blabla')
       pr = proc { .... }             #      ex = assert_raise(Error) { .... }
       ok {pr}.raise?(Error, "mesg")  #      assert ex.message, "mesg"
       ex = pr.exception              #
@@ -321,10 +321,10 @@ ok {a}.in_delta?(e, x)   # fail unless e-x < a < e+x
 ok {a}.truthy?           # fail unless !!a == true
 ok {a}.falsy?            # fail unless !!a == false
 
-ok {a}.exist?            # fail unless File.exist?(a)
-ok {a}.file?             # fail unless File.file?(a)
-ok {a}.directory?        # fail unless File.directory?(a)
-ok {a}.symlink?          # fail unless File.symlink?(a)
+ok {a}.file_exist?       # fail unless File.file?(a)
+ok {a}.dir_exist?        # fail unless File.directory?(a)
+ok {a}.symlink_exist?    # fail unless File.symlink?(a)
+ok {a}.not_exist?        # fail unless ! File.exist?(a)
 
 ok {a}.attr(name, e)     # fail unless a.__send__(name) == e
 ok {a}.keyval(key, e)    # fail unless a[key] == e
