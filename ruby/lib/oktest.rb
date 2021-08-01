@@ -1054,15 +1054,13 @@ module Oktest
     end
 
     def footer(elapsed)
-      total = 0; @counts.each {|k, v| total += v }
-      buf = "## total:#{total}"
-      STATUSES.each do |st|
+      total = 0; @counts.each {|_, v| total += v }
+      arr = STATUSES.collect {|st|
         s = "#{st.to_s.downcase}:#{@counts[st]}"
-        s = Color.status(st, s) if @counts[st] > 0
-        buf << ", " << s
-      end
-      buf << "  (in %.3fs)" % elapsed
-      return buf
+        @counts[st] == 0 ? s : Color.status(st, s)
+      }
+      hhmmss = Util.seconds2hhmmss(elapsed)
+      return "## total:#{total} (#{arr.join(', ')}) in #{hhmmss}s"
     end
 
     def spec_path(spec, topic)
@@ -1252,6 +1250,15 @@ module Oktest
       return str
     end if RUBY_VERSION >= '1.9'
 
+    def seconds2hhmmss(n)
+      h, n = n.divmod(60*60)
+      m, s = n.divmod(60)
+      return "%d:%02d:%04.1f" % [h, m, s] if h > 0
+      return "%d:%04.1f" % [m, s]         if m > 0
+      return "%.1f" % s                   if s >= 10
+      return "%.2f" % s                   if s >= 1
+      return "%.3f" % s
+    end
 
     def chain_errors(*errors)
     end

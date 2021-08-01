@@ -89,7 +89,7 @@ ZeroDivisionError: divided by 0
 END
 
   FOOTER = <<'END'
-## total:8, <G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>  (in 0.000s)
+## total:8 (<G>pass:4</G>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
 
   VERBOSE_PART = <<'END'
@@ -127,7 +127,7 @@ END
     output = output.gsub(/^.*\r/, '')
     output = output.gsub(/^    .*(_test\.tmp:\d+)/, '    \1')
     output = output.gsub(/^    .*test.reporter_test\.rb:.*\n(    .*\n)*/, "%%%\n")
-    output = output.sub(/\(in \d+\.\d\d\ds\)/, '(in 0.000s)')
+    output = output.sub(/ in \d+\.\d\d\ds/, ' in 0.000s')
     return output
   end
 
