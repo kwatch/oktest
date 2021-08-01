@@ -36,7 +36,7 @@ class AssertionObject_TC < TC
     end
     #
     assert errmsg === exc.message,
-           "expected error message: #{errmsg.inspect}, actual error message: #{exc.message}"
+           "expected error message: #{errmsg}, actual error message: #{exc.message}"
   end
 
   def should_return_self
@@ -74,7 +74,8 @@ $<actual> == $<expected>: failed.
 +Michiru
  Yuki
 END
-      errmsg.gsub!(/1,4/, '1,3') #if RUBY_VERSION < "1.9.2"
+      #errmsg.gsub!(/1,4/, '1,3') if RUBY_VERSION < "1.9.2"
+      errmsg.gsub!(/1,4/, '1,3') unless defined?(Diff::LCS)
       should_be_failed(errmsg) { ok {actual} == expected }
     end
   end
