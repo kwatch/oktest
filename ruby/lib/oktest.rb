@@ -656,6 +656,25 @@ module Oktest
       end
     end
 
+    def dummy_dir(dirname=nil)
+      dirname ||= "_tmpdir_#{rand().to_s[2...8]}"
+      ! File.exist?(dirname)  or
+        raise ArgumentError.new("dummy_dir('#{dirname}'): temporary directory already exists.")
+      require 'fileutils' unless defined?(FileUtils)
+      FileUtils.mkdir_p(dirname)
+      recover = proc { FileUtils.rm_rf(dirname) if File.exist?(dirname) }
+      if block_given?()
+        begin
+          return yield dirname
+        ensure
+          recover.call
+        end
+      else
+        at_end(&recover)
+        return dirname
+      end
+    end
+
     def recorder()
       require 'benry/recorder' unless defined?(Benry::Recorder)
       return Benry::Recorder.new

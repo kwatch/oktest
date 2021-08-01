@@ -114,4 +114,74 @@ class SpecHelper_TC < TC
     end
   end
 
+  describe '#dummy_dir()' do
+    it "creates dummy directory." do
+      tmpdir = "_tmpdir_7903"
+      Dir.rmdir(tmpdir) if File.exist?(tmpdir)
+      begin
+        dummy_dir(tmpdir)
+        assert File.exist?(tmpdir), "tmpdir should be created."
+        assert_eq @_at_end_blocks.length, 1
+        pr = @_at_end_blocks.pop()
+        pr.call()
+        assert !File.exist?(tmpdir), "tmpdir should be removed."
+      ensure
+        Dir.rmdir(tmpdir) if File.exist?(tmpdir)
+      end
+    end
+    it "removes dummy directory even if it contains other files." do
+      tmpdir = "_tmpdir_3869"
+      begin
+        dummy_dir(tmpdir)
+        File.write("#{tmpdir}/foo.txt", "foofoo", encoding: 'utf-8')
+        Dir.mkdir("#{tmpdir}/d1")
+        Dir.mkdir("#{tmpdir}/d1/d2")
+        File.write("#{tmpdir}/d1/d2/bar.txt", "barbar", encoding: 'utf-8')
+        assert File.exist?("#{tmpdir}/foo.txt"), "should exists."
+        assert File.exist?("#{tmpdir}/d1/d2/bar.txt"), "should exists."
+        #
+        pr = @_at_end_blocks.pop()
+        pr.call()
+        assert !File.exist?(tmpdir), "tmpdir should be removed."
+      ensure
+        FileUtils.rm_rf(tmpdir) if File.exist?(tmpdir)
+      end
+    end
+    it "returns directory name." do
+      tmpdir = "_tmpdir_2546"
+      begin
+        ret = dummy_dir(tmpdir)
+        assert_eq ret, tmpdir
+      ensure
+        Dir.rmdir(tmpdir) if File.exist?(tmpdir)
+      end
+    end
+    it "generates temporary directory name if 1st arg is nil." do
+      begin
+        tmpdir1 = dummy_dir(nil)
+        tmpdir2 = dummy_dir()
+        assert tmpdir1 =~ /^_tmpdir_\d{6}/, "tempoary directory name should be generated."
+        assert tmpdir2 =~ /^_tmpdir_\d{6}/, "tempoary directory name should be generated."
+        assert tmpdir1 != tmpdir2, "tempoary directory name should contain random number."
+      ensure
+        Dir.rmdir(tmpdir1) if File.exist?(tmpdir1)
+        Dir.rmdir(tmpdir2) if File.exist?(tmpdir2)
+      end
+    end
+    it "can take block argument." do
+      tmpdir = "_tmp_5799"
+      begin
+        ret = dummy_dir(tmpdir) do |dirname|
+          assert_eq dirname, tmpdir
+          assert File.directory?(tmpdir), "tmpdir should be created."
+          2345
+        end
+        assert !File.directory?(tmpdir), "tmpdir should be removed."
+        assert_eq ret, 2345
+      ensure
+        Dir.rmdir(tmpdir) if File.exist?(tmpdir)
+      end
+    end
+  end
+
 end
