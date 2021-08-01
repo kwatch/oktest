@@ -638,15 +638,6 @@ module Oktest
       $stdin, $stdout, $stderr = bkup
     end
 
-    def tmp
-      unless @_tmp
-        require 'section9/tmp' unless defined?(Section9::Tmp)
-        @_tmp = Section9::Tmp.new
-        at_end { @_tmp.revert }
-      end
-      return @_tmp
-    end
-
     def recorder
       require 'section9/recorder' unless defined?(Section9::Recorder)
       return Section9::Recorder.new
