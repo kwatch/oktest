@@ -85,6 +85,7 @@ Oktest.rb requires Ruby 2.4 or later.
 ```terminal
 ### install
 $ gem install oktest
+$ oktest --help
 
 ### create test directory
 $ mkdir test
@@ -136,7 +137,7 @@ end
 Result:
 
 ```terminal
-$ ruby test/example01_test.rb
+$ oketst test/example01_test.rb   # or: ruby test/example01_test.rb
 * Hello
   * #hello()
     - [pass] returns greeting message.
@@ -173,7 +174,7 @@ end
 Result:
 
 ```terminal
-$ ruby test/example02_test.rb
+$ oktest test/example02_test.rb   # or: ruby test/example02_test.rb
 * other examples
   - [Fail] example of assertion failure
   - [ERROR] example of something error
@@ -220,7 +221,7 @@ end
 Result:
 
 ```terminal
-$ ruby test/example03_test.rb
+$ oktest test/example03_test.rb   # or: ruby test/example03_test.rb
 * other examples
   - [Skip] example of skip (reason: requires Ruby3)
   - [TODO] example of todo
@@ -233,7 +234,7 @@ $ ruby test/example03_test.rb
 Verbose mode (default):
 
 ```terminal
-$ ruby test/example01_test.rb -s verbose  # or -sv
+$ oktest test/example01_test.rb -s verbose  # or -sv
 * Hello
   * #hello()
     - [pass] returns greeting message.
@@ -244,7 +245,7 @@ $ ruby test/example01_test.rb -s verbose  # or -sv
 Simple mode:
 
 ```terminal
-$ ruby test/example01_test.rb -s simple   # or -ss
+$ oktest test/example01_test.rb -s simple   # or -ss
 test/example01_test.rb: ..
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
@@ -252,7 +253,7 @@ test/example01_test.rb: ..
 Plain mode:
 
 ```terminal
-$ ruby test/example01_test.rb -s simple   # or -ss
+$ oktest test/example01_test.rb -s simple   # or -ss
 ..
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
@@ -266,7 +267,7 @@ How to run test scripts under `test` directory:
 $ ls test
 example01_test.rb       example02_test.rb       example03_test.rb
 
-$ ruby -r oktest -e 'Oktest.main' -- test -s simple
+$ oktest -s simple test  # or: ruby -r oktest -e 'Oktest.main' -- test -s simple
 tmp/test/example01_test.rb: ..
 tmp/test/example02_test.rb: fE
 ----------------------------------------------------------------------
@@ -481,7 +482,7 @@ end
 Result:
 
 ```terminal
-$ ruby test/example21_test.rb
+$ oktest test/example21_test.rb    # or: ruby test/example21_test.rb
 * before_all() called
 ** before() called
 ---- example spec #1 ----
