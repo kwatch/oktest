@@ -396,7 +396,7 @@ END
     end
   end
 
-  describe "#attr" do
+  describe "#attr()" do
     it "returns self when passed." do
       should_return_self { ok {"SOS"}.attr(:length, 3) }
     end
@@ -412,9 +412,6 @@ END
                "    $actual.size: 3\n"\
                "    $expected: 3"
       should_be_failed(errmsg) { ok {"SOS"}.NOT.attr(:size, 3) }
-    end
-    it "can take hash object." do
-      should_return_self { ok {"SOS"}.attr(:length=>3, :size=>3) }
     end
   end
 

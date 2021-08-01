@@ -333,18 +333,15 @@ module Oktest
       self
     end
 
-    def attr(name, val=nil)
+    def attr(name, expected)
       _done()
-      d = name.is_a?(Hash) ? name : {name=>val}
-      d.each_pair do |k, v|
-        attr_val = @actual.__send__(k)
-        __assert(@bool == (attr_val == v)) {
-          op = @bool ? '==' : '!='
-          "$actual.#{k} #{op} $expected: failed.\n"\
-          "    $actual.#{k}: #{attr_val}\n"\
-          "    $expected: #{v.inspect}"\
-        }
-      end
+      val = @actual.__send__(name)
+      __assert(@bool == (expected == val)) {
+        op = @bool ? '==' : '!='
+        "$actual.#{name} #{op} $expected: failed.\n"\
+        "    $actual.#{name}: #{val.inspect}\n"\
+        "    $expected: #{expected.inspect}"\
+      }
       self
     end
 
