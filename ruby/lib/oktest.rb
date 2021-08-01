@@ -12,14 +12,12 @@ class Test::Unit::AutoRunner
   @@need_auto_run = false
 end if defined?(Test::Unit::AutoRunner)
 
-#require 'section/tmp'
-#require 'section/recorder'
 
 
 module Oktest
 
 
-  VERSION = '$Release: 0.0.0 $'.split(/ /)[1]
+  VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
   class SkipException < Exception
