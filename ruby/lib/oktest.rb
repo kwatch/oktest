@@ -638,6 +638,24 @@ module Oktest
       $stdin, $stdout, $stderr = bkup
     end
 
+    def dummy_file(filename=nil, content=nil, encoding: 'utf-8')
+      filename ||= "_tmpfile_#{rand().to_s[2...8]}"
+      ! File.exist?(filename)  or
+        raise ArgumentError.new("dummy_file('#{filename}'): temporary file already exists.")
+      File.write(filename, content, encoding: encoding)
+      recover = proc { File.unlink(filename) if File.exist?(filename) }
+      if block_given?()
+        begin
+          return yield filename
+        ensure
+          recover.call
+        end
+      else
+        at_end(&recover)
+        return filename
+      end
+    end
+
     def recorder()
       require 'benry/recorder' unless defined?(Benry::Recorder)
       return Benry::Recorder.new

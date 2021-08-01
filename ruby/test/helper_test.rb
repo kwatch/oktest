@@ -62,4 +62,56 @@ class SpecHelper_TC < TC
     end
   end
 
+  describe '#dummy_file()' do
+    it "creates dummy file." do
+      tmpfile = "_tmp_3511.txt"
+      File.unlink(tmpfile) if File.exist?(tmpfile)
+      begin
+        dummy_file(tmpfile, "foobar")
+        assert File.exist?(tmpfile), "tmpfile should be created."
+        assert_eq @_at_end_blocks.length, 1
+        pr = @_at_end_blocks.pop()
+        pr.call()
+        assert !File.exist?(tmpfile), "tmpfile should be removed."
+      ensure
+        File.unlink(tmpfile) if File.exist?(tmpfile)
+      end
+    end
+    it "returns filename." do
+      tmpfile = "_tmp_4947.txt"
+      begin
+        ret = dummy_file(tmpfile, "foobar")
+        assert_eq ret, tmpfile
+      ensure
+        File.unlink(tmpfile) if File.exist?(tmpfile)
+      end
+    end
+    it "generates temporary filename if 1st arg is nil." do
+      begin
+        tmpfile1 = dummy_file(nil, "foobar")
+        tmpfile2 = dummy_file(nil, "foobar")
+        assert tmpfile1 =~ /^_tmpfile_\d{6}/, "tempoary filename should be generated."
+        assert tmpfile2 =~ /^_tmpfile_\d{6}/, "tempoary filename should be generated."
+        assert tmpfile1 != tmpfile2, "tempoary filename should contain random number."
+      ensure
+        File.unlink(tmpfile1) if File.exist?(tmpfile1)
+        File.unlink(tmpfile2) if File.exist?(tmpfile2)
+      end
+    end
+    it "can take block argument." do
+      tmpfile = "_tmp_9080"
+      begin
+        ret = dummy_file(tmpfile) do |filename|
+          assert_eq filename, tmpfile
+          assert File.file?(tmpfile), "tmpfile should be created."
+          1234
+        end
+        assert !File.file?(tmpfile), "tmpfile should be removed."
+        assert_eq ret, 1234
+      ensure
+        File.unlink(tmpfile) if File.exist?(tmpfile)
+      end
+    end
+  end
+
 end
