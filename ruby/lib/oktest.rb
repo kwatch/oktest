@@ -703,6 +703,28 @@ module Oktest
       end
     end
 
+    def dummy_attrs(object, keyvals={})
+      prev_values = {}
+      keyvals.each do |k, v|
+        prev_values[k] = object.__send__(k)
+        object.__send__("#{k}=", v)
+      end
+      recover = proc do
+        prev_values.each {|k, v| object.__send__("#{k}=", v) }
+      end
+      #
+      if block_given?
+        begin
+          return yield keyvals
+        ensure
+          recover.call
+        end
+      else
+        at_end(&recover)
+        return keyvals
+      end
+    end
+
     def recorder()
       require 'benry/recorder' unless defined?(Benry::Recorder)
       return Benry::Recorder.new

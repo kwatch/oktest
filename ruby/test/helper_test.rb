@@ -7,6 +7,15 @@
 require_relative './initialize'
 
 
+class DummyUser
+  def initialize(id, name)
+    @id = id
+    @name = name
+  end
+  attr_accessor :id, :name
+end
+
+
 class SpecHelper_TC < TC
   include Oktest::SpecHelper
 
@@ -228,6 +237,45 @@ class SpecHelper_TC < TC
       assert_eq hashobj['b'], 20
       assert_eq hashobj[:c], 30
       assert !hashobj.key?(:x), "key :x should not exist."
+      assert_eq @_at_end_blocks, nil
+    end
+  end
+
+  describe '#dummy_attrs()' do
+    it "changes object attributes temporarily." do
+      obj = DummyUser.new(123, "alice")
+      dummy_attrs(obj, :id=>999, :name=>"bob")
+      assert_eq obj.id, 999
+      assert_eq obj.name, "bob"
+    end
+    it "recovers attribute values." do
+      obj = DummyUser.new(123, "alice")
+      dummy_attrs(obj, :id=>999, :name=>"bob")
+      assert_eq obj.id, 999
+      assert_eq obj.name, "bob"
+      #
+      assert_eq @_at_end_blocks.length, 1
+      pr = @_at_end_blocks.pop()
+      pr.call()
+      assert_eq obj.id, 123
+      assert_eq obj.name, "alice"
+    end
+    it "returns keyvals." do
+      obj = DummyUser.new(123, "alice")
+      ret = dummy_attrs(obj, :id=>789, :name=>"charlie")
+      assert_eq ret, {:id=>789, :name=>"charlie"}
+    end
+    it "can take block argument." do
+      obj = DummyUser.new(123, "alice")
+      ret = dummy_attrs(obj, :id=>888, :name=>"dave") do |kvs|
+        assert_eq obj.id, 888
+        assert_eq obj.name, "dave"
+        assert_eq kvs, {:id=>888, :name=>"dave"}
+        4567
+      end
+      assert_eq ret, 4567
+      assert_eq obj.id, 123
+      assert_eq obj.name, "alice"
       assert_eq @_at_end_blocks, nil
     end
   end
