@@ -638,44 +638,40 @@ module Oktest
       $stdin, $stdout, $stderr = bkup
     end
 
-    def dummy_file(filename=nil, content=nil, encoding: 'utf-8')
-      filename ||= "_tmpfile_#{rand().to_s[2...8]}"
-      ! File.exist?(filename)  or
-        raise ArgumentError.new("dummy_file('#{filename}'): temporary file already exists.")
-      File.write(filename, content, encoding: encoding)
-      recover = proc { File.unlink(filename) if File.exist?(filename) }
+    def __do_dummy(val, recover, &b)
       if block_given?()
         begin
-          return yield filename
+          return yield val
         ensure
           recover.call
         end
       else
         at_end(&recover)
-        return filename
+        return val
       end
     end
+    private :__do_dummy
 
-    def dummy_dir(dirname=nil)
+    def dummy_file(filename=nil, content=nil, encoding: 'utf-8', &b)
+      filename ||= "_tmpfile_#{rand().to_s[2...8]}"
+      ! File.exist?(filename)  or
+        raise ArgumentError.new("dummy_file('#{filename}'): temporary file already exists.")
+      File.write(filename, content, encoding: encoding)
+      recover = proc { File.unlink(filename) if File.exist?(filename) }
+      return __do_dummy(filename, recover, &b)
+    end
+
+    def dummy_dir(dirname=nil, &b)
       dirname ||= "_tmpdir_#{rand().to_s[2...8]}"
       ! File.exist?(dirname)  or
         raise ArgumentError.new("dummy_dir('#{dirname}'): temporary directory already exists.")
       require 'fileutils' unless defined?(FileUtils)
       FileUtils.mkdir_p(dirname)
       recover = proc { FileUtils.rm_rf(dirname) if File.exist?(dirname) }
-      if block_given?()
-        begin
-          return yield dirname
-        ensure
-          recover.call
-        end
-      else
-        at_end(&recover)
-        return dirname
-      end
+      return __do_dummy(dirname, recover, &b)
     end
 
-    def dummy_values(hashobj, keyvals={})
+    def dummy_values(hashobj, keyvals={}, &b)
       prev_values = {}
       key_not_exists = {}
       keyvals.each do |k, v|
@@ -690,20 +686,10 @@ module Oktest
         key_not_exists.each {|k, _| hashobj.delete(k) }
         prev_values.each {|k, v| hashobj[k] = v }
       end
-      #
-      if block_given?
-        begin
-          return yield keyvals
-        ensure
-          recover.call
-        end
-      else
-        at_end(&recover)
-        return keyvals
-      end
+      return __do_dummy(keyvals, recover, &b)
     end
 
-    def dummy_attrs(object, keyvals={})
+    def dummy_attrs(object, keyvals={}, &b)
       prev_values = {}
       keyvals.each do |k, v|
         prev_values[k] = object.__send__(k)
@@ -712,20 +698,10 @@ module Oktest
       recover = proc do
         prev_values.each {|k, v| object.__send__("#{k}=", v) }
       end
-      #
-      if block_given?
-        begin
-          return yield keyvals
-        ensure
-          recover.call
-        end
-      else
-        at_end(&recover)
-        return keyvals
-      end
+      return __do_dummy(keyvals, recover, &b)
     end
 
-    def dummy_ivars(object, keyvals={})
+    def dummy_ivars(object, keyvals={}, &b)
       prev_values = {}
       keyvals.each do |k, v|
         prev_values[k] = object.instance_variable_get("@#{k}")
@@ -734,17 +710,7 @@ module Oktest
       recover = proc do
         prev_values.each {|k, v| object.instance_variable_set("@#{k}", v) }
       end
-      #
-      if block_given?
-        begin
-          return yield keyvals
-        ensure
-          recover.call
-        end
-      else
-        at_end(&recover)
-        return keyvals
-      end
+      return __do_dummy(keyvals, recover, &b)
     end
 
     def recorder()

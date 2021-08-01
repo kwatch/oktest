@@ -117,6 +117,7 @@ class SpecHelper_TC < TC
         end
         assert !File.file?(tmpfile), "tmpfile should be removed."
         assert_eq ret, 1234
+        assert_eq @_at_end_blocks, nil
       ensure
         File.unlink(tmpfile) if File.exist?(tmpfile)
       end
@@ -187,6 +188,7 @@ class SpecHelper_TC < TC
         end
         assert !File.directory?(tmpdir), "tmpdir should be removed."
         assert_eq ret, 2345
+        assert_eq @_at_end_blocks, nil
       ensure
         Dir.rmdir(tmpdir) if File.exist?(tmpdir)
       end
