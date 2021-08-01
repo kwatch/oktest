@@ -374,29 +374,29 @@ module Oktest
       self
     end
 
-    def __assert2(bool, s)
+    def __assert_fs(bool, s)
       __assert(@bool == bool) {
         "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
         "    $<actual>:   #{@actual.inspect}"
       }
     end
-    private :__assert2
+    private :__assert_fs
 
     def file_exist?
       _done()
-      __assert2(File.file?(@actual) , "File.file?($<actual>)")
+      __assert_fs(File.file?(@actual) , "File.file?($<actual>)")
       self
     end
 
     def dir_exist?
       _done()
-      __assert2(File.directory?(@actual), "File.directory?($<actual>)")
+      __assert_fs(File.directory?(@actual), "File.directory?($<actual>)")
       self
     end
 
     def symlink_exist?
       _done()
-      __assert2(File.symlink?(@actual), "File.symlink?($<actual>)")
+      __assert_fs(File.symlink?(@actual), "File.symlink?($<actual>)")
       self
     end
 
