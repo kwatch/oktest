@@ -1334,10 +1334,9 @@ module Oktest
     @color_available = ! @os_windows
     @color_enabled   = @color_available
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
-    @system_exit     = true     # exit() on Oktest.main()
 
     class << self
-      attr_accessor :auto_run, :color_available, :color_enabled, :system_exit
+      attr_accessor :auto_run, :color_available, :color_enabled
     end
 
   end

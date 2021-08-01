@@ -10,4 +10,3 @@ end
 
 require_relative './tc'
 require 'oktest'
-Oktest::Config.system_exit = false
