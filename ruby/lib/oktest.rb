@@ -621,18 +621,101 @@ module Oktest
       (@_at_end_blocks ||= []) << block
     end
 
-    def tmp
-      unless @_tmp
-        require 'section9/tmp' unless defined?(Section9::Tmp)
-        @_tmp = Section9::Tmp.new
-        at_end { @_tmp.revert }
+    def capture_sio(input="", tty: false, &b)
+      require 'stringio' unless defined?(StringIO)
+      bkup = [$stdin, $stdout, $stderr]
+      $stdin  = sin  = StringIO.new(input)
+      $stdout = sout = StringIO.new
+      $stderr = serr = StringIO.new
+      if tty
+        def sin.tty?; true; end
+        def sout.tty?; true; end
+        def serr.tty?; true; end
       end
-      return @_tmp
+      yield sout, serr
+      return sout.string, serr.string
+    ensure
+      $stdin, $stdout, $stderr = bkup
     end
 
-    def recorder
-      require 'section9/recorder' unless defined?(Section9::Recorder)
-      return Section9::Recorder.new
+    def __do_dummy(val, recover, &b)
+      if block_given?()
+        begin
+          return yield val
+        ensure
+          recover.call
+        end
+      else
+        at_end(&recover)
+        return val
+      end
+    end
+    private :__do_dummy
+
+    def dummy_file(filename=nil, content=nil, encoding: 'utf-8', &b)
+      filename ||= "_tmpfile_#{rand().to_s[2...8]}"
+      ! File.exist?(filename)  or
+        raise ArgumentError.new("dummy_file('#{filename}'): temporary file already exists.")
+      File.write(filename, content, encoding: encoding)
+      recover = proc { File.unlink(filename) if File.exist?(filename) }
+      return __do_dummy(filename, recover, &b)
+    end
+
+    def dummy_dir(dirname=nil, &b)
+      dirname ||= "_tmpdir_#{rand().to_s[2...8]}"
+      ! File.exist?(dirname)  or
+        raise ArgumentError.new("dummy_dir('#{dirname}'): temporary directory already exists.")
+      require 'fileutils' unless defined?(FileUtils)
+      FileUtils.mkdir_p(dirname)
+      recover = proc { FileUtils.rm_rf(dirname) if File.exist?(dirname) }
+      return __do_dummy(dirname, recover, &b)
+    end
+
+    def dummy_values(hashobj, keyvals={}, &b)
+      prev_values = {}
+      key_not_exists = {}
+      keyvals.each do |k, v|
+        if hashobj.key?(k)
+          prev_values[k] = hashobj[k]
+        else
+          key_not_exists[k] = true
+        end
+        hashobj[k] = v
+      end
+      recover = proc do
+        key_not_exists.each {|k, _| hashobj.delete(k) }
+        prev_values.each {|k, v| hashobj[k] = v }
+      end
+      return __do_dummy(keyvals, recover, &b)
+    end
+
+    def dummy_attrs(object, keyvals={}, &b)
+      prev_values = {}
+      keyvals.each do |k, v|
+        prev_values[k] = object.__send__(k)
+        object.__send__("#{k}=", v)
+      end
+      recover = proc do
+        prev_values.each {|k, v| object.__send__("#{k}=", v) }
+      end
+      return __do_dummy(keyvals, recover, &b)
+    end
+
+    def dummy_ivars(object, keyvals={}, &b)
+      prev_values = {}
+      keyvals.each do |k, v|
+        prev_values[k] = object.instance_variable_get("@#{k}")
+        object.instance_variable_set("@#{k}", v)
+      end
+      recover = proc do
+        prev_values.each {|k, v| object.instance_variable_set("@#{k}", v) }
+      end
+      return __do_dummy(keyvals, recover, &b)
+    end
+
+    def recorder()
+      require 'benry/recorder' unless defined?(Benry::Recorder)
+      return Benry::Recorder.new
     end
 
   end
