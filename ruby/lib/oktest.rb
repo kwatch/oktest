@@ -621,6 +621,23 @@ module Oktest
       (@_at_end_blocks ||= []) << block
     end
 
+    def capture_sio(input="", tty: false, &b)
+      require 'stringio' unless defined?(StringIO)
+      bkup = [$stdin, $stdout, $stderr]
+      $stdin  = sin  = StringIO.new(input)
+      $stdout = sout = StringIO.new
+      $stderr = serr = StringIO.new
+      if tty
+        def sin.tty?; true; end
+        def sout.tty?; true; end
+        def serr.tty?; true; end
+      end
+      yield sout, serr
+      return sout.string, serr.string
+    ensure
+      $stdin, $stdout, $stderr = bkup
+    end
+
     def tmp
       unless @_tmp
         require 'section9/tmp' unless defined?(Section9::Tmp)
