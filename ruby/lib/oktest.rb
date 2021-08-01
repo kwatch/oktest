@@ -107,19 +107,27 @@ module Oktest
       self
     end
 
-    if RUBY_VERSION >= '1.9'
-      op = @bool ? '==' : '!='
-      eval <<-END, binding, __FILE__, __LINE__+1
-      def !=(expected)
-        _done()
-        __assert(@bool == (@actual != expected)) {
-          "$actual #{op} $expected: failed.\n"\
-          "    $actual:   \#{@actual.inspect}\n"\
-          "    $expected: \#{expected.inspect}"
-        }
-        self
-      end
-      END
+    def !=(expected)    # Ruby >= 1.9
+      _done()
+      __assert(@bool == (@actual != expected)) {
+        op = @bool ? '!=' : '=='
+        "$actual #{op} $expected: failed.\n"\
+        "    $actual:   #{@actual.inspect}\n"\
+        "    $expected: #{expected.inspect}"
+      }
+      self
+    end
+
+    def ===(expected)
+      _done()
+      __assert(@bool == (@actual === expected)) {
+        s = "$actual === $expected"
+        s = "!(#{s})" unless @bool
+        "#{s}: failed.\n"\
+        "    $actual:   #{@actual.inspect}\n"\
+        "    $expected: #{expected.inspect}"
+      }
+      self
     end
 
     #--
@@ -132,7 +140,7 @@ module Oktest
     def >(expected)
       _done()
       __assert(@bool == (@actual > expected)) {
-        "#{@actual.inspect} #{@bool ? '>' : '<='} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '>' : '<='} #{expected.inspect}: failed."
       }
       self
     end
@@ -140,7 +148,7 @@ module Oktest
     def >=(expected)
       _done()
       __assert(@bool == (@actual >= expected)) {
-        "#{@actual.inspect} #{@bool ? '>=' : '<'} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '>=' : '<'} #{expected.inspect}: failed."
       }
       self
     end
@@ -148,7 +156,7 @@ module Oktest
     def <(expected)
       _done()
       __assert(@bool == (@actual < expected)) {
-        "#{@actual.inspect} #{@bool ? '<' : '>='} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '<' : '>='} #{expected.inspect}: failed."
       }
       self
     end
@@ -156,7 +164,7 @@ module Oktest
     def <=(expected)
       _done()
       __assert(@bool == (@actual <= expected)) {
-        "#{@actual.inspect} #{@bool ? '<=' : '>'} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '<=' : '>'} #{expected.inspect}: failed."
       }
       self
     end
@@ -177,24 +185,20 @@ module Oktest
       self
     end
 
-    if RUBY_VERSION >= "1.9"
-      eval <<-'END', binding, __FILE__, __LINE__+1
-      def !~(expected)
-        _done()
-        #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
-        __assert(@bool == !!(@actual !~ expected)) {
-          op = @bool ? '!~' : '=~'
-          msg = "$actual #{op} $expected: failed.\n"\
-                "    $expected: #{expected.inspect}\n"
-          if @actual =~ /\n\z/
-            msg << "    $actual:   <<'END'\n#{@actual}END\n"
-          else
-            msg << "    $actual:   #{@actual.inspect}\n"
-          end
-        }
-        self
-      end
-      END
+    def !~(expected)    # Ruby >= 1.9
+      _done()
+      #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
+      __assert(@bool == !!(@actual !~ expected)) {
+        op = @bool ? '!~' : '=~'
+        msg = "$actual #{op} $expected: failed.\n"\
+              "    $expected: #{expected.inspect}\n"
+        if @actual =~ /\n\z/
+          msg << "    $actual:   <<'END'\n#{@actual}END\n"
+        else
+          msg << "    $actual:   #{@actual.inspect}\n"
+        end
+      }
+      self
     end
 
     def in_delta?(expected, delta)
@@ -329,18 +333,27 @@ module Oktest
       self
     end
 
-    def attr(name, val=nil)
+    def attr(name, expected)
       _done()
-      d = name.is_a?(Hash) ? name : {name=>val}
-      d.each_pair do |k, v|
-        attr_val = @actual.__send__(k)
-        __assert(@bool == (attr_val == v)) {
-          op = @bool ? '==' : '!='
-          "$actual.#{k} #{op} $expected: failed.\n"\
-          "    $actual.#{k}: #{attr_val}\n"\
-          "    $expected: #{v.inspect}"\
-        }
-      end
+      val = @actual.__send__(name)
+      __assert(@bool == (expected == val)) {
+        op = @bool ? '==' : '!='
+        "$actual.#{name} #{op} $expected: failed.\n"\
+        "    $actual.#{name}: #{val.inspect}\n"\
+        "    $expected: #{expected.inspect}"\
+      }
+      self
+    end
+
+    def keyval(key, expected)
+      _done()
+      val = @actual[key]
+      __assert(@bool == (expected == val)) {
+        op = @bool ? '==' : '!='
+        "$actual[#{key.inspect}] #{op} $expected: failed.\n"\
+        "    $actual[#{key.inspect}]: #{val.inspect}\n"\
+        "    $expected: #{expected.inspect}"\
+      }
       self
     end
 
@@ -382,33 +395,45 @@ module Oktest
       self
     end
 
-    def file_exist?
-      _done()
-      __assert(@bool == File.file?(@actual)) {
-        eq = @bool ? '' : ' == false'
-        "File.file?($actual)#{eq}: failed.\n"\
+    def __assert2(bool, s)
+      __assert(@bool == bool) {
+        "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
         "    $actual:   #{@actual.inspect}"
       }
+    end
+    private :__assert2
+
+    def file?
+      _done()
+      @actual.respond_to?(:file?) \
+      ? __assert2(@actual.file?       , "$actual.file?") \
+      : __assert2(File.file?(@actual) , "File.file?($actual)")
       self
     end
+    alias file_exist? file?       # for backward compatibilify
 
-    def dir_exist?
+    def directory?
       _done()
-      __assert(@bool == File.directory?(@actual)) {
-        eq = @bool ? '' : ' == false'
-        "File.directory?($actual)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
-      }
+      @actual.respond_to?(:directory?) \
+      ? __assert2(@actual.directory?       , "$actual.directory?") \
+      : __assert2(File.directory?(@actual) , "File.directory?($actual)")
+      self
+    end
+    alias dir_exist? directory?   # for backward compatibilify
+
+    def symlink?
+      _done()
+      @actual.respond_to?(:symlink?) \
+      ? __assert2(@actual.symlink?       , "$actual.symlink?") \
+      : __assert2(File.symlink?(@actual) , "File.symlink?($actual)")
       self
     end
 
     def exist?
       _done()
-      __assert(@bool == File.exist?(@actual)) {
-        eq = @bool ? '' : ' == false'
-        "File.exist?($actual)#{eq}: failed.\n"\
-        "    $actual:   #{@actual.inspect}"
-      }
+      @actual.respond_to?(:exist?) \
+      ? __assert2(@actual.exist?       , "$actual.exist?") \
+      : __assert2(File.exist?(@actual) , "File.exist?($actual)")
       self
     end
 

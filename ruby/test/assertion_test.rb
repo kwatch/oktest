@@ -88,12 +88,31 @@ END
     it "is avaialbe with NOT." do
       should_return_self { ok {1+1}.NOT != 2 }
       #errmsg = "<3> expected but was\n<2>."
-      errmsg = "$actual != $expected: failed.\n"\
+      errmsg = "$actual == $expected: failed.\n"\
                "    $actual:   2\n"\
                "    $expected: 3"
       should_be_failed(errmsg) { ok {1+1}.NOT != 3 }
     end
-  end if RUBY_VERSION >= "1.9"
+  end #if RUBY_VERSION >= "1.9"
+
+  describe "#===" do
+    it "returns self when passed." do
+      should_return_self { ok {String} === 'str' }
+    end
+    it "raises assertion error when failed." do
+      errmsg = "$actual === $expected: failed.\n"\
+               "    $actual:   Integer\n"\
+               "    $expected: \"str\""
+      should_be_failed(errmsg) { ok {Integer} === 'str' }
+    end
+    it "is avaialbe with NOT." do
+      should_return_self { ok {Integer}.NOT === 'str' }
+      errmsg = "!($actual === $expected): failed.\n"\
+               "    $actual:   String\n"\
+               "    $expected: \"str\""
+      should_be_failed(errmsg) { ok {String}.NOT === 'str' }
+    end
+  end
 
   describe ">" do
     it "returns self when passed." do
@@ -105,6 +124,9 @@ END
       should_be_failed(errmsg) { ok {2} > 2 }
       errmsg = "1 > 2: failed."
       should_be_failed(errmsg) { ok {1} > 2 }
+      #
+      errmsg = "\"aaa\" > \"bbb\": failed."
+      should_be_failed(errmsg) { ok {'aaa'} > 'bbb' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {2}.NOT > 2 }
@@ -123,6 +145,9 @@ END
       #errmsg = "Expected 1 to be >= 2."
       errmsg = "1 >= 2: failed."
       should_be_failed(errmsg) { ok {1} >= 2 }
+      #
+      errmsg = "\"aaa\" >= \"bbb\": failed."
+      should_be_failed(errmsg) { ok {'aaa'} >= 'bbb' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {1}.NOT >= 2 }
@@ -142,6 +167,9 @@ END
       should_be_failed(errmsg) { ok {2} < 2 }
       errmsg = "2 < 1: failed."
       should_be_failed(errmsg) { ok {2} < 1 }
+      #
+      errmsg = "\"bbb\" < \"aaa\": failed."
+      should_be_failed(errmsg) { ok {'bbb'} < 'aaa' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {2}.NOT < 2 }
@@ -160,6 +188,9 @@ END
       #errmsg = "Expected 2 to be <= 1."
       errmsg = "2 <= 1: failed."
       should_be_failed(errmsg) { ok {2} <= 1 }
+      #
+      errmsg = "\"bbb\" <= \"aaa\": failed."
+      should_be_failed(errmsg) { ok {'bbb'} <= 'aaa' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {2}.NOT <= 1 }
@@ -211,7 +242,7 @@ END
                "    $actual:   <<'END'\nSOS\nEND\n"
       should_be_failed(errmsg) { ok {"SOS\n"}.NOT !~ /\d+/ }
     end
-  end if RUBY_VERSION >= "1.9"
+  end #if RUBY_VERSION >= "1.9"
 
   describe "#in_delta?" do
     it "returns self when passed." do
@@ -365,7 +396,7 @@ END
     end
   end
 
-  describe "#attr" do
+  describe "#attr()" do
     it "returns self when passed." do
       should_return_self { ok {"SOS"}.attr(:length, 3) }
     end
@@ -382,8 +413,27 @@ END
                "    $expected: 3"
       should_be_failed(errmsg) { ok {"SOS"}.NOT.attr(:size, 3) }
     end
-    it "can take hash object." do
-      should_return_self { ok {"SOS"}.attr(:length=>3, :size=>3) }
+  end
+
+  describe "#keyval()" do
+    it "returns self when passed." do
+      d = {'a'=>1}
+      should_return_self { ok {d}.keyval('a', 1) }
+    end
+    it "raises assertion error when failed." do
+      d = {'a'=>1}
+      errmsg = "$actual[\"a\"] == $expected: failed.\n"\
+               "    $actual[\"a\"]: 1\n"\
+               "    $expected: \"1\""
+      should_be_failed(errmsg) { ok {d}.keyval('a', '1') }
+    end
+    it "is available with NOT." do
+      d = {'a'=>1}
+      should_return_self { ok {d}.NOT.keyval('a', '1') }
+      errmsg = "$actual[\"a\"] != $expected: failed.\n"\
+               "    $actual[\"a\"]: 1\n"\
+               "    $expected: 1"
+      should_be_failed(errmsg) { ok {d}.NOT.keyval('a', 1) }
     end
   end
 
@@ -440,37 +490,88 @@ END
     end
   end
 
-  describe "#file_exist?" do
+  describe "#file?" do
     it "returns self when passed." do
-      should_return_self { ok {__FILE__}.file_exist? }
+      should_return_self { ok {__FILE__}.file? }
     end
     it "raises assertion error when failed." do
       errmsg = "File.file?($actual): failed.\n"\
                "    $actual:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.file_exist? }
+      should_be_failed(errmsg) { ok {'.'}.file? }
     end
     it "is available with NOT." do
-      should_return_self { ok {'.'}.NOT.file_exist? }
+      should_return_self { ok {'.'}.NOT.file? }
       errmsg = "File.file?($actual) == false: failed.\n"\
                "    $actual:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.NOT.file_exist? }
+      should_be_failed(errmsg) { ok {__FILE__}.NOT.file? }
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      should_return_self { ok {Pathname(__FILE__)}.file? }
+      should_return_self { ok {Pathname('.')}.NOT.file? }
     end
   end
 
-  describe "#dir_exist?" do
+  describe "#directory?" do
     it "returns self when passed." do
-      should_return_self { ok {'.'}.dir_exist? }
+      should_return_self { ok {'.'}.directory? }
     end
     it "raises assertion error when failed." do
       errmsg = "File.directory?($actual): failed.\n"\
                "    $actual:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.dir_exist? }
+      should_be_failed(errmsg) { ok {__FILE__}.directory? }
     end
     it "is available with NOT." do
-      should_return_self { ok {__FILE__}.NOT.dir_exist? }
+      should_return_self { ok {__FILE__}.NOT.directory? }
       errmsg = "File.directory?($actual) == false: failed.\n"\
                "    $actual:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.NOT.dir_exist? }
+      should_be_failed(errmsg) { ok {'.'}.NOT.directory? }
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      should_return_self { ok {Pathname('.')}.directory? }
+      should_return_self { ok {Pathname(__FILE__)}.NOT.directory? }
+    end
+  end
+
+  describe "#symlink?" do
+    def with_symlink
+      linkname = "_sym_#{rand().to_s[2...7]}"
+      File.symlink(__FILE__, linkname)
+      yield linkname
+    ensure
+      File.unlink(linkname)
+    end
+    it "returns self when passed." do
+      with_symlink do |linkname|
+        should_return_self { ok {linkname}.symlink? }
+      end
+    end
+    it "raises assertion error when failed." do
+      with_symlink do |linkname|
+        errmsg = "File.symlink?($actual): failed.\n"\
+                 "    $actual:   \"_not_exist\""
+        should_be_failed(errmsg) { ok {'_not_exist'}.symlink? }
+        errmsg = "File.symlink?($actual): failed.\n"\
+                 "    $actual:   \".\""
+        should_be_failed(errmsg) { ok {'.'}.symlink? }
+      end
+    end
+    it "is available with NOT." do
+      with_symlink do |linkname|
+        should_return_self { ok {'_not_exist'}.NOT.symlink? }
+        should_return_self { ok {'.'}.NOT.symlink? }
+        errmsg = "File.symlink?($actual) == false: failed.\n"\
+                 "    $actual:   \"#{linkname}\""
+        should_be_failed(errmsg) { ok {linkname}.NOT.symlink? }
+      end
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      with_symlink do |linkname|
+        should_return_self { ok {Pathname(linkname)}.symlink? }
+        should_return_self { ok {Pathname('.')}.NOT.symlink? }
+      end
     end
   end
 
@@ -492,6 +593,12 @@ END
       errmsg = "File.exist?($actual) == false: failed.\n"\
                "    $actual:   \".\""
       should_be_failed(errmsg) { ok {'.'}.NOT.exist? }
+    end
+    it "supports Pathname object." do
+      require 'pathname'
+      should_return_self { ok {Pathname(__FILE__)}.exist? }
+      should_return_self { ok {Pathname('.')}.exist? }
+      should_return_self { ok {Pathname('...')}.NOT.exist? }
     end
   end
 
