@@ -178,4 +178,42 @@ namespace :readme do
     end
   end
 
+  desc "builds table of contents"
+  task :toc do
+    url = "https://gist.github.com/kwatch/76f770cf75a1b3b474d76bf3910fdbe1"
+    htmlfile = "README.html"
+    sh "curl -s -o #{htmlfile} #{url}"
+    rexp = /<h(\d)><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
+    html_str = File.read(htmlfile, encoding: 'utf-8')
+    buf = []
+    html_str.scan(rexp) do
+      level = $1.to_i
+      id = $2
+      title = $3
+      next if title =~ /Table of Contents/
+      anchor = id.sub(/^user-content-/, '')
+      indent = "  " * (level - 1)
+      buf << "#{indent}* <a href=\"##{anchor}\">#{title}</a>\n"
+    end
+    buf.shift() if buf[0] && buf[0] =~ /^\* /
+    toc_str = buf.join()
+    #
+    changed = File.open("README.md", "r+", encoding: 'utf-8') do |f|
+      s1 = f.read()
+      s2 = s1.sub(/(<!-- TOC -->\n).*(<!-- \/TOC -->\n)/m) {
+        [$1, toc_str, $2].join("\n")
+      }
+      if s1 != s2
+        f.rewind()
+        f.truncate(0)
+        f.write(s2)
+        true
+      else
+        false
+      end
+    end
+    puts "[changed] README.md"          if changed
+    puts "[not changed] README.md"  unless changed
+  end
+
 end
