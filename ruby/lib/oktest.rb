@@ -1059,8 +1059,8 @@ module Oktest
         s = "#{st.to_s.downcase}:#{@counts[st]}"
         @counts[st] == 0 ? s : Color.status(st, s)
       }
-      sec = "%.3f" % elapsed
-      return "## total:#{total} (#{arr.join(', ')}) in #{sec}s"
+      hhmmss = Util.seconds2hhmmss(elapsed)
+      return "## total:#{total} (#{arr.join(', ')}) in #{hhmmss}s"
     end
 
     def spec_path(spec, topic)
