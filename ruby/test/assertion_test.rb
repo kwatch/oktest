@@ -490,51 +490,41 @@ END
     end
   end
 
-  describe "#file?" do
+  describe "#file_exist?" do
     it "returns self when passed." do
-      should_return_self { ok {__FILE__}.file? }
+      should_return_self { ok {__FILE__}.file_exist? }
     end
     it "raises assertion error when failed." do
       errmsg = "File.file?($<actual>): failed.\n"\
                "    $<actual>:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.file? }
+      should_be_failed(errmsg) { ok {'.'}.file_exist? }
     end
     it "is available with NOT." do
-      should_return_self { ok {'.'}.NOT.file? }
+      should_return_self { ok {'.'}.NOT.file_exist? }
       errmsg = "File.file?($<actual>) == false: failed.\n"\
                "    $<actual>:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.NOT.file? }
-    end
-    it "supports Pathname object." do
-      require 'pathname'
-      should_return_self { ok {Pathname(__FILE__)}.file? }
-      should_return_self { ok {Pathname('.')}.NOT.file? }
+      should_be_failed(errmsg) { ok {__FILE__}.NOT.file_exist? }
     end
   end
 
-  describe "#directory?" do
+  describe "#dir_exist?" do
     it "returns self when passed." do
-      should_return_self { ok {'.'}.directory? }
+      should_return_self { ok {'.'}.dir_exist? }
     end
     it "raises assertion error when failed." do
       errmsg = "File.directory?($<actual>): failed.\n"\
                "    $<actual>:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.directory? }
+      should_be_failed(errmsg) { ok {__FILE__}.dir_exist? }
     end
     it "is available with NOT." do
-      should_return_self { ok {__FILE__}.NOT.directory? }
+      should_return_self { ok {__FILE__}.NOT.dir_exist? }
       errmsg = "File.directory?($<actual>) == false: failed.\n"\
                "    $<actual>:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.NOT.directory? }
-    end
-    it "supports Pathname object." do
-      require 'pathname'
-      should_return_self { ok {Pathname('.')}.directory? }
-      should_return_self { ok {Pathname(__FILE__)}.NOT.directory? }
+      should_be_failed(errmsg) { ok {'.'}.NOT.dir_exist? }
     end
   end
 
-  describe "#symlink?" do
+  describe "#symlink_exist?" do
     def with_symlink
       linkname = "_sym_#{rand().to_s[2...7]}"
       File.symlink(__FILE__, linkname)
@@ -544,33 +534,26 @@ END
     end
     it "returns self when passed." do
       with_symlink do |linkname|
-        should_return_self { ok {linkname}.symlink? }
+        should_return_self { ok {linkname}.symlink_exist? }
       end
     end
     it "raises assertion error when failed." do
       with_symlink do |linkname|
         errmsg = "File.symlink?($<actual>): failed.\n"\
                  "    $<actual>:   \"_not_exist\""
-        should_be_failed(errmsg) { ok {'_not_exist'}.symlink? }
+        should_be_failed(errmsg) { ok {'_not_exist'}.symlink_exist? }
         errmsg = "File.symlink?($<actual>): failed.\n"\
                  "    $<actual>:   \".\""
-        should_be_failed(errmsg) { ok {'.'}.symlink? }
+        should_be_failed(errmsg) { ok {'.'}.symlink_exist? }
       end
     end
     it "is available with NOT." do
       with_symlink do |linkname|
-        should_return_self { ok {'_not_exist'}.NOT.symlink? }
-        should_return_self { ok {'.'}.NOT.symlink? }
+        should_return_self { ok {'_not_exist'}.NOT.symlink_exist? }
+        should_return_self { ok {'.'}.NOT.symlink_exist? }
         errmsg = "File.symlink?($<actual>) == false: failed.\n"\
                  "    $<actual>:   \"#{linkname}\""
-        should_be_failed(errmsg) { ok {linkname}.NOT.symlink? }
-      end
-    end
-    it "supports Pathname object." do
-      require 'pathname'
-      with_symlink do |linkname|
-        should_return_self { ok {Pathname(linkname)}.symlink? }
-        should_return_self { ok {Pathname('.')}.NOT.symlink? }
+        should_be_failed(errmsg) { ok {linkname}.NOT.symlink_exist? }
       end
     end
   end
