@@ -184,4 +184,52 @@ class SpecHelper_TC < TC
     end
   end
 
+  describe '#dummy_values()' do
+    it "changes hash value temporarily." do
+      hashobj = {:a=>10, 'b'=>20, :c=>30}
+      dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000)
+      assert_eq hashobj[:a], 1000
+      assert_eq hashobj['b'], 2000
+      assert_eq hashobj[:c], 30
+      assert_eq hashobj[:x], 9000
+    end
+    it "recovers hash values." do
+      hashobj = {:a=>10, 'b'=>20, :c=>30}
+      dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000)
+      assert_eq hashobj[:a], 1000
+      assert_eq hashobj['b'], 2000
+      assert_eq hashobj[:c], 30
+      assert_eq hashobj[:x], 9000
+      assert_eq @_at_end_blocks.length, 1
+      pr = @_at_end_blocks.pop()
+      pr.call()
+      assert_eq hashobj[:a], 10
+      assert_eq hashobj['b'], 20
+      assert_eq hashobj[:c], 30
+      assert !hashobj.key?(:x), "key :x should not exist."
+    end
+    it "returns keyvals." do
+      hashobj = {:a=>10, 'b'=>20, :c=>30}
+      ret = dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000)
+      assert_eq ret, {:a=>1000, 'b'=>2000, :x=>9000}
+    end
+    it "can take block argument." do
+      hashobj = {:a=>10, 'b'=>20, :c=>30}
+      ret = dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000) do |kvs|
+        assert_eq hashobj[:a], 1000
+        assert_eq hashobj['b'], 2000
+        assert_eq hashobj[:c], 30
+        assert_eq hashobj[:x], 9000
+        assert_eq kvs, {:a=>1000, 'b'=>2000, :x=>9000}
+        5678
+      end
+      assert_eq ret, 5678
+      assert_eq hashobj[:a], 10
+      assert_eq hashobj['b'], 20
+      assert_eq hashobj[:c], 30
+      assert !hashobj.key?(:x), "key :x should not exist."
+      assert_eq @_at_end_blocks, nil
+    end
+  end
+
 end

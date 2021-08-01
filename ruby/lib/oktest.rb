@@ -675,6 +675,34 @@ module Oktest
       end
     end
 
+    def dummy_values(hashobj, keyvals={})
+      prev_values = {}
+      key_not_exists = {}
+      keyvals.each do |k, v|
+        if hashobj.key?(k)
+          prev_values[k] = hashobj[k]
+        else
+          key_not_exists[k] = true
+        end
+        hashobj[k] = v
+      end
+      recover = proc do
+        key_not_exists.each {|k, _| hashobj.delete(k) }
+        prev_values.each {|k, v| hashobj[k] = v }
+      end
+      #
+      if block_given?
+        begin
+          return yield keyvals
+        ensure
+          recover.call
+        end
+      else
+        at_end(&recover)
+        return keyvals
+      end
+    end
+
     def recorder()
       require 'benry/recorder' unless defined?(Benry::Recorder)
       return Benry::Recorder.new
