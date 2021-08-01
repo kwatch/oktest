@@ -558,30 +558,20 @@ END
     end
   end
 
-  describe "#exist?" do
+  describe "#not_exist?" do
     it "returns self when passed." do
-      should_return_self { ok {__FILE__}.exist? }
-      should_return_self { ok {'.'}.exist? }
+      should_return_self { ok {'_not_exist'}.not_exist? }
     end
     it "raises assertion error when failed." do
-      errmsg = "File.exist?($<actual>): failed.\n"\
-               "    $<actual>:   \"_not_exist\""
-      should_be_failed(errmsg) { ok {'_not_exist'}.exist? }
-    end
-    it "is available with NOT." do
-      should_return_self { ok {'_not_exist'}.NOT.exist? }
-      errmsg = "File.exist?($<actual>) == false: failed.\n"\
-               "    $<actual>:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.NOT.exist? }
       errmsg = "File.exist?($<actual>) == false: failed.\n"\
                "    $<actual>:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.NOT.exist? }
+      should_be_failed(errmsg) { ok {'.'}.not_exist? }
     end
-    it "supports Pathname object." do
-      require 'pathname'
-      should_return_self { ok {Pathname(__FILE__)}.exist? }
-      should_return_self { ok {Pathname('.')}.exist? }
-      should_return_self { ok {Pathname('...')}.NOT.exist? }
+    it "is available with NOT." do
+      should_return_self { ok {'.'}.NOT.not_exist? }
+      errmsg = "File.exist?($<actual>): failed.\n"\
+               "    $<actual>:   \"_not_exist\""
+      should_be_failed(errmsg) { ok {'_not_exist'}.NOT.not_exist? }
     end
   end
 
