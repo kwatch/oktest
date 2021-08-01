@@ -95,6 +95,25 @@ END
     end
   end #if RUBY_VERSION >= "1.9"
 
+  describe "#===" do
+    it "returns self when passed." do
+      should_return_self { ok {String} === 'str' }
+    end
+    it "raises assertion error when failed." do
+      errmsg = "$actual === $expected: failed.\n"\
+               "    $actual:   Integer\n"\
+               "    $expected: \"str\""
+      should_be_failed(errmsg) { ok {Integer} === 'str' }
+    end
+    it "is avaialbe with NOT." do
+      should_return_self { ok {Integer}.NOT === 'str' }
+      errmsg = "!($actual === $expected): failed.\n"\
+               "    $actual:   String\n"\
+               "    $expected: \"str\""
+      should_be_failed(errmsg) { ok {String}.NOT === 'str' }
+    end
+  end
+
   describe ">" do
     it "returns self when passed." do
       should_return_self { ok {2} > 1 }

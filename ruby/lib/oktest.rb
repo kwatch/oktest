@@ -118,6 +118,18 @@ module Oktest
       self
     end
 
+    def ===(expected)
+      _done()
+      __assert(@bool == (@actual === expected)) {
+        s = "$actual === $expected"
+        s = "!(#{s})" unless @bool
+        "#{s}: failed.\n"\
+        "    $actual:   #{@actual.inspect}\n"\
+        "    $expected: #{expected.inspect}"
+      }
+      self
+    end
+
     #--
     #def >  expected; _done(); assert_operator(@actual, @bool ? :> : :<=, expected); self end
     def >= expected; _done(); assert_operator(@actual, @bool ? :>= : :<, expected); self end
