@@ -105,6 +105,9 @@ END
       should_be_failed(errmsg) { ok {2} > 2 }
       errmsg = "1 > 2: failed."
       should_be_failed(errmsg) { ok {1} > 2 }
+      #
+      errmsg = "\"aaa\" > \"bbb\": failed."
+      should_be_failed(errmsg) { ok {'aaa'} > 'bbb' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {2}.NOT > 2 }
@@ -123,6 +126,9 @@ END
       #errmsg = "Expected 1 to be >= 2."
       errmsg = "1 >= 2: failed."
       should_be_failed(errmsg) { ok {1} >= 2 }
+      #
+      errmsg = "\"aaa\" >= \"bbb\": failed."
+      should_be_failed(errmsg) { ok {'aaa'} >= 'bbb' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {1}.NOT >= 2 }
@@ -142,6 +148,9 @@ END
       should_be_failed(errmsg) { ok {2} < 2 }
       errmsg = "2 < 1: failed."
       should_be_failed(errmsg) { ok {2} < 1 }
+      #
+      errmsg = "\"bbb\" < \"aaa\": failed."
+      should_be_failed(errmsg) { ok {'bbb'} < 'aaa' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {2}.NOT < 2 }
@@ -160,6 +169,9 @@ END
       #errmsg = "Expected 2 to be <= 1."
       errmsg = "2 <= 1: failed."
       should_be_failed(errmsg) { ok {2} <= 1 }
+      #
+      errmsg = "\"bbb\" <= \"aaa\": failed."
+      should_be_failed(errmsg) { ok {'bbb'} <= 'aaa' }
     end
     it "is avaialbe with NOT." do
       should_return_self { ok {2}.NOT <= 1 }

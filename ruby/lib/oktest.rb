@@ -132,7 +132,7 @@ module Oktest
     def >(expected)
       _done()
       __assert(@bool == (@actual > expected)) {
-        "#{@actual.inspect} #{@bool ? '>' : '<='} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '>' : '<='} #{expected.inspect}: failed."
       }
       self
     end
@@ -140,7 +140,7 @@ module Oktest
     def >=(expected)
       _done()
       __assert(@bool == (@actual >= expected)) {
-        "#{@actual.inspect} #{@bool ? '>=' : '<'} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '>=' : '<'} #{expected.inspect}: failed."
       }
       self
     end
@@ -148,7 +148,7 @@ module Oktest
     def <(expected)
       _done()
       __assert(@bool == (@actual < expected)) {
-        "#{@actual.inspect} #{@bool ? '<' : '>='} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '<' : '>='} #{expected.inspect}: failed."
       }
       self
     end
@@ -156,7 +156,7 @@ module Oktest
     def <=(expected)
       _done()
       __assert(@bool == (@actual <= expected)) {
-        "#{@actual.inspect} #{@bool ? '<=' : '>'} #{expected}: failed."
+        "#{@actual.inspect} #{@bool ? '<=' : '>'} #{expected.inspect}: failed."
       }
       self
     end
