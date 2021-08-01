@@ -1,0 +1,590 @@
+<!-- coding: utf-8 -->
+# Oktest.rb README
+
+
+Oktest.rb is a new-style testing library.
+
+* `ok {actual} == expected` style assertion.
+* fixture injection inspired by dependency injection
+* structured test specifications.
+
+```ruby
+### Oktest                           ### Test::Unit
+require 'oktest'                     #  require 'test/unit'
+                                     #
+Oketst.scope do                      #
+                                     #
+  topic "Example" do                 #  class ExampleTest < Test::Unit::TestCase
+                                     #
+    spec "...description..." do      #    def test_1     # ...description...
+      ok {1+1} == 2                  #      assert_equal 2, 1+1
+      not_ok {1+1} == 3              #      assert_not_equal 3, 1+1
+      ok {3*3} < 10                  #      assert 3*3 < 10
+      not_ok {3*4} < 10              #      assert 3*4 >= 10
+      ok {@var}.nil?                 #      assert_nil @var
+      not_ok {123}.nil?              #      assert_not_nil 123
+      ok {3.14}.in_delta?(3.1, 0.1)  #      assert_in_delta 3.1, 3.14, 0.1
+      ok {'aaa'}.is_a?(String)       #      assert_kind_of String, 'aaa'
+      ok {'123'} =~ (/\d+/)          #      assert_match /\d+/, '123'
+      ok {:sym}.same?(:sym)          #      assert_same? :sym, :sym
+      ok {'README.md'}.exist?        #      assert File.exist?('README.md')
+      ok {'README.md'}.file_exist?   #      assert File.file?('README.md')
+      ok {'/tmp'}.dir_exist?         #      assert File.directory?('/tmp')
+      pr = proc { .... }             #      ex = assert_raise(Error) { .... }
+      ok {pr}.raise?(Error, "mesg")  #      assert ex.message, "mesg"
+      ex = pr.exception              #
+    end                              #    end
+                                     #
+  end                                #  end
+                                     #
+end                                  #
+```
+
+Oktest.rb requires Ruby 2.4 or later.
+
+
+
+## Quick Tutorial
+
+
+### Install
+
+```terminal
+### install
+$ gem install oktest
+
+### create test directory
+$ mkdir test
+
+### create test script
+$ vim test/example_test.rb
+```
+
+
+### Basic Example
+
+test/example01_test.rb:
+
+```ruby
+# coding: utf-8
+
+require 'oktest'
+
+class Hello
+  def hello(name="world")
+    return "Hello, #{name}!"
+  end
+end
+
+
+Oktest.scope do
+
+  topic Hello do
+
+    topic '#hello()' do
+
+      spec "returns greeting message." do
+        actual = Hello.new.hello()
+        ok {actual} == "Hello, world!"
+      end
+
+      spec "accepts user name." do
+        actual = Hello.new.hello("RWBY")
+        ok {actual} == "Hello, RWBY!"
+      end
+
+    end
+
+  end
+
+end
+```
+
+Result:
+
+```terminal
+$ ruby test/example01_test.rb
+* Hello
+  * #hello()
+    - [pass] returns greeting message.
+    - [pass] accepts user name.
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
+
+### Assertion Failure, and Error
+
+test/example02_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic 'other examples' do
+
+    spec "example of assertion failure" do
+      ok {1+1} == 2     # pass
+      ok {1+1} == 0     # FAIL
+    end
+
+    spec "example of something error" do
+      x = foobar        # NameError
+    end
+
+  end
+
+end
+```
+
+Result:
+
+```terminal
+$ ruby test/example02_test.rb
+* other examples
+  - [Fail] example of assertion failure
+  - [ERROR] example of something error
+----------------------------------------------------------------------
+[Fail] other examples > example of assertion failure
+    tmp/test/example02_test.rb:9:in `block (3 levels) in <main>'
+        ok {1+1} == 0     # FAIL
+$actual == $expected: failed.
+    $actual:   2
+    $expected: 0
+----------------------------------------------------------------------
+[ERROR] other examples > example of something error
+    tmp/test/example02_test.rb:13:in `block (3 levels) in <main>'
+        x = foobar        # NameError
+NameError: undefined local variable or method `foobar' for #<#<Class:...>:...>
+----------------------------------------------------------------------
+## total:2 (pass:0, fail:1, error:1, skip:0, todo:0) in 0.000s
+```
+
+
+### Skip, and Todo
+
+test/example03_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic 'other examples' do
+
+    spec "example of skip" do
+      skip_when RUBY_VERSION < "3.0", "requires Ruby3"
+      ok {1+1} == 2
+    end
+
+    spec "example of todo"    # no block means TODO
+
+  end
+
+end
+```
+
+Result:
+
+```terminal
+$ ruby test/example03_test.rb
+* other examples
+  - [Skip] example of skip (reason: requires Ruby3)
+  - [TODO] example of todo
+## total:2 (pass:0, fail:0, error:0, skip:1, todo:1) in 0.000s
+```
+
+
+### Reporting Style
+
+Verbose mode (default):
+
+```terminal
+$ ruby test/example01_test.rb -s verbose  # or -sv
+* Hello
+  * #hello()
+    - [pass] returns greeting message.
+    - [pass] accepts user name.
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
+Simple mode:
+
+```terminal
+$ ruby test/example01_test.rb -s simple   # or -ss
+test/example01_test.rb: ..
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
+Plain mode:
+
+```terminal
+$ ruby test/example01_test.rb -s simple   # or -ss
+..
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
+
+### Run All Test Scripts Under Directory
+
+How to run test scripts under `test` directory:
+
+```terminal
+$ ls test
+example01_test.rb       example02_test.rb       example03_test.rb
+
+$ ruby -r oktest -e 'Oktest.main' -- test -s simple
+tmp/test/example01_test.rb: ..
+tmp/test/example02_test.rb: fE
+----------------------------------------------------------------------
+[Fail] other examples > example of assertion failure
+    tmp/test/example02_test.rb:9:in `block (3 levels) in <top (required)>'
+        ok {1+1} == 0     # FAIL
+    -e:1:in `<main>'
+$actual == $expected: failed.
+    $actual:   2
+    $expected: 0
+----------------------------------------------------------------------
+[ERROR] other examples > example of something error
+    tmp/test/example02_test.rb:13:in `block (3 levels) in <top (required)>'
+        x = foobar        # NameError
+    -e:1:in `<main>'
+NameError: undefined local variable or method `foobar' for #<#<Class:...>:...>
+----------------------------------------------------------------------
+tmp/test/example03_test.rb: st
+## total:6 (pass:2, fail:1, error:1, skip:1, todo:1) in 0.000s
+```
+
+Test script filename should be `test_xxx.rb` or `xxx_test.rb`
+(not `test-xxx.rb` nor `xxx-test.rb`).
+
+
+
+## Assertions
+
+
+### Basic Assertions
+
+In the following example, `a` means actual value and `e` means expected value.
+
+```ruby
+ok {a} == e              # fail unless a == e
+ok {a} != e              # fail unless a != e
+ok {a} === e             # fail unless a === e
+ok {a} !== e             # fail unless a !== e
+
+ok {a} >  e              # fail unless a > e
+ok {a} >= e              # fail unless a >= e
+ok {a} <  e              # fail unless a < e
+ok {a} <= e              # fail unless a <= e
+
+ok {a} =~ e              # fail unless a =~ e
+ok {a} !~ e              # fail unless a !~ e
+
+ok {a}.same?(e)          # fail unless a.equal?(e)
+ok {a}.include?(e)       # fail unless a.include?(e)
+ok {a}.in?(e)            # fail unless e.include?(a)
+ok {a}.in_delta?(e, x)   # fail unless e-x < a < e+x
+
+ok {a}.exist?            # fail unless File.exist?(x)
+ok {a}.file_exist?       # fail unless File.exist?(x)
+ok {a}.dir_exist?        # fail unless File.exist?(x)
+
+ok {a}.attr(key, val)    # fail unless a.__send__(key) == val
+ok {a}.length(e)         # fail unless a.length == e
+```
+
+
+### Predicate Assertions
+
+`ok {}` handles predicate methods (such as `.nil?`, `.empty?`, or `.key?`) automatically.
+
+```ruby
+ok {a}.nil?              # same as ok {a.nil?} == true
+ok {a}.empty?            # same as ok {a.empty?} == true
+ok {a}.key?(e)           # same as ok {a.key?(e)} == true
+ok {a}.is_a?(e)          # same as ok {a.is_a?(e)} == true
+ok {a}.between?(x, y)    # same as ok {a.between?(x, y)} == true
+```
+
+
+### Negative Assertion
+
+```ruby
+not_ok {a} == e          # fail if a == e
+ok {a}.NOT == e          # fail if a == e
+
+not_ok {a}.exist?        # fail if File.exist?(a)
+ok {a}.NOT.exist?        # fail if File.exist?(a)
+```
+
+
+### Exception Assertion
+
+If you want to assert whether exception raised or not:
+
+```ruby
+pr = proc do
+  "abc".len()    # NoMethodError
+end
+ok {pr}.raise?(NoMethodError)
+ok {pr}.raise?(NoMethodError, "undefined method `len' for \"abc\":String")
+ok {pr}.raise?(NoMethodError, /^undefined method `len'/)
+
+## get exception object
+ok {pr.exception.class} == NoMethodError
+ok {pr.exception.message} == "undefined method `len' for \"abc\":String"
+
+## if you want to assert that procedure NOT raise exception...
+not_ok {pr}.raise?(NoMethodError)   # only exception class, no errmsg
+ok {pr}.NOT.raise?(NoMethodError)   # only exception class, no errmsg
+```
+
+
+### Custom Assertion
+
+How to define custom assertion:
+
+test/example11_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest::AssertionObject.class_eval do
+  def readable?     # custom assertion: file readable?
+    _done()
+    result = File.readable?(@actual)
+    __assert(result == @bool) {
+      "File.readable?($<actual>) == #{@bool}: failed.\n" +
+      "    $<actual>:   #{@actual.inspect}"
+    }
+    self
+  end
+end
+
+Oktest.scope do
+
+  topic "Custom assertion" do
+
+    spec "example spec" do
+      ok {__FILE__}.readable?     # custom assertion
+    end
+
+  end
+
+end
+```
+
+
+## Fixtures
+
+
+### Setup and Teardown
+
+test/example21_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic "Fixture example" do
+
+    before do       # equivarent to setUp()
+      puts "** before() called"
+    end
+
+    after do        # equivarent to tearDown()
+      puts "** after() called"
+    end
+
+    before_all do   # equivarent to setUpAll()
+      puts "* before_all() called"
+    end
+
+    after_all do    # equvarent to tearDownAll()
+      puts "* after_all() called"
+    end
+
+    spec "example spec #1" do
+      puts "[[example spec #1]]"
+    end
+
+    spec "example spec #2" do
+      puts "[[example spec #2]]"
+    end
+
+  end
+
+end
+```
+
+Result:
+
+```terminal
+$ ruby test/example21_test.rb
+* before_all() called
+** before() called
+---- example spec #1 ----
+** after() called
+.** before() called
+---- example spec #2 ----
+** after() called
+.* after_all() called
+
+## total:2, pass:2, fail:0, error:0, skip:0, todo:0  (in 0.000s)
+```
+
+
+### Clean-up
+
+It is possible to register clean-up operation with `at_end()`.
+
+test/example22_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic "Auto clean-up" do
+
+    spec "example spec" do
+      tmpfile = "tmp123.txt"
+      File.write(tmpfile, "foobar\n")
+      at_end do                # register clean-up operation
+        File.unlink(tmpfile)
+      end
+      #
+      ok {tmpfile}.file_exist?
+    end
+
+  end
+
+end
+```
+
+* `at_end()` can be called multiple times.
+* Registered blocks are invoked in reverse order at end of test case.
+* Registered blocks of `at_end()` are invoked before blocks of `after()`.
+
+
+### Fixture Injection
+
+test/example23_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  fixture :alice do               # define fixture
+    {name: "Alice", age: 22}
+  end
+
+  fixture :bob do                 # define fixture
+    {name: "Bob", age: 29}
+  end
+
+  fixture :team do |alice, bob|   # !!! fixture injection !!!
+    {
+      name: "Blabla",
+      members: [alice, bob]
+    }
+  end
+
+  topic "Fixture Injection" do
+
+    spec "example spec" do
+      |alice, bob, team|          # !!! fixture injection !!!
+      ok {alice[:name]} == "Alice"
+      ok {alice[:age]} == 22
+      ok {bob[:name]} == "Bob"
+      ok {bob[:age]} == 29
+      #
+      ok {team[:name]} == "Blabla"
+      ok {team[:members]}.length(2)
+      ok {team[:members][0][:name]} == "Alice"
+      ok {team[:members][1][:name]} == "Bob"
+    end
+
+  end
+
+end
+```
+
+* If fixture requires clean-up operation, call `at_end()` in `fixture()` block.
+
+```ruby
+  fixture :tmpfile do
+    tmpfile = "tmp#{rand().to_s[2..5]}.txt"
+    File.write(tmpfile, "foobar\n", encoding: 'utf-8')
+    at_end { File.unlink(tmpfile) if File.exist?(tmpfile) }   # !!!!!
+    tmpfile
+  end
+```
+
+* Fixtures can be defined in block of `topc()` as well as block of `Object.scope()`.
+* It is good idea to common fixtures into dedicated script, such as:
+
+test/common_fixtures.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  fixture :alice do
+    {name: "Alice", age: 22}
+  end
+
+  fixture :bob do
+    {name: "Bob", age: 29}
+  end
+
+  fixture :team do |alice, bob|
+    {
+      name: "Blabla",
+      members: [alice, bob]
+    }
+  end
+
+end
+```
+
+
+## Helpers
+
+
+### Capturing Stdio
+
+`capture_sio()` captures standard I/O.
+
+test/example31_test.rb:
+
+```ruby
+Oktest.scope do
+
+  topic "Capturing" do
+
+    spec "example spec" do
+      data = nil
+      sout, serr = capture_sio("blabla") do            # !!!!!
+        data = $stdin.read()     # read from stdin
+        puts "fooo"              # write into stdout
+        $stderr.puts "baaa"      # write into stderr
+      end
+      ok {data} == "blabla"
+      ok {sout} == "fooo\n"
+      ok {serr} == "baaa\n"
+    end
+
+  end
+
+end
+```
+
+* First argument of `capture_sio()` represents data from `$stdin`.
+  If it is not necessary, you can omit it like `caputre_sio() do ... end`.
+* If you need `$stdin.tty? == true` and `$stdout.tty? == true`,
+  call `capture_sio(tty: true) do ... end`.
