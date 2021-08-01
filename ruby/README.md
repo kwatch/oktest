@@ -374,8 +374,8 @@ ok {Pathname(a)}.relative?   # same as ok {Pathname(a).relative?} == true
 not_ok {a} == e          # fail if a == e
 ok {a}.NOT == e          # fail if a == e
 
-not_ok {a}.exist?        # fail if File.exist?(a)
-ok {a}.NOT.exist?        # fail if File.exist?(a)
+not_ok {a}.file_exist?   # fail if File.file?(a)
+ok {a}.NOT.file_exist?   # fail if File.file?(a)
 ```
 
 
@@ -681,7 +681,7 @@ Oktest.scope do
 	1234
       end
       ok {result} == 1234
-      not_ok {"_tmp_file.txt"}.exist?
+      ok {"_tmp_file.txt"}.not_exist?
     end
 
   end
@@ -723,7 +723,7 @@ Oktest.scope do
 	2345
       end
       ok {result} == 2345
-      not_ok {"_tmp_dir"}.exist?
+      ok {"_tmp_dir"}.not_exist?
     end
 
   end
