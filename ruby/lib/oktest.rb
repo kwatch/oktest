@@ -5,9 +5,9 @@
 ###
 
 require 'test/unit'
-if defined?(Test::Unit::Runner)
-  Test::Unit::Runner.class_variable_set(:@@stop_auto_run, true)
-end
+class Test::Unit::Runner
+  @@stop_auto_run = true
+end if defined?(Test::Unit::Runner)
 
 #require 'section/tmp'
 #require 'section/recorder'
