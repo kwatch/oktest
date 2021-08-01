@@ -363,12 +363,14 @@ module Oktest
       }
       self
     end
+    alias item keyval      # for compatibility with minitest-ok
 
     def keyvals(keyvals={})
       _done()
       keyvals.each {|name, expected| keyval(name, expected) }
       self
     end
+    alias items keyvals    # for compatibility with minitest-ok
 
     def length(n)
       _done()
