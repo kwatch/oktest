@@ -1459,7 +1459,7 @@ END
     end
 
     def load_dir(dir, pattern=/^(test_.*|.*_test)\.rb$/)
-      Dir.glob("#{dir}/**/*").each do |path|
+      Dir.glob("#{dir}/**/*").sort.each do |path|
         next unless File.file?(path)
         load(path) if File.basename(path) =~ pattern
       end
