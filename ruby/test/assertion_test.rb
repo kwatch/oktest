@@ -415,6 +415,25 @@ END
     end
   end
 
+  describe "#attrs()" do
+    it "returns self when passed." do
+      should_return_self { ok {"SOS"}.attrs(:length=>3, :size=>3) }
+    end
+    it "raises assertion error when failed." do
+      errmsg = "$<actual>.size == $<expected>: failed.\n"\
+               "    $<actual>.size: 3\n"\
+               "    $<expected>: 2"
+      should_be_failed(errmsg) { ok {"SOS"}.attrs(:size=>2) }
+    end
+    it "is available with NOT." do
+      should_return_self { ok {"SOS"}.NOT.attrs(:length=>2) }
+      errmsg = "$<actual>.size != $<expected>: failed.\n"\
+               "    $<actual>.size: 3\n"\
+               "    $<expected>: 3"
+      should_be_failed(errmsg) { ok {"SOS"}.NOT.attrs(:size=>3) }
+    end
+  end
+
   describe "#keyval()" do
     it "returns self when passed." do
       d = {'a'=>1}

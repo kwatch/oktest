@@ -346,6 +346,12 @@ module Oktest
       self
     end
 
+    def attrs(keyvals={})
+      _done()
+      keyvals.each {|name, expected| attr(name, expected) }
+      self
+    end
+
     def keyval(key, expected)
       _done()
       val = @actual[key]
