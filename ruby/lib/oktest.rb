@@ -107,19 +107,15 @@ module Oktest
       self
     end
 
-    if RUBY_VERSION >= '1.9'
-      op = @bool ? '==' : '!='
-      eval <<-END, binding, __FILE__, __LINE__+1
-      def !=(expected)
-        _done()
-        __assert(@bool == (@actual != expected)) {
-          "$actual #{op} $expected: failed.\n"\
-          "    $actual:   \#{@actual.inspect}\n"\
-          "    $expected: \#{expected.inspect}"
-        }
-        self
-      end
-      END
+    def !=(expected)    # Ruby >= 1.9
+      _done()
+      __assert(@bool == (@actual != expected)) {
+        op = @bool ? '!=' : '=='
+        "$actual #{op} $expected: failed.\n"\
+        "    $actual:   #{@actual.inspect}\n"\
+        "    $expected: #{expected.inspect}"
+      }
+      self
     end
 
     #--
@@ -177,24 +173,20 @@ module Oktest
       self
     end
 
-    if RUBY_VERSION >= "1.9"
-      eval <<-'END', binding, __FILE__, __LINE__+1
-      def !~(expected)
-        _done()
-        #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
-        __assert(@bool == !!(@actual !~ expected)) {
-          op = @bool ? '!~' : '=~'
-          msg = "$actual #{op} $expected: failed.\n"\
-                "    $expected: #{expected.inspect}\n"
-          if @actual =~ /\n\z/
-            msg << "    $actual:   <<'END'\n#{@actual}END\n"
-          else
-            msg << "    $actual:   #{@actual.inspect}\n"
-          end
-        }
-        self
-      end
-      END
+    def !~(expected)    # Ruby >= 1.9
+      _done()
+      #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
+      __assert(@bool == !!(@actual !~ expected)) {
+        op = @bool ? '!~' : '=~'
+        msg = "$actual #{op} $expected: failed.\n"\
+              "    $expected: #{expected.inspect}\n"
+        if @actual =~ /\n\z/
+          msg << "    $actual:   <<'END'\n#{@actual}END\n"
+        else
+          msg << "    $actual:   #{@actual.inspect}\n"
+        end
+      }
+      self
     end
 
     def in_delta?(expected, delta)

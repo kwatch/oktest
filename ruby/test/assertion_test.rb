@@ -88,12 +88,12 @@ END
     it "is avaialbe with NOT." do
       should_return_self { ok {1+1}.NOT != 2 }
       #errmsg = "<3> expected but was\n<2>."
-      errmsg = "$actual != $expected: failed.\n"\
+      errmsg = "$actual == $expected: failed.\n"\
                "    $actual:   2\n"\
                "    $expected: 3"
       should_be_failed(errmsg) { ok {1+1}.NOT != 3 }
     end
-  end if RUBY_VERSION >= "1.9"
+  end #if RUBY_VERSION >= "1.9"
 
   describe ">" do
     it "returns self when passed." do
@@ -223,7 +223,7 @@ END
                "    $actual:   <<'END'\nSOS\nEND\n"
       should_be_failed(errmsg) { ok {"SOS\n"}.NOT !~ /\d+/ }
     end
-  end if RUBY_VERSION >= "1.9"
+  end #if RUBY_VERSION >= "1.9"
 
   describe "#in_delta?" do
     it "returns self when passed." do
