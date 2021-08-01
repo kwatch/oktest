@@ -398,50 +398,44 @@ module Oktest
     def file?
       _done()
       if @actual.respond_to?(:file?)
-        __assert(@bool == @actual.file?) {
-          "$actual.file?#{@bool ? '' : ' == false'}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
-        }
+        bool = @actual.file?       ; s = "$actual.file?"
       else
-        __assert(@bool == File.file?(@actual)) {
-          "File.file?($actual)#{@bool ? '' : ' == false'}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
-        }
+        bool = File.file?(@actual) ; s = "File.file?($actual)"
       end
+      __assert(@bool == bool) {
+        "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
+        "    $actual:   #{@actual.inspect}"
+      }
       self
     end
-    alias file_exist? file?
+    alias file_exist? file?       # for backward compatibilify
 
     def directory?
       _done()
       if @actual.respond_to?(:directory?)
-        __assert(@bool == @actual.directory?) {
-          "$actual.directory?#{@bool ? '' : ' == false'}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
-        }
+        bool = @actual.directory?       ; s = "$actual.directory?"
       else
-        __assert(@bool == File.directory?(@actual)) {
-          "File.directory?($actual)#{@bool ? '' : ' == false'}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
-        }
+        bool = File.directory?(@actual) ; s = "File.directory?($actual)"
       end
+      __assert(@bool == bool) {
+        "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
+        "    $actual:   #{@actual.inspect}"
+      }
       self
     end
-    alias dir_exist? directory?
+    alias dir_exist? directory?   # for backward compatibilify
 
     def exist?
       _done()
       if @actual.respond_to?(:exist?)
-        __assert(@bool == @actual.exist?) {
-          "$actual.exist?#{@bool ? '' : ' == false'}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
-        }
+        bool = @actual.exist?       ; s = "$actual.exist?"
       else
-        __assert(@bool == File.exist?(@actual)) {
-          "File.exist?($actual)#{@bool ? '' : ' == false'}: failed.\n"\
-          "    $actual:   #{@actual.inspect}"
-        }
+        bool = File.exist?(@actual) ; s = "File.exist?($actual)"
       end
+      __assert(@bool == bool) {
+        "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
+        "    $actual:   #{@actual.inspect}"
+      }
       self
     end
 
