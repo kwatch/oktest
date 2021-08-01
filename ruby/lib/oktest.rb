@@ -346,6 +346,12 @@ module Oktest
       self
     end
 
+    def attrs(keyvals={})
+      _done()
+      keyvals.each {|name, expected| attr(name, expected) }
+      self
+    end
+
     def keyval(key, expected)
       _done()
       val = @actual[key]
@@ -357,6 +363,14 @@ module Oktest
       }
       self
     end
+    alias item keyval      # for compatibility with minitest-ok
+
+    def keyvals(keyvals={})
+      _done()
+      keyvals.each {|name, expected| keyval(name, expected) }
+      self
+    end
+    alias items keyvals    # for compatibility with minitest-ok
 
     def length(n)
       _done()
