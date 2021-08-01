@@ -407,11 +407,11 @@ Oktest.scope do
     end
 
     spec "example spec #1" do
-      puts "[[example spec #1]]"
+      puts "---- example spec #1 ----"
     end
 
     spec "example spec #2" do
-      puts "[[example spec #2]]"
+      puts "---- example spec #2 ----"
     end
 
   end
@@ -436,7 +436,7 @@ $ ruby test/example21_test.rb
 ```
 
 
-### Clean-up
+### `at_end()`: Crean-up Handler
 
 It is possible to register clean-up operation with `at_end()`.
 
@@ -556,13 +556,15 @@ end
 ## Helpers
 
 
-### Capturing Stdio
+### `capture_sio()`
 
 `capture_sio()` captures standard I/O.
 
 test/example31_test.rb:
 
 ```ruby
+require 'oktest'
+
 Oktest.scope do
 
   topic "Capturing" do
@@ -588,3 +590,247 @@ end
   If it is not necessary, you can omit it like `caputre_sio() do ... end`.
 * If you need `$stdin.tty? == true` and `$stdout.tty? == true`,
   call `capture_sio(tty: true) do ... end`.
+
+
+### `dummy_file()`
+
+`dummy_file()` creates dummy file temporarily.
+
+test/example32_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic "dummy_file()" do
+
+    spec "usage #1: without block" do
+      tmpfile = dummy_file("_tmp_file.txt", "blablabla")    # !!!!!
+      ok {tmpfile} == "_tmp_file.txt"
+      ok {tmpfile}.file_exist?
+      ## dummy file will be removed automatically at end of spec block.
+    end
+
+    spec "usage #2: with block" do
+      result = dummy_file("_tmp_file.txt", "blabla") do |tmpfile|  # !!!!!
+        ok {tmpfile} == "_tmp_file.txt"
+        ok {tmpfile}.file_exist?
+        ## dummy file will be removed automatically at end of this block.
+	## last value of block will be the return value of dummy_file().
+	1234
+      end
+      ok {result} == 1234
+      not_ok {"_tmp_file.txt"}.exist?
+    end
+
+  end
+
+end
+```
+
+* If first argument of `dummy_file()` is nil, then it generates temporary file name automatically.
+
+
+### `dummy_dir()`
+
+`dummy_dir()` creates dummy directory temporarily.
+
+test/example33_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic "dummy_dir()" do
+
+    spec "usage #1: without block" do
+      tmpdir = dummy_dir("_tmp_dir")               # !!!!!
+      ok {tmpdir} == "_tmp_dir"
+      ok {tmpdir}.dir_exist?
+      ## dummy directory will be removed automatically at end of spec block
+      ## even if it contais other files or directories.
+    end
+
+    spec "usage #2: with block" do
+      result = dummy_dir("_tmp_dir") do |tmpdir|   # !!!!!
+        ok {tmpdir} == "_tmp_dir"
+        ok {tmpdir}.dir_exist?
+        ## dummy directory will be removed automatically at end of this block
+        ## even if it contais other files or directories.
+	## last value of block will be the return value of dummy_dir().
+	2345
+      end
+      ok {result} == 2345
+      not_ok {"_tmp_dir"}.exist?
+    end
+
+  end
+
+end
+```
+
+* If first argument of `dummy_dir()` is nil, then it generates temorary directory name automatically.
+
+
+### `dummy_values()`
+
+`dummy_values()` changes hash values temporarily.
+
+test/example34_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic "dummy_values()" do
+
+    spec "usage #1: without block" do
+      hashobj = {:a=>1, 'b'=>2, :c=>3}   # `:x` is not a key
+      ret = dummy_values(hashobj, :a=>100, 'b'=>200, :x=>900)  # !!!!!
+      ok {hashobj[:a]} == 100
+      ok {hashobj['b']} == 200
+      ok {hashobj[:c]} == 3
+      ok {hashobj[:x]} == 900
+      ok {ret} == {:a=>100, 'b'=>200, :x=>900}
+      ## values of hash object are recovered at end of spec block.
+    end
+
+    spec "usage #2: with block" do
+      hashobj = {:a=>1, 'b'=>2, :c=>3}   # `:x` is not a key
+      ret = dummy_values(hashobj, :a=>100, 'b'=>200, :x=>900) do |keyvals| # !!!!!
+        ok {hashobj[:a]} == 100
+        ok {hashobj['b']} == 200
+        ok {hashobj[:c]} == 3
+        ok {hashobj[:x]} == 900
+        ok {keyvals} == {:a=>100, 'b'=>200, :x=>900}
+        ## values of hash object are recovered at end of this block.
+	## last value of block will be the return value of dummy_values().
+        3456
+      end
+      ok {hashobj[:a]} == 1
+      ok {hashobj['b']} == 2
+      ok {hashobj[:c]} == 3
+      not_ok {hashobj}.key?(:x)   # because `:x` was not a key
+      ok {ret} == 3456
+    end
+
+  end
+
+end
+```
+
+* `dummy_values()` is very useful to change envirnment variables temporarily,
+   such as `dummy_values(ENV, 'LANG'=>'en_US.UTF-8')`.
+
+
+### `dummy_attrs()`
+
+`dummy_attrs()` changes object attribute values temporarily.
+
+test/example35_test.rb:
+
+```ruby
+require 'oktest'
+
+class User
+  def initialize(id, name)
+    @id   = id
+    @name = name
+  end
+  attr_accessor :id, :name
+end
+
+Oktest.scope do
+
+  topic "dummy_attrs()" do
+
+    spec "usage #1: without block" do
+      user = User.new(123, "alice")
+      ok {user.id} == 123
+      ok {user.name} == "alice"
+      ret = dummy_attrs(user, :id=>999, :name=>"bob")   # !!!!!
+      ok {user.id} == 999
+      ok {user.name} == "bob"
+      ok {ret} == {:id=>999, :name=>"bob"}
+      ## attribute values are recovered at end of spec block.
+    end
+
+    spec "usage #2: with block" do
+      user = User.new(123, "alice")
+      ok {user.id} == 123
+      ok {user.name} == "alice"
+      ret = dummy_attrs(user, :id=>999, :name=>"bob") do |keyvals|  # !!!!!
+        ok {user.id} == 999
+        ok {user.name} == "bob"
+        ok {keyvals} == {:id=>999, :name=>"bob"}
+        ## attribute values are recovered at end of this block.
+	## last value of block will be the return value of dummy_attrs().
+	4567
+      end
+      ok {user.id} == 123
+      ok {user.name} == "alice"
+      ok {ret} == 4567
+    end
+
+  end
+
+end
+```
+
+
+### `dummy_ivars()`
+
+`dummy_ivars()` changes instance variables in object with dummy values temporarily.
+
+test/example36_test.rb:
+
+```ruby
+require 'oktest'
+
+class User
+  def initialize(id, name)
+    @id   = id
+    @name = name
+  end
+  attr_reader :id, :name    # setter, not accessor
+end
+
+Oktest.scope do
+
+  topic "dummy_attrs()" do
+
+    spec "usage #1: without block" do
+      user = User.new(123, "alice")
+      ok {user.id} == 123
+      ok {user.name} == "alice"
+      ret = dummy_ivars(user, :id=>999, :name=>"bob")   # !!!!!
+      ok {user.id} == 999
+      ok {user.name} == "bob"
+      ok {ret} == {:id=>999, :name=>"bob"}
+      ## attribute values are recovered at end of spec block.
+    end
+
+    spec "usage #2: with block" do
+      user = User.new(123, "alice")
+      ok {user.id} == 123
+      ok {user.name} == "alice"
+      ret = dummy_ivars(user, :id=>999, :name=>"bob") do |keyvals|  # !!!!!
+        ok {user.id} == 999
+        ok {user.name} == "bob"
+        ok {keyvals} == {:id=>999, :name=>"bob"}
+        ## attribute values are recovered at end of this block.
+	## last value of block will be the return value of dummy_attrs().
+	6789
+      end
+      ok {user.id} == 123
+      ok {user.name} == "alice"
+      ok {ret} == 6789
+    end
+
+  end
+
+end
+```
