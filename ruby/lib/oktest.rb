@@ -1496,6 +1496,13 @@ Test::Unit::Assertions.module_eval do
     Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
     return ass
   end
+  def not_ok
+    location = caller(1).first
+    actual = yield
+    ass = Oktest::AssertionObject.new(actual, false, location)
+    Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
+    return ass
+  end
 end
 
 
