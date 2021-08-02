@@ -161,12 +161,9 @@ module Oktest
       self
     end
 
-    def =~(expected)
-      _done()
-      #@bool ? assert_match(expected, @actual) : assert_no_match(expected, @actual)
-      __assert(@bool == !!(@actual =~ expected)) {
-        op = @bool ? '=~' : '!~'
-        msg = "$<actual> #{op} $<expected>: failed.\n"\
+    def __assert_match(result, op1, op2, expected)
+      __assert(@bool == !!result) {
+        msg = "$<actual> #{@bool ? op1 : op2} $<expected>: failed.\n"\
               "    $<expected>: #{expected.inspect}\n"
         if @actual =~ /\n\z/
           msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
@@ -174,22 +171,18 @@ module Oktest
           msg << "    $<actual>:   #{@actual.inspect}\n"
         end
       }
+    end
+    private :__assert_match
+
+    def =~(expected)
+      _done()
+      __assert_match(@actual =~ expected, '=~', '!~', expected)
       self
     end
 
     def !~(expected)    # Ruby >= 1.9
       _done()
-      #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
-      __assert(@bool == !!(@actual !~ expected)) {
-        op = @bool ? '!~' : '=~'
-        msg = "$<actual> #{op} $<expected>: failed.\n"\
-              "    $<expected>: #{expected.inspect}\n"
-        if @actual =~ /\n\z/
-          msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
-        else
-          msg << "    $<actual>:   #{@actual.inspect}\n"
-        end
-      }
+      __assert_match(@actual !~ expected, '!~', '=~', expected)
       self
     end
 
