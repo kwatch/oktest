@@ -551,8 +551,8 @@ module Oktest
 
   FILESCOPES = []
 
-  def self.scope(&block)
-    filename = caller(1).first =~ /:\d+/ ? $` : nil
+  def self.__scope(depth, &block)
+    filename = caller(depth).first =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
     scope = FileScopeObject.new(filename)
     klass = Class.new
@@ -562,6 +562,11 @@ module Oktest
     end
     klass.class_eval(&block)
     scope._klass = klass
+    return scope
+  end
+
+  def self.scope(&block)
+    scope = __scope(2, &block)
     FILESCOPES << scope
     return scope
   end
@@ -571,7 +576,7 @@ module Oktest
     return GLOBAL_SCOPE
   end
 
-  GLOBAL_SCOPE = self.scope() { nil }
+  GLOBAL_SCOPE = __scope(1) { nil }
 
 
   class SpecObject
