@@ -454,9 +454,9 @@ module Oktest
 
   class TopicObject < ScopeObject
 
-    def initialize(name=nil)
+    def initialize(target=nil)
       super()
-      @name = name
+      @target = target
     end
 
     def accept_runner(runner, *args)
@@ -464,7 +464,7 @@ module Oktest
     end
 
     def filter_match?(pattern)
-      return File.fnmatch?(pattern, @name.to_s)
+      return File.fnmatch?(pattern, @target.to_s)
     end
 
   end
@@ -483,8 +483,8 @@ module Oktest
       @_scope.fixtures[name] = [block, argnames, location]
     end
 
-    def topic(name, &block)
-      topic = TopicObject.new(name)
+    def topic(target, &block)
+      topic = TopicObject.new(target)
       @_scope.add_child(topic)
       klass = Class.new(self)
       klass.class_eval do
@@ -1074,7 +1074,7 @@ module Oktest
     def spec_path(spec, topic)
       arr = []
       while topic
-        arr << topic.name.to_s if topic.name
+        arr << topic.target.to_s if topic.target
         topic = topic.parent
       end
       arr.reverse!
@@ -1091,7 +1091,7 @@ module Oktest
 
     def enter_topic(topic, depth)
       super
-      puts "#{'  ' * depth}#{topic._prefix} #{Color.topic(topic.name)}"
+      puts "#{'  ' * depth}#{topic._prefix} #{Color.topic(topic.target)}"
     end
 
     def exit_topic(topic, depth)
