@@ -470,6 +470,11 @@ module Oktest
       return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
     end
 
+    def tag_match?(pattern)
+      return false if @tag.nil?
+      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
+    end
+
   end
 
 
@@ -587,6 +592,11 @@ module Oktest
 
     def filter_match?(pattern)
       return File.fnmatch?(pattern, @desc.to_s, File::FNM_EXTGLOB)
+    end
+
+    def tag_match?(pattern)
+      return false if @tag.nil?
+      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
