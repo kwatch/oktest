@@ -44,24 +44,24 @@ module Oktest
 
     attr_reader :actual, :bool, :location
 
-    def _done
+    def _done()
       AssertionObject::NOT_YET.delete(self.__id__)
     end
     private :_done
 
-    def self.report_not_yet
+    def self.report_not_yet()
       return if NOT_YET.empty?
       NOT_YET.each_value do |ass|
         $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
       end
     end
 
-    def _not
+    def _not()
       return @bool ? '' : 'not '
     end
     private :_not
 
-    def __assert result
+    def __assert(result)
       raise FAIL_EXCEPTION, yield unless result
     end
     #if defined?(MiniTest)
@@ -84,7 +84,7 @@ module Oktest
     #  end
     #end
 
-    def NOT
+    def NOT()
       @bool = ! @bool
       self
     end
@@ -406,7 +406,7 @@ module Oktest
 
   class ScopeObject
 
-    def initialize
+    def initialize()
       @children = []
       @fixtures = {}
     end
@@ -428,7 +428,7 @@ module Oktest
       #@fixtures ? @fixtures[name] : nil   # or [nil, nil, nil]?
     end
 
-    def new_context
+    def new_context()
       return @_klass.new
     end
 
@@ -598,7 +598,7 @@ module Oktest
 
     attr_accessor :_TODO, :_at_end_blocks
 
-    def ok
+    def ok()
       location = caller(1).first
       actual = yield
       ass = Oktest::AssertionObject.new(actual, true, location)
@@ -606,7 +606,7 @@ module Oktest
       return ass
     end
 
-    def not_ok
+    def not_ok()
       location = caller(1).first
       actual = yield
       ass = Oktest::AssertionObject.new(actual, false, location)
@@ -618,7 +618,7 @@ module Oktest
       raise SkipException.new(reason) if condition
     end
 
-    def TODO
+    def TODO()
       @_TODO = true
     end
 
@@ -785,7 +785,7 @@ module Oktest
       @reporter.exit_spec(spec, depth, status, ex, parent)
     end
 
-    def run_all
+    def run_all()
       @reporter.enter_all(self)
       while (scope = FILESCOPES.shift)
         run_filescope(scope)
@@ -874,7 +874,7 @@ module Oktest
 
   class FixtureManager
 
-    def self.instance
+    def self.instance()
       return @instance ||= self.new
     end
 
@@ -998,11 +998,11 @@ module Oktest
 
     protected
 
-    def reset_counts
+    def reset_counts()
       STATUSES.each {|sym| @counts[sym] = 0 }
     end
 
-    def print_exceptions
+    def print_exceptions()
       sep = '-' * 70
       @exceptions.each do |tuple|
         puts sep
