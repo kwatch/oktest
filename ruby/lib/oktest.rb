@@ -549,8 +549,6 @@ module Oktest
   end
 
 
-  TOPLEVEL_SCOPES = []
-
   def self.__scope(depth, &block)
     filename = caller(depth).first =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
@@ -576,7 +574,8 @@ module Oktest
     return GLOBAL_SCOPE
   end
 
-  GLOBAL_SCOPE = __scope(1) { nil }
+  TOPLEVEL_SCOPES = []
+  GLOBAL_SCOPE    = __scope(1) { nil }
 
 
   class SpecObject
