@@ -294,8 +294,11 @@ Oktest.scope do
 
 
     topic '#hello' do
+
       spec "default name is 'world'."
+
       spec "returns greeting message."
+
     end
 
 

@@ -1390,6 +1390,7 @@ module Oktest
       if keyword == 'spec'
         _, _, spec = tuple
         escaped = spec.gsub(/"/, '\\\"')
+        buf << "\n"
         buf << "#{indent}spec \"#{escaped}\"\n"
       else
         _, _, topic, children = tuple
@@ -1400,7 +1401,7 @@ module Oktest
         children.each do |child_tuple|
           _transform(child_tuple, depth+1, buf)
         end
-        buf << "\n" unless buf[-1].end_with?("\"\n")
+        buf << "\n"
         buf << "#{indent}end\n"                if keyword == 'def'
         buf << "#{indent}end # #{topic}\n" unless keyword == 'def'
         buf << "\n"
