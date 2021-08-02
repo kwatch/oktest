@@ -393,7 +393,7 @@ module Oktest
       @fixtures = {}
     end
 
-    attr_accessor :name, :parent, :children, :before, :after, :before_all, :after_all, :fixtures
+    attr_accessor :parent, :children, :before, :after, :before_all, :after_all, :fixtures
     attr_accessor :_klass, :_prefix  #:nodoc:
 
     def add_child(child)
@@ -458,6 +458,8 @@ module Oktest
       super()
       @target = target
     end
+
+    attr_reader :target
 
     def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
@@ -1073,7 +1075,7 @@ module Oktest
 
     def spec_path(spec, topic)
       arr = []
-      while topic
+      while topic && topic.is_a?(TopicObject)
         arr << topic.target.to_s if topic.target
         topic = topic.parent
       end
