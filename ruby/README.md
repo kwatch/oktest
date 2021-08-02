@@ -844,8 +844,8 @@ Oktest.scope do
         ok {tmpfile} == "_tmp_file.txt"
         ok {tmpfile}.file_exist?
         ## dummy file will be removed automatically at end of this block.
-	## last value of block will be the return value of dummy_file().
-	1234
+        ## last value of block will be the return value of dummy_file().
+        1234
       end
       ok {result} == 1234
       ok {"_tmp_file.txt"}.not_exist?
@@ -886,8 +886,8 @@ Oktest.scope do
         ok {tmpdir}.dir_exist?
         ## dummy directory will be removed automatically at end of this block
         ## even if it contais other files or directories.
-	## last value of block will be the return value of dummy_dir().
-	2345
+        ## last value of block will be the return value of dummy_dir().
+        2345
       end
       ok {result} == 2345
       ok {"_tmp_dir"}.not_exist?
@@ -934,7 +934,7 @@ Oktest.scope do
         ok {hashobj[:x]} == 900
         ok {keyvals} == {:a=>100, 'b'=>200, :x=>900}
         ## values of hash object are recovered at end of this block.
-	## last value of block will be the return value of dummy_values().
+        ## last value of block will be the return value of dummy_values().
         3456
       end
       ok {hashobj[:a]} == 1
@@ -994,8 +994,8 @@ Oktest.scope do
         ok {user.name} == "bob"
         ok {keyvals} == {:id=>999, :name=>"bob"}
         ## attribute values are recovered at end of this block.
-	## last value of block will be the return value of dummy_attrs().
-	4567
+        ## last value of block will be the return value of dummy_attrs().
+        4567
       end
       ok {user.id} == 123
       ok {user.name} == "alice"
@@ -1049,8 +1049,8 @@ Oktest.scope do
         ok {user.name} == "bob"
         ok {keyvals} == {:id=>999, :name=>"bob"}
         ## attribute values are recovered at end of this block.
-	## last value of block will be the return value of dummy_attrs().
-	6789
+        ## last value of block will be the return value of dummy_attrs().
+        6789
       end
       ok {user.id} == 123
       ok {user.name} == "alice"
