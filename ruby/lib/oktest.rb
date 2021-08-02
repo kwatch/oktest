@@ -463,6 +463,10 @@ module Oktest
       return runner.run_topic(self, *args)
     end
 
+    def filter_match?(pattern)
+      return File.fnmatch?(pattern, @name.to_s)
+    end
+
   end
 
 
@@ -575,6 +579,10 @@ module Oktest
 
     def accept_runner(runner, *args)       #:nodoc:
       runner.run_spec(self, *args)
+    end
+
+    def filter_match?(pattern)
+      return File.fnmatch?(pattern, @desc.to_s)
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
