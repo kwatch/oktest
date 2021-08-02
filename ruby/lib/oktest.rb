@@ -13,6 +13,10 @@ module Oktest
   VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
+  class OktestError < StandardError
+  end
+
+
   class AssertionFailed < Exception
   end
 
@@ -550,6 +554,7 @@ module Oktest
 
 
   def self.__scope(depth, &block)
+    @_in_scope = true
     filename = caller(depth).first =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
     scope = FileScopeObject.new(filename)
@@ -560,16 +565,21 @@ module Oktest
     end
     klass.class_eval(&block)
     scope._klass = klass
+    @_in_scope = nil
     return scope
   end
 
   def self.scope(&block)
+    ! @_in_scope  or
+      raise OktestError, "scope() is not nestable."
     scope = __scope(2, &block)
     TOPLEVEL_SCOPES << scope
     return scope
   end
 
   def self.global_scope(&block)
+    ! @_in_scope  or
+      raise OktestError, "global_scope() is not nestable."
     GLOBAL_SCOPE._klass.class_eval(&block)
     return GLOBAL_SCOPE
   end
