@@ -1514,6 +1514,9 @@ END
       end
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
+      if opts.filter
+        filter(opts.filter)
+      end
       Oktest::Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
       AssertionObject.report_not_yet()
@@ -1523,7 +1526,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :generate
+      attr_accessor :help, :version, :style, :filter, :generate
     end
 
     def option_parser(opts)
@@ -1536,6 +1539,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.style = val
       }
+      parser.on('-f PATTERN')       {|val| opts.filter = val }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
@@ -1577,6 +1581,19 @@ END
         end
       end
       return buf.join()
+    end
+
+    def filter(pattern)
+      topic_pat = spec_pat = nil
+      case pattern
+      when /\Atopic=/ ; topic_pat = $'
+      when /\Aspec=/  ; spec_pat  = $'
+      else            ; spec_pat  = pattern
+      end
+      filter = Filter.new(topic_pat, spec_pat)
+      TOPLEVEL_SCOPES.each do |filescope|
+        filter.filter_toplevel_scope!(filescope)
+      end
     end
 
   end
