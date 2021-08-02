@@ -432,8 +432,8 @@ module Oktest
       return @_klass.new
     end
 
-    def accept(runner, *args)
-      raise NotImplementedError.new("#{self.class.name}#accept(): not implemented yet.")
+    def accept_runner(runner, *args)
+      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
     end
 
     def _repr(depth=0, buf="")
@@ -463,7 +463,7 @@ module Oktest
       @filename = filename
     end
 
-    def accept(runner, *args)
+    def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
     end
 
@@ -477,7 +477,7 @@ module Oktest
       @name = name
     end
 
-    def accept(runner, *args)
+    def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
     end
 
@@ -578,7 +578,7 @@ module Oktest
     attr_reader :desc, :block, :argnames, :location #:nodoc:
     attr_accessor :_prefix   #:nodoc:
 
-    def accept(runner, *args)       #:nodoc:
+    def accept_runner(runner, *args)       #:nodoc:
       runner.run_spec(self, *args)
     end
 
@@ -739,7 +739,7 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       call_before_all_block(topic)
       topic.children.each do |child|
-        child.accept(self, depth+1, topic)
+        child.accept_runner(self, depth+1, topic)
       end
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
@@ -797,7 +797,7 @@ module Oktest
       @reporter.enter_file(filescope.filename)
       call_before_all_block(filescope)
       filescope.children.each do |child|
-        child.accept(self, 0, nil)
+        child.accept_runner(self, 0, nil)
       end
       call_after_all_block(filescope)
       @reporter.exit_file(filescope.filename)
