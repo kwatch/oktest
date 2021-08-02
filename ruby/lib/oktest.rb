@@ -549,7 +549,7 @@ module Oktest
   end
 
 
-  FILESCOPES = []
+  TOPLEVEL_SCOPES = []
 
   def self.__scope(depth, &block)
     filename = caller(depth).first =~ /:\d+/ ? $` : nil
@@ -567,7 +567,7 @@ module Oktest
 
   def self.scope(&block)
     scope = __scope(2, &block)
-    FILESCOPES << scope
+    TOPLEVEL_SCOPES << scope
     return scope
   end
 
@@ -800,7 +800,7 @@ module Oktest
 
     def run_all()
       @reporter.enter_all(self)
-      while (scope = FILESCOPES.shift)
+      while (scope = TOPLEVEL_SCOPES.shift)
         run_filescope(scope)
       end
       @reporter.exit_all(self)
@@ -1182,13 +1182,13 @@ module Oktest
 
 
   def self.run(opts={})
-    return if FILESCOPES.empty?
+    return if TOPLEVEL_SCOPES.empty?
     klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
       raise ArgumentError.new("#{opts[:style].inspect}: unknown style.")
     reporter = klass.new
     runner = Runner.new(reporter)
     runner.run_all()
-    FILESCOPES.clear
+    TOPLEVEL_SCOPES.clear
     counts = reporter.counts
     return counts[:FAIL] + counts[:ERROR]
   end
@@ -1585,7 +1585,7 @@ END
   def self.auto_run?()   # :nodoc:
     exc = $!
     return false if exc && !exc.is_a?(SystemExit)
-    return false if Oktest::FILESCOPES.empty?
+    return false if TOPLEVEL_SCOPES.empty?
     return Oktest::Config.auto_run
   end
 
