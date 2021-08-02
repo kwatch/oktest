@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ###
 ### $Release: $
 ### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
@@ -10,4 +12,3 @@ end
 
 require_relative './tc'
 require 'oktest'
-Oktest::Config.system_exit = false

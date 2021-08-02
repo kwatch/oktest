@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ###
 ### $Release: $
 ### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
@@ -44,24 +46,24 @@ module Oktest
 
     attr_reader :actual, :bool, :location
 
-    def _done
+    def _done()
       AssertionObject::NOT_YET.delete(self.__id__)
     end
     private :_done
 
-    def self.report_not_yet
+    def self.report_not_yet()
       return if NOT_YET.empty?
       NOT_YET.each_value do |ass|
         $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
       end
     end
 
-    def _not
+    def _not()
       return @bool ? '' : 'not '
     end
     private :_not
 
-    def __assert result
+    def __assert(result)
       raise FAIL_EXCEPTION, yield unless result
     end
     #if defined?(MiniTest)
@@ -84,7 +86,7 @@ module Oktest
     #  end
     #end
 
-    def NOT
+    def NOT()
       @bool = ! @bool
       self
     end
@@ -130,51 +132,40 @@ module Oktest
       self
     end
 
-    #--
-    #def >  expected; _done(); assert_operator(@actual, @bool ? :> : :<=, expected); self end
-    def >= expected; _done(); assert_operator(@actual, @bool ? :>= : :<, expected); self end
-    def <  expected; _done(); assert_operator(@actual, @bool ? :< : :>=, expected); self end
-    def <= expected; _done(); assert_operator(@actual, @bool ? :<= : :>, expected); self end
-    #++
+    def __assert_op(bool, op1, op2, expected)
+      __assert(@bool == bool) {
+        "#{@actual.inspect} #{@bool ? op1 : op2} #{expected.inspect}: failed."
+      }
+    end
+    private :__assert_op
 
     def >(expected)
       _done()
-      __assert(@bool == (@actual > expected)) {
-        "#{@actual.inspect} #{@bool ? '>' : '<='} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual > expected, '>', '<=', expected)
       self
     end
 
     def >=(expected)
       _done()
-      __assert(@bool == (@actual >= expected)) {
-        "#{@actual.inspect} #{@bool ? '>=' : '<'} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual >= expected, '>=', '<', expected)
       self
     end
 
     def <(expected)
       _done()
-      __assert(@bool == (@actual < expected)) {
-        "#{@actual.inspect} #{@bool ? '<' : '>='} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual < expected, '<', '>=', expected)
       self
     end
 
     def <=(expected)
       _done()
-      __assert(@bool == (@actual <= expected)) {
-        "#{@actual.inspect} #{@bool ? '<=' : '>'} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual <= expected, '<=', '>', expected)
       self
     end
 
-    def =~(expected)
-      _done()
-      #@bool ? assert_match(expected, @actual) : assert_no_match(expected, @actual)
-      __assert(@bool == !!(@actual =~ expected)) {
-        op = @bool ? '=~' : '!~'
-        msg = "$<actual> #{op} $<expected>: failed.\n"\
+    def __assert_match(result, op1, op2, expected)
+      __assert(@bool == !!result) {
+        msg = "$<actual> #{@bool ? op1 : op2} $<expected>: failed.\n"\
               "    $<expected>: #{expected.inspect}\n"
         if @actual =~ /\n\z/
           msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
@@ -182,22 +173,18 @@ module Oktest
           msg << "    $<actual>:   #{@actual.inspect}\n"
         end
       }
+    end
+    private :__assert_match
+
+    def =~(expected)
+      _done()
+      __assert_match(@actual =~ expected, '=~', '!~', expected)
       self
     end
 
     def !~(expected)    # Ruby >= 1.9
       _done()
-      #@bool ? assert_no_match(expected, @actual) : assert_match(expected, @actual)
-      __assert(@bool == !!(@actual !~ expected)) {
-        op = @bool ? '!~' : '=~'
-        msg = "$<actual> #{op} $<expected>: failed.\n"\
-              "    $<expected>: #{expected.inspect}\n"
-        if @actual =~ /\n\z/
-          msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
-        else
-          msg << "    $<actual>:   #{@actual.inspect}\n"
-        end
-      }
+      __assert_match(@actual !~ expected, '!~', '=~', expected)
       self
     end
 
@@ -249,16 +236,6 @@ module Oktest
       self
     end
 
-    #--
-    #def same?         expected ; _done(); assert_same        expected, @actual; self; end
-    #def not_same?     expected ; _done(); assert_not_same    expected, @actual; self; end
-    #def is_a?         expected ; _done(); assert_kind_of     expected, @actual; self; end
-    #def instance_of?  expected ; _done(); assert_instance_of expected, @actual; self; end
-    #def respond_to?   expected ; _done(); assert_respond_to  expected, @actual; self; end
-    #def nil?     ; _done(); assert_nil     @actual; self; end
-    #def not_nil? ; _done(); assert_not_nil @actual; self; end
-    #++
-
     def raise?(expected=Exception, errmsg=nil)
       _done()
       proc_obj = @actual
@@ -299,17 +276,6 @@ module Oktest
       end
       self
     end
-
-    #--
-    #def not_raise?
-    #  _done()
-    #  ! @bool  or
-    #    StandardError.new("ok().not_raise? is not available with '.NOT'.")
-    #  proc_obj = @actual
-    #  assert_nothing_raised(&proc_obj)
-    #  self
-    #end
-    #++
 
     def in?(expected)
       _done()
@@ -382,13 +348,6 @@ module Oktest
       self
     end
 
-    #--
-    #def empty?;     _done(); @actual.empty?       or flunk "#{@actual}.empty?: failed.";      self; end
-    #def not_empty?; _done(); ! @actual.empty?     or flunk "! #{@actual}.empty?: failed.";    self; end
-    #def truthy?;    _done(); !! @actual == true   or flunk "!! #{@actual} == true: failed.";  self; end
-    #def falsy?;     _done(); !! @actual == false  or flunk "!! #{@actual} == false: failed."; self; end
-    #++
-
     def truthy?
       _done()
       __assert(@bool == (!!@actual == true)) {
@@ -409,29 +368,29 @@ module Oktest
       self
     end
 
-    def __assert2(bool, s)
+    def __assert_fs(bool, s)
       __assert(@bool == bool) {
         "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
         "    $<actual>:   #{@actual.inspect}"
       }
     end
-    private :__assert2
+    private :__assert_fs
 
     def file_exist?
       _done()
-      __assert2(File.file?(@actual) , "File.file?($<actual>)")
+      __assert_fs(File.file?(@actual) , "File.file?($<actual>)")
       self
     end
 
     def dir_exist?
       _done()
-      __assert2(File.directory?(@actual), "File.directory?($<actual>)")
+      __assert_fs(File.directory?(@actual), "File.directory?($<actual>)")
       self
     end
 
     def symlink_exist?
       _done()
-      __assert2(File.symlink?(@actual), "File.symlink?($<actual>)")
+      __assert_fs(File.symlink?(@actual), "File.symlink?($<actual>)")
       self
     end
 
@@ -449,7 +408,7 @@ module Oktest
 
   class ScopeObject
 
-    def initialize
+    def initialize()
       @children = []
       @fixtures = {}
     end
@@ -471,12 +430,12 @@ module Oktest
       #@fixtures ? @fixtures[name] : nil   # or [nil, nil, nil]?
     end
 
-    def new_context
+    def new_context()
       return @_klass.new
     end
 
-    def accept(runner, *args)
-      raise NotImplementedError.new("#{self.class.name}#accept(): not implemented yet.")
+    def accept_runner(runner, *args)
+      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
     end
 
     def _repr(depth=0, buf="")
@@ -506,7 +465,7 @@ module Oktest
       @filename = filename
     end
 
-    def accept(runner, *args)
+    def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
     end
 
@@ -520,7 +479,7 @@ module Oktest
       @name = name
     end
 
-    def accept(runner, *args)
+    def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
     end
 
@@ -621,7 +580,7 @@ module Oktest
     attr_reader :desc, :block, :argnames, :location #:nodoc:
     attr_accessor :_prefix   #:nodoc:
 
-    def accept(runner, *args)       #:nodoc:
+    def accept_runner(runner, *args)       #:nodoc:
       runner.run_spec(self, *args)
     end
 
@@ -641,7 +600,7 @@ module Oktest
 
     attr_accessor :_TODO, :_at_end_blocks
 
-    def ok
+    def ok()
       location = caller(1).first
       actual = yield
       ass = Oktest::AssertionObject.new(actual, true, location)
@@ -649,7 +608,7 @@ module Oktest
       return ass
     end
 
-    def not_ok
+    def not_ok()
       location = caller(1).first
       actual = yield
       ass = Oktest::AssertionObject.new(actual, false, location)
@@ -661,7 +620,7 @@ module Oktest
       raise SkipException.new(reason) if condition
     end
 
-    def TODO
+    def TODO()
       @_TODO = true
     end
 
@@ -782,7 +741,7 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       call_before_all_block(topic)
       topic.children.each do |child|
-        child.accept(self, depth+1, topic)
+        child.accept_runner(self, depth+1, topic)
       end
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
@@ -828,7 +787,7 @@ module Oktest
       @reporter.exit_spec(spec, depth, status, ex, parent)
     end
 
-    def run_all
+    def run_all()
       @reporter.enter_all(self)
       while (scope = FILESCOPES.shift)
         run_filescope(scope)
@@ -840,7 +799,7 @@ module Oktest
       @reporter.enter_file(filescope.filename)
       call_before_all_block(filescope)
       filescope.children.each do |child|
-        child.accept(self, 0, nil)
+        child.accept_runner(self, 0, nil)
       end
       call_after_all_block(filescope)
       @reporter.exit_file(filescope.filename)
@@ -917,7 +876,7 @@ module Oktest
 
   class FixtureManager
 
-    def self.instance
+    def self.instance()
       return @instance ||= self.new
     end
 
@@ -1041,11 +1000,11 @@ module Oktest
 
     protected
 
-    def reset_counts
+    def reset_counts()
       STATUSES.each {|sym| @counts[sym] = 0 }
     end
 
-    def print_exceptions
+    def print_exceptions()
       sep = '-' * 70
       @exceptions.each do |tuple|
         puts sep
@@ -1209,18 +1168,6 @@ module Oktest
   }
 
 
-  #def self.run(*topics)
-  #  opts = topics[-1].is_a?(Hash) ? topics.pop() : {}
-  #  topics = TOPICS if topics.empty?
-  #  return if topics.empty?
-  #  klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
-  #    raise ArgumentError.new("#{opts[:style].inspect}: unknown style.")
-  #  reporter = klass.new
-  #  runner = Runner.new(reporter)
-  #  runner.run_all(*topics)
-  #  counts = reporter.counts
-  #  return counts[:FAIL] + counts[:ERROR]
-  #end
   def self.run(opts={})
     return if FILESCOPES.empty?
     klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
@@ -1308,10 +1255,6 @@ module Oktest
       return "%.3f" % s
     end
 
-    def chain_errors(*errors)
-    end
-
-
     def _text2lines(text, no_newline_msg=nil)
       lines = []
       text.each_line {|line| line.chomp!; lines << line }
@@ -1385,10 +1328,9 @@ module Oktest
     @color_available = ! @os_windows
     @color_enabled   = @color_available
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
-    @system_exit     = true     # exit() on Oktest.main()
 
     class << self
-      attr_accessor :auto_run, :color_available, :color_enabled, :system_exit
+      attr_accessor :auto_run, :color_available, :color_enabled
     end
 
   end
@@ -1563,25 +1505,26 @@ END
     def option_parser(opts)
       require 'optparse' unless defined?(OptionParser)
       parser = OptionParser.new
-      parser.on('-h', '--help')    {|val| opts.help = val }
-      parser.on(      '--version') {|val| opts.version = val }
+      parser.on('-h', '--help')    { opts.help    = true }
+      parser.on(      '--version') { opts.version = true }
       parser.on('-s STYLE') {|val|
         REPORTER_CLASSES.key?(val)  or
           raise OptionParser::InvalidArgument.new(val)
         opts.style = val
       }
-      parser.on('-g', '--generate') {|val| opts.generate = val }
+      parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
 
     def help_message(command=nil)
       command ||= File.basename($0)
-      buf = "Usage: #{command} [<options>] [<file-or-directory>...]\n"
-      buf << "  -h, --help    : show help\n"
-      buf << "      --version : print version\n"
-      buf << "  -s STYLE      : report style (verbose/simple/plain, or v/s/p)\n"
-      buf << "  -g, --generate: generate test code from source file\n"
-      return buf
+      return <<END
+Usage: #{command} [<options>] [<file-or-directory>...]
+  -h, --help       : show help
+      --version    : print version
+  -s STYLE         : report style (verbose/simple/plain, or v/s/p)
+  -g, --generate   : generate test code from source file
+END
     end
 
     def load_files(filenames)
@@ -1622,19 +1565,22 @@ END
     exit(status)
   end
 
-
-end
-
-
-at_exit do
-  unless Oktest::FILESCOPES.empty?
-    ex = $!
-    if (! ex || ex.is_a?(SystemExit)) && Oktest::Config.auto_run
-      Oktest.main()
-      raise ex if ex
-    end
+  def self.on_exit()     # :nodoc:
+    Oktest.main() if self.auto_run?()
   end
+
+  def self.auto_run?()   # :nodoc:
+    exc = $!
+    return false if exc && !exc.is_a?(SystemExit)
+    return false if Oktest::FILESCOPES.empty?
+    return Oktest::Config.auto_run
+  end
+
+
 end
+
+
+at_exit { Oktest.on_exit() }
 
 
 if __FILE__ == $0

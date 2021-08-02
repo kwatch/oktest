@@ -2,11 +2,11 @@
 # Oktest.rb README
 
 
-Oktest.rb is a new-style testing library.
+Oktest.rb is a new-style testing library for Ruby.
 
 * `ok {actual} == expected` style assertion.
 * **Fixture injection** inspired by dependency injection.
-* Structured test specifications.
+* Structured test specifications like RSpec.
 * Adopts blue/red color instead of green/red for accesability.
 
 ```ruby
@@ -41,7 +41,7 @@ Oketst.scope do                      #
 end                                  #
 ```
 
-Oktest.rb requires Ruby 2.4 or later.
+Oktest.rb requires Ruby 2.3 or later.
 
 
 ## Table of Contents
