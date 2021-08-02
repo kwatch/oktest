@@ -466,7 +466,7 @@ module Oktest
     end
 
     def filter_match?(pattern)
-      return File.fnmatch?(pattern, @target.to_s)
+      return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
     end
 
   end
@@ -584,7 +584,7 @@ module Oktest
     end
 
     def filter_match?(pattern)
-      return File.fnmatch?(pattern, @desc.to_s)
+      return File.fnmatch?(pattern, @desc.to_s, File::FNM_EXTGLOB)
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
