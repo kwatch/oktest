@@ -211,7 +211,7 @@ module Oktest
           "    $<actual>:   #{@actual.inspect}"
         }
       else
-        raise TypeError.new("ok(): #{@actual.class}##{method_name}() expected to return true or false, but got #{ret.inspect}.")
+        raise TypeError, "ok(): #{@actual.class}##{method_name}() expected to return true or false, but got #{ret.inspect}."
       end
       self
     end
@@ -245,7 +245,7 @@ module Oktest
         end
       else
         ! errmsg  or
-          raise ArgumentError.new("#{errmsg.inspect}: NOT.raise?() can't take errmsg.")
+          raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
         begin
           proc_obj.call
         rescue Exception => ex
@@ -399,7 +399,7 @@ module Oktest
     def add_child(child)
       if child.is_a?(ScopeObject)
         child.parent.nil?  or
-          raise ArgumentError.new("add_child(): can't add child scope which already belongs to other.")
+          raise ArgumentError, "add_child(): can't add child scope which already belongs to other."
         child.parent = self
       end
       @children << child
@@ -415,7 +415,7 @@ module Oktest
     end
 
     def accept_runner(runner, *args)
-      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
+      raise NotImplementedError, "#{self.class.name}#accept_runner(): not implemented yet."
     end
 
     def _repr(depth=0, buf="")
@@ -514,7 +514,7 @@ module Oktest
       if block
         argnames = Util.block_argnames(block, location)
       else
-        block = proc { raise TodoException.new("not implemented yet") }
+        block = proc { raise TodoException, "not implemented yet" }
         argnames = []
       end
       spec = SpecObject.new(desc, block, argnames, location)
@@ -610,7 +610,7 @@ module Oktest
     end
 
     def skip_when(condition, reason)
-      raise SkipException.new(reason) if condition
+      raise SkipException, reason if condition
     end
 
     def TODO()
@@ -655,7 +655,7 @@ module Oktest
     def dummy_file(filename=nil, content=nil, encoding: 'utf-8', &b)
       filename ||= "_tmpfile_#{rand().to_s[2...8]}"
       ! File.exist?(filename)  or
-        raise ArgumentError.new("dummy_file('#{filename}'): temporary file already exists.")
+        raise ArgumentError, "dummy_file('#{filename}'): temporary file already exists."
       File.write(filename, content, encoding: encoding)
       recover = proc { File.unlink(filename) if File.exist?(filename) }
       return __do_dummy(filename, recover, &b)
@@ -664,7 +664,7 @@ module Oktest
     def dummy_dir(dirname=nil, &b)
       dirname ||= "_tmpdir_#{rand().to_s[2...8]}"
       ! File.exist?(dirname)  or
-        raise ArgumentError.new("dummy_dir('#{dirname}'): temporary directory already exists.")
+        raise ArgumentError, "dummy_dir('#{dirname}'): temporary directory already exists."
       require 'fileutils' unless defined?(FileUtils)
       FileUtils.mkdir_p(dirname)
       recover = proc { FileUtils.rm_rf(dirname) if File.exist?(dirname) }
@@ -1164,7 +1164,7 @@ module Oktest
   def self.run(opts={})
     return if TOPLEVEL_SCOPES.empty?
     klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
-      raise ArgumentError.new("#{opts[:style].inspect}: unknown style.")
+      raise ArgumentError, "#{opts[:style].inspect}: unknown style."
     reporter = klass.new
     runner = Runner.new(reporter)
     runner.run_all()
@@ -1201,10 +1201,10 @@ module Oktest
         filename = $`
         linenum  = $1.to_i
         File.file?(filename)  or
-          raise ArgumentError.new("block_argnames(): #{filename.inspect}: source file not found.")
+          raise ArgumentError, "block_argnames(): #{filename.inspect}: source file not found."
         linestr = file_line(filename, linenum) || ""
         linestr =~ /(?:\bdo|\{) *\|(.*)\|/  or
-          raise ArgumentError.new("spec(): can't detect block parameters at #{filename}:#{linenum}")
+          raise ArgumentError, "spec(): can't detect block parameters at #{filename}:#{linenum}"
         argnames = $1.split(/,/).collect {|var| var.strip.intern }
       end
       return argnames
@@ -1483,7 +1483,7 @@ END
       parser.on(      '--version') { opts.version = true }
       parser.on('-s STYLE') {|val|
         REPORTER_CLASSES.key?(val)  or
-          raise OptionParser::InvalidArgument.new(val)
+          raise OptionParser::InvalidArgument, val
         opts.style = val
       }
       parser.on('-g', '--generate') { opts.generate = true }
@@ -1504,7 +1504,7 @@ END
     def load_files(filenames)
       filenames.each do |fname|
         File.exist?(fname)  or
-          raise OptionParser::InvalidOption.new("#{fname}: not found.")
+          raise OptionParser::InvalidOption, "#{fname}: not found."
       end
       filenames.each do |fname|
         File.directory?(fname) ? load_dir(fname) : load(fname)
