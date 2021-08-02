@@ -61,11 +61,6 @@ module Oktest
       end
     end
 
-    def _not()
-      return @bool ? '' : 'not '
-    end
-    private :_not
-
     def __assert(result)
       raise FAIL_EXCEPTION, yield unless result
     end
