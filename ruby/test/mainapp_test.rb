@@ -273,6 +273,49 @@ END
       assert_eq serr, ""
     end
 
+    it "'-f topic=...' option filters topics." do
+      expected = <<END
+* <b>Parent</b>
+  * <b>Child1</b>
+    - [<B>pass</B>] 1+1 should be 2
+    - [<B>pass</B>] 1-1 should be 0
+## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "topic=Child1", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
+    it "'-f spec=...' option filters specs." do
+      expected = <<END
+* <b>Parent</b>
+  * <b>Child1</b>
+    - [<B>pass</B>] 1-1 should be 0
+## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "spec=*1-1*", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
+    it "'-f ...' option filters specs." do
+      expected = <<END
+* <b>Parent</b>
+  * <b>Child1</b>
+    - [<B>pass</B>] 1-1 should be 0
+## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "*1-1*", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
     it "'-g' or '--generate' option prints test code." do
       input = <<'END'
 class Hello
