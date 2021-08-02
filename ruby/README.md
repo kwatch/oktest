@@ -293,6 +293,38 @@ Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
 
 
+## Optional: unary `+` and `-` operators
+
+`topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
+This makes test scripts more readable.
+
+test/example04_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  + topic 'example' do            # unary `+` operator
+
+    + topic 'example' do          # unary `+` operator
+
+      - spec "1+1 is 2." do       # unary `-` operator
+          ok {1+1} == 2
+        end
+
+      - spec "1*1 is 1." do       # unary `-` operator
+          ok {1*1} == 1
+        end
+
+      end
+
+    end
+
+end
+```
+
+
 
 ## Assertions
 
