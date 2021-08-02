@@ -55,6 +55,9 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#skip-and-todo">Skip, and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
+    * <a href="#case_when-and-case_else"><code>case_when</code> and <code>case_else</code></a>
+    * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
+    * <a href="#optional-unary-operators">Optional: Unary Operators</a>
   * <a href="#assertions">Assertions</a>
     * <a href="#basic-assertions">Basic Assertions</a>
     * <a href="#predicate-assertions">Predicate Assertions</a>
@@ -65,6 +68,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#setup-and-teardown">Setup and Teardown</a>
     * <a href="#at_end-crean-up-handler"><code>at_end()</code>: Crean-up Handler</a>
     * <a href="#fixture-injection">Fixture Injection</a>
+    * <a href="#global-scope">Global Scope</a>
   * <a href="#helpers">Helpers</a>
     * <a href="#capture_sio"><code>capture_sio()</code></a>
     * <a href="#dummy_file"><code>dummy_file()</code></a>
@@ -72,6 +76,10 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#dummy_values"><code>dummy_values()</code></a>
     * <a href="#dummy_attrs"><code>dummy_attrs()</code></a>
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
+  * <a href="#tips">Tips</a>
+    * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
+    * <a href="#testing-rack-application">Testing Rack Application</a>
+  * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
 
@@ -291,6 +299,147 @@ tmp/test/example03_test.rb: st
 
 Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
+
+
+### `case_when` and `case_else`
+
+`case_when` and `case_else` represents conditional spec.
+
+test/example04_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+  topic Integer do
+    topic '#abs()' do
+
+      case_when "value is negative..." do
+        spec "converts value into positive." do
+          ok {-123.abs()} == 123
+        end
+      end
+
+      case_when "value is zero..." do
+        spec "returns zero." do
+          ok {0.abs()} == 0
+        end
+      end
+
+      case_else do
+        spec "returns itself." do
+          ok {123.abs()} == 123
+        end
+      end
+
+    end
+  end
+end
+```
+
+Result:
+
+```terminal
+$ ruby test/example04_test.rb
+* Integer
+  * #abs()
+    - When value is negative...
+      - [pass] converts value into positive.
+    - When value is zero...
+      - [pass] returns zero.
+    - Else
+      - [pass] returns itself.
+## total:3 (pass:3, fail:0, error:0, skip:0, todo:0) in 0.001s
+```
+
+
+### Generate Test Code Skeleton
+
+`oktest -g` (or `oktest --generate`) generates test code skeleton from ruby file.
+Comment line starting with `#;` is regarded as spec description.
+
+hello.rb:
+
+```ruby
+class Hello
+
+  def hello(name=nil)
+    #; default name is 'world'.
+    if name.nil?
+      name = "world"
+    end
+    #; returns greeting message.
+    return "Hello, #{name}!"
+  end
+
+end
+```
+
+Generate test code skeleton:
+
+```terminal
+$ oktest -g hello.rb > test/hello_test.rb
+```
+
+test/hello_test.rb:
+
+```ruby
+# coding: utf-8
+
+require 'oktest'
+
+Oktest.scope do
+
+
+  topic Hello do
+
+
+    topic '#hello' do
+
+      spec "default name is 'world'."
+
+      spec "returns greeting message."
+
+    end
+
+
+  end # Hello
+
+
+end
+```
+
+
+### Optional: Unary Operators
+
+`topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
+This makes test scripts more readable.
+
+test/example05_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
++ topic 'example' do            # unary `+` operator
+
+  + topic 'example' do          # unary `+` operator
+
+    - spec "1+1 is 2." do       # unary `-` operator
+        ok {1+1} == 2
+      end
+
+    - spec "1*1 is 1." do       # unary `-` operator
+        ok {1*1} == 1
+      end
+
+    end
+
+  end
+
+end
+```
 
 
 
@@ -573,6 +722,7 @@ Oktest.scope do
 end
 ```
 
+* Fixtures can be defined in block of `topic()` as well as block of `Object.scope()`.
 * If fixture requires clean-up operation, call `at_end()` in `fixture()` block.
 
 ```ruby
@@ -584,8 +734,11 @@ end
   end
 ```
 
-* Fixtures can be defined in block of `topc()` as well as block of `Object.scope()`.
-* It is good idea to common fixtures into dedicated script, such as:
+
+### Global Scope
+
+It is a good idea to separate common fixtures into dedicated file.
+In this case, use `Oktest.global_scope()` instead of `Oktest.scope()`.
 
 test/common_fixtures.rb:
 
@@ -612,6 +765,7 @@ Oktest.global_scope do     # !!!!!
 
 end
 ```
+
 
 
 ## Helpers
@@ -895,3 +1049,75 @@ Oktest.scope do
 
 end
 ```
+
+
+## Tips
+
+
+### `ok {}` in MiniTest
+
+If you want to use `ok {actual} == expected` style assertion in MiniTest,
+install `minitest-ok` gem instead of `otest` gem.
+
+test/example41_test.rb:
+
+```ruby
+require 'minitest/spec'
+require 'minitest/autorun'
+require 'minitest/ok'      # !!!!!
+
+describe 'MiniTest::Ok' do
+
+  it "helps to write assertions" do
+    ok {1+1} == 2          # !!!!!
+  end
+
+end
+```
+
+See [minitest-ok README](https://github.com/kwatch/minitest-ok) for details.
+
+
+### Testing Rack Application
+
+`rack-test_app` gem will help you to test Rack application very well.
+
+test/example42_test.rb:
+
+```ruby
+require 'rack'
+require 'rack/lint'
+require 'rack/test_app'      # !!!!!
+require 'oktest'
+
+app = proc {|env|            # sample Rack application
+  text = '{"status":"OK"}'
+  headers = {"Content-Type"   => "application/json",
+             "Content-Length" => text.bytesize.to_s}
+  [200, headers, [text]]
+}
+
+http = Rack::TestApp.wrap(Rack::Lint.new(app))   # wrap Rack app
+
+Oktest.scope do
+
++ topic "GET /api/hello" do
+
+  - spec "returns JSON data." do
+      response = http.GET('/api/hello')        # call Rack app
+      ok {response.status}       == 200
+      ok {response.content_type} == "application/json"
+      ok {response.body_json}    == {"status"=>"OK"}
+    end
+
+  end
+
+end
+```
+
+
+
+## License and Copyright
+
+* $License: MIT License $
+* $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $

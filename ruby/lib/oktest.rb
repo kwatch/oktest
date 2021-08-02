@@ -17,13 +17,13 @@ module Oktest
   end
 
 
-  class AssertionFailed < Exception
+  class AssertionFailed < StandardError
   end
 
-  class SkipException < Exception
+  class SkipException < StandardError
   end
 
-  class TodoException < Exception
+  class TodoException < StandardError
   end
 
   #FAIL_EXCEPTION = (defined?(MiniTest)   ? MiniTest::Assertion :
@@ -34,7 +34,6 @@ module Oktest
 
 
   class AssertionObject
-    #include Test::Unit::Assertions
 
     self.instance_methods.grep(/\?\z/).each do |k|
       undef_method k unless k.to_s == 'equal?' || k.to_s =~ /^assert/
@@ -51,7 +50,7 @@ module Oktest
     attr_reader :actual, :bool, :location
 
     def _done()
-      AssertionObject::NOT_YET.delete(self.__id__)
+      NOT_YET.delete(self.__id__)
     end
     private :_done
 
@@ -60,35 +59,12 @@ module Oktest
       NOT_YET.each_value do |ass|
         $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
       end
+      NOT_YET.clear()
     end
-
-    def _not()
-      return @bool ? '' : 'not '
-    end
-    private :_not
 
     def __assert(result)
       raise FAIL_EXCEPTION, yield unless result
     end
-    #if defined?(MiniTest)
-    #  def __assert result
-    #    if result
-    #      assert true
-    #    else
-    #      #assert_block(yield) { false }
-    #      #flunk yield
-    #      assert false, yield
-    #    end
-    #  end
-    #elsif defined?(Test::Unit)
-    #  def __assert result
-    #    if result
-    #      assert true
-    #    else
-    #      assert_block(yield) { false }
-    #    end
-    #  end
-    #end
 
     def NOT()
       @bool = ! @bool
@@ -172,9 +148,9 @@ module Oktest
         msg = "$<actual> #{@bool ? op1 : op2} $<expected>: failed.\n"\
               "    $<expected>: #{expected.inspect}\n"
         if @actual =~ /\n\z/
-          msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
+          msg + "    $<actual>:   <<'END'\n#{@actual}END\n"
         else
-          msg << "    $<actual>:   #{@actual.inspect}\n"
+          msg + "    $<actual>:   #{@actual.inspect}\n"
         end
       }
     end
@@ -197,9 +173,9 @@ module Oktest
       __assert(@bool == !!((@actual - expected).abs < delta)) {
         eq = @bool ? '' : ' == false'
         "($<actual> - $<expected>).abs < #{delta}#{eq}: failed.\n"\
-                "    $<actual>:   #{@actual.inspect}\n"\
-                "    $<expected>: #{expected.inspect}\n"\
-                "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}\n"\
+        "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
       }
       self
     end
@@ -235,7 +211,7 @@ module Oktest
           "    $<actual>:   #{@actual.inspect}"
         }
       else
-        raise TypeError.new("ok(): #{@actual.class}##{method_name}() expected to return true or false, but got #{ret.inspect}.")
+        raise TypeError, "ok(): #{@actual.class}##{method_name}() expected to return true or false, but got #{ret.inspect}."
       end
       self
     end
@@ -269,7 +245,7 @@ module Oktest
         end
       else
         ! errmsg  or
-          raise ArgumentError.new("#{errmsg.inspect}: NOT.raise?() can't take errmsg.")
+          raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
         begin
           proc_obj.call
         rescue Exception => ex
@@ -423,7 +399,7 @@ module Oktest
     def add_child(child)
       if child.is_a?(ScopeObject)
         child.parent.nil?  or
-          raise ArgumentError.new("add_child(): can't add child scope which already belongs to other.")
+          raise ArgumentError, "add_child(): can't add child scope which already belongs to other."
         child.parent = self
       end
       @children << child
@@ -439,7 +415,7 @@ module Oktest
     end
 
     def accept_runner(runner, *args)
-      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
+      raise NotImplementedError, "#{self.class.name}#accept_runner(): not implemented yet."
     end
 
     def _repr(depth=0, buf="")
@@ -492,8 +468,6 @@ module Oktest
 
   module ScopeClassMethods
 
-    #attr_accessor :_scope
-
     def before(&block);     @_scope.before     = block;  end
     def after(&block);      @_scope.after      = block;  end
     def before_all(&block); @_scope.before_all = block;  end
@@ -511,7 +485,6 @@ module Oktest
       klass = Class.new(self)
       klass.class_eval do
         extend ScopeClassMethods
-        #include Test::Unit::Assertions
         include SpecHelper
         @_scope = topic
       end
@@ -541,7 +514,7 @@ module Oktest
       if block
         argnames = Util.block_argnames(block, location)
       else
-        block = proc { raise TodoException.new("not implemented yet") }
+        block = proc { raise TodoException, "not implemented yet" }
         argnames = []
       end
       spec = SpecObject.new(desc, block, argnames, location)
@@ -637,7 +610,7 @@ module Oktest
     end
 
     def skip_when(condition, reason)
-      raise SkipException.new(reason) if condition
+      raise SkipException, reason if condition
     end
 
     def TODO()
@@ -682,7 +655,7 @@ module Oktest
     def dummy_file(filename=nil, content=nil, encoding: 'utf-8', &b)
       filename ||= "_tmpfile_#{rand().to_s[2...8]}"
       ! File.exist?(filename)  or
-        raise ArgumentError.new("dummy_file('#{filename}'): temporary file already exists.")
+        raise ArgumentError, "dummy_file('#{filename}'): temporary file already exists."
       File.write(filename, content, encoding: encoding)
       recover = proc { File.unlink(filename) if File.exist?(filename) }
       return __do_dummy(filename, recover, &b)
@@ -691,7 +664,7 @@ module Oktest
     def dummy_dir(dirname=nil, &b)
       dirname ||= "_tmpdir_#{rand().to_s[2...8]}"
       ! File.exist?(dirname)  or
-        raise ArgumentError.new("dummy_dir('#{dirname}'): temporary directory already exists.")
+        raise ArgumentError, "dummy_dir('#{dirname}'): temporary directory already exists."
       require 'fileutils' unless defined?(FileUtils)
       FileUtils.mkdir_p(dirname)
       recover = proc { FileUtils.rm_rf(dirname) if File.exist?(dirname) }
@@ -1068,7 +1041,6 @@ module Oktest
     FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)\.rbc?:` #:nodoc:
 
     def print_exc_message(ex, status)
-      #puts Color.status(status, "#{ex.class.name}: #{ex}")
       if status == :FAIL
         msg = "#{ex}"
       else
@@ -1076,7 +1048,6 @@ module Oktest
       end
       lines = []
       msg.each_line {|line| lines << line }
-      #puts Color.status(status, lines.shift.chomp)
       puts lines.shift.chomp
       puts lines.join.chomp unless lines.empty?
       puts ex.diff if ex.respond_to?(:diff) && ex.diff   # for oktest.rb
@@ -1088,7 +1059,7 @@ module Oktest
         s = "#{st.to_s.downcase}:#{@counts[st]}"
         @counts[st] == 0 ? s : Color.status(st, s)
       }
-      hhmmss = Util.seconds2hhmmss(elapsed)
+      hhmmss = Util.hhmmss(elapsed)
       return "## total:#{total} (#{arr.join(', ')}) in #{hhmmss}s"
     end
 
@@ -1193,7 +1164,7 @@ module Oktest
   def self.run(opts={})
     return if TOPLEVEL_SCOPES.empty?
     klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
-      raise ArgumentError.new("#{opts[:style].inspect}: unknown style.")
+      raise ArgumentError, "#{opts[:style].inspect}: unknown style."
     reporter = klass.new
     runner = Runner.new(reporter)
     runner.run_all()
@@ -1230,29 +1201,15 @@ module Oktest
         filename = $`
         linenum  = $1.to_i
         File.file?(filename)  or
-          raise ArgumentError.new("block_argnames(): #{filename.inspect}: source file not found.")
+          raise ArgumentError, "block_argnames(): #{filename.inspect}: source file not found."
         linestr = file_line(filename, linenum) || ""
         linestr =~ /(?:\bdo|\{) *\|(.*)\|/  or
-          raise ArgumentError.new("spec(): can't detect block parameters at #{filename}:#{linenum}")
+          raise ArgumentError, "spec(): can't detect block parameters at #{filename}:#{linenum}"
         argnames = $1.split(/,/).collect {|var| var.strip.intern }
       end
       return argnames
     end
 
-    def strfold(str, width=80, mark='...')
-      return str if str.length <= width
-      return str[0, width - mark.length] + mark if str =~ /\A[\x00-\x7f]*\z/
-      limit = width - mark.length
-      w = len = 0
-      str.split(//u).each do |ch|
-        n = ch.length
-        w += n == 1 ? 1 : 2
-        break if w >= limit
-        len += n
-      end
-      str = str[0, len] + mark if w >= limit
-      return str
-    end
     def strfold(str, width=80, mark='...')
       return str if str.bytesize <= width
       return str[0, width - mark.length] + mark if str.ascii_only?
@@ -1265,9 +1222,9 @@ module Oktest
       end
       str = str[0, len] + mark if w >= limit
       return str
-    end if RUBY_VERSION >= '1.9'
+    end
 
-    def seconds2hhmmss(n)
+    def hhmmss(n)
       h, n = n.divmod(60*60)
       m, s = n.divmod(60)
       return "%d:%02d:%04.1f" % [h, m, s] if h > 0
@@ -1362,25 +1319,25 @@ module Oktest
 
     module_function
 
-    def normal (s);  return s; end
-    def bold   (s);  return "\x1b[0;1m#{s}\x1b[22m"; end
-    def black  (s);  return "\x1b[1;30m#{s}\x1b[0m"; end
-    def red    (s);  return "\x1b[1;31m#{s}\x1b[0m"; end
-    def green  (s);  return "\x1b[1;32m#{s}\x1b[0m"; end
-    def yellow (s);  return "\x1b[1;33m#{s}\x1b[0m"; end
-    def blue   (s);  return "\x1b[1;34m#{s}\x1b[0m"; end
-    def magenta(s);  return "\x1b[1;35m#{s}\x1b[0m"; end
-    def cyan   (s);  return "\x1b[1;36m#{s}\x1b[0m"; end
-    def white  (s);  return "\x1b[1;37m#{s}\x1b[0m"; end
+    def normal  s;  return s; end
+    def bold    s;  return "\x1b[0;1m#{s}\x1b[22m"; end
+    def black   s;  return "\x1b[1;30m#{s}\x1b[0m"; end
+    def red     s;  return "\x1b[1;31m#{s}\x1b[0m"; end
+    def green   s;  return "\x1b[1;32m#{s}\x1b[0m"; end
+    def yellow  s;  return "\x1b[1;33m#{s}\x1b[0m"; end
+    def blue    s;  return "\x1b[1;34m#{s}\x1b[0m"; end
+    def magenta s;  return "\x1b[1;35m#{s}\x1b[0m"; end
+    def cyan    s;  return "\x1b[1;36m#{s}\x1b[0m"; end
+    def white   s;  return "\x1b[1;37m#{s}\x1b[0m"; end
 
-    def topic(s); Config.color_enabled ? bold(s)   : s; end
-    def spec (s); Config.color_enabled ? normal(s) : s; end
-    def pass (s); Config.color_enabled ? blue(s)   : s; end
-    def fail (s); Config.color_enabled ? red(s)    : s; end
-    def error(s); Config.color_enabled ? red(s)    : s; end
-    def skip (s); Config.color_enabled ? yellow(s) : s; end
-    def todo (s); Config.color_enabled ? yellow(s) : s; end
-    def reason(s); Config.color_enabled ? yellow(s) : s; end
+    def topic  s; Config.color_enabled ? bold(s)   : s; end
+    def spec   s; Config.color_enabled ? normal(s) : s; end
+    def pass   s; Config.color_enabled ? blue(s)   : s; end
+    def fail   s; Config.color_enabled ? red(s)    : s; end
+    def error  s; Config.color_enabled ? red(s)    : s; end
+    def skip   s; Config.color_enabled ? yellow(s) : s; end
+    def todo   s; Config.color_enabled ? yellow(s) : s; end
+    def reason s; Config.color_enabled ? yellow(s) : s; end
     def status(status, s); __send__(status.to_s.downcase, s); end
 
   end
@@ -1433,6 +1390,7 @@ module Oktest
       if keyword == 'spec'
         _, _, spec = tuple
         escaped = spec.gsub(/"/, '\\\"')
+        buf << "\n"
         buf << "#{indent}spec \"#{escaped}\"\n"
       else
         _, _, topic, children = tuple
@@ -1443,7 +1401,7 @@ module Oktest
         children.each do |child_tuple|
           _transform(child_tuple, depth+1, buf)
         end
-        buf << "\n" unless buf[-1].end_with?("\"\n")
+        buf << "\n"
         buf << "#{indent}end\n"                if keyword == 'def'
         buf << "#{indent}end # #{topic}\n" unless keyword == 'def'
         buf << "\n"
@@ -1490,11 +1448,9 @@ END
     end
 
     def run(*args)
-      ## parse command-line options
       opts = Options.new
       parser = option_parser(opts)
       filenames = parser.parse(args)
-      ## help, version
       if opts.help
         puts help_message()
         return 0
@@ -1503,14 +1459,11 @@ END
         puts VERSION
         return 0
       end
-      ## fix not to load this file twice.
-      $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__)
-      ## generate test code from source code
       if opts.generate
         print generate(filenames)
         return 0
       end
-      ## load and run
+      $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
       Oktest::Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
@@ -1531,7 +1484,7 @@ END
       parser.on(      '--version') { opts.version = true }
       parser.on('-s STYLE') {|val|
         REPORTER_CLASSES.key?(val)  or
-          raise OptionParser::InvalidArgument.new(val)
+          raise OptionParser::InvalidArgument, val
         opts.style = val
       }
       parser.on('-g', '--generate') { opts.generate = true }
@@ -1545,17 +1498,15 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -h, --help       : show help
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
-  -g, --generate   : generate test code from source file
+  -g, --generate   : generate test code skeleton from ruby file
 END
     end
 
     def load_files(filenames)
-      ## file exists?
       filenames.each do |fname|
         File.exist?(fname)  or
-          raise OptionParser::InvalidOption.new("#{fname}: not found.")
+          raise OptionParser::InvalidOption, "#{fname}: not found."
       end
-      ## load files
       filenames.each do |fname|
         File.directory?(fname) ? load_dir(fname) : load(fname)
       end
@@ -1606,8 +1557,6 @@ at_exit { Oktest.on_exit() }
 
 
 if __FILE__ == $0
-  ## prevent to load oktest.rb twice
-  $LOADED_FEATURES << File.expand_path(__FILE__)
-  ## run test scripts
-  Oktest.main()
+  $LOADED_FEATURES << File.expand_path(__FILE__)  # avoid loading oktest.rb twice
+  Oktest.main()   # run test scripts
 end
