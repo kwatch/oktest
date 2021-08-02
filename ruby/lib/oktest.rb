@@ -1447,11 +1447,9 @@ END
     end
 
     def run(*args)
-      ## parse command-line options
       opts = Options.new
       parser = option_parser(opts)
       filenames = parser.parse(args)
-      ## help, version
       if opts.help
         puts help_message()
         return 0
@@ -1460,14 +1458,11 @@ END
         puts VERSION
         return 0
       end
-      ## fix not to load this file twice.
-      $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__)
-      ## generate test code from source code
       if opts.generate
         print generate(filenames)
         return 0
       end
-      ## load and run
+      $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
       Oktest::Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
