@@ -1371,7 +1371,7 @@ module Oktest
           elsif tag_pat
             item.tag_match?(tag_pat) ? item : nil
           else
-            topic_pat ? nil : item
+            nil    # or: topic_pat ? nil : item
           end
         else
           item
