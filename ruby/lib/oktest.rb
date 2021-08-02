@@ -1323,6 +1323,47 @@ module Oktest
   end
 
 
+  class Filter
+
+    def initialize(topic_pattern, spec_pattern)
+      @topic_pattern = topic_pattern
+      @spec_pattern  = spec_pattern
+    end
+
+    def filter_toplevel_scope!(scope)
+      _filter!(scope.children)
+    end
+
+    private
+
+    def _filter!(children)
+      topic_pat = @topic_pattern
+      spec_pat  = @spec_pattern
+      children.collect! {|item|
+        case item
+        when TopicObject
+          if topic_pat && item.filter_match?(topic_pat)
+            item
+          else
+            _filter!(item.children) ? item : nil
+          end
+        when SpecObject
+          if spec_pat
+            item.filter_match?(spec_pat) ? item : nil
+          else
+            topic_pat ? nil : item
+          end
+        else
+          item
+        end
+      }
+      children.compact!
+      return !children.empty?
+    end
+
+  end
+
+
   module Color
 
     module_function
