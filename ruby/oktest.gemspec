@@ -22,9 +22,10 @@ Gem::Specification.new do |s|
   s.description = <<'END'
 Oktest.rb is a new-style testing library for Ruby.
 
-* `ok {actual} == expected` style assertion
-* smart fixture similar to dependency injection
-* structured test specifications
+* `ok {actual} == expected` style assertion.
+* **Fixture injection** inspired by dependency injection.
+* Structured test specifications like RSpec.
+* Adopts blue/red color instead of green/red for accesability.
 END
 
   ## files
