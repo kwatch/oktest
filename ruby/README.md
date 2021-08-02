@@ -55,6 +55,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#skip-and-todo">Skip, and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
+    * <a href="#filtering">Filtering</a>
     * <a href="#case_when-and-case_else"><code>case_when</code> and <code>case_else</code></a>
     * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#optional-unary-operators">Optional: Unary Operators</a>
@@ -299,6 +300,17 @@ tmp/test/example03_test.rb: st
 
 Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
+
+
+### Filtering
+
+It is possible to filter topics or specs by `-f pattern` option.
+Pattern (!= regular expression) supports `*`, `?`, `[]`, and `{}`.
+
+```terminal
+$ oktest -f topic='*Hello*' test/    # filter topics by pattern
+$ oktest -f spec='*hello*' test/     # filter specs by pattern
+```
 
 
 ### `case_when` and `case_else`

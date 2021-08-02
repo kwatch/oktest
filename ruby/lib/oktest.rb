@@ -463,6 +463,10 @@ module Oktest
       return runner.run_topic(self, *args)
     end
 
+    def filter_match?(pattern)
+      return File.fnmatch?(pattern, @name.to_s)
+    end
+
   end
 
 
@@ -575,6 +579,10 @@ module Oktest
 
     def accept_runner(runner, *args)       #:nodoc:
       runner.run_spec(self, *args)
+    end
+
+    def filter_match?(pattern)
+      return File.fnmatch?(pattern, @desc.to_s)
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
@@ -1315,6 +1323,47 @@ module Oktest
   end
 
 
+  class Filter
+
+    def initialize(topic_pattern, spec_pattern)
+      @topic_pattern = topic_pattern
+      @spec_pattern  = spec_pattern
+    end
+
+    def filter_toplevel_scope!(scope)
+      _filter!(scope.children)
+    end
+
+    private
+
+    def _filter!(children)
+      topic_pat = @topic_pattern
+      spec_pat  = @spec_pattern
+      children.collect! {|item|
+        case item
+        when TopicObject
+          if topic_pat && item.filter_match?(topic_pat)
+            item
+          else
+            _filter!(item.children) ? item : nil
+          end
+        when SpecObject
+          if spec_pat
+            item.filter_match?(spec_pat) ? item : nil
+          else
+            topic_pat ? nil : item
+          end
+        else
+          item
+        end
+      }
+      children.compact!
+      return !children.empty?
+    end
+
+  end
+
+
   module Color
 
     module_function
@@ -1465,6 +1514,9 @@ END
       end
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
+      if opts.filter
+        filter(opts.filter)
+      end
       Oktest::Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
       AssertionObject.report_not_yet()
@@ -1474,7 +1526,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :generate
+      attr_accessor :help, :version, :style, :filter, :generate
     end
 
     def option_parser(opts)
@@ -1487,6 +1539,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.style = val
       }
+      parser.on('-f PATTERN')       {|val| opts.filter = val }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
@@ -1498,7 +1551,13 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -h, --help       : show help
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
+  -f PATTERN       : filter topic or spec with pattern (see below)
   -g, --generate   : generate test code skeleton from ruby file
+
+Filter examples:
+  $ oktest -f topic=Hello         # filter by topic
+  $ oktest -f spec='*hello*'      # filter by spec
+  $ oktest -f '*hello*'           # same as above
 END
     end
 
@@ -1528,6 +1587,19 @@ END
         end
       end
       return buf.join()
+    end
+
+    def filter(pattern)
+      topic_pat = spec_pat = nil
+      case pattern
+      when /\Atopic=/ ; topic_pat = $'
+      when /\Aspec=/  ; spec_pat  = $'
+      else            ; spec_pat  = pattern
+      end
+      filter = Filter.new(topic_pat, spec_pat)
+      TOPLEVEL_SCOPES.each do |filescope|
+        filter.filter_toplevel_scope!(filescope)
+      end
     end
 
   end
