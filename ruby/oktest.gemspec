@@ -27,6 +27,8 @@ Oktest.rb is a new-style testing library for Ruby.
 * Structured test specifications like RSpec.
 * Adopts blue/red color instead of green/red for accesability.
 END
+  s.required_ruby_version = ">= 2.3"
+  s.add_dependency "diff-lcs", "~> 1.0"
 
   ## files
   files = Dir['lib/oktest.rb', 'test/*.rb']
