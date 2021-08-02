@@ -13,6 +13,10 @@ module Oktest
   VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
+  class OktestError < StandardError
+  end
+
+
   class AssertionFailed < Exception
   end
 
@@ -549,11 +553,9 @@ module Oktest
   end
 
 
-  FILESCOPES = []
-
-
-  def self.scope(&block)
-    filename = caller(1).first =~ /:\d+/ ? $` : nil
+  def self.__scope(depth, &block)
+    @_in_scope = true
+    filename = caller(depth).first =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
     scope = FileScopeObject.new(filename)
     klass = Class.new
@@ -563,9 +565,27 @@ module Oktest
     end
     klass.class_eval(&block)
     scope._klass = klass
-    FILESCOPES << scope
+    @_in_scope = nil
     return scope
   end
+
+  def self.scope(&block)
+    ! @_in_scope  or
+      raise OktestError, "scope() is not nestable."
+    scope = __scope(2, &block)
+    TOPLEVEL_SCOPES << scope
+    return scope
+  end
+
+  def self.global_scope(&block)
+    ! @_in_scope  or
+      raise OktestError, "global_scope() is not nestable."
+    GLOBAL_SCOPE._klass.class_eval(&block)
+    return GLOBAL_SCOPE
+  end
+
+  TOPLEVEL_SCOPES = []
+  GLOBAL_SCOPE    = __scope(1) { nil }
 
 
   class SpecObject
@@ -789,7 +809,7 @@ module Oktest
 
     def run_all()
       @reporter.enter_all(self)
-      while (scope = FILESCOPES.shift)
+      while (scope = TOPLEVEL_SCOPES.shift)
         run_filescope(scope)
       end
       @reporter.exit_all(self)
@@ -908,6 +928,8 @@ module Oktest
         return val
       elsif topic.parent
         return get_fixture_value(name, topic.parent, spec, context, location, resolved, resolving)
+      elsif ! topic.equal?(GLOBAL_SCOPE)
+        return get_fixture_value(name, GLOBAL_SCOPE, spec, context, location, resolved, resolving)
       else
         ex = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
         ex.set_backtrace([location])
@@ -1169,13 +1191,13 @@ module Oktest
 
 
   def self.run(opts={})
-    return if FILESCOPES.empty?
+    return if TOPLEVEL_SCOPES.empty?
     klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
       raise ArgumentError.new("#{opts[:style].inspect}: unknown style.")
     reporter = klass.new
     runner = Runner.new(reporter)
     runner.run_all()
-    FILESCOPES.clear
+    TOPLEVEL_SCOPES.clear
     counts = reporter.counts
     return counts[:FAIL] + counts[:ERROR]
   end
@@ -1572,7 +1594,7 @@ END
   def self.auto_run?()   # :nodoc:
     exc = $!
     return false if exc && !exc.is_a?(SystemExit)
-    return false if Oktest::FILESCOPES.empty?
+    return false if TOPLEVEL_SCOPES.empty?
     return Oktest::Config.auto_run
   end
 

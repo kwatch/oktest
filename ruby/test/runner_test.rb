@@ -75,13 +75,13 @@ END
       assert_eq serr, ""
     end
     it "clears filescopes list." do
-      assert Oktest::FILESCOPES.empty?, "Oktest::FILESCOPES should NOT be empty #1"
+      assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #1"
       sout, serr = capture do
         build_topics.call
-        assert !Oktest::FILESCOPES.empty?, "Oktest::FILESCOPES should be empty"
+        assert !Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should be empty"
         Oktest::Runner.new(DummyReporter.new).run_all()
       end
-      assert Oktest::FILESCOPES.empty?, "Oktest::FILESCOPES should NOT be empty #2"
+      assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #2"
     end
   end
 
