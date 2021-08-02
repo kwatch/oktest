@@ -17,13 +17,13 @@ module Oktest
   end
 
 
-  class AssertionFailed < Exception
+  class AssertionFailed < StandardError
   end
 
-  class SkipException < Exception
+  class SkipException < StandardError
   end
 
-  class TodoException < Exception
+  class TodoException < StandardError
   end
 
   #FAIL_EXCEPTION = (defined?(MiniTest)   ? MiniTest::Assertion :
