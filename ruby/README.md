@@ -55,6 +55,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#skip-and-todo">Skip, and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
+    * <a href="#case_when-and-case_else"><code>case_when</code> and <code>case_else</code></a>
     * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#optional-unary-operators">Optional: Unary Operators</a>
   * <a href="#assertions">Assertions</a>
@@ -78,6 +79,7 @@ Oktest.rb requires Ruby 2.3 or later.
   * <a href="#tips">Tips</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
+  * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
 
@@ -299,6 +301,58 @@ Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
 
 
+### `case_when` and `case_else`
+
+`case_when` and `case_else` represents conditional spec.
+
+test/example04_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+  topic Integer do
+    topic '#abs()' do
+
+      case_when "value is negative..." do
+        spec "converts value into positive." do
+          ok {-123.abs()} == 123
+        end
+      end
+
+      case_when "value is zero..." do
+        spec "returns zero." do
+          ok {0.abs()} == 0
+        end
+      end
+
+      case_else do
+        spec "returns itself." do
+          ok {123.abs()} == 123
+        end
+      end
+
+    end
+  end
+end
+```
+
+Result:
+
+```terminal
+$ ruby test/example04_test.rb
+* Integer
+  * #abs()
+    - When value is negative...
+      - [pass] converts value into positive.
+    - When value is zero...
+      - [pass] returns zero.
+    - Else
+      - [pass] returns itself.
+## total:3 (pass:3, fail:0, error:0, skip:0, todo:0) in 0.001s
+```
+
+
 ### Generate Test Code Skeleton
 
 `oktest -g` (or `oktest --generate`) generates test code skeleton from ruby file.
@@ -361,7 +415,7 @@ end
 `topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
 This makes test scripts more readable.
 
-test/example04_test.rb:
+test/example05_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1047,16 +1101,23 @@ http = Rack::TestApp.wrap(Rack::Lint.new(app))   # wrap Rack app
 
 Oktest.scope do
 
-  + topic "GET /api/hello" do
++ topic "GET /api/hello" do
 
-    - spec "returns JSON data." do
-        response = http.GET('/api/hello')        # call Rack app
-        ok {response.status}       == 200
-        ok {response.content_type} == "application/json"
-        ok {response.body_json}    == {"status"=>"OK"}
-      end
-
+  - spec "returns JSON data." do
+      response = http.GET('/api/hello')        # call Rack app
+      ok {response.status}       == 200
+      ok {response.content_type} == "application/json"
+      ok {response.body_json}    == {"status"=>"OK"}
     end
+
+  end
 
 end
 ```
+
+
+
+## License and Copyright
+
+* $License: MIT License $
+* $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
