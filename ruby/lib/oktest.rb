@@ -914,6 +914,8 @@ module Oktest
         return val
       elsif topic.parent
         return get_fixture_value(name, topic.parent, spec, context, location, resolved, resolving)
+      elsif ! topic.eql?(GLOBAL_SCOPE)
+        return get_fixture_value(name, GLOBAL_SCOPE, spec, context, location, resolved, resolving)
       else
         ex = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
         ex.set_backtrace([location])
