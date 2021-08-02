@@ -1059,7 +1059,7 @@ module Oktest
         s = "#{st.to_s.downcase}:#{@counts[st]}"
         @counts[st] == 0 ? s : Color.status(st, s)
       }
-      hhmmss = Util.seconds2hhmmss(elapsed)
+      hhmmss = Util.hhmmss(elapsed)
       return "## total:#{total} (#{arr.join(', ')}) in #{hhmmss}s"
     end
 
@@ -1224,7 +1224,7 @@ module Oktest
       return str
     end
 
-    def seconds2hhmmss(n)
+    def hhmmss(n)
       h, n = n.divmod(60*60)
       m, s = n.divmod(60)
       return "%d:%02d:%04.1f" % [h, m, s] if h > 0
