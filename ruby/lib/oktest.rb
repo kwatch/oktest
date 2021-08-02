@@ -1498,7 +1498,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -h, --help       : show help
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
-  -g, --generate   : generate test code from source file
+  -g, --generate   : generate test code skeleton from ruby file
 END
     end
 
