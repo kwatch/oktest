@@ -1568,11 +1568,10 @@ END
   end
 
   def self.auto_run?()   # :nodoc:
-    return false if Oktest::FILESCOPES.empty?
-    return false if ! Oktest::Config.auto_run
     exc = $!
-    return false if exc.nil? || exc.is_a?(SystemExit)
-    return true
+    return false if exc && !exc.is_a?(SystemExit)
+    return false if Oktest::FILESCOPES.empty?
+    return Oktest::Config.auto_run
   end
 
 
