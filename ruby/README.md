@@ -592,7 +592,8 @@ test/common_fixtures.rb:
 ```ruby
 require 'oktest'
 
-Oktest.scope do
+## define common fixtures in global scope
+Oktest.global_scope do     # !!!!!
 
   fixture :alice do
     {name: "Alice", age: 22}
