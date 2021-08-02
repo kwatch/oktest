@@ -148,9 +148,9 @@ module Oktest
         msg = "$<actual> #{@bool ? op1 : op2} $<expected>: failed.\n"\
               "    $<expected>: #{expected.inspect}\n"
         if @actual =~ /\n\z/
-          msg << "    $<actual>:   <<'END'\n#{@actual}END\n"
+          msg + "    $<actual>:   <<'END'\n#{@actual}END\n"
         else
-          msg << "    $<actual>:   #{@actual.inspect}\n"
+          msg + "    $<actual>:   #{@actual.inspect}\n"
         end
       }
     end
@@ -173,9 +173,9 @@ module Oktest
       __assert(@bool == !!((@actual - expected).abs < delta)) {
         eq = @bool ? '' : ' == false'
         "($<actual> - $<expected>).abs < #{delta}#{eq}: failed.\n"\
-                "    $<actual>:   #{@actual.inspect}\n"\
-                "    $<expected>: #{expected.inspect}\n"\
-                "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
+        "    $<actual>:   #{@actual.inspect}\n"\
+        "    $<expected>: #{expected.inspect}\n"\
+        "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
       }
       self
     end
