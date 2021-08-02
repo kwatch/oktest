@@ -34,7 +34,6 @@ module Oktest
 
 
   class AssertionObject
-    #include Test::Unit::Assertions
 
     self.instance_methods.grep(/\?\z/).each do |k|
       undef_method k unless k.to_s == 'equal?' || k.to_s =~ /^assert/
@@ -70,25 +69,6 @@ module Oktest
     def __assert(result)
       raise FAIL_EXCEPTION, yield unless result
     end
-    #if defined?(MiniTest)
-    #  def __assert result
-    #    if result
-    #      assert true
-    #    else
-    #      #assert_block(yield) { false }
-    #      #flunk yield
-    #      assert false, yield
-    #    end
-    #  end
-    #elsif defined?(Test::Unit)
-    #  def __assert result
-    #    if result
-    #      assert true
-    #    else
-    #      assert_block(yield) { false }
-    #    end
-    #  end
-    #end
 
     def NOT()
       @bool = ! @bool
@@ -492,8 +472,6 @@ module Oktest
 
   module ScopeClassMethods
 
-    #attr_accessor :_scope
-
     def before(&block);     @_scope.before     = block;  end
     def after(&block);      @_scope.after      = block;  end
     def before_all(&block); @_scope.before_all = block;  end
@@ -511,7 +489,6 @@ module Oktest
       klass = Class.new(self)
       klass.class_eval do
         extend ScopeClassMethods
-        #include Test::Unit::Assertions
         include SpecHelper
         @_scope = topic
       end
@@ -1068,7 +1045,6 @@ module Oktest
     FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)\.rbc?:` #:nodoc:
 
     def print_exc_message(ex, status)
-      #puts Color.status(status, "#{ex.class.name}: #{ex}")
       if status == :FAIL
         msg = "#{ex}"
       else
@@ -1076,7 +1052,6 @@ module Oktest
       end
       lines = []
       msg.each_line {|line| lines << line }
-      #puts Color.status(status, lines.shift.chomp)
       puts lines.shift.chomp
       puts lines.join.chomp unless lines.empty?
       puts ex.diff if ex.respond_to?(:diff) && ex.diff   # for oktest.rb
@@ -1550,12 +1525,10 @@ END
     end
 
     def load_files(filenames)
-      ## file exists?
       filenames.each do |fname|
         File.exist?(fname)  or
           raise OptionParser::InvalidOption.new("#{fname}: not found.")
       end
-      ## load files
       filenames.each do |fname|
         File.directory?(fname) ? load_dir(fname) : load(fname)
       end
