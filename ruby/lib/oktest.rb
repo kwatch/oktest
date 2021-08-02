@@ -1551,7 +1551,13 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -h, --help       : show help
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
+  -f PATTERN       : filter topic or spec with pattern (see below)
   -g, --generate   : generate test code skeleton from ruby file
+
+Filter examples:
+  $ oktest -f topic=Hello         # filter by topic
+  $ oktest -f spec='*hello*'      # filter by spec
+  $ oktest -f '*hello*'           # same as above
 END
     end
 
