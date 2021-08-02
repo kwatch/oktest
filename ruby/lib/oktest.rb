@@ -130,35 +130,34 @@ module Oktest
       self
     end
 
+    def __assert_op(bool, op1, op2, expected)
+      __assert(@bool == bool) {
+        "#{@actual.inspect} #{@bool ? op1 : op2} #{expected.inspect}: failed."
+      }
+    end
+    private :__assert_op
+
     def >(expected)
       _done()
-      __assert(@bool == (@actual > expected)) {
-        "#{@actual.inspect} #{@bool ? '>' : '<='} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual > expected, '>', '<=', expected)
       self
     end
 
     def >=(expected)
       _done()
-      __assert(@bool == (@actual >= expected)) {
-        "#{@actual.inspect} #{@bool ? '>=' : '<'} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual >= expected, '>=', '<', expected)
       self
     end
 
     def <(expected)
       _done()
-      __assert(@bool == (@actual < expected)) {
-        "#{@actual.inspect} #{@bool ? '<' : '>='} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual < expected, '<', '>=', expected)
       self
     end
 
     def <=(expected)
       _done()
-      __assert(@bool == (@actual <= expected)) {
-        "#{@actual.inspect} #{@bool ? '<=' : '>'} #{expected.inspect}: failed."
-      }
+      __assert_op(@actual <= expected, '<=', '>', expected)
       self
     end
 
