@@ -50,7 +50,7 @@ module Oktest
     attr_reader :actual, :bool, :location
 
     def _done()
-      AssertionObject::NOT_YET.delete(self.__id__)
+      NOT_YET.delete(self.__id__)
     end
     private :_done
 
@@ -59,6 +59,7 @@ module Oktest
       NOT_YET.each_value do |ass|
         $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
       end
+      NOT_YET.clear()
     end
 
     def __assert(result)
