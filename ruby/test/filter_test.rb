@@ -14,18 +14,18 @@ class Filter_TC < TC
   def prepare()
     Oktest.scope do
       topic 'Hello' do
-        spec "hello spec" do ok {"hello"} == "hello" end
+        spec "hello spec", tag: 'new' do ok {"hello"} == "hello" end
       end
       topic 'Topic 832795' do
         topic Integer do
           spec "spec example #1" do ok {1+1} == 2 end
-          spec "spec example #2" do ok {1-1} == 0 end
+          spec "spec example #2", tag: 'new' do ok {1-1} == 0 end
         end
-        topic Float do
+        topic Float, tag: 'exp' do
           spec "spec example #3" do ok {1.0+1.0} == 2.0 end
           spec "spec example #4" do ok {1.0-1.0} == 0.0 end
         end
-        spec "spec example #5" do ok {1%1} == 0 end
+        spec "spec example #5", tag: ['exp', 'new'] do ok {1%1} == 0 end
       end
     end
   end
@@ -122,6 +122,45 @@ END
     - [pass] spec example #4
 END
       sout = run_filter(nil, '*#4', nil)
+      assert_eq uncolor(sout), expected
+    end
+
+    it "can filter topics and specs by tag name." do
+      expected = <<END
+* Hello
+  - [pass] hello spec
+* Topic 832795
+  * Integer
+    - [pass] spec example #2
+  - [pass] spec example #5
+END
+      sout = run_filter(nil, nil, 'new')
+      assert_eq uncolor(sout), expected
+      #
+      expected = <<END
+* Topic 832795
+  * Float
+    - [pass] spec example #3
+    - [pass] spec example #4
+  - [pass] spec example #5
+END
+      sout = run_filter(nil, nil, 'exp')
+      assert_eq uncolor(sout), expected
+    end
+
+    it "can filter by multiple tag name." do
+      expected = <<END
+* Hello
+  - [pass] hello spec
+* Topic 832795
+  * Integer
+    - [pass] spec example #2
+  * Float
+    - [pass] spec example #3
+    - [pass] spec example #4
+  - [pass] spec example #5
+END
+      sout = run_filter(nil, nil, '{new,exp}')
       assert_eq uncolor(sout), expected
     end
 
