@@ -30,9 +30,9 @@ class Filter_TC < TC
     end
   end
 
-  def run_filter(topic_pattern, spec_pattern)
+  def run_filter(topic_pattern, spec_pattern, tag_pattern)
     prepare()
-    filter = Oktest::Filter.new(topic_pattern, spec_pattern)
+    filter = Oktest::Filter.new(topic_pattern, spec_pattern, tag_pattern)
     Oktest::TOPLEVEL_SCOPES.each {|x| filter.filter_toplevel_scope!(x) }
     reporter = Oktest::VerboseReporter.new()
     sout, serr = capture('', tty: false) do
@@ -54,7 +54,7 @@ class Filter_TC < TC
 * Hello
   - [pass] hello spec
 END
-      sout = run_filter('Hello', nil)
+      sout = run_filter('Hello', nil, nil)
       assert_eq uncolor(sout), expected
     end
 
@@ -69,7 +69,7 @@ END
     - [pass] spec example #4
   - [pass] spec example #5
 END
-      sout = run_filter('*832795*', nil)
+      sout = run_filter('*832795*', nil, nil)
       assert_eq uncolor(sout), expected
     end
 
@@ -80,7 +80,7 @@ END
     - [pass] spec example #3
     - [pass] spec example #4
 END
-      sout = run_filter('*loat*', nil)
+      sout = run_filter('*loat*', nil, nil)
       assert_eq uncolor(sout), expected
     end
 
@@ -89,7 +89,7 @@ END
 * Hello
   - [pass] hello spec
 END
-      sout = run_filter(nil, 'hello spec')
+      sout = run_filter(nil, 'hello spec', nil)
       assert_eq uncolor(sout), expected
     end
 
@@ -98,7 +98,7 @@ END
 * Topic 832795
   - [pass] spec example #5
 END
-      sout = run_filter(nil, '*#5')
+      sout = run_filter(nil, '*#5', nil)
       assert_eq uncolor(sout), expected
       #
       expected = <<END
@@ -111,7 +111,7 @@ END
     - [pass] spec example #4
   - [pass] spec example #5
 END
-      sout = run_filter(nil, 'spec example*')
+      sout = run_filter(nil, 'spec example*', nil)
       assert_eq uncolor(sout), expected
     end
 
@@ -121,7 +121,7 @@ END
   * Float
     - [pass] spec example #4
 END
-      sout = run_filter(nil, '*#4')
+      sout = run_filter(nil, '*#4', nil)
       assert_eq uncolor(sout), expected
     end
 

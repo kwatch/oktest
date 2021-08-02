@@ -1339,9 +1339,10 @@ module Oktest
 
   class Filter
 
-    def initialize(topic_pattern, spec_pattern)
+    def initialize(topic_pattern, spec_pattern, tag_pattern)
       @topic_pattern = topic_pattern
       @spec_pattern  = spec_pattern
+      @tag_pattern   = tag_pattern
     end
 
     def filter_toplevel_scope!(scope)
@@ -1353,10 +1354,13 @@ module Oktest
     def _filter!(children)
       topic_pat = @topic_pattern
       spec_pat  = @spec_pattern
+      tag_pat   = @tag_pattern
       children.collect! {|item|
         case item
         when TopicObject
           if topic_pat && item.filter_match?(topic_pat)
+            item
+          elsif tag_pat && item.tag_match?(tag_pat)
             item
           else
             _filter!(item.children) ? item : nil
@@ -1364,6 +1368,8 @@ module Oktest
         when SpecObject
           if spec_pat
             item.filter_match?(spec_pat) ? item : nil
+          elsif tag_pat
+            item.tag_match?(tag_pat) ? item : nil
           else
             topic_pat ? nil : item
           end
@@ -1604,13 +1610,14 @@ END
     end
 
     def filter(pattern)
-      topic_pat = spec_pat = nil
+      topic_pat = spec_pat = tag_pat = nil
       case pattern
       when /\Atopic=/ ; topic_pat = $'
       when /\Aspec=/  ; spec_pat  = $'
+      when /\Atag=/   ; tag_pat   = $'
       else            ; spec_pat  = pattern
       end
-      filter = Filter.new(topic_pat, spec_pat)
+      filter = Filter.new(topic_pat, spec_pat, tag_pat)
       TOPLEVEL_SCOPES.each do |filescope|
         filter.filter_toplevel_scope!(filescope)
       end
