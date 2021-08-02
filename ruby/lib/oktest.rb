@@ -1211,20 +1211,6 @@ module Oktest
     end
 
     def strfold(str, width=80, mark='...')
-      return str if str.length <= width
-      return str[0, width - mark.length] + mark if str =~ /\A[\x00-\x7f]*\z/
-      limit = width - mark.length
-      w = len = 0
-      str.split(//u).each do |ch|
-        n = ch.length
-        w += n == 1 ? 1 : 2
-        break if w >= limit
-        len += n
-      end
-      str = str[0, len] + mark if w >= limit
-      return str
-    end
-    def strfold(str, width=80, mark='...')
       return str if str.bytesize <= width
       return str[0, width - mark.length] + mark if str.ascii_only?
       limit = width - mark.length
@@ -1236,7 +1222,7 @@ module Oktest
       end
       str = str[0, len] + mark if w >= limit
       return str
-    end if RUBY_VERSION >= '1.9'
+    end
 
     def seconds2hhmmss(n)
       h, n = n.divmod(60*60)
