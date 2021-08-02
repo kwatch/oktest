@@ -59,6 +59,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#case_when-and-case_else"><code>case_when</code> and <code>case_else</code></a>
     * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#optional-unary-operators">Optional: Unary Operators</a>
+    * <a href="#defining-methods-in-topics">Defining Methods in Topics</a>
   * <a href="#assertions">Assertions</a>
     * <a href="#basic-assertions">Basic Assertions</a>
     * <a href="#predicate-assertions">Predicate Assertions</a>
@@ -446,6 +447,75 @@ Oktest.scope do
         ok {1*1} == 1
       end
 
+    end
+
+  end
+
+end
+```
+
+
+### Defining Methods in Topics
+
+Methods defined in topics can be called in specs.
+
+<!--
+test/example91_test.rb:
+-->
+
+```ruby
+require 'oktest'
+Oktest.scope do
+
+  topic "Method example" do
+
+    def hello()                 # define method in topic block
+      return "Hello!"
+    end
+
+    spec "example" do
+      s = hello()               # call method in spec block
+      ok {s} == "Hello!"
+    end
+
+  end
+
+end
+```
+
+* It is OK to call methods defined in parent topics.
+* It will be ERROR to call methods defined in child topics.
+
+<!--
+test/example92_test.rb:
+-->
+
+```ruby
+require 'oktest'
+Oktest.scope do
+
++ topic "Outer" do
+
+  + topic "Middle" do
+
+      def hello()              # define method in topic block
+        return "Hello!"
+      end
+
+    + topic "Inner" do
+
+      - spec "inner spec" do
+          s = hello()          # OK: call method defined in parent topic
+          ok {s} == "Hello!"
+        end
+
+      end
+
+    end
+
+  - spec "outer spec" do
+      s = hello()              # ERROR: call method defined in child topic
+      ok {x} == "Hello!"
     end
 
   end
