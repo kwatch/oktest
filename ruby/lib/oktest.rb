@@ -454,12 +454,13 @@ module Oktest
 
   class TopicObject < ScopeObject
 
-    def initialize(target=nil)
+    def initialize(target=nil, tag=nil)
       super()
       @target = target
+      @tag    = tag
     end
 
-    attr_reader :target
+    attr_reader :target, :tag
 
     def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
@@ -485,8 +486,8 @@ module Oktest
       @_scope.fixtures[name] = [block, argnames, location]
     end
 
-    def topic(target, &block)
-      topic = TopicObject.new(target)
+    def topic(target, tag: nil, &block)
+      topic = TopicObject.new(target, tag)
       @_scope.add_child(topic)
       klass = Class.new(self)
       klass.class_eval do
@@ -500,22 +501,22 @@ module Oktest
       return topic
     end
 
-    def case_when(desc, &block)
-      return __case_when("When #{desc}", &block)
+    def case_when(desc, tag: nil, &block)
+      return __case_when("When #{desc}", tag, &block)
     end
 
-    def case_else(&block)
-      return __case_when("Else", &block)
+    def case_else(tag: nil, &block)
+      return __case_when("Else", tag, &block)
     end
 
-    def __case_when(desc, &block)
-      obj = topic(desc, &block)
+    def __case_when(desc, tag, &block)
+      obj = topic(desc, tag: tag, &block)
       obj._prefix = '-'
       return obj
     end
     private :__case_when
 
-    def spec(desc, &block)
+    def spec(desc, tag: nil, &block)
       location = caller(1).first
       if block
         argnames = Util.block_argnames(block, location)
@@ -523,7 +524,7 @@ module Oktest
         block = proc { raise TodoException, "not implemented yet" }
         argnames = []
       end
-      spec = SpecObject.new(desc, block, argnames, location)
+      spec = SpecObject.new(desc, block, argnames, location, tag)
       @_scope.add_child(spec)
       spec._prefix = '-'
       return spec
@@ -569,14 +570,15 @@ module Oktest
 
   class SpecObject
 
-    def initialize(desc, block, argnames, location)
+    def initialize(desc, block, argnames, location, tag=nil)
       @desc = desc
       @block = block
       @argnames = argnames
       @location = location   # necessary when raising fixture not found error
+      @tag      = tag
     end
 
-    attr_reader :desc, :block, :argnames, :location #:nodoc:
+    attr_reader :desc, :block, :argnames, :location, :tag #:nodoc:
     attr_accessor :_prefix   #:nodoc:
 
     def accept_runner(runner, *args)       #:nodoc:
