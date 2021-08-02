@@ -76,17 +76,19 @@ class TC
     raise AssertionFailed, errmsg
   end
 
-  def capture(tty: true, &b)
+  def capture(input="", tty: true, &b)
     require 'stringio' unless defined?(StringIO)
-    stdout, stderr = $stdout, $stderr
+    stdin, stdout, stderr = $stdin, $stdout, $stderr
+    $stdin  = sin  = StringIO.new(input)
     $stdout = sout = StringIO.new
     $stderr = serr = StringIO.new
+    def sin.tty? ; true; end if tty
     def sout.tty?; true; end if tty
     def sout.tty?; true; end if tty
     yield
     return sout.string, serr.string
   ensure
-    $stdout, $stderr = stdout, stderr
+    $stdin, $stdout, $stderr = stdin, stdout, stderr
   end
 
 end
