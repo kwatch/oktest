@@ -1333,25 +1333,25 @@ module Oktest
 
     module_function
 
-    def normal (s);  return s; end
-    def bold   (s);  return "\x1b[0;1m#{s}\x1b[22m"; end
-    def black  (s);  return "\x1b[1;30m#{s}\x1b[0m"; end
-    def red    (s);  return "\x1b[1;31m#{s}\x1b[0m"; end
-    def green  (s);  return "\x1b[1;32m#{s}\x1b[0m"; end
-    def yellow (s);  return "\x1b[1;33m#{s}\x1b[0m"; end
-    def blue   (s);  return "\x1b[1;34m#{s}\x1b[0m"; end
-    def magenta(s);  return "\x1b[1;35m#{s}\x1b[0m"; end
-    def cyan   (s);  return "\x1b[1;36m#{s}\x1b[0m"; end
-    def white  (s);  return "\x1b[1;37m#{s}\x1b[0m"; end
+    def normal  s;  return s; end
+    def bold    s;  return "\x1b[0;1m#{s}\x1b[22m"; end
+    def black   s;  return "\x1b[1;30m#{s}\x1b[0m"; end
+    def red     s;  return "\x1b[1;31m#{s}\x1b[0m"; end
+    def green   s;  return "\x1b[1;32m#{s}\x1b[0m"; end
+    def yellow  s;  return "\x1b[1;33m#{s}\x1b[0m"; end
+    def blue    s;  return "\x1b[1;34m#{s}\x1b[0m"; end
+    def magenta s;  return "\x1b[1;35m#{s}\x1b[0m"; end
+    def cyan    s;  return "\x1b[1;36m#{s}\x1b[0m"; end
+    def white   s;  return "\x1b[1;37m#{s}\x1b[0m"; end
 
-    def topic(s); Config.color_enabled ? bold(s)   : s; end
-    def spec (s); Config.color_enabled ? normal(s) : s; end
-    def pass (s); Config.color_enabled ? blue(s)   : s; end
-    def fail (s); Config.color_enabled ? red(s)    : s; end
-    def error(s); Config.color_enabled ? red(s)    : s; end
-    def skip (s); Config.color_enabled ? yellow(s) : s; end
-    def todo (s); Config.color_enabled ? yellow(s) : s; end
-    def reason(s); Config.color_enabled ? yellow(s) : s; end
+    def topic  s; Config.color_enabled ? bold(s)   : s; end
+    def spec   s; Config.color_enabled ? normal(s) : s; end
+    def pass   s; Config.color_enabled ? blue(s)   : s; end
+    def fail   s; Config.color_enabled ? red(s)    : s; end
+    def error  s; Config.color_enabled ? red(s)    : s; end
+    def skip   s; Config.color_enabled ? yellow(s) : s; end
+    def todo   s; Config.color_enabled ? yellow(s) : s; end
+    def reason s; Config.color_enabled ? yellow(s) : s; end
     def status(status, s); __send__(status.to_s.downcase, s); end
 
   end
