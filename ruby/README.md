@@ -55,6 +55,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#skip-and-todo">Skip, and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
+    * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#optional-unary-operators">Optional: Unary Operators</a>
   * <a href="#assertions">Assertions</a>
     * <a href="#basic-assertions">Basic Assertions</a>
@@ -298,6 +299,63 @@ Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
 
 
+### Generate Test Code Skeleton
+
+`oktest -g` (or `oktest --generate`) generates test code skeleton from ruby file.
+Comment line starting with `#;` is regarded as spec description.
+
+hello.rb:
+
+```ruby
+class Hello
+
+  def hello(name=nil)
+    #; default name is 'world'.
+    if name.nil?
+      name = "world"
+    end
+    #; returns greeting message.
+    return "Hello, #{name}!"
+  end
+
+end
+```
+
+Generate test code skeleton:
+
+```terminal
+$ oktest -g hello.rb > test/hello_test.rb
+```
+
+test/hello_test.rb:
+
+```ruby
+# coding: utf-8
+
+require 'oktest'
+
+Oktest.scope do
+
+
+  topic Hello do
+
+
+    topic '#hello' do
+
+      spec "default name is 'world'."
+
+      spec "returns greeting message."
+
+    end
+
+
+  end # Hello
+
+
+end
+```
+
+
 ### Optional: Unary Operators
 
 `topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
@@ -310,21 +368,21 @@ require 'oktest'
 
 Oktest.scope do
 
-  + topic 'example' do            # unary `+` operator
++ topic 'example' do            # unary `+` operator
 
-    + topic 'example' do          # unary `+` operator
+  + topic 'example' do          # unary `+` operator
 
-      - spec "1+1 is 2." do       # unary `-` operator
-          ok {1+1} == 2
-        end
+    - spec "1+1 is 2." do       # unary `-` operator
+        ok {1+1} == 2
+      end
 
-      - spec "1*1 is 1." do       # unary `-` operator
-          ok {1*1} == 1
-        end
-
+    - spec "1*1 is 1." do       # unary `-` operator
+        ok {1*1} == 1
       end
 
     end
+
+  end
 
 end
 ```
