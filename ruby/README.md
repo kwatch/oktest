@@ -55,6 +55,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#skip-and-todo">Skip, and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
+    * <a href="#optional-unary-operators">Optional: Unary Operators</a>
   * <a href="#assertions">Assertions</a>
     * <a href="#basic-assertions">Basic Assertions</a>
     * <a href="#predicate-assertions">Predicate Assertions</a>
@@ -65,6 +66,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#setup-and-teardown">Setup and Teardown</a>
     * <a href="#at_end-crean-up-handler"><code>at_end()</code>: Crean-up Handler</a>
     * <a href="#fixture-injection">Fixture Injection</a>
+    * <a href="#global-scope">Global Scope</a>
   * <a href="#helpers">Helpers</a>
     * <a href="#capture_sio"><code>capture_sio()</code></a>
     * <a href="#dummy_file"><code>dummy_file()</code></a>
@@ -72,6 +74,9 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#dummy_values"><code>dummy_values()</code></a>
     * <a href="#dummy_attrs"><code>dummy_attrs()</code></a>
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
+  * <a href="#tips">Tips</a>
+    * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
+    * <a href="#testing-rack-application">Testing Rack Application</a>
 
 <!-- /TOC -->
 
@@ -293,7 +298,7 @@ Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
 
 
-## Optional: unary `+` and `-` operators
+### Optional: Unary Operators
 
 `topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
 This makes test scripts more readable.
@@ -605,6 +610,7 @@ Oktest.scope do
 end
 ```
 
+* Fixtures can be defined in block of `topic()` as well as block of `Object.scope()`.
 * If fixture requires clean-up operation, call `at_end()` in `fixture()` block.
 
 ```ruby
@@ -616,8 +622,11 @@ end
   end
 ```
 
-* Fixtures can be defined in block of `topc()` as well as block of `Object.scope()`.
-* It is good idea to common fixtures into dedicated script, such as:
+
+### Global Scope
+
+It is a good idea to separate common fixtures into dedicated file.
+In this case, use `Oktest.global_scope()` instead of `Oktest.scope()`.
 
 test/common_fixtures.rb:
 
@@ -644,6 +653,7 @@ Oktest.global_scope do     # !!!!!
 
 end
 ```
+
 
 
 ## Helpers
@@ -924,6 +934,71 @@ Oktest.scope do
     end
 
   end
+
+end
+```
+
+
+## Tips
+
+
+### `ok {}` in MiniTest
+
+If you want to use `ok {actual} == expected` style assertion in MiniTest,
+install `minitest-ok` gem instead of `otest` gem.
+
+test/example41_test.rb:
+
+```ruby
+require 'minitest/spec'
+require 'minitest/autorun'
+require 'minitest/ok'      # !!!!!
+
+describe 'MiniTest::Ok' do
+
+  it "helps to write assertions" do
+    ok {1+1} == 2          # !!!!!
+  end
+
+end
+```
+
+See [minitest-ok README](https://github.com/kwatch/minitest-ok) for details.
+
+
+### Testing Rack Application
+
+`rack-test_app` gem will help you to test Rack application very well.
+
+test/example42_test.rb:
+
+```ruby
+require 'rack'
+require 'rack/lint'
+require 'rack/test_app'      # !!!!!
+require 'oktest'
+
+app = proc {|env|            # sample Rack application
+  text = '{"status":"OK"}'
+  headers = {"Content-Type"   => "application/json",
+             "Content-Length" => text.bytesize.to_s}
+  [200, headers, [text]]
+}
+
+http = Rack::TestApp.wrap(Rack::Lint.new(app))   # wrap Rack app
+
+Oktest.scope do
+
+  + topic "GET /api/hello" do
+
+    - spec "returns JSON data." do
+        response = http.GET('/api/hello')        # call Rack app
+        ok {response.status}       == 200
+        ok {response.content_type} == "application/json"
+        ok {response.body_json}    == {"status"=>"OK"}
+      end
+
+    end
 
 end
 ```
