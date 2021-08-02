@@ -107,6 +107,26 @@ END
     assert_eq serr, ""
   end
 
+  it "suports global scope." do
+    Oktest.global_scope do
+      fixture :gf1592 do {id: "gf1592"} end
+      fixture :gf6535 do |gf1592| {id: "gf6535", parent: gf1592} end
+    end
+    Oktest.global_scope do
+      fixture :gf8979 do |gf6535| {id: "gf8979", parent: gf6535} end
+    end
+    data = nil
+    Oktest.scope do
+      topic "global fixtures" do
+        spec "example" do |gf8979| data = gf8979 end
+      end
+    end
+    sout, serr = capture do
+      Oktest::Runner.new(DummyReporter2.new).run_all()
+    end
+    assert_eq data, {:id=>"gf8979", :parent=>{:id=>"gf6535", :parent=>{:id=>"gf1592"}}}
+  end
+
   it "raises error when fixture not found." do
     Oktest.scope do
       topic "Parent" do
