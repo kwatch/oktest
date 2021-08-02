@@ -1556,8 +1556,6 @@ at_exit { Oktest.on_exit() }
 
 
 if __FILE__ == $0
-  ## prevent to load oktest.rb twice
-  $LOADED_FEATURES << File.expand_path(__FILE__)
-  ## run test scripts
-  Oktest.main()
+  $LOADED_FEATURES << File.expand_path(__FILE__)  # avoid loading oktest.rb twice
+  Oktest.main()   # run test scripts
 end
