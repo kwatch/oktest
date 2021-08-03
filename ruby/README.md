@@ -361,6 +361,13 @@ $ oktest -f topic='*Integer*' test/    # filter topics by pattern
 $ oktest -f spec='*#[1-3]'    test/    # filter specs by pattern
 ```
 
+If you need negative filter, use `!=` instead of `=`.
+
+```terminal
+$ oktest -f spec!='*#5'      tests/    # exclude spec 'example #5'
+$ oktest -f tag!='{exp,old}' tests/    # exclude tag='exp' or tag='old'
+```
+
 
 ### `case_when` and `case_else`
 
