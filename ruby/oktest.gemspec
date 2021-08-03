@@ -29,6 +29,7 @@ Oktest.rb is a new-style testing library for Ruby.
 END
   s.required_ruby_version = ">= 2.3"
   s.add_dependency "diff-lcs", "~> 1.0"
+  s.add_dependency "benry-recorder", "~> 1.0"
 
   ## files
   files = Dir['lib/oktest.rb', 'test/*.rb']
