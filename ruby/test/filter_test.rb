@@ -30,9 +30,9 @@ class Filter_TC < TC
     end
   end
 
-  def run_filter(topic_pattern, spec_pattern, tag_pattern)
+  def run_filter(topic_pattern, spec_pattern, tag_pattern, negative: false)
     prepare()
-    filter = Oktest::Filter.new(topic_pattern, spec_pattern, tag_pattern)
+    filter = Oktest::Filter.new(topic_pattern, spec_pattern, tag_pattern, negative: negative)
     Oktest::TOPLEVEL_SCOPES.each {|x| filter.filter_toplevel_scope!(x) }
     reporter = Oktest::VerboseReporter.new()
     sout, serr = capture('', tty: false) do
@@ -161,6 +161,78 @@ END
   - [pass] spec example #5
 END
       sout = run_filter(nil, nil, '{new,exp}')
+      assert_eq uncolor(sout), expected
+    end
+
+    it "supports negative filter by topic." do
+      expected = <<END
+* Hello
+  - [pass] hello spec
+END
+      sout = run_filter('Topic 832795', nil, nil, negative: true)
+      assert_eq uncolor(sout), expected
+      #
+      expected = <<END
+* Hello
+  - [pass] hello spec
+* Topic 832795
+  - [pass] spec example #5
+END
+      sout = run_filter('{Integer,Float}', nil, nil, negative: true)
+      assert_eq uncolor(sout), expected
+    end
+
+    it "supports negative filter by spec." do
+      expected = <<END
+* Topic 832795
+  * Integer
+    - [pass] spec example #1
+    - [pass] spec example #2
+  * Float
+    - [pass] spec example #3
+    - [pass] spec example #4
+  - [pass] spec example #5
+END
+      sout = run_filter(nil, '*hello*', nil, negative: true)
+      assert_eq uncolor(sout), expected
+      #
+      expected = <<END
+* Hello
+  - [pass] hello spec
+END
+      sout = run_filter(nil, 'spec example #[1-5]', nil, negative: true)
+      assert_eq uncolor(sout), expected
+    end
+
+    it "supports negative filter by tag name." do
+      expected = <<END
+* Topic 832795
+  * Integer
+    - [pass] spec example #1
+  * Float
+    - [pass] spec example #3
+    - [pass] spec example #4
+END
+      sout = run_filter(nil, nil, 'new', negative: true)
+      assert_eq uncolor(sout), expected
+      #
+      expected = <<END
+* Hello
+  - [pass] hello spec
+* Topic 832795
+  * Integer
+    - [pass] spec example #1
+    - [pass] spec example #2
+END
+      sout = run_filter(nil, nil, 'exp', negative: true)
+      assert_eq uncolor(sout), expected
+      #
+      expected = <<END
+* Topic 832795
+  * Integer
+    - [pass] spec example #1
+END
+      sout = run_filter(nil, nil, '{exp,new}', negative: true)
       assert_eq uncolor(sout), expected
     end
 

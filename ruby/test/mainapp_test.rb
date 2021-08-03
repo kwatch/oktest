@@ -35,10 +35,10 @@ Oktest.scope do
     end
 
     topic "Child2" do
-      spec "1*1 should be 1" do
+      spec "1*1 should be 1", tag: 'fail' do
         ok {1*1} == 2
       end
-      spec "1/1 should be 1" do
+      spec "1/1 should be 1", tag: 'err' do
         ok {1/0} == 1
       end
     end
@@ -321,6 +321,23 @@ END
 END
       #
       ret, sout, serr = run("-f", "tag={new,exp}", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
+    it "supports negative filter." do
+      expected = <<'END'
+* <b>Parent</b>
+  * <b>Child1</b>
+    - [<B>pass</B>] 1+1 should be 2
+    - [<B>pass</B>] 1-1 should be 0
+  - <b>Else</b>
+    - [<B>pass</B>] x*x is also positive.
+## total:3 (<B>pass:3</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "tag!={fail,err,exp}", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""

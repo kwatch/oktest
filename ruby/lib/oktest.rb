@@ -1339,10 +1339,11 @@ module Oktest
 
   class Filter
 
-    def initialize(topic_pattern, spec_pattern, tag_pattern)
+    def initialize(topic_pattern, spec_pattern, tag_pattern, negative: false)
       @topic_pattern = topic_pattern
       @spec_pattern  = spec_pattern
       @tag_pattern   = tag_pattern
+      @negative      = negative
     end
 
     def filter_toplevel_scope!(scope)
@@ -1355,23 +1356,24 @@ module Oktest
       topic_pat = @topic_pattern
       spec_pat  = @spec_pattern
       tag_pat   = @tag_pattern
+      positive  = ! @negative
       children.collect! {|item|
         case item
         when TopicObject
           if topic_pat && item.filter_match?(topic_pat)
-            item
+            positive ? item : nil
           elsif tag_pat && item.tag_match?(tag_pat)
-            item
+            positive ? item : nil
           else
             _filter!(item.children) ? item : nil
           end
         when SpecObject
           if spec_pat
-            item.filter_match?(spec_pat) ? item : nil
+            item.filter_match?(spec_pat) == positive ? item : nil
           elsif tag_pat
-            item.tag_match?(tag_pat) ? item : nil
+            item.tag_match?(tag_pat) == positive ? item : nil
           else
-            nil    # or: topic_pat ? nil : item
+            positive ? nil : item
           end
         else
           item
@@ -1560,7 +1562,7 @@ END
         opts.style = val
       }
       parser.on('-f PATTERN') {|val|
-        val =~ /\A(topic|spec|tag)=/  or
+        val =~ /\A(topic|spec|tag)(=|!=)/  or
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
@@ -1616,10 +1618,11 @@ END
 
     def filter(pattern)
       pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
-      pattern =~ /\A(\w+)=/ && pat.key?($1)  or
+      pattern =~ /\A(\w+)(=|!=)/ && pat.key?($1)  or
         raise Exception, "** internal error: pattern=#{pattern.inspect}"
       pat[$1] = $'
-      filter = Filter.new(pat['topic'], pat['spec'], pat['tag'])
+      negative = ($2 == '!=')
+      filter = Filter.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
       TOPLEVEL_SCOPES.each do |filescope|
         filter.filter_toplevel_scope!(filescope)
       end
