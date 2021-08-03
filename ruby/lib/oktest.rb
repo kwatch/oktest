@@ -1060,7 +1060,7 @@ module Oktest
       end
     end
 
-    FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)\.rbc?:` #:nodoc:
+    FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)(?:\.rbc?)?:` #:nodoc:
 
     def print_exc_message(ex, status)
       if status == :FAIL
@@ -1173,7 +1173,7 @@ module Oktest
   end
 
 
-  REPORTER = VerboseReporter
+  REPORTER_CLASS = VerboseReporter
 
 
   REPORTER_CLASSES = {
@@ -1185,7 +1185,7 @@ module Oktest
 
   def self.run(opts={})
     return if TOPLEVEL_SCOPES.empty?
-    klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
+    klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER_CLASS)  or
       raise ArgumentError, "#{opts[:style].inspect}: unknown style."
     reporter = klass.new
     runner = Runner.new(reporter)
@@ -1270,7 +1270,7 @@ module Oktest
       lines_old = _text2lines(text_old, msg)
       lines_new = _text2lines(text_new, msg)
       #
-      buf = "#{label}"
+      buf = [label]
       len = 0
       prevhunk = hunk = nil
       diffs = Diff::LCS.diff(lines_old, lines_new)
@@ -1285,7 +1285,7 @@ module Oktest
         prevhunk = hunk
       end
       buf << prevhunk.diff(:unified) << "\n" if prevhunk
-      return buf
+      return buf.join()
     end
 
     ## platform depend, but not require extra library
@@ -1505,8 +1505,8 @@ END
     def self.main(argv=nil)
       argv ||= ARGV
       begin
-        status = self.new.run(*argv)
-        return status || 0
+        status = self.new.run(*argv)  or raise "** internal error"
+        return status
       rescue OptionParser::ParseError => ex
         case ex
         when OptionParser::InvalidOption   ; s = "unknown option."
@@ -1546,7 +1546,7 @@ END
       if opts.filter
         filter(opts.filter)
       end
-      Oktest::Config.auto_run = false
+      Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
       AssertionObject.report_not_yet()
       return n_errors
@@ -1575,7 +1575,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
-      parser.on('--color[={on|off}]') {|val|
+      parser.on(      '--color[={on|off}]') {|val|
         val.nil? || val == 'on' || val == 'off'  or
           raise OptionParser::InvalidArgument, val
         opts.color = val || 'on'
@@ -1588,19 +1588,19 @@ END
       command ||= File.basename($0)
       return <<END
 Usage: #{command} [<options>] [<file-or-directory>...]
-  -h, --help       : show help
-      --version    : print version
-  -s STYLE         : report style (verbose/simple/plain, or v/s/p)
-  -f PATTERN       : filter topic or spec with pattern (see below)
-  --color[={on|off}] : enable/disable output coloring forcedly
-  -g, --generate   : generate test code skeleton from ruby file
+  -h, --help             : show help
+      --version          : print version
+  -s STYLE               : report style (verbose/simple/plain, or v/s/p)
+  -f PATTERN             : filter topic or spec with pattern (see below)
+      --color[={on|off}] : enable/disable output coloring forcedly
+  -g, --generate         : generate test code skeleton from ruby file
 
 Filter examples:
-  $ oktest -f topic=Hello         # filter by topic
-  $ oktest -f spec='*hello*'      # filter by spec
-  $ oktest -f tag=experimental    # filter by tag name
-  $ oktest -f tag!=experimental   # negative filter by tag name
-  $ oktest -f tag='{exp,old}'     # filter by multiple tag names
+  $ oktest -f topic=Hello            # filter by topic
+  $ oktest -f spec='*hello*'         # filter by spec
+  $ oktest -f tag=name               # filter by tag name
+  $ oktest -f tag!=name              # negative filter by tag name
+  $ oktest -f tag='{name1,name2}'    # filter by multiple tag names
 END
     end
 
@@ -1661,7 +1661,7 @@ END
     exc = $!
     return false if exc && !exc.is_a?(SystemExit)
     return false if TOPLEVEL_SCOPES.empty?
-    return Oktest::Config.auto_run
+    return Config.auto_run
   end
 
 
