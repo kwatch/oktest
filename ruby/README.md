@@ -1,4 +1,4 @@
-<!-- coding: utf-8 -->
+<!-- # -*- coding: utf-8 -*- -->
 # Oktest.rb README
 
 
@@ -45,6 +45,7 @@ end                                  #
 Oktest.rb requires Ruby 2.3 or later.
 
 
+
 ## Table of Contents
 
 <!-- TOC -->
@@ -86,6 +87,7 @@ Oktest.rb requires Ruby 2.3 or later.
   * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
+
 
 
 ## Quick Tutorial
@@ -493,15 +495,15 @@ require 'oktest'
 
 Oktest.scope do
 
-+ topic 'example' do            # unary `+` operator
++ topic('example') do            # unary `+` operator
 
-  + topic 'example' do          # unary `+` operator
+  + topic('example') do          # unary `+` operator
 
-    - spec "1+1 is 2." do       # unary `-` operator
+    - spec("1+1 is 2.") do       # unary `-` operator
         ok {1+1} == 2
       end
 
-    - spec "1*1 is 1." do       # unary `-` operator
+    - spec("1*1 is 1.") do       # unary `-` operator
         ok {1*1} == 1
       end
 
@@ -552,17 +554,17 @@ test/example08b_test.rb:
 require 'oktest'
 Oktest.scope do
 
-+ topic "Outer" do
++ topic('Outer') do
 
-  + topic "Middle" do
+  + topic('Middle') do
 
       def hello()              # define method in topic block
         return "Hello!"
       end
 
-    + topic "Inner" do
+    + topic('Inner') do
 
-      - spec "inner spec" do
+      - spec("inner spec") do
           s = hello()          # OK: call method defined in parent topic
           ok {s} == "Hello!"
         end
@@ -571,7 +573,7 @@ Oktest.scope do
 
     end
 
-  - spec "outer spec" do
+  - spec("outer spec") do
       s = hello()              # ERROR: call method defined in child topic
       ok {x} == "Hello!"
     end
@@ -723,6 +725,7 @@ Oktest.scope do
 
 end
 ```
+
 
 
 ## Fixtures
@@ -1312,10 +1315,10 @@ http = Rack::TestApp.wrap(Rack::Lint.new(app))   # wrap Rack app
 
 Oktest.scope do
 
-+ topic "GET /api/hello" do
++ topic("GET /api/hello") do
 
-  - spec "returns JSON data." do
-      response = http.GET('/api/hello')        # call Rack app
+  - spec("returns JSON data.") do
+      response = http.GET("/api/hello")        # call Rack app
       ok {response.status}       == 200
       ok {response.content_type} == "application/json"
       ok {response.body_json}    == {"status"=>"OK"}
@@ -1333,13 +1336,13 @@ $http = http                                   # !!!!
 
 Oktest.scope do
 
-+ topic "GET /api/hello" do
++ topic("GET /api/hello") do
 
     def api_call(**kwargs)                     # !!!!!
       $http.GET("/api/hello", **kwargs)        # !!!!!
     end                                        # !!!!!
 
-  - spec "returns JSON data." do
+  - spec("returns JSON data.") do
       response = api_call()                    # !!!!!
       ok {response.status}       == 200
       ok {response.content_type} == "application/json"
