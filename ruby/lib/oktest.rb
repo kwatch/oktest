@@ -1521,6 +1521,7 @@ END
     end
 
     def run(*args)
+      color_enabled = nil
       opts = Options.new
       parser = option_parser(opts)
       filenames = parser.parse(args)
@@ -1537,6 +1538,7 @@ END
         return 0
       end
       if opts.color
+        color_enabled = Config.color_enabled
         Config.color_enabled = (opts.color == 'on')
       end
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
@@ -1548,6 +1550,8 @@ END
       n_errors = Oktest.run(:style=>opts.style)
       AssertionObject.report_not_yet()
       return n_errors
+    ensure
+      Config.color_enabled = color_enabled if color_enabled != nil
     end
 
     private

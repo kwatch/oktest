@@ -377,32 +377,41 @@ END
     end
 
     it "'--color=on' option enables output coloring forcedly." do
-      [true, false].each do |tty|
-        _, sout, serr = run("--color=on", @testfile, tty: tty)
-        assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
-        assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
-        assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
-        assert_eq serr, ""
+      [true, false].each do |bool|
+        [true, false].each do |tty|
+          Oktest::Config.color_enabled = bool
+          _, sout, serr = run("--color=on", @testfile, tty: tty)
+          assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+          assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
+          assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
+          assert_eq serr, ""
+        end
       end
     end
 
     it "'--color' is same as '--color=on'." do
-      [true, false].each do |tty|
-        _, sout, serr = run("--color", @testfile, tty: tty)
-        assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
-        assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
-        assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
-        assert_eq serr, ""
+      [true, false].each do |bool|
+        [true, false].each do |tty|
+          Oktest::Config.color_enabled = bool
+          _, sout, serr = run("--color", @testfile, tty: tty)
+          assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+          assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
+          assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
+          assert_eq serr, ""
+        end
       end
     end
 
     it "'--color=off' option disables output coloring forcedly." do
-      [true, false].each do |tty|
-        _, sout, serr = run("--color=off", @testfile, tty: tty)
-        assert !sout.include?(edit_expected("[<B>pass</B>]")), "should not contain blue string"
-        assert !sout.include?(edit_expected("[<R>Fail</R>]")), "should not contain red string"
-        assert !sout.include?(edit_expected("[<Y>Skip</Y>]")), "should not contain yellos string"
-        assert_eq serr, ""
+      [true, false].each do |bool|
+        [true, false].each do |tty|
+          Oktest::Config.color_enabled = bool
+          _, sout, serr = run("--color=off", @testfile, tty: tty)
+          assert !sout.include?(edit_expected("[<B>pass</B>]")), "should not contain blue string"
+          assert !sout.include?(edit_expected("[<R>Fail</R>]")), "should not contain red string"
+          assert !sout.include?(edit_expected("[<Y>Skip</Y>]")), "should not contain yellos string"
+          assert_eq serr, ""
+        end
       end
     end
 
