@@ -1173,7 +1173,7 @@ module Oktest
   end
 
 
-  REPORTER = VerboseReporter
+  REPORTER_CLASS = VerboseReporter
 
 
   REPORTER_CLASSES = {
@@ -1185,7 +1185,7 @@ module Oktest
 
   def self.run(opts={})
     return if TOPLEVEL_SCOPES.empty?
-    klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER)  or
+    klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER_CLASS)  or
       raise ArgumentError, "#{opts[:style].inspect}: unknown style."
     reporter = klass.new
     runner = Runner.new(reporter)
