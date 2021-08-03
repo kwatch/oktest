@@ -145,9 +145,12 @@ END
   def setup
     @filename = "_test.tmp"
     File.write(@filename, INPUT)
+    @_color_enabled = Oktest::Config.color_enabled
+    Oktest::Config.color_enabled = true
   end
 
   def teardown
+    Oktest::Config.color_enabled = @_color_enabled
     File.unlink(@filename) if @filename && File.exist?(@filename)
   end
 

@@ -12,9 +12,12 @@ class MainApp_TC < TC
   def setup
     @testfile = "_tmp_test.rb"
     File.write(@testfile, INPUT, encoding: 'utf-8')
+    @_color_enabled = Oktest::Config.color_enabled
+    Oktest::Config.color_enabled = true
   end
 
   def teardown
+    Oktest::Config.color_enabled = @_color_enabled
     File.unlink(@testfile)
   end
 
@@ -141,6 +144,10 @@ END
       ret, sout, serr = main(["-f", "aaa=*pat*"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -f aaa=*pat*: invalid argument.\n"
+      #
+      ret, sout, serr = main(["--color=true"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: --color=true: invalid argument.\n"
     end
 
   end
@@ -148,9 +155,9 @@ END
 
   describe '#run()' do
 
-    def run(*args)
+    def run(*args, tty: true)
       ret = nil
-      sout, serr = capture do
+      sout, serr = capture("", tty: tty) do
         ret = Oktest::MainApp.new.run(*args)
       end
       return ret, sout, serr
@@ -190,6 +197,7 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
   -f PATTERN       : filter topic or spec with pattern (see below)
+  --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate   : generate test code skeleton from ruby file
 
 Filter examples:
@@ -359,14 +367,59 @@ END
     end
 
     it "'-f ...' option will be error." do
-      expected = <<'END'
-
-END
-      #
       begin
         run("-f", "*pat*", @testfile)
       rescue OptionParser::InvalidArgument => ex
         assert_eq ex.message, "invalid argument: -f *pat*"
+      else
+        assert false, "OptionParser::InvalidArgument expected but not raised."
+      end
+    end
+
+    it "'--color=on' option enables output coloring forcedly." do
+      [true, false].each do |bool|
+        [true, false].each do |tty|
+          Oktest::Config.color_enabled = bool
+          _, sout, serr = run("--color=on", @testfile, tty: tty)
+          assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+          assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
+          assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
+          assert_eq serr, ""
+        end
+      end
+    end
+
+    it "'--color' is same as '--color=on'." do
+      [true, false].each do |bool|
+        [true, false].each do |tty|
+          Oktest::Config.color_enabled = bool
+          _, sout, serr = run("--color", @testfile, tty: tty)
+          assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+          assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
+          assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
+          assert_eq serr, ""
+        end
+      end
+    end
+
+    it "'--color=off' option disables output coloring forcedly." do
+      [true, false].each do |bool|
+        [true, false].each do |tty|
+          Oktest::Config.color_enabled = bool
+          _, sout, serr = run("--color=off", @testfile, tty: tty)
+          assert !sout.include?(edit_expected("[<B>pass</B>]")), "should not contain blue string"
+          assert !sout.include?(edit_expected("[<R>Fail</R>]")), "should not contain red string"
+          assert !sout.include?(edit_expected("[<Y>Skip</Y>]")), "should not contain yellos string"
+          assert_eq serr, ""
+        end
+      end
+    end
+
+    it "'--color=true' option raises error." do
+      begin
+        run("--color=true", @testfile)
+      rescue OptionParser::InvalidArgument => ex
+        assert_eq ex.message, "invalid argument: --color=true"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end

@@ -1326,8 +1326,8 @@ module Oktest
 
     @os_windows      = RUBY_PLATFORM =~ /mswin|mingw/i
     @auto_run        = true
-    @color_available = ! @os_windows
-    @color_enabled   = @color_available
+    @color_available = ! @os_windows || ENV['COLORTERM'] =~ /color|24bit/i
+    @color_enabled   = @color_available && $stdout.tty?
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
 
     class << self
@@ -1521,6 +1521,7 @@ END
     end
 
     def run(*args)
+      color_enabled = nil
       opts = Options.new
       parser = option_parser(opts)
       filenames = parser.parse(args)
@@ -1536,6 +1537,10 @@ END
         print generate(filenames)
         return 0
       end
+      if opts.color
+        color_enabled = Config.color_enabled
+        Config.color_enabled = (opts.color == 'on')
+      end
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
       if opts.filter
@@ -1545,12 +1550,14 @@ END
       n_errors = Oktest.run(:style=>opts.style)
       AssertionObject.report_not_yet()
       return n_errors
+    ensure
+      Config.color_enabled = color_enabled if color_enabled != nil
     end
 
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :generate
+      attr_accessor :help, :version, :style, :filter, :color, :generate
     end
 
     def option_parser(opts)
@@ -1568,6 +1575,11 @@ END
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
+      parser.on('--color[={on|off}]') {|val|
+        val.nil? || val == 'on' || val == 'off'  or
+          raise OptionParser::InvalidArgument, val
+        opts.color = val || 'on'
+      }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
@@ -1580,6 +1592,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
   -f PATTERN       : filter topic or spec with pattern (see below)
+  --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate   : generate test code skeleton from ruby file
 
 Filter examples:
