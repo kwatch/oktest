@@ -107,33 +107,33 @@ END
     assert_eq serr, ""
   end
 
-  it "resolves 'spec' fixture name as description of current spec." do
+  it "resolves 'this_spec' fixture name as description of current spec." do
     Oktest.scope do
       topic Integer do
-        spec "1+1 should be 2." do |spec|
-          puts "spec=#{spec.inspect}"
+        spec "1+1 should be 2." do |this_spec|
+          puts "this_spec=#{this_spec.inspect}"
         end
       end
     end
     sout, serr = capture do
       Oktest::Runner.new(Oktest::Reporter.new).run_all()
     end
-    assert_eq sout, "spec=\"1+1 should be 2.\"\n"
+    assert_eq sout, "this_spec=\"1+1 should be 2.\"\n"
     assert_eq serr, ""
   end
 
-  it "resolves 'topic' fixture name as target objec of current topic." do
+  it "resolves 'this_topic' fixture name as target objec of current topic." do
     Oktest.scope do
       topic Integer do
-        spec "1+1 should be 2." do |topic|
-          puts "topic=#{topic.inspect}"
+        spec "1+1 should be 2." do |this_topic|
+          puts "this_topic=#{this_topic.inspect}"
         end
       end
     end
     sout, serr = capture do
       Oktest::Runner.new(Oktest::Reporter.new).run_all()
     end
-    assert_eq sout, "topic=Integer\n"
+    assert_eq sout, "this_topic=Integer\n"
     assert_eq serr, ""
   end
 
