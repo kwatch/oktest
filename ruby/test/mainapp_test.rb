@@ -195,7 +195,8 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
 Filter examples:
   $ oktest -f topic=Hello         # filter by topic
   $ oktest -f spec='*hello*'      # filter by spec
-  $ oktest -f '*hello*'           # same as above
+  $ oktest -f tag=experimental    # filter by tag name
+  $ oktest -f tag='{exp,old}'     # filter by multiple tag names
 END
       #
       ret, sout, serr = run("-h")
