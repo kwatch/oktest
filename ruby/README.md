@@ -863,6 +863,10 @@ end
 ```
 
 * Fixtures can be defined in block of `topic()` as well as block of `Object.scope()`.
+<!--
+* Special fixture name `this_topic` represents the first argument of `topic()`.
+* Special fixture name `this_spec` represents the description of `spec()`.
+-->
 * If fixture requires clean-up operation, call `at_end()` in `fixture()` block.
 
 ```ruby
@@ -1312,6 +1316,31 @@ Oktest.scope do
 
   - spec "returns JSON data." do
       response = http.GET('/api/hello')        # call Rack app
+      ok {response.status}       == 200
+      ok {response.content_type} == "application/json"
+      ok {response.body_json}    == {"status"=>"OK"}
+    end
+
+  end
+
+end
+```
+
+Defining h method per topic may help you.
+
+```ruby
+$http = http                                   # !!!!
+
+Oktest.scope do
+
++ topic "GET /api/hello" do
+
+    def api_call(**kwargs)                     # !!!!!
+      $http.GET("/api/hello", **kwargs)        # !!!!!
+    end                                        # !!!!!
+
+  - spec "returns JSON data." do
+      response = api_call()                    # !!!!!
       ok {response.status}       == 200
       ok {response.content_type} == "application/json"
       ok {response.body_json}    == {"status"=>"OK"}

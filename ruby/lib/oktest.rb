@@ -896,6 +896,8 @@ module Oktest
     end
 
     def get_fixture_values(names, topic, spec, context, location=nil, resolved={}, resolving=[])
+      resolved[:this_topic] ||= topic.target
+      resolved[:this_spec]  ||= spec.desc
       location ||= spec.location
       return names.collect {|name|
         ! resolving.include?(name)  or
