@@ -21,7 +21,7 @@ class Runner_TC < TC
       puts "/file"
     end
     def enter_topic(topic, depth)
-      puts "#{'  '*depth}topic: #{topic.name.inspect}"
+      puts "#{'  '*depth}topic: #{topic.target.inspect}"
     end
     def exit_topic(topic, depth)
       puts "#{'  '*depth}/topic"

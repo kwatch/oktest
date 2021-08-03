@@ -393,7 +393,7 @@ module Oktest
       @fixtures = {}
     end
 
-    attr_accessor :name, :parent, :children, :before, :after, :before_all, :after_all, :fixtures
+    attr_accessor :parent, :children, :before, :after, :before_all, :after_all, :fixtures
     attr_accessor :_klass, :_prefix  #:nodoc:
 
     def add_child(child)
@@ -454,17 +454,25 @@ module Oktest
 
   class TopicObject < ScopeObject
 
-    def initialize(name=nil)
+    def initialize(target=nil, tag=nil)
       super()
-      @name = name
+      @target = target
+      @tag    = tag
     end
+
+    attr_reader :target, :tag
 
     def accept_runner(runner, *args)
       return runner.run_topic(self, *args)
     end
 
     def filter_match?(pattern)
-      return File.fnmatch?(pattern, @name.to_s)
+      return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
+    end
+
+    def tag_match?(pattern)
+      return false if @tag.nil?
+      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
     end
 
   end
@@ -483,8 +491,8 @@ module Oktest
       @_scope.fixtures[name] = [block, argnames, location]
     end
 
-    def topic(name, &block)
-      topic = TopicObject.new(name)
+    def topic(target, tag: nil, &block)
+      topic = TopicObject.new(target, tag)
       @_scope.add_child(topic)
       klass = Class.new(self)
       klass.class_eval do
@@ -498,22 +506,22 @@ module Oktest
       return topic
     end
 
-    def case_when(desc, &block)
-      return __case_when("When #{desc}", &block)
+    def case_when(desc, tag: nil, &block)
+      return __case_when("When #{desc}", tag, &block)
     end
 
-    def case_else(&block)
-      return __case_when("Else", &block)
+    def case_else(tag: nil, &block)
+      return __case_when("Else", tag, &block)
     end
 
-    def __case_when(desc, &block)
-      obj = topic(desc, &block)
+    def __case_when(desc, tag, &block)
+      obj = topic(desc, tag: tag, &block)
       obj._prefix = '-'
       return obj
     end
     private :__case_when
 
-    def spec(desc, &block)
+    def spec(desc, tag: nil, &block)
       location = caller(1).first
       if block
         argnames = Util.block_argnames(block, location)
@@ -521,7 +529,7 @@ module Oktest
         block = proc { raise TodoException, "not implemented yet" }
         argnames = []
       end
-      spec = SpecObject.new(desc, block, argnames, location)
+      spec = SpecObject.new(desc, block, argnames, location, tag)
       @_scope.add_child(spec)
       spec._prefix = '-'
       return spec
@@ -567,14 +575,15 @@ module Oktest
 
   class SpecObject
 
-    def initialize(desc, block, argnames, location)
+    def initialize(desc, block, argnames, location, tag=nil)
       @desc = desc
       @block = block
       @argnames = argnames
       @location = location   # necessary when raising fixture not found error
+      @tag      = tag
     end
 
-    attr_reader :desc, :block, :argnames, :location #:nodoc:
+    attr_reader :desc, :block, :argnames, :location, :tag #:nodoc:
     attr_accessor :_prefix   #:nodoc:
 
     def accept_runner(runner, *args)       #:nodoc:
@@ -582,7 +591,12 @@ module Oktest
     end
 
     def filter_match?(pattern)
-      return File.fnmatch?(pattern, @desc.to_s)
+      return File.fnmatch?(pattern, @desc.to_s, File::FNM_EXTGLOB)
+    end
+
+    def tag_match?(pattern)
+      return false if @tag.nil?
+      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
@@ -1073,8 +1087,8 @@ module Oktest
 
     def spec_path(spec, topic)
       arr = []
-      while topic
-        arr << topic.name.to_s if topic.name
+      while topic && topic.is_a?(TopicObject)
+        arr << topic.target.to_s if topic.target
         topic = topic.parent
       end
       arr.reverse!
@@ -1091,7 +1105,7 @@ module Oktest
 
     def enter_topic(topic, depth)
       super
-      puts "#{'  ' * depth}#{topic._prefix} #{Color.topic(topic.name)}"
+      puts "#{'  ' * depth}#{topic._prefix} #{Color.topic(topic.target)}"
     end
 
     def exit_topic(topic, depth)
@@ -1325,9 +1339,11 @@ module Oktest
 
   class Filter
 
-    def initialize(topic_pattern, spec_pattern)
+    def initialize(topic_pattern, spec_pattern, tag_pattern, negative: false)
       @topic_pattern = topic_pattern
       @spec_pattern  = spec_pattern
+      @tag_pattern   = tag_pattern
+      @negative      = negative
     end
 
     def filter_toplevel_scope!(scope)
@@ -1339,19 +1355,25 @@ module Oktest
     def _filter!(children)
       topic_pat = @topic_pattern
       spec_pat  = @spec_pattern
+      tag_pat   = @tag_pattern
+      positive  = ! @negative
       children.collect! {|item|
         case item
         when TopicObject
           if topic_pat && item.filter_match?(topic_pat)
-            item
+            positive ? item : nil
+          elsif tag_pat && item.tag_match?(tag_pat)
+            positive ? item : nil
           else
             _filter!(item.children) ? item : nil
           end
         when SpecObject
-          if spec_pat
-            item.filter_match?(spec_pat) ? item : nil
+          if spec_pat && item.filter_match?(spec_pat)
+            positive ? item : nil
+          elsif tag_pat && item.tag_match?(tag_pat)
+            positive ? item : nil
           else
-            topic_pat ? nil : item
+            positive ? nil : item
           end
         else
           item
@@ -1362,6 +1384,8 @@ module Oktest
     end
 
   end
+
+  FILTER_CLASS = Filter
 
 
   module Color
@@ -1539,7 +1563,11 @@ END
           raise OptionParser::InvalidArgument, val
         opts.style = val
       }
-      parser.on('-f PATTERN')       {|val| opts.filter = val }
+      parser.on('-f PATTERN') {|val|
+        val =~ /\A(topic|spec|tag|sid)(=|!=)/  or
+          raise OptionParser::InvalidArgument, val
+        opts.filter = val
+      }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
@@ -1557,7 +1585,9 @@ Usage: #{command} [<options>] [<file-or-directory>...]
 Filter examples:
   $ oktest -f topic=Hello         # filter by topic
   $ oktest -f spec='*hello*'      # filter by spec
-  $ oktest -f '*hello*'           # same as above
+  $ oktest -f tag=experimental    # filter by tag name
+  $ oktest -f tag!=experimental   # negative filter by tag name
+  $ oktest -f tag='{exp,old}'     # filter by multiple tag names
 END
     end
 
@@ -1590,13 +1620,13 @@ END
     end
 
     def filter(pattern)
-      topic_pat = spec_pat = nil
-      case pattern
-      when /\Atopic=/ ; topic_pat = $'
-      when /\Aspec=/  ; spec_pat  = $'
-      else            ; spec_pat  = pattern
-      end
-      filter = Filter.new(topic_pat, spec_pat)
+      pattern = "spec#{$1}\\[!#{$2}\\]*" if pattern =~ /\Asid(=|!=)(.*)/  # filter by spec id
+      pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
+      pattern =~ /\A(\w+)(=|!=)/ && pat.key?($1)  or
+        raise Exception, "** internal error: pattern=#{pattern.inspect}"
+      pat[$1] = $'
+      negative = ($2 == '!=')
+      filter = FILTER_CLASS.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
       TOPLEVEL_SCOPES.each do |filescope|
         filter.filter_toplevel_scope!(filescope)
       end

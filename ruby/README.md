@@ -55,7 +55,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#skip-and-todo">Skip, and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
-    * <a href="#filtering">Filtering</a>
+    * <a href="#tag-and-filtering">Tag and Filtering</a>
     * <a href="#case_when-and-case_else"><code>case_when</code> and <code>case_else</code></a>
     * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#optional-unary-operators">Optional: Unary Operators</a>
@@ -303,14 +303,69 @@ Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 (not `test-xxx.rb` nor `xxx-test.rb`).
 
 
-### Filtering
+### Tag and Filtering
 
-It is possible to filter topics or specs by `-f pattern` option.
+`topic()` and `spec()` accepts tag name, for example 'obsolete' or 'experimental'.
+
+test/example04_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic 'Example topic' do
+
+    topic Integer do
+      spec "example #1" do
+        ok {1+1} == 2
+      end
+      spec "example #2", tag: 'old' do     # tag name: 'old'
+        ok {1-1} == 0
+      end
+    end
+
+    topic Float, tag: 'exp' do             # tag name: 'exp'
+      spec "example #3" do
+        ok {1.0+1.0} == 2.0
+      end
+      spec "example #4" do
+        ok {1.0-1.0} == 0.0
+      end
+    end
+
+    topic String, tag: ['exp', 'old'] do   # tag name: 'old' and 'exp'
+      spec "example #5" do
+        ok {'a'*3} == 'aaa'
+      end
+    end
+
+  end
+
+end
+```
+
+It is possible to filter topics and specs by tag name (pattern).
+
+```terminal
+$ oktest -f tag=exp         tests/     # filter by tag name
+$ oktest -f tag='*exp*'     tests/     # filter by tag name pattern
+$ oktest -f tag='{exp,old}' tests/     # filter by multiple tag names
+```
+
+It is also possible to filter topics or specs by name.
 Pattern (!= regular expression) supports `*`, `?`, `[]`, and `{}`.
 
 ```terminal
-$ oktest -f topic='*Hello*' test/    # filter topics by pattern
-$ oktest -f spec='*hello*' test/     # filter specs by pattern
+$ oktest -f topic='*Integer*' test/    # filter topics by pattern
+$ oktest -f spec='*#[1-3]'    test/    # filter specs by pattern
+```
+
+If you need negative filter, use `!=` instead of `=`.
+
+```terminal
+$ oktest -f spec!='*#5'      tests/    # exclude spec 'example #5'
+$ oktest -f tag!='{exp,old}' tests/    # exclude tag='exp' or tag='old'
 ```
 
 
@@ -318,7 +373,7 @@ $ oktest -f spec='*hello*' test/     # filter specs by pattern
 
 `case_when` and `case_else` represents conditional spec.
 
-test/example04_test.rb:
+test/example05_test.rb:
 
 ```ruby
 require 'oktest'
@@ -353,7 +408,7 @@ end
 Result:
 
 ```terminal
-$ ruby test/example04_test.rb
+$ ruby test/example05_test.rb
 * Integer
   * #abs()
     - When value is negative...
@@ -428,7 +483,9 @@ end
 `topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
 This makes test scripts more readable.
 
-test/example05_test.rb:
+<!--
+test/example06_test.rb:
+-->
 
 ```ruby
 require 'oktest'
@@ -460,7 +517,7 @@ end
 Methods defined in topics can be called in specs.
 
 <!--
-test/example91_test.rb:
+test/example08a_test.rb:
 -->
 
 ```ruby
@@ -487,7 +544,7 @@ end
 * It will be ERROR to call methods defined in child topics.
 
 <!--
-test/example92_test.rb:
+test/example08b_test.rb:
 -->
 
 ```ruby

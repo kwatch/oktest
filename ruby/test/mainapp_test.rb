@@ -29,36 +29,36 @@ Oktest.scope do
       spec "1+1 should be 2" do
         ok {1+1} == 2
       end
-      spec "1-1 should be 0" do
+      spec "1-1 should be 0", tag: 'new' do
         ok {1-1} == 0
       end
     end
 
     topic "Child2" do
-      spec "1*1 should be 1" do
+      spec "1*1 should be 1", tag: 'fail' do
         ok {1*1} == 2
       end
-      spec "1/1 should be 1" do
+      spec "1/1 should be 1", tag: 'err' do
         ok {1/0} == 1
       end
     end
 
-    topic "Child3" do
+    topic "Child3", tag: ['exp', 'new'] do
       spec "skip example" do
         skip_when true, "a certain condition"
       end
       spec "todo example"
     end
 
-    case_when "x is negative" do
-      spec "x*x is positive." do
+    case_when "x is negative", tag: 'exp' do
+      spec "[!6hs1j] x*x is positive." do
         x = -2
         ok {x*x} > 0
       end
     end
 
     case_else do
-      spec "x*x is also positive." do
+      spec "[!pwiq7] x*x is also positive." do
         x = 2
         ok {x*x} > 0
       end
@@ -137,6 +137,10 @@ END
       ret, sout, serr = main(["-s", "foobar"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -s foobar: invalid argument.\n"
+      #
+      ret, sout, serr = main(["-f", "aaa=*pat*"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: -f aaa=*pat*: invalid argument.\n"
     end
 
   end
@@ -191,7 +195,9 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
 Filter examples:
   $ oktest -f topic=Hello         # filter by topic
   $ oktest -f spec='*hello*'      # filter by spec
-  $ oktest -f '*hello*'           # same as above
+  $ oktest -f tag=experimental    # filter by tag name
+  $ oktest -f tag!=experimental   # negative filter by tag name
+  $ oktest -f tag='{exp,old}'     # filter by multiple tag names
 END
       #
       ret, sout, serr = run("-h")
@@ -302,18 +308,68 @@ END
       assert_eq serr, ""
     end
 
-    it "'-f ...' option filters specs." do
-      expected = <<END
+    it "'-f tag=...' option filters by tag name." do
+      expected = <<'END'
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1-1 should be 0
-## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+  * <b>Child3</b>
+    - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
+    - [<Y>TODO</Y>] todo example
+  - <b>When x is negative</b>
+    - [<B>pass</B>] [!6hs1j] x*x is positive.
+## total:4 (<B>pass:2</B>, fail:0, error:0, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       #
-      ret, sout, serr = run("-f", "*1-1*", @testfile)
+      ret, sout, serr = run("-f", "tag={new,exp}", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
+    end
+
+    it "'-f sid=...' option filters by spec id." do
+      expected = <<'END'
+* <b>Parent</b>
+  - <b>When x is negative</b>
+    - [<B>pass</B>] [!6hs1j] x*x is positive.
+## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "sid=6hs1j", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
+    it "supports negative filter." do
+      expected = <<'END'
+* <b>Parent</b>
+  * <b>Child1</b>
+    - [<B>pass</B>] 1+1 should be 2
+    - [<B>pass</B>] 1-1 should be 0
+  - <b>Else</b>
+    - [<B>pass</B>] [!pwiq7] x*x is also positive.
+## total:3 (<B>pass:3</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "tag!={fail,err,exp}", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
+    it "'-f ...' option will be error." do
+      expected = <<'END'
+
+END
+      #
+      begin
+        run("-f", "*pat*", @testfile)
+      rescue OptionParser::InvalidArgument => ex
+        assert_eq ex.message, "invalid argument: -f *pat*"
+      else
+        assert false, "OptionParser::InvalidArgument expected but not raised."
+      end
     end
 
     it "'-g' or '--generate' option prints test code." do
