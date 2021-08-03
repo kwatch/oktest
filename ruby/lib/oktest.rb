@@ -1569,10 +1569,10 @@ END
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
-      parser.on('--color={on|off}') {|val|
-        val == 'on' || val == 'off'  or
+      parser.on('--color[={on|off}]') {|val|
+        val.nil? || val == 'on' || val == 'off'  or
           raise OptionParser::InvalidArgument, val
-        opts.color = val
+        opts.color = val || 'on'
       }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
@@ -1586,7 +1586,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
   -f PATTERN       : filter topic or spec with pattern (see below)
-  --color={on|off} : enable/disable output coloring forcedly
+  --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate   : generate test code skeleton from ruby file
 
 Filter examples:

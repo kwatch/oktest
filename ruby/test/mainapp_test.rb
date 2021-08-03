@@ -134,10 +134,6 @@ END
       ret, sout, serr = main(["-s"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -s: argument required.\n"
-      #
-      ret, sout, serr = main(["--color"])
-      assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: --color: argument required.\n"
     end
 
     it "reports error when argument is invalid." do
@@ -201,7 +197,7 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
   -f PATTERN       : filter topic or spec with pattern (see below)
-  --color={on|off} : enable/disable output coloring forcedly
+  --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate   : generate test code skeleton from ruby file
 
 Filter examples:
@@ -390,6 +386,16 @@ END
       end
     end
 
+    it "'--color' is same as '--color=on'." do
+      [true, false].each do |tty|
+        _, sout, serr = run("--color", @testfile, tty: tty)
+        assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+        assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
+        assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
+        assert_eq serr, ""
+      end
+    end
+
     it "'--color=off' option disables output coloring forcedly." do
       [true, false].each do |tty|
         _, sout, serr = run("--color=off", @testfile, tty: tty)
@@ -407,24 +413,6 @@ END
         assert_eq ex.message, "invalid argument: --color=true"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
-      end
-    end
-
-    it "'--color' option raises error." do
-      begin
-        run("--color", @testfile)
-      rescue OptionParser::InvalidArgument => ex
-        assert_eq ex.message, "invalid argument: --color #{@testfile}"
-      else
-        assert false, "OptionParser::InvalidArgument expected but not raised."
-      end
-      #
-      begin
-        run("--color")
-      rescue OptionParser::MissingArgument => ex
-        assert_eq ex.message, "missing argument: --color"
-      else
-        assert false, "OptionParser::MissingArgument expected but not raised."
       end
     end
 
