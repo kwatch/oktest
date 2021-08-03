@@ -12,9 +12,12 @@ class MainApp_TC < TC
   def setup
     @testfile = "_tmp_test.rb"
     File.write(@testfile, INPUT, encoding: 'utf-8')
+    @_color_enabled = Oktest::Config.color_enabled
+    Oktest::Config.color_enabled = true
   end
 
   def teardown
+    Oktest::Config.color_enabled = @_color_enabled
     File.unlink(@testfile)
   end
 
