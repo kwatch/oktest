@@ -1326,7 +1326,7 @@ module Oktest
 
     @os_windows      = RUBY_PLATFORM =~ /mswin|mingw/i
     @auto_run        = true
-    @color_available = ! @os_windows
+    @color_available = ! @os_windows || ENV['COLORTERM'] =~ /color|24bit/i
     @color_enabled   = @color_available
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
 
