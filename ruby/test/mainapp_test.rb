@@ -141,9 +141,9 @@ END
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -s foobar: invalid argument.\n"
       #
-      ret, sout, serr = main(["-f", "aaa=*pat*"])
+      ret, sout, serr = main(["-F", "aaa=*pat*"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -f aaa=*pat*: invalid argument.\n"
+      assert_eq serr, "#{File.basename($0)}: -F aaa=*pat*: invalid argument.\n"
       #
       ret, sout, serr = main(["--color=true"])
       assert_eq ret, 1
@@ -196,16 +196,16 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
   -s STYLE               : report style (verbose/simple/plain, or v/s/p)
-  -f PATTERN             : filter topic or spec with pattern (see below)
+  -F PATTERN             : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
 
 Filter examples:
-  $ oktest -f topic=Hello            # filter by topic
-  $ oktest -f spec='*hello*'         # filter by spec
-  $ oktest -f tag=name               # filter by tag name
-  $ oktest -f tag!=name              # negative filter by tag name
-  $ oktest -f tag='{name1,name2}'    # filter by multiple tag names
+  $ oktest -F topic=Hello            # filter by topic
+  $ oktest -F spec='*hello*'         # filter by spec
+  $ oktest -F tag=name               # filter by tag name
+  $ oktest -F tag!=name              # negative filter by tag name
+  $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
 END
       #
       ret, sout, serr = run("-h")
@@ -287,7 +287,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-f topic=...' option filters topics." do
+    it "'-F topic=...' option filters topics." do
       expected = <<END
 * <b>Parent</b>
   * <b>Child1</b>
@@ -296,13 +296,13 @@ END
 ## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
-      ret, sout, serr = run("-f", "topic=Child1", @testfile)
+      ret, sout, serr = run("-F", "topic=Child1", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
     end
 
-    it "'-f spec=...' option filters specs." do
+    it "'-F spec=...' option filters specs." do
       expected = <<END
 * <b>Parent</b>
   * <b>Child1</b>
@@ -310,13 +310,13 @@ END
 ## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
-      ret, sout, serr = run("-f", "spec=*1-1*", @testfile)
+      ret, sout, serr = run("-F", "spec=*1-1*", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
     end
 
-    it "'-f tag=...' option filters by tag name." do
+    it "'-F tag=...' option filters by tag name." do
       expected = <<'END'
 * <b>Parent</b>
   * <b>Child1</b>
@@ -329,13 +329,13 @@ END
 ## total:4 (<B>pass:2</B>, fail:0, error:0, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       #
-      ret, sout, serr = run("-f", "tag={new,exp}", @testfile)
+      ret, sout, serr = run("-F", "tag={new,exp}", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
     end
 
-    it "'-f sid=...' option filters by spec id." do
+    it "'-F sid=...' option filters by spec id." do
       expected = <<'END'
 * <b>Parent</b>
   - <b>When x is negative</b>
@@ -343,7 +343,7 @@ END
 ## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
-      ret, sout, serr = run("-f", "sid=6hs1j", @testfile)
+      ret, sout, serr = run("-F", "sid=6hs1j", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
@@ -360,17 +360,17 @@ END
 ## total:3 (<B>pass:3</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
-      ret, sout, serr = run("-f", "tag!={fail,err,exp}", @testfile)
+      ret, sout, serr = run("-F", "tag!={fail,err,exp}", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
     end
 
-    it "'-f ...' option will be error." do
+    it "'-F ...' option will be error." do
       begin
-        run("-f", "*pat*", @testfile)
+        run("-F", "*pat*", @testfile)
       rescue OptionParser::InvalidArgument => ex
-        assert_eq ex.message, "invalid argument: -f *pat*"
+        assert_eq ex.message, "invalid argument: -F *pat*"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end
