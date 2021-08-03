@@ -1570,7 +1570,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.style = val
       }
-      parser.on('-f PATTERN') {|val|
+      parser.on('-F PATTERN') {|val|
         val =~ /\A(topic|spec|tag|sid)(=|!=)/  or
           raise OptionParser::InvalidArgument, val
         opts.filter = val
@@ -1591,16 +1591,16 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
   -s STYLE               : report style (verbose/simple/plain, or v/s/p)
-  -f PATTERN             : filter topic or spec with pattern (see below)
+  -F PATTERN             : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
 
 Filter examples:
-  $ oktest -f topic=Hello            # filter by topic
-  $ oktest -f spec='*hello*'         # filter by spec
-  $ oktest -f tag=name               # filter by tag name
-  $ oktest -f tag!=name              # negative filter by tag name
-  $ oktest -f tag='{name1,name2}'    # filter by multiple tag names
+  $ oktest -F topic=Hello            # filter by topic
+  $ oktest -F spec='*hello*'         # filter by spec
+  $ oktest -F tag=name               # filter by tag name
+  $ oktest -F tag!=name              # negative filter by tag name
+  $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
 END
     end
 
