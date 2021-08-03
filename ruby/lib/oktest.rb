@@ -1615,14 +1615,11 @@ END
     end
 
     def filter(pattern)
-      topic_pat = spec_pat = tag_pat = nil
-      case pattern
-      when /\Atopic=/ ; topic_pat = $'
-      when /\Aspec=/  ; spec_pat  = $'
-      when /\Atag=/   ; tag_pat   = $'
-      else            ; spec_pat  = pattern
-      end
-      filter = Filter.new(topic_pat, spec_pat, tag_pat)
+      pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
+      pattern =~ /\A(\w+)=/ && pat.key?($1)  or
+        raise Exception, "** internal error: pattern=#{pattern.inspect}"
+      pat[$1] = $'
+      filter = Filter.new(pat['topic'], pat['spec'], pat['tag'])
       TOPLEVEL_SCOPES.each do |filescope|
         filter.filter_toplevel_scope!(filescope)
       end
