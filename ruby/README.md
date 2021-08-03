@@ -349,24 +349,24 @@ end
 It is possible to filter topics and specs by tag name (pattern).
 
 ```terminal
-$ oktest -f tag=exp         tests/     # filter by tag name
-$ oktest -f tag='*exp*'     tests/     # filter by tag name pattern
-$ oktest -f tag='{exp,old}' tests/     # filter by multiple tag names
+$ oktest -F tag=exp         tests/     # filter by tag name
+$ oktest -F tag='*exp*'     tests/     # filter by tag name pattern
+$ oktest -F tag='{exp,old}' tests/     # filter by multiple tag names
 ```
 
 It is also possible to filter topics or specs by name.
 Pattern (!= regular expression) supports `*`, `?`, `[]`, and `{}`.
 
 ```terminal
-$ oktest -f topic='*Integer*' test/    # filter topics by pattern
-$ oktest -f spec='*#[1-3]'    test/    # filter specs by pattern
+$ oktest -F topic='*Integer*' test/    # filter topics by pattern
+$ oktest -F spec='*#[1-3]'    test/    # filter specs by pattern
 ```
 
 If you need negative filter, use `!=` instead of `=`.
 
 ```terminal
-$ oktest -f spec!='*#5'      tests/    # exclude spec 'example #5'
-$ oktest -f tag!='{exp,old}' tests/    # exclude tag='exp' or tag='old'
+$ oktest -F spec!='*#5'      tests/    # exclude spec 'example #5'
+$ oktest -F tag!='{exp,old}' tests/    # exclude tag='exp' or tag='old'
 ```
 
 
