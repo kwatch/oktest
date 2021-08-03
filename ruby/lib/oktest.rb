@@ -1368,10 +1368,10 @@ module Oktest
             _filter!(item.children) ? item : nil
           end
         when SpecObject
-          if spec_pat
-            item.filter_match?(spec_pat) == positive ? item : nil
-          elsif tag_pat
-            item.tag_match?(tag_pat) == positive ? item : nil
+          if spec_pat && item.filter_match?(spec_pat)
+            positive ? item : nil
+          elsif tag_pat && item.tag_match?(tag_pat)
+            positive ? item : nil
           else
             positive ? nil : item
           end
