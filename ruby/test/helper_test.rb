@@ -321,4 +321,16 @@ class SpecHelper_TC < TC
     end
   end
 
+  describe '#recorder()' do
+    it "creates Benry::Recorder object." do
+      rec = recorder()
+      ok {defined? Benry::Recorder}.truthy?
+      ok {rec}.is_a?(Benry::Recorder)
+      o = rec.fake_object(:foo=>123)
+      ok {o.foo()} == 123
+      ok {rec[0].name} == :foo
+      ok {rec[0].obj} == o
+    end
+  end
+
 end
