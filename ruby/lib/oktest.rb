@@ -1385,6 +1385,8 @@ module Oktest
 
   end
 
+  FILTER_CLASS = Filter
+
 
   module Color
 
@@ -1623,7 +1625,7 @@ END
         raise Exception, "** internal error: pattern=#{pattern.inspect}"
       pat[$1] = $'
       negative = ($2 == '!=')
-      filter = Filter.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
+      filter = FILTER_CLASS.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
       TOPLEVEL_SCOPES.each do |filescope|
         filter.filter_toplevel_scope!(filescope)
       end
