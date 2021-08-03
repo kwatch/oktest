@@ -1546,7 +1546,7 @@ END
       if opts.filter
         filter(opts.filter)
       end
-      Oktest::Config.auto_run = false
+      Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
       AssertionObject.report_not_yet()
       return n_errors
@@ -1661,7 +1661,7 @@ END
     exc = $!
     return false if exc && !exc.is_a?(SystemExit)
     return false if TOPLEVEL_SCOPES.empty?
-    return Oktest::Config.auto_run
+    return Config.auto_run
   end
 
 
