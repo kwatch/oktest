@@ -1060,7 +1060,7 @@ module Oktest
       end
     end
 
-    FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)\.rbc?:` #:nodoc:
+    FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)(?:\.rbc?)?:` #:nodoc:
 
     def print_exc_message(ex, status)
       if status == :FAIL
