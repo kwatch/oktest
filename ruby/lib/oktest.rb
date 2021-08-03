@@ -1327,7 +1327,7 @@ module Oktest
     @os_windows      = RUBY_PLATFORM =~ /mswin|mingw/i
     @auto_run        = true
     @color_available = ! @os_windows || ENV['COLORTERM'] =~ /color|24bit/i
-    @color_enabled   = @color_available
+    @color_enabled   = @color_available && $stdout.tty?
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
 
     class << self
@@ -1536,7 +1536,9 @@ END
         print generate(filenames)
         return 0
       end
-      Config.color_enabled = opts.color ? (opts.color == 'on') : color_enabled?()
+      if opts.color
+        Config.color_enabled = (opts.color == 'on')
+      end
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
       if opts.filter
@@ -1624,10 +1626,6 @@ END
         end
       end
       return buf.join()
-    end
-
-    def color_enabled?()
-      return Config.color_available && $stdout.tty?
     end
 
     def filter(pattern)
