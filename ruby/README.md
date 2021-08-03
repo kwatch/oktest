@@ -79,13 +79,13 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#dummy_values"><code>dummy_values()</code></a>
     * <a href="#dummy_attrs"><code>dummy_attrs()</code></a>
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
+    * <a href="#recorder"><code>recorder()</code></a>
   * <a href="#tips">Tips</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
   * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
-
 
 
 ## Quick Tutorial
@@ -1189,6 +1189,73 @@ Oktest.scope do
 
 end
 ```
+
+
+### `recorder()`
+
+`recorder()` returns Benry::Recorder object.
+See [Benry::Recorder README](https://github.com/kwatch/benry-ruby/blob/ruby/benry-recorder/README.md)
+for detals.
+
+test/example37_test.rb:
+
+```ruby
+require 'oktest'
+
+class Calc
+  def total(*nums)
+    t = 0; nums.each {|n| t += n }
+    return t
+  end
+  def average(*nums)
+    return total(*nums).to_f / nums.length
+  end
+end
+
+
+Oktest.scope do
+
+  topic 'recorder()' do
+
+    spec "records method calls." do
+      ## target object
+      calc = Calc.new
+      ## record method call
+      rec = recorder()
+      rec.record_method(calc, :total)
+      ## method call
+      v = calc.average(1, 2, 3, 4)   # calc.average() calls calc.total() internally
+      p v                   #=> 2.5
+      ## show method call info
+      p rec.length          #=> 1
+      p rec[0].obj == calc  #=> true
+      p rec[0].name         #=> :total
+      p rec[0].args         #=> [1, 2, 3, 4]
+      p rec[0].ret          #=> 2.5
+    end
+
+    spec "defines fake methods." do
+      ## target object
+      calc = Calc.new
+      ## define fake methods
+      rec = recorder()
+      rec.fake_method(calc, :total=>20, :average=>5.5)
+      ## call fake methods
+      v1 = calc.total(1, 2, 3)         # fake method returns dummy value
+      p v1                  #=> 20
+      v2 = calc.average(1, 2, 'a'=>3)  # fake methods accepts any args
+      p v2                  #=> 5.5
+      ## show method call info
+      puts rec.inspect
+        #=> 0: #<Calc:0x00007fdb5482c968>.total(1, 2, 3) #=> 20
+        #   1: #<Calc:0x00007fdb5482c968>.average(1, 2, {"a"=>3}) #=> 5.5
+    end
+
+  end
+
+end
+```
+
 
 
 ## Tips
