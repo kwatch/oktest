@@ -1505,8 +1505,8 @@ END
     def self.main(argv=nil)
       argv ||= ARGV
       begin
-        status = self.new.run(*argv)
-        return status || 0
+        status = self.new.run(*argv)  or raise "** internal error"
+        return status
       rescue OptionParser::ParseError => ex
         case ex
         when OptionParser::InvalidOption   ; s = "unknown option."
