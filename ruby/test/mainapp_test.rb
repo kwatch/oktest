@@ -137,6 +137,10 @@ END
       ret, sout, serr = main(["-s", "foobar"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -s foobar: invalid argument.\n"
+      #
+      ret, sout, serr = main(["-f", "aaa=*pat*"])
+      assert_eq ret, 1
+      assert_eq serr, "#{File.basename($0)}: -f aaa=*pat*: invalid argument.\n"
     end
 
   end
@@ -319,6 +323,20 @@ END
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
+    end
+
+    it "'-f ...' option will be error." do
+      expected = <<'END'
+
+END
+      #
+      begin
+        run("-f", "*pat*", @testfile)
+      rescue OptionParser::InvalidArgument => ex
+        assert_eq ex.message, "invalid argument: -f *pat*"
+      else
+        assert false, "OptionParser::InvalidArgument expected but not raised."
+      end
     end
 
     it "'-g' or '--generate' option prints test code." do

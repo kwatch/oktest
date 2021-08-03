@@ -1559,7 +1559,11 @@ END
           raise OptionParser::InvalidArgument, val
         opts.style = val
       }
-      parser.on('-f PATTERN')       {|val| opts.filter = val }
+      parser.on('-f PATTERN') {|val|
+        val =~ /\A(topic|spec|tag)=/  or
+          raise OptionParser::InvalidArgument, val
+        opts.filter = val
+      }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
