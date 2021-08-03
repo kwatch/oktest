@@ -1575,7 +1575,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
-      parser.on('--color[={on|off}]') {|val|
+      parser.on(      '--color[={on|off}]') {|val|
         val.nil? || val == 'on' || val == 'off'  or
           raise OptionParser::InvalidArgument, val
         opts.color = val || 'on'
@@ -1588,19 +1588,19 @@ END
       command ||= File.basename($0)
       return <<END
 Usage: #{command} [<options>] [<file-or-directory>...]
-  -h, --help       : show help
-      --version    : print version
-  -s STYLE         : report style (verbose/simple/plain, or v/s/p)
-  -f PATTERN       : filter topic or spec with pattern (see below)
-  --color[={on|off}] : enable/disable output coloring forcedly
-  -g, --generate   : generate test code skeleton from ruby file
+  -h, --help             : show help
+      --version          : print version
+  -s STYLE               : report style (verbose/simple/plain, or v/s/p)
+  -f PATTERN             : filter topic or spec with pattern (see below)
+      --color[={on|off}] : enable/disable output coloring forcedly
+  -g, --generate         : generate test code skeleton from ruby file
 
 Filter examples:
-  $ oktest -f topic=Hello         # filter by topic
-  $ oktest -f spec='*hello*'      # filter by spec
-  $ oktest -f tag=experimental    # filter by tag name
-  $ oktest -f tag!=experimental   # negative filter by tag name
-  $ oktest -f tag='{exp,old}'     # filter by multiple tag names
+  $ oktest -f topic=Hello            # filter by topic
+  $ oktest -f spec='*hello*'         # filter by spec
+  $ oktest -f tag=name               # filter by tag name
+  $ oktest -f tag!=name              # negative filter by tag name
+  $ oktest -f tag='{name1,name2}'    # filter by multiple tag names
 END
     end
 
