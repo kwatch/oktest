@@ -1536,6 +1536,7 @@ END
         print generate(filenames)
         return 0
       end
+      Config.color_enabled = opts.color ? (opts.color == 'on') : color_enabled?()
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       load_files(filenames)
       if opts.filter
@@ -1550,7 +1551,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :generate
+      attr_accessor :help, :version, :style, :filter, :color, :generate
     end
 
     def option_parser(opts)
@@ -1568,6 +1569,11 @@ END
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
+      parser.on('--color={on|off}') {|val|
+        val == 'on' || val == 'off'  or
+          raise OptionParser::InvalidArgument, val
+        opts.color = val
+      }
       parser.on('-g', '--generate') { opts.generate = true }
       return parser
     end
@@ -1580,6 +1586,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
       --version    : print version
   -s STYLE         : report style (verbose/simple/plain, or v/s/p)
   -f PATTERN       : filter topic or spec with pattern (see below)
+  --color={on|off} : enable/disable output coloring forcedly
   -g, --generate   : generate test code skeleton from ruby file
 
 Filter examples:
@@ -1617,6 +1624,10 @@ END
         end
       end
       return buf.join()
+    end
+
+    def color_enabled?()
+      return Config.color_available && $stdout.tty?
     end
 
     def filter(pattern)
