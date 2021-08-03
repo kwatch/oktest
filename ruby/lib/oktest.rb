@@ -1450,7 +1450,7 @@ module Oktest
     end
     private :_parse
 
-    def transform(tree, depth=0)
+    def transform(tree, depth=1)
       buf = []
       tree.each do |tuple|
         _transform(tuple, depth, buf)
@@ -1460,25 +1460,25 @@ module Oktest
     end
 
     def _transform(tuple, depth, buf)
-      indent = '  ' * depth
+      indent = '  ' * (depth - 1)
       keyword = tuple[1]
       if keyword == 'spec'
         _, _, spec = tuple
         escaped = spec.gsub(/"/, '\\\"')
         buf << "\n"
-        buf << "#{indent}spec \"#{escaped}\"\n"
+        buf << "#{indent}  spec \"#{escaped}\"\n"
       else
         _, _, topic, children = tuple
         buf << "\n"
-        buf << "#{indent}topic '#{topic}' do\n"     if keyword == 'def'
-        buf << "#{indent}topic #{topic} do\n"   unless keyword == 'def'
+        buf << "#{indent}  topic '#{topic}' do\n"     if keyword == 'def'
+        buf << "#{indent}  topic #{topic} do\n"   unless keyword == 'def'
         buf << "\n" unless keyword == 'def'
         children.each do |child_tuple|
           _transform(child_tuple, depth+1, buf)
         end
         buf << "\n"
-        buf << "#{indent}end\n"                if keyword == 'def'
-        buf << "#{indent}end # #{topic}\n" unless keyword == 'def'
+        buf << "#{indent}  end\n"                if keyword == 'def'
+        buf << "#{indent}  end # #{topic}\n" unless keyword == 'def'
         buf << "\n"
       end
     end
