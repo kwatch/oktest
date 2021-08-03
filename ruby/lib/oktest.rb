@@ -1270,7 +1270,7 @@ module Oktest
       lines_old = _text2lines(text_old, msg)
       lines_new = _text2lines(text_new, msg)
       #
-      buf = "#{label}"
+      buf = [label]
       len = 0
       prevhunk = hunk = nil
       diffs = Diff::LCS.diff(lines_old, lines_new)
@@ -1285,7 +1285,7 @@ module Oktest
         prevhunk = hunk
       end
       buf << prevhunk.diff(:unified) << "\n" if prevhunk
-      return buf
+      return buf.join()
     end
 
     ## platform depend, but not require extra library
