@@ -1584,6 +1584,7 @@ Filter examples:
   $ oktest -f topic=Hello         # filter by topic
   $ oktest -f spec='*hello*'      # filter by spec
   $ oktest -f tag=experimental    # filter by tag name
+  $ oktest -f tag!=experimental   # negative filter by tag name
   $ oktest -f tag='{exp,old}'     # filter by multiple tag names
 END
     end
