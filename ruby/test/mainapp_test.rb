@@ -51,14 +51,14 @@ Oktest.scope do
     end
 
     case_when "x is negative", tag: 'exp' do
-      spec "x*x is positive." do
+      spec "[!6hs1j] x*x is positive." do
         x = -2
         ok {x*x} > 0
       end
     end
 
     case_else do
-      spec "x*x is also positive." do
+      spec "[!pwiq7] x*x is also positive." do
         x = 2
         ok {x*x} > 0
       end
@@ -317,11 +317,25 @@ END
     - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
     - [<Y>TODO</Y>] todo example
   - <b>When x is negative</b>
-    - [<B>pass</B>] x*x is positive.
+    - [<B>pass</B>] [!6hs1j] x*x is positive.
 ## total:4 (<B>pass:2</B>, fail:0, error:0, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       #
       ret, sout, serr = run("-f", "tag={new,exp}", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
+    it "'-f sid=...' option filters by spec id." do
+      expected = <<'END'
+* <b>Parent</b>
+  - <b>When x is negative</b>
+    - [<B>pass</B>] [!6hs1j] x*x is positive.
+## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-f", "sid=6hs1j", @testfile)
       assert_eq ret, 0
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
@@ -334,7 +348,7 @@ END
     - [<B>pass</B>] 1+1 should be 2
     - [<B>pass</B>] 1-1 should be 0
   - <b>Else</b>
-    - [<B>pass</B>] x*x is also positive.
+    - [<B>pass</B>] [!pwiq7] x*x is also positive.
 ## total:3 (<B>pass:3</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #

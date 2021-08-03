@@ -1564,7 +1564,7 @@ END
         opts.style = val
       }
       parser.on('-f PATTERN') {|val|
-        val =~ /\A(topic|spec|tag)(=|!=)/  or
+        val =~ /\A(topic|spec|tag|sid)(=|!=)/  or
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
@@ -1620,6 +1620,7 @@ END
     end
 
     def filter(pattern)
+      pattern = "spec#{$1}\\[!#{$2}\\]*" if pattern =~ /\Asid(=|!=)(.*)/  # filter by spec id
       pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
       pattern =~ /\A(\w+)(=|!=)/ && pat.key?($1)  or
         raise Exception, "** internal error: pattern=#{pattern.inspect}"
