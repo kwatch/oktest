@@ -1420,6 +1420,11 @@ module Oktest
 
   class TestGenerator
 
+    def initialize(styleoption=nil)
+      @styleoption = styleoption
+    end
+    attr_reader :styleoption
+
     def parse(io)
       tree = _parse(io, [], nil)
       return tree
@@ -1450,7 +1455,7 @@ module Oktest
     end
     private :_parse
 
-    def transform(tree, depth=0)
+    def transform(tree, depth=1)
       buf = []
       tree.each do |tuple|
         _transform(tuple, depth, buf)
@@ -1460,25 +1465,28 @@ module Oktest
     end
 
     def _transform(tuple, depth, buf)
-      indent = '  ' * depth
+      indent = '  ' * (depth - 1)
+      unaryop = @styleoption == 'unaryop'
       keyword = tuple[1]
       if keyword == 'spec'
         _, _, spec = tuple
         escaped = spec.gsub(/"/, '\\\"')
         buf << "\n"
-        buf << "#{indent}spec \"#{escaped}\"\n"
+        buf << "#{indent}- spec(\"#{escaped}\")\n"    if unaryop
+        buf << "#{indent}  spec \"#{escaped}\"\n" unless unaryop
       else
         _, _, topic, children = tuple
+        topic += '()' if keyword == 'def'
+        topic_ = keyword == 'def' ? "'#{topic}'" : topic
         buf << "\n"
-        buf << "#{indent}topic '#{topic}' do\n"     if keyword == 'def'
-        buf << "#{indent}topic #{topic} do\n"   unless keyword == 'def'
+        buf << "#{indent}+ topic(#{topic_}) do\n"     if unaryop
+        buf << "#{indent}  topic #{topic_} do\n"  unless unaryop
         buf << "\n" unless keyword == 'def'
         children.each do |child_tuple|
           _transform(child_tuple, depth+1, buf)
         end
         buf << "\n"
-        buf << "#{indent}end\n"                if keyword == 'def'
-        buf << "#{indent}end # #{topic}\n" unless keyword == 'def'
+        buf << "#{indent}  end  # #{topic}\n"
         buf << "\n"
       end
     end
@@ -1536,7 +1544,7 @@ END
         return 0
       end
       if opts.generate
-        print generate(filenames)
+        print generate(filenames, opts.generate)
         return 0
       end
       if opts.color
@@ -1582,7 +1590,11 @@ END
           raise OptionParser::InvalidArgument, val
         opts.color = val || 'on'
       }
-      parser.on('-g', '--generate') { opts.generate = true }
+      parser.on('-g', '--generate[=styleoption]') {|val|
+        val.nil? || val == 'unaryop'  or
+          raise OptionParser::InvalidArgument, val
+        opts.generate = val || true
+      }
       return parser
     end
 
@@ -1623,10 +1635,10 @@ END
       end
     end
 
-    def generate(filenames)
+    def generate(filenames, styleoption)
       buf = []
       filenames.each do |fname|
-        generator = TestGenerator.new
+        generator = TestGenerator.new(styleoption)
         File.open(fname) do |f|
           buf << generator.generate(f)
         end
