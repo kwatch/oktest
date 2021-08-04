@@ -1427,6 +1427,10 @@ module Oktest
     private
 
     def _filter!(children)
+      #; [!6to6n] can filter by multiple tag name.
+      #; [!r6g6a] supports negative filter by topic.
+      #; [!doozg] supports negative filter by spec.
+      #; [!ntv44] supports negative filter by tag name.
       topic_pat = @topic_pattern
       spec_pat  = @spec_pattern
       tag_pat   = @tag_pattern
@@ -1434,18 +1438,26 @@ module Oktest
       children.collect! {|item|
         case item
         when TopicObject
+          #; [!osoq2] can filter topics by full name.
+          #; [!wzcco] can filter topics by pattern.
           if topic_pat && item.filter_match?(topic_pat)
             positive ? item : nil
+          #; [!eirmu] can filter topics by tag name.
           elsif tag_pat && item.tag_match?(tag_pat)
             positive ? item : nil
+          #; [!mz6id] can filter nested topics.
           else
             _filter!(item.children) ? item : nil
           end
         when SpecObject
+          #; [!0kw9c] can filter specs by full name.
+          #; [!fd8wt] can filter specs by pattern.
           if spec_pat && item.filter_match?(spec_pat)
             positive ? item : nil
+          #; [!6sq7g] can filter specs by tag name.
           elsif tag_pat && item.tag_match?(tag_pat)
             positive ? item : nil
+          #; [!1jphf] can filter specs from nested topics.
           else
             positive ? nil : item
           end
