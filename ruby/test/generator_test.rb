@@ -50,16 +50,16 @@ END
   topic Hello do
 
 
-    topic '#hello' do
+    topic '#hello()' do
 
       spec "default name is 'world'."
 
       spec "returns greeting message."
 
-    end
+    end  # #hello()
 
 
-  end # Hello
+  end  # Hello
 END
       assert_eq code, expected
     end
@@ -80,16 +80,16 @@ Oktest.scope do
   topic Hello do
 
 
-    topic '#hello' do
+    topic '#hello()' do
 
       spec "default name is 'world'."
 
       spec "returns greeting message."
 
-    end
+    end  # #hello()
 
 
-  end # Hello
+  end  # Hello
 
 
 end

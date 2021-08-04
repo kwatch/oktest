@@ -1469,16 +1469,16 @@ module Oktest
         buf << "#{indent}  spec \"#{escaped}\"\n"
       else
         _, _, topic, children = tuple
+        topic += '()' if keyword == 'def'
+        topic_ = keyword == 'def' ? "'#{topic}'" : topic
         buf << "\n"
-        buf << "#{indent}  topic '#{topic}' do\n"     if keyword == 'def'
-        buf << "#{indent}  topic #{topic} do\n"   unless keyword == 'def'
+        buf << "#{indent}  topic #{topic_} do\n"
         buf << "\n" unless keyword == 'def'
         children.each do |child_tuple|
           _transform(child_tuple, depth+1, buf)
         end
         buf << "\n"
-        buf << "#{indent}  end\n"                if keyword == 'def'
-        buf << "#{indent}  end # #{topic}\n" unless keyword == 'def'
+        buf << "#{indent}  end  # #{topic}\n"
         buf << "\n"
       end
     end
