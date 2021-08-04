@@ -1706,10 +1706,15 @@ END
   class MainApp
 
     def self.main(argv=nil)
+      #; [!tb6sx] returns 0 when no errors raised.
+      #; [!d5mql] returns 1 when a certain error raised.
       argv ||= ARGV
       begin
         status = self.new.run(*argv)  or raise "** internal error"
         return status
+      #; [!jr49p] reports error when unknown option specified.
+      #; [!uqomj] reports error when required argument is missing.
+      #; [!8i755] reports error when argument is invalid.
       rescue OptionParser::ParseError => ex
         case ex
         when OptionParser::InvalidOption   ; s = "unknown option."
@@ -1728,32 +1733,53 @@ END
       opts = Options.new
       parser = option_parser(opts)
       filenames = parser.parse(args)
+      #; [!9973n] '-h' or '--help' option prints help message.
       if opts.help
         puts help_message()
         return 0
       end
+      #; [!qqizl] '--version' option prints version number.
       if opts.version
         puts VERSION
         return 0
       end
+      #; [!uxh5e] '-g' or '--generate' option prints test code.
+      #; [!wmxu5] '--generate=unaryop' option prints test code with unary op.
       if opts.generate
         print generate(filenames, opts.generate)
         return 0
       end
+      #; [!6ro7j] '--color=on' option enables output coloring forcedly.
+      #; [!vmw0q] '--color=off' option disables output coloring forcedly.
       if opts.color
         color_enabled = Config.color_enabled
         Config.color_enabled = (opts.color == 'on')
       end
+      #
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
+      #; [!hiu5b] finds test scripts in directory and runs them.
       load_files(filenames)
+      #; [!yz7g5] '-F topic=...' option filters topics.
+      #; [!ww2mp] '-F spec=...' option filters specs.
+      #; [!8uvib] '-F tag=...' option filters by tag name.
+      #; [!m0iwm] '-F sid=...' option filters by spec id.
+      #; [!noi8i] '-F' option supports negative filter.
       if opts.filter
-        filter(opts.filter)
+        filter_obj = parse_filter_pattern(opts.filter)
+        filter(filter_obj)
       end
+      #; [!18qpe] runs test scripts.
+      #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
+      #; [!ef5v7] '-s simple' or '-ss' option prints test results in simple mode.
+      #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
       Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
+      #; [!dsrae] reports if 'ok()' called but assertion not performed.
       AssertionObject.report_not_yet()
+      #; [!bzgiw] returns total number of failures and errors.
       return n_errors
     ensure
+      #; [!937kw] recovers 'Config.color_enabled' value.
       Config.color_enabled = color_enabled if color_enabled != nil
     end
 
@@ -1774,13 +1800,16 @@ END
         opts.style = val
       }
       parser.on('-F PATTERN') {|val|
+        #; [!71h2x] '-F ...' option will be error.
         val =~ /\A(topic|spec|tag|sid)(=|!=)/  or
           raise OptionParser::InvalidArgument, val
         opts.filter = val
       }
       parser.on(      '--color[={on|off}]') {|val|
+        #; [!9nr94] '--color=true' option raises error.
         val.nil? || val == 'on' || val == 'off'  or
           raise OptionParser::InvalidArgument, val
+        #; [!dptgn] '--color' is same as '--color=on'.
         opts.color = val || 'on'
       }
       parser.on('-g', '--generate[=styleoption]') {|val|
@@ -1839,16 +1868,25 @@ END
       return buf.join()
     end
 
-    def filter(pattern)
+    def parse_filter_pattern(pattern)
+      #; [!gtpt1] parses 'sid=...' as filter pattern for spec.
       pattern = "spec#{$1}\\[!#{$2}\\]*" if pattern =~ /\Asid(=|!=)(.*)/  # filter by spec id
+      #; [!xt364] parses 'topic=...' as filter pattern for topic.
+      #; [!53ega] parses 'spec=...' as filter pattern for spec.
+      #; [!go6us] parses 'tag=...' as filter pattern for tag.
       pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
       pattern =~ /\A(\w+)(=|!=)/ && pat.key?($1)  or
         raise Exception, "** internal error: pattern=#{pattern.inspect}"
       pat[$1] = $'
+      #; [!5hl7z] parses 'xxx!=...' as negative filter pattern.
       negative = ($2 == '!=')
-      filter = FILTER_CLASS.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
+      #; [!9dzmg] returns filter object.
+      return FILTER_CLASS.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
+    end
+
+    def filter(filter_obj)
       TOPLEVEL_SCOPES.each do |filescope|
-        filter.filter_toplevel_scope!(filescope)
+        filter_obj.filter_toplevel_scope!(filescope)
       end
     end
 
