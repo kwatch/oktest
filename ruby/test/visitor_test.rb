@@ -14,7 +14,11 @@ class Visitor_TC < TC
   class MyVisitor < Oktest::Visitor
     def on_topic(target, tag, depth)
       print "  " * depth
-      print "+ topic: #{target}"
+      case target
+      when /^When (.*)$/  ; print "- case_when: $1"
+      when /^Else$/       ; print "- case_else:"
+      else                ; print "+ topic: #{target}"
+      end
       print " (tag: #{tag})" if tag
       print "\n"
       yield
@@ -33,6 +37,12 @@ class Visitor_TC < TC
         topic Integer, tag: 'cls' do
           spec "1+1 should be 2." do ok {1+1} == 2 end
           spec "1-1 should be 0." do ok {1-1} == 0 end
+          case_when 'negative...' do
+            spec "abs() returns sign-reversed value." do ok {-3.abs()} == 3 end
+          end
+          case_else do
+            spec "abs() returns positive value." do ok {4.abs()} == 4 end
+          end
         end
         topic Float, tag: 'cls' do
           spec "1*1 should be 1.", tag: 'err' do ok {1*1} == 2 end   # fail
@@ -52,6 +62,10 @@ class Visitor_TC < TC
   + topic: Integer (tag: cls)
     - spec: 1+1 should be 2.
     - spec: 1-1 should be 0.
+    - case_when: $1
+      - spec: abs() returns sign-reversed value.
+    - case_else:
+      - spec: abs() returns positive value.
   + topic: Float (tag: cls)
     - spec: 1*1 should be 1. (tag: err)
     - spec: 1/1 should be 1. (tag: err)
