@@ -646,17 +646,22 @@ module Oktest
     def capture_sio(input="", tty: false, &b)
       require 'stringio' unless defined?(StringIO)
       bkup = [$stdin, $stdout, $stderr]
+      #; [!53mai] takes $stdin data.
       $stdin  = sin  = StringIO.new(input)
+      #; [!1kbnj] captures $stdio and $stderr
       $stdout = sout = StringIO.new
       $stderr = serr = StringIO.new
+      #; [!6ik8b] can simulate tty.
       if tty
         def sin.tty?; true; end
         def sout.tty?; true; end
         def serr.tty?; true; end
       end
+      #; [!4j494] returns outpouts of stdout and stderr.
       yield sout, serr
       return sout.string, serr.string
     ensure
+      #; [!wq8a9] recovers stdio even when exception raised.
       $stdin, $stdout, $stderr = bkup
     end
 
@@ -675,25 +680,37 @@ module Oktest
     private :__do_dummy
 
     def dummy_file(filename=nil, content=nil, encoding: 'utf-8', &b)
+      #; [!3mg26] generates temporary filename if 1st arg is nil.
       filename ||= "_tmpfile_#{rand().to_s[2...8]}"
+      #; [!yvfxq] raises error when dummy file already exists.
       ! File.exist?(filename)  or
         raise ArgumentError, "dummy_file('#{filename}'): temporary file already exists."
+      #; [!7e0bo] creates dummy file.
       File.write(filename, content, encoding: encoding)
       recover = proc { File.unlink(filename) if File.exist?(filename) }
+      #; [!nvlkq] returns filename.
+      #; [!ky7nh] can take block argument.
       return __do_dummy(filename, recover, &b)
     end
 
     def dummy_dir(dirname=nil, &b)
+      #; [!r14uy] generates temporary directory name if 1st arg is nil.
       dirname ||= "_tmpdir_#{rand().to_s[2...8]}"
+      #; [!zypj6] raises error when dummy dir already exists.
       ! File.exist?(dirname)  or
         raise ArgumentError, "dummy_dir('#{dirname}'): temporary directory already exists."
+      #; [!l34d5] creates dummy directory.
       require 'fileutils' unless defined?(FileUtils)
       FileUtils.mkdir_p(dirname)
+      #; [!01gt7] removes dummy directory even if it contains other files.
       recover = proc { FileUtils.rm_rf(dirname) if File.exist?(dirname) }
+      #; [!jxh30] returns directory name.
+      #; [!tfsqo] can take block argument.
       return __do_dummy(dirname, recover, &b)
     end
 
     def dummy_values(hashobj, keyvals={}, &b)
+      #; [!hgwg2] changes hash value temporarily.
       prev_values = {}
       key_not_exists = {}
       keyvals.each do |k, v|
@@ -704,39 +721,52 @@ module Oktest
         end
         hashobj[k] = v
       end
+      #; [!jw2kx] recovers hash values.
       recover = proc do
         key_not_exists.each {|k, _| hashobj.delete(k) }
         prev_values.each {|k, v| hashobj[k] = v }
       end
+      #; [!w3r0p] returns keyvals.
+      #; [!pwq6v] can take block argument.
       return __do_dummy(keyvals, recover, &b)
     end
 
     def dummy_attrs(object, keyvals={}, &b)
+      #; [!4vd73] changes object attributes temporarily.
       prev_values = {}
       keyvals.each do |k, v|
         prev_values[k] = object.__send__(k)
         object.__send__("#{k}=", v)
       end
+      #; [!fi0t3] recovers attribute values.
       recover = proc do
         prev_values.each {|k, v| object.__send__("#{k}=", v) }
       end
+      #; [!27yeh] returns keyvals.
+      #; [!j7tvp] can take block argument.
       return __do_dummy(keyvals, recover, &b)
     end
 
     def dummy_ivars(object, keyvals={}, &b)
+      #; [!rnqiv] changes instance variables temporarily.
       prev_values = {}
       keyvals.each do |k, v|
         prev_values[k] = object.instance_variable_get("@#{k}")
         object.instance_variable_set("@#{k}", v)
       end
+      #; [!8oirn] recovers instance variables.
       recover = proc do
         prev_values.each {|k, v| object.instance_variable_set("@#{k}", v) }
       end
+      #; [!01dc8] returns keyvals.
+      #; [!myzk4] can take block argument.
       return __do_dummy(keyvals, recover, &b)
     end
 
     def recorder()
+      #; [!qwrr8] loads 'benry/recorder' automatically.
       require 'benry/recorder' unless defined?(Benry::Recorder)
+      #; [!glfvx] creates Benry::Recorder object.
       return Benry::Recorder.new
     end
 
