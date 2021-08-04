@@ -1065,14 +1065,19 @@ module Oktest
   class FixtureManager
 
     def self.instance()
+      #; [!jsi9q] returns same object every time.
       return @instance ||= self.new
     end
 
     def get_fixture_values(names, topic, spec, context, location=nil, resolved={}, resolving=[])
+      #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
       resolved[:this_topic] ||= topic.target
+      #; [!ja2ew] resolves 'this_spec' fixture name as description of current spec.
       resolved[:this_spec]  ||= spec.desc
+      #; [!v587k] resolves fixtures.
       location ||= spec.location
       return names.collect {|name|
+        #; [!np4p9] raises error when loop exists in dependency.
         ! resolving.include?(name)  or
           raise _looped_dependency_error(name, resolving, location)
         get_fixture_value(name, topic, spec, context, location, resolved, resolving)
@@ -1085,22 +1090,28 @@ module Oktest
       tuple = topic.get_fixture_info(name)
       if tuple
         block, argnames, location = tuple
+        #; [!2esaf] resolves fixture dependencies.
         if argnames
           resolving << name
           args = get_fixture_values(argnames, topic, spec, context, location, resolved, resolving)
           (popped = resolving.pop) == name  or
             raise "** assertion failed: name=#{name.inspect}, resolvng[-1]=#{popped.inspect}"
+          #; [!4xghy] calls fixture block with context object as self.
           val = context.instance_exec(*args, &block)
         else
           val = context.instance_eval(&block)
         end
+        #; [!8t3ul] caches fixture value to call fixture block only once per spec.
         resolved[name] = val
         return val
       elsif topic.parent
+        #; [!4chb9] traverses parent topics if fixture not found in current topic.
         return get_fixture_value(name, topic.parent, spec, context, location, resolved, resolving)
       elsif ! topic.equal?(GLOBAL_SCOPE)
+        #; [!wt3qk] suports global scope.
         return get_fixture_value(name, GLOBAL_SCOPE, spec, context, location, resolved, resolving)
       else
+        #; [!nr79z] raises error when fixture not found.
         ex = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
         ex.set_backtrace([location])
         raise ex
