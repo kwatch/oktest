@@ -1245,7 +1245,7 @@ require 'oktest'
 
 class Calc
   def total(*nums)
-    t = 0; nums.each {|n| t += n }
+    t = 0; nums.each {|n| t += n }   # or: nums.sum()
     return t
   end
   def average(*nums)
@@ -1262,7 +1262,7 @@ Oktest.scope do
       ## target object
       calc = Calc.new
       ## record method call
-      rec = recorder()
+      rec = recorder()               # !!!!!
       rec.record_method(calc, :total)
       ## method call
       v = calc.average(1, 2, 3, 4)   # calc.average() calls calc.total() internally
@@ -1279,7 +1279,7 @@ Oktest.scope do
       ## target object
       calc = Calc.new
       ## define fake methods
-      rec = recorder()
+      rec = recorder()                 # !!!!!
       rec.fake_method(calc, :total=>20, :average=>5.5)
       ## call fake methods
       v1 = calc.total(1, 2, 3)         # fake method returns dummy value
@@ -1382,6 +1382,16 @@ Oktest.scope do
       ok {response.content_type} == "application/json"
       ok {response.body_json}    == {"status"=>"OK"}
     end
+
+  end
+
++ topic("POST /api/hello") do
+
+    def api_call(**kwargs)                     # !!!!!
+      $http.POST("/api/hello", **kwargs)       # !!!!!
+    end                                        # !!!!!
+
+    ....
 
   end
 
