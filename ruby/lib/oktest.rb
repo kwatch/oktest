@@ -1060,11 +1060,13 @@ module Oktest
     attr_reader :counts
 
     def enter_all(runner)
+      #; [!pq3ia] initalizes counter by zero.
       reset_counts()
       @start_at = Time.now
     end
 
     def exit_all(runner)
+      #; [!wjp7u] prints footer with elapsed time.
       elapsed = Time.now - @start_at
       puts footer(elapsed)
     end
@@ -1085,41 +1087,50 @@ module Oktest
     end
 
     def exit_spec(spec, depth, status, ex, parent)
+      #; [!r6yge] increments counter according to status.
       @counts[status] += 1
+      #; [!nupb4] keeps exception info when status is FAIL or ERROR.
       @exceptions << [spec, status, ex, parent] if status == :FAIL || status == :ERROR
     end
 
     protected
 
     def reset_counts()
+      #; [!oc29s] clears counters to zero.
       STATUSES.each {|sym| @counts[sym] = 0 }
     end
 
     def print_exceptions()
+      #; [!fbr16] prints assertion failures and excerptions with separator.
       sep = '-' * 70
       @exceptions.each do |tuple|
         puts sep
         print_exc(*tuple)
         tuple.clear
       end
+      #; [!2s9r2] prints nothing when no fails nor errors.
       puts sep if ! @exceptions.empty?
+      #; [!ueeih] clears exceptions.
       @exceptions.clear
     end
 
-    def print_exc(spec, status, ex, parent)
+    def print_exc(spec, status, ex, topic)
+      #; [!5ara3] prints exception info of assertion failure.
+      #; [!pcpy4] prints exception info of error.
       label = Color.status(status, LABELS[status])
-      topic = parent
       path = Color.topic(spec_path(spec, topic))
-      topic = parent
       puts "[#{label}] #{path}"
       print_exc_backtrace(ex, status)
       print_exc_message(ex, status)
     end
 
     def print_exc_backtrace(ex, status)
+      #; [!ocxy6] prints backtrace info and lines in file.
       rexp = FILENAME_FILTER
       prev_file = prev_line = nil
       ex.backtrace.each_with_index do |str, i|
+        #; [!jbped] skips backtrace of oktest.rb when assertion failure.
+        #; [!cfkzg] don't skip first backtrace entry when error.
         next if str =~ rexp && ! (i == 0 && status == :ERROR)
         linestr = nil
         if str =~ /:(\d+)/
@@ -1137,6 +1148,8 @@ module Oktest
     FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)(?:\.rbc?)?:` #:nodoc:
 
     def print_exc_message(ex, status)
+      #; [!hr7jn] prints detail of assertion failed.
+      #; [!pd41p] prints detail of exception.
       if status == :FAIL
         msg = "#{ex}"
       else
@@ -1150,30 +1163,35 @@ module Oktest
     end
 
     def footer(elapsed)
+      #; [!iy4uo] calculates total count of specs.
       total = 0; @counts.each {|_, v| total += v }
+      #; [!2nnma] includes count of each status.
       arr = STATUSES.collect {|st|
         s = "#{st.to_s.downcase}:#{@counts[st]}"
         @counts[st] == 0 ? s : Color.status(st, s)
       }
+      #; [!fp57l] includes elapsed time.
+      #; [!r5y02] elapsed time format is adjusted along to time length.
       hhmmss = Util.hhmmss(elapsed)
+      #; [!gx0n2] builds footer line.
       return "## total:#{total} (#{arr.join(', ')}) in #{hhmmss}s"
     end
 
     def spec_path(spec, topic)
-      arr = []
+      #; [!dv6fu] returns path string from top topic to current spec.
+      arr = [spec.desc]
       while topic && topic.is_a?(TopicObject)
         arr << topic.target.to_s if topic.target
         topic = topic.parent
       end
-      arr.reverse!
-      arr << spec.desc
-      return arr.join(" > ")
+      return arr.reverse.join(" > ")
     end
 
   end
 
 
   class VerboseReporter < BaseReporter
+    #; [!6o9nw] reports topic name and spec desc.
 
     LABELS = { :PASS=>'pass', :FAIL=>'Fail', :ERROR=>'ERROR', :SKIP=>'Skip', :TODO=>'TODO' }
 
@@ -1210,13 +1228,14 @@ module Oktest
 
 
   class SimpleReporter < BaseReporter
+    #; [!xfd5o] reports filename.
 
     def enter_file(filename)
       print "#{filename}: "
     end
 
     def exit_file(filename)
-      puts
+      puts()
       print_exceptions()
     end
 
@@ -1230,10 +1249,11 @@ module Oktest
 
 
   class PlainReporter < BaseReporter
+    #; [!w842j] reports results only.
 
     def exit_all(runner)
       elapsed = Time.now - @start_at
-      puts
+      puts()
       print_exceptions()
       puts footer(elapsed)
     end
