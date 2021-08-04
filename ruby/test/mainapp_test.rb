@@ -481,6 +481,62 @@ END
       end
     end
 
+    it "'--generate=unaryop' option prints test code with unary op." do
+      input = <<'END'
+class Hello
+  def hello(name=nil)
+    #; default name is 'world'.
+    if name.nil?
+      name = "world"
+    end
+    #; returns greeting message.
+    return "Hello, #{name}!"
+  end
+end
+END
+      filename = "_tmpcode_6431.rb"
+      File.write(filename, input)
+      expected = <<END
+# coding: utf-8
+
+require 'oktest'
+
+Oktest.scope do
+
+
++ topic(Hello) do
+
+
+  + topic('#hello()') do
+
+    - spec("default name is 'world'.")
+
+    - spec("returns greeting message.")
+
+    end  # #hello()
+
+
+  end  # Hello
+
+
+end
+END
+      #
+      begin
+        ret, sout, serr = run("-gunaryop", filename)
+        assert_eq ret, 0
+        assert_eq sout, expected
+        assert_eq serr, ""
+        #
+        ret, sout, serr = run("--generate=unaryop", filename)
+        assert_eq ret, 0
+        assert_eq sout, expected
+        assert_eq serr, ""
+      ensure
+        File.unlink(filename)
+      end
+    end
+
   end
 
 

@@ -1544,7 +1544,7 @@ END
         return 0
       end
       if opts.generate
-        print generate(filenames)
+        print generate(filenames, opts.generate)
         return 0
       end
       if opts.color
@@ -1590,7 +1590,11 @@ END
           raise OptionParser::InvalidArgument, val
         opts.color = val || 'on'
       }
-      parser.on('-g', '--generate') { opts.generate = true }
+      parser.on('-g', '--generate[=styleoption]') {|val|
+        val.nil? || val == 'unaryop'  or
+          raise OptionParser::InvalidArgument, val
+        opts.generate = val || true
+      }
       return parser
     end
 
@@ -1631,10 +1635,10 @@ END
       end
     end
 
-    def generate(filenames)
+    def generate(filenames, styleoption)
       buf = []
       filenames.each do |fname|
-        generator = TestGenerator.new
+        generator = TestGenerator.new(styleoption)
         File.open(fname) do |f|
           buf << generator.generate(f)
         end
