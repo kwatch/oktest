@@ -425,8 +425,7 @@ END
       end
     end
 
-    it "'-g' or '--generate' option prints test code." do
-      input = <<'END'
+    HELLO_CLASS_DEF = <<'END'
 class Hello
   def hello(name=nil)
     #; default name is 'world'.
@@ -438,6 +437,9 @@ class Hello
   end
 end
 END
+
+    it "'-g' or '--generate' option prints test code." do
+      input = HELLO_CLASS_DEF
       filename = "_tmpcode_4674.rb"
       File.write(filename, input)
       expected = <<END
@@ -482,18 +484,7 @@ END
     end
 
     it "'--generate=unaryop' option prints test code with unary op." do
-      input = <<'END'
-class Hello
-  def hello(name=nil)
-    #; default name is 'world'.
-    if name.nil?
-      name = "world"
-    end
-    #; returns greeting message.
-    return "Hello, #{name}!"
-  end
-end
-END
+      input = HELLO_CLASS_DEF
       filename = "_tmpcode_6431.rb"
       File.write(filename, input)
       expected = <<END
