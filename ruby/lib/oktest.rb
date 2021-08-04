@@ -55,10 +55,12 @@ module Oktest
     private :_done
 
     def self.report_not_yet()
+      #; [!3nksf] reports if 'ok{}' called but assertion not performed.
       return if NOT_YET.empty?
       NOT_YET.each_value do |ass|
         $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
       end
+      #; [!f92q4] clears remained objects.
       NOT_YET.clear()
     end
 
@@ -67,16 +69,21 @@ module Oktest
     end
 
     def NOT()
+      #; [!63dde] toggles internal boolean.
       @bool = ! @bool
+      #; [!g775v] returns self.
       self
     end
 
     def ==(expected)
       _done()
+      #; [!1iun4] raises assertion error when failed.
+      #; [!eyslp] is avaialbe with NOT.
       __assert(@bool == (@actual == expected)) {
         if @bool && ! (@actual == expected) \
-          && @actual.is_a?(String) && expected.is_a?(String) \
-          && (@actual =~ /\n/ || expected =~ /\n/)
+            && @actual.is_a?(String) && expected.is_a?(String) \
+            && (@actual =~ /\n/ || expected =~ /\n/)
+          #; [!3xnqv] shows context diff when both actual and expected are text.
           diff = Util.unified_diff(expected, @actual, "--- $<expected>\n+++ $<actual>\n")
           "$<actual> == $<expected>: failed.\n#{diff}"
         else
@@ -86,22 +93,28 @@ module Oktest
           "    $<expected>: #{expected.inspect}"
         end
       }
+      #; [!c6p0e] returns self when passed.
       self
     end
 
     def !=(expected)    # Ruby >= 1.9
       _done()
+      #; [!90tfb] raises assertion error when failed.
+      #; [!l6afg] is avaialbe with NOT.
       __assert(@bool == (@actual != expected)) {
         op = @bool ? '!=' : '=='
         "$<actual> #{op} $<expected>: failed.\n"\
         "    $<actual>:   #{@actual.inspect}\n"\
         "    $<expected>: #{expected.inspect}"
       }
+      #; [!iakbb] returns self when passed.
       self
     end
 
     def ===(expected)
       _done()
+      #; [!42f6a] raises assertion error when failed.
+      #; [!vhvyu] is avaialbe with NOT.
       __assert(@bool == (@actual === expected)) {
         s = "$<actual> === $<expected>"
         s = "!(#{s})" unless @bool
@@ -109,6 +122,7 @@ module Oktest
         "    $<actual>:   #{@actual.inspect}\n"\
         "    $<expected>: #{expected.inspect}"
       }
+      #; [!uh8bm] returns self when passed.
       self
     end
 
@@ -121,25 +135,37 @@ module Oktest
 
     def >(expected)
       _done()
+      #; [!vjjuq] raises assertion error when failed.
+      #; [!73a0t] is avaialbe with NOT.
       __assert_op(@actual > expected, '>', '<=', expected)
+      #; [!3j7ty] returns self when passed.
       self
     end
 
     def >=(expected)
       _done()
+      #; [!isdfc] raises assertion error when failed.
+      #; [!3dgmh] is avaialbe with NOT.
       __assert_op(@actual >= expected, '>=', '<', expected)
+      #; [!75iqw] returns self when passed.
       self
     end
 
     def <(expected)
       _done()
+      #; [!ukqa0] raises assertion error when failed.
+      #; [!gwvdl] is avaialbe with NOT.
       __assert_op(@actual < expected, '<', '>=', expected)
+      #; [!vkwcc] returns self when passed.
       self
     end
 
     def <=(expected)
       _done()
+      #; [!ordwe] raises assertion error when failed.
+      #; [!mcb9w] is avaialbe with NOT.
       __assert_op(@actual <= expected, '<=', '>', expected)
+      #; [!yk7t2] returns self when passed.
       self
     end
 
@@ -158,18 +184,26 @@ module Oktest
 
     def =~(expected)
       _done()
+      #; [!xkldu] raises assertion error when failed.
+      #; [!2aa6f] is avaialbe with NOT.
       __assert_match(@actual =~ expected, '=~', '!~', expected)
+      #; [!acypf] returns self when passed.
       self
     end
 
     def !~(expected)    # Ruby >= 1.9
       _done()
+      #; [!58udu] raises assertion error when failed.
+      #; [!iuf5j] is avaialbe with NOT.
       __assert_match(@actual !~ expected, '!~', '=~', expected)
+      #; [!xywdr] returns self when passed.
       self
     end
 
     def in_delta?(expected, delta)
       _done()
+      #; [!f3zui] raises assertion error when failed.
+      #; [!t7liw] is avaialbe with NOT.
       __assert(@bool == !!((@actual - expected).abs < delta)) {
         eq = @bool ? '' : ' == false'
         "($<actual> - $<expected>).abs < #{delta}#{eq}: failed.\n"\
@@ -177,32 +211,41 @@ module Oktest
         "    $<expected>: #{expected.inspect}\n"\
         "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
       }
+      #; [!m0791] returns self when passed.
       self
     end
 
     def same?(expected)
       _done()
-      #@bool ? assert_same(expected, @actual) \
-      #      : assert_not_same(expected, @actual)
+      #; [!ozbf4] raises assertion error when failed.
+      #; [!dwtig] is avaialbe with NOT.
       __assert(@bool == !! @actual.equal?(expected)) {
         eq = @bool ? '' : ' == false'
         "$<actual>.equal?($<expected>)#{eq}: failed.\n"\
         "    $<actual>:   #{@actual.inspect}\n"\
         "    $<expected>: #{expected.inspect}\n"
       }
+      #; [!yk7zo] returns self when passed.
       self
     end
 
     def method_missing(method_name, *args)
       _done()
+      #; [!yjnxb] enables to handle boolean methods.
+      #; [!ttow6] raises NoMethodError when not a boolean method.
       method_name.to_s =~ /\?\z/  or
         super
       begin
         ret = @actual.__send__(method_name, *args)
       rescue NoMethodError, TypeError => ex
-        ex.set_backtrace(caller(1))
-        raise ex
+        #; [!f0ekh] skip top of backtrace when NoMethodError raised.
+        while !ex.backtrace.empty? && ex.backtrace[0].start_with?(__FILE__)
+          ex.backtrace.shift()
+        end
+        raise
       end
+      #; [!cun59] fails when boolean method failed returned false.
+      #; [!4objh] is available with NOT.
       if ret == true || ret == false
         __assert(@bool == ret) {
           args = args.empty? ? '' : "(#{args.collect {|x| x.inspect }.join(', ')})"
@@ -210,9 +253,11 @@ module Oktest
           "$<actual>.#{method_name}#{args}#{eq}: failed.\n"\
           "    $<actual>:   #{@actual.inspect}"
         }
+      #; [!sljta] raises TypeError when boolean method returned non-boolean value.
       else
         raise TypeError, "ok(): #{@actual.class}##{method_name}() expected to return true or false, but got #{ret.inspect}."
       end
+      #; [!7bbrv] returns self when passed.
       self
     end
 
@@ -220,6 +265,7 @@ module Oktest
       _done()
       proc_obj = @actual
       if @bool
+        #; [!wbwdo] raises assertion error when failed.
         ex = nil
         begin
           proc_obj.call
@@ -227,9 +273,11 @@ module Oktest
           ex.is_a?(expected)  or
             __assert(false) { "Expected #{expected.inspect} to be raised but got #{ex.class}." }
         end
+        #; [!vnc6b] sets exceptio object into '#exception' attribute.
         (class << proc_obj; self; end).class_eval { attr_accessor :exception }
         proc_obj.exception = ex
         __assert(! ex.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
+        #; [!tpxlv] accepts string or regexp as error message.
         case errmsg
         when nil;     # do nothing
         when Regexp
@@ -244,6 +292,7 @@ module Oktest
           }
         end
       else
+        #; [!spzy2] is available with NOT.
         ! errmsg  or
           raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
         begin
@@ -254,33 +303,42 @@ module Oktest
           }
         end
       end
+      #; [!y1b28] returns self when passed.
       self
     end
 
     def in?(expected)
       _done()
+      #; [!9rm8g] raises assertion error when failed.
+      #; [!singl] is available with NOT.
       __assert(@bool == !! expected.include?(@actual)) {
         eq = @bool ? '' : ' == false'
         "$<expected>.include?($<actual>)#{eq}: failed.\n"\
         "    $<actual>:   #{@actual.inspect}\n"\
         "    $<expected>: #{expected.inspect}"
       }
+      #; [!jzoxg] returns self when passed.
       self
     end
 
     def include?(expected)
       _done()
+      #; [!960j7] raises assertion error when failed.
+      #; [!55git] is available with NOT.
       __assert(@bool == !! @actual.include?(expected)) {
         eq = @bool ? '' : ' == false'
         "$<actual>.include?($<expected>)#{eq}: failed.\n"\
         "    $<actual>:   #{@actual.inspect}\n"\
         "    $<expected>: #{expected.inspect}"
       }
+      #; [!2hddj] returns self when passed.
       self
     end
 
     def attr(name, expected)
       _done()
+      #; [!79tgn] raises assertion error when failed.
+      #; [!cqnu3] is available with NOT.
       val = @actual.__send__(name)
       __assert(@bool == (expected == val)) {
         op = @bool ? '==' : '!='
@@ -288,17 +346,23 @@ module Oktest
         "    $<actual>.#{name}: #{val.inspect}\n"\
         "    $<expected>: #{expected.inspect}"\
       }
+      #; [!lz3lb] returns self when passed.
       self
     end
 
     def attrs(keyvals={})
       _done()
+      #; [!7ta0s] raises assertion error when failed.
+      #; [!s0pnk] is available with NOT.
       keyvals.each {|name, expected| attr(name, expected) }
+      #; [!rtq9f] returns self when passed.
       self
     end
 
     def keyval(key, expected)
       _done()
+      #; [!vtrlz] raises assertion error when failed.
+      #; [!mmpwz] is available with NOT.
       val = @actual[key]
       __assert(@bool == (expected == val)) {
         op = @bool ? '==' : '!='
@@ -306,45 +370,58 @@ module Oktest
         "    $<actual>[#{key.inspect}]: #{val.inspect}\n"\
         "    $<expected>: #{expected.inspect}"\
       }
+      #; [!byebv] returns self when passed.
       self
     end
     alias item keyval      # for compatibility with minitest-ok
 
     def keyvals(keyvals={})
       _done()
+      #; [!fyvmn] raises assertion error when failed.
+      #; [!js2j2] is available with NOT.
       keyvals.each {|name, expected| keyval(name, expected) }
+      #; [!vtw22] returns self when passed.
       self
     end
     alias items keyvals    # for compatibility with minitest-ok
 
     def length(n)
       _done()
+      #; [!1y787] raises assertion error when failed.
+      #; [!kryx2] is available with NOT.
       __assert(@bool == (@actual.length == n)) {
         op = @bool ? '==' : '!='
         "$<actual>.length #{op} #{n}: failed.\n"\
         "    $<actual>.length: #{@actual.length}\n"\
         "    $<actual>:   #{actual.inspect}"
       }
+      #; [!l9vnv] returns self when passed.
       self
     end
 
     def truthy?
       _done()
+      #; [!3d94h] raises assertion error when failed.
+      #; [!8rmgp] is available with NOT.
       __assert(@bool == (!!@actual == true)) {
         op = @bool ? '==' : '!='
         "!!$<actual> #{op} true: failed.\n"\
         "    $<actual>:   #{@actual.inspect}"
       }
+      #; [!nhmuk] returns self when passed.
       self
     end
 
     def falsy?
       _done()
+      #; [!7o48g] raises assertion error when failed.
+      #; [!i44q6] is available with NOT.
       __assert(@bool == (!!@actual == false)) {
         op = @bool ? '==' : '!='
         "!!$<actual> #{op} false: failed.\n"\
         "    $<actual>:   #{@actual.inspect}"
       }
+      #; [!w1vm6] returns self when passed.
       self
     end
 
@@ -358,28 +435,40 @@ module Oktest
 
     def file_exist?
       _done()
+      #; [!69bs0] raises assertion error when failed.
+      #; [!r1mze] is available with NOT.
       __assert_fs(File.file?(@actual) , "File.file?($<actual>)")
+      #; [!6bcpp] returns self when passed.
       self
     end
 
     def dir_exist?
       _done()
+      #; [!vfh7a] raises assertion error when failed.
+      #; [!qtllp] is available with NOT.
       __assert_fs(File.directory?(@actual), "File.directory?($<actual>)")
+      #; [!8qe7u] returns self when passed.
       self
     end
 
     def symlink_exist?
       _done()
+      #; [!qwngl] raises assertion error when failed.
+      #; [!cgpbt] is available with NOT.
       __assert_fs(File.symlink?(@actual), "File.symlink?($<actual>)")
+      #; [!ugfi3] returns self when passed.
       self
     end
 
     def not_exist?
       _done()
+      #; [!ja84s] raises assertion error when failed.
+      #; [!to5z3] is available with NOT.
       __assert(@bool == ! File.exist?(@actual)) {
         "File.exist?($<actual>)#{@bool ? ' == false' : ''}: failed.\n"\
         "    $<actual>:   #{@actual.inspect}"
       }
+      #; [!1ujag] returns self when passed.
       self
     end
 
