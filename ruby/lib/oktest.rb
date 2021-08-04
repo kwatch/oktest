@@ -1631,6 +1631,7 @@ module Oktest
     attr_reader :styleoption
 
     def parse(io)
+      #; [!5mzd3] parses ruby code.
       tree = _parse(io, [], nil)
       return tree
     end
@@ -1661,6 +1662,7 @@ module Oktest
     private :_parse
 
     def transform(tree, depth=1)
+      #; [!te7zw] converts tree into test code.
       buf = []
       tree.each do |tuple|
         _transform(tuple, depth, buf)
@@ -1670,8 +1672,9 @@ module Oktest
     end
 
     def _transform(tuple, depth, buf)
-      indent = '  ' * (depth - 1)
+      #; [!q5duk] supports 'unaryop' style option.
       unaryop = @styleoption == 'unaryop'
+      indent  = '  ' * (depth - 1)
       keyword = tuple[1]
       if keyword == 'spec'
         _, _, spec = tuple
@@ -1698,6 +1701,7 @@ module Oktest
     private :_transform
 
     def generate(io)
+      #; [!5hdw4] generates test code.
       tree = parse(io)
       return <<END
 # coding: utf-8
