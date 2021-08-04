@@ -746,16 +746,20 @@ module Oktest
   class Visitor
 
     def start()
+      #; [!5zonp] visits topics and specs and calls callbacks.
+      #; [!gkopz] doesn't change Oktest::TOPLEVEL_SCOPES.
       Oktest::TOPLEVEL_SCOPES.each do |scope|
         scope.children.each {|c| c.accept_runner(self, 0, nil) }
       end
     end
 
     def run_topic(topic, depth, parent)   #:nodoc:
+      #; [!x8r9w] calls on_topic() callback on topic.
       if topic._prefix == '*'
         on_topic(topic.target, topic.tag, depth) do
           topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
         end
+      #; [!qh0q3] calls on_case() callback on case_when or case_else.
       else
         on_case(topic.target, topic.tag, depth) do
           topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
@@ -764,6 +768,7 @@ module Oktest
     end
 
     def run_spec(spec, depth, parent)   #:nodoc:
+      #; [!41uyj] calls on_spec() callback.
       on_spec(spec.desc, spec.tag, depth)
     end
 
