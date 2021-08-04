@@ -743,6 +743,38 @@ module Oktest
   end
 
 
+  class Visitor
+
+    def start()
+      Oktest::TOPLEVEL_SCOPES.each do |scope|
+        scope.children.each do |child|
+          child.accept_runner(self, 0, nil)
+        end
+      end
+    end
+
+    def run_topic(topic, depth, parent)   #:nodoc:
+      on_topic(topic.target, topic.tag, depth) do
+        topic.children.each do |child|
+          child.accept_runner(self, depth+1, topic)
+        end
+      end
+    end
+
+    def run_spec(spec, depth, parent)   #:nodoc:
+      on_spec(spec.desc, spec.tag, depth)
+    end
+
+    def on_topic(topic_target, tag, depth)
+      yield
+    end
+
+    def on_spec(spec_desc, tag, depth)
+    end
+
+  end
+
+
   STATUSES = [:PASS, :FAIL, :ERROR, :SKIP, :TODO]
 
 
