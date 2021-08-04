@@ -747,16 +747,18 @@ module Oktest
 
     def start()
       Oktest::TOPLEVEL_SCOPES.each do |scope|
-        scope.children.each do |child|
-          child.accept_runner(self, 0, nil)
-        end
+        scope.children.each {|c| c.accept_runner(self, 0, nil) }
       end
     end
 
     def run_topic(topic, depth, parent)   #:nodoc:
-      on_topic(topic.target, topic.tag, depth) do
-        topic.children.each do |child|
-          child.accept_runner(self, depth+1, topic)
+      if topic._prefix == '*'
+        on_topic(topic.target, topic.tag, depth) do
+          topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+        end
+      else
+        on_case(topic.target, topic.tag, depth) do
+          topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
         end
       end
     end
@@ -766,6 +768,10 @@ module Oktest
     end
 
     def on_topic(topic_target, tag, depth)
+      yield
+    end
+
+    def on_case(case_cond, tag, depth)
       yield
     end
 
