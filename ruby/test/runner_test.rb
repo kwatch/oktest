@@ -56,7 +56,7 @@ class Runner_TC < TC
         end
       end
     }
-    it "runs topics and specs." do
+    it "[!xrisl] runs topics and specs." do
       sout, serr = capture do
         build_topics.call
         Oktest::Runner.new(DummyReporter.new).run_all()
@@ -74,7 +74,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "clears filescopes list." do
+    it "[!dth2c] clears filescopes list." do
       assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #1"
       sout, serr = capture do
         build_topics.call
@@ -86,7 +86,7 @@ END
   end
 
   describe "#run_spec()" do
-    it "runs spec body, catching assertions or exceptions." do
+    it "[!yd24o] runs spec body, catching assertions or exceptions." do
       Oktest.scope do
         topic "Parent" do
           topic "Child" do
@@ -130,7 +130,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "runs spec block with context object which allows to call methods defined in topics." do
+    it "[!u45di] runs spec block with context object which allows to call methods defined in topics." do
       Oktest.scope do
         def v1; "V1"; end
         topic "Parent" do
@@ -164,7 +164,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "calls 'before' and 'after' blocks with context object as self." do
+    it "[!yagka] calls 'before' and 'after' blocks with context object as self." do
       sout, serr = capture do
         Oktest.scope do
           before     { @x ||= 1; puts "      [all] before: @x=#{@x}" }
@@ -231,7 +231,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "calls 'after' blocks even when exception raised." do
+    it "[!76g7q] calls 'after' blocks even when exception raised." do
       sout, serr = capture do
         Oktest.scope do
           after { puts "[all] after" }
@@ -263,7 +263,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "calls 'at_end' blocks, even when exception raised." do
+    it "[!dihkr] calls 'at_end' blocks, even when exception raised." do
       sout, serr = capture do
         Oktest.scope do
           topic "topic#A" do
@@ -288,10 +288,46 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
+    describe "[!68cnr] if TODO() called in spec..." do
+      it "[!6ol3p] changes PASS status to FAIL because test passed unexpectedly." do
+        Oktest.scope do
+          topic "topic#A" do
+            spec("spec#1") { TODO(); ok {1+1} == 2 }  # passed unexpectedly
+          end
+        end
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).run_all() }
+        expected = <<'END'
+file: "test/runner_test.rb"
+topic: "topic#A"
+  spec: "spec#1"
+  /spec: status=:FAIL, error=#<ASSERTION: spec should be failed (because not implemented yet), but passed unexpectedly.>
+/topic
+/file
+END
+        assert_eq sout, expected
+      end
+      it "[!6syw4] changes FAIL status to TODO because test failed expectedly." do
+        Oktest.scope do
+          topic "topic#A" do
+            spec("spec#1") { TODO(); ok {1+1} == 1 }  # failed expectedly
+          end
+        end
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).run_all() }
+        expected = <<'END'
+file: "test/runner_test.rb"
+topic: "topic#A"
+  spec: "spec#1"
+  /spec: status=:TODO, error=#<Oktest::TodoException: not implemented yet>
+/topic
+/file
+END
+        assert_eq sout, expected
+      end
+    end
   end
 
   describe "#run_topic()" do
-    it "calls 'before_all' and 'after_all' blocks." do
+    it "[!i3yfv] calls 'before_all' and 'after_all' blocks." do
       sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all" }
@@ -343,7 +379,7 @@ END
   end
 
   describe "#run_filescope()" do
-    it "calls before_all and after_all blocks." do
+    it "[!5anr7] calls before_all and after_all blocks." do
       sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all#1" }

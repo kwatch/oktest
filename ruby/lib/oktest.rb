@@ -916,6 +916,7 @@ module Oktest
 
     def run_topic(topic, depth, parent)
       @reporter.enter_topic(topic, depth)
+      #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
       topic.children.each do |child|
         child.accept_runner(self, depth+1, topic)
@@ -926,11 +927,14 @@ module Oktest
 
     def run_spec(spec, depth, parent)
       @reporter.enter_spec(spec, depth)
+      #; [!u45di] runs spec block with context object which allows to call methods defined in topics.
       topic = parent
       context = new_context(topic, spec)
+      #; [!yagka] calls 'before' and 'after' blocks with context object as self.
       call_before_blocks(topic, context)
       status = :PASS
       ex = nil
+      #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
         if spec.argnames.empty?
           call_spec_block(spec, context)
@@ -945,18 +949,23 @@ module Oktest
       rescue TODO_EXCEPTION  => ex;  status = :TODO
       rescue Exception       => ex;  status = :ERROR
       end
+      #; [!68cnr] if TODO() called in spec...
       if context._TODO
+        #; [!6ol3p] changes PASS status to FAIL because test passed unexpectedly.
         if status == :PASS
           status = :FAIL
           ex = FAIL_EXCEPTION.new("spec should be failed (because not implemented yet), but passed unexpectedly.")
+        #; [!6syw4] changes FAIL status to TODO because test failed expectedly.
         elsif status == :FAIL
           status = :TODO
           ex = TODO_EXCEPTION.new("not implemented yet")
         end
         ex.set_backtrace([spec.location])
       end
+      #; [!dihkr] calls 'at_end' blocks, even when exception raised.
       begin
         call_at_end_blocks(context)
+      #; [!76g7q] calls 'after' blocks even when exception raised.
       ensure
         call_after_blocks(topic, context)
       end
@@ -964,6 +973,8 @@ module Oktest
     end
 
     def run_all()
+      #; [!xrisl] runs topics and specs.
+      #; [!dth2c] clears filescopes list.
       @reporter.enter_all(self)
       while (scope = TOPLEVEL_SCOPES.shift)
         run_filescope(scope)
@@ -973,6 +984,7 @@ module Oktest
 
     def run_filescope(filescope)
       @reporter.enter_file(filescope.filename)
+      #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(filescope)
       filescope.children.each do |child|
         child.accept_runner(self, 0, nil)
