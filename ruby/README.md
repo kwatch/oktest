@@ -59,8 +59,8 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
     * <a href="#tag-and-filtering">Tag and Filtering</a>
     * <a href="#case_when-and-case_else"><code>case_when</code> and <code>case_else</code></a>
-    * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#optional-unary-operators">Optional: Unary Operators</a>
+    * <a href="#generate-test-code-skeleton">Generate Test Code Skeleton</a>
     * <a href="#defining-methods-in-topics">Defining Methods in Topics</a>
   * <a href="#assertions">Assertions</a>
     * <a href="#basic-assertions">Basic Assertions</a>
@@ -424,6 +424,40 @@ $ ruby test/example05_test.rb
 ```
 
 
+### Optional: Unary Operators
+
+`topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
+This makes test scripts more readable.
+
+<!--
+test/example06_test.rb:
+-->
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
++ topic('example') do            # unary `+` operator
+
+  + topic('example') do          # unary `+` operator
+
+    - spec("1+1 is 2.") do       # unary `-` operator
+        ok {1+1} == 2
+      end
+
+    - spec("1*1 is 1.") do       # unary `-` operator
+        ok {1*1} == 1
+      end
+
+    end
+
+  end
+
+end
+```
+
+
 ### Generate Test Code Skeleton
 
 `oktest -g` (or `oktest --generate`) generates test code skeleton from ruby file.
@@ -465,51 +499,51 @@ Oktest.scope do
   topic Hello do
 
 
-    topic '#hello' do
+    topic '#hello()' do
 
       spec "default name is 'world'."
 
       spec "returns greeting message."
 
-    end
+    end  # #hello()
 
 
-  end # Hello
+  end  # Hello
 
 
 end
 ```
 
+(Experimental) `--generate=unaryop` generates test skeleton with unary operator `+` and `-`.
 
-### Optional: Unary Operators
+```terminal
+$ oktest --generate=unaryop hello.rb > test/hello2_test.rb
+```
 
-`topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
-This makes test scripts more readable.
-
-<!--
-test/example06_test.rb:
--->
+test/hello2_test.rb:
 
 ```ruby
+# coding: utf-8
+
 require 'oktest'
 
 Oktest.scope do
 
-+ topic('example') do            # unary `+` operator
 
-  + topic('example') do          # unary `+` operator
++ topic(Hello) do
 
-    - spec("1+1 is 2.") do       # unary `-` operator
-        ok {1+1} == 2
-      end
 
-    - spec("1*1 is 1.") do       # unary `-` operator
-        ok {1*1} == 1
-      end
+  + topic('#hello()') do
 
-    end
+    - spec "default name is 'world'."
 
-  end
+    - spec "returns greeting message."
+
+    end  #hello()
+
+
+  end  # Hello
+
 
 end
 ```
