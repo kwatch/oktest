@@ -84,6 +84,7 @@ Oktest.rb requires Ruby 2.3 or later.
   * <a href="#tips">Tips</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
+    * <a href="#visitor-class">Visitor Class</a>
   * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
@@ -1396,6 +1397,71 @@ Oktest.scope do
   end
 
 end
+```
+
+
+### Visitor Class
+
+Oktest.rb provides visitor class.
+
+test/example44_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
++ topic('Example Topic') do
+  - spec("sample #1") do ok {1+1} == 2 end
+  - spec("sample #2") do ok {1-1} == 0 end
+  + case_when('some condition...') do
+    - spec("sample #3") do ok {1*1} == 1 end
+    end
+  + case_else() do
+    - spec("sample #4") do ok {1/1} == 1 end
+    end
+  end
+end
+
+## custom visitor class
+class MyVisitor < Oktest::Visitor      # !!!!!
+  def on_topic(target, tag, depth)     # !!!!!
+    print "  " * depth
+    print "+ topic: #{target}"
+    print " (tag: #{tag})" if tag
+    print "\n"
+    yield                              # should yield !!!
+  end
+  def on_case(cond, tag, depth)        # !!!!!
+    print "  " * depth
+    print "+ case: #{cond}"
+    print " (tag: #{tag})" if tag
+    print "\n"
+    yield                              # should yield !!!
+  end
+  def on_spec(desc, tag, depth)        # !!!!!
+    print "  " * depth
+    print "- spec: #{desc}"
+    print " (tag: #{tag})" if tag
+    print "\n"
+  end
+end
+
+## run custom visitor
+Oktest::Config.auto_run = false    # stop running test cases
+MyVisitor.new.start()
+```
+
+Result:
+
+```terminal
+$ ruby test/example44_test.rb
++ topic: Example Topic
+  - spec: sample #1
+  - spec: sample #2
+  + case: When some condition...
+    - spec: sample #3
+  + case: Else
+    - spec: sample #4
 ```
 
 
