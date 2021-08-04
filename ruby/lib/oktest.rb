@@ -801,7 +801,6 @@ module Oktest
     end
 
     def run_spec(spec, depth, parent)
-      return if ENV['OKTEST_SPEC'] && ENV['OKTEST_SPEC'] != spec.desc
       @reporter.enter_spec(spec, depth)
       topic = parent
       context = new_context(topic, spec)

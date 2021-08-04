@@ -288,32 +288,6 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "skips spec if $OKTEST_SPEC is set and it is not equal to spec text." do
-      sout, serr = capture do
-        Oktest.scope do
-          topic "topic#A" do
-            spec("spec#1") { ok {1+1} == 2 }
-            spec("spec#2") { ok {1-1} == 0 }
-          end
-        end
-        ENV['OKTEST_SPEC'] = "spec#2"
-        begin
-          runner = Oktest::Runner.new(DummyReporter.new).run_all()
-        ensure
-          ENV['OKTEST_SPEC'] = nil
-        end
-      end
-      expected = <<'END'
-file: "test/runner_test.rb"
-topic: "topic#A"
-  spec: "spec#2"
-  /spec: status=:PASS
-/topic
-/file
-END
-      assert_eq sout, expected
-      assert_eq serr, ""
-    end
   end
 
   describe "#run_topic()" do
