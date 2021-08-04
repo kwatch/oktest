@@ -1420,6 +1420,11 @@ module Oktest
 
   class TestGenerator
 
+    def initialize(styleoption=nil)
+      @styleoption = styleoption
+    end
+    attr_reader :styleoption
+
     def parse(io)
       tree = _parse(io, [], nil)
       return tree
@@ -1461,18 +1466,21 @@ module Oktest
 
     def _transform(tuple, depth, buf)
       indent = '  ' * (depth - 1)
+      unaryop = @styleoption == 'unaryop'
       keyword = tuple[1]
       if keyword == 'spec'
         _, _, spec = tuple
         escaped = spec.gsub(/"/, '\\\"')
         buf << "\n"
-        buf << "#{indent}  spec \"#{escaped}\"\n"
+        buf << "#{indent}- spec(\"#{escaped}\")\n"    if unaryop
+        buf << "#{indent}  spec \"#{escaped}\"\n" unless unaryop
       else
         _, _, topic, children = tuple
         topic += '()' if keyword == 'def'
         topic_ = keyword == 'def' ? "'#{topic}'" : topic
         buf << "\n"
-        buf << "#{indent}  topic #{topic_} do\n"
+        buf << "#{indent}+ topic(#{topic_}) do\n"     if unaryop
+        buf << "#{indent}  topic #{topic_} do\n"  unless unaryop
         buf << "\n" unless keyword == 'def'
         children.each do |child_tuple|
           _transform(child_tuple, depth+1, buf)

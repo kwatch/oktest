@@ -63,6 +63,28 @@ END
 END
       assert_eq code, expected
     end
+    it "supports 'unaryop' style option." do
+      g = Oktest::TestGenerator.new('unaryop')
+      tree = g.parse(StringIO.new(INPUT))
+      code = g.transform(tree, 1)
+      expected = <<'END'
+
++ topic(Hello) do
+
+
+  + topic('#hello()') do
+
+    - spec("default name is 'world'.")
+
+    - spec("returns greeting message.")
+
+    end  # #hello()
+
+
+  end  # Hello
+END
+      assert_eq code, expected
+    end
   end
 
   describe '#generate()' do
