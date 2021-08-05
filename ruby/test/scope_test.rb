@@ -355,9 +355,9 @@ class ScopeFunctions_TC < TC
           Oktest.scope do ; x = 3
           end
         end
-      rescue Exception => ex
-        assert_eq ex.class, Oktest::OktestError
-        assert_eq ex.message, "scope() and global_scope() are not nestable."
+      rescue Exception => exc
+        assert_eq exc.class, Oktest::OktestError
+        assert_eq exc.message, "scope() and global_scope() are not nestable."
       else
         assert false, "Oktest::OktestError expected."
       ensure
@@ -399,9 +399,9 @@ class ScopeFunctions_TC < TC
           Oktest.global_scope do ; x = 3
           end
         end
-      rescue Exception => ex
-        assert_eq ex.class, Oktest::OktestError
-        assert_eq ex.message, "scope() and global_scope() are not nestable."
+      rescue Exception => exc
+        assert_eq exc.class, Oktest::OktestError
+        assert_eq exc.message, "scope() and global_scope() are not nestable."
       else
         assert false, "Oktest::OktestError expected."
       ensure
@@ -415,9 +415,9 @@ class ScopeFunctions_TC < TC
           Oktest.global_scope do ; x = 3
           end
         end
-      rescue Exception => ex
-        assert_eq ex.class, Oktest::OktestError
-        assert_eq ex.message, "scope() and global_scope() are not nestable."
+      rescue Exception => exc
+        assert_eq exc.class, Oktest::OktestError
+        assert_eq exc.message, "scope() and global_scope() are not nestable."
       else
         assert false, "Oktest::OktestError expected."
       ensure
@@ -431,9 +431,9 @@ class ScopeFunctions_TC < TC
           Oktest.scope do      ; x = 3
           end
         end
-      rescue Exception => ex
-        assert_eq ex.class, Oktest::OktestError
-        assert_eq ex.message, "scope() and global_scope() are not nestable."
+      rescue Exception => exc
+        assert_eq exc.class, Oktest::OktestError
+        assert_eq exc.message, "scope() and global_scope() are not nestable."
       else
         assert false, "Oktest::OktestError expected."
       ensure

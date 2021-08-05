@@ -237,10 +237,10 @@ module Oktest
         super
       begin
         ret = @actual.__send__(method_name, *args)
-      rescue NoMethodError, TypeError => ex
+      rescue NoMethodError, TypeError => exc
         #; [!f0ekh] skip top of backtrace when NoMethodError raised.
-        while !ex.backtrace.empty? && ex.backtrace[0].start_with?(__FILE__)
-          ex.backtrace.shift()
+        while !exc.backtrace.empty? && exc.backtrace[0].start_with?(__FILE__)
+          exc.backtrace.shift()
         end
         raise
       end
@@ -266,29 +266,29 @@ module Oktest
       proc_obj = @actual
       if @bool
         #; [!wbwdo] raises assertion error when failed.
-        ex = nil
+        exc = nil
         begin
           proc_obj.call
-        rescue Exception => ex
-          ex.is_a?(expected)  or
-            __assert(false) { "Expected #{expected.inspect} to be raised but got #{ex.class}." }
+        rescue Exception => exc
+          exc.is_a?(expected)  or
+            __assert(false) { "Expected #{expected.inspect} to be raised but got #{exc.class}." }
         end
         #; [!vnc6b] sets exceptio object into '#exception' attribute.
         (class << proc_obj; self; end).class_eval { attr_accessor :exception }
-        proc_obj.exception = ex
-        __assert(! ex.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
+        proc_obj.exception = exc
+        __assert(! exc.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
         #; [!tpxlv] accepts string or regexp as error message.
         case errmsg
         when nil;     # do nothing
         when Regexp
-          __assert(ex.message =~ errmsg) {
+          __assert(exc.message =~ errmsg) {
             "$error_message =~ #{errmsg.inspect}: failed.\n"\
-            "    $error_message: #{ex.message.inspect}"
+            "    $error_message: #{exc.message.inspect}"
           }
         else
-          __assert(errmsg == ex.message) {
+          __assert(errmsg == exc.message) {
             "$error_message == #{errmsg.inspect}: failed.\n"\
-            "    $error_message: #{ex.message.inspect}"
+            "    $error_message: #{exc.message.inspect}"
           }
         end
       else
@@ -297,9 +297,9 @@ module Oktest
           raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
         begin
           proc_obj.call
-        rescue Exception => ex
-          __assert(! ex.is_a?(expected)) {
-            "#{expected.inspect} should not be raised but got #{ex.inspect}."
+        rescue Exception => exc
+          __assert(! exc.is_a?(expected)) {
+            "#{expected.inspect} should not be raised but got #{exc.inspect}."
           }
         end
       end
@@ -983,7 +983,7 @@ module Oktest
       #; [!yagka] calls 'before' and 'after' blocks with context object as self.
       call_before_blocks(topic, context)
       status = :PASS
-      ex = nil
+      exc = nil
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
         if spec.params.empty?
@@ -992,25 +992,25 @@ module Oktest
           values = get_fixture_values(spec.params, topic, spec, context)
           call_spec_block(spec, context, *values)
         end
-      rescue NoMemoryError   => ex;  raise ex
-      rescue SignalException => ex;  raise ex
-      rescue FAIL_EXCEPTION  => ex;  status = :FAIL
-      rescue SKIP_EXCEPTION  => ex;  status = :SKIP
-      rescue TODO_EXCEPTION  => ex;  status = :TODO
-      rescue Exception       => ex;  status = :ERROR
+      rescue NoMemoryError   => exc;  raise exc
+      rescue SignalException => exc;  raise exc
+      rescue FAIL_EXCEPTION  => exc;  status = :FAIL
+      rescue SKIP_EXCEPTION  => exc;  status = :SKIP
+      rescue TODO_EXCEPTION  => exc;  status = :TODO
+      rescue Exception       => exc;  status = :ERROR
       end
       #; [!68cnr] if TODO() called in spec...
       if context._TODO
         #; [!6ol3p] changes PASS status to FAIL because test passed unexpectedly.
         if status == :PASS
           status = :FAIL
-          ex = FAIL_EXCEPTION.new("spec should be failed (because not implemented yet), but passed unexpectedly.")
+          exc = FAIL_EXCEPTION.new("spec should be failed (because not implemented yet), but passed unexpectedly.")
         #; [!6syw4] changes FAIL status to TODO because test failed expectedly.
         elsif status == :FAIL
           status = :TODO
-          ex = TODO_EXCEPTION.new("not implemented yet")
+          exc = TODO_EXCEPTION.new("not implemented yet")
         end
-        ex.set_backtrace([spec.location])
+        exc.set_backtrace([spec.location])
       end
       #; [!dihkr] calls 'at_end' blocks, even when exception raised.
       begin
@@ -1019,7 +1019,7 @@ module Oktest
       ensure
         call_after_blocks(topic, context)
       end
-      @reporter.exit_spec(spec, depth, status, ex, parent)
+      @reporter.exit_spec(spec, depth, status, exc, parent)
     end
 
     def run_all()
@@ -1162,9 +1162,9 @@ module Oktest
         return get_fixture_value(name, GLOBAL_SCOPE, spec, context, location, resolved, resolving)
       else
         #; [!nr79z] raises error when fixture not found.
-        ex = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
-        ex.set_backtrace([location])
-        raise ex
+        exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
+        exc.set_backtrace([location])
+        raise exc
       end
     end
 
@@ -1177,9 +1177,9 @@ module Oktest
       s2 = resolving[i..-1].join('=>')
       loop = s1.empty? ? s2 : "#{s1}->#{s2}"
       #location = $1 if location =~ /(.*:\d+)/
-      ex = LoopedDependencyError.new("fixture dependency is looped: #{loop}")
-      ex.set_backtrace([location])
-      return ex
+      exc = LoopedDependencyError.new("fixture dependency is looped: #{loop}")
+      exc.set_backtrace([location])
+      return exc
     end
 
   end
@@ -1248,11 +1248,11 @@ module Oktest
     def enter_spec(spec, depth)
     end
 
-    def exit_spec(spec, depth, status, ex, parent)
+    def exit_spec(spec, depth, status, exc, parent)
       #; [!r6yge] increments counter according to status.
       @counts[status] += 1
       #; [!nupb4] keeps exception info when status is FAIL or ERROR.
-      @exceptions << [spec, status, ex, parent] if status == :FAIL || status == :ERROR
+      @exceptions << [spec, status, exc, parent] if status == :FAIL || status == :ERROR
     end
 
     protected
@@ -1276,21 +1276,21 @@ module Oktest
       @exceptions.clear
     end
 
-    def print_exc(spec, status, ex, topic)
+    def print_exc(spec, status, exc, topic)
       #; [!5ara3] prints exception info of assertion failure.
       #; [!pcpy4] prints exception info of error.
       label = Color.status(status, LABELS[status])
       path = Color.topic(spec_path(spec, topic))
       puts "[#{label}] #{path}"
-      print_exc_backtrace(ex, status)
-      print_exc_message(ex, status)
+      print_exc_backtrace(exc, status)
+      print_exc_message(exc, status)
     end
 
-    def print_exc_backtrace(ex, status)
+    def print_exc_backtrace(exc, status)
       #; [!ocxy6] prints backtrace info and lines in file.
       rexp = FILENAME_FILTER
       prev_file = prev_line = nil
-      ex.backtrace.each_with_index do |str, i|
+      exc.backtrace.each_with_index do |str, i|
         #; [!jbped] skips backtrace of oktest.rb when assertion failure.
         #; [!cfkzg] don't skip first backtrace entry when error.
         next if str =~ rexp && ! (i == 0 && status == :ERROR)
@@ -1309,19 +1309,19 @@ module Oktest
 
     FILENAME_FILTER = %r`/(?:oktest|minitest/unit|test/unit(?:/assertions|/testcase)?)(?:\.rbc?)?:` #:nodoc:
 
-    def print_exc_message(ex, status)
+    def print_exc_message(exc, status)
       #; [!hr7jn] prints detail of assertion failed.
       #; [!pd41p] prints detail of exception.
       if status == :FAIL
-        msg = "#{ex}"
+        msg = "#{exc}"
       else
-        msg = "#{ex.class.name}: #{ex}"
+        msg = "#{exc.class.name}: #{exc}"
       end
       lines = []
       msg.each_line {|line| lines << line }
       puts lines.shift.chomp
       puts lines.join.chomp unless lines.empty?
-      puts ex.diff if ex.respond_to?(:diff) && ex.diff   # for oktest.rb
+      puts exc.diff if exc.respond_to?(:diff) && exc.diff   # for oktest.rb
     end
 
     def footer(elapsed)
@@ -1846,14 +1846,14 @@ END
       #; [!jr49p] reports error when unknown option specified.
       #; [!uqomj] reports error when required argument is missing.
       #; [!8i755] reports error when argument is invalid.
-      rescue OptionParser::ParseError => ex
-        case ex
+      rescue OptionParser::ParseError => exc
+        case exc
         when OptionParser::InvalidOption   ; s = "unknown option."
         when OptionParser::InvalidArgument ; s = "invalid argument."
         when OptionParser::MissingArgument ; s = "argument required."
         else                               ; s = nil
         end
-        msg = s ? "#{ex.args.join(' ')}: #{s}" : ex.message
+        msg = s ? "#{exc.args.join(' ')}: #{s}" : exc.message
         $stderr.puts("#{File.basename($0)}: #{msg}")
         return 1
       end

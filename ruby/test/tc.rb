@@ -32,14 +32,14 @@ class TC
     obj.setup()
     begin
       obj.instance_eval(&b)
-    rescue => ex
-      if ex.is_a?(AssertionFailed)
+    rescue => exc
+      if exc.is_a?(AssertionFailed)
         COUNTS[:fail]  += 1; puts "FAILED!" unless ENV['TC_QUIET']
       else
         COUNTS[:error] += 1; puts "ERROR!"  unless ENV['TC_QUIET']
       end
-      puts "  #{ex.class.name}: #{ex.message}"
-      ex.backtrace.each do |bt|
+      puts "  #{exc.class.name}: #{exc.message}"
+      exc.backtrace.each do |bt|
         puts "    #{bt}" if bt.index(__FILE__) == nil
       end
     else

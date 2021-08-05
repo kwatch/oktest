@@ -375,8 +375,8 @@ END
     it "[!71h2x] '-F ...' option will be error." do
       begin
         run("-F", "*pat*", @testfile)
-      rescue OptionParser::InvalidArgument => ex
-        assert_eq ex.message, "invalid argument: -F *pat*"
+      rescue OptionParser::InvalidArgument => exc
+        assert_eq exc.message, "invalid argument: -F *pat*"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end
@@ -424,8 +424,8 @@ END
     it "[!9nr94] '--color=true' option raises error." do
       begin
         run("--color=true", @testfile)
-      rescue OptionParser::InvalidArgument => ex
-        assert_eq ex.message, "invalid argument: --color=true"
+      rescue OptionParser::InvalidArgument => exc
+        assert_eq exc.message, "invalid argument: --color=true"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end
