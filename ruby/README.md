@@ -34,7 +34,6 @@ Oketst.scope do                      #
       ok {'/blabla'}.not_exist?      #      assert !File.exist?('/blabla')
       pr = proc { .... }             #      exc = assert_raise(Error) { .... }
       ok {pr}.raise?(Error, "mesg")  #      assert exc.message, "mesg"
-      exc = pr.exception             #
     end                              #    end
                                      #
   end                                #  end
@@ -718,8 +717,10 @@ ok {pr}.raise?(NoMethodError, "undefined method `len' for \"abc\":String")
 ok {pr}.raise?(NoMethodError, /^undefined method `len'/)
 
 ## get exception object
-ok {pr.exception.class} == NoMethodError
-ok {pr.exception.message} == "undefined method `len' for \"abc\":String"
+ok {pr}.raise?(NoMethodError) {|exc|
+  ok {exc.class}   == NoMethodError
+  ok {exc.message} == "undefined method `len' for \"abc\":String"
+}
 
 ## if you want to assert that procedure NOT raise exception...
 not_ok {pr}.raise?(NoMethodError)   # only exception class, no errmsg
