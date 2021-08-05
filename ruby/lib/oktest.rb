@@ -787,7 +787,7 @@ module Oktest
       bkup = [$stdin, $stdout, $stderr]
       #; [!53mai] takes $stdin data.
       $stdin  = sin  = StringIO.new(input)
-      #; [!1kbnj] captures $stdio and $stderr
+      #; [!1kbnj] captures $stdio and $stderr.
       $stdout = sout = StringIO.new
       $stderr = serr = StringIO.new
       #; [!6ik8b] can simulate tty.

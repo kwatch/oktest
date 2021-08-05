@@ -516,6 +516,10 @@ class SpecObject_TC < TC
       assert_eq sp.tag_match?('foo'), false
       assert_eq sp.tag_match?('{foo,bar}'), false
     end
+    it "[!lpaz2] returns false if spec object has no tags." do
+      sp = new_spec_object("sample #1", tag: nil)
+      assert_eq sp.tag_match?('*'), false
+    end
   end
 
   describe '#_repr()' do
