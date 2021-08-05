@@ -1698,6 +1698,13 @@ module Oktest
 
   FILTER_CLASS = Filter
 
+  def self.filter(filter_obj)
+    TOPLEVEL_SCOPES.each do |filescope|
+      filter_obj.filter_toplevel_scope!(filescope)
+    end
+  end
+
+
 
   module Color
 
@@ -1890,7 +1897,7 @@ END
       #; [!noi8i] '-F' option supports negative filter.
       if opts.filter
         filter_obj = FILTER_CLASS.create_from(opts.filter)
-        filter(filter_obj)
+        Oktest.filter(filter_obj)
       end
       #; [!bim36] changes auto-running to off.
       Config.auto_run = false
@@ -1991,12 +1998,6 @@ END
         end
       end
       return buf.join()
-    end
-
-    def filter(filter_obj)
-      TOPLEVEL_SCOPES.each do |filescope|
-        filter_obj.filter_toplevel_scope!(filescope)
-      end
     end
 
   end
