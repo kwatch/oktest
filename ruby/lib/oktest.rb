@@ -49,10 +49,10 @@ module Oktest
 
     attr_reader :actual, :bool, :location
 
-    def _done()
+    def __done()
       NOT_YET.delete(self.__id__)
     end
-    private :_done
+    private :__done
 
     def self.report_not_yet()
       #; [!3nksf] reports if 'ok{}' called but assertion not performed.
@@ -76,7 +76,7 @@ module Oktest
     end
 
     def ==(expected)
-      _done()
+      __done()
       #; [!1iun4] raises assertion error when failed.
       #; [!eyslp] is avaialbe with NOT.
       __assert(@bool == (@actual == expected)) {
@@ -98,7 +98,7 @@ module Oktest
     end
 
     def !=(expected)    # Ruby >= 1.9
-      _done()
+      __done()
       #; [!90tfb] raises assertion error when failed.
       #; [!l6afg] is avaialbe with NOT.
       __assert(@bool == (@actual != expected)) {
@@ -112,7 +112,7 @@ module Oktest
     end
 
     def ===(expected)
-      _done()
+      __done()
       #; [!42f6a] raises assertion error when failed.
       #; [!vhvyu] is avaialbe with NOT.
       __assert(@bool == (@actual === expected)) {
@@ -134,7 +134,7 @@ module Oktest
     private :__assert_op
 
     def >(expected)
-      _done()
+      __done()
       #; [!vjjuq] raises assertion error when failed.
       #; [!73a0t] is avaialbe with NOT.
       __assert_op(@actual > expected, '>', '<=', expected)
@@ -143,7 +143,7 @@ module Oktest
     end
 
     def >=(expected)
-      _done()
+      __done()
       #; [!isdfc] raises assertion error when failed.
       #; [!3dgmh] is avaialbe with NOT.
       __assert_op(@actual >= expected, '>=', '<', expected)
@@ -152,7 +152,7 @@ module Oktest
     end
 
     def <(expected)
-      _done()
+      __done()
       #; [!ukqa0] raises assertion error when failed.
       #; [!gwvdl] is avaialbe with NOT.
       __assert_op(@actual < expected, '<', '>=', expected)
@@ -161,7 +161,7 @@ module Oktest
     end
 
     def <=(expected)
-      _done()
+      __done()
       #; [!ordwe] raises assertion error when failed.
       #; [!mcb9w] is avaialbe with NOT.
       __assert_op(@actual <= expected, '<=', '>', expected)
@@ -183,7 +183,7 @@ module Oktest
     private :__assert_match
 
     def =~(expected)
-      _done()
+      __done()
       #; [!xkldu] raises assertion error when failed.
       #; [!2aa6f] is avaialbe with NOT.
       __assert_match(@actual =~ expected, '=~', '!~', expected)
@@ -192,7 +192,7 @@ module Oktest
     end
 
     def !~(expected)    # Ruby >= 1.9
-      _done()
+      __done()
       #; [!58udu] raises assertion error when failed.
       #; [!iuf5j] is avaialbe with NOT.
       __assert_match(@actual !~ expected, '!~', '=~', expected)
@@ -201,7 +201,7 @@ module Oktest
     end
 
     def in_delta?(expected, delta)
-      _done()
+      __done()
       #; [!f3zui] raises assertion error when failed.
       #; [!t7liw] is avaialbe with NOT.
       __assert(@bool == !!((@actual - expected).abs < delta)) {
@@ -216,7 +216,7 @@ module Oktest
     end
 
     def same?(expected)
-      _done()
+      __done()
       #; [!ozbf4] raises assertion error when failed.
       #; [!dwtig] is avaialbe with NOT.
       __assert(@bool == !! @actual.equal?(expected)) {
@@ -230,7 +230,7 @@ module Oktest
     end
 
     def method_missing(method_name, *args)
-      _done()
+      __done()
       #; [!yjnxb] enables to handle boolean methods.
       #; [!ttow6] raises NoMethodError when not a boolean method.
       method_name.to_s =~ /\?\z/  or
@@ -262,7 +262,7 @@ module Oktest
     end
 
     def raise?(expected=Exception, errmsg=nil)
-      _done()
+      __done()
       proc_obj = @actual
       if @bool
         #; [!wbwdo] raises assertion error when failed.
@@ -308,7 +308,7 @@ module Oktest
     end
 
     def in?(expected)
-      _done()
+      __done()
       #; [!9rm8g] raises assertion error when failed.
       #; [!singl] is available with NOT.
       __assert(@bool == !! expected.include?(@actual)) {
@@ -322,7 +322,7 @@ module Oktest
     end
 
     def include?(expected)
-      _done()
+      __done()
       #; [!960j7] raises assertion error when failed.
       #; [!55git] is available with NOT.
       __assert(@bool == !! @actual.include?(expected)) {
@@ -336,7 +336,7 @@ module Oktest
     end
 
     def attr(name, expected)
-      _done()
+      __done()
       #; [!79tgn] raises assertion error when failed.
       #; [!cqnu3] is available with NOT.
       val = @actual.__send__(name)
@@ -351,7 +351,7 @@ module Oktest
     end
 
     def attrs(keyvals={})
-      _done()
+      __done()
       #; [!7ta0s] raises assertion error when failed.
       #; [!s0pnk] is available with NOT.
       keyvals.each {|name, expected| attr(name, expected) }
@@ -360,7 +360,7 @@ module Oktest
     end
 
     def keyval(key, expected)
-      _done()
+      __done()
       #; [!vtrlz] raises assertion error when failed.
       #; [!mmpwz] is available with NOT.
       val = @actual[key]
@@ -376,7 +376,7 @@ module Oktest
     alias item keyval      # for compatibility with minitest-ok
 
     def keyvals(keyvals={})
-      _done()
+      __done()
       #; [!fyvmn] raises assertion error when failed.
       #; [!js2j2] is available with NOT.
       keyvals.each {|name, expected| keyval(name, expected) }
@@ -386,7 +386,7 @@ module Oktest
     alias items keyvals    # for compatibility with minitest-ok
 
     def length(n)
-      _done()
+      __done()
       #; [!1y787] raises assertion error when failed.
       #; [!kryx2] is available with NOT.
       __assert(@bool == (@actual.length == n)) {
@@ -400,7 +400,7 @@ module Oktest
     end
 
     def truthy?
-      _done()
+      __done()
       #; [!3d94h] raises assertion error when failed.
       #; [!8rmgp] is available with NOT.
       __assert(@bool == (!!@actual == true)) {
@@ -413,7 +413,7 @@ module Oktest
     end
 
     def falsy?
-      _done()
+      __done()
       #; [!7o48g] raises assertion error when failed.
       #; [!i44q6] is available with NOT.
       __assert(@bool == (!!@actual == false)) {
@@ -434,7 +434,7 @@ module Oktest
     private :__assert_fs
 
     def file_exist?
-      _done()
+      __done()
       #; [!69bs0] raises assertion error when failed.
       #; [!r1mze] is available with NOT.
       __assert_fs(File.file?(@actual) , "File.file?($<actual>)")
@@ -443,7 +443,7 @@ module Oktest
     end
 
     def dir_exist?
-      _done()
+      __done()
       #; [!vfh7a] raises assertion error when failed.
       #; [!qtllp] is available with NOT.
       __assert_fs(File.directory?(@actual), "File.directory?($<actual>)")
@@ -452,7 +452,7 @@ module Oktest
     end
 
     def symlink_exist?
-      _done()
+      __done()
       #; [!qwngl] raises assertion error when failed.
       #; [!cgpbt] is available with NOT.
       __assert_fs(File.symlink?(@actual), "File.symlink?($<actual>)")
@@ -461,7 +461,7 @@ module Oktest
     end
 
     def not_exist?
-      _done()
+      __done()
       #; [!ja84s] raises assertion error when failed.
       #; [!to5z3] is available with NOT.
       __assert(@bool == ! File.exist?(@actual)) {
