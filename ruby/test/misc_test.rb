@@ -12,9 +12,12 @@ require_relative './initialize'
 class Misc_TC < TC
 
   def setup()
+    @_auto_run = Oktest::Config.auto_run
+    Oktest::Config.auto_run = true
   end
 
   def teardown()
+    Oktest::Config.auto_run = @_auto_run
     Oktest::TOPLEVEL_SCOPES.clear()
   end
 
