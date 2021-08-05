@@ -1449,7 +1449,7 @@ module Oktest
     reporter = klass.new
     runner = RUNNER_CLASS.new(reporter)
     runner.run_all()
-    TOPLEVEL_SCOPES.clear
+    TOPLEVEL_SCOPES.empty?  or "** internal error"
     #; [!p52se] returns total number of failures and errors.
     counts = reporter.counts
     return counts[:FAIL] + counts[:ERROR]
