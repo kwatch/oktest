@@ -375,7 +375,7 @@ module Oktest
     end
     alias item keyval      # for compatibility with minitest-ok
 
-    def keyvals(**keyvals)
+    def keyvals(keyvals={})  # never use keyword args!
       __done()
       #; [!fyvmn] raises assertion error when failed.
       #; [!js2j2] is available with NOT.
@@ -848,7 +848,7 @@ module Oktest
       return __do_dummy(dirname, recover, &b)
     end
 
-    def dummy_values(hashobj, **keyvals, &b)
+    def dummy_values(hashobj, keyvals={}, &b)  # never use keyword args!
       #; [!hgwg2] changes hash value temporarily.
       prev_values = {}
       key_not_exists = {}
