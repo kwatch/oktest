@@ -1675,6 +1675,25 @@ module Oktest
       return !children.empty?
     end
 
+    public
+
+    def self.create_from(pattern)  # ex: 'topic=name', 'spec="*pat*"'
+      #; [!gtpt1] parses 'sid=...' as filter pattern for spec.
+      pattern = "spec#{$1}\\[!#{$2}\\]*" if pattern =~ /\Asid(=|!=)(.*)/  # filter by spec id
+      #; [!xt364] parses 'topic=...' as filter pattern for topic.
+      #; [!53ega] parses 'spec=...' as filter pattern for spec.
+      #; [!go6us] parses 'tag=...' as filter pattern for tag.
+      #; [!cmp6e] raises ArgumentError when invalid argument.
+      pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
+      pattern =~ /\A(\w+)(=|!=)/ && pat.key?($1)  or
+        raise ArgumentError, "#{pattern.inspect}: unexpected pattern string."
+      pat[$1] = $'
+      #; [!5hl7z] parses 'xxx!=...' as negative filter pattern.
+      negative = ($2 == '!=')
+      #; [!9dzmg] returns filter object.
+      return self.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
+    end
+
   end
 
   FILTER_CLASS = Filter
