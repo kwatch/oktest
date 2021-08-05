@@ -14,7 +14,82 @@ class Util_TC < TC
 
   describe Oktest::Util do
 
-    describe '#hhmmss()' do
+    describe '.file_line()' do
+      it "[!4z65g] returns nil if file not exist or not a file." do
+        assert_eq Oktest::Util.file_line("not-exist-file", 1), nil
+        assert_eq Oktest::Util.file_line(".", 1), nil
+      end
+      it "[!162e1] returns line string." do
+        lineno = __LINE__ + 2
+        _ = <<END
+U6XYR-SH08J
+END
+        assert_eq Oktest::Util.file_line(__FILE__, lineno), "U6XYR-SH08J\n"
+      end
+      it "[!4a2ji] caches recent file content for performance reason." do
+        _ = Oktest::Util.file_line(__FILE__, 1)
+        c = Oktest::Util.instance_variable_get('@__cache')
+        assert c.is_a?(Array), "array object expected."
+        assert_eq c[0], __FILE__
+        assert_eq c[1][0], "# -*- coding: utf-8 -*-\n"
+        assert_eq c[1][11], "class Util_TC < TC\n"
+        #
+        data1 = c[1]
+        _ = Oktest::Util.file_line(__FILE__, 1)
+        c2 = Oktest::Util.instance_variable_get('@__cache')
+        assert c2[1].equal?(data1), "cache object changed unexpectedly."
+      end
+      it "[!wtrl5] recreates cache data if other file requested." do
+        _ = Oktest::Util.file_line(__FILE__, 1)
+        c = Oktest::Util.instance_variable_get('@__cache')
+        data1 = c[1]
+        #
+        otherfile = File.join(File.dirname(__FILE__), "initialize.rb")
+        _ = Oktest::Util.file_line(otherfile, 1)
+        c3 = Oktest::Util.instance_variable_get('@__cache')
+        assert_eq c3[0], otherfile
+        assert ! c3[1].equal?(data1), "cache object should be recreated, but not."
+      end
+    end
+
+    describe '.block_argnames()' do
+      it "[!a9n46] returns nil if argument is nil." do
+        assert_eq block_argnames(nil, "file:123"), nil
+      end
+      it "[!7m81p] returns empty array if block has no parameters." do
+        pr = proc { nil }
+        assert_eq block_argnames(pr, "file:123"), []
+      end
+      it "[!n3g63] returns parameter names of block." do
+        pr = proc {|x, y, z| nil }
+        assert_eq block_argnames(pr, "file:123"), [:x, :y, :z]
+      end
+    end
+
+    describe '.strfold()' do
+      it "[!wb7m8] returns string as it is if string is not long." do
+        s = "*" * 79
+        assert_eq strfold(s, 80), s
+        s = "*" * 80
+        assert_eq strfold(s, 80), s
+      end
+      it "[!a2igb] shorten string if it is enough long." do
+        expected = "*" * 77 + "..."
+        s = "*" * 81
+        assert_eq strfold(s, 80), expected
+      end
+      it "[!0gjye] supports non-ascii characters." do
+        expected = "あ" * 38 + "..."
+        s = "あ" * 41
+        assert_eq strfold(s, 80), expected
+        #
+        expected = "x" + "あ" * 37 + "..."
+        s = "x" + "あ" * 40
+        assert_eq strfold(s, 80), expected
+      end
+    end
+
+    describe '.hhmmss()' do
       it "[!shyl1] converts 400953.444 into '111:22:33.4'." do
         x = 111*60*60 + 22*60 + 33.444
         assert_eq x, 400953.444
@@ -49,8 +124,127 @@ class Util_TC < TC
       end
     end
 
+    describe '.hhmmss()' do
+      it "[!wf4ns] calculates unified diff from two text strings." do
+        s1 = <<'END'
+Haruhi
+Mikuru
+Yuki
+END
+        s2 = <<'END'
+Haruhi
+Michiru
+Yuki
+END
+        expected = <<'END'
+--- old
++++ new
+@@ -1,4 +1,4 @@
+ Haruhi
+-Mikuru
++Michiru
+ Yuki
+END
+        diff = Oktest::Util.unified_diff(s1, s2)
+        assert_eq diff, expected
+      end
+    end
+
+    describe '.unified_diff()' do
+      it "[!rnx4f] checks whether text string ends with newline char." do
+        s1 = <<'END'
+Haruhi
+Mikuru
+Yuki
+END
+        s2 = s1
+        #
+        expected1 = <<'END'
+--- old
++++ new
+@@ -1,4 +1,4 @@
+ Haruhi
+ Mikuru
+-Yuki\ No newline at end of string
++Yuki
+END
+        diff = Oktest::Util.unified_diff(s1.chomp, s2)
+        assert_eq diff, expected1
+        #
+        expected2 = <<'END'
+--- old
++++ new
+@@ -1,4 +1,4 @@
+ Haruhi
+ Mikuru
+-Yuki
++Yuki\ No newline at end of string
+END
+        diff = Oktest::Util.unified_diff(s1, s2.chomp)
+        assert_eq diff, expected2
+      end
+    end
+
+    describe '.diff_unified()' do
+      it "[!ulyq5] returns unified diff string of two text strings." do
+        s1 = <<'END'
+Haruhi
+Mikuru
+Yuki
+END
+        s2 = <<'END'
+Haruhi
+Michiru
+Yuki
+END
+        expected = <<'END'
+--- old
++++ new
+@@ -1,3 +1,3 @@
+ Haruhi
+-Mikuru
++Michiru
+ Yuki
+END
+        diff = Oktest::Util.diff_unified(s1, s2)
+        assert_eq diff, expected
+      end
+      it "[!6tgum] detects whether char at end of file is newline or not." do
+        s1 = <<'END'
+Haruhi
+Mikuru
+Yuki
+END
+        s2 = s1
+        #
+        expected1 = <<'END'
+--- old
++++ new
+@@ -1,3 +1,3 @@
+ Haruhi
+ Mikuru
+-Yuki
+\ No newline at end of file
++Yuki
+END
+        diff = Oktest::Util.diff_unified(s1.chomp, s2)
+        assert_eq diff, expected1
+        #
+        expected2 = <<'END'
+--- old
++++ new
+@@ -1,3 +1,3 @@
+ Haruhi
+ Mikuru
+-Yuki
++Yuki
+\ No newline at end of file
+END
+        diff = Oktest::Util.diff_unified(s1, s2.chomp)
+        assert_eq diff, expected2
+      end
+    end
+
   end
 
 end
-
-

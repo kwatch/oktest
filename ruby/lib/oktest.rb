@@ -1407,21 +1407,28 @@ module Oktest
     module_function
 
     def file_line(filename, linenum)
+      #; [!4z65g] returns nil if file not exist or not a file.
       return nil unless File.file?(filename)
-      @cache ||= [nil, []]
-      if @cache[0] != filename
-        @cache[0] = filename
-        @cache[1].clear
-        @cache[1] = lines = File.open(filename, 'rb') {|f| f.to_a }
+      #; [!4a2ji] caches recent file content for performance reason.
+      @__cache ||= [nil, []]
+      if @__cache[0] != filename
+        #; [!wtrl5] recreates cache data if other file requested.
+        @__cache[0] = filename
+        @__cache[1].clear
+        @__cache[1] = lines = File.open(filename, 'rb') {|f| f.to_a }
       else
-        lines = @cache[1]
+        lines = @__cache[1]
       end
+      #; [!162e1] returns line string.
       return lines[linenum-1]
     end
 
     def block_argnames(block, location)
+      #; [!a9n46] returns nil if argument is nil.
       return nil unless block
+      #; [!7m81p] returns empty array if block has no parameters.
       return [] if block.arity <= 0
+      #; [!n3g63] returns parameter names of block.
       if block.respond_to?(:parameters)
         argnames = block.parameters.collect {|pair| pair.last }
       else
@@ -1439,8 +1446,11 @@ module Oktest
     end
 
     def strfold(str, width=80, mark='...')
+      #; [!wb7m8] returns string as it is if string is not long.
       return str if str.bytesize <= width
+      #; [!a2igb] shorten string if it is enough long.
       return str[0, width - mark.length] + mark if str.ascii_only?
+      #; [!0gjye] supports non-ascii characters.
       limit = width - mark.length
       w = len = 0
       str.each_char do |ch|
@@ -1479,10 +1489,11 @@ module Oktest
 
     ## platform independent, but requires 'diff-lcs' gem
     def unified_diff(text_old, text_new, label="--- old\n+++ new\n", context=3)
+      #; [!rnx4f] checks whether text string ends with newline char.
       msg = "\\ No newline at end of string"
       lines_old = _text2lines(text_old, msg)
       lines_new = _text2lines(text_new, msg)
-      #
+      #; [!wf4ns] calculates unified diff from two text strings.
       buf = [label]
       len = 0
       prevhunk = hunk = nil
@@ -1503,6 +1514,8 @@ module Oktest
 
     ## platform depend, but not require extra library
     def diff_unified(text_old, text_new, label="--- old\n+++ new\n", context=3)
+      #; [!ulyq5] returns unified diff string of two text strings.
+      #; [!6tgum] detects whether char at end of file is newline or not.
       tmp_old = "_tmp.old.#{rand()}"
       tmp_new = "_tmp.new.#{rand()}"
       File.open(tmp_old, 'w') {|f| f.write(text_old) }
