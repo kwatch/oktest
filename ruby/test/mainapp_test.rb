@@ -172,6 +172,12 @@ END
       assert edit_actual(sout).end_with?(edit_expected(expected)), "invalid status line"
     end
 
+    it "[!bim36] changes auto-running to off." do
+      Oktest::Config.auto_run = true
+      _ = run(@testfile)
+      assert_eq Oktest::Config.auto_run, false
+    end
+
     it "[!hiu5b] finds test scripts in directory and runs them." do
       expected = <<'END'
 ## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
@@ -369,8 +375,8 @@ END
     it "[!71h2x] '-F ...' option will be error." do
       begin
         run("-F", "*pat*", @testfile)
-      rescue OptionParser::InvalidArgument => ex
-        assert_eq ex.message, "invalid argument: -F *pat*"
+      rescue OptionParser::InvalidArgument => exc
+        assert_eq exc.message, "invalid argument: -F *pat*"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end
@@ -418,8 +424,8 @@ END
     it "[!9nr94] '--color=true' option raises error." do
       begin
         run("--color=true", @testfile)
-      rescue OptionParser::InvalidArgument => ex
-        assert_eq ex.message, "invalid argument: --color=true"
+      rescue OptionParser::InvalidArgument => exc
+        assert_eq exc.message, "invalid argument: --color=true"
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end
@@ -575,48 +581,6 @@ END
       end
     end
 
-  end
-
-  describe '#parse_filter_pattern()' do
-    def new_filter(pattern)
-      return Oktest::MainApp.new.__send__(:parse_filter_pattern, pattern)
-    end
-    def filter_attrs(ft)
-      #return ft.topic_pattern, ft.spec_pattern, ft.tag_pattern, ft.negative
-      return ft.instance_eval {
-        [@topic_pattern, @spec_pattern, @tag_pattern, @negative]
-      }
-    end
-    it "[!9dzmg] returns filter object." do
-      ft = new_filter("topic=*pat*")
-      assert ft.is_a?(Oktest::Filter), "should be a filter object."
-    end
-    it "[!xt364] parses 'topic=...' as filter pattern for topic." do
-      ft = new_filter("topic=*pat*")
-      assert_eq filter_attrs(ft), ['*pat*', nil, nil, false]
-    end
-    it "[!53ega] parses 'spec=...' as filter pattern for spec." do
-      ft = new_filter("spec=*pat*")
-      assert_eq filter_attrs(ft), [nil, '*pat*', nil, false]
-    end
-    it "[!go6us] parses 'tag=...' as filter pattern for tag." do
-      ft = new_filter("tag={exp,old}")
-      assert_eq filter_attrs(ft), [nil, nil, '{exp,old}', false]
-    end
-    it "[!gtpt1] parses 'sid=...' as filter pattern for spec." do
-      ft = new_filter("sid=abc123")
-      assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, false]
-    end
-    it "[!5hl7z] parses 'xxx!=...' as negative filter pattern." do
-      ft = new_filter("topic!=*pat*")
-      assert_eq filter_attrs(ft), ['*pat*', nil, nil, true]
-      ft = new_filter("spec!=*pat*")
-      assert_eq filter_attrs(ft), [nil, '*pat*', nil, true]
-      ft = new_filter("tag!={exp,old}")
-      assert_eq filter_attrs(ft), [nil, nil, '{exp,old}', true]
-      ft = new_filter("sid!=abc123")
-      assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, true]
-    end
   end
 
 end

@@ -32,9 +32,9 @@ Oketst.scope do                      #
       ok {'README.md'}.file_exist?   #      assert File.file?('README.md')
       ok {'/tmp'}.dir_exist?         #      assert File.directory?('/tmp')
       ok {'/blabla'}.not_exist?      #      assert !File.exist?('/blabla')
-      pr = proc { .... }             #      ex = assert_raise(Error) { .... }
-      ok {pr}.raise?(Error, "mesg")  #      assert ex.message, "mesg"
-      ex = pr.exception              #
+      pr = proc { .... }             #      exc = assert_raise(Error) { .... }
+      ok {pr}.raise?(Error, "mesg")  #      assert exc.message, "mesg"
+      exc = pr.exception             #
     end                              #    end
                                      #
   end                                #  end
@@ -536,9 +536,9 @@ Oktest.scope do
 
   + topic('#hello()') do
 
-    - spec "default name is 'world'."
+    - spec("default name is 'world'.")
 
-    - spec "returns greeting message."
+    - spec("returns greeting message.")
 
     end  #hello()
 
