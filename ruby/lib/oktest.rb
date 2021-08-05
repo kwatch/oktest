@@ -1455,10 +1455,17 @@ module Oktest
     def hhmmss(n)
       h, n = n.divmod(60*60)
       m, s = n.divmod(60)
+      #; [!shyl1] converts 400953.444 into '111:22:33.4'.
+      #; [!vyi2v] converts 5025.678 into '1:23:45.7'.
       return "%d:%02d:%04.1f" % [h, m, s] if h > 0
+      #; [!pm4xf] converts 754.888 into '12:34.9'.
+      #; [!lwewr] converts 83.444 into '1:23.4'.
       return "%d:%04.1f" % [m, s]         if m > 0
+      #; [!ijx52] converts 56.8888 into '56.9'.
       return "%.1f" % s                   if s >= 10
+      #; [!2kra2] converts 9.777 into '9.78'.
       return "%.2f" % s                   if s >= 1
+      #; [!4aomb] converts 0.7777 into '0.778'.
       return "%.3f" % s
     end
 
