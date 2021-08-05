@@ -350,7 +350,7 @@ module Oktest
       self
     end
 
-    def attrs(keyvals={})
+    def attrs(**keyvals)
       __done()
       #; [!7ta0s] raises assertion error when failed.
       #; [!s0pnk] is available with NOT.
@@ -375,7 +375,7 @@ module Oktest
     end
     alias item keyval      # for compatibility with minitest-ok
 
-    def keyvals(keyvals={})
+    def keyvals(**keyvals)
       __done()
       #; [!fyvmn] raises assertion error when failed.
       #; [!js2j2] is available with NOT.
@@ -848,7 +848,7 @@ module Oktest
       return __do_dummy(dirname, recover, &b)
     end
 
-    def dummy_values(hashobj, keyvals={}, &b)
+    def dummy_values(hashobj, **keyvals, &b)
       #; [!hgwg2] changes hash value temporarily.
       prev_values = {}
       key_not_exists = {}
@@ -870,7 +870,7 @@ module Oktest
       return __do_dummy(keyvals, recover, &b)
     end
 
-    def dummy_attrs(object, keyvals={}, &b)
+    def dummy_attrs(object, **keyvals, &b)
       #; [!4vd73] changes object attributes temporarily.
       prev_values = {}
       keyvals.each do |k, v|
@@ -886,7 +886,7 @@ module Oktest
       return __do_dummy(keyvals, recover, &b)
     end
 
-    def dummy_ivars(object, keyvals={}, &b)
+    def dummy_ivars(object, **keyvals, &b)
       #; [!rnqiv] changes instance variables temporarily.
       prev_values = {}
       keyvals.each do |k, v|
