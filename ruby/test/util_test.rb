@@ -52,17 +52,17 @@ END
       end
     end
 
-    describe '.block_argnames()' do
+    describe '.block_params()' do
       it "[!a9n46] returns nil if argument is nil." do
-        assert_eq block_argnames(nil, "file:123"), nil
+        assert_eq block_params(nil, "file:123"), nil
       end
       it "[!7m81p] returns empty array if block has no parameters." do
         pr = proc { nil }
-        assert_eq block_argnames(pr, "file:123"), []
+        assert_eq block_params(pr, "file:123"), []
       end
       it "[!n3g63] returns parameter names of block." do
         pr = proc {|x, y, z| nil }
-        assert_eq block_argnames(pr, "file:123"), [:x, :y, :z]
+        assert_eq block_params(pr, "file:123"), [:x, :y, :z]
       end
     end
 

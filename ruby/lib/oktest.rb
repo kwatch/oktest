@@ -593,8 +593,8 @@ module Oktest
       #; [!8wfrq] registers fixture factory block.
       #; [!y3ks3] retrieves block parameter names.
       location = caller(1).first
-      argnames = block.arity > 0 ? Util.block_argnames(block, location) : nil
-      @_scope.fixtures[name] = [block, argnames, location]
+      param_names = block.arity > 0 ? Util.block_params(block, location) : nil
+      @_scope.fixtures[name] = [block, param_names, location]
     end
 
     def topic(target, tag: nil, &block)
@@ -636,14 +636,14 @@ module Oktest
       location = caller(1).first
       #; [!ep8ya] collects block parameter names if block given.
       if block
-        argnames = Util.block_argnames(block, location)
+        param_names = Util.block_params(block, location)
       #; [!ala78] provides raising TodoException block if block not given.
       else
         block = proc { raise TodoException, "not implemented yet" }
-        argnames = []
+        param_names = []
       end
       #; [!c8c8o] creates new spec object.
-      spec = SpecObject.new(desc, block, argnames, location, tag)
+      spec = SpecObject.new(desc, block, param_names, location, tag)
       @_scope.add_child(spec)
       spec._prefix = '-'
       return spec
@@ -697,15 +697,15 @@ module Oktest
 
   class SpecObject
 
-    def initialize(desc, block, argnames, location, tag=nil)
+    def initialize(desc, block, param_names, location, tag=nil)
       @desc = desc
       @block = block
-      @argnames = argnames
+      @params = param_names
       @location = location   # necessary when raising fixture not found error
       @tag      = tag
     end
 
-    attr_reader :desc, :block, :argnames, :location, :tag #:nodoc:
+    attr_reader :desc, :block, :params, :location, :tag #:nodoc:
     attr_accessor :_prefix   #:nodoc:
 
     def accept_runner(runner, *args)       #:nodoc:
@@ -986,10 +986,10 @@ module Oktest
       ex = nil
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
-        if spec.argnames.empty?
+        if spec.params.empty?
           call_spec_block(spec, context)
         else
-          values = get_fixture_values(spec.argnames, topic, spec, context)
+          values = get_fixture_values(spec.params, topic, spec, context)
           call_spec_block(spec, context, *values)
         end
       rescue NoMemoryError   => ex;  raise ex
@@ -1139,11 +1139,11 @@ module Oktest
       location ||= spec.location
       tuple = topic.get_fixture_info(name)
       if tuple
-        block, argnames, location = tuple
+        block, param_names, location = tuple
         #; [!2esaf] resolves fixture dependencies.
-        if argnames
+        if param_names
           resolving << name
-          args = get_fixture_values(argnames, topic, spec, context, location, resolved, resolving)
+          args = get_fixture_values(param_names, topic, spec, context, location, resolved, resolving)
           (popped = resolving.pop) == name  or
             raise "** assertion failed: name=#{name.inspect}, resolvng[-1]=#{popped.inspect}"
           #; [!4xghy] calls fixture block with context object as self.
@@ -1477,26 +1477,26 @@ module Oktest
       return lines[linenum-1]
     end
 
-    def block_argnames(block, location)
+    def block_params(block, location)
       #; [!a9n46] returns nil if argument is nil.
       return nil unless block
       #; [!7m81p] returns empty array if block has no parameters.
       return [] if block.arity <= 0
       #; [!n3g63] returns parameter names of block.
       if block.respond_to?(:parameters)
-        argnames = block.parameters.collect {|pair| pair.last }
+        param_names = block.parameters.collect {|pair| pair.last }
       else
         location =~ /:(\d+)/
         filename = $`
         linenum  = $1.to_i
         File.file?(filename)  or
-          raise ArgumentError, "block_argnames(): #{filename.inspect}: source file not found."
+          raise ArgumentError, "block_params(): #{filename.inspect}: source file not found."
         linestr = file_line(filename, linenum) || ""
         linestr =~ /(?:\bdo|\{) *\|(.*)\|/  or
           raise ArgumentError, "spec(): can't detect block parameters at #{filename}:#{linenum}"
-        argnames = $1.split(/,/).collect {|var| var.strip.intern }
+        param_names = $1.split(/,/).collect {|var| var.strip.intern }
       end
-      return argnames
+      return param_names
     end
 
     def strfold(str, width=80, mark='...')

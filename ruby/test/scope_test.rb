@@ -302,7 +302,7 @@ class ScopeClassMethods_TC < TC
       assert_eq sp.class, Oktest::SpecObject
       assert_eq sp.desc, "example #1"
       assert_eq sp.tag, "exp"
-      assert_eq sp.argnames, []
+      assert_eq sp.params, []
       assert_eq sp._prefix, "-"
     end
     it "[!ep8ya] collects block parameter names if block given." do
@@ -312,7 +312,7 @@ class ScopeClassMethods_TC < TC
       end
       assert_eq so.children.length, 1
       sp = so.children[0]
-      assert_eq sp.argnames, [:alice, :bob]
+      assert_eq sp.params, [:alice, :bob]
     end
     it "[!ala78] provides raising TodoException block if block not given." do
       so = new_scope_object() do
