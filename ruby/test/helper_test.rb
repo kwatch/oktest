@@ -19,6 +19,84 @@ end
 class SpecHelper_TC < TC
   include Oktest::SpecHelper
 
+  def setup()
+  end
+
+  def teardown()
+    Oktest::AssertionObject::NOT_YET.clear()
+  end
+
+  describe '#ok()' do
+    it "[!3jhg6] creates new assertion object." do
+      o = ok {"foo"}
+      assert_eq o.class, Oktest::AssertionObject
+      assert_eq o.actual, "foo"
+      assert_eq o.bool, true
+    end
+    it "[!bc3l2] records invoked location." do
+      lineno = __LINE__ + 1
+      o = ok {"bar"}
+      assert o.location.start_with?("#{__FILE__}:#{lineno}:")
+    end
+  end
+
+  describe '#not_ok()' do
+    it "[!d332o] creates new assertion object for negative condition." do
+      o = not_ok {"abc"}
+      assert_eq o.class, Oktest::AssertionObject
+      assert_eq o.actual, "abc"
+      assert_eq o.bool, false
+    end
+    it "[!agmx8] records invoked location." do
+      lineno = __LINE__ + 1
+      o = not_ok {"bar"}
+      assert o.location.start_with?("#{__FILE__}:#{lineno}:")
+    end
+  end
+
+  describe '#skip_when()' do
+    it "[!3xqf4] raises SkipException if condition is truthy." do
+      begin
+        skip_when (1+1 == 2), "..reason.."
+      rescue Exception => exc
+        assert_eq exc.class, Oktest::SkipException
+        assert_eq exc.message, "..reason.."
+      else
+        assert false, "SkipException expected"
+      end
+    end
+    it "[!r7cxx] not raise nothing if condition is falsy." do
+      begin
+        skip_when (1+1 == 0), "..reason.."
+      rescue Exception => exc
+        assert false, "nothing should be raised but #{exc.class} raised"
+      else
+        assert true, "OK"
+      end
+    end
+  end
+
+  describe '#at_end()' do
+    it "[!x58eo] records clean-up block." do
+      Oktest.scope() do
+        topic 'Example' do
+          spec 'sample #1' do
+            puts "before at_end()"
+            at_end { puts "in at_end()" }
+            puts "after at_end()"
+          end
+        end
+      end
+      sout, serr = capture { Oktest.run() }
+      expected = <<'END'
+before at_end()
+after at_end()
+in at_end()
+END
+      assert sout.include?(expected), "not matched"
+    end
+  end
+
   describe '#capture_sio()' do
     it "[!1kbnj] captures $stdio and $stderr." do
       sout, serr = capture_sio() do

@@ -748,6 +748,8 @@ module Oktest
     attr_accessor :_TODO, :_at_end_blocks
 
     def ok()
+      #; [!3jhg6] creates new assertion object.
+      #; [!bc3l2] records invoked location.
       location = caller(1).first
       actual = yield
       ass = Oktest::AssertionObject.new(actual, true, location)
@@ -756,6 +758,8 @@ module Oktest
     end
 
     def not_ok()
+      #; [!d332o] creates new assertion object for negative condition.
+      #; [!agmx8] records invoked location.
       location = caller(1).first
       actual = yield
       ass = Oktest::AssertionObject.new(actual, false, location)
@@ -764,6 +768,8 @@ module Oktest
     end
 
     def skip_when(condition, reason)
+      #; [!3xqf4] raises SkipException if condition is truthy.
+      #; [!r7cxx] not raise nothing if condition is falsy.
       raise SkipException, reason if condition
     end
 
@@ -772,6 +778,7 @@ module Oktest
     end
 
     def at_end(&block)
+      #; [!x58eo] records clean-up block.
       (@_at_end_blocks ||= []) << block
     end
 
