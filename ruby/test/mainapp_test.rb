@@ -172,6 +172,12 @@ END
       assert edit_actual(sout).end_with?(edit_expected(expected)), "invalid status line"
     end
 
+    it "[!bim36] changes auto-running to off." do
+      Oktest::Config.auto_run = true
+      _ = run(@testfile)
+      assert_eq Oktest::Config.auto_run, false
+    end
+
     it "[!hiu5b] finds test scripts in directory and runs them." do
       expected = <<'END'
 ## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s

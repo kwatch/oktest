@@ -1873,11 +1873,12 @@ END
         filter_obj = parse_filter_pattern(opts.filter)
         filter(filter_obj)
       end
+      #; [!bim36] changes auto-running to off.
+      Config.auto_run = false
       #; [!18qpe] runs test scripts.
       #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
       #; [!ef5v7] '-s simple' or '-ss' option prints test results in simple mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
-      Config.auto_run = false
       n_errors = Oktest.run(:style=>opts.style)
       #; [!dsrae] reports if 'ok()' called but assertion not performed.
       AssertionObject.report_not_yet()
