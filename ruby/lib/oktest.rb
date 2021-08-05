@@ -1109,7 +1109,7 @@ module Oktest
   end
 
 
-  RUNNER = Runner
+  RUNNER_CLASS = Runner
 
 
   class FixtureManager
@@ -1447,7 +1447,7 @@ module Oktest
       raise ArgumentError, "#{opts[:style].inspect}: unknown style."
     #; [!mn451] run test cases.
     reporter = klass.new
-    runner = Runner.new(reporter)
+    runner = RUNNER_CLASS.new(reporter)
     runner.run_all()
     TOPLEVEL_SCOPES.clear
     #; [!p52se] returns total number of failures and errors.
