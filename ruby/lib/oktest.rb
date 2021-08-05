@@ -1481,10 +1481,13 @@ module Oktest
       #; [!a9n46] returns nil if argument is nil.
       return nil unless block
       #; [!7m81p] returns empty array if block has no parameters.
-      return [] if block.arity <= 0
+      n = block.arity
+      n = - n - 1 if n < 0
+      return [] if n == 0
       #; [!n3g63] returns parameter names of block.
+      #; [!d5kym] collects only normal parameter names.
       if block.respond_to?(:parameters)
-        param_names = block.parameters.collect {|pair| pair.last }
+        param_names = block.parameters[0...n].collect {|pair| pair[1] }
       else
         location =~ /:(\d+)/
         filename = $`
