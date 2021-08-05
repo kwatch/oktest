@@ -291,6 +291,8 @@ module Oktest
             "    $error_message: #{exc.message.inspect}"
           }
         end
+        #; [!dq97o] if block given, call it with exception object.
+        yield exc if block_given?()
       else
         #; [!spzy2] is available with NOT.
         ! errmsg  or

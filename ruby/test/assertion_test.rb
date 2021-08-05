@@ -438,6 +438,15 @@ end
       assert pr.exc.is_a?(NoMethodError)
       assert_eq pr.exc.message, "undefined method `foobar' for \"SOS\":String"
     end
+    it "[!dq97o] if block given, call it with exception object." do
+      pr = proc { "SOS".foobar }
+      exc1 = nil
+      ok {pr}.raise?(NoMethodError) do |exc2|
+        exc1 = exc2
+      end
+      assert exc1 != nil
+      assert exc1.equal?(pr.exc)
+    end
   end
 
   describe "#in?" do
