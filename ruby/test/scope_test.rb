@@ -269,14 +269,14 @@ class ScopeClassMethods_TC < TC
   describe '#case_else()' do
     it "[!oww4b] returns topic object." do
       so = new_scope_object() do
-        case_else do
+        case_else tag: "dev" do
         end
       end
       assert_eq so.children.length, 1
       to = so.children[0]
       assert_eq to.class, Oktest::TopicObject
       assert_eq to.target, "Else"
-      assert_eq to.tag, nil
+      assert_eq to.tag, "dev"
       assert_eq to._prefix, "-"
     end
     it "[!j5gnp] target is a description which is 'Else'." do
@@ -288,6 +288,16 @@ class ScopeClassMethods_TC < TC
       to = so.children[0]
       assert_eq to.class, Oktest::TopicObject
       assert_eq to.target, "Else"
+    end
+    it "[!hs1to] 1st parameter is optional." do
+      so = new_scope_object() do
+        case_else "(x < 0)" do
+        end
+      end
+      assert_eq so.children.length, 1
+      to = so.children[0]
+      assert_eq to.class, Oktest::TopicObject
+      assert_eq to.target, "Else (x < 0)"
     end
   end
 

@@ -619,10 +619,12 @@ module Oktest
       return __case_when("When #{desc}", tag, &block)
     end
 
-    def case_else(tag: nil, &block)
+    def case_else(desc=nil, tag: nil, &block)
+      #; [!hs1to] 1st parameter is optional.
+      desc = desc ? "Else #{desc}" : "Else"
       #; [!oww4b] returns topic object.
       #; [!j5gnp] target is a description which is 'Else'.
-      return __case_when("Else", tag, &block)
+      return __case_when(desc, tag, &block)
     end
 
     def __case_when(desc, tag, &block)
