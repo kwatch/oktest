@@ -1711,15 +1711,15 @@ module Oktest
     module_function
 
     def normal  s;  return s; end
-    def bold    s;  return "\x1b[0;1m#{s}\x1b[22m"; end
-    def black   s;  return "\x1b[1;30m#{s}\x1b[0m"; end
-    def red     s;  return "\x1b[1;31m#{s}\x1b[0m"; end
-    def green   s;  return "\x1b[1;32m#{s}\x1b[0m"; end
-    def yellow  s;  return "\x1b[1;33m#{s}\x1b[0m"; end
-    def blue    s;  return "\x1b[1;34m#{s}\x1b[0m"; end
-    def magenta s;  return "\x1b[1;35m#{s}\x1b[0m"; end
-    def cyan    s;  return "\x1b[1;36m#{s}\x1b[0m"; end
-    def white   s;  return "\x1b[1;37m#{s}\x1b[0m"; end
+    def bold    s;  return "\e[0;1m#{s}\e[22m"; end
+    def black   s;  return "\e[1;30m#{s}\e[0m"; end
+    def red     s;  return "\e[1;31m#{s}\e[0m"; end
+    def green   s;  return "\e[1;32m#{s}\e[0m"; end
+    def yellow  s;  return "\e[1;33m#{s}\e[0m"; end
+    def blue    s;  return "\e[1;34m#{s}\e[0m"; end
+    def magenta s;  return "\e[1;35m#{s}\e[0m"; end
+    def cyan    s;  return "\e[1;36m#{s}\e[0m"; end
+    def white   s;  return "\e[1;37m#{s}\e[0m"; end
 
     def topic  s; Config.color_enabled ? bold(s)   : s; end
     def spec   s; Config.color_enabled ? normal(s) : s; end
