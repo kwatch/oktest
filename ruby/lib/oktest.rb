@@ -1439,14 +1439,14 @@ module Oktest
   }
 
 
-  def self.run(opts={})
+  def self.run(reporter: nil, style: nil)
     #; [!kfi8b] do nothing when 'Oktest.scope()' not called.
     return if TOPLEVEL_SCOPES.empty?
     #; [!6xn3t] creates reporter object according to 'style:' keyword arg.
-    klass = (opts[:style] ? REPORTER_CLASSES[opts[:style]] : REPORTER_CLASS)  or
-      raise ArgumentError, "#{opts[:style].inspect}: unknown style."
+    klass = (style ? REPORTER_CLASSES[style] : REPORTER_CLASS)  or
+      raise ArgumentError, "#{style.inspect}: unknown style."
+    reporter ||= klass.new
     #; [!mn451] run test cases.
-    reporter = klass.new
     runner = RUNNER_CLASS.new(reporter)
     runner.run_all()
     TOPLEVEL_SCOPES.empty?  or "** internal error"
