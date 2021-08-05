@@ -1649,7 +1649,11 @@ module Oktest
     def skip   s; Config.color_enabled ? yellow(s) : s; end
     def todo   s; Config.color_enabled ? yellow(s) : s; end
     def reason s; Config.color_enabled ? yellow(s) : s; end
-    def status(status, s); __send__(status.to_s.downcase, s); end
+
+    def status(status, s)
+      #; [!yev5y] returns string containing color escape sequence.
+      return __send__(status.to_s.downcase, s)
+    end
 
   end
 
@@ -1950,9 +1954,13 @@ END
   end
 
   def self.auto_run?()   # :nodoc:
+    #; [!7vm4d] returns false if error raised when loading test scripts.
+    #; [!oae85] returns true if exit() called.
     exc = $!
     return false if exc && !exc.is_a?(SystemExit)
+    #; [!rg5aw] returns false if Oktest.scope() never been called.
     return false if TOPLEVEL_SCOPES.empty?
+    #; [!0j3ek] returns true if Config.auto_run is enabled.
     return Config.auto_run
   end
 
