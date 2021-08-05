@@ -273,9 +273,10 @@ module Oktest
           exc.is_a?(expected)  or
             __assert(false) { "Expected #{expected.inspect} to be raised but got #{exc.class}." }
         end
-        #; [!vnc6b] sets exceptio object into '#exception' attribute.
-        (class << proc_obj; self; end).class_eval { attr_accessor :exception }
-        proc_obj.exception = exc
+        #; [!vnc6b] sets exceptio object into '#exc' attribute.
+        (class << proc_obj; self; end).class_eval { attr_accessor :exc, :exception }
+        proc_obj.exc = exc
+        proc_obj.exception = exc   # for backward compatibilify
         __assert(! exc.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
         #; [!tpxlv] accepts string or regexp as error message.
         case errmsg

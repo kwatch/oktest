@@ -430,13 +430,15 @@ end
       errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `sos' for \"SOS\":String>."
       should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
     end
-    it "[!vnc6b] sets exceptio object into '#exception' attribute." do
+    it "[!vnc6b] sets exceptio object into '#exc' attribute." do
       pr = proc { "SOS".foobar }
-      assert !pr.respond_to?(:exception)
+      assert !pr.respond_to?(:exc)
       ok {pr}.raise?(NoMethodError)
-      assert pr.respond_to?(:exception)
-      assert pr.exception.is_a?(NoMethodError)
-      assert_eq pr.exception.message, "undefined method `foobar' for \"SOS\":String"
+      assert pr.respond_to?(:exc)
+      assert pr.exc.is_a?(NoMethodError)
+      assert_eq pr.exc.message, "undefined method `foobar' for \"SOS\":String"
+      assert pr.respond_to?(:exception)     # for backward compatibility
+      assert pr.exception.equal?(pr.exc)
     end
   end
 
