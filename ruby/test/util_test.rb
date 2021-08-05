@@ -64,6 +64,14 @@ END
         pr = proc {|x, y, z| nil }
         assert_eq block_params(pr, "file:123"), [:x, :y, :z]
       end
+      it "[!d5kym] collects only normal parameter names." do
+        pr = proc {|x, y, z=1, *rest, a: 1, b: 2, &blk| nil }
+        assert_eq block_params(pr, "file:123"), [:x, :y]
+        pr = proc {|a: 1, b: 2, &blk| nil }
+        assert_eq block_params(pr, "file:123"), []
+        pr = proc {|*rest, &blk| nil }
+        assert_eq block_params(pr, "file:123"), []
+      end
     end
 
     describe '.strfold()' do
