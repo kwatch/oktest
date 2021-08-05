@@ -479,35 +479,42 @@ module Oktest
 
     def initialize()
       @children = []
-      @fixtures = {}
+      @fixtures = {}       # {name=>[block, params, location]}
     end
 
     attr_accessor :parent, :children, :before, :after, :before_all, :after_all, :fixtures
     attr_accessor :_klass, :_prefix  #:nodoc:
 
     def add_child(child)
+      #; [!prkgy] child object may be scope object, such as SpecObject.
       if child.is_a?(ScopeObject)
+        #; [!v4alp] error if child scope already has parent scope.
         child.parent.nil?  or
           raise ArgumentError, "add_child(): can't add child scope which already belongs to other."
+        #; [!on2s1] sets self as parent scope of child scope.
         child.parent = self
       end
+      #; [!1fyk9] keeps children.
       @children << child
     end
 
     def get_fixture_info(name)
+      #; [!f0105] returns fixture info.
       return @fixtures[name]
-      #@fixtures ? @fixtures[name] : nil   # or [nil, nil, nil]?
     end
 
     def new_context()
+      #; [!p271z] creates new context object.
       return @_klass.new
     end
 
     def accept_runner(runner, *args)
+      #; [!olckb] raises NotImplementedError.
       raise NotImplementedError, "#{self.class.name}#accept_runner(): not implemented yet."
     end
 
     def _repr(depth=0, buf="")
+      #; [!bt5j8] builds debug string.
       indent = "  " * depth
       buf << "#{indent}-\n"
       instance_variables().sort.each do |name|
@@ -519,6 +526,7 @@ module Oktest
     end
 
     def +@
+      #; [!tzorv] returns self.
       self
     end
 
@@ -535,6 +543,7 @@ module Oktest
     end
 
     def accept_runner(runner, *args)
+      #; [!5mt5k] invokes 'run_topic()' method of runner.
       return runner.run_topic(self, *args)
     end
 
@@ -552,15 +561,21 @@ module Oktest
     attr_reader :target, :tag
 
     def accept_runner(runner, *args)
+      #; [!og6l8] invokes '.run_topic()' object of runner.
       return runner.run_topic(self, *args)
     end
 
     def filter_match?(pattern)
+      #; [!650bv] returns true if pattern matched to topic target name.
+      #; [!24qgr] returns false if pattern not matched to topic target name.
       return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
     end
 
     def tag_match?(pattern)
+      #; [!5kmcf] returns false if topic object has no tags.
       return false if @tag.nil?
+      #; [!fmwfy] returns true if pattern matched to tag name.
+      #; [!tjk7p] supports array of tag names.
       return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
     end
 
@@ -575,12 +590,15 @@ module Oktest
     def after_all(&block);  @_scope.after_all  = block;  end
 
     def fixture(name, &block)
+      #; [!8wfrq] registers fixture factory block.
+      #; [!y3ks3] retrieves block parameter names.
       location = caller(1).first
       argnames = block.arity > 0 ? Util.block_argnames(block, location) : nil
       @_scope.fixtures[name] = [block, argnames, location]
     end
 
     def topic(target, tag: nil, &block)
+      #; [!0gfvq] creates new topic object.
       topic = TopicObject.new(target, tag)
       @_scope.add_child(topic)
       klass = Class.new(self)
@@ -596,10 +614,14 @@ module Oktest
     end
 
     def case_when(desc, tag: nil, &block)
+      #; [!g3cvh] returns topic object.
+      #; [!ofw1i] target is a description starting with 'When '.
       return __case_when("When #{desc}", tag, &block)
     end
 
     def case_else(tag: nil, &block)
+      #; [!oww4b] returns topic object.
+      #; [!j5gnp] target is a description which is 'Else'.
       return __case_when("Else", tag, &block)
     end
 
@@ -612,12 +634,15 @@ module Oktest
 
     def spec(desc, tag: nil, &block)
       location = caller(1).first
+      #; [!ep8ya] collects block parameter names if block given.
       if block
         argnames = Util.block_argnames(block, location)
+      #; [!ala78] provides raising TodoException block if block not given.
       else
         block = proc { raise TodoException, "not implemented yet" }
         argnames = []
       end
+      #; [!c8c8o] creates new spec object.
       spec = SpecObject.new(desc, block, argnames, location, tag)
       @_scope.add_child(spec)
       spec._prefix = '-'
@@ -644,17 +669,25 @@ module Oktest
   end
 
   def self.scope(&block)
+    #; [!jmc4q] raises error when nested called.
     ! @_in_scope  or
-      raise OktestError, "scope() is not nestable."
+      raise OktestError, "scope() and global_scope() are not nestable."
+    #; [!vxoy1] creates new scope object.
     scope = __scope(2, &block)
+    #; [!rsimc] registers scope object into TOPLEVEL_SCOPES.
     TOPLEVEL_SCOPES << scope
     return scope
   end
 
   def self.global_scope(&block)
+    #; [!pe0g2] raises error when nested called.
     ! @_in_scope  or
-      raise OktestError, "global_scope() is not nestable."
+      raise OktestError, "scope() and global_scope() are not nestable."
+    #; [!flnpc] run block in the GLOBAL_SCOPE object.
+    @_in_scope = true
     GLOBAL_SCOPE._klass.class_eval(&block)
+    @_in_scope = nil
+    #; [!fcmt2] not create new scope object.
     return GLOBAL_SCOPE
   end
 
@@ -676,24 +709,34 @@ module Oktest
     attr_accessor :_prefix   #:nodoc:
 
     def accept_runner(runner, *args)       #:nodoc:
+      #; [!q9j3w] invokes 'run_spec()' method of runner.
       runner.run_spec(self, *args)
     end
 
     def filter_match?(pattern)
+      #; [!v3u3k] returns true if pattern matched to spec description.
+      #; [!kmc5m] returns false if pattern not matched to spec description.
       return File.fnmatch?(pattern, @desc.to_s, File::FNM_EXTGLOB)
     end
 
     def tag_match?(pattern)
+      #; [!lpaz2] returns false if spec object has no tags.
       return false if @tag.nil?
+      #; [!5besp] returns true if pattern matched to tag name.
+      #; [!id88u] supports multiple tag names.
       return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
-      buf << "  " * depth << "- #{@desc}\n"
+      #; [!6nsgy] builds debug string.
+      buf << "  " * depth << "- #{@desc}"
+      buf << " (tag: #{@tag.inspect})" if @tag
+      buf << "\n"
       return buf
     end
 
     def -@
+      #; [!bua80] returns self.
       self
     end
 
