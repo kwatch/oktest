@@ -34,7 +34,7 @@ class Visitor_TC < TC
     end
   end
 
-  def setup()
+  def prepare()
     Oktest.scope do
       topic 'Example' do
         topic Integer, tag: 'cls' do
@@ -59,8 +59,10 @@ class Visitor_TC < TC
     Oktest::TOPLEVEL_SCOPES.clear()
   end
 
-  it "visits topics and specs and calls callbacks." do
-    expected = <<'END'
+
+  describe '#start()' do
+    it "[!5zonp] visits topics and specs and calls callbacks." do
+      expected = <<'END'
 + topic: Example
   + topic: Integer (tag: cls)
     - spec: 1+1 should be 2.
@@ -73,19 +75,74 @@ class Visitor_TC < TC
     - spec: 1*1 should be 1. (tag: err)
     - spec: 1/1 should be 1. (tag: err)
 END
-    sout, serr = capture do
-      MyVisitor.new.start()
+      prepare()
+      sout, serr = capture { MyVisitor.new.start() }
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
-    assert_eq sout, expected
-    assert_eq serr, ""
+    it "[!gkopz] doesn't change Oktest::TOPLEVEL_SCOPES." do
+      prepare()
+      n = Oktest::TOPLEVEL_SCOPES.length
+      sout, serr = capture do
+        MyVisitor.new.start()
+      end
+      assert_eq Oktest::TOPLEVEL_SCOPES.length, n
+    end
   end
 
-  it "doesn't change Oktest::TOPLEVEL_SCOPES." do
-    n = Oktest::TOPLEVEL_SCOPES.length
-    sout, serr = capture do
-      MyVisitor.new.start()
+  describe '#run_topic()' do
+    it "[!x8r9w] calls on_topic() callback on topic." do
+      expected = <<'END'
++ topic: Parent
+  + topic: Child
+END
+      Oktest.scope do
+        topic 'Parent' do
+          topic 'Child' do
+          end
+        end
+      end
+      sout, serr = capture { MyVisitor.new.start() }
+      assert_eq sout, expected
+      assert_eq serr, ""
     end
-    assert_eq Oktest::TOPLEVEL_SCOPES.length, n
+    it "[!qh0q3] calls on_case() callback on case_when or case_else." do
+      expected = <<'END'
++ topic: Parent
+  - case: When some condition
+  - case: Else
+END
+      Oktest.scope do
+        topic 'Parent' do
+          case_when 'some condition' do
+          end
+          case_else do
+          end
+        end
+      end
+      sout, serr = capture { MyVisitor.new.start() }
+      assert_eq sout, expected
+      assert_eq serr, ""
+    end
+  end
+
+  describe '#run_spec()' do
+    it "[!41uyj] calls on_spec() callback." do
+      expected = <<'END'
++ topic: Example
+  - spec: sample #1
+  - spec: sample #2
+END
+      Oktest.scope do
+        topic 'Example' do
+          spec "sample #1" do ok {1+1} == 2 end
+          spec "sample #2" do ok {1-1} == 0 end
+        end
+      end
+      sout, serr = capture { MyVisitor.new.start() }
+      assert_eq sout, expected
+      assert_eq serr, ""
+    end
   end
 
 end

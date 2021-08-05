@@ -25,7 +25,7 @@ end
 END
 
   describe '#parse()' do
-    it "parses ruby code." do
+    it "[!5mzd3] parses ruby code." do
       g = Oktest::TestGenerator.new()
       tree = g.parse(StringIO.new(INPUT))
       expected = [
@@ -41,7 +41,7 @@ END
   end
 
   describe '#transform()' do
-    it "converts tree into test code." do
+    it "[!te7zw] converts tree into test code." do
       g = Oktest::TestGenerator.new()
       tree = g.parse(StringIO.new(INPUT))
       code = g.transform(tree, 1)
@@ -63,7 +63,7 @@ END
 END
       assert_eq code, expected
     end
-    it "supports 'unaryop' style option." do
+    it "[!q5duk] supports 'unaryop' style option." do
       g = Oktest::TestGenerator.new('unaryop')
       tree = g.parse(StringIO.new(INPUT))
       code = g.transform(tree, 1)
@@ -88,7 +88,7 @@ END
   end
 
   describe '#generate()' do
-    it "generates test code." do
+    it "[!5hdw4] generates test code." do
       g = Oktest::TestGenerator.new()
       code = g.generate(StringIO.new(INPUT))
       expected = <<'END'

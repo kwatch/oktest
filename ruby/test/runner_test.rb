@@ -56,7 +56,7 @@ class Runner_TC < TC
         end
       end
     }
-    it "runs topics and specs." do
+    it "[!xrisl] runs topics and specs." do
       sout, serr = capture do
         build_topics.call
         Oktest::Runner.new(DummyReporter.new).run_all()
@@ -74,7 +74,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "clears filescopes list." do
+    it "[!dth2c] clears filescopes list." do
       assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #1"
       sout, serr = capture do
         build_topics.call
@@ -86,7 +86,7 @@ END
   end
 
   describe "#run_spec()" do
-    it "runs spec body, catching assertions or exceptions." do
+    it "[!yd24o] runs spec body, catching assertions or exceptions." do
       Oktest.scope do
         topic "Parent" do
           topic "Child" do
@@ -130,7 +130,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "runs spec block with context object which allows to call methods defined in topics." do
+    it "[!u45di] runs spec block with context object which allows to call methods defined in topics." do
       Oktest.scope do
         def v1; "V1"; end
         topic "Parent" do
@@ -164,7 +164,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "calls 'before' and 'after' blocks with context object as self." do
+    it "[!yagka] calls 'before' and 'after' blocks with context object as self." do
       sout, serr = capture do
         Oktest.scope do
           before     { @x ||= 1; puts "      [all] before: @x=#{@x}" }
@@ -231,7 +231,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "calls 'after' blocks even when exception raised." do
+    it "[!76g7q] calls 'after' blocks even when exception raised." do
       sout, serr = capture do
         Oktest.scope do
           after { puts "[all] after" }
@@ -263,7 +263,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "calls 'at_end' blocks, even when exception raised." do
+    it "[!dihkr] calls 'at_end' blocks, even when exception raised." do
       sout, serr = capture do
         Oktest.scope do
           topic "topic#A" do
@@ -288,10 +288,46 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
+    describe "[!68cnr] if TODO() called in spec..." do
+      it "[!6ol3p] changes PASS status to FAIL because test passed unexpectedly." do
+        Oktest.scope do
+          topic "topic#A" do
+            spec("spec#1") { TODO(); ok {1+1} == 2 }  # passed unexpectedly
+          end
+        end
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).run_all() }
+        expected = <<'END'
+file: "test/runner_test.rb"
+topic: "topic#A"
+  spec: "spec#1"
+  /spec: status=:FAIL, error=#<ASSERTION: spec should be failed (because not implemented yet), but passed unexpectedly.>
+/topic
+/file
+END
+        assert_eq sout, expected
+      end
+      it "[!6syw4] changes FAIL status to TODO because test failed expectedly." do
+        Oktest.scope do
+          topic "topic#A" do
+            spec("spec#1") { TODO(); ok {1+1} == 1 }  # failed expectedly
+          end
+        end
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).run_all() }
+        expected = <<'END'
+file: "test/runner_test.rb"
+topic: "topic#A"
+  spec: "spec#1"
+  /spec: status=:TODO, error=#<Oktest::TodoException: not implemented yet>
+/topic
+/file
+END
+        assert_eq sout, expected
+      end
+    end
   end
 
   describe "#run_topic()" do
-    it "calls 'before_all' and 'after_all' blocks." do
+    it "[!i3yfv] calls 'before_all' and 'after_all' blocks." do
       sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all" }
@@ -343,7 +379,7 @@ END
   end
 
   describe "#run_filescope()" do
-    it "calls before_all and after_all blocks." do
+    it "[!5anr7] calls before_all and after_all blocks." do
       sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all#1" }
@@ -370,5 +406,122 @@ END
     end
   end
 
+
+end
+
+
+class RunnerFunctions_TC < TC
+
+  def setup()
+  end
+
+  def teardown()
+    Oktest::TOPLEVEL_SCOPES.clear()
+  end
+
+  def plain2colored(str)
+    str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }
+    str = str.gsub(/<G>(.*?)<\/G>/) { Oktest::Color.green($1) }
+    str = str.gsub(/<B>(.*?)<\/B>/) { Oktest::Color.blue($1) }
+    str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
+    str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
+    return str
+  end
+
+  def edit_actual(output)
+    bkup = output.dup
+    output = output.gsub(/^.*\r/, '')
+    output = output.gsub(/^    .*(_test\.tmp:\d+)/, '    \1')
+    output = output.gsub(/^    .*test.reporter_test\.rb:.*\n(    .*\n)*/, "%%%\n")
+    output = output.sub(/ in \d+\.\d\d\ds/, ' in 0.000s')
+    return output
+  end
+
+  def edit_expected(expected)
+    expected = expected.gsub(/^    (.*:\d+)(:in `block .*)/, '    \1') if RUBY_VERSION < "1.9"
+    expected = plain2colored(expected)
+    return expected
+  end
+
+  def prepare()
+    Oktest.scope do
+      topic 'Example' do
+        spec '1+1 should be 2' do
+          ok {1+1} == 2
+        end
+        spec '1-1 should be 0' do
+          ok {1-1} == 0
+        end
+      end
+    end
+  end
+
+  VERBOSE_OUTPUT = <<'END'
+* <b>Example</b>
+  - [<B>pass</B>] 1+1 should be 2
+  - [<B>pass</B>] 1-1 should be 0
+## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+  SIMPLE_OUTPUT = <<'END'
+test/runner_test.rb: <B>.</B><B>.</B>
+## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+  PLAIN_OUTPUT = <<'END'
+<B>.</B><B>.</B>
+## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+
+
+  describe 'Oktest.run()' do
+    it "[!mn451] run test cases." do
+      expected = VERBOSE_OUTPUT
+      prepare()
+      sout, serr = capture { Oktest.run() }
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+    it "[!kfi8b] do nothing when 'Oktest.scope()' not called." do
+      sout, serr = capture { Oktest.run() }
+      assert_eq sout, ""
+      assert_eq serr, ""
+    end
+    it "[!6xn3t] creates reporter object according to 'style:' keyword arg." do
+      expected = VERBOSE_OUTPUT
+      prepare()
+      sout, serr = capture { Oktest.run(:style=>"verbose") }
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+      #
+      expected = SIMPLE_OUTPUT
+      prepare()
+      sout, serr = capture { Oktest.run(:style=>"simple") }
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+      #
+      expected = PLAIN_OUTPUT
+      prepare()
+      sout, serr = capture { Oktest.run(:style=>"plain") }
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+    it "[!p52se] returns total number of failures and errors." do
+      prepare()
+      ret = nil
+      _ = capture { ret = Oktest.run() }
+      assert_eq ret, 0          # no failures, no errors
+      #
+      Oktest.scope do
+        topic 'Example' do
+          spec('pass') { ok {1+1} == 2 }
+          spec('fail') { ok {1*1} == 2 }
+          spec('error') { ok {1/0} == 0 }
+          spec('skip') { skip_when true, "reason" }
+          spec('todo')
+        end
+      end
+      _ = capture { ret = Oktest.run() }
+      assert_eq ret, 2          # 1 failure, 1 error
+    end
+  end
 
 end

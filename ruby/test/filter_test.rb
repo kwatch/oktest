@@ -49,7 +49,7 @@ class Filter_TC < TC
 
   describe '#filter_toplevel_scope!()' do
 
-    it "can filter topics by full name." do
+    it "[!osoq2] can filter topics by full name." do
       expected = <<END
 * Hello
   - [pass] hello spec
@@ -58,7 +58,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter topics by pattern." do
+    it "[!wzcco] can filter topics by pattern." do
       expected = <<END
 * Topic 832795
   * Integer
@@ -73,7 +73,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter nested topics." do
+    it "[!mz6id] can filter nested topics." do
       expected = <<END
 * Topic 832795
   * Float
@@ -84,7 +84,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter specs by full name." do
+    it "[!0kw9c] can filter specs by full name." do
       expected = <<END
 * Hello
   - [pass] hello spec
@@ -93,7 +93,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter specs by pattern." do
+    it "[!fd8wt] can filter specs by pattern." do
       expected = <<END
 * Topic 832795
   - [pass] spec example #5
@@ -115,7 +115,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter specs from nested topics." do
+    it "[!1jphf] can filter specs from nested topics." do
       expected = <<END
 * Topic 832795
   * Float
@@ -125,18 +125,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter topics and specs by tag name." do
-      expected = <<END
-* Hello
-  - [pass] hello spec
-* Topic 832795
-  * Integer
-    - [pass] spec example #2
-  - [pass] spec example #5
-END
-      sout = run_filter(nil, nil, 'new')
-      assert_eq uncolor(sout), expected
-      #
+    it "[!eirmu] can filter topics by tag name." do
       expected = <<END
 * Topic 832795
   * Float
@@ -148,7 +137,20 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "can filter by multiple tag name." do
+    it "[!6sq7g] can filter specs by tag name." do
+      expected = <<END
+* Hello
+  - [pass] hello spec
+* Topic 832795
+  * Integer
+    - [pass] spec example #2
+  - [pass] spec example #5
+END
+      sout = run_filter(nil, nil, 'new')
+      assert_eq uncolor(sout), expected
+    end
+
+    it "[!6to6n] can filter by multiple tag name." do
       expected = <<END
 * Hello
   - [pass] hello spec
@@ -164,7 +166,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "supports negative filter by topic." do
+    it "[!r6g6a] supports negative filter by topic." do
       expected = <<END
 * Hello
   - [pass] hello spec
@@ -182,7 +184,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "supports negative filter by spec." do
+    it "[!doozg] supports negative filter by spec." do
       expected = <<END
 * Topic 832795
   * Integer
@@ -204,7 +206,7 @@ END
       assert_eq uncolor(sout), expected
     end
 
-    it "supports negative filter by tag name." do
+    it "[!ntv44] supports negative filter by tag name." do
       expected = <<END
 * Topic 832795
   * Integer

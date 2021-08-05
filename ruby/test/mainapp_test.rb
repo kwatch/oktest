@@ -108,19 +108,19 @@ END
       return ret, sout, serr
     end
 
-    it "returns 0 when no errors raised." do
+    it "[!tb6sx] returns 0 when no errors raised." do
       ret, sout, serr = main(["-h"])
       assert_eq ret, 0
       assert_eq serr, ""
     end
 
-    it "returns 1 when a certain error raised." do
+    it "[!d5mql] returns 1 when a certain error raised." do
       ret, sout, serr = main(["-U"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -U: unknown option.\n"
     end
 
-    it "reports error when unknown option specified." do
+    it "[!jr49p] reports error when unknown option specified." do
       ret, sout, serr = main(["-X"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -X: unknown option.\n"
@@ -130,13 +130,13 @@ END
       assert_eq serr, "#{File.basename($0)}: --foobar: unknown option.\n"
     end
 
-    it "reports error when required argument is missing." do
+    it "[!uqomj] reports error when required argument is missing." do
       ret, sout, serr = main(["-s"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -s: argument required.\n"
     end
 
-    it "reports error when argument is invalid." do
+    it "[!8i755] reports error when argument is invalid." do
       ret, sout, serr = main(["-s", "foobar"])
       assert_eq ret, 1
       assert_eq serr, "#{File.basename($0)}: -s foobar: invalid argument.\n"
@@ -163,7 +163,7 @@ END
       return ret, sout, serr
     end
 
-    it "runs test scripts." do
+    it "[!18qpe] runs test scripts." do
       expected = <<'END'
 ## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
@@ -172,7 +172,7 @@ END
       assert edit_actual(sout).end_with?(edit_expected(expected)), "invalid status line"
     end
 
-    it "finds test scripts in directory and runs them." do
+    it "[!hiu5b] finds test scripts in directory and runs them." do
       expected = <<'END'
 ## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
@@ -190,7 +190,7 @@ END
       end
     end
 
-    it "'-h' or '--help' option prints help message." do
+    it "[!9973n] '-h' or '--help' option prints help message." do
       expected = <<END
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
@@ -219,7 +219,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'--version' option prints version number." do
+    it "[!qqizl] '--version' option prints version number." do
       expected = <<END
 0.0.0
 END
@@ -230,7 +230,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-s verbose' or '-sv' option prints test results in verbose mode." do
+    it "[!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode." do
       expected = <<END
 * <b>Parent</b>
   * <b>Child1</b>
@@ -253,7 +253,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-s simple' or '-ss' option prints test results in simple mode." do
+    it "[!ef5v7] '-s simple' or '-ss' option prints test results in simple mode." do
       expected = <<END
 #{@testfile}: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 ----------------------------------------------------------------------
@@ -270,7 +270,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-s plain' or '-sp' option prints test results in plain mode." do
+    it "[!244te] '-s plain' or '-sp' option prints test results in plain mode." do
       expected = <<END
 <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 ----------------------------------------------------------------------
@@ -287,7 +287,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-F topic=...' option filters topics." do
+    it "[!yz7g5] '-F topic=...' option filters topics." do
       expected = <<END
 * <b>Parent</b>
   * <b>Child1</b>
@@ -302,7 +302,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-F spec=...' option filters specs." do
+    it "[!ww2mp] '-F spec=...' option filters specs." do
       expected = <<END
 * <b>Parent</b>
   * <b>Child1</b>
@@ -316,7 +316,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-F tag=...' option filters by tag name." do
+    it "[!8uvib] '-F tag=...' option filters by tag name." do
       expected = <<'END'
 * <b>Parent</b>
   * <b>Child1</b>
@@ -335,7 +335,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-F sid=...' option filters by spec id." do
+    it "[!m0iwm] '-F sid=...' option filters by spec id." do
       expected = <<'END'
 * <b>Parent</b>
   - <b>When x is negative</b>
@@ -349,7 +349,7 @@ END
       assert_eq serr, ""
     end
 
-    it "supports negative filter." do
+    it "[!noi8i] '-F' option supports negative filter." do
       expected = <<'END'
 * <b>Parent</b>
   * <b>Child1</b>
@@ -366,7 +366,7 @@ END
       assert_eq serr, ""
     end
 
-    it "'-F ...' option will be error." do
+    it "[!71h2x] '-F ...' option will be error." do
       begin
         run("-F", "*pat*", @testfile)
       rescue OptionParser::InvalidArgument => ex
@@ -376,7 +376,7 @@ END
       end
     end
 
-    it "'--color=on' option enables output coloring forcedly." do
+    it "[!6ro7j] '--color=on' option enables output coloring forcedly." do
       [true, false].each do |bool|
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
@@ -389,7 +389,7 @@ END
       end
     end
 
-    it "'--color' is same as '--color=on'." do
+    it "[!dptgn] '--color' is same as '--color=on'." do
       [true, false].each do |bool|
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
@@ -402,7 +402,7 @@ END
       end
     end
 
-    it "'--color=off' option disables output coloring forcedly." do
+    it "[!vmw0q] '--color=off' option disables output coloring forcedly." do
       [true, false].each do |bool|
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
@@ -415,7 +415,7 @@ END
       end
     end
 
-    it "'--color=true' option raises error." do
+    it "[!9nr94] '--color=true' option raises error." do
       begin
         run("--color=true", @testfile)
       rescue OptionParser::InvalidArgument => ex
@@ -438,7 +438,7 @@ class Hello
 end
 END
 
-    it "'-g' or '--generate' option prints test code." do
+    it "[!uxh5e] '-g' or '--generate' option prints test code." do
       input = HELLO_CLASS_DEF
       filename = "_tmpcode_4674.rb"
       File.write(filename, input)
@@ -483,7 +483,7 @@ END
       end
     end
 
-    it "'--generate=unaryop' option prints test code with unary op." do
+    it "[!wmxu5] '--generate=unaryop' option prints test code with unary op." do
       input = HELLO_CLASS_DEF
       filename = "_tmpcode_6431.rb"
       File.write(filename, input)
@@ -528,7 +528,95 @@ END
       end
     end
 
+    it "[!dsrae] reports if 'ok()' called but assertion not performed." do
+      input = <<'END'
+require 'oktest'
+Oktest.scope do
+  topic 'Example' do
+    spec 'sample #1' do
+      ok {1+1} == 2          # assertion performed
+    end
+    spec 'sample #2' do
+      ok {1+1}               # ok() called but assertion not performed
+    end
+    spec 'sample #3' do
+      ok {'abc'}.start_with?(str)   # assetion not performed unexpectedly
+    end
+  end
+end
+END
+      File.write(@testfile, input)
+      expected = <<END
+** warning: ok() is called but not tested yet (at #{@testfile}:8:in `block (3 levels) in <top (required)>')
+** warning: ok() is called but not tested yet (at #{@testfile}:11:in `block (3 levels) in <top (required)>')
+END
+      ret, sout, serr = run(@testfile)
+      assert_eq ret, 1
+      assert_eq serr, expected
+    end
+
+    it "[!bzgiw] returns total number of failures and errors." do
+      ret, sout, serr = run(@testfile)
+      assert_eq ret, 2    # 1 failure, 1 error
+    end
+
+    it "[!937kw] recovers 'Config.color_enabled' value." do
+      bkup = Oktest::Config.color_enabled
+      begin
+        [true, false].each do |bool|
+          ["on", "off"].each do |flag|
+            Oktest::Config.color_enabled = bool
+            run(@testfile, "--color=#{flag}")
+            assert_eq Oktest::Config.color_enabled, bool
+          end
+        end
+      ensure
+        Oktest::Config.color_enabled = bkup
+      end
+    end
+
   end
 
+  describe '#parse_filter_pattern()' do
+    def new_filter(pattern)
+      return Oktest::MainApp.new.__send__(:parse_filter_pattern, pattern)
+    end
+    def filter_attrs(ft)
+      #return ft.topic_pattern, ft.spec_pattern, ft.tag_pattern, ft.negative
+      return ft.instance_eval {
+        [@topic_pattern, @spec_pattern, @tag_pattern, @negative]
+      }
+    end
+    it "[!9dzmg] returns filter object." do
+      ft = new_filter("topic=*pat*")
+      assert ft.is_a?(Oktest::Filter), "should be a filter object."
+    end
+    it "[!xt364] parses 'topic=...' as filter pattern for topic." do
+      ft = new_filter("topic=*pat*")
+      assert_eq filter_attrs(ft), ['*pat*', nil, nil, false]
+    end
+    it "[!53ega] parses 'spec=...' as filter pattern for spec." do
+      ft = new_filter("spec=*pat*")
+      assert_eq filter_attrs(ft), [nil, '*pat*', nil, false]
+    end
+    it "[!go6us] parses 'tag=...' as filter pattern for tag." do
+      ft = new_filter("tag={exp,old}")
+      assert_eq filter_attrs(ft), [nil, nil, '{exp,old}', false]
+    end
+    it "[!gtpt1] parses 'sid=...' as filter pattern for spec." do
+      ft = new_filter("sid=abc123")
+      assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, false]
+    end
+    it "[!5hl7z] parses 'xxx!=...' as negative filter pattern." do
+      ft = new_filter("topic!=*pat*")
+      assert_eq filter_attrs(ft), ['*pat*', nil, nil, true]
+      ft = new_filter("spec!=*pat*")
+      assert_eq filter_attrs(ft), [nil, '*pat*', nil, true]
+      ft = new_filter("tag!={exp,old}")
+      assert_eq filter_attrs(ft), [nil, nil, '{exp,old}', true]
+      ft = new_filter("sid!=abc123")
+      assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, true]
+    end
+  end
 
 end

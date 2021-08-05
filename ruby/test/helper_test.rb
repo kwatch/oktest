@@ -19,8 +19,86 @@ end
 class SpecHelper_TC < TC
   include Oktest::SpecHelper
 
+  def setup()
+  end
+
+  def teardown()
+    Oktest::AssertionObject::NOT_YET.clear()
+  end
+
+  describe '#ok()' do
+    it "[!3jhg6] creates new assertion object." do
+      o = ok {"foo"}
+      assert_eq o.class, Oktest::AssertionObject
+      assert_eq o.actual, "foo"
+      assert_eq o.bool, true
+    end
+    it "[!bc3l2] records invoked location." do
+      lineno = __LINE__ + 1
+      o = ok {"bar"}
+      assert o.location.start_with?("#{__FILE__}:#{lineno}:")
+    end
+  end
+
+  describe '#not_ok()' do
+    it "[!d332o] creates new assertion object for negative condition." do
+      o = not_ok {"abc"}
+      assert_eq o.class, Oktest::AssertionObject
+      assert_eq o.actual, "abc"
+      assert_eq o.bool, false
+    end
+    it "[!agmx8] records invoked location." do
+      lineno = __LINE__ + 1
+      o = not_ok {"bar"}
+      assert o.location.start_with?("#{__FILE__}:#{lineno}:")
+    end
+  end
+
+  describe '#skip_when()' do
+    it "[!3xqf4] raises SkipException if condition is truthy." do
+      begin
+        skip_when (1+1 == 2), "..reason.."
+      rescue Exception => exc
+        assert_eq exc.class, Oktest::SkipException
+        assert_eq exc.message, "..reason.."
+      else
+        assert false, "SkipException expected"
+      end
+    end
+    it "[!r7cxx] not raise nothing if condition is falsy." do
+      begin
+        skip_when (1+1 == 0), "..reason.."
+      rescue Exception => exc
+        assert false, "nothing should be raised but #{exc.class} raised"
+      else
+        assert true, "OK"
+      end
+    end
+  end
+
+  describe '#at_end()' do
+    it "[!x58eo] records clean-up block." do
+      Oktest.scope() do
+        topic 'Example' do
+          spec 'sample #1' do
+            puts "before at_end()"
+            at_end { puts "in at_end()" }
+            puts "after at_end()"
+          end
+        end
+      end
+      sout, serr = capture { Oktest.run() }
+      expected = <<'END'
+before at_end()
+after at_end()
+in at_end()
+END
+      assert sout.include?(expected), "not matched"
+    end
+  end
+
   describe '#capture_sio()' do
-    it "captures $stdio and $stderr" do
+    it "[!1kbnj] captures $stdio and $stderr." do
       sout, serr = capture_sio() do
         puts "fooo"
         $stderr.puts "baaa"
@@ -28,14 +106,14 @@ class SpecHelper_TC < TC
       assert_eq sout, "fooo\n"
       assert_eq serr, "baaa\n"
     end
-    it "takes $stdin data." do
+    it "[!53mai] takes $stdin data." do
       data = nil
       sout, serr = capture_sio("blabla") do
         data = $stdin.read()
       end
       data = "blabla"
     end
-    it "recovers stdio even when exception raised." do
+    it "[!wq8a9] recovers stdio even when exception raised." do
       stdin_, stdout_, stderr_ = $stdin, $stdout, $stderr
       exception = nil
       begin
@@ -56,7 +134,15 @@ class SpecHelper_TC < TC
       assert stdout_ == $stdout, "stdout should be recovered"
       assert stderr_ == $stderr, "stderr should be recovered"
     end
-    it "can simulate tty." do
+    it "[!4j494] returns outpouts of stdout and stderr." do
+      sout, serr = capture_sio() do
+        puts "foo"
+        $stderr.puts "bar"
+      end
+      assert_eq sout, "foo\n"
+      assert_eq serr, "bar\n"
+    end
+    it "[!6ik8b] can simulate tty." do
       sout, serr = capture_sio() do
         assert_eq $stdin.tty?, false
         assert_eq $stdout.tty?, false
@@ -72,7 +158,7 @@ class SpecHelper_TC < TC
   end
 
   describe '#dummy_file()' do
-    it "creates dummy file." do
+    it "[!7e0bo] creates dummy file." do
       tmpfile = "_tmp_3511.txt"
       File.unlink(tmpfile) if File.exist?(tmpfile)
       begin
@@ -86,7 +172,23 @@ class SpecHelper_TC < TC
         File.unlink(tmpfile) if File.exist?(tmpfile)
       end
     end
-    it "returns filename." do
+    it "[!yvfxq] raises error when dummy file already exists." do
+      tmp = "_tmp_4883.txt"
+      [true, false].each do |flag|
+        begin
+          flag ? File.write(tmp, "") : Dir.mkdir(tmp)
+          dummy_file(tmp, "foobar")
+          assert false, "ArgumentError should be raised."
+        rescue => exc
+          assert exc.is_a?(ArgumentError), "ArgumentError expected."
+          assert_eq exc.message, "dummy_file('#{tmp}'): temporary file already exists."
+        ensure
+          File.unlink(tmp) if File.file?(tmp)
+          Dir.rmdir(tmp)   if File.directory?(tmp)
+        end
+      end
+    end
+    it "[!nvlkq] returns filename." do
       tmpfile = "_tmp_4947.txt"
       begin
         ret = dummy_file(tmpfile, "foobar")
@@ -95,7 +197,7 @@ class SpecHelper_TC < TC
         File.unlink(tmpfile) if File.exist?(tmpfile)
       end
     end
-    it "generates temporary filename if 1st arg is nil." do
+    it "[!3mg26] generates temporary filename if 1st arg is nil." do
       begin
         tmpfile1 = dummy_file(nil, "foobar")
         tmpfile2 = dummy_file(nil, "foobar")
@@ -107,7 +209,7 @@ class SpecHelper_TC < TC
         File.unlink(tmpfile2) if File.exist?(tmpfile2)
       end
     end
-    it "can take block argument." do
+    it "[!ky7nh] can take block argument." do
       tmpfile = "_tmp_9080"
       begin
         ret = dummy_file(tmpfile) do |filename|
@@ -125,7 +227,7 @@ class SpecHelper_TC < TC
   end
 
   describe '#dummy_dir()' do
-    it "creates dummy directory." do
+    it "[!l34d5] creates dummy directory." do
       tmpdir = "_tmpdir_7903"
       Dir.rmdir(tmpdir) if File.exist?(tmpdir)
       begin
@@ -139,7 +241,23 @@ class SpecHelper_TC < TC
         Dir.rmdir(tmpdir) if File.exist?(tmpdir)
       end
     end
-    it "removes dummy directory even if it contains other files." do
+    it "[!zypj6] raises error when dummy dir already exists." do
+      tmp = "_tmpdir_1062"
+      [true, false].each do |flag|
+        begin
+          flag ? Dir.mkdir(tmp) : File.write(tmp, "")
+          dummy_dir(tmp)
+          assert false, "ArgumentError should be raised."
+        rescue => exc
+          assert exc.is_a?(ArgumentError), "ArgumentError expected but not."
+          assert exc.message, "dummy_dir('#{tmp}'): temporary directory already exists."
+        ensure
+          Dir.rmdir(tmp)   if File.directory?(tmp)
+          File.unlink(tmp) if File.file?(tmp)
+        end
+      end
+    end
+    it "[!01gt7] removes dummy directory even if it contains other files." do
       tmpdir = "_tmpdir_3869"
       begin
         dummy_dir(tmpdir)
@@ -157,7 +275,7 @@ class SpecHelper_TC < TC
         FileUtils.rm_rf(tmpdir) if File.exist?(tmpdir)
       end
     end
-    it "returns directory name." do
+    it "[!jxh30] returns directory name." do
       tmpdir = "_tmpdir_2546"
       begin
         ret = dummy_dir(tmpdir)
@@ -166,7 +284,7 @@ class SpecHelper_TC < TC
         Dir.rmdir(tmpdir) if File.exist?(tmpdir)
       end
     end
-    it "generates temporary directory name if 1st arg is nil." do
+    it "[!r14uy] generates temporary directory name if 1st arg is nil." do
       begin
         tmpdir1 = dummy_dir(nil)
         tmpdir2 = dummy_dir()
@@ -178,7 +296,7 @@ class SpecHelper_TC < TC
         Dir.rmdir(tmpdir2) if File.exist?(tmpdir2)
       end
     end
-    it "can take block argument." do
+    it "[!tfsqo] can take block argument." do
       tmpdir = "_tmp_5799"
       begin
         ret = dummy_dir(tmpdir) do |dirname|
@@ -196,7 +314,7 @@ class SpecHelper_TC < TC
   end
 
   describe '#dummy_values()' do
-    it "changes hash value temporarily." do
+    it "[!hgwg2] changes hash value temporarily." do
       hashobj = {:a=>10, 'b'=>20, :c=>30}
       dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000)
       assert_eq hashobj[:a], 1000
@@ -204,7 +322,7 @@ class SpecHelper_TC < TC
       assert_eq hashobj[:c], 30
       assert_eq hashobj[:x], 9000
     end
-    it "recovers hash values." do
+    it "[!jw2kx] recovers hash values." do
       hashobj = {:a=>10, 'b'=>20, :c=>30}
       dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000)
       assert_eq hashobj[:a], 1000
@@ -219,12 +337,12 @@ class SpecHelper_TC < TC
       assert_eq hashobj[:c], 30
       assert !hashobj.key?(:x), "key :x should not exist."
     end
-    it "returns keyvals." do
+    it "[!w3r0p] returns keyvals." do
       hashobj = {:a=>10, 'b'=>20, :c=>30}
       ret = dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000)
       assert_eq ret, {:a=>1000, 'b'=>2000, :x=>9000}
     end
-    it "can take block argument." do
+    it "[!pwq6v] can take block argument." do
       hashobj = {:a=>10, 'b'=>20, :c=>30}
       ret = dummy_values(hashobj, :a=>1000, 'b'=>2000, :x=>9000) do |kvs|
         assert_eq hashobj[:a], 1000
@@ -244,13 +362,13 @@ class SpecHelper_TC < TC
   end
 
   describe '#dummy_attrs()' do
-    it "changes object attributes temporarily." do
+    it "[!4vd73] changes object attributes temporarily." do
       obj = DummyUser.new(123, "alice")
       dummy_attrs(obj, :id=>999, :name=>"bob")
       assert_eq obj.id, 999
       assert_eq obj.name, "bob"
     end
-    it "recovers attribute values." do
+    it "[!fi0t3] recovers attribute values." do
       obj = DummyUser.new(123, "alice")
       dummy_attrs(obj, :id=>999, :name=>"bob")
       assert_eq obj.id, 999
@@ -262,12 +380,12 @@ class SpecHelper_TC < TC
       assert_eq obj.id, 123
       assert_eq obj.name, "alice"
     end
-    it "returns keyvals." do
+    it "[!27yeh] returns keyvals." do
       obj = DummyUser.new(123, "alice")
       ret = dummy_attrs(obj, :id=>789, :name=>"charlie")
       assert_eq ret, {:id=>789, :name=>"charlie"}
     end
-    it "can take block argument." do
+    it "[!j7tvp] can take block argument." do
       obj = DummyUser.new(123, "alice")
       ret = dummy_attrs(obj, :id=>888, :name=>"dave") do |kvs|
         assert_eq obj.id, 888
@@ -283,13 +401,13 @@ class SpecHelper_TC < TC
   end
 
   describe '#dummy_ivars()' do
-    it "changes instance variables temporarily." do
+    it "[!rnqiv] changes instance variables temporarily." do
       obj = DummyUser.new(123, "alice")
       dummy_ivars(obj, :id=>999, :name=>"bob")
       assert_eq obj.instance_variable_get('@id'), 999
       assert_eq obj.instance_variable_get('@name'), "bob"
     end
-    it "recovers instance variables." do
+    it "[!8oirn] recovers instance variables." do
       obj = DummyUser.new(123, "alice")
       dummy_ivars(obj, :id=>999, :name=>"bob")
       assert_eq obj.instance_variable_get('@id'), 999
@@ -301,12 +419,12 @@ class SpecHelper_TC < TC
       assert_eq obj.instance_variable_get('@id'), 123
       assert_eq obj.instance_variable_get('@name'), "alice"
     end
-    it "returns keyvals." do
+    it "[!01dc8] returns keyvals." do
       obj = DummyUser.new(123, "alice")
       ret = dummy_ivars(obj, :id=>789, :name=>"charlie")
       assert_eq ret, {:id=>789, :name=>"charlie"}
     end
-    it "can take block argument." do
+    it "[!myzk4] can take block argument." do
       obj = DummyUser.new(123, "alice")
       ret = dummy_attrs(obj, :id=>888, :name=>"dave") do |kvs|
         assert_eq obj.instance_variable_get('@id'), 888
@@ -322,14 +440,22 @@ class SpecHelper_TC < TC
   end
 
   describe '#recorder()' do
-    it "creates Benry::Recorder object." do
+    it "[!qwrr8] loads 'benry/recorder' automatically." do
+      if defined?(Benry::Recorder)
+        $stderr.puts "** skip because 'benry/recorder' already loaded."
+      else
+        assert !defined? Benry::Recorder, "should not be loaded."
+        recorder()
+        assert defined? Benry::Recorder, "should be loaded."
+      end
+    end
+    it "[!glfvx] creates Benry::Recorder object." do
       rec = recorder()
-      ok {defined? Benry::Recorder}.truthy?
-      ok {rec}.is_a?(Benry::Recorder)
+      assert rec.is_a?(Benry::Recorder)
       o = rec.fake_object(:foo=>123)
-      ok {o.foo()} == 123
-      ok {rec[0].name} == :foo
-      ok {rec[0].obj} == o
+      assert_eq o.foo(), 123
+      assert_eq rec[0].name, :foo
+      assert_eq rec[0].obj, o
     end
   end
 
