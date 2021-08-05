@@ -583,46 +583,4 @@ END
 
   end
 
-  describe '#parse_filter_pattern()' do
-    def new_filter(pattern)
-      return Oktest::MainApp.new.__send__(:parse_filter_pattern, pattern)
-    end
-    def filter_attrs(ft)
-      #return ft.topic_pattern, ft.spec_pattern, ft.tag_pattern, ft.negative
-      return ft.instance_eval {
-        [@topic_pattern, @spec_pattern, @tag_pattern, @negative]
-      }
-    end
-    it "[!9dzmg] returns filter object." do
-      ft = new_filter("topic=*pat*")
-      assert ft.is_a?(Oktest::Filter), "should be a filter object."
-    end
-    it "[!xt364] parses 'topic=...' as filter pattern for topic." do
-      ft = new_filter("topic=*pat*")
-      assert_eq filter_attrs(ft), ['*pat*', nil, nil, false]
-    end
-    it "[!53ega] parses 'spec=...' as filter pattern for spec." do
-      ft = new_filter("spec=*pat*")
-      assert_eq filter_attrs(ft), [nil, '*pat*', nil, false]
-    end
-    it "[!go6us] parses 'tag=...' as filter pattern for tag." do
-      ft = new_filter("tag={exp,old}")
-      assert_eq filter_attrs(ft), [nil, nil, '{exp,old}', false]
-    end
-    it "[!gtpt1] parses 'sid=...' as filter pattern for spec." do
-      ft = new_filter("sid=abc123")
-      assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, false]
-    end
-    it "[!5hl7z] parses 'xxx!=...' as negative filter pattern." do
-      ft = new_filter("topic!=*pat*")
-      assert_eq filter_attrs(ft), ['*pat*', nil, nil, true]
-      ft = new_filter("spec!=*pat*")
-      assert_eq filter_attrs(ft), [nil, '*pat*', nil, true]
-      ft = new_filter("tag!={exp,old}")
-      assert_eq filter_attrs(ft), [nil, nil, '{exp,old}', true]
-      ft = new_filter("sid!=abc123")
-      assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, true]
-    end
-  end
-
 end

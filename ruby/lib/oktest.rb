@@ -1889,7 +1889,7 @@ END
       #; [!m0iwm] '-F sid=...' option filters by spec id.
       #; [!noi8i] '-F' option supports negative filter.
       if opts.filter
-        filter_obj = parse_filter_pattern(opts.filter)
+        filter_obj = FILTER_CLASS.create_from(opts.filter)
         filter(filter_obj)
       end
       #; [!bim36] changes auto-running to off.
@@ -1991,22 +1991,6 @@ END
         end
       end
       return buf.join()
-    end
-
-    def parse_filter_pattern(pattern)
-      #; [!gtpt1] parses 'sid=...' as filter pattern for spec.
-      pattern = "spec#{$1}\\[!#{$2}\\]*" if pattern =~ /\Asid(=|!=)(.*)/  # filter by spec id
-      #; [!xt364] parses 'topic=...' as filter pattern for topic.
-      #; [!53ega] parses 'spec=...' as filter pattern for spec.
-      #; [!go6us] parses 'tag=...' as filter pattern for tag.
-      pat = {'topic'=>nil, 'spec'=>nil, 'tag'=>nil}
-      pattern =~ /\A(\w+)(=|!=)/ && pat.key?($1)  or
-        raise Exception, "** internal error: pattern=#{pattern.inspect}"
-      pat[$1] = $'
-      #; [!5hl7z] parses 'xxx!=...' as negative filter pattern.
-      negative = ($2 == '!=')
-      #; [!9dzmg] returns filter object.
-      return FILTER_CLASS.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
     end
 
     def filter(filter_obj)
