@@ -437,8 +437,6 @@ end
       assert pr.respond_to?(:exc)
       assert pr.exc.is_a?(NoMethodError)
       assert_eq pr.exc.message, "undefined method `foobar' for \"SOS\":String"
-      assert pr.respond_to?(:exception)     # for backward compatibility
-      assert pr.exception.equal?(pr.exc)
     end
   end
 
