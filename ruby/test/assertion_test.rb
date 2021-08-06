@@ -407,6 +407,15 @@ end
       pr = proc { "SOS".sos }
       should_return_self { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
     end
+    it "[!2rnni] error class is omittable (default: RuntimeError)." do
+      pr = proc { raise "something wrong" }
+      should_return_self { ok {pr}.raise?("something wrong") }
+      should_return_self { ok {pr}.raise?(/something wrong/) }
+      #
+      pr = proc { raise StandardError, "something wrong" }
+      errmsg = "Expected RuntimeError to be raised but got StandardError."
+      should_be_failed(errmsg) { ok {pr}.raise?("something wrong") }
+    end
     it "[!spzy2] is available with NOT." do
       pr = proc { "SOS".length }
       should_return_self { ok {pr}.NOT.raise?  }

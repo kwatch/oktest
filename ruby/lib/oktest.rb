@@ -261,8 +261,14 @@ module Oktest
       self
     end
 
-    def raise?(errcls=Exception, errmsg=nil)
+    def raise?(errcls=RuntimeError, errmsg=nil)
       __done()
+      #; [!2rnni] error class is omittable (default: RuntimeError).
+      if errmsg.nil? && ! errcls.nil? && ! (errcls.is_a?(Class) && errcls <= Exception)
+        errmsg = errcls
+        errcls = RuntimeError
+      end
+      #
       proc_obj = @actual
       if @bool
         #; [!wbwdo] raises assertion error when failed.
