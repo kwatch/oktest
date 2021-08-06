@@ -449,6 +449,68 @@ end
     end
   end
 
+  describe "#thrown?" do
+    it "[!w7935] raises ArgumentError when arg of 'thrown?()' is nil." do
+      pr = proc { throw :sym1 }
+      begin
+        ok {}.throw?(nil)
+      rescue => exc
+        assert_eq exc.class, ArgumentError
+        assert_eq exc.message, "throw?(nil): expected tag required."
+      else
+        assert false, "ArgumentError expected"
+      end
+    end
+    it "[!lglzr] assertion passes when expected symbol thrown." do
+      pr = proc { throw :sym2 }
+      ok {pr}.throw?(:sym2)
+      assert true, "ok"
+    end
+    it "[!gf9nx] assertion fails when thrown tag is equal to but not same as expected." do
+      pr = proc { throw "sym" }
+      expected = ("Thrown tag \"sym\" is equal to but not same as expected.\n"\
+                  "    (`\"sym\".equal?(\"sym\")` should be true but not.)")
+      should_be_failed(expected) { ok {pr}.throw?("sym") }
+    end
+    it "[!flgwy] raises UncaughtThrowError when unexpected object thrown." do
+      pr = proc { throw :sym9 }
+      begin
+        ok {pr}.throw?(:sym4)
+      rescue UncaughtThrowError => exc
+        assert_eq exc.tag, :sym9
+      else
+        assert false, "UncaughtThrowError expected"
+      end
+    end
+    it "[!9ik3x] assertion fails when nothing thrown." do
+      pr = proc { nil }
+      expected = ":sym5 should be thrown but nothing thrown."
+      should_be_failed(expected) { ok {pr}.throw?(:sym5) }
+    end
+    it "[!m03vq] raises ArgumentError when non-nil arg passed to 'NOT.thrown?()'." do
+      pr = proc { nil }
+      begin
+        ok {pr}.NOT.throw?(:sym6)
+      rescue ArgumentError => exc
+        assert_eq exc.message, "NOT.throw?(:sym6): argument should be nil."
+      else
+        assert false, "ArgumentError expected."
+      end
+    end
+    it "[!kxizg] assertion fails when something thrown in 'NOT.throw?()'." do
+      pr = proc { throw :sym7 }
+      expected = "Nothing should be thrown but :sym7 thrown."
+      should_be_failed(expected) { ok {pr}.NOT.throw?(nil) }
+    end
+    it "[!zq9h6] returns self when passed." do
+      pr = proc { throw :sym8 }
+      should_return_self { ok {pr}.throw?(:sym8) }
+      #
+      pr = proc { nil }
+      should_return_self { ok {pr}.NOT.throw?(nil) }
+    end
+  end
+
   describe "#in?" do
     it "[!jzoxg] returns self when passed." do
       should_return_self { ok {3}.in?(1..5) }

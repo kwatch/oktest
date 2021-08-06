@@ -309,6 +309,51 @@ module Oktest
       self
     end
 
+    def throw?(expected)
+      __done()
+      proc_obj = @actual
+      if @bool
+        #; [!w7935] raises ArgumentError when arg of 'thrown?()' is nil.
+        expected != nil  or
+          raise ArgumentError, "throw?(#{expected.inspect}): expected tag required."
+        #
+        begin
+          proc_obj.call
+        rescue UncaughtThrowError => exc
+          #; [!lglzr] assertion passes when expected symbol thrown.
+          if exc.tag.equal?(expected)
+            nil
+          #; [!gf9nx] assertion fails when thrown tag is equal to but not same as expected.
+          elsif exc.tag == expected
+            __assert(false) {
+              "Thrown tag #{exc.tag.inspect} is equal to but not same as expected.\n"\
+              "    (`#{exc.tag.inspect}.equal?(#{expected.inspect})` should be true but not.)"
+            }
+          #; [!flgwy] raises UncaughtThrowError when unexpected object thrown.
+          else
+            raise
+          end
+        else
+          #; [!9ik3x] assertion fails when nothing thrown.
+          __assert(false) { "#{expected.inspect} should be thrown but nothing thrown." }
+        end
+      else
+        #; [!m03vq] raises ArgumentError when non-nil arg passed to 'NOT.thrown?()'.
+        expected == nil  or
+          raise ArgumentError, "NOT.throw?(#{expected.inspect}): argument should be nil."
+        #; [!kxizg] assertion fails when something thrown in 'NOT.throw?()'.
+        begin
+          proc_obj.call
+        rescue UncaughtThrowError => exc
+          __assert(false) {
+            "Nothing should be thrown but #{exc.tag.inspect} thrown."
+          }
+        end
+      end
+      #; [!zq9h6] returns self when passed.
+      self
+    end
+
     def in?(expected)
       __done()
       #; [!9rm8g] raises assertion error when failed.
