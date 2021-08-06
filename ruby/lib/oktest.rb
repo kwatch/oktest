@@ -271,15 +271,24 @@ module Oktest
       #
       proc_obj = @actual
       if @bool
-        #; [!wbwdo] raises assertion error when failed.
         exc = nil
         begin
           proc_obj.call
         rescue Exception => exc
           #; [!4c6x3] not check exception class when nil specified as errcls.
-          if errcls
-            __assert(exc.is_a?(errcls)) { "Expected #{errcls.inspect} to be raised but got #{exc.class}." }
+          if errcls.nil?
+            nil
+          #; [!yps62] assertion passes when expected exception raised.
+          elsif exc.is_a?(errcls)
+            nil
+          #; [!4n3ed] reraises if exception is not matched to specified error class.
+          else
+            #__assert(false) { "Expected #{errcls} to be raised but got #{exc.class}." }
+            raise
           end
+        else
+          #; [!wbwdo] raises assertion error when nothing raised.
+          __assert(false) { "Expected #{errcls} to be raised but nothing raised." }
         end
         #; [!vnc6b] sets exceptio object into '#exc' attribute.
         (class << proc_obj; self; end).class_eval { attr_accessor :exc }
@@ -306,11 +315,16 @@ module Oktest
           if errcls == nil
             #__assert(false) { "Nothing should be raised but got #{exc.inspect}." }
             raise
+          #; [!61vtv] assertion fails when specified exception raised.
+          elsif exc.is_a?(errcls)
+            __assert(false) { "#{errcls.inspect} should not be raised but got #{exc.inspect}." }
+          #; [!shxne] reraises exception if different from specified error class.
           else
-            __assert(! exc.is_a?(errcls)) {
-              "#{errcls.inspect} should not be raised but got #{exc.inspect}."
-            }
+            raise
           end
+        else
+          #; [!a1a40] assertion passes when nothing raised.
+          nil
         end
       end
       #; [!y1b28] returns self when passed.

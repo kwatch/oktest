@@ -393,13 +393,25 @@ end
       pr = proc { "SOS".sos }
       should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String")  }
     end
-    it "[!wbwdo] raises assertion error when failed." do
-      pr = proc { "SOS".sos }
-      errmsg = "Expected ArgumentError to be raised but got NoMethodError."
+    it "[!yps62] assertion passes when expected exception raised." do
+      pr = proc { "SOS".sub() }
+      should_return_self { ok {pr}.raise?(ArgumentError) }
+      pr = proc { 1/0 }
+      should_return_self { ok {pr}.raise?(ZeroDivisionError) }
+    end
+    it "[!wbwdo] raises assertion error when nothing raised." do
+      pr = proc { nil }
+      errmsg = "Expected ArgumentError to be raised but nothing raised."
       should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
-      errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
-               "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
-      should_be_failed(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
+      #should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
+      #errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
+      #         "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
+      #should_be_failed(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
+    end
+    it "[!4n3ed] reraises if exception is not matched to specified error class." do
+      pr = proc { "SOS".sos }
+      errmsg = "undefined method `sos' for \"SOS\":String"
+      should_be_error(NoMethodError, errmsg) { ok {pr}.raise?(ArgumentError) }
     end
     it "[!tpxlv] accepts string or regexp as error message." do
       pr = proc { "SOS".sos }
@@ -413,8 +425,7 @@ end
       should_return_self { ok {pr}.raise?(/something wrong/) }
       #
       pr = proc { raise StandardError, "something wrong" }
-      errmsg = "Expected RuntimeError to be raised but got StandardError."
-      should_be_failed(errmsg) { ok {pr}.raise?("something wrong") }
+      should_be_error(StandardError, "something wrong") { ok {pr}.raise?("something wrong") }
     end
     it "[!4c6x3] not check exception class when nil specified as errcls." do
       pr = proc { foobar() }
@@ -427,10 +438,20 @@ end
     it "[!spzy2] is available with NOT." do
       pr = proc { "SOS".length }
       should_return_self { ok {pr}.NOT.raise? }
-      pr = proc { "SOS".sos }
-      should_return_self { ok {pr}.NOT.raise?(ArgumentError)  }
-      errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `sos' for \"SOS\":String>."
+    end
+    it "[!a1a40] assertion passes when nothing raised." do
+      pr = proc { nil }
+      should_return_self { ok {pr}.NOT.raise? }
+    end
+    it "[!61vtv] assertion fails when specified exception raised." do
+      pr = proc { "SOS".foo }
+      errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foo' for \"SOS\":String>."
       should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+    end
+    it "[!shxne] reraises exception if different from specified error class." do
+      pr = proc { 1/0 }
+      errmsg = "divided by 0"
+      should_be_error(ZeroDivisionError, errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
     end
     it "[!36032] 'NOT.raise?()' reraises exception when errcls is nil." do
       pr = proc { foobar() }
