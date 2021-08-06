@@ -96,7 +96,7 @@ class AssertionObject_TC < TC
     end
   end
 
-  describe "#==" do
+  describe '#==' do
     it "[!c6p0e] returns self when passed." do
       should_return_self { ok {1+1} == 2 }
     end
@@ -132,7 +132,7 @@ END
     end
   end
 
-  describe "#!=" do
+  describe '#!=' do
     it "[!iakbb] returns self when passed." do
       should_return_self { ok {1+1} != 3 }
     end
@@ -153,7 +153,7 @@ END
     end
   end #if RUBY_VERSION >= "1.9"
 
-  describe "#===" do
+  describe '#===' do
     it "[!uh8bm] returns self when passed." do
       should_return_self { ok {String} === 'str' }
     end
@@ -172,7 +172,7 @@ END
     end
   end
 
-  describe ">" do
+  describe '>' do
     it "[!3j7ty] returns self when passed." do
       should_return_self { ok {2} > 1 }
     end
@@ -194,7 +194,7 @@ END
     end
   end
 
-  describe ">=" do
+  describe '>=' do
     it "[!75iqw] returns self when passed." do
       should_return_self { ok {2} >= 2 }
       should_return_self { ok {2} >= 1 }
@@ -215,7 +215,7 @@ END
     end
   end
 
-  describe "<" do
+  describe '<' do
     it "[!vkwcc] returns self when passed." do
       should_return_self { ok {1} < 2 }
     end
@@ -237,7 +237,7 @@ END
     end
   end
 
-  describe "<=" do
+  describe '<=' do
     it "[!yk7t2] returns self when passed." do
       should_return_self { ok {1} <= 2 }
       should_return_self { ok {1} <= 1 }
@@ -258,7 +258,7 @@ END
     end
   end
 
-  describe "=~" do
+  describe '=~' do
     it "[!acypf] returns self when passed." do
       should_return_self { ok {'SOS'} =~ /^[A-Z]+$/ }
     end
@@ -281,7 +281,7 @@ END
     end if false
   end
 
-  describe "!~" do
+  describe '!~' do
     it "[!xywdr] returns self when passed." do
       should_return_self { ok {'SOS'} !~ /^\d+$/ }
     end
@@ -302,7 +302,7 @@ END
     end
   end #if RUBY_VERSION >= "1.9"
 
-  describe "#in_delta?" do
+  describe '#in_delta?' do
     it "[!m0791] returns self when passed." do
       should_return_self { ok {3.14159}.in_delta?(3.141, 0.001) }
     end
@@ -323,7 +323,7 @@ END
     end
   end
 
-  describe "#same?" do
+  describe '#same?' do
     it "[!yk7zo] returns self when passed." do
       should_return_self { ok {:SOS}.same?(:SOS) }
     end
@@ -342,7 +342,7 @@ END
     end
   end
 
-describe "#method_missing()" do
+describe '#method_missing()' do
     it "[!7bbrv] returns self when passed." do
       should_return_self { ok {"file.png"}.end_with?(".png") }
     end
@@ -392,7 +392,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#raise?" do
+  describe '#raise?' do
     it "[!y1b28] returns self when passed." do
       pr = proc { "SOS".sos }
       should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String")  }
@@ -405,7 +405,7 @@ describe "#method_missing()" do
       pr = proc { raise StandardError, "something wrong" }
       ERROR!(StandardError, "something wrong") { ok {pr}.raise?("something wrong") }
     end
-    describe "[!dpv5g] when `ok{}` called..." do
+    describe '[!dpv5g] when `ok{}` called...' do
       it "[!yps62] assertion passes when expected exception raised." do
         pr = proc { "SOS".sub() }
         PASS! { ok {pr}.raise?(ArgumentError) }
@@ -450,7 +450,7 @@ describe "#method_missing()" do
         assert exc1.equal?(pr.exc)
       end
     end
-    describe "[!qkr3h] when `ok{}.NOT` called..." do
+    describe '[!qkr3h] when `ok{}.NOT` called...' do
       it "[!cownv] not support error message." do
         pr = proc { raise "some error" }
         errmsg = "\"some error\": NOT.raise?() can't take errmsg."
@@ -497,7 +497,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#thrown?" do
+  describe '#thrown?' do
     it "[!w7935] raises ArgumentError when arg of 'thrown?()' is nil." do
       ERROR!(ArgumentError, "throw?(nil): expected tag required.") do
         pr = proc { throw :sym1 }
@@ -546,7 +546,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#in?" do
+  describe '#in?' do
     it "[!jzoxg] returns self when passed." do
       should_return_self { ok {3}.in?(1..5) }
     end
@@ -565,7 +565,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#include?" do
+  describe '#include?' do
     it "[!2hddj] returns self when passed." do
       should_return_self { ok {1..5}.include?(3) }
     end
@@ -584,7 +584,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#attr()" do
+  describe '#attr()' do
     it "[!lz3lb] returns self when passed." do
       should_return_self { ok {"SOS"}.attr(:length, 3) }
     end
@@ -603,7 +603,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#attrs()" do
+  describe '#attrs()' do
     it "[!rtq9f] returns self when passed." do
       should_return_self { ok {"SOS"}.attrs(:length=>3, :size=>3) }
     end
@@ -622,7 +622,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#keyval()" do
+  describe '#keyval()' do
     it "[!byebv] returns self when passed." do
       d = {'a'=>1}
       should_return_self { ok {d}.keyval('a', 1) }
@@ -644,7 +644,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#keyvals()" do
+  describe '#keyvals()' do
     it "[!vtw22] returns self when passed." do
       d = {'a'=>1, 'b'=>2}
       should_return_self { ok {d}.keyvals('a'=>1, 'b'=>2) }
@@ -666,7 +666,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#length" do
+  describe '#length' do
     it "[!l9vnv] returns self when passed." do
       should_return_self { ok {"SOS"}.length(3) }
     end
@@ -685,7 +685,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#truthy?" do
+  describe '#truthy?' do
     it "[!nhmuk] returns self when passed." do
       should_return_self { ok {""}.truthy? }
     end
@@ -702,7 +702,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#falsy?" do
+  describe '#falsy?' do
     it "[!w1vm6] returns self when passed." do
       should_return_self { ok {nil}.falsy? }
     end
@@ -719,7 +719,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#file_exist?" do
+  describe '#file_exist?' do
     it "[!6bcpp] returns self when passed." do
       should_return_self { ok {__FILE__}.file_exist? }
     end
@@ -736,7 +736,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#dir_exist?" do
+  describe '#dir_exist?' do
     it "[!8qe7u] returns self when passed." do
       should_return_self { ok {'.'}.dir_exist? }
     end
@@ -753,7 +753,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#symlink_exist?" do
+  describe '#symlink_exist?' do
     def with_symlink
       linkname = "_sym_#{rand().to_s[2...7]}"
       File.symlink(__FILE__, linkname)
@@ -787,7 +787,7 @@ describe "#method_missing()" do
     end
   end
 
-  describe "#not_exist?" do
+  describe '#not_exist?' do
     it "[!1ujag] returns self when passed." do
       should_return_self { ok {'_not_exist'}.not_exist? }
     end
