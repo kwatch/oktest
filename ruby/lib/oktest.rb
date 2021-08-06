@@ -270,8 +270,9 @@ module Oktest
       end
       #
       proc_obj = @actual
+      exc = nil
+      #; [!dpv5g] when `ok{}` called...
       if @bool
-        exc = nil
         begin
           proc_obj.call
         rescue Exception => exc
@@ -290,10 +291,6 @@ module Oktest
           #; [!wbwdo] raises assertion error when nothing raised.
           __assert(false) { "Expected #{errcls} to be raised but nothing raised." }
         end
-        #; [!vnc6b] sets exceptio object into '#exc' attribute.
-        (class << proc_obj; self; end).class_eval { attr_accessor :exc }
-        proc_obj.exc = exc
-        __assert(! exc.nil?) { "Expected #{errcls.inspect} to be raised but nothing raised." }
         #; [!tpxlv] accepts string or regexp as error message.
         if errmsg
           __assert(errmsg === exc.message) {
@@ -304,15 +301,16 @@ module Oktest
         end
         #; [!dq97o] if block given, call it with exception object.
         yield exc if block_given?()
+      #; [!qkr3h] when `ok{}.NOT` called...
       else
-        #; [!spzy2] is available with NOT.
+        #; [!cownv] not support error message.
         ! errmsg  or
           raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
         begin
           proc_obj.call
         rescue Exception => exc
           #; [!36032] 'NOT.raise?()' reraises exception when errcls is nil.
-          if errcls == nil
+          if errcls.nil?
             #__assert(false) { "Nothing should be raised but got #{exc.inspect}." }
             raise
           #; [!61vtv] assertion fails when specified exception raised.
@@ -327,6 +325,9 @@ module Oktest
           nil
         end
       end
+      #; [!vnc6b] sets exception object into '#exc' attribute.
+      (class << proc_obj; self; end).class_eval { attr_accessor :exc }
+      proc_obj.exc = exc
       #; [!y1b28] returns self when passed.
       self
     end

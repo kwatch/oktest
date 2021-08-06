@@ -386,40 +386,14 @@ describe "#method_missing()" do
         ok {s}.sos?
       end
     end
-end
+  end
 
   describe "#raise?" do
     it "[!y1b28] returns self when passed." do
       pr = proc { "SOS".sos }
       should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String")  }
     end
-    it "[!yps62] assertion passes when expected exception raised." do
-      pr = proc { "SOS".sub() }
-      should_return_self { ok {pr}.raise?(ArgumentError) }
-      pr = proc { 1/0 }
-      should_return_self { ok {pr}.raise?(ZeroDivisionError) }
-    end
-    it "[!wbwdo] raises assertion error when nothing raised." do
-      pr = proc { nil }
-      errmsg = "Expected ArgumentError to be raised but nothing raised."
-      should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
-      #should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
-      #errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
-      #         "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
-      #should_be_failed(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
-    end
-    it "[!4n3ed] reraises if exception is not matched to specified error class." do
-      pr = proc { "SOS".sos }
-      errmsg = "undefined method `sos' for \"SOS\":String"
-      should_be_error(NoMethodError, errmsg) { ok {pr}.raise?(ArgumentError) }
-    end
-    it "[!tpxlv] accepts string or regexp as error message." do
-      pr = proc { "SOS".sos }
-      should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String") }
-      pr = proc { "SOS".sos }
-      should_return_self { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
-    end
-    it "[!2rnni] [!2rnni] 1st argument can be error message string or rexp." do
+    it "[!2rnni] 1st argument can be error message string or rexp." do
       pr = proc { raise "something wrong" }
       should_return_self { ok {pr}.raise?("something wrong") }
       should_return_self { ok {pr}.raise?(/something wrong/) }
@@ -427,54 +401,95 @@ end
       pr = proc { raise StandardError, "something wrong" }
       should_be_error(StandardError, "something wrong") { ok {pr}.raise?("something wrong") }
     end
-    it "[!4c6x3] not check exception class when nil specified as errcls." do
-      pr = proc { foobar() }
-      should_return_self { ok {pr}.raise?(nil, /undefined method `foobar'/) }
-      pr = proc { 1/0 }
-      should_return_self { ok {pr}.raise?(nil, "divided by 0") }
-      pr = proc { 1/0 }
-      should_return_self { ok {pr}.raise?(nil) }
+    describe "[!dpv5g] when `ok{}` called..." do
+      it "[!yps62] assertion passes when expected exception raised." do
+        pr = proc { "SOS".sub() }
+        should_return_self { ok {pr}.raise?(ArgumentError) }
+        pr = proc { 1/0 }
+        should_return_self { ok {pr}.raise?(ZeroDivisionError) }
+      end
+      it "[!wbwdo] raises assertion error when nothing raised." do
+        pr = proc { nil }
+        errmsg = "Expected ArgumentError to be raised but nothing raised."
+        should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
+        #should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
+        #errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
+        #         "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
+        #should_be_failed(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
+      end
+      it "[!4n3ed] reraises if exception is not matched to specified error class." do
+        pr = proc { "SOS".sos }
+        errmsg = "undefined method `sos' for \"SOS\":String"
+        should_be_error(NoMethodError, errmsg) { ok {pr}.raise?(ArgumentError) }
+      end
+      it "[!tpxlv] accepts string or regexp as error message." do
+        pr = proc { "SOS".sos }
+        should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String") }
+        pr = proc { "SOS".sos }
+        should_return_self { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
+      end
+      it "[!4c6x3] not check exception class when nil specified as errcls." do
+        pr = proc { foobar() }
+        should_return_self { ok {pr}.raise?(nil, /undefined method `foobar'/) }
+        pr = proc { 1/0 }
+        should_return_self { ok {pr}.raise?(nil, "divided by 0") }
+        pr = proc { 1/0 }
+        should_return_self { ok {pr}.raise?(nil) }
+      end
+      it "[!dq97o] if block given, call it with exception object." do
+        pr = proc { "SOS".foobar }
+        exc1 = nil
+        ok {pr}.raise?(NoMethodError) do |exc2|
+          exc1 = exc2
+        end
+        assert exc1 != nil
+        assert exc1.equal?(pr.exc)
+      end
     end
-    it "[!spzy2] is available with NOT." do
-      pr = proc { "SOS".length }
-      should_return_self { ok {pr}.NOT.raise? }
+    describe "[!qkr3h] when `ok{}.NOT` called..." do
+      it "[!cownv] not support error message." do
+        pr = proc { raise "some error" }
+        errmsg = "\"some error\": NOT.raise?() can't take errmsg."
+        should_be_error(ArgumentError, errmsg) { ok {pr}.NOT.raise?(Exception, "some error") }
+      end
+      it "[!spzy2] is available with NOT." do
+        pr = proc { "SOS".length }
+        should_return_self { ok {pr}.NOT.raise? }
+      end
+      it "[!a1a40] assertion passes when nothing raised." do
+        pr = proc { nil }
+        should_return_self { ok {pr}.NOT.raise? }
+      end
+      it "[!61vtv] assertion fails when specified exception raised." do
+        pr = proc { "SOS".foo }
+        errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foo' for \"SOS\":String>."
+        should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+      end
+      it "[!shxne] reraises exception if different from specified error class." do
+        pr = proc { 1/0 }
+        errmsg = "divided by 0"
+        should_be_error(ZeroDivisionError, errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+      end
+      it "[!36032] 'NOT.raise?()' reraises exception when errcls is nil." do
+        pr = proc { foobar() }
+        should_be_error(NoMethodError) { ok {pr}.NOT.raise?(nil) }
+        pr = proc { 1/0 }
+        should_be_error(ZeroDivisionError) { ok {pr}.NOT.raise?(nil) }
+      end
     end
-    it "[!a1a40] assertion passes when nothing raised." do
-      pr = proc { nil }
-      should_return_self { ok {pr}.NOT.raise? }
-    end
-    it "[!61vtv] assertion fails when specified exception raised." do
-      pr = proc { "SOS".foo }
-      errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foo' for \"SOS\":String>."
-      should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
-    end
-    it "[!shxne] reraises exception if different from specified error class." do
-      pr = proc { 1/0 }
-      errmsg = "divided by 0"
-      should_be_error(ZeroDivisionError, errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
-    end
-    it "[!36032] 'NOT.raise?()' reraises exception when errcls is nil." do
-      pr = proc { foobar() }
-      should_be_error(NoMethodError) { ok {pr}.NOT.raise?(nil) }
-      pr = proc { 1/0 }
-      should_be_error(ZeroDivisionError) { ok {pr}.NOT.raise?(nil) }
-    end
-    it "[!vnc6b] sets exceptio object into '#exc' attribute." do
+    it "[!vnc6b] sets exception object into '#exc' attribute." do
       pr = proc { "SOS".foobar }
       assert !pr.respond_to?(:exc)
       ok {pr}.raise?(NoMethodError)
       assert pr.respond_to?(:exc)
       assert pr.exc.is_a?(NoMethodError)
       assert_eq pr.exc.message, "undefined method `foobar' for \"SOS\":String"
-    end
-    it "[!dq97o] if block given, call it with exception object." do
-      pr = proc { "SOS".foobar }
-      exc1 = nil
-      ok {pr}.raise?(NoMethodError) do |exc2|
-        exc1 = exc2
-      end
-      assert exc1 != nil
-      assert exc1.equal?(pr.exc)
+      #
+      pr = proc { nil }
+      assert !pr.respond_to?(:exc)
+      ok {pr}.NOT.raise?(NoMethodError)
+      assert pr.respond_to?(:exc)
+      assert_eq pr.exc, nil
     end
   end
 
