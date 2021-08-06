@@ -539,7 +539,7 @@ Oktest.scope do
 
     - spec("returns greeting message.")
 
-    end  #hello()
+    end  # #hello()
 
 
   end  # Hello
@@ -710,11 +710,12 @@ If you want to assert whether exception raised or not:
 
 ```ruby
 pr = proc do
-  "abc".len()    # NoMethodError
+  "abc".len()        # raises NoMethodError
 end
 ok {pr}.raise?(NoMethodError)
 ok {pr}.raise?(NoMethodError, "undefined method `len' for \"abc\":String")
 ok {pr}.raise?(NoMethodError, /^undefined method `len'/)
+ok {pr}.raise?       # pass if any exception raised, fail if nothing raised
 
 ## get exception object
 ok {pr}.raise?(NoMethodError) {|exc|
@@ -722,10 +723,78 @@ ok {pr}.raise?(NoMethodError) {|exc|
   ok {exc.message} == "undefined method `len' for \"abc\":String"
 }
 
-## if you want to assert that procedure NOT raise exception...
-not_ok {pr}.raise?(NoMethodError)   # only exception class, no errmsg
-ok {pr}.NOT.raise?(NoMethodError)   # only exception class, no errmsg
+## assert that procedure does NOT raise any exception
+ok {pr}.NOT.raise?   # no exception class nor error message
+not_ok {pr}.raise?   # same as above
+
+## assert that procedure throws symbol.
+pr2 = proc do
+  throw :quit
+end
+ok {pr2}.throw?(:quit)  # pass if :quit thrown, fail if other or nothing thrown
 ```
+
+If procedure contains `raise "errmsg"` instead of `raise ErrorClass, "errmsg"`,
+you can omit exception class such as `ok {pr}.raise?("errmsg")`.
+
+```ruby
+pr = proc do
+  raise "something wrong"           # !!! error class not specified !!!
+end
+ok {pr}.raise?("something wrong")   # !!! error class not specified !!!
+```
+
+Notice that `ok().raise?()` compares error class by `==` operator, not `.is_a?` method.
+
+```ruby
+pr = proc { 1/0 }     # raises ZeroDivisionError
+
+ok {pr}.raise?(ZeroDivisoinError)   # pass
+ok {pr}.raise?(StandardError)       # ERROR: ZeroDivisionError raised
+ok {pr}.raise?(Exception)           # ERROR: ZeroDivisionError raised
+```
+
+This is an intended design to avoid unexpected assertion success.
+For example, `assert_raises(NameError) { .... }` in MiniTest will result in
+success unexpectedly even if `NoMethodError` raised in the block, because
+`NoMethodError` is a subclass of `NameError`.
+
+```ruby
+require 'minitest/spec'
+require 'minitest/autorun'
+
+describe "assert_raise()" do
+  it "results in success unexpectedly" do
+    ## catches NameError and it's subclasses, including NoMethodError.
+    assert_raises(NameError) do   # catches NoMethodError, too.
+      "str".foobar()              # raises NoMethodError.
+    end
+  end
+end
+```
+
+Oktest.rb can avoid this pitfall, because `.raise?()` compares error class
+by `==` operator, not `.is_a?` method.
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+  topic 'ok().raise?' do
+    spec "doesn't catch subclasses." do
+      pr = proc do
+        "str".foobar()      # raises NoMethodError
+      end
+      ok {pr}.raise?(NoMethodError)   # pass
+      ok {pr}.raise?(NameError)       # NoMethodError raised intendedly
+    end
+  end
+end
+```
+
+To catch subclass of error class, add `subclass: true` keyword argument
+to `.raise?()`.
+For example: `ok {pr}.raise?(NameError, /foobar/, subclass: true)`.
 
 
 ### Custom Assertion
