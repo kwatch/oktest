@@ -9,36 +9,36 @@
 require_relative './initialize'
 
 
-#class TestUnitTestCase_TC < TC
-#  include Test::Unit::Assertions
-#
-#  describe "#ok()" do
-#    it "availables in Test::Unit::TestCase." do
-#      assert_nothing_raised do
-#        ok {1+1} == 2
-#      end
-#    end
-#  end
-#
-#end
-
-
 class AssertionObject_TC < TC
   #include Test::Unit::Assertions
   include Oktest::SpecHelper
 
-  def should_be_failed(errmsg, &block)
+  def should_be_failed(errmsg, &b)
+    failmsg = "expected to be failed, but succeeded unexpectedly."
+    return should_be_error(Oktest::FAIL_EXCEPTION, errmsg, failmsg, &b)
+  end
+
+  def should_be_error(errcls, errmsg=nil, _failmsg=nil, &b)
     exc = nil
     begin
-      block.call
-    rescue Oktest::FAIL_EXCEPTION => exc_
+      yield
+    rescue Exception => exc_
       exc = exc_
+      errcls == exc_.class or
+        raise
     else
-      assert false, "expected to be failed, but succeeded unexpectedly."
+      _failmsg ||= "#{errcls} expected to be raised, but nothing raised."
+      assert false, _failmsg
     end
     #
-    assert errmsg === exc.message,
-           "expected error message: #{errmsg}, actual error message: #{exc.message}"
+    if errmsg
+      assert errmsg === exc.message,
+        ("unexpected error message:\n"\
+         "  expected: #{errmsg}\n"\
+         "  actual:   #{exc.message}")
+    end
+    #
+    return exc
   end
 
   def should_return_self
@@ -348,21 +348,13 @@ describe "#method_missing()" do
       should_return_self { ok {1}.is_a?(Integer)  }
     end
     it "[!ttow6] raises NoMethodError when not a boolean method." do
-      begin
+      should_be_error(NoMethodError) do
         ok {"a"}.start_with
-      rescue => exc
-        assert exc.is_a?(NoMethodError)
-      else
-        assert false, "NoMethodError should be raised"
       end
     end
     it "[!f0ekh] skip top of backtrace when NoMethodError raised." do
-      begin
+      exc = should_be_error(NoMethodError) do
         ok {[1]}.start_with?(1)
-      rescue => exc
-        assert exc.is_a?(NoMethodError)
-      else
-        assert false, "NoMethodError should be raised"
       end
       assert exc.backtrace[0] !~ /\/oktest\.rbc?:/, "backtrace not skipped"
       assert exc.backtrace[0].start_with?(__FILE__), "backtrace not skipped"
@@ -387,19 +379,12 @@ describe "#method_missing()" do
       should_be_failed(errmsg) { ok {1}.NOT.is_a?(Integer) }
     end
     it "[!sljta] raises TypeError when boolean method returned non-boolean value." do
-      errmsg = "$<actual>.empty?: failed.\n    $<actual>:   \"SOS\""
-      exc = nil
-      begin
+      errmsg = "ok(): String#sos?() expected to return true or false, but got 1."
+      should_be_error(TypeError, errmsg) do
         s = "SOS"
         def s.sos?; return 1; end
         ok {s}.sos?
-      rescue TypeError => exc_
-        exc = exc_
-      else
-        assert false, "TypeError expected but nothing raised."
       end
-      errmsg = "ok(): String#sos?() expected to return true or false, but got 1."
-      assert_eq exc.message, errmsg
     end
 end
 
@@ -451,14 +436,9 @@ end
 
   describe "#thrown?" do
     it "[!w7935] raises ArgumentError when arg of 'thrown?()' is nil." do
-      pr = proc { throw :sym1 }
-      begin
-        ok {}.throw?(nil)
-      rescue => exc
-        assert_eq exc.class, ArgumentError
-        assert_eq exc.message, "throw?(nil): expected tag required."
-      else
-        assert false, "ArgumentError expected"
+      should_be_error(ArgumentError, "throw?(nil): expected tag required.") do
+        pr = proc { throw :sym1 }
+        ok {pr}.throw?(nil)
       end
     end
     it "[!lglzr] assertion passes when expected symbol thrown." do
@@ -473,14 +453,11 @@ end
       should_be_failed(expected) { ok {pr}.throw?("sym") }
     end
     it "[!flgwy] raises UncaughtThrowError when unexpected object thrown." do
-      pr = proc { throw :sym9 }
-      begin
+      exc = should_be_error(UncaughtThrowError, "uncaught throw :sym9") do
+        pr = proc { throw :sym9 }
         ok {pr}.throw?(:sym4)
-      rescue UncaughtThrowError => exc
-        assert_eq exc.tag, :sym9
-      else
-        assert false, "UncaughtThrowError expected"
       end
+      assert_eq exc.tag, :sym9
     end
     it "[!9ik3x] assertion fails when nothing thrown." do
       pr = proc { nil }
@@ -488,13 +465,9 @@ end
       should_be_failed(expected) { ok {pr}.throw?(:sym5) }
     end
     it "[!m03vq] raises ArgumentError when non-nil arg passed to 'NOT.thrown?()'." do
-      pr = proc { nil }
-      begin
+      should_be_error(ArgumentError, "NOT.throw?(:sym6): argument should be nil.") do
+        pr = proc { nil }
         ok {pr}.NOT.throw?(:sym6)
-      rescue ArgumentError => exc
-        assert_eq exc.message, "NOT.throw?(:sym6): argument should be nil."
-      else
-        assert false, "ArgumentError expected."
       end
     end
     it "[!kxizg] assertion fails when something thrown in 'NOT.throw?()'." do
