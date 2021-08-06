@@ -329,9 +329,11 @@ module Oktest
               "Thrown tag #{exc.tag.inspect} is equal to but not same as expected.\n"\
               "    (`#{exc.tag.inspect}.equal?(#{expected.inspect})` should be true but not.)"
             }
-          #; [!flgwy] raises UncaughtThrowError when unexpected object thrown.
+          #; [!flgwy] assertion fails when thrown tag is different from expectd.
           else
-            raise
+            __assert(false) {
+              "#{expected.inspect} should be thrown but actually #{exc.tag.inspect} thrown."
+            }
           end
         else
           #; [!9ik3x] assertion fails when nothing thrown.

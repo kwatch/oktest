@@ -452,12 +452,11 @@ end
                   "    (`\"sym\".equal?(\"sym\")` should be true but not.)")
       should_be_failed(expected) { ok {pr}.throw?("sym") }
     end
-    it "[!flgwy] raises UncaughtThrowError when unexpected object thrown." do
-      exc = should_be_error(UncaughtThrowError, "uncaught throw :sym9") do
+    it "[!flgwy] assertion fails when thrown tag is different from expectd." do
+      should_be_failed(":sym4 should be thrown but actually :sym9 thrown.") do
         pr = proc { throw :sym9 }
         ok {pr}.throw?(:sym4)
       end
-      assert_eq exc.tag, :sym9
     end
     it "[!9ik3x] assertion fails when nothing thrown." do
       pr = proc { nil }
