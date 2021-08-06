@@ -276,8 +276,10 @@ module Oktest
         begin
           proc_obj.call
         rescue Exception => exc
-          exc.is_a?(errcls)  or
-            __assert(false) { "Expected #{errcls.inspect} to be raised but got #{exc.class}." }
+          #; [!4c6x3] not check exception class when nil specified as errcls.
+          if errcls
+            __assert(exc.is_a?(errcls)) { "Expected #{errcls.inspect} to be raised but got #{exc.class}." }
+          end
         end
         #; [!vnc6b] sets exceptio object into '#exc' attribute.
         (class << proc_obj; self; end).class_eval { attr_accessor :exc }
@@ -300,9 +302,15 @@ module Oktest
         begin
           proc_obj.call
         rescue Exception => exc
-          __assert(! exc.is_a?(errcls)) {
-            "#{errcls.inspect} should not be raised but got #{exc.inspect}."
-          }
+          #; [!36032] 'NOT.raise?()' reraises exception when errcls is nil.
+          if errcls == nil
+            #__assert(false) { "Nothing should be raised but got #{exc.inspect}." }
+            raise
+          else
+            __assert(! exc.is_a?(errcls)) {
+              "#{errcls.inspect} should not be raised but got #{exc.inspect}."
+            }
+          end
         end
       end
       #; [!y1b28] returns self when passed.

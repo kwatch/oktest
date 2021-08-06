@@ -416,6 +416,14 @@ end
       errmsg = "Expected RuntimeError to be raised but got StandardError."
       should_be_failed(errmsg) { ok {pr}.raise?("something wrong") }
     end
+    it "[!4c6x3] not check exception class when nil specified as errcls." do
+      pr = proc { foobar() }
+      should_return_self { ok {pr}.raise?(nil, /undefined method `foobar'/) }
+      pr = proc { 1/0 }
+      should_return_self { ok {pr}.raise?(nil, "divided by 0") }
+      pr = proc { 1/0 }
+      should_return_self { ok {pr}.raise?(nil) }
+    end
     it "[!spzy2] is available with NOT." do
       pr = proc { "SOS".length }
       should_return_self { ok {pr}.NOT.raise?  }
@@ -423,6 +431,12 @@ end
       should_return_self { ok {pr}.NOT.raise?(ArgumentError)  }
       errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `sos' for \"SOS\":String>."
       should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+    end
+    it "[!36032] 'NOT.raise?()' reraises exception when errcls is nil." do
+      pr = proc { foobar() }
+      should_be_error(NoMethodError) { ok {pr}.NOT.raise?(nil) }
+      pr = proc { 1/0 }
+      should_be_error(ZeroDivisionError) { ok {pr}.NOT.raise?(nil) }
     end
     it "[!vnc6b] sets exceptio object into '#exc' attribute." do
       pr = proc { "SOS".foobar }
