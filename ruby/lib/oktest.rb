@@ -309,7 +309,7 @@ module Oktest
         begin
           proc_obj.call
         rescue Exception => exc
-          #; [!36032] 'NOT.raise?()' reraises exception when errcls is nil.
+          #; [!36032] re-raises exception when errcls is nil.
           if errcls.nil?
             #__assert(false) { "Nothing should be raised but got #{exc.inspect}." }
             raise

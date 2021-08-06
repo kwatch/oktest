@@ -13,12 +13,12 @@ class AssertionObject_TC < TC
   #include Test::Unit::Assertions
   include Oktest::SpecHelper
 
-  def should_be_failed(errmsg, &b)
+  def FAIL!(errmsg, &b)
     failmsg = "expected to be failed, but succeeded unexpectedly."
-    return should_be_error(Oktest::FAIL_EXCEPTION, errmsg, failmsg, &b)
+    return ERROR!(Oktest::FAIL_EXCEPTION, errmsg, failmsg, &b)
   end
 
-  def should_be_error(errcls, errmsg=nil, _failmsg=nil, &b)
+  def ERROR!(errcls, errmsg=nil, _failmsg=nil, &b)
     exc = nil
     begin
       yield
@@ -39,6 +39,10 @@ class AssertionObject_TC < TC
     end
     #
     return exc
+  end
+
+  def PASS!()
+    yield
   end
 
   def should_return_self
@@ -100,14 +104,14 @@ class AssertionObject_TC < TC
       errmsg = "$<actual> == $<expected>: failed.\n"\
                "    $<actual>:   2\n"\
                "    $<expected>: 3"
-      should_be_failed(errmsg) { ok {1+1} == 3 }
+      FAIL!(errmsg) { ok {1+1} == 3 }
     end
     it "[!eyslp] is avaialbe with NOT." do
-      should_return_self { ok {1+1}.NOT == 3 }
+      PASS! { ok {1+1}.NOT == 3 }
       errmsg = "$<actual> != $<expected>: failed.\n"\
                "    $<actual>:   2\n"\
                "    $<expected>: 2"
-      should_be_failed(errmsg) { ok {1+1}.NOT == 2 }
+      FAIL!(errmsg) { ok {1+1}.NOT == 2 }
     end
     it "[!3xnqv] shows context diff when both actual and expected are text." do
       expected = "Haruhi\nMikuru\nYuki\n"
@@ -124,7 +128,7 @@ $<actual> == $<expected>: failed.
 END
       #errmsg.gsub!(/1,4/, '1,3') if RUBY_VERSION < "1.9.2"
       errmsg.gsub!(/1,4/, '1,3') unless defined?(Diff::LCS)
-      should_be_failed(errmsg) { ok {actual} == expected }
+      FAIL!(errmsg) { ok {actual} == expected }
     end
   end
 
@@ -137,15 +141,15 @@ END
       errmsg = "$<actual> != $<expected>: failed.\n"\
                "    $<actual>:   2\n"\
                "    $<expected>: 2"
-      should_be_failed(errmsg) { ok {1+1} != 2 }
+      FAIL!(errmsg) { ok {1+1} != 2 }
     end
     it "[!l6afg] is avaialbe with NOT." do
-      should_return_self { ok {1+1}.NOT != 2 }
+      PASS! { ok {1+1}.NOT != 2 }
       #errmsg = "<3> expected but was\n<2>."
       errmsg = "$<actual> == $<expected>: failed.\n"\
                "    $<actual>:   2\n"\
                "    $<expected>: 3"
-      should_be_failed(errmsg) { ok {1+1}.NOT != 3 }
+      FAIL!(errmsg) { ok {1+1}.NOT != 3 }
     end
   end #if RUBY_VERSION >= "1.9"
 
@@ -157,14 +161,14 @@ END
       errmsg = "$<actual> === $<expected>: failed.\n"\
                "    $<actual>:   Integer\n"\
                "    $<expected>: \"str\""
-      should_be_failed(errmsg) { ok {Integer} === 'str' }
+      FAIL!(errmsg) { ok {Integer} === 'str' }
     end
     it "[!vhvyu] is avaialbe with NOT." do
-      should_return_self { ok {Integer}.NOT === 'str' }
+      PASS! { ok {Integer}.NOT === 'str' }
       errmsg = "!($<actual> === $<expected>): failed.\n"\
                "    $<actual>:   String\n"\
                "    $<expected>: \"str\""
-      should_be_failed(errmsg) { ok {String}.NOT === 'str' }
+      FAIL!(errmsg) { ok {String}.NOT === 'str' }
     end
   end
 
@@ -175,18 +179,18 @@ END
     it "[!vjjuq] raises assertion error when failed." do
       #errmsg = "Expected 2 to be > 2."
       errmsg = "2 > 2: failed."
-      should_be_failed(errmsg) { ok {2} > 2 }
+      FAIL!(errmsg) { ok {2} > 2 }
       errmsg = "1 > 2: failed."
-      should_be_failed(errmsg) { ok {1} > 2 }
+      FAIL!(errmsg) { ok {1} > 2 }
       #
       errmsg = "\"aaa\" > \"bbb\": failed."
-      should_be_failed(errmsg) { ok {'aaa'} > 'bbb' }
+      FAIL!(errmsg) { ok {'aaa'} > 'bbb' }
     end
     it "[!73a0t] is avaialbe with NOT." do
-      should_return_self { ok {2}.NOT > 2 }
+      PASS! { ok {2}.NOT > 2 }
       #errmsg = "Expected 2 to be <= 1."
       errmsg = "2 <= 1: failed."
-      should_be_failed(errmsg) { ok {2}.NOT > 1 }
+      FAIL!(errmsg) { ok {2}.NOT > 1 }
     end
   end
 
@@ -198,16 +202,16 @@ END
     it "[!isdfc] raises assertion error when failed." do
       #errmsg = "Expected 1 to be >= 2."
       errmsg = "1 >= 2: failed."
-      should_be_failed(errmsg) { ok {1} >= 2 }
+      FAIL!(errmsg) { ok {1} >= 2 }
       #
       errmsg = "\"aaa\" >= \"bbb\": failed."
-      should_be_failed(errmsg) { ok {'aaa'} >= 'bbb' }
+      FAIL!(errmsg) { ok {'aaa'} >= 'bbb' }
     end
     it "[!3dgmh] is avaialbe with NOT." do
-      should_return_self { ok {1}.NOT >= 2 }
+      PASS! { ok {1}.NOT >= 2 }
       #errmsg = "Expected 2 to be < 2."
       errmsg = "2 < 2: failed."
-      should_be_failed(errmsg) { ok {2}.NOT >= 2 }
+      FAIL!(errmsg) { ok {2}.NOT >= 2 }
     end
   end
 
@@ -218,18 +222,18 @@ END
     it "[!ukqa0] raises assertion error when failed." do
       #errmsg = "Expected 2 to be < 2."
       errmsg = "2 < 2: failed."
-      should_be_failed(errmsg) { ok {2} < 2 }
+      FAIL!(errmsg) { ok {2} < 2 }
       errmsg = "2 < 1: failed."
-      should_be_failed(errmsg) { ok {2} < 1 }
+      FAIL!(errmsg) { ok {2} < 1 }
       #
       errmsg = "\"bbb\" < \"aaa\": failed."
-      should_be_failed(errmsg) { ok {'bbb'} < 'aaa' }
+      FAIL!(errmsg) { ok {'bbb'} < 'aaa' }
     end
     it "[!gwvdl] is avaialbe with NOT." do
-      should_return_self { ok {2}.NOT < 2 }
+      PASS! { ok {2}.NOT < 2 }
       #errmsg = "Expected 1 to be >= 2."
       errmsg = "1 >= 2: failed."
-      should_be_failed(errmsg) { ok {1}.NOT < 2 }
+      FAIL!(errmsg) { ok {1}.NOT < 2 }
     end
   end
 
@@ -241,16 +245,16 @@ END
     it "[!ordwe] raises assertion error when failed." do
       #errmsg = "Expected 2 to be <= 1."
       errmsg = "2 <= 1: failed."
-      should_be_failed(errmsg) { ok {2} <= 1 }
+      FAIL!(errmsg) { ok {2} <= 1 }
       #
       errmsg = "\"bbb\" <= \"aaa\": failed."
-      should_be_failed(errmsg) { ok {'bbb'} <= 'aaa' }
+      FAIL!(errmsg) { ok {'bbb'} <= 'aaa' }
     end
     it "[!mcb9w] is avaialbe with NOT." do
-      should_return_self { ok {2}.NOT <= 1 }
+      PASS! { ok {2}.NOT <= 1 }
       #errmsg = "Expected 1 to be > 2."
       errmsg = "1 > 2: failed."
-      should_be_failed(errmsg) { ok {1}.NOT <= 2 }
+      FAIL!(errmsg) { ok {1}.NOT <= 2 }
     end
   end
 
@@ -265,15 +269,15 @@ END
                "    $<actual>:   <<'END'\n"\
                "SOS\n"\
                "END\n"
-      should_be_failed(errmsg) { ok {"SOS\n"} =~ /^\d+$/ }
+      FAIL!(errmsg) { ok {"SOS\n"} =~ /^\d+$/ }
     end
     it "[!2aa6f] is avaialbe with NOT." do
-      should_return_self { ok {'SOS'}.NOT =~ /^\d+$/ }
+      PASS! { ok {'SOS'}.NOT =~ /^\d+$/ }
       #errmsg = "</\\w+/> expected to not match\n<\"SOS\">."
       errmsg = "$<actual> !~ $<expected>: failed.\n"\
                "    $<expected>: /\\w+/\n"\
                "    $<actual>:   \"SOS\"\n"
-      should_be_failed(errmsg) { ok {'SOS'}.NOT =~ /\w+/ }
+      FAIL!(errmsg) { ok {'SOS'}.NOT =~ /\w+/ }
     end if false
   end
 
@@ -286,15 +290,15 @@ END
       errmsg = "$<actual> !~ $<expected>: failed.\n"\
                "    $<expected>: /^\\w+$/\n"\
                "    $<actual>:   \"SOS\"\n"
-      should_be_failed(errmsg) { ok {'SOS'} !~ /^\w+$/ }
+      FAIL!(errmsg) { ok {'SOS'} !~ /^\w+$/ }
     end
     it "[!iuf5j] is avaialbe with NOT." do
-      should_return_self { ok {'SOS'}.NOT !~ /^\w+$/ }
+      PASS! { ok {'SOS'}.NOT !~ /^\w+$/ }
       #errmsg = "Expected /\\d+/ to match \"SOS\"."
       errmsg = "$<actual> =~ $<expected>: failed.\n"\
                "    $<expected>: /\\d+/\n"\
                "    $<actual>:   <<'END'\nSOS\nEND\n"
-      should_be_failed(errmsg) { ok {"SOS\n"}.NOT !~ /\d+/ }
+      FAIL!(errmsg) { ok {"SOS\n"}.NOT !~ /\d+/ }
     end
   end #if RUBY_VERSION >= "1.9"
 
@@ -307,15 +311,15 @@ END
                "    $<actual>:   1.375\n"\
                "    $<expected>: 1.5\n"\
                "    ($<actual> - $<expected>).abs: #{0.125}"
-      should_be_failed(errmsg) { ok {1.375}.in_delta?(1.5, 0.1) }
+      FAIL!(errmsg) { ok {1.375}.in_delta?(1.5, 0.1) }
     end
     it "[!t7liw] is avaialbe with NOT." do
-      should_return_self { ok {1.375}.NOT.in_delta?(1.5, 0.1) }
+      PASS! { ok {1.375}.NOT.in_delta?(1.5, 0.1) }
       errmsg = "($<actual> - $<expected>).abs < #{0.2} == false: failed.\n"\
                "    $<actual>:   1.375\n"\
                "    $<expected>: 1.5\n"\
                "    ($<actual> - $<expected>).abs: #{0.125}"
-      should_be_failed(errmsg) { ok {1.375}.NOT.in_delta?(1.5, 0.2) }
+      FAIL!(errmsg) { ok {1.375}.NOT.in_delta?(1.5, 0.2) }
     end
   end
 
@@ -327,14 +331,14 @@ END
       errmsg = "$<actual>.equal?($<expected>): failed.\n"\
                "    $<actual>:   \"SOS\"\n"\
                "    $<expected>: \"SOS\"\n"
-      should_be_failed(errmsg) { ok {'SOS'}.same?('SOS') }
+      FAIL!(errmsg) { ok {'SOS'}.same?('SOS') }
     end
     it "[!dwtig] is avaialbe with NOT." do
-      should_return_self { ok {'SOS'}.NOT.same? 'SOS' }
+      PASS! { ok {'SOS'}.NOT.same? 'SOS' }
       errmsg = "$<actual>.equal?($<expected>) == false: failed.\n"\
                "    $<actual>:   :SOS\n"\
                "    $<expected>: :SOS\n"
-      should_be_failed(errmsg) { ok {:SOS}.NOT.same?(:SOS) }
+      FAIL!(errmsg) { ok {:SOS}.NOT.same?(:SOS) }
     end
   end
 
@@ -343,17 +347,17 @@ describe "#method_missing()" do
       should_return_self { ok {"file.png"}.end_with?(".png") }
     end
     it "[!yjnxb] enables to handle boolean methods." do
-      should_return_self { ok {""}.empty?  }
-      should_return_self { ok {nil}.nil?  }
-      should_return_self { ok {1}.is_a?(Integer)  }
+      PASS! { ok {""}.empty?  }
+      PASS! { ok {nil}.nil?  }
+      PASS! { ok {1}.is_a?(Integer)  }
     end
     it "[!ttow6] raises NoMethodError when not a boolean method." do
-      should_be_error(NoMethodError) do
+      ERROR!(NoMethodError) do
         ok {"a"}.start_with
       end
     end
     it "[!f0ekh] skip top of backtrace when NoMethodError raised." do
-      exc = should_be_error(NoMethodError) do
+      exc = ERROR!(NoMethodError) do
         ok {[1]}.start_with?(1)
       end
       assert exc.backtrace[0] !~ /\/oktest\.rbc?:/, "backtrace not skipped"
@@ -361,26 +365,26 @@ describe "#method_missing()" do
     end
     it "[!cun59] fails when boolean method failed returned false." do
       errmsg = "$<actual>.empty?: failed.\n    $<actual>:   \"SOS\""
-      should_be_failed(errmsg) { ok {"SOS"}.empty? }
+      FAIL!(errmsg) { ok {"SOS"}.empty? }
       errmsg = "$<actual>.nil?: failed.\n    $<actual>:   \"\""
-      should_be_failed(errmsg) { ok {""}.nil? }
+      FAIL!(errmsg) { ok {""}.nil? }
       errmsg = "$<actual>.is_a?(Integer): failed.\n    $<actual>:   3.14"
-      should_be_failed(errmsg) { ok {3.14}.is_a?(Integer) }
+      FAIL!(errmsg) { ok {3.14}.is_a?(Integer) }
     end
     it "[!4objh] is available with NOT." do
       ok {"SOS"}.NOT.empty?
       ok {"SOS"}.NOT.nil?
       ok {"SOS"}.NOT.is_a?(Integer)
       errmsg = "$<actual>.empty? == false: failed.\n    $<actual>:   \"\""
-      should_be_failed(errmsg) { ok {""}.NOT.empty? }
+      FAIL!(errmsg) { ok {""}.NOT.empty? }
       errmsg = "$<actual>.nil? == false: failed.\n    $<actual>:   nil"
-      should_be_failed(errmsg) { ok {nil}.NOT.nil? }
+      FAIL!(errmsg) { ok {nil}.NOT.nil? }
       errmsg = "$<actual>.is_a?(Integer) == false: failed.\n    $<actual>:   1"
-      should_be_failed(errmsg) { ok {1}.NOT.is_a?(Integer) }
+      FAIL!(errmsg) { ok {1}.NOT.is_a?(Integer) }
     end
     it "[!sljta] raises TypeError when boolean method returned non-boolean value." do
       errmsg = "ok(): String#sos?() expected to return true or false, but got 1."
-      should_be_error(TypeError, errmsg) do
+      ERROR!(TypeError, errmsg) do
         s = "SOS"
         def s.sos?; return 1; end
         ok {s}.sos?
@@ -395,46 +399,46 @@ describe "#method_missing()" do
     end
     it "[!2rnni] 1st argument can be error message string or rexp." do
       pr = proc { raise "something wrong" }
-      should_return_self { ok {pr}.raise?("something wrong") }
-      should_return_self { ok {pr}.raise?(/something wrong/) }
+      PASS! { ok {pr}.raise?("something wrong") }
+      PASS! { ok {pr}.raise?(/something wrong/) }
       #
       pr = proc { raise StandardError, "something wrong" }
-      should_be_error(StandardError, "something wrong") { ok {pr}.raise?("something wrong") }
+      ERROR!(StandardError, "something wrong") { ok {pr}.raise?("something wrong") }
     end
     describe "[!dpv5g] when `ok{}` called..." do
       it "[!yps62] assertion passes when expected exception raised." do
         pr = proc { "SOS".sub() }
-        should_return_self { ok {pr}.raise?(ArgumentError) }
+        PASS! { ok {pr}.raise?(ArgumentError) }
         pr = proc { 1/0 }
-        should_return_self { ok {pr}.raise?(ZeroDivisionError) }
+        PASS! { ok {pr}.raise?(ZeroDivisionError) }
       end
       it "[!wbwdo] raises assertion error when nothing raised." do
         pr = proc { nil }
         errmsg = "Expected ArgumentError to be raised but nothing raised."
-        should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
-        #should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
+        FAIL!(errmsg) { ok {pr}.raise?(ArgumentError) }
+        #FAIL!(errmsg) { ok {pr}.raise?(ArgumentError) }
         #errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
         #         "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
-        #should_be_failed(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
+        #FAIL!(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
       end
       it "[!4n3ed] reraises if exception is not matched to specified error class." do
         pr = proc { "SOS".sos }
         errmsg = "undefined method `sos' for \"SOS\":String"
-        should_be_error(NoMethodError, errmsg) { ok {pr}.raise?(ArgumentError) }
+        ERROR!(NoMethodError, errmsg) { ok {pr}.raise?(ArgumentError) }
       end
       it "[!tpxlv] accepts string or regexp as error message." do
         pr = proc { "SOS".sos }
-        should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String") }
+        PASS! { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String") }
         pr = proc { "SOS".sos }
-        should_return_self { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
+        PASS! { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
       end
       it "[!4c6x3] not check exception class when nil specified as errcls." do
         pr = proc { foobar() }
-        should_return_self { ok {pr}.raise?(nil, /undefined method `foobar'/) }
+        PASS! { ok {pr}.raise?(nil, /undefined method `foobar'/) }
         pr = proc { 1/0 }
-        should_return_self { ok {pr}.raise?(nil, "divided by 0") }
+        PASS! { ok {pr}.raise?(nil, "divided by 0") }
         pr = proc { 1/0 }
-        should_return_self { ok {pr}.raise?(nil) }
+        PASS! { ok {pr}.raise?(nil) }
       end
       it "[!dq97o] if block given, call it with exception object." do
         pr = proc { "SOS".foobar }
@@ -450,31 +454,31 @@ describe "#method_missing()" do
       it "[!cownv] not support error message." do
         pr = proc { raise "some error" }
         errmsg = "\"some error\": NOT.raise?() can't take errmsg."
-        should_be_error(ArgumentError, errmsg) { ok {pr}.NOT.raise?(Exception, "some error") }
+        ERROR!(ArgumentError, errmsg) { ok {pr}.NOT.raise?(Exception, "some error") }
       end
       it "[!spzy2] is available with NOT." do
         pr = proc { "SOS".length }
-        should_return_self { ok {pr}.NOT.raise? }
+        PASS! { ok {pr}.NOT.raise? }
       end
       it "[!a1a40] assertion passes when nothing raised." do
         pr = proc { nil }
-        should_return_self { ok {pr}.NOT.raise? }
+        PASS! { ok {pr}.NOT.raise? }
       end
       it "[!61vtv] assertion fails when specified exception raised." do
-        pr = proc { "SOS".foo }
-        errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foo' for \"SOS\":String>."
-        should_be_failed(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+        pr = proc { "SOS".foobar }
+        errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foobar' for \"SOS\":String>."
+        FAIL!(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
       end
       it "[!shxne] reraises exception if different from specified error class." do
         pr = proc { 1/0 }
         errmsg = "divided by 0"
-        should_be_error(ZeroDivisionError, errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+        ERROR!(ZeroDivisionError, errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
       end
-      it "[!36032] 'NOT.raise?()' reraises exception when errcls is nil." do
+      it "[!36032] re-raises exception when errcls is nil." do
         pr = proc { foobar() }
-        should_be_error(NoMethodError) { ok {pr}.NOT.raise?(nil) }
+        ERROR!(NoMethodError) { ok {pr}.NOT.raise?(nil) }
         pr = proc { 1/0 }
-        should_be_error(ZeroDivisionError) { ok {pr}.NOT.raise?(nil) }
+        ERROR!(ZeroDivisionError) { ok {pr}.NOT.raise?(nil) }
       end
     end
     it "[!vnc6b] sets exception object into '#exc' attribute." do
@@ -495,7 +499,7 @@ describe "#method_missing()" do
 
   describe "#thrown?" do
     it "[!w7935] raises ArgumentError when arg of 'thrown?()' is nil." do
-      should_be_error(ArgumentError, "throw?(nil): expected tag required.") do
+      ERROR!(ArgumentError, "throw?(nil): expected tag required.") do
         pr = proc { throw :sym1 }
         ok {pr}.throw?(nil)
       end
@@ -509,10 +513,10 @@ describe "#method_missing()" do
       pr = proc { throw "sym" }
       expected = ("Thrown tag \"sym\" is equal to but not same as expected.\n"\
                   "    (`\"sym\".equal?(\"sym\")` should be true but not.)")
-      should_be_failed(expected) { ok {pr}.throw?("sym") }
+      FAIL!(expected) { ok {pr}.throw?("sym") }
     end
     it "[!flgwy] assertion fails when thrown tag is different from expectd." do
-      should_be_failed(":sym4 should be thrown but actually :sym9 thrown.") do
+      FAIL!(":sym4 should be thrown but actually :sym9 thrown.") do
         pr = proc { throw :sym9 }
         ok {pr}.throw?(:sym4)
       end
@@ -520,10 +524,10 @@ describe "#method_missing()" do
     it "[!9ik3x] assertion fails when nothing thrown." do
       pr = proc { nil }
       expected = ":sym5 should be thrown but nothing thrown."
-      should_be_failed(expected) { ok {pr}.throw?(:sym5) }
+      FAIL!(expected) { ok {pr}.throw?(:sym5) }
     end
     it "[!m03vq] raises ArgumentError when non-nil arg passed to 'NOT.thrown?()'." do
-      should_be_error(ArgumentError, "NOT.throw?(:sym6): argument should be nil.") do
+      ERROR!(ArgumentError, "NOT.throw?(:sym6): argument should be nil.") do
         pr = proc { nil }
         ok {pr}.NOT.throw?(:sym6)
       end
@@ -531,7 +535,7 @@ describe "#method_missing()" do
     it "[!kxizg] assertion fails when something thrown in 'NOT.throw?()'." do
       pr = proc { throw :sym7 }
       expected = "Nothing should be thrown but :sym7 thrown."
-      should_be_failed(expected) { ok {pr}.NOT.throw?(nil) }
+      FAIL!(expected) { ok {pr}.NOT.throw?(nil) }
     end
     it "[!zq9h6] returns self when passed." do
       pr = proc { throw :sym8 }
@@ -550,14 +554,14 @@ describe "#method_missing()" do
       errmsg = "$<expected>.include?($<actual>): failed.\n"\
                "    $<actual>:   3\n"\
                "    $<expected>: 1..2"
-      should_be_failed(errmsg) { ok {3}.in?(1..2) }
+      FAIL!(errmsg) { ok {3}.in?(1..2) }
     end
     it "[!singl] is available with NOT." do
-      should_return_self { ok {3}.NOT.in?(1..2) }
+      PASS! { ok {3}.NOT.in?(1..2) }
       errmsg = "$<expected>.include?($<actual>) == false: failed.\n"\
                "    $<actual>:   3\n"\
                "    $<expected>: 1..5"
-      should_be_failed(errmsg) { ok {3}.NOT.in?(1..5) }
+      FAIL!(errmsg) { ok {3}.NOT.in?(1..5) }
     end
   end
 
@@ -569,14 +573,14 @@ describe "#method_missing()" do
       errmsg = "$<actual>.include?($<expected>): failed.\n"\
                "    $<actual>:   1..2\n"\
                "    $<expected>: 3"
-      should_be_failed(errmsg) { ok {1..2}.include?(3) }
+      FAIL!(errmsg) { ok {1..2}.include?(3) }
     end
     it "[!55git] is available with NOT." do
-      should_return_self { ok {1..2}.NOT.include?(3) }
+      PASS! { ok {1..2}.NOT.include?(3) }
       errmsg = "$<actual>.include?($<expected>) == false: failed.\n"\
                "    $<actual>:   1..5\n"\
                "    $<expected>: 3"
-      should_be_failed(errmsg) { ok {1..5}.NOT.include?(3) }
+      FAIL!(errmsg) { ok {1..5}.NOT.include?(3) }
     end
   end
 
@@ -588,14 +592,14 @@ describe "#method_missing()" do
       errmsg = "$<actual>.size == $<expected>: failed.\n"\
                "    $<actual>.size: 3\n"\
                "    $<expected>: 2"
-      should_be_failed(errmsg) { ok {"SOS"}.attr(:size, 2) }
+      FAIL!(errmsg) { ok {"SOS"}.attr(:size, 2) }
     end
     it "[!cqnu3] is available with NOT." do
-      should_return_self { ok {"SOS"}.NOT.attr(:length, 2) }
+      PASS! { ok {"SOS"}.NOT.attr(:length, 2) }
       errmsg = "$<actual>.size != $<expected>: failed.\n"\
                "    $<actual>.size: 3\n"\
                "    $<expected>: 3"
-      should_be_failed(errmsg) { ok {"SOS"}.NOT.attr(:size, 3) }
+      FAIL!(errmsg) { ok {"SOS"}.NOT.attr(:size, 3) }
     end
   end
 
@@ -607,14 +611,14 @@ describe "#method_missing()" do
       errmsg = "$<actual>.size == $<expected>: failed.\n"\
                "    $<actual>.size: 3\n"\
                "    $<expected>: 2"
-      should_be_failed(errmsg) { ok {"SOS"}.attrs(:size=>2) }
+      FAIL!(errmsg) { ok {"SOS"}.attrs(:size=>2) }
     end
     it "[!s0pnk] is available with NOT." do
-      should_return_self { ok {"SOS"}.NOT.attrs(:length=>2) }
+      PASS! { ok {"SOS"}.NOT.attrs(:length=>2) }
       errmsg = "$<actual>.size != $<expected>: failed.\n"\
                "    $<actual>.size: 3\n"\
                "    $<expected>: 3"
-      should_be_failed(errmsg) { ok {"SOS"}.NOT.attrs(:size=>3) }
+      FAIL!(errmsg) { ok {"SOS"}.NOT.attrs(:size=>3) }
     end
   end
 
@@ -628,15 +632,15 @@ describe "#method_missing()" do
       errmsg = "$<actual>[\"a\"] == $<expected>: failed.\n"\
                "    $<actual>[\"a\"]: 1\n"\
                "    $<expected>: \"1\""
-      should_be_failed(errmsg) { ok {d}.keyval('a', '1') }
+      FAIL!(errmsg) { ok {d}.keyval('a', '1') }
     end
     it "[!mmpwz] is available with NOT." do
       d = {'a'=>1}
-      should_return_self { ok {d}.NOT.keyval('a', '1') }
+      PASS! { ok {d}.NOT.keyval('a', '1') }
       errmsg = "$<actual>[\"a\"] != $<expected>: failed.\n"\
                "    $<actual>[\"a\"]: 1\n"\
                "    $<expected>: 1"
-      should_be_failed(errmsg) { ok {d}.NOT.keyval('a', 1) }
+      FAIL!(errmsg) { ok {d}.NOT.keyval('a', 1) }
     end
   end
 
@@ -650,15 +654,15 @@ describe "#method_missing()" do
       errmsg = "$<actual>[\"a\"] == $<expected>: failed.\n"\
                "    $<actual>[\"a\"]: 1\n"\
                "    $<expected>: \"1\""
-      should_be_failed(errmsg) { ok {d}.keyvals('a'=>'1', 'b'=>2) }
+      FAIL!(errmsg) { ok {d}.keyvals('a'=>'1', 'b'=>2) }
     end
     it "[!js2j2] is available with NOT." do
       d = {'a'=>1, 'b'=>2}
-      should_return_self { ok {d}.NOT.keyvals('a'=>'1') }
+      PASS! { ok {d}.NOT.keyvals('a'=>'1') }
       errmsg = "$<actual>[\"a\"] != $<expected>: failed.\n"\
                "    $<actual>[\"a\"]: 1\n"\
                "    $<expected>: 1"
-      should_be_failed(errmsg) { ok {d}.NOT.keyvals('a'=>1) }
+      FAIL!(errmsg) { ok {d}.NOT.keyvals('a'=>1) }
     end
   end
 
@@ -670,14 +674,14 @@ describe "#method_missing()" do
       errmsg = "$<actual>.length == 5: failed.\n"\
                "    $<actual>.length: 3\n"\
                "    $<actual>:   \"SOS\""
-      should_be_failed(errmsg) { ok {"SOS"}.length(5) }
+      FAIL!(errmsg) { ok {"SOS"}.length(5) }
     end
     it "[!kryx2] is available with NOT." do
-      should_return_self { ok {"SOS"}.NOT.length(5) }
+      PASS! { ok {"SOS"}.NOT.length(5) }
       errmsg = "$<actual>.length != 3: failed.\n"\
                "    $<actual>.length: 3\n"\
                "    $<actual>:   \"SOS\""
-      should_be_failed(errmsg) { ok {"SOS"}.NOT.length(3) }
+      FAIL!(errmsg) { ok {"SOS"}.NOT.length(3) }
     end
   end
 
@@ -688,13 +692,13 @@ describe "#method_missing()" do
     it "[!3d94h] raises assertion error when failed." do
       errmsg = "!!$<actual> == true: failed.\n"\
                "    $<actual>:   nil"
-      should_be_failed(errmsg) { ok {nil}.truthy? }
+      FAIL!(errmsg) { ok {nil}.truthy? }
     end
     it "[!8rmgp] is available with NOT." do
-      should_return_self { ok {nil}.NOT.truthy? }
+      PASS! { ok {nil}.NOT.truthy? }
       errmsg = "!!$<actual> != true: failed.\n"\
                "    $<actual>:   0"
-      should_be_failed(errmsg) { ok {0}.NOT.truthy? }
+      FAIL!(errmsg) { ok {0}.NOT.truthy? }
     end
   end
 
@@ -705,13 +709,13 @@ describe "#method_missing()" do
     it "[!7o48g] raises assertion error when failed." do
       errmsg = "!!$<actual> == false: failed.\n"\
                "    $<actual>:   0"
-      should_be_failed(errmsg) { ok {0}.falsy? }
+      FAIL!(errmsg) { ok {0}.falsy? }
     end
     it "[!i44q6] is available with NOT." do
-      should_return_self { ok {0}.NOT.falsy? }
+      PASS! { ok {0}.NOT.falsy? }
       errmsg = "!!$<actual> != false: failed.\n"\
                "    $<actual>:   nil"
-      should_be_failed(errmsg) { ok {nil}.NOT.falsy? }
+      FAIL!(errmsg) { ok {nil}.NOT.falsy? }
     end
   end
 
@@ -722,13 +726,13 @@ describe "#method_missing()" do
     it "[!69bs0] raises assertion error when failed." do
       errmsg = "File.file?($<actual>): failed.\n"\
                "    $<actual>:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.file_exist? }
+      FAIL!(errmsg) { ok {'.'}.file_exist? }
     end
     it "[!r1mze] is available with NOT." do
-      should_return_self { ok {'.'}.NOT.file_exist? }
+      PASS! { ok {'.'}.NOT.file_exist? }
       errmsg = "File.file?($<actual>) == false: failed.\n"\
                "    $<actual>:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.NOT.file_exist? }
+      FAIL!(errmsg) { ok {__FILE__}.NOT.file_exist? }
     end
   end
 
@@ -739,13 +743,13 @@ describe "#method_missing()" do
     it "[!vfh7a] raises assertion error when failed." do
       errmsg = "File.directory?($<actual>): failed.\n"\
                "    $<actual>:   \"#{__FILE__}\""
-      should_be_failed(errmsg) { ok {__FILE__}.dir_exist? }
+      FAIL!(errmsg) { ok {__FILE__}.dir_exist? }
     end
     it "[!qtllp] is available with NOT." do
-      should_return_self { ok {__FILE__}.NOT.dir_exist? }
+      PASS! { ok {__FILE__}.NOT.dir_exist? }
       errmsg = "File.directory?($<actual>) == false: failed.\n"\
                "    $<actual>:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.NOT.dir_exist? }
+      FAIL!(errmsg) { ok {'.'}.NOT.dir_exist? }
     end
   end
 
@@ -766,19 +770,19 @@ describe "#method_missing()" do
       with_symlink do |linkname|
         errmsg = "File.symlink?($<actual>): failed.\n"\
                  "    $<actual>:   \"_not_exist\""
-        should_be_failed(errmsg) { ok {'_not_exist'}.symlink_exist? }
+        FAIL!(errmsg) { ok {'_not_exist'}.symlink_exist? }
         errmsg = "File.symlink?($<actual>): failed.\n"\
                  "    $<actual>:   \".\""
-        should_be_failed(errmsg) { ok {'.'}.symlink_exist? }
+        FAIL!(errmsg) { ok {'.'}.symlink_exist? }
       end
     end
     it "[!cgpbt] is available with NOT." do
       with_symlink do |linkname|
-        should_return_self { ok {'_not_exist'}.NOT.symlink_exist? }
-        should_return_self { ok {'.'}.NOT.symlink_exist? }
+        PASS! { ok {'_not_exist'}.NOT.symlink_exist? }
+        PASS! { ok {'.'}.NOT.symlink_exist? }
         errmsg = "File.symlink?($<actual>) == false: failed.\n"\
                  "    $<actual>:   \"#{linkname}\""
-        should_be_failed(errmsg) { ok {linkname}.NOT.symlink_exist? }
+        FAIL!(errmsg) { ok {linkname}.NOT.symlink_exist? }
       end
     end
   end
@@ -790,13 +794,13 @@ describe "#method_missing()" do
     it "[!ja84s] raises assertion error when failed." do
       errmsg = "File.exist?($<actual>) == false: failed.\n"\
                "    $<actual>:   \".\""
-      should_be_failed(errmsg) { ok {'.'}.not_exist? }
+      FAIL!(errmsg) { ok {'.'}.not_exist? }
     end
     it "[!to5z3] is available with NOT." do
-      should_return_self { ok {'.'}.NOT.not_exist? }
+      PASS! { ok {'.'}.NOT.not_exist? }
       errmsg = "File.exist?($<actual>): failed.\n"\
                "    $<actual>:   \"_not_exist\""
-      should_be_failed(errmsg) { ok {'_not_exist'}.NOT.not_exist? }
+      FAIL!(errmsg) { ok {'_not_exist'}.NOT.not_exist? }
     end
   end
 
