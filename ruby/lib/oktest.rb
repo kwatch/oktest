@@ -261,7 +261,7 @@ module Oktest
       self
     end
 
-    def raise?(expected=Exception, errmsg=nil)
+    def raise?(errcls=Exception, errmsg=nil)
       __done()
       proc_obj = @actual
       if @bool
@@ -270,25 +270,19 @@ module Oktest
         begin
           proc_obj.call
         rescue Exception => exc
-          exc.is_a?(expected)  or
-            __assert(false) { "Expected #{expected.inspect} to be raised but got #{exc.class}." }
+          exc.is_a?(errcls)  or
+            __assert(false) { "Expected #{errcls.inspect} to be raised but got #{exc.class}." }
         end
         #; [!vnc6b] sets exceptio object into '#exc' attribute.
         (class << proc_obj; self; end).class_eval { attr_accessor :exc }
         proc_obj.exc = exc
-        __assert(! exc.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
+        __assert(! exc.nil?) { "Expected #{errcls.inspect} to be raised but nothing raised." }
         #; [!tpxlv] accepts string or regexp as error message.
-        case errmsg
-        when nil;     # do nothing
-        when Regexp
-          __assert(exc.message =~ errmsg) {
-            "$error_message =~ #{errmsg.inspect}: failed.\n"\
-            "    $error_message: #{exc.message.inspect}"
-          }
-        else
-          __assert(errmsg == exc.message) {
-            "$error_message == #{errmsg.inspect}: failed.\n"\
-            "    $error_message: #{exc.message.inspect}"
+        if errmsg
+          __assert(errmsg === exc.message) {
+            op = errmsg.is_a?(Regexp) ? '=~' : '=='
+            "$<error_message> #{op} #{errmsg.inspect}: failed.\n"\
+            "    $<error_message>: #{exc.message.inspect}"
           }
         end
         #; [!dq97o] if block given, call it with exception object.
@@ -300,8 +294,8 @@ module Oktest
         begin
           proc_obj.call
         rescue Exception => exc
-          __assert(! exc.is_a?(expected)) {
-            "#{expected.inspect} should not be raised but got #{exc.inspect}."
+          __assert(! exc.is_a?(errcls)) {
+            "#{errcls.inspect} should not be raised but got #{exc.inspect}."
           }
         end
       end

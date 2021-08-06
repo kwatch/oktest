@@ -397,8 +397,8 @@ end
       pr = proc { "SOS".sos }
       errmsg = "Expected ArgumentError to be raised but got NoMethodError."
       should_be_failed(errmsg) { ok {pr}.raise?(ArgumentError) }
-      errmsg = "$error_message == \"FOOBAR\": failed.\n"\
-               "    $error_message: \"undefined method `sos' for \\\"SOS\\\":String\""
+      errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
+               "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
       should_be_failed(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
     end
     it "[!tpxlv] accepts string or regexp as error message." do
