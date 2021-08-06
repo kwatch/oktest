@@ -261,9 +261,9 @@ module Oktest
       self
     end
 
-    def raise?(errcls=RuntimeError, errmsg=nil)
+    def raise?(errcls=nil, errmsg=nil)
       __done()
-      #; [!2rnni] error class is omittable (default: RuntimeError).
+      #; [!2rnni] 1st argument can be error message string or rexp.
       if errmsg.nil? && ! errcls.nil? && ! (errcls.is_a?(Class) && errcls <= Exception)
         errmsg = errcls
         errcls = RuntimeError

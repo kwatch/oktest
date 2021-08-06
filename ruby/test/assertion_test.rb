@@ -407,7 +407,7 @@ end
       pr = proc { "SOS".sos }
       should_return_self { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
     end
-    it "[!2rnni] error class is omittable (default: RuntimeError)." do
+    it "[!2rnni] [!2rnni] 1st argument can be error message string or rexp." do
       pr = proc { raise "something wrong" }
       should_return_self { ok {pr}.raise?("something wrong") }
       should_return_self { ok {pr}.raise?(/something wrong/) }
@@ -426,7 +426,7 @@ end
     end
     it "[!spzy2] is available with NOT." do
       pr = proc { "SOS".length }
-      should_return_self { ok {pr}.NOT.raise?  }
+      should_return_self { ok {pr}.NOT.raise? }
       pr = proc { "SOS".sos }
       should_return_self { ok {pr}.NOT.raise?(ArgumentError)  }
       errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `sos' for \"SOS\":String>."
