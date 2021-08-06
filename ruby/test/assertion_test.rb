@@ -423,6 +423,12 @@ describe '#method_missing()' do
         assert NoMethodError < NameError, "NoMethodError extends NameError"
         ERROR!(NoMethodError, /foobar/) { ok {pr}.raise?(NameError) }
       end
+      it "[!hwg0z] compares error class with '.is_a?' if 'subclass: true' specified." do
+        pr = proc { "SOS".foobar }
+        PASS! { ok {pr}.raise?(NoMethodError, nil) }
+        assert NoMethodError < NameError, "NoMethodError extends NameError"
+        PASS! { ok {pr}.raise?(NameError, nil, subclass: true) }
+      end
       it "[!4n3ed] reraises if exception is not matched to specified error class." do
         pr = proc { "SOS".sos }
         errmsg = "undefined method `sos' for \"SOS\":String"
@@ -476,6 +482,12 @@ describe '#method_missing()' do
         FAIL!(/foobar/) { ok {pr}.NOT.raise?(NoMethodError) }
         assert NoMethodError < NameError, "NoMethodError extends NameError"
         ERROR!(NoMethodError) { ok {pr}.NOT.raise?(NameError) }
+      end
+      it "[!34nd8] compares error class with '.is_a?' if 'subclass: true' specified." do
+        pr = proc { "SOS".foobar }
+        FAIL!(/foobar/) { ok {pr}.NOT.raise?(NoMethodError, nil) }
+        assert NoMethodError < NameError, "NoMethodError extends NameError"
+        FAIL!(/foobar/) { ok {pr}.NOT.raise?(NameError, nil, subclass: true) }
       end
       it "[!shxne] reraises exception if different from specified error class." do
         pr = proc { 1/0 }
