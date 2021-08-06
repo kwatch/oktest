@@ -416,10 +416,12 @@ describe '#method_missing()' do
         pr = proc { nil }
         errmsg = "Expected ArgumentError to be raised but nothing raised."
         FAIL!(errmsg) { ok {pr}.raise?(ArgumentError) }
-        #FAIL!(errmsg) { ok {pr}.raise?(ArgumentError) }
-        #errmsg = "$<error_message> == \"FOOBAR\": failed.\n"\
-        #         "    $<error_message>: \"undefined method `sos' for \\\"SOS\\\":String\""
-        #FAIL!(errmsg) { ok {pr}.raise?(NoMethodError, "FOOBAR") }
+      end
+      it "[!lq6jv] compares error class with '==' operator, not '.is_a?'." do
+        pr = proc { "SOS".foobar }
+        PASS! { ok {pr}.raise?(NoMethodError) }
+        assert NoMethodError < NameError, "NoMethodError extends NameError"
+        ERROR!(NoMethodError, /foobar/) { ok {pr}.raise?(NameError) }
       end
       it "[!4n3ed] reraises if exception is not matched to specified error class." do
         pr = proc { "SOS".sos }
@@ -468,6 +470,12 @@ describe '#method_missing()' do
         pr = proc { "SOS".foobar }
         errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foobar' for \"SOS\":String>."
         FAIL!(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
+      end
+      it "[!smprc] compares error class with '==' operator, not '.is_a?'." do
+        pr = proc { "SOS".foobar }
+        FAIL!(/foobar/) { ok {pr}.NOT.raise?(NoMethodError) }
+        assert NoMethodError < NameError, "NoMethodError extends NameError"
+        ERROR!(NoMethodError) { ok {pr}.NOT.raise?(NameError) }
       end
       it "[!shxne] reraises exception if different from specified error class." do
         pr = proc { 1/0 }

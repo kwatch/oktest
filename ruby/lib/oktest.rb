@@ -280,7 +280,8 @@ module Oktest
           if errcls.nil?
             nil
           #; [!yps62] assertion passes when expected exception raised.
-          elsif exc.is_a?(errcls)
+          #; [!lq6jv] compares error class with '==' operator, not '.is_a?'.
+          elsif exc.class == errcls    # not `exc.is_a?(errcls)`
             nil
           #; [!4n3ed] reraises if exception is not matched to specified error class.
           else
@@ -314,7 +315,8 @@ module Oktest
             #__assert(false) { "Nothing should be raised but got #{exc.inspect}." }
             raise
           #; [!61vtv] assertion fails when specified exception raised.
-          elsif exc.is_a?(errcls)
+          #; [!smprc] compares error class with '==' operator, not '.is_a?'.
+          elsif exc.class == errcls    # not `exc.is_a?(errcls)`
             __assert(false) { "#{errcls.inspect} should not be raised but got #{exc.inspect}." }
           #; [!shxne] reraises exception if different from specified error class.
           else
