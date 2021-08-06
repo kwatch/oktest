@@ -261,49 +261,129 @@ module Oktest
       self
     end
 
-    def raise?(expected=Exception, errmsg=nil)
+    def raise?(errcls=nil, errmsg=nil, subclass: false)
       __done()
+      #; [!2rnni] 1st argument can be error message string or rexp.
+      if errmsg.nil? && ! errcls.nil? && ! (errcls.is_a?(Class) && errcls <= Exception)
+        errmsg = errcls
+        errcls = RuntimeError
+      end
+      #
       proc_obj = @actual
+      exc = nil
+      #; [!dpv5g] when `ok{}` called...
       if @bool
-        #; [!wbwdo] raises assertion error when failed.
-        exc = nil
         begin
           proc_obj.call
         rescue Exception => exc
-          exc.is_a?(expected)  or
-            __assert(false) { "Expected #{expected.inspect} to be raised but got #{exc.class}." }
-        end
-        #; [!vnc6b] sets exceptio object into '#exception' attribute.
-        (class << proc_obj; self; end).class_eval { attr_accessor :exception }
-        proc_obj.exception = exc
-        __assert(! exc.nil?) { "Expected #{expected.inspect} to be raised but nothing raised." }
-        #; [!tpxlv] accepts string or regexp as error message.
-        case errmsg
-        when nil;     # do nothing
-        when Regexp
-          __assert(exc.message =~ errmsg) {
-            "$error_message =~ #{errmsg.inspect}: failed.\n"\
-            "    $error_message: #{exc.message.inspect}"
-          }
+          #; [!4c6x3] not check exception class when nil specified as errcls.
+          if errcls.nil?
+            nil
+          #; [!yps62] assertion passes when expected exception raised.
+          #; [!lq6jv] compares error class with '==' operator, not '.is_a?'.
+          elsif exc.class == errcls    # not `exc.is_a?(errcls)`
+            nil
+          #; [!hwg0z] compares error class with '.is_a?' if 'subclass: true' specified.
+          elsif subclass && exc.class < errcls
+            nil
+          #; [!4n3ed] reraises if exception is not matched to specified error class.
+          else
+            #__assert(false) { "Expected #{errcls} to be raised but got #{exc.class}." }
+            raise
+          end
         else
-          __assert(errmsg == exc.message) {
-            "$error_message == #{errmsg.inspect}: failed.\n"\
-            "    $error_message: #{exc.message.inspect}"
+          #; [!wbwdo] raises assertion error when nothing raised.
+          __assert(false) { "Expected #{errcls} to be raised but nothing raised." }
+        end
+        #; [!tpxlv] accepts string or regexp as error message.
+        if errmsg
+          __assert(errmsg === exc.message) {
+            op = errmsg.is_a?(Regexp) ? '=~' : '=='
+            "$<error_message> #{op} #{errmsg.inspect}: failed.\n"\
+            "    $<error_message>: #{exc.message.inspect}"
           }
         end
+        #; [!dq97o] if block given, call it with exception object.
+        yield exc if block_given?()
+      #; [!qkr3h] when `ok{}.NOT` called...
       else
-        #; [!spzy2] is available with NOT.
+        #; [!cownv] not support error message.
         ! errmsg  or
           raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
         begin
           proc_obj.call
         rescue Exception => exc
-          __assert(! exc.is_a?(expected)) {
-            "#{expected.inspect} should not be raised but got #{exc.inspect}."
+          #; [!36032] re-raises exception when errcls is nil.
+          if errcls.nil?
+            #__assert(false) { "Nothing should be raised but got #{exc.inspect}." }
+            raise
+          #; [!61vtv] assertion fails when specified exception raised.
+          #; [!smprc] compares error class with '==' operator, not '.is_a?'.
+          elsif exc.class == errcls    # not `exc.is_a?(errcls)`
+            __assert(false) { "#{errcls.inspect} should not be raised but got #{exc.inspect}." }
+          #; [!34nd8] compares error class with '.is_a?' if 'subclass: true' specified.
+          elsif subclass && exc.class < errcls
+            __assert(false) { "#{errcls.inspect} should not be raised but got #{exc.inspect}." }
+          #; [!shxne] reraises exception if different from specified error class.
+          else
+            raise
+          end
+        else
+          #; [!a1a40] assertion passes when nothing raised.
+          nil
+        end
+      end
+      #; [!vnc6b] sets exception object into '#exc' attribute.
+      (class << proc_obj; self; end).class_eval { attr_accessor :exc }
+      proc_obj.exc = exc
+      #; [!y1b28] returns self when passed.
+      self
+    end
+
+    def throw?(expected)
+      __done()
+      proc_obj = @actual
+      if @bool
+        #; [!w7935] raises ArgumentError when arg of 'thrown?()' is nil.
+        expected != nil  or
+          raise ArgumentError, "throw?(#{expected.inspect}): expected tag required."
+        #
+        begin
+          proc_obj.call
+        rescue UncaughtThrowError => exc
+          #; [!lglzr] assertion passes when expected symbol thrown.
+          if exc.tag.equal?(expected)
+            nil
+          #; [!gf9nx] assertion fails when thrown tag is equal to but not same as expected.
+          elsif exc.tag == expected
+            __assert(false) {
+              "Thrown tag #{exc.tag.inspect} is equal to but not same as expected.\n"\
+              "    (`#{exc.tag.inspect}.equal?(#{expected.inspect})` should be true but not.)"
+            }
+          #; [!flgwy] assertion fails when thrown tag is different from expectd.
+          else
+            __assert(false) {
+              "#{expected.inspect} should be thrown but actually #{exc.tag.inspect} thrown."
+            }
+          end
+        else
+          #; [!9ik3x] assertion fails when nothing thrown.
+          __assert(false) { "#{expected.inspect} should be thrown but nothing thrown." }
+        end
+      else
+        #; [!m03vq] raises ArgumentError when non-nil arg passed to 'NOT.thrown?()'.
+        expected == nil  or
+          raise ArgumentError, "NOT.throw?(#{expected.inspect}): argument should be nil."
+        #; [!kxizg] assertion fails when something thrown in 'NOT.throw?()'.
+        begin
+          proc_obj.call
+        rescue UncaughtThrowError => exc
+          __assert(false) {
+            "Nothing should be thrown but #{exc.tag.inspect} thrown."
           }
         end
       end
-      #; [!y1b28] returns self when passed.
+      #; [!zq9h6] returns self when passed.
       self
     end
 
