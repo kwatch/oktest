@@ -123,7 +123,7 @@ class Filter_TC < TC
       assert_eq new_filter('*', '*', 'f*' ).scope_match?(sc), true
       assert_eq new_filter('*', '*', 'x*' ).scope_match?(sc), false
       #
-      sc = Oktest::ScopeNode.new(nil, tag: nil)
+      sc = Oktest::ScopeNode.new(nil, 'file.rb', tag: nil)
       assert_eq new_filter('*', '*', 'foo').scope_match?(sc), false
       assert_eq new_filter('*', '*', '*'  ).scope_match?(sc), false
     end
