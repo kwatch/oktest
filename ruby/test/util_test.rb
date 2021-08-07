@@ -52,25 +52,25 @@ END
       end
     end
 
-    describe '.block_params()' do
+    describe '.required_param_names_of_block()' do
       it "[!a9n46] returns nil if argument is nil." do
-        assert_eq block_params(nil, "file:123"), nil
+        assert_eq required_param_names_of_block(nil), nil
       end
       it "[!7m81p] returns empty array if block has no parameters." do
         pr = proc { nil }
-        assert_eq block_params(pr, "file:123"), []
+        assert_eq required_param_names_of_block(pr), []
       end
       it "[!n3g63] returns parameter names of block." do
         pr = proc {|x, y, z| nil }
-        assert_eq block_params(pr, "file:123"), [:x, :y, :z]
+        assert_eq required_param_names_of_block(pr), [:x, :y, :z]
       end
       it "[!d5kym] collects only normal parameter names." do
         pr = proc {|x, y, z=1, *rest, a: 1, b: 2, &blk| nil }
-        assert_eq block_params(pr, "file:123"), [:x, :y]
+        assert_eq required_param_names_of_block(pr), [:x, :y]
         pr = proc {|a: 1, b: 2, &blk| nil }
-        assert_eq block_params(pr, "file:123"), []
+        assert_eq required_param_names_of_block(pr), []
         pr = proc {|*rest, &blk| nil }
-        assert_eq block_params(pr, "file:123"), []
+        assert_eq required_param_names_of_block(pr), []
       end
     end
 
