@@ -1624,7 +1624,7 @@ module Oktest
       return lines[linenum-1]
     end
 
-    def block_params(block, location=nil)
+    def block_params(block)
       #; [!a9n46] returns nil if argument is nil.
       return nil unless block
       #; [!7m81p] returns empty array if block has no parameters.
@@ -1633,19 +1633,7 @@ module Oktest
       return [] if n == 0
       #; [!n3g63] returns parameter names of block.
       #; [!d5kym] collects only normal parameter names.
-      if block.respond_to?(:parameters)
-        param_names = block.parameters[0...n].collect {|pair| pair[1] }
-      else
-        location =~ /:(\d+)/
-        filename = $`
-        linenum  = $1.to_i
-        File.file?(filename)  or
-          raise ArgumentError, "block_params(): #{filename.inspect}: source file not found."
-        linestr = file_line(filename, linenum) || ""
-        linestr =~ /(?:\bdo|\{) *\|(.*)\|/  or
-          raise ArgumentError, "spec(): can't detect block parameters at #{filename}:#{linenum}"
-        param_names = $1.split(/,/).collect {|var| var.strip.intern }
-      end
+      param_names = block.parameters[0...n].collect {|pair| pair[1] }
       return param_names
     end
 
