@@ -39,7 +39,7 @@ module Oktest
       undef_method k unless k.to_s == 'equal?' || k.to_s =~ /^assert/
     end
 
-    NOT_YET = {}
+    NOT_YET = {}   # `ok()` registers AssertionObject into this. `__done()` removes from this.
 
     def initialize(actual, bool, location)
       @actual   = actual
@@ -555,54 +555,241 @@ module Oktest
   end
 
 
-  class ScopeObject
+  class Context
+    ## * Context class is separated from ScopeNode, TopicNode, and SpecLeaf.
+    ## * `topic()` and `spec()` creates subclass of Context class,
+    ##    and run blocks in these subclasses.
+    ## * `scope()` instanciates those subclasses, and run spec blocks
+    ##    in that instance objects.
 
-    def initialize()
-      @children = []
-      @fixtures = {}       # {name=>[block, params, location]}
+    class << self
+      attr_accessor :__node
     end
 
-    attr_accessor :parent, :children, :before, :after, :before_all, :after_all, :fixtures
-    attr_accessor :_klass, :_prefix  #:nodoc:
+    def self.topic(target, tag: nil, &block)
+      #; [!0gfvq] creates new topic node.
+      node = @__node
+      topic = TopicNode.new(node, target, tag: tag)
+      node.add_child(topic)
+      topic.run_block_in_context_class(&block)
+      return topic
+    end
+
+    def self.case_when(desc, tag: nil, &block)
+      #; [!g3cvh] returns topic object.
+      #; [!ofw1i] target is a description starting with 'When '.
+      return __case_when("When #{desc}", tag, &block)
+    end
+
+    def self.case_else(desc=nil, tag: nil, &block)
+      #; [!hs1to] 1st parameter is optional.
+      desc = desc ? "Else #{desc}" : "Else"
+      #; [!oww4b] returns topic object.
+      #; [!j5gnp] target is a description which is 'Else'.
+      return __case_when(desc, tag, &block)
+    end
+
+    def self.__case_when(desc, tag, &block)  #:nodoc:
+      to = topic(desc, tag: tag, &block)
+      to._prefix = '-'
+      return to
+    end
+
+    def self.spec(desc, tag: nil, &block)
+      node = @__node
+      node.is_a?(Node)  or raise "internal error: node=#{node.inspect}"  # for debug
+      #; [!ala78] provides raising TodoException block if block not given.
+      block ||= proc { raise TodoException, "not implemented yet" }
+      #; [!c8c8o] creates new spec object.
+      location = caller(1).first
+      spec = SpecLeaf.new(desc, tag: tag, location: location, &block)
+      node.add_child(spec)
+      return spec
+    end
+
+    def self.fixture(name, &block)
+      #; [!8wfrq] registers fixture factory block.
+      #; [!y3ks3] retrieves block parameter names.
+      location = caller(1).first
+      @__node.register_fixture_block(name, location, &block)
+      self
+    end
+
+    def self.before(&block)
+      #; [!275zr] registers 'before' hook block.
+      @__node.register_hook_block(:before, &block)
+      self
+    end
+
+    def self.after(&block)
+      #; [!ngkvz] registers 'after' hook block.
+      @__node.register_hook_block(:after, &block)
+      self
+    end
+
+    def self.before_all(&block)
+      #; [!8v1y4] registers 'before_all' hook block.
+      @__node.register_hook_block(:before_all, &block)
+      self
+    end
+
+    def self.after_all(&block)
+      #; [!0w5ik] registers 'after_all' hook block.
+      @__node.register_hook_block(:after_all, &block)
+      self
+    end
+
+  end
+
+
+  class Node
+
+    def initialize(parent, tag: nil)
+      @parent   = parent
+      @tag      = tag
+      @children = []
+      @context_class = Class.new(parent ? parent.context_class : Oktest::Context)
+      @context_class.__node = self
+      @fixtures = {}       # {name: [[param], block]}
+      @hooks    = {}       # {name: block}
+    end
+
+    attr_reader :parent, :children, :tag, :context_class, :fixtures, :hooks
+
+    def topic?; false; end
 
     def add_child(child)
-      #; [!prkgy] child object may be scope object, such as SpecObject.
-      if child.is_a?(ScopeObject)
-        #; [!v4alp] error if child scope already has parent scope.
-        child.parent.nil?  or
-          raise ArgumentError, "add_child(): can't add child scope which already belongs to other."
-        #; [!on2s1] sets self as parent scope of child scope.
-        child.parent = self
-      end
       #; [!1fyk9] keeps children.
       @children << child
+      #; [!w5r6l] returns self.
+      self
     end
 
-    def get_fixture_info(name)
-      #; [!f0105] returns fixture info.
-      return @fixtures[name]
+    def run_block_in_context_class(&block)
+      #; [!j9qdh] run block in context class.
+      @context_class.class_eval(&block)
     end
 
-    def new_context()
+    def new_context_object()
       #; [!p271z] creates new context object.
-      return @_klass.new
+      context = @context_class.new()
+      #; [!9hbxn] context object has 'ok()' method.
+      context.extend SpecHelper
+      return context
     end
 
     def accept_runner(runner, *args)
       #; [!olckb] raises NotImplementedError.
-      raise NotImplementedError, "#{self.class.name}#accept_runner(): not implemented yet."
+      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
+    end
+
+    def register_fixture_block(name, location, &block)
+      #; [!5ctsn] registers fixture name, block, and location.
+      params = Util.block_params(block)  # [Symbol]
+      params = nil if params.empty?
+      @fixtures[name] = [block, params, location]
+      #; [!hfcvo] returns self.
+      self
+    end
+
+    def get_fixture_block(name)
+      #; [!f0105] returns fixture info.
+      return @fixtures[name]
+    end
+
+    def register_hook_block(key, &block)
+      #; [!zb66o] registers block with key.
+      @hooks[key] = block
+      self
+    end
+
+    def get_hook_block(key)
+      #; [!u3fc6] returns block corresponding to key.
+      return @hooks[key]
+    end
+
+    def filter_match?(pattern)
+      #; [!lt56h] always returns false.
+      return false
+    end
+
+    def tag_match?(pattern)
+      #; [!5kmcf] returns false if node has no tags.
+      return false if @tag.nil?
+      #; [!fmwfy] returns true if pattern matched to tag name.
+      #; [!tjk7p] supports array of tag names.
+      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
     end
 
     def _repr(depth=0, buf="")
       #; [!bt5j8] builds debug string.
+      if depth < 0
+        id_str = "%x" % self.object_id
+        return "#<#{self.class.name}:0x#{id_str}>"
+      end
       indent = "  " * depth
-      buf << "#{indent}-\n"
+      id_str = "%x" % self.object_id
+      buf << "#{indent}- #<#{self.class.name}:0x#{id_str}>\n"
       instance_variables().sort.each do |name|
         next if name.to_s == "@children"
-        buf << "#{indent}  #{name}: #{instance_variable_get(name).inspect}\n"
+        val = instance_variable_get(name)
+        next if val.nil?
+        next if val.respond_to?(:empty?) && val.empty?
+        if val.respond_to?(:_repr)
+          buf << "#{indent}  #{name}: #{val._repr(-1)}\n"
+        else
+          buf << "#{indent}  #{name}: #{val.inspect}\n"
+        end
       end
       @children.each {|child| child._repr(depth+1, buf) }
       return buf
+    end
+
+  end
+
+
+  class ScopeNode < Node
+
+    def initialize(parent, filename, tag: nil)
+      super(parent, tag: tag)
+      @filename = filename
+    end
+
+    attr_reader :filename
+
+    def accept_runner(runner, *args)
+      #; [!5mt5k] invokes 'run_topic()' method of runner.
+      runner.run_scope(self, *args)
+    end
+
+  end
+
+
+  class TopicNode < Node
+
+    def initialize(parent, target, tag: nil)
+      super(parent, tag: tag)
+      @target = target
+    end
+
+    attr_reader :target
+    attr_accessor :_prefix
+
+    def _prefix
+      @_prefix || '*'
+    end
+
+    def topic?; true; end
+
+    def accept_runner(runner, *args)
+      #; [!og6l8] invokes '.run_topic()' object of runner.
+      runner.run_topic(self, *args)
+    end
+
+    def filter_match?(pattern)
+      #; [!650bv] returns true if pattern matched to topic target name.
+      #; [!24qgr] returns false if pattern not matched to topic target name.
+      return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
     end
 
     def +@
@@ -613,184 +800,27 @@ module Oktest
   end
 
 
-  class FileScopeObject < ScopeObject
+  class SpecLeaf
 
-    attr_accessor :filename
-
-    def initialize(filename=nil)
-      super()
-      @filename = filename
-    end
-
-    def accept_runner(runner, *args)
-      #; [!5mt5k] invokes 'run_topic()' method of runner.
-      return runner.run_topic(self, *args)
-    end
-
-  end
-
-
-  class TopicObject < ScopeObject
-
-    def initialize(target=nil, tag=nil)
-      super()
-      @target = target
-      @tag    = tag
-    end
-
-    attr_reader :target, :tag
-
-    def accept_runner(runner, *args)
-      #; [!og6l8] invokes '.run_topic()' object of runner.
-      return runner.run_topic(self, *args)
-    end
-
-    def filter_match?(pattern)
-      #; [!650bv] returns true if pattern matched to topic target name.
-      #; [!24qgr] returns false if pattern not matched to topic target name.
-      return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
-    end
-
-    def tag_match?(pattern)
-      #; [!5kmcf] returns false if topic object has no tags.
-      return false if @tag.nil?
-      #; [!fmwfy] returns true if pattern matched to tag name.
-      #; [!tjk7p] supports array of tag names.
-      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
-    end
-
-  end
-
-
-  module ScopeClassMethods
-
-    def before(&block);     @_scope.before     = block;  end
-    def after(&block);      @_scope.after      = block;  end
-    def before_all(&block); @_scope.before_all = block;  end
-    def after_all(&block);  @_scope.after_all  = block;  end
-
-    def fixture(name, &block)
-      #; [!8wfrq] registers fixture factory block.
-      #; [!y3ks3] retrieves block parameter names.
-      location = caller(1).first
-      param_names = block.arity > 0 ? Util.block_params(block, location) : nil
-      @_scope.fixtures[name] = [block, param_names, location]
-    end
-
-    def topic(target, tag: nil, &block)
-      #; [!0gfvq] creates new topic object.
-      topic = TopicObject.new(target, tag)
-      @_scope.add_child(topic)
-      klass = Class.new(self)
-      klass.class_eval do
-        extend ScopeClassMethods
-        include SpecHelper
-        @_scope = topic
-      end
-      klass.class_eval(&block)
-      topic._klass = klass
-      topic._prefix = '*'
-      return topic
-    end
-
-    def case_when(desc, tag: nil, &block)
-      #; [!g3cvh] returns topic object.
-      #; [!ofw1i] target is a description starting with 'When '.
-      return __case_when("When #{desc}", tag, &block)
-    end
-
-    def case_else(desc=nil, tag: nil, &block)
-      #; [!hs1to] 1st parameter is optional.
-      desc = desc ? "Else #{desc}" : "Else"
-      #; [!oww4b] returns topic object.
-      #; [!j5gnp] target is a description which is 'Else'.
-      return __case_when(desc, tag, &block)
-    end
-
-    def __case_when(desc, tag, &block)
-      obj = topic(desc, tag: tag, &block)
-      obj._prefix = '-'
-      return obj
-    end
-    private :__case_when
-
-    def spec(desc, tag: nil, &block)
-      location = caller(1).first
-      #; [!ep8ya] collects block parameter names if block given.
-      if block
-        param_names = Util.block_params(block, location)
-      #; [!ala78] provides raising TodoException block if block not given.
-      else
-        block = proc { raise TodoException, "not implemented yet" }
-        param_names = []
-      end
-      #; [!c8c8o] creates new spec object.
-      spec = SpecObject.new(desc, block, param_names, location, tag)
-      @_scope.add_child(spec)
-      spec._prefix = '-'
-      return spec
-    end
-
-  end
-
-
-  def self.__scope(depth, &block)
-    @_in_scope = true
-    filename = caller(depth).first =~ /:\d+/ ? $` : nil
-    filename = filename.sub(/\A\.\//, '')
-    scope = FileScopeObject.new(filename)
-    klass = Class.new
-    klass.class_eval do
-      extend ScopeClassMethods
-      @_scope = scope
-    end
-    klass.class_eval(&block)
-    scope._klass = klass
-    @_in_scope = nil
-    return scope
-  end
-
-  def self.scope(&block)
-    #; [!jmc4q] raises error when nested called.
-    ! @_in_scope  or
-      raise OktestError, "scope() and global_scope() are not nestable."
-    #; [!vxoy1] creates new scope object.
-    scope = __scope(2, &block)
-    #; [!rsimc] registers scope object into TOPLEVEL_SCOPES.
-    TOPLEVEL_SCOPES << scope
-    return scope
-  end
-
-  def self.global_scope(&block)
-    #; [!pe0g2] raises error when nested called.
-    ! @_in_scope  or
-      raise OktestError, "scope() and global_scope() are not nestable."
-    #; [!flnpc] run block in the GLOBAL_SCOPE object.
-    @_in_scope = true
-    GLOBAL_SCOPE._klass.class_eval(&block)
-    @_in_scope = nil
-    #; [!fcmt2] not create new scope object.
-    return GLOBAL_SCOPE
-  end
-
-  TOPLEVEL_SCOPES = []
-  GLOBAL_SCOPE    = __scope(1) { nil }
-
-
-  class SpecObject
-
-    def initialize(desc, block, param_names, location, tag=nil)
-      @desc = desc
-      @block = block
-      @params = param_names
+    def initialize(desc, tag: nil, location: nil, &block)
+      @desc  = desc
+      @tag   = tag
       @location = location   # necessary when raising fixture not found error
-      @tag      = tag
+      @block = block
     end
 
-    attr_reader :desc, :block, :params, :location, :tag #:nodoc:
-    attr_accessor :_prefix   #:nodoc:
+    attr_reader :desc, :tag, :location, :block
 
-    def accept_runner(runner, *args)       #:nodoc:
+    def _prefix
+      '-'
+    end
+
+    def run_block_in_context_object(context, *args)
+      #; [!tssim] run spec block in text object.
+      context.instance_exec(*args, &@block)
+    end
+
+    def accept_runner(runner, *args)
       #; [!q9j3w] invokes 'run_spec()' method of runner.
       runner.run_spec(self, *args)
     end
@@ -822,6 +852,40 @@ module Oktest
       self
     end
 
+  end
+
+
+  GLOBAL_SCOPE = ScopeNode.new(nil, __FILE__)
+  TOPLEVEL_SCOPES = []
+
+
+  def self.global_scope(&block)
+    #; [!flnpc] run block in the GLOBAL_SCOPE object.
+    #; [!pe0g2] raises error when nested called.
+    self.__scope(GLOBAL_SCOPE, &block)
+    #; [!fcmt2] not create new scope object.
+    return GLOBAL_SCOPE
+  end
+
+  def self.scope(tag: nil, &block)
+    #; [!vxoy1] creates new scope object.
+    filename = caller(1).first =~ /:\d+/ ? $` : nil
+    filename = filename.sub(/\A\.\//, '')
+    scope = ScopeNode.new(GLOBAL_SCOPE, filename, tag: tag)
+    #; [!jmc4q] raises error when nested called.
+    self.__scope(scope, &block)
+    #; [!rsimc] registers scope object into TOPLEVEL_SCOPES.
+    TOPLEVEL_SCOPES << scope
+    return scope
+  end
+
+  def self.__scope(scope, &block)  #:nodoc:
+    ! @_in_scope  or
+      raise OktestError, "scope() and global_scope() are not nestable."
+    @_in_scope = true
+    scope.run_block_in_context_class(&block)
+  ensure
+    @_in_scope = false
   end
 
 
@@ -1060,18 +1124,19 @@ module Oktest
     def run_spec(spec, depth, parent)
       @reporter.enter_spec(spec, depth)
       #; [!u45di] runs spec block with context object which allows to call methods defined in topics.
-      topic = parent
-      context = new_context(topic, spec)
+      scope = parent
+      context = scope.new_context_object()
       #; [!yagka] calls 'before' and 'after' blocks with context object as self.
-      call_before_blocks(topic, context)
+      call_before_blocks(scope, context)
       status = :PASS
       exc = nil
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
-        if spec.params.empty?
+        params = Util.block_params(spec.block)
+        if params.nil? || params.empty?
           call_spec_block(spec, context)
         else
-          values = get_fixture_values(spec.params, topic, spec, context)
+          values = get_fixture_values(params, scope, spec, context)
           call_spec_block(spec, context, *values)
         end
       rescue NoMemoryError   => exc;  raise exc
@@ -1099,7 +1164,7 @@ module Oktest
         call_at_end_blocks(context)
       #; [!76g7q] calls 'after' blocks even when exception raised.
       ensure
-        call_after_blocks(topic, context)
+        call_after_blocks(scope, context)
       end
       @reporter.exit_spec(spec, depth, status, exc, parent)
     end
@@ -1138,7 +1203,7 @@ module Oktest
     def _call_blocks_parent_first(topic, name, obj)
       blocks = []
       while topic
-        block = topic.__send__(name)
+        block = topic.get_hook_block(name)
         blocks << block if block
         topic = topic.parent
       end
@@ -1148,7 +1213,7 @@ module Oktest
 
     def _call_blocks_child_first(topic, name, obj)
       while topic
-        block = topic.__send__(name)
+        block = topic.get_hook_block(name)
         obj.instance_eval(&block) if block
         topic = topic.parent
       end
@@ -1163,12 +1228,12 @@ module Oktest
     end
 
     def call_before_all_block(topic)
-      block = topic.before_all
+      block = topic.get_hook_block(:before_all)
       topic.instance_eval(&block) if block
     end
 
     def call_after_all_block(topic)
-      block = topic.after_all
+      block = topic.get_hook_block(:after_all)
       topic.instance_eval(&block) if block
     end
 
@@ -1219,7 +1284,7 @@ module Oktest
     def get_fixture_value(name, topic, spec, context, location=nil, _resolved={}, _resolving=[])
       return _resolved[name] if _resolved.key?(name)
       location ||= spec.location
-      tuple = topic.get_fixture_info(name)
+      tuple = topic.get_fixture_block(name)
       if tuple
         block, param_names, location = tuple
         #; [!2esaf] resolves fixture dependencies.
@@ -1424,7 +1489,7 @@ module Oktest
     def spec_path(spec, topic)
       #; [!dv6fu] returns path string from top topic to current spec.
       arr = [spec.desc]
-      while topic && topic.is_a?(TopicObject)
+      while topic && topic.topic?
         arr << topic.target.to_s if topic.target
         topic = topic.parent
       end
@@ -1559,7 +1624,7 @@ module Oktest
       return lines[linenum-1]
     end
 
-    def block_params(block, location)
+    def block_params(block, location=nil)
       #; [!a9n46] returns nil if argument is nil.
       return nil unless block
       #; [!7m81p] returns empty array if block has no parameters.
@@ -1728,7 +1793,7 @@ module Oktest
       positive  = ! @negative
       children.collect! {|item|
         case item
-        when TopicObject
+        when TopicNode
           #; [!osoq2] can filter topics by full name.
           #; [!wzcco] can filter topics by pattern.
           if topic_pat && item.filter_match?(topic_pat)
@@ -1740,7 +1805,7 @@ module Oktest
           else
             _filter!(item.children) ? item : nil
           end
-        when SpecObject
+        when SpecLeaf
           #; [!0kw9c] can filter specs by full name.
           #; [!fd8wt] can filter specs by pattern.
           if spec_pat && item.filter_match?(spec_pat)

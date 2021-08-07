@@ -42,11 +42,11 @@ class BaseReporter_TC < TC
   include ReporterTestHelper
 
   def new_topic_and_spec()
-    t1 = Oktest::TopicObject.new('Example')
-    t2 = Oktest::TopicObject.new(Array)
-    t3 = Oktest::TopicObject.new('When some condition')
-    t3.parent = t2; t2.parent = t1; t1.parent = Oktest::FileScopeObject.new("foo.rb")
-    spec = Oktest::SpecObject.new("1+1 shoould be 2.", proc { }, [], nil, nil)
+    sc = Oktest::ScopeNode.new(nil, "foo.rb")
+    t1 = Oktest::TopicNode.new(sc, 'Example')
+    t2 = Oktest::TopicNode.new(t1, Array)
+    t3 = Oktest::TopicNode.new(t2, 'When some condition')
+    spec = Oktest::SpecLeaf.new("1+1 shoould be 2.") { nil }
     return t3, spec
   end
 
@@ -356,11 +356,11 @@ END
 
   describe '#spec_path()' do
     it "[!dv6fu] returns path string from top topic to current spec." do
-      t1 = Oktest::TopicObject.new('Example')
-      t2 = Oktest::TopicObject.new(Array)
-      t3 = Oktest::TopicObject.new('When some condition')
-      t3.parent = t2; t2.parent = t1; t1.parent = Oktest::FileScopeObject.new("foo.rb")
-      s1 = Oktest::SpecObject.new("1+1 shoould be 2.", proc { }, [], nil, nil)
+      sc = Oktest::ScopeNode.new(nil, "foo.rb")
+      t1 = Oktest::TopicNode.new(sc, 'Example')
+      t2 = Oktest::TopicNode.new(t1, Array)
+      t3 = Oktest::TopicNode.new(t2, 'When some condition')
+      s1 = Oktest::SpecLeaf.new("1+1 shoould be 2.") { nil }
       path = Oktest::BaseReporter.new.__send__(:spec_path, s1, t3)
       assert_eq path, "Example > Array > When some condition > 1+1 shoould be 2."
     end
