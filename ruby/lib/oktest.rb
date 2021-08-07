@@ -713,17 +713,9 @@ module Oktest
       return @hooks[key]
     end
 
-    def filter_match?(pattern)
-      #; [!lt56h] always returns false.
-      return false
-    end
-
-    def tag_match?(pattern)
-      #; [!5kmcf] returns false if node has no tags.
-      return false if @tag.nil?
-      #; [!fmwfy] returns true if pattern matched to tag name.
-      #; [!tjk7p] supports array of tag names.
-      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
+    def accept_filter(filter)
+      #; [!49xz4] raises NotImplementedError.
+      raise NotImplementedError.new("#{self.class.name}#accept_filter(): not implemented yet.")
     end
 
     def _repr(depth=0, buf="")
@@ -767,6 +759,11 @@ module Oktest
       runner.run_scope(self, *args)
     end
 
+    def accept_filter(filter)
+      #; [!5ltmi] invokes 'scope_match?()' method of filter and returns result of it.
+      return filter.scope_match?(self)
+    end
+
   end
 
 
@@ -791,10 +788,9 @@ module Oktest
       runner.run_topic(self, *args)
     end
 
-    def filter_match?(pattern)
-      #; [!650bv] returns true if pattern matched to topic target name.
-      #; [!24qgr] returns false if pattern not matched to topic target name.
-      return File.fnmatch?(pattern, @target.to_s, File::FNM_EXTGLOB)
+    def accept_filter(filter)
+      #; [!m80ok] invokes 'topic_match?()' method of filter and returns result of it.
+      return filter.topic_match?(self)
     end
 
     def +@
@@ -830,18 +826,9 @@ module Oktest
       runner.run_spec(self, *args)
     end
 
-    def filter_match?(pattern)
-      #; [!v3u3k] returns true if pattern matched to spec description.
-      #; [!kmc5m] returns false if pattern not matched to spec description.
-      return File.fnmatch?(pattern, @desc.to_s, File::FNM_EXTGLOB)
-    end
-
-    def tag_match?(pattern)
-      #; [!lpaz2] returns false if spec object has no tags.
-      return false if @tag.nil?
-      #; [!5besp] returns true if pattern matched to tag name.
-      #; [!id88u] supports multiple tag names.
-      return [@tag].flatten.any? {|tag| File.fnmatch?(pattern, tag.to_s, File::FNM_EXTGLOB) }
+    def accept_filter(filter)
+      #; [!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it.
+      return filter.spec_match?(self)
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
@@ -1769,56 +1756,7 @@ module Oktest
       @negative      = negative
     end
 
-    def filter_toplevel_scope!(scope)
-      _filter!(scope.children)
-    end
-
-    private
-
-    def _filter!(children)
-      #; [!6to6n] can filter by multiple tag name.
-      #; [!r6g6a] supports negative filter by topic.
-      #; [!doozg] supports negative filter by spec.
-      #; [!ntv44] supports negative filter by tag name.
-      topic_pat = @topic_pattern
-      spec_pat  = @spec_pattern
-      tag_pat   = @tag_pattern
-      positive  = ! @negative
-      children.collect! {|item|
-        case item
-        when TopicNode
-          #; [!osoq2] can filter topics by full name.
-          #; [!wzcco] can filter topics by pattern.
-          if topic_pat && item.filter_match?(topic_pat)
-            positive ? item : nil
-          #; [!eirmu] can filter topics by tag name.
-          elsif tag_pat && item.tag_match?(tag_pat)
-            positive ? item : nil
-          #; [!mz6id] can filter nested topics.
-          else
-            _filter!(item.children) ? item : nil
-          end
-        when SpecLeaf
-          #; [!0kw9c] can filter specs by full name.
-          #; [!fd8wt] can filter specs by pattern.
-          if spec_pat && item.filter_match?(spec_pat)
-            positive ? item : nil
-          #; [!6sq7g] can filter specs by tag name.
-          elsif tag_pat && item.tag_match?(tag_pat)
-            positive ? item : nil
-          #; [!1jphf] can filter specs from nested topics.
-          else
-            positive ? nil : item
-          end
-        else
-          item
-        end
-      }
-      children.compact!
-      return !children.empty?
-    end
-
-    public
+    attr_reader :topic_pattern, :spec_pattern, :tag_pattern, :negative
 
     def self.create_from(pattern)  # ex: 'topic=name', 'spec="*pat*"'
       #; [!gtpt1] parses 'sid=...' as filter pattern for spec.
@@ -1837,16 +1775,89 @@ module Oktest
       return self.new(pat['topic'], pat['spec'], pat['tag'], negative: negative)
     end
 
+    def scope_match?(scope)
+      #; [!zkq6r] returns true only if tag name matched to pattern.
+      return true if @tag_pattern && _match_tag?(scope.tag, @tag_pattern)
+      return false
+    end
+
+    def topic_match?(topic)
+      #; [!jpycj] returns true if topic target name matched to pattern.
+      #; [!6lfp1] returns true if tag name matched to pattern.
+      return true if @topic_pattern && _match?(topic.target.to_s, @topic_pattern)
+      return true if @tag_pattern && _match_tag?(topic.tag, @tag_pattern)
+      return false
+    end
+
+    def spec_match?(spec)
+      #; [!k45p3] returns true if spec description matched to pattern.
+      #; [!li3pd] returns true if tag name matched to pattern.
+      return true if @spec_pattern && _match?(spec.desc, @spec_pattern)
+      return true if @tag_pattern && _match_tag?(spec.tag, @tag_pattern)
+      return false
+    end
+
+    private
+
+    def _match?(str, pattern)
+      #; [!h90x3] returns true if str matched to pattern.
+      return File.fnmatch(pattern, str.to_s, File::FNM_EXTGLOB)
+    end
+
+    def _match_tag?(tag, pattern)
+      #; [!lyo18] returns false if tag is nil.
+      #; [!8lxin] returns true if tag matched to pattern.
+      #; [!7wxmh] supports multiple tag names.
+      return false if tag.nil?
+      return [tag].flatten.any? {|tag_| _match?(tag_, pattern) }
+    end
+
+    public
+
+    def filter_children!(node)
+      _filter_children!(node.children)
+    end
+
+    private
+
+    def _filter_children!(children)   #:nodoc:
+      #; [!r6g6a] supports negative filter by topic.
+      #; [!doozg] supports negative filter by spec.
+      #; [!ntv44] supports negative filter by tag name.
+      positive = ! @negative
+      children.collect! {|item|
+        #; [!osoq2] can filter topics by full name.
+        #; [!wzcco] can filter topics by pattern.
+        #; [!eirmu] can filter topics by tag name.
+        #; [!0kw9c] can filter specs by full name.
+        #; [!fd8wt] can filter specs by pattern.
+        #; [!6sq7g] can filter specs by tag name.
+        #; [!6to6n] can filter by multiple tag name.
+        if item.accept_filter(self)
+          positive ? item : nil
+        #; [!mz6id] can filter nested topics.
+        elsif item.is_a?(Node)
+          _filter_children!(item.children) ? item : nil
+        #; [!1jphf] can filter specs from nested topics.
+        elsif item.is_a?(SpecLeaf)
+          positive ? nil : item
+        else
+          raise "** internal error: item=#{item.inspect}"
+        end
+      }
+      children.compact!
+      return !children.empty?
+    end
+
   end
 
   FILTER_CLASS = Filter
 
   def self.filter(filter_obj)
-    TOPLEVEL_SCOPES.each do |filescope|
-      filter_obj.filter_toplevel_scope!(filescope)
+    TOPLEVEL_SCOPES.each do |node|
+      filter_obj.filter_children!(node)
     end
   end
-
 
 
   module Color

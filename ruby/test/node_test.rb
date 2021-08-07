@@ -18,6 +18,7 @@ class Node_TC < TC
     Oktest::TOPLEVEL_SCOPES.clear()
   end
 
+
   describe '#add_child()' do
     it "[!1fyk9] keeps children." do
       p = Oktest::Node.new(nil)
@@ -122,37 +123,15 @@ class Node_TC < TC
     end
   end
 
-  describe '#filter_match?()' do
-    it "[!lt56h] always returns false." do
-      x = Oktest::Node.new(nil)
-      ft = Oktest::Filter.new("*", "*", "*")
-      assert_eq x.filter_match?(ft), false
-    end
-  end
-
-  describe '#tag_match?()' do
-    it "[!5kmcf] returns false if node has no tags." do
-      x = Oktest::Node.new(nil, tag: nil)
-      assert_eq x.tag_match?('*'), false
-    end
-    it "[!fmwfy] returns true if pattern matched to tag name." do
-      x = Oktest::Node.new(nil, tag: 'deprecated')
-      assert_eq x.tag_match?('deprecated'), true
-      assert_eq x.tag_match?('dep*'), true
-      assert_eq x.tag_match?('{dep*}'), true
-      #
-      assert_eq x.tag_match?('obsolete'), false
-      assert_eq x.tag_match?('*ob*'), false
-    end
-    it "[!tjk7p] supports array of tag names." do
-      x = Oktest::Node.new(nil, tag: ['exp', 'wip'])
-      assert_eq x.tag_match?('exp'), true
-      assert_eq x.tag_match?('wip'), true
-      assert_eq x.tag_match?('{exp,wip}'), true
-      assert_eq x.tag_match?('{foo,wip,bar}'), true
-      #
-      assert_eq x.tag_match?('foo*'), false
-      assert_eq x.tag_match?('{foo,bar}'), false
+  describe '#accept_filter()' do
+    it "[!49xz4] raises NotImplementedError." do
+      begin
+        Oktest::Node.new(nil).accept_filter(Oktest::Filter.new(nil, nil, nil))
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+      else
+        assert false, "NotImplementedError expected."
+      end
     end
   end
 
@@ -195,6 +174,24 @@ class ScopeNode_TC < TC
     end
   end
 
+  class DummyFilter1 < Oktest::Filter
+    def scope_match?(*args)
+      @_args = args
+      "<<96888>>"
+    end
+    attr_reader :_args
+  end
+
+  describe '#accept_filter()' do
+    it "[!5ltmi] invokes 'scope_match?()' method of filter and returns result of it." do
+      ft = DummyFilter1.new(nil, nil, nil)
+      sc = Oktest::ScopeNode.new(nil, __FILE__)
+      ret = sc.accept_filter(ft)
+      assert_eq ft._args, [sc]
+      assert_eq ret, "<<96888>>"
+    end
+  end
+
 end
 
 
@@ -220,24 +217,21 @@ class TopicNode_TC < TC
     end
   end
 
-  describe '#filter_match?()' do
-    it "[!650bv] returns true if pattern matched to topic target name." do
-      to = new_topic('#foobar()')
-      assert_eq to.filter_match?('#foobar()'), true
-      assert_eq to.filter_match?('*foobar*'), true
-      assert_eq to.filter_match?('{*foobar*}'), true
-      assert_eq to.filter_match?('[.#]foobar()'), true
-      #
-      to = new_topic(Array)
-      assert_eq to.filter_match?('Array'), true
-      assert_eq to.filter_match?('[aA]rray'), true
+  class DummyFilter2 < Oktest::Filter
+    def topic_match?(*args)
+      @_args = args
+      "<<07570>>"
     end
-    it "[!24qgr] returns false if pattern not matched to topic target name." do
-      to = new_topic('#foobar()')
-      assert_eq to.filter_match?('foobar'), false
-      assert_eq to.filter_match?('#foobar'), false
-      assert_eq to.filter_match?('foobar()'), false
-      assert_eq to.filter_match?('*barfoo*'), false
+    attr_reader :_args
+  end
+
+  describe '#accept_filter()' do
+    it "[!m80ok] invokes 'topic_match?()' method of filter and returns result of it." do
+      ft = DummyFilter2.new(nil, nil, nil)
+      to = Oktest::TopicNode.new(nil, Array)
+      ret = to.accept_filter(ft)
+      assert_eq ft._args, [to]
+      assert_eq ret, "<<07570>>"
     end
   end
 
@@ -593,43 +587,21 @@ class SpecLeafTC < TC
     end
   end
 
-  describe '#filter_match?()' do
-    it "[!v3u3k] returns true if pattern matched to spec description." do
-      sp = new_spec_object("sample #1")
-      assert_eq sp.filter_match?('sample #1'), true
-      assert_eq sp.filter_match?('sample*'), true
-      assert_eq sp.filter_match?('*#1'), true
-      assert_eq sp.filter_match?('{sample*}'), true
+  class DummyFilter3 < Oktest::Filter
+    def spec_match?(*args)
+      @_args = args
+      "<<60733>>"
     end
-    it "[!kmc5m] returns false if pattern not matched to spec description." do
-      sp = new_spec_object("sample #1")
-      assert_eq sp.filter_match?('sample'), false
-      assert_eq sp.filter_match?('sample #2'), false
-      assert_eq sp.filter_match?('#2'), false
-    end
+    attr_reader :_args
   end
 
-  describe '#tag_match?()' do
-    it "[!5besp] returns true if pattern matched to tag name." do
-      sp = new_spec_object("sample #1", tag: "experiment")
-      assert_eq sp.tag_match?('experiment'), true
-      assert_eq sp.tag_match?('exp*'), true
-      assert_eq sp.tag_match?('*exp*'), true
-      assert_eq sp.tag_match?('{exp*,obso*}'), true
-    end
-    it "[!id88u] supports multiple tag names." do
-      sp = new_spec_object("sample #1", tag: ['exp', 'wip'])
-      assert_eq sp.tag_match?('exp'), true
-      assert_eq sp.tag_match?('wip'), true
-      assert_eq sp.tag_match?('{exp,wip}'), true
-      assert_eq sp.tag_match?('{foo,wip,bar}'), true
-      #
-      assert_eq sp.tag_match?('foo'), false
-      assert_eq sp.tag_match?('{foo,bar}'), false
-    end
-    it "[!lpaz2] returns false if spec object has no tags." do
-      sp = new_spec_object("sample #1", tag: nil)
-      assert_eq sp.tag_match?('*'), false
+  describe '#accept_filter()' do
+    it "[!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it." do
+      ft = DummyFilter3.new(nil, nil, nil)
+      sc = Oktest::SpecLeaf.new("sample")
+      ret = sc.accept_filter(ft)
+      assert_eq ft._args, [sc]
+      assert_eq ret, "<<60733>>"
     end
   end
 
