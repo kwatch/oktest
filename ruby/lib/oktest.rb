@@ -1815,17 +1815,17 @@ module Oktest
     public
 
     def filter_children!(node)
-      _filter!(node)
+      _filter_children!(node.children)
     end
 
     private
 
-    def _filter!(node)   #:nodoc:
+    def _filter_children!(children)   #:nodoc:
       #; [!r6g6a] supports negative filter by topic.
       #; [!doozg] supports negative filter by spec.
       #; [!ntv44] supports negative filter by tag name.
-      positive  = ! @negative
-      node.children.collect! {|item|
+      positive = ! @negative
+      children.collect! {|item|
         #; [!osoq2] can filter topics by full name.
         #; [!wzcco] can filter topics by pattern.
         #; [!eirmu] can filter topics by tag name.
@@ -1837,7 +1837,7 @@ module Oktest
           positive ? item : nil
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)
-          _filter!(item) ? item : nil
+          _filter_children!(item.children) ? item : nil
         #; [!1jphf] can filter specs from nested topics.
         elsif item.is_a?(SpecLeaf)
           positive ? nil : item
@@ -1845,8 +1845,8 @@ module Oktest
           raise "** internal error: item=#{item.inspect}"
         end
       }
-      node.children.compact!
-      return !node.children.empty?
+      children.compact!
+      return !children.empty?
     end
 
   end
