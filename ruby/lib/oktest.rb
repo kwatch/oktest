@@ -718,39 +718,6 @@ module Oktest
       raise NotImplementedError.new("#{self.class.name}#accept_filter(): not implemented yet.")
     end
 
-    def filter_children!(filter)
-      _filter!(filter)
-    end
-
-    def _filter!(filter)   #:nodoc:
-      #; [!r6g6a] supports negative filter by topic.
-      #; [!doozg] supports negative filter by spec.
-      #; [!ntv44] supports negative filter by tag name.
-      positive  = ! filter.negative
-      @children.collect! {|item|
-        #; [!osoq2] can filter topics by full name.
-        #; [!wzcco] can filter topics by pattern.
-        #; [!eirmu] can filter topics by tag name.
-        #; [!0kw9c] can filter specs by full name.
-        #; [!fd8wt] can filter specs by pattern.
-        #; [!6sq7g] can filter specs by tag name.
-        #; [!6to6n] can filter by multiple tag name.
-        if item.accept_filter(filter)
-          positive ? item : nil
-        #; [!mz6id] can filter nested topics.
-        elsif item.is_a?(Node)
-          item._filter!(filter) ? item : nil
-        #; [!1jphf] can filter specs from nested topics.
-        elsif item.is_a?(SpecLeaf)
-          positive ? nil : item
-        else
-          raise "** internal error: item=#{item.inspect}"
-        end
-      }
-      children.compact!
-      return !children.empty?
-    end
-
     def _repr(depth=0, buf="")
       #; [!bt5j8] builds debug string.
       if depth < 0
@@ -1845,13 +1812,50 @@ module Oktest
       return [tag].flatten.any? {|tag_| _match?(tag_, pattern) }
     end
 
+    public
+
+    def filter_children!(node)
+      _filter!(node)
+    end
+
+    private
+
+    def _filter!(node)   #:nodoc:
+      #; [!r6g6a] supports negative filter by topic.
+      #; [!doozg] supports negative filter by spec.
+      #; [!ntv44] supports negative filter by tag name.
+      positive  = ! @negative
+      node.children.collect! {|item|
+        #; [!osoq2] can filter topics by full name.
+        #; [!wzcco] can filter topics by pattern.
+        #; [!eirmu] can filter topics by tag name.
+        #; [!0kw9c] can filter specs by full name.
+        #; [!fd8wt] can filter specs by pattern.
+        #; [!6sq7g] can filter specs by tag name.
+        #; [!6to6n] can filter by multiple tag name.
+        if item.accept_filter(self)
+          positive ? item : nil
+        #; [!mz6id] can filter nested topics.
+        elsif item.is_a?(Node)
+          _filter!(item) ? item : nil
+        #; [!1jphf] can filter specs from nested topics.
+        elsif item.is_a?(SpecLeaf)
+          positive ? nil : item
+        else
+          raise "** internal error: item=#{item.inspect}"
+        end
+      }
+      node.children.compact!
+      return !node.children.empty?
+    end
+
   end
 
   FILTER_CLASS = Filter
 
   def self.filter(filter_obj)
     TOPLEVEL_SCOPES.each do |node|
-      node.filter_children!(filter_obj)
+      filter_obj.filter_children!(node)
     end
   end
 
