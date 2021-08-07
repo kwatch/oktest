@@ -685,7 +685,7 @@ module Oktest
 
     def register_fixture_block(name, location, &block)
       #; [!5ctsn] registers fixture name, block, and location.
-      params = Util.block_params(block)  # [Symbol]
+      params = Util.required_param_names_of_block(block)  # [Symbol]
       params = nil if params.empty?
       @fixtures[name] = [block, params, location]
       #; [!hfcvo] returns self.
@@ -1132,7 +1132,7 @@ module Oktest
       exc = nil
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
-        params = Util.block_params(spec.block)
+        params = Util.required_param_names_of_block(spec.block)
         if params.nil? || params.empty?
           call_spec_block(spec, context)
         else
@@ -1624,7 +1624,7 @@ module Oktest
       return lines[linenum-1]
     end
 
-    def block_params(block)
+    def required_param_names_of_block(block)
       #; [!a9n46] returns nil if argument is nil.
       return nil unless block
       #; [!7m81p] returns empty array if block has no parameters.
