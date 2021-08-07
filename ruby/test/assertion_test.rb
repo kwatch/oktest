@@ -504,16 +504,25 @@ describe '#method_missing()' do
     it "[!vnc6b] sets exception object into '#exc' attribute." do
       pr = proc { "SOS".foobar }
       assert !pr.respond_to?(:exc)
-      ok {pr}.raise?(NoMethodError)
+      PASS! { ok {pr}.raise?(NoMethodError) }
       assert pr.respond_to?(:exc)
       assert pr.exc.is_a?(NoMethodError)
       assert_eq pr.exc.message, "undefined method `foobar' for \"SOS\":String"
       #
       pr = proc { nil }
       assert !pr.respond_to?(:exc)
-      ok {pr}.NOT.raise?(NoMethodError)
+      PASS! { ok {pr}.NOT.raise?(NoMethodError) }
       assert pr.respond_to?(:exc)
       assert_eq pr.exc, nil
+    end
+  end
+
+  describe '#raise!' do
+    it "[!8k6ee] compares error class by '.is_a?' instead of '=='." do
+      pr = proc { "SOS".foobar }
+      PASS! { ok {pr}.raise!(NoMethodError) }
+      PASS! { ok {pr}.raise!(NameError) }
+      ERROR!(NoMethodError, /foobar/) { ok {pr}.raise?(NameError) }
     end
   end
 

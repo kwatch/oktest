@@ -261,7 +261,12 @@ module Oktest
       self
     end
 
-    def raise?(errcls=nil, errmsg=nil, subclass: false)
+    def raise!(errcls=nil, errmsg=nil, &b)
+      #; [!8k6ee] compares error class by '.is_a?' instead of '=='.
+      return raise?(errcls, errmsg, subclass: true, &b)
+    end
+
+    def raise?(errcls=nil, errmsg=nil, subclass: false, &b)
       __done()
       #; [!2rnni] 1st argument can be error message string or rexp.
       if errmsg.nil? && ! errcls.nil? && ! (errcls.is_a?(Class) && errcls <= Exception)
