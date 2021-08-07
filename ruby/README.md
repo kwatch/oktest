@@ -792,9 +792,24 @@ Oktest.scope do
 end
 ```
 
-To catch subclass of error class, add `subclass: true` keyword argument
-to `.raise?()`.
-For example: `ok {pr}.raise?(NameError, /foobar/, subclass: true)`.
+To catch subclass of error class, invoke `.raise!` instead of `.raise?`.
+For example: `ok {pr}.raise!(NameError, /foobar/, subclass: true)`.
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+  topic 'ok().raise!' do
+    spec "catches subclasses." do
+      pr = proc do
+        "str".foobar()      # raises NoMethodError
+      end
+      ok {pr}.raise!(NoMethodError)   # pass
+      ok {pr}.raise!(NameError)       # pass !!!!!
+    end
+  end
+end
+```
 
 
 ### Custom Assertion
