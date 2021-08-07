@@ -33,7 +33,7 @@ class Filter_TC < TC
   def run_filter(topic_pattern, spec_pattern, tag_pattern, negative: false)
     prepare()
     filter = Oktest::Filter.new(topic_pattern, spec_pattern, tag_pattern, negative: negative)
-    Oktest::TOPLEVEL_SCOPES.each {|x| filter.filter_toplevel_scope!(x) }
+    Oktest.filter(filter)
     reporter = Oktest::VerboseReporter.new()
     sout, serr = capture('', tty: false) do
       Oktest::Runner.new(reporter).run_all()
