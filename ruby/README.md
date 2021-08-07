@@ -626,6 +626,10 @@ end
 
 In the following example, `a` means actual value and `e` means expected value.
 
+<!--
+test/example11_test.rb:
+-->
+
 ```ruby
 ok {a} == e              # fail unless a == e
 ok {a} != e              # fail unless a != e
@@ -660,6 +664,10 @@ ok {a}.length(e)         # fail unless a.length == e
 
 It is possible to chan method call of `.attr()` and `.keyval()`.
 
+<!--
+test/example11b_test.rb:
+-->
+
 ```ruby
 ok {a}.attr(:name1, 'val1').attr(:name2, 'val2').attr(:name3, 'val3')
 ok {a}.keyval(:key1, 'val1').keyval(:key2, 'val2').keyval(:key3, 'val3')
@@ -669,6 +677,10 @@ ok {a}.keyval(:key1, 'val1').keyval(:key2, 'val2').keyval(:key3, 'val3')
 ### Predicate Assertions
 
 `ok {}` handles predicate methods (such as `.nil?`, `.empty?`, or `.key?`) automatically.
+
+<!--
+test/example12_test.rb:
+-->
 
 ```ruby
 ok {a}.nil?              # same as ok {a.nil?} == true
@@ -681,6 +693,10 @@ ok {a}.between?(x, y)    # same as ok {a.between?(x, y)} == true
 `Pathname()` is a good example of predicate methods.
 See [pathname.rb](https://ruby-doc.org/stdlib-2.7.0/libdoc/pathname/rdoc/Pathname.html)
 document for details about `Pathname()`.
+
+<!--
+test/example12b_test.rb:
+-->
 
 ```ruby
 require 'pathname'      # !!!!!
@@ -695,6 +711,10 @@ ok {Pathname(a)}.relative?   # same as ok {Pathname(a).relative?} == true
 
 ### Negative Assertion
 
+<!--
+test/example13_test.rb:
+-->
+
 ```ruby
 not_ok {a} == e          # fail if a == e
 ok {a}.NOT == e          # fail if a == e
@@ -707,6 +727,10 @@ ok {a}.NOT.file_exist?   # fail if File.file?(a)
 ### Exception Assertion
 
 If you want to assert whether exception raised or not:
+
+<!--
+test/example14_test.rb:
+-->
 
 ```ruby
 pr = proc do
@@ -737,6 +761,10 @@ ok {pr2}.throw?(:quit)  # pass if :quit thrown, fail if other or nothing thrown
 If procedure contains `raise "errmsg"` instead of `raise ErrorClass, "errmsg"`,
 you can omit exception class such as `ok {pr}.raise?("errmsg")`.
 
+<!--
+test/example14b_test.rb:
+-->
+
 ```ruby
 pr = proc do
   raise "something wrong"           # !!! error class not specified !!!
@@ -745,6 +773,10 @@ ok {pr}.raise?("something wrong")   # !!! error class not specified !!!
 ```
 
 Notice that `ok().raise?()` compares error class by `==` operator, not `.is_a?` method.
+
+<!--
+test/example14c_test.rb:
+-->
 
 ```ruby
 pr = proc { 1/0 }     # raises ZeroDivisionError
@@ -758,6 +790,10 @@ This is an intended design to avoid unexpected assertion success.
 For example, `assert_raises(NameError) { .... }` in MiniTest will result in
 success unexpectedly even if `NoMethodError` raised in the block, because
 `NoMethodError` is a subclass of `NameError`.
+
+<!--
+test/example14d_test.rb:
+-->
 
 ```ruby
 require 'minitest/spec'
@@ -776,6 +812,10 @@ end
 Oktest.rb can avoid this pitfall, because `.raise?()` compares error class
 by `==` operator, not `.is_a?` method.
 
+<!--
+test/example14e_test.rb:
+-->
+
 ```ruby
 require 'oktest'
 
@@ -792,17 +832,37 @@ Oktest.scope do
 end
 ```
 
-To catch subclass of error class, add `subclass: true` keyword argument
-to `.raise?()`.
-For example: `ok {pr}.raise?(NameError, /foobar/, subclass: true)`.
+To catch subclass of error class, invoke `.raise!` instead of `.raise?`.
+For example: `ok {pr}.raise!(NameError, /foobar/, subclass: true)`.
+
+<!--
+test/example14f_test.rb:
+-->
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+  topic 'ok().raise!' do
+    spec "catches subclasses." do
+      pr = proc do
+        "str".foobar()      # raises NoMethodError
+      end
+      ok {pr}.raise!(NoMethodError)   # pass
+      ok {pr}.raise!(NameError)       # pass !!!!!
+    end
+  end
+end
+```
 
 
 ### Custom Assertion
 
 How to define custom assertion:
 
-test/example11_test.rb:
-
+<!--
+test/example15_test.rb:
+-->
 ```ruby
 require 'oktest'
 
