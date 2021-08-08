@@ -1116,9 +1116,7 @@ module Oktest
       @reporter.enter_scope(scope.filename)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.children.each do |child|
-        child.accept_runner(self, depth+1, scope)
-      end
+      scope.children.each {|c| c.accept_runner(self, depth+1, scope) }
       call_after_all_block(scope)
       @reporter.exit_scope(scope.filename)
     end
@@ -1127,9 +1125,7 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.children.each do |child|
-        child.accept_runner(self, depth+1, topic)
-      end
+      topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
