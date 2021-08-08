@@ -1116,10 +1116,10 @@ module Oktest
     def run_spec(spec, depth, parent)
       @reporter.enter_spec(spec, depth)
       #; [!u45di] runs spec block with context object which allows to call methods defined in topics.
-      scope = parent
-      context = scope.new_context_object()
+      node = parent
+      context = node.new_context_object()
       #; [!yagka] calls 'before' and 'after' blocks with context object as self.
-      call_before_blocks(scope, context)
+      call_before_blocks(node, context)
       status = :PASS
       exc = nil
       #; [!yd24o] runs spec body, catching assertions or exceptions.
@@ -1128,7 +1128,7 @@ module Oktest
         if params.nil? || params.empty?
           call_spec_block(spec, context)
         else
-          values = get_fixture_values(params, scope, spec, context)
+          values = get_fixture_values(params, node, spec, context)
           call_spec_block(spec, context, *values)
         end
       rescue NoMemoryError   => exc;  raise exc
@@ -1156,7 +1156,7 @@ module Oktest
         call_at_end_blocks(context)
       #; [!76g7q] calls 'after' blocks even when exception raised.
       ensure
-        call_after_blocks(scope, context)
+        call_after_blocks(node, context)
       end
       @reporter.exit_spec(spec, depth, status, exc, parent)
     end
@@ -1188,45 +1188,45 @@ module Oktest
       return topic.new_context()
     end
 
-    def get_fixture_values(names, topic, spec, context)
-      return FixtureManager.instance.get_fixture_values(names, topic, spec, context)
+    def get_fixture_values(names, node, spec, context)
+      return FixtureManager.instance.get_fixture_values(names, node, spec, context)
     end
 
-    def _call_blocks_parent_first(topic, name, obj)
+    def _call_blocks_parent_first(node, name, obj)
       blocks = []
-      while topic
-        block = topic.get_hook_block(name)
+      while node
+        block = node.get_hook_block(name)
         blocks << block if block
-        topic = topic.parent
+        node = node.parent
       end
       blocks.reverse.each {|blk| obj.instance_eval(&blk) }
       blocks.clear
     end
 
-    def _call_blocks_child_first(topic, name, obj)
-      while topic
-        block = topic.get_hook_block(name)
+    def _call_blocks_child_first(node, name, obj)
+      while node
+        block = node.get_hook_block(name)
         obj.instance_eval(&block) if block
-        topic = topic.parent
+        node = node.parent
       end
     end
 
-    def call_before_blocks(topic, spec)
-      _call_blocks_parent_first(topic, :before, spec)
+    def call_before_blocks(node, spec)
+      _call_blocks_parent_first(node, :before, spec)
     end
 
-    def call_after_blocks(topic, spec)
-      _call_blocks_child_first(topic, :after, spec)
+    def call_after_blocks(node, spec)
+      _call_blocks_child_first(node, :after, spec)
     end
 
-    def call_before_all_block(topic)
-      block = topic.get_hook_block(:before_all)
-      topic.instance_eval(&block) if block
+    def call_before_all_block(node)
+      block = node.get_hook_block(:before_all)
+      node.instance_eval(&block) if block
     end
 
-    def call_after_all_block(topic)
-      block = topic.get_hook_block(:after_all)
-      topic.instance_eval(&block) if block
+    def call_after_all_block(node)
+      block = node.get_hook_block(:after_all)
+      node.instance_eval(&block) if block
     end
 
     def call_spec_block(spec, context, *args)
