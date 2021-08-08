@@ -74,7 +74,7 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "[!dth2c] clears filescopes list." do
+    it "[!dth2c] clears toplvel scope list." do
       assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #1"
       sout, serr = capture do
         build_topics.call
@@ -378,7 +378,7 @@ END
     end
   end
 
-  describe "#run_filescope()" do
+  describe "#run_scope()" do
     it "[!5anr7] calls before_all and after_all blocks." do
       sout, serr = capture do
         Oktest.scope do

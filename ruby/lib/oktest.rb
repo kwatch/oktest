@@ -1163,23 +1163,23 @@ module Oktest
 
     def run_all()
       #; [!xrisl] runs topics and specs.
-      #; [!dth2c] clears filescopes list.
+      #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
-      while (scope = TOPLEVEL_SCOPES.shift)
-        run_filescope(scope)
+      while (scope = TOPLEVEL_SCOPES.shift()) != nil
+        run_scope(scope)
       end
       @reporter.exit_all(self)
     end
 
-    def run_filescope(filescope)
-      @reporter.enter_file(filescope.filename)
+    def run_scope(scope)
+      @reporter.enter_file(scope.filename)
       #; [!5anr7] calls before_all and after_all blocks.
-      call_before_all_block(filescope)
-      filescope.children.each do |child|
+      call_before_all_block(scope)
+      scope.children.each do |child|
         child.accept_runner(self, 0, nil)
       end
-      call_after_all_block(filescope)
-      @reporter.exit_file(filescope.filename)
+      call_after_all_block(scope)
+      @reporter.exit_file(scope.filename)
     end
 
     private
