@@ -1107,17 +1107,17 @@ module Oktest
       #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
       while (scope = TOPLEVEL_SCOPES.shift()) != nil
-        run_scope(scope)
+        run_scope(scope, -1, nil)
       end
       @reporter.exit_all(self)
     end
 
-    def run_scope(scope)
+    def run_scope(scope, depth, parent)
       @reporter.enter_scope(scope.filename)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
       scope.children.each do |child|
-        child.accept_runner(self, 0, nil)
+        child.accept_runner(self, depth+1, scope)
       end
       call_after_all_block(scope)
       @reporter.exit_scope(scope.filename)
