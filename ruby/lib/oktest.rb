@@ -1113,12 +1113,12 @@ module Oktest
     end
 
     def run_scope(scope, depth, parent)
-      @reporter.enter_scope(scope.filename)
+      @reporter.enter_scope(scope)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
       scope.children.each {|c| c.accept_runner(self, depth+1, scope) }
       call_after_all_block(scope)
-      @reporter.exit_scope(scope.filename)
+      @reporter.exit_scope(scope)
     end
 
     def run_topic(topic, depth, parent)
@@ -1316,8 +1316,8 @@ module Oktest
 
     def enter_all(runner); end
     def exit_all(runner); end
-    def enter_scope(filename); end
-    def exit_scope(filename); end
+    def enter_scope(scope); end
+    def exit_scope(scope); end
     def enter_topic(topic, depth); end
     def exit_topic(topic, depth); end
     def enter_spec(spec, depth); end
@@ -1353,10 +1353,10 @@ module Oktest
       puts footer(elapsed)
     end
 
-    def enter_scope(filename)
+    def enter_scope(scope)
     end
 
-    def exit_scope(filename)
+    def exit_scope(scope)
     end
 
     def enter_topic(topic, depth)
@@ -1512,11 +1512,11 @@ module Oktest
   class SimpleReporter < BaseReporter
     #; [!xfd5o] reports filename.
 
-    def enter_scope(filename)
-      print "#{filename}: "
+    def enter_scope(scope)
+      print "#{scope.filename}: "
     end
 
-    def exit_scope(filename)
+    def exit_scope(scope)
       puts()
       print_exceptions()
     end

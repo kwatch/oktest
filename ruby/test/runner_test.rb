@@ -14,10 +14,10 @@ class Runner_TC < TC
   class DummyReporter < Oktest::Reporter
     def enter_all(runner); end
     def exit_all(runner); end
-    def enter_scope(filename)
-      puts "file: #{filename.inspect}"
+    def enter_scope(scope)
+      puts "file: #{scope.filename.inspect}"
     end
-    def exit_scope(filename)
+    def exit_scope(scope)
       puts "/file"
     end
     def enter_topic(topic, depth)
