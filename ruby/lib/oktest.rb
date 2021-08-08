@@ -1125,12 +1125,9 @@ module Oktest
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
         params = Util.required_param_names_of_block(spec.block)
-        if params.nil? || params.empty?
-          call_spec_block(spec, context)
-        else
-          values = get_fixture_values(params, node, spec, context)
-          call_spec_block(spec, context, *values)
-        end
+        values = params.nil? || params.empty? ? [] \
+                 : get_fixture_values(params, node, spec, context)
+        spec.run_block_in_context_object(context, *values)
       rescue NoMemoryError   => exc;  raise exc
       rescue SignalException => exc;  raise exc
       rescue FAIL_EXCEPTION  => exc;  status = :FAIL
@@ -1184,10 +1181,6 @@ module Oktest
 
     private
 
-    def new_context(topic, spec)
-      return topic.new_context()
-    end
-
     def get_fixture_values(names, node, spec, context)
       return FixtureManager.instance.get_fixture_values(names, node, spec, context)
     end
@@ -1227,14 +1220,6 @@ module Oktest
     def call_after_all_block(node)
       block = node.get_hook_block(:after_all)
       node.instance_eval(&block) if block
-    end
-
-    def call_spec_block(spec, context, *args)
-      if args.empty?
-        context.instance_eval(&spec.block)
-      else
-        context.instance_exec(*args, &spec.block)
-      end
     end
 
     def call_at_end_blocks(context)
