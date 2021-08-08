@@ -75,13 +75,13 @@ END
       assert_eq serr, ""
     end
     it "[!dth2c] clears toplvel scope list." do
-      assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #1"
+      assert_eq Oktest::GLOBAL_SCOPE.has_child?, false
       sout, serr = capture do
         build_topics.call
-        assert !Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should be empty"
+        assert_eq Oktest::GLOBAL_SCOPE.has_child?, true
         Oktest::Runner.new(DummyReporter.new).start()
       end
-      assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #2"
+      assert_eq Oktest::GLOBAL_SCOPE.has_child?, false
     end
   end
 
@@ -416,7 +416,7 @@ class RunnerFunctions_TC < TC
   end
 
   def teardown()
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::GLOBAL_SCOPE.clear_children()
   end
 
   def plain2colored(str)

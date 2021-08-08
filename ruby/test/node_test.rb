@@ -15,7 +15,7 @@ class Node_TC < TC
   end
 
   def teardown()
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::GLOBAL_SCOPE.clear_children()
   end
 
 
@@ -50,7 +50,7 @@ class Node_TC < TC
       p.add_child(Oktest::Node.new(nil))
       p.add_child(Oktest::Node.new(nil))
       assert_eq p.has_child?, true
-      p.clearchildren()
+      p.clear_children()
       assert_eq p.has_child?, false
     end
     it "[!cvaq1] return self." do
@@ -276,7 +276,7 @@ class ScopeFunctions_TC < TC
   end
 
   def teardown
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::GLOBAL_SCOPE.clear_children()
   end
 
   describe 'Oktest.scope()' do
@@ -301,12 +301,12 @@ class ScopeFunctions_TC < TC
       end
       assert_eq x, 2
     end
-    it "[!rsimc] registers scope object into TOPLEVEL_SCOPES." do
-      assert Oktest::TOPLEVEL_SCOPES.empty?, "should be empty"
+    it "[!rsimc] adds scope object as child of GLOBAL_SCOPE." do
+      assert_eq Oktest::GLOBAL_SCOPE.has_child?, false
       so = Oktest.scope do
       end
-      assert ! Oktest::TOPLEVEL_SCOPES.empty?, "should not be empty"
-      assert_eq Oktest::TOPLEVEL_SCOPES, [so]
+      assert_eq Oktest::GLOBAL_SCOPE.has_child?, true
+      assert_eq Oktest::GLOBAL_SCOPE.children, [so]
     end
   end
 
@@ -571,7 +571,7 @@ class SpecLeafTC < TC
   end
 
   def teardown
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::GLOBAL_SCOPE.clear_children()
   end
 
   def new_spec_object(desc="sample #1", tag: nil)
