@@ -14,10 +14,10 @@ class Runner_TC < TC
   class DummyReporter < Oktest::Reporter
     def enter_all(runner); end
     def exit_all(runner); end
-    def enter_file(filename)
-      puts "file: #{filename.inspect}"
+    def enter_scope(scope)
+      puts "file: #{scope.filename.inspect}"
     end
-    def exit_file(filename)
+    def exit_scope(scope)
       puts "/file"
     end
     def enter_topic(topic, depth)
@@ -44,7 +44,7 @@ class Runner_TC < TC
     def counts; {}; end
   end
 
-  describe "#run_all()" do
+  describe "#start()" do
     build_topics = proc {
       Oktest.scope do
         topic "Parent" do
@@ -59,7 +59,7 @@ class Runner_TC < TC
     it "[!xrisl] runs topics and specs." do
       sout, serr = capture do
         build_topics.call
-        Oktest::Runner.new(DummyReporter.new).run_all()
+        Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -74,12 +74,12 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "[!dth2c] clears filescopes list." do
+    it "[!dth2c] clears toplvel scope list." do
       assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #1"
       sout, serr = capture do
         build_topics.call
         assert !Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should be empty"
-        Oktest::Runner.new(DummyReporter.new).run_all()
+        Oktest::Runner.new(DummyReporter.new).start()
       end
       assert Oktest::TOPLEVEL_SCOPES.empty?, "Oktest::TOPLEVEL_SCOPES should NOT be empty #2"
     end
@@ -101,7 +101,7 @@ END
         end
       end
       sout, serr = capture do
-        runner = Oktest::Runner.new(DummyReporter.new).run_all()
+        runner = Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -146,7 +146,7 @@ END
         end
       end
       sout, serr = capture do
-        runner = Oktest::Runner.new(DummyReporter.new).run_all()
+        runner = Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -184,7 +184,7 @@ END
             end
           end
         end
-        runner = Oktest::Runner.new(DummyReporter.new).run_all()
+        runner = Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -243,7 +243,7 @@ END
             end
           end
         end
-        runner = Oktest::Runner.new(DummyReporter.new).run_all()
+        runner = Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -271,7 +271,7 @@ END
             spec("spec#2") { at_end { puts "  - at_end A2" }; "".null? }   # raises NoMethodError
           end
         end
-        runner = Oktest::Runner.new(DummyReporter.new).run_all()
+        runner = Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -295,7 +295,7 @@ END
             spec("spec#1") { TODO(); ok {1+1} == 2 }  # passed unexpectedly
           end
         end
-        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).run_all() }
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).start() }
         expected = <<'END'
 file: "test/runner_test.rb"
 topic: "topic#A"
@@ -312,7 +312,7 @@ END
             spec("spec#1") { TODO(); ok {1+1} == 1 }  # failed expectedly
           end
         end
-        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).run_all() }
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).start() }
         expected = <<'END'
 file: "test/runner_test.rb"
 topic: "topic#A"
@@ -347,7 +347,7 @@ END
             end
           end
         end
-        Oktest::Runner.new(DummyReporter.new).run_all()
+        Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"
@@ -378,7 +378,7 @@ END
     end
   end
 
-  describe "#run_filescope()" do
+  describe "#run_scope()" do
     it "[!5anr7] calls before_all and after_all blocks." do
       sout, serr = capture do
         Oktest.scope do
@@ -389,7 +389,7 @@ END
           before_all { puts "[all] before_all#2" }
           after_all  { puts "[all] after_all#2" }
         end
-        Oktest::Runner.new(DummyReporter.new).run_all()
+        Oktest::Runner.new(DummyReporter.new).start()
       end
       expected = <<'END'
 file: "test/runner_test.rb"

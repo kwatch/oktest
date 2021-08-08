@@ -1102,13 +1102,30 @@ module Oktest
       @reporter = reporter
     end
 
+    def start()
+      #; [!xrisl] runs topics and specs.
+      #; [!dth2c] clears toplvel scope list.
+      @reporter.enter_all(self)
+      while (scope = TOPLEVEL_SCOPES.shift()) != nil
+        run_scope(scope, -1, nil)
+      end
+      @reporter.exit_all(self)
+    end
+
+    def run_scope(scope, depth, parent)
+      @reporter.enter_scope(scope)
+      #; [!5anr7] calls before_all and after_all blocks.
+      call_before_all_block(scope)
+      scope.children.each {|c| c.accept_runner(self, depth+1, scope) }
+      call_after_all_block(scope)
+      @reporter.exit_scope(scope)
+    end
+
     def run_topic(topic, depth, parent)
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.children.each do |child|
-        child.accept_runner(self, depth+1, topic)
-      end
+      topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
@@ -1116,21 +1133,18 @@ module Oktest
     def run_spec(spec, depth, parent)
       @reporter.enter_spec(spec, depth)
       #; [!u45di] runs spec block with context object which allows to call methods defined in topics.
-      scope = parent
-      context = scope.new_context_object()
+      node = parent
+      context = node.new_context_object()
       #; [!yagka] calls 'before' and 'after' blocks with context object as self.
-      call_before_blocks(scope, context)
+      call_before_blocks(node, context)
       status = :PASS
       exc = nil
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
         params = Util.required_param_names_of_block(spec.block)
-        if params.nil? || params.empty?
-          call_spec_block(spec, context)
-        else
-          values = get_fixture_values(params, scope, spec, context)
-          call_spec_block(spec, context, *values)
-        end
+        values = params.nil? || params.empty? ? [] \
+                 : get_fixture_values(params, node, spec, context)
+        spec.run_block_in_context_object(context, *values)
       rescue NoMemoryError   => exc;  raise exc
       rescue SignalException => exc;  raise exc
       rescue FAIL_EXCEPTION  => exc;  status = :FAIL
@@ -1156,85 +1170,52 @@ module Oktest
         call_at_end_blocks(context)
       #; [!76g7q] calls 'after' blocks even when exception raised.
       ensure
-        call_after_blocks(scope, context)
+        call_after_blocks(node, context)
       end
       @reporter.exit_spec(spec, depth, status, exc, parent)
     end
 
-    def run_all()
-      #; [!xrisl] runs topics and specs.
-      #; [!dth2c] clears filescopes list.
-      @reporter.enter_all(self)
-      while (scope = TOPLEVEL_SCOPES.shift)
-        run_filescope(scope)
-      end
-      @reporter.exit_all(self)
-    end
-
-    def run_filescope(filescope)
-      @reporter.enter_file(filescope.filename)
-      #; [!5anr7] calls before_all and after_all blocks.
-      call_before_all_block(filescope)
-      filescope.children.each do |child|
-        child.accept_runner(self, 0, nil)
-      end
-      call_after_all_block(filescope)
-      @reporter.exit_file(filescope.filename)
-    end
-
     private
 
-    def new_context(topic, spec)
-      return topic.new_context()
+    def get_fixture_values(names, node, spec, context)
+      return FixtureManager.instance.get_fixture_values(names, node, spec, context)
     end
 
-    def get_fixture_values(names, topic, spec, context)
-      return FixtureManager.instance.get_fixture_values(names, topic, spec, context)
-    end
-
-    def _call_blocks_parent_first(topic, name, obj)
+    def _call_blocks_parent_first(node, name, context)
       blocks = []
-      while topic
-        block = topic.get_hook_block(name)
+      while node
+        block = node.get_hook_block(name)
         blocks << block if block
-        topic = topic.parent
+        node = node.parent
       end
-      blocks.reverse.each {|blk| obj.instance_eval(&blk) }
+      blocks.reverse.each {|blk| context.instance_eval(&blk) }
       blocks.clear
     end
 
-    def _call_blocks_child_first(topic, name, obj)
-      while topic
-        block = topic.get_hook_block(name)
-        obj.instance_eval(&block) if block
-        topic = topic.parent
+    def _call_blocks_child_first(node, name, context)
+      while node
+        block = node.get_hook_block(name)
+        context.instance_eval(&block) if block
+        node = node.parent
       end
     end
 
-    def call_before_blocks(topic, spec)
-      _call_blocks_parent_first(topic, :before, spec)
+    def call_before_blocks(node, context)
+      _call_blocks_parent_first(node, :before, context)
     end
 
-    def call_after_blocks(topic, spec)
-      _call_blocks_child_first(topic, :after, spec)
+    def call_after_blocks(node, context)
+      _call_blocks_child_first(node, :after, context)
     end
 
-    def call_before_all_block(topic)
-      block = topic.get_hook_block(:before_all)
-      topic.instance_eval(&block) if block
+    def call_before_all_block(node)
+      block = node.get_hook_block(:before_all)
+      node.instance_eval(&block) if block
     end
 
-    def call_after_all_block(topic)
-      block = topic.get_hook_block(:after_all)
-      topic.instance_eval(&block) if block
-    end
-
-    def call_spec_block(spec, context, *args)
-      if args.empty?
-        context.instance_eval(&spec.block)
-      else
-        context.instance_exec(*args, &spec.block)
-      end
+    def call_after_all_block(node)
+      block = node.get_hook_block(:after_all)
+      node.instance_eval(&block) if block
     end
 
     def call_at_end_blocks(context)
@@ -1335,8 +1316,8 @@ module Oktest
 
     def enter_all(runner); end
     def exit_all(runner); end
-    def enter_file(filename); end
-    def exit_file(filename); end
+    def enter_scope(scope); end
+    def exit_scope(scope); end
     def enter_topic(topic, depth); end
     def exit_topic(topic, depth); end
     def enter_spec(spec, depth); end
@@ -1372,10 +1353,10 @@ module Oktest
       puts footer(elapsed)
     end
 
-    def enter_file(filename)
+    def enter_scope(scope)
     end
 
-    def exit_file(filename)
+    def exit_scope(scope)
     end
 
     def enter_topic(topic, depth)
@@ -1531,11 +1512,11 @@ module Oktest
   class SimpleReporter < BaseReporter
     #; [!xfd5o] reports filename.
 
-    def enter_file(filename)
-      print "#{filename}: "
+    def enter_scope(scope)
+      print "#{scope.filename}: "
     end
 
-    def exit_file(filename)
+    def exit_scope(scope)
       puts()
       print_exceptions()
     end
@@ -1587,7 +1568,7 @@ module Oktest
     reporter ||= klass.new
     #; [!mn451] run test cases.
     runner = RUNNER_CLASS.new(reporter)
-    runner.run_all()
+    runner.start()
     TOPLEVEL_SCOPES.empty?  or "** internal error"
     #; [!p52se] returns total number of failures and errors.
     counts = reporter.counts

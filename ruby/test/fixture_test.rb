@@ -20,7 +20,7 @@ class FixtureManager_TC < TC
   def run_all(dummy: false)
     reporter = dummy ? DummyReporter2.new : Oktest::Reporter.new
     sout, serr = capture do
-      Oktest::Runner.new(reporter).run_all()
+      Oktest::Runner.new(reporter).start()
     end
     assert_eq serr, ""
     return sout
