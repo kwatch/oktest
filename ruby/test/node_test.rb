@@ -34,6 +34,31 @@ class Node_TC < TC
     end
   end
 
+  describe '#has_child?' do
+    it "[!xb30d] return true when no children, else false." do
+      p = Oktest::Node.new(nil)
+      c = Oktest::Node.new(nil)
+      p.add_child(c)
+      assert_eq p.has_child?, true
+      assert_eq c.has_child?, false
+    end
+  end
+
+  describe '#clear_children()' do
+    it "[!o8xfb] removes all children." do
+      p = Oktest::Node.new(nil)
+      p.add_child(Oktest::Node.new(nil))
+      p.add_child(Oktest::Node.new(nil))
+      assert_eq p.has_child?, true
+      p.clearchildren()
+      assert_eq p.has_child?, false
+    end
+    it "[!cvaq1] return self." do
+      p = Oktest::Node.new(nil)
+      assert p.clear_children().equal?(p)
+    end
+  end
+
   describe '#run_block_in_context_class()' do
     it "[!j9qdh] run block in context class." do
       x = Oktest::Node.new(nil)

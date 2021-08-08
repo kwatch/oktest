@@ -670,6 +670,18 @@ module Oktest
       self
     end
 
+    def has_child?
+      #; [!xb30d] return true when no children, else false.
+      return !@children.empty?
+    end
+
+    def clear_children()
+      #; [!o8xfb] removes all children.
+      @children.clear()
+      #; [!cvaq1] return self.
+      self
+    end
+
     def run_block_in_context_class(&block)
       #; [!j9qdh] run block in context class.
       @context_class.class_eval(&block)
