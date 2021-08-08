@@ -1102,7 +1102,7 @@ module Oktest
       @reporter = reporter
     end
 
-    def run_all()
+    def start()
       #; [!xrisl] runs topics and specs.
       #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
@@ -1572,7 +1572,7 @@ module Oktest
     reporter ||= klass.new
     #; [!mn451] run test cases.
     runner = RUNNER_CLASS.new(reporter)
-    runner.run_all()
+    runner.start()
     TOPLEVEL_SCOPES.empty?  or "** internal error"
     #; [!p52se] returns total number of failures and errors.
     counts = reporter.counts

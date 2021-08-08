@@ -190,7 +190,7 @@ class Filter_TC < TC
     Oktest.filter(filter)
     reporter = Oktest::VerboseReporter.new()
     sout, serr = capture('', tty: false) do
-      Oktest::Runner.new(reporter).run_all()
+      Oktest::Runner.new(reporter).start()
     end
     assert_eq serr, ""
     return sout.sub(/^## total:.*\n/, '')
