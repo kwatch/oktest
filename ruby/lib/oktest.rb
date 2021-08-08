@@ -1102,6 +1102,27 @@ module Oktest
       @reporter = reporter
     end
 
+    def run_all()
+      #; [!xrisl] runs topics and specs.
+      #; [!dth2c] clears toplvel scope list.
+      @reporter.enter_all(self)
+      while (scope = TOPLEVEL_SCOPES.shift()) != nil
+        run_scope(scope)
+      end
+      @reporter.exit_all(self)
+    end
+
+    def run_scope(scope)
+      @reporter.enter_scope(scope.filename)
+      #; [!5anr7] calls before_all and after_all blocks.
+      call_before_all_block(scope)
+      scope.children.each do |child|
+        child.accept_runner(self, 0, nil)
+      end
+      call_after_all_block(scope)
+      @reporter.exit_scope(scope.filename)
+    end
+
     def run_topic(topic, depth, parent)
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
@@ -1156,27 +1177,6 @@ module Oktest
         call_after_blocks(node, context)
       end
       @reporter.exit_spec(spec, depth, status, exc, parent)
-    end
-
-    def run_all()
-      #; [!xrisl] runs topics and specs.
-      #; [!dth2c] clears toplvel scope list.
-      @reporter.enter_all(self)
-      while (scope = TOPLEVEL_SCOPES.shift()) != nil
-        run_scope(scope)
-      end
-      @reporter.exit_all(self)
-    end
-
-    def run_scope(scope)
-      @reporter.enter_scope(scope.filename)
-      #; [!5anr7] calls before_all and after_all blocks.
-      call_before_all_block(scope)
-      scope.children.each do |child|
-        child.accept_runner(self, 0, nil)
-      end
-      call_after_all_block(scope)
-      @reporter.exit_scope(scope.filename)
     end
 
     private
