@@ -1185,31 +1185,31 @@ module Oktest
       return FixtureManager.instance.get_fixture_values(names, node, spec, context)
     end
 
-    def _call_blocks_parent_first(node, name, obj)
+    def _call_blocks_parent_first(node, name, context)
       blocks = []
       while node
         block = node.get_hook_block(name)
         blocks << block if block
         node = node.parent
       end
-      blocks.reverse.each {|blk| obj.instance_eval(&blk) }
+      blocks.reverse.each {|blk| context.instance_eval(&blk) }
       blocks.clear
     end
 
-    def _call_blocks_child_first(node, name, obj)
+    def _call_blocks_child_first(node, name, context)
       while node
         block = node.get_hook_block(name)
-        obj.instance_eval(&block) if block
+        context.instance_eval(&block) if block
         node = node.parent
       end
     end
 
-    def call_before_blocks(node, spec)
-      _call_blocks_parent_first(node, :before, spec)
+    def call_before_blocks(node, context)
+      _call_blocks_parent_first(node, :before, context)
     end
 
-    def call_after_blocks(node, spec)
-      _call_blocks_child_first(node, :after, spec)
+    def call_after_blocks(node, context)
+      _call_blocks_child_first(node, :after, context)
     end
 
     def call_before_all_block(node)
