@@ -18,7 +18,7 @@ class Misc_TC < TC
 
   def teardown()
     Oktest::Config.auto_run = @_auto_run
-    Oktest::GLOBAL_SCOPE.clear_children()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
   describe 'Oktest.auto_run?()' do
@@ -44,7 +44,7 @@ class Misc_TC < TC
       assert exc != nil, "exception not raised"
     end
     it "[!rg5aw] returns false if Oktest.scope() never been called." do
-      assert_eq Oktest::GLOBAL_SCOPE.has_child?, false
+      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
       assert_eq Oktest.auto_run?, false
     end
     it "[!0j3ek] returns true if Config.auto_run is enabled." do

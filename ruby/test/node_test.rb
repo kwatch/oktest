@@ -15,7 +15,7 @@ class Node_TC < TC
   end
 
   def teardown()
-    Oktest::GLOBAL_SCOPE.clear_children()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
 
@@ -276,7 +276,7 @@ class ScopeFunctions_TC < TC
   end
 
   def teardown
-    Oktest::GLOBAL_SCOPE.clear_children()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
   describe 'Oktest.scope()' do
@@ -301,12 +301,12 @@ class ScopeFunctions_TC < TC
       end
       assert_eq x, 2
     end
-    it "[!rsimc] adds scope object as child of GLOBAL_SCOPE." do
-      assert_eq Oktest::GLOBAL_SCOPE.has_child?, false
+    it "[!rsimc] adds scope object as child of THE_GLOBAL_SCOPE." do
+      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
       so = Oktest.scope do
       end
-      assert_eq Oktest::GLOBAL_SCOPE.has_child?, true
-      assert_eq Oktest::GLOBAL_SCOPE.children, [so]
+      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
+      assert_eq Oktest::THE_GLOBAL_SCOPE.children, [so]
     end
   end
 
@@ -316,16 +316,16 @@ class ScopeFunctions_TC < TC
       assert_eq go1.class, Oktest::ScopeNode
       go2 = Oktest.global_scope() { nil }
       assert_eq go2, go1
-      assert_eq go2, Oktest::GLOBAL_SCOPE
+      assert_eq go2, Oktest::THE_GLOBAL_SCOPE
     end
-    it "[!flnpc] run block in the GLOBAL_SCOPE object." do
+    it "[!flnpc] run block in the THE_GLOBAL_SCOPE object." do
       Oktest.global_scope do
         fixture :tmp_37531 do
           {id: 37531}
         end
       end
-      assert Oktest::GLOBAL_SCOPE.fixtures.key?(:tmp_37531)
-      v = Oktest::GLOBAL_SCOPE.fixtures[:tmp_37531][0].call
+      assert Oktest::THE_GLOBAL_SCOPE.fixtures.key?(:tmp_37531)
+      v = Oktest::THE_GLOBAL_SCOPE.fixtures[:tmp_37531][0].call
       assert_eq v, {id: 37531}
     end
     it "[!pe0g2] raises error when nested called." do
@@ -571,7 +571,7 @@ class SpecLeafTC < TC
   end
 
   def teardown
-    Oktest::GLOBAL_SCOPE.clear_children()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
   def new_spec_object(desc="sample #1", tag: nil)
