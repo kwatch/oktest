@@ -1248,9 +1248,9 @@ module Oktest
       return @instance ||= self.new
     end
 
-    def get_fixture_values(names, topic, spec, context, location=nil, _resolved={}, _resolving=[])
+    def get_fixture_values(names, node, spec, context, location=nil, _resolved={}, _resolving=[])
       #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
-      _resolved[:this_topic] ||= topic.target
+      _resolved[:this_topic] ||= node.target if node.topic?
       #; [!ja2ew] resolves 'this_spec' fixture name as description of current spec.
       _resolved[:this_spec]  ||= spec.desc
       #; [!v587k] resolves fixtures.
@@ -1259,20 +1259,20 @@ module Oktest
         #; [!np4p9] raises error when loop exists in dependency.
         ! _resolving.include?(name)  or
           raise _looped_dependency_error(name, _resolving, location)
-        get_fixture_value(name, topic, spec, context, location, _resolved, _resolving)
+        get_fixture_value(name, node, spec, context, location, _resolved, _resolving)
       }
     end
 
-    def get_fixture_value(name, topic, spec, context, location=nil, _resolved={}, _resolving=[])
+    def get_fixture_value(name, node, spec, context, location=nil, _resolved={}, _resolving=[])
       return _resolved[name] if _resolved.key?(name)
       location ||= spec.location
-      tuple = topic.get_fixture_block(name)
+      tuple = node.get_fixture_block(name)
       if tuple
         block, param_names, location = tuple
         #; [!2esaf] resolves fixture dependencies.
         if param_names
           _resolving << name
-          args = get_fixture_values(param_names, topic, spec, context, location, _resolved, _resolving)
+          args = get_fixture_values(param_names, node, spec, context, location, _resolved, _resolving)
           (popped = _resolving.pop) == name  or
             raise "** assertion failed: name=#{name.inspect}, resolvng[-1]=#{popped.inspect}"
           #; [!4xghy] calls fixture block with context object as self.
@@ -1283,10 +1283,10 @@ module Oktest
         #; [!8t3ul] caches fixture value to call fixture block only once per spec.
         _resolved[name] = val
         return val
-      elsif topic.parent
+      elsif node.parent
         #; [!4chb9] traverses parent topics if fixture not found in current topic.
-        return get_fixture_value(name, topic.parent, spec, context, location, _resolved, _resolving)
-      elsif ! topic.equal?(THE_GLOBAL_SCOPE)
+        return get_fixture_value(name, node.parent, spec, context, location, _resolved, _resolving)
+      elsif ! node.equal?(THE_GLOBAL_SCOPE)
         #; [!wt3qk] suports global scope.
         return get_fixture_value(name, THE_GLOBAL_SCOPE, spec, context, location, _resolved, _resolving)
       else
