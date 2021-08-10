@@ -1245,9 +1245,9 @@ module Oktest
 
     def get_fixture_values(names, node, spec, context, location=nil, _resolved={}, _resolving=[])
       #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
-      _resolved[:this_topic] ||= node.target if node.topic?
+      _resolved[:this_topic] = node.target if !_resolved.key?(:this_topic) && node.topic?
       #; [!ja2ew] resolves 'this_spec' fixture name as description of current spec.
-      _resolved[:this_spec]  ||= spec.desc
+      _resolved[:this_spec]  = spec.desc   if !_resolved.key?(:this_spec)
       #; [!v587k] resolves fixtures.
       location ||= spec.location
       return names.collect {|name|
