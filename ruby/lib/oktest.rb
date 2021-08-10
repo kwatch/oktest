@@ -606,8 +606,7 @@ module Oktest
       block ||= proc { raise TodoException, "not implemented yet" }
       #; [!c8c8o] creates new spec object.
       location = caller(1).first
-      spec = SpecLeaf.new(desc, tag: tag, location: location, &block)
-      node.add_child(spec)
+      spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
       return spec
     end
 
@@ -825,11 +824,13 @@ module Oktest
 
   class SpecLeaf < Item
 
-    def initialize(desc, tag: nil, location: nil, &block)
+    def initialize(parent, desc, tag: nil, location: nil, &block)
+      #@parent = parent      # not keep parent node to avoid recursive reference
       @desc  = desc
       @tag   = tag
       @location = location   # necessary when raising fixture not found error
       @block = block
+      parent.add_child(self) if parent
     end
 
     attr_reader :desc, :tag, :location, :block

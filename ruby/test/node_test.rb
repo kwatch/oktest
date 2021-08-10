@@ -640,7 +640,7 @@ class SpecLeafTC < TC
   describe '#run_block_in_context_object()' do
     it "[!tssim] run spec block in text object." do
       to = Oktest::TopicNode.new(nil, 'Example')
-      sp = Oktest::SpecLeaf.new("#sample 2") { @called = "<<29193>>" }
+      sp = Oktest::SpecLeaf.new(to, "#sample 2") { @called = "<<29193>>" }
       ctx = to.new_context_object()
       assert_eq ctx.instance_variable_get('@called'), nil
       sp.run_block_in_context_object(ctx)
@@ -669,7 +669,7 @@ class SpecLeafTC < TC
   describe '#accept_filter()' do
     it "[!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it." do
       ft = DummyFilter3.new(nil, nil, nil)
-      sc = Oktest::SpecLeaf.new("sample")
+      sc = Oktest::SpecLeaf.new(nil, "sample")
       ret = sc.accept_filter(ft)
       assert_eq ft._args, [sc]
       assert_eq ret, "<<60733>>"

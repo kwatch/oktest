@@ -149,13 +149,13 @@ class Filter_TC < TC
 
   describe '#spec_match?()' do
     it "[!k45p3] returns true if spec description matched to pattern." do
-      sp = Oktest::SpecLeaf.new("sample", tag: 'foo')
+      sp = Oktest::SpecLeaf.new(nil, "sample", tag: 'foo')
       assert_eq new_filter(nil, 'sample', nil).spec_match?(sp), true
       assert_eq new_filter(nil, '*samp*', nil).spec_match?(sp), true
       assert_eq new_filter(nil, '*abc*' , nil).spec_match?(sp), false
     end
     it "[!li3pd] returns true if tag name matched to pattern." do
-      sp = Oktest::SpecLeaf.new("sample", tag: 'foo')
+      sp = Oktest::SpecLeaf.new(nil, "sample", tag: 'foo')
       [nil, '*bar*'].each do |pat|
         assert_eq new_filter(nil, pat, 'foo'      ).spec_match?(sp), true
         assert_eq new_filter(nil, pat, 'f*'       ).spec_match?(sp), true
