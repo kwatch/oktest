@@ -26,17 +26,6 @@ class FixtureManager_TC < TC
     return sout
   end
 
-  describe '.instance()' do
-
-    it "[!jsi9q] returns same object every time." do
-      o1 = Oktest::FixtureManager.instance()
-      assert o1.is_a?(Oktest::FixtureManager), "unexpected object."
-      o2 = Oktest::FixtureManager.instance()
-      assert o1.equal?(o2), "different object."
-    end
-
-  end
-
   describe '#get_fixture_values()' do
 
     it "[!v587k] resolves fixtures." do

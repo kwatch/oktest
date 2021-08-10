@@ -1243,11 +1243,6 @@ module Oktest
 
   class FixtureManager
 
-    def self.instance()
-      #; [!jsi9q] returns same object every time.
-      return @instance ||= self.new
-    end
-
     def get_fixture_values(names, node, spec, context, location=nil, _resolved={}, _resolving=[])
       #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
       _resolved[:this_topic] ||= node.target if node.topic?
