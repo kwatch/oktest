@@ -1187,7 +1187,7 @@ module Oktest
     private
 
     def get_fixture_values(names, node, spec, context)
-      return FixtureManager.instance.get_fixture_values(names, node, spec, context)
+      return THE_FIXTURE_MANAGER.get_fixture_values(names, node, spec, context)
     end
 
     def _call_blocks_parent_first(node, name, context)
@@ -1312,6 +1312,8 @@ module Oktest
     end
 
   end
+
+  THE_FIXTURE_MANAGER = FixtureManager.new()
 
 
   class FixtureNotFoundError < StandardError
