@@ -646,7 +646,27 @@ module Oktest
   end
 
 
-  class Node
+  class Item
+
+    def accept_runner(runner, *args)
+      #; [!olckb] raises NotImplementedError.
+      raise NotImplementedError, "#{self.class.name}#accept_runner(): not implemented yet."
+    end
+
+    def accept_filter(filter)
+      #; [!49xz4] raises NotImplementedError.
+      raise NotImplementedError, "#{self.class.name}#accept_filter(): not implemented yet."
+    end
+
+    def _repr(depth=0, buf="")       #:nodoc:
+      #; [!qi1af] raises NotImplementedError.
+      raise NotImplementedError, "#{self.class.name}#_repr(): not implemented yet."
+    end
+
+  end
+
+
+  class Node < Item
 
     def initialize(parent, tag: nil)
       @parent   = parent
@@ -695,11 +715,6 @@ module Oktest
       return context
     end
 
-    def accept_runner(runner, *args)
-      #; [!olckb] raises NotImplementedError.
-      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
-    end
-
     def register_fixture_block(name, location, &block)
       #; [!5ctsn] registers fixture name, block, and location.
       params = Util.required_param_names_of_block(block)  # [Symbol]
@@ -723,11 +738,6 @@ module Oktest
     def get_hook_block(key)
       #; [!u3fc6] returns block corresponding to key.
       return @hooks[key]
-    end
-
-    def accept_filter(filter)
-      #; [!49xz4] raises NotImplementedError.
-      raise NotImplementedError.new("#{self.class.name}#accept_filter(): not implemented yet.")
     end
 
     def _repr(depth=0, buf="")
@@ -813,7 +823,7 @@ module Oktest
   end
 
 
-  class SpecLeaf
+  class SpecLeaf < Item
 
     def initialize(desc, tag: nil, location: nil, &block)
       @desc  = desc

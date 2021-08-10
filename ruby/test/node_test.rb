@@ -9,6 +9,52 @@
 require_relative './initialize'
 
 
+class Item_TC < TC
+
+  describe '#accept_runner()' do
+    it "[!olckb] raises NotImplementedError." do
+      runner = Oktest::Runner.new(nil)
+      begin
+        Oktest::Item.new().accept_runner(runner)
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+        assert_eq exc.message, "Oktest::Item#accept_runner(): not implemented yet."
+      else
+        assert false, "NotImplemtendedError should be raised."
+      end
+    end
+  end
+
+  describe '#accept_filter()' do
+    it "[!49xz4] raises NotImplementedError." do
+      filter = Oktest::Filter.new(nil, nil, nil)
+      begin
+        Oktest::Item.new().accept_filter(filter)
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+        assert_eq exc.message, "Oktest::Item#accept_filter(): not implemented yet."
+      else
+        assert false, "NotImplemtendedError should be raised."
+      end
+    end
+  end
+
+  describe '#_repr()' do
+    it "[!qi1af] raises NotImplementedError." do
+      begin
+        Oktest::Item.new()._repr(0)
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+        assert_eq exc.message, "Oktest::Item#_repr(): not implemented yet."
+      else
+        assert false, "NotImplemtendedError should be raised."
+      end
+    end
+  end
+
+end
+
+
 class Node_TC < TC
 
   def setup()
