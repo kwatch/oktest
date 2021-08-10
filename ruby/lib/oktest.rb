@@ -575,7 +575,6 @@ module Oktest
       #; [!0gfvq] creates new topic node.
       node = @__node
       topic = TopicNode.new(node, target, tag: tag)
-      node.add_child(topic)
       topic.run_block_in_context_class(&block)
       return topic
     end
@@ -653,6 +652,7 @@ module Oktest
       @parent   = parent
       @tag      = tag
       @children = []
+      parent.add_child(self) if parent
       @context_class = Class.new(parent ? parent.context_class : Oktest::Context)
       @context_class.__node = self
       @fixtures = {}       # {name: [[param], block]}
@@ -667,6 +667,18 @@ module Oktest
       #; [!1fyk9] keeps children.
       @children << child
       #; [!w5r6l] returns self.
+      self
+    end
+
+    def has_child?
+      #; [!xb30d] return true when no children, else false.
+      return !@children.empty?
+    end
+
+    def clear_children()
+      #; [!o8xfb] removes all children.
+      @children.clear()
+      #; [!cvaq1] return self.
       self
     end
 
@@ -847,27 +859,25 @@ module Oktest
   end
 
 
-  GLOBAL_SCOPE = ScopeNode.new(nil, __FILE__)
-  TOPLEVEL_SCOPES = []
+  THE_GLOBAL_SCOPE = ScopeNode.new(nil, __FILE__)
 
 
   def self.global_scope(&block)
-    #; [!flnpc] run block in the GLOBAL_SCOPE object.
+    #; [!flnpc] run block in the THE_GLOBAL_SCOPE object.
     #; [!pe0g2] raises error when nested called.
-    self.__scope(GLOBAL_SCOPE, &block)
+    self.__scope(THE_GLOBAL_SCOPE, &block)
     #; [!fcmt2] not create new scope object.
-    return GLOBAL_SCOPE
+    return THE_GLOBAL_SCOPE
   end
 
   def self.scope(tag: nil, &block)
     #; [!vxoy1] creates new scope object.
+    #; [!rsimc] adds scope object as child of THE_GLOBAL_SCOPE.
     filename = caller(1).first =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
-    scope = ScopeNode.new(GLOBAL_SCOPE, filename, tag: tag)
+    scope = ScopeNode.new(THE_GLOBAL_SCOPE, filename, tag: tag)
     #; [!jmc4q] raises error when nested called.
     self.__scope(scope, &block)
-    #; [!rsimc] registers scope object into TOPLEVEL_SCOPES.
-    TOPLEVEL_SCOPES << scope
     return scope
   end
 
@@ -1054,8 +1064,8 @@ module Oktest
 
     def start()
       #; [!5zonp] visits topics and specs and calls callbacks.
-      #; [!gkopz] doesn't change Oktest::TOPLEVEL_SCOPES.
-      Oktest::TOPLEVEL_SCOPES.each do |scope|
+      #; [!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE.
+      Oktest::THE_GLOBAL_SCOPE.children.each do |scope|
         scope.children.each {|c| c.accept_runner(self, 0, nil) }
       end
     end
@@ -1106,19 +1116,18 @@ module Oktest
       #; [!xrisl] runs topics and specs.
       #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
-      while (scope = TOPLEVEL_SCOPES.shift()) != nil
-        run_scope(scope, -1, nil)
-      end
+      run_scope(THE_GLOBAL_SCOPE, -2, nil)
+      THE_GLOBAL_SCOPE.clear_children()
       @reporter.exit_all(self)
     end
 
     def run_scope(scope, depth, parent)
-      @reporter.enter_scope(scope)
+      @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
       scope.children.each {|c| c.accept_runner(self, depth+1, scope) }
       call_after_all_block(scope)
-      @reporter.exit_scope(scope)
+      @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
 
     def run_topic(topic, depth, parent)
@@ -1277,9 +1286,9 @@ module Oktest
       elsif topic.parent
         #; [!4chb9] traverses parent topics if fixture not found in current topic.
         return get_fixture_value(name, topic.parent, spec, context, location, _resolved, _resolving)
-      elsif ! topic.equal?(GLOBAL_SCOPE)
+      elsif ! topic.equal?(THE_GLOBAL_SCOPE)
         #; [!wt3qk] suports global scope.
-        return get_fixture_value(name, GLOBAL_SCOPE, spec, context, location, _resolved, _resolving)
+        return get_fixture_value(name, THE_GLOBAL_SCOPE, spec, context, location, _resolved, _resolving)
       else
         #; [!nr79z] raises error when fixture not found.
         exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
@@ -1561,7 +1570,7 @@ module Oktest
 
   def self.run(reporter: nil, style: nil)
     #; [!kfi8b] do nothing when 'Oktest.scope()' not called.
-    return if TOPLEVEL_SCOPES.empty?
+    return unless THE_GLOBAL_SCOPE.has_child?
     #; [!6xn3t] creates reporter object according to 'style:' keyword arg.
     klass = (style ? REPORTER_CLASSES[style] : REPORTER_CLASS)  or
       raise ArgumentError, "#{style.inspect}: unknown style."
@@ -1569,7 +1578,7 @@ module Oktest
     #; [!mn451] run test cases.
     runner = RUNNER_CLASS.new(reporter)
     runner.start()
-    TOPLEVEL_SCOPES.empty?  or "** internal error"
+    ! THE_GLOBAL_SCOPE.has_child?  or "** internal error"
     #; [!p52se] returns total number of failures and errors.
     counts = reporter.counts
     return counts[:FAIL] + counts[:ERROR]
@@ -1835,9 +1844,7 @@ module Oktest
   FILTER_CLASS = Filter
 
   def self.filter(filter_obj)
-    TOPLEVEL_SCOPES.each do |node|
-      filter_obj.filter_children!(node)
-    end
+    filter_obj.filter_children!(THE_GLOBAL_SCOPE)
   end
 
 
@@ -2153,7 +2160,7 @@ END
     exc = $!
     return false if exc && !exc.is_a?(SystemExit)
     #; [!rg5aw] returns false if Oktest.scope() never been called.
-    return false if TOPLEVEL_SCOPES.empty?
+    return false unless THE_GLOBAL_SCOPE.has_child?
     #; [!0j3ek] returns true if Config.auto_run is enabled.
     return Config.auto_run
   end

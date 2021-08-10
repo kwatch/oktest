@@ -56,7 +56,7 @@ class Visitor_TC < TC
   end
 
   def teardown()
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
 
@@ -80,13 +80,13 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
-    it "[!gkopz] doesn't change Oktest::TOPLEVEL_SCOPES." do
+    it "[!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE." do
       prepare()
-      n = Oktest::TOPLEVEL_SCOPES.length
+      n = Oktest::THE_GLOBAL_SCOPE.children.length
       sout, serr = capture do
         MyVisitor.new.start()
       end
-      assert_eq Oktest::TOPLEVEL_SCOPES.length, n
+      assert_eq Oktest::THE_GLOBAL_SCOPE.children.length, n
     end
   end
 

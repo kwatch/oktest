@@ -15,7 +15,7 @@ class Node_TC < TC
   end
 
   def teardown()
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
 
@@ -31,6 +31,31 @@ class Node_TC < TC
       c = Oktest::Node.new(nil)
       ret = p.add_child(c)
       assert ret.equal?(p), "should be same"
+    end
+  end
+
+  describe '#has_child?' do
+    it "[!xb30d] return true when no children, else false." do
+      p = Oktest::Node.new(nil)
+      c = Oktest::Node.new(nil)
+      p.add_child(c)
+      assert_eq p.has_child?, true
+      assert_eq c.has_child?, false
+    end
+  end
+
+  describe '#clear_children()' do
+    it "[!o8xfb] removes all children." do
+      p = Oktest::Node.new(nil)
+      p.add_child(Oktest::Node.new(nil))
+      p.add_child(Oktest::Node.new(nil))
+      assert_eq p.has_child?, true
+      p.clear_children()
+      assert_eq p.has_child?, false
+    end
+    it "[!cvaq1] return self." do
+      p = Oktest::Node.new(nil)
+      assert p.clear_children().equal?(p)
     end
   end
 
@@ -251,7 +276,7 @@ class ScopeFunctions_TC < TC
   end
 
   def teardown
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
   describe 'Oktest.scope()' do
@@ -276,12 +301,12 @@ class ScopeFunctions_TC < TC
       end
       assert_eq x, 2
     end
-    it "[!rsimc] registers scope object into TOPLEVEL_SCOPES." do
-      assert Oktest::TOPLEVEL_SCOPES.empty?, "should be empty"
+    it "[!rsimc] adds scope object as child of THE_GLOBAL_SCOPE." do
+      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
       so = Oktest.scope do
       end
-      assert ! Oktest::TOPLEVEL_SCOPES.empty?, "should not be empty"
-      assert_eq Oktest::TOPLEVEL_SCOPES, [so]
+      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
+      assert_eq Oktest::THE_GLOBAL_SCOPE.children, [so]
     end
   end
 
@@ -291,16 +316,16 @@ class ScopeFunctions_TC < TC
       assert_eq go1.class, Oktest::ScopeNode
       go2 = Oktest.global_scope() { nil }
       assert_eq go2, go1
-      assert_eq go2, Oktest::GLOBAL_SCOPE
+      assert_eq go2, Oktest::THE_GLOBAL_SCOPE
     end
-    it "[!flnpc] run block in the GLOBAL_SCOPE object." do
+    it "[!flnpc] run block in the THE_GLOBAL_SCOPE object." do
       Oktest.global_scope do
         fixture :tmp_37531 do
           {id: 37531}
         end
       end
-      assert Oktest::GLOBAL_SCOPE.fixtures.key?(:tmp_37531)
-      v = Oktest::GLOBAL_SCOPE.fixtures[:tmp_37531][0].call
+      assert Oktest::THE_GLOBAL_SCOPE.fixtures.key?(:tmp_37531)
+      v = Oktest::THE_GLOBAL_SCOPE.fixtures[:tmp_37531][0].call
       assert_eq v, {id: 37531}
     end
     it "[!pe0g2] raises error when nested called." do
@@ -546,7 +571,7 @@ class SpecLeafTC < TC
   end
 
   def teardown
-    Oktest::TOPLEVEL_SCOPES.clear()
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
   def new_spec_object(desc="sample #1", tag: nil)
