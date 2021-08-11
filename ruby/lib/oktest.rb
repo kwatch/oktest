@@ -1116,33 +1116,44 @@ module Oktest
   end
 
 
-  class Traverser
+  class Traverser < Visitor
 
     def start()
       #; [!5zonp] visits topics and specs and calls callbacks.
       #; [!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE.
-      Oktest::THE_GLOBAL_SCOPE.children.each do |scope|
-        scope.children.each {|c| c.accept_runner(self, 0, nil) }
+      THE_GLOBAL_SCOPE.children.each do |scope|
+        scope.accept_visitor(self, 0, nil)
       end
     end
 
-    def run_topic(topic, depth, parent)   #:nodoc:
+    def visit_scope(scope, depth, parent)  #:nodoc:
+      #; [!ledj3] calls on_scope() callback on scope.
+      on_scope(scope.filename, scope.tag, depth) do
+        scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+      end
+    end
+
+    def visit_topic(topic, depth, parent)   #:nodoc:
       #; [!x8r9w] calls on_topic() callback on topic.
       if topic._prefix == '*'
         on_topic(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
         end
       #; [!qh0q3] calls on_case() callback on case_when or case_else.
       else
         on_case(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
         end
       end
     end
 
-    def run_spec(spec, depth, parent)   #:nodoc:
+    def visit_spec(spec, depth, parent)   #:nodoc:
       #; [!41uyj] calls on_spec() callback.
       on_spec(spec.desc, spec.tag, depth)
+    end
+
+    def on_scope(scope_filename, tag, depth)
+      yield
     end
 
     def on_topic(topic_target, tag, depth)

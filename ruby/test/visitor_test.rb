@@ -129,6 +129,13 @@ end
 class Traverser_TC < TC
 
   class MyTraverser < Oktest::Traverser
+    def on_scope(filename, tag, depth)
+      print "  " * depth if depth >= 0
+      print "* scope: #{filename}"
+      print " (tag: #{tag})" if tag
+      print "\n"
+      yield
+    end
     def on_topic(target, tag, depth)
       print "  " * depth
       print "+ topic: #{target}"
@@ -180,17 +187,18 @@ class Traverser_TC < TC
   describe '#start()' do
     it "[!5zonp] visits topics and specs and calls callbacks." do
       expected = <<'END'
-+ topic: Example
-  + topic: Integer (tag: cls)
-    - spec: 1+1 should be 2.
-    - spec: 1-1 should be 0.
-    - case: When negative...
-      - spec: abs() returns sign-reversed value.
-    - case: Else
-      - spec: abs() returns positive value.
-  + topic: Float (tag: cls)
-    - spec: 1*1 should be 1. (tag: err)
-    - spec: 1/1 should be 1. (tag: err)
+* scope: test/visitor_test.rb
+  + topic: Example
+    + topic: Integer (tag: cls)
+      - spec: 1+1 should be 2.
+      - spec: 1-1 should be 0.
+      - case: When negative...
+        - spec: abs() returns sign-reversed value.
+      - case: Else
+        - spec: abs() returns positive value.
+    + topic: Float (tag: cls)
+      - spec: 1*1 should be 1. (tag: err)
+      - spec: 1/1 should be 1. (tag: err)
 END
       prepare()
       sout, serr = capture { MyTraverser.new.start() }
@@ -207,11 +215,28 @@ END
     end
   end
 
-  describe '#run_topic()' do
+  describe '#visit_scope()' do
+    it "[!ledj3] calls on_scope() callback on scope." do
+      expected = <<'END'
+* scope: test/visitor_test.rb
+* scope: test/visitor_test.rb
+END
+      Oktest.scope do
+      end
+      Oktest.scope do
+      end
+      sout, serr = capture { MyTraverser.new.start() }
+      assert_eq sout, expected
+      assert_eq serr, ""
+    end
+  end
+
+  describe '#visit_topic()' do
     it "[!x8r9w] calls on_topic() callback on topic." do
       expected = <<'END'
-+ topic: Parent
-  + topic: Child
+* scope: test/visitor_test.rb
+  + topic: Parent
+    + topic: Child
 END
       Oktest.scope do
         topic 'Parent' do
@@ -225,9 +250,10 @@ END
     end
     it "[!qh0q3] calls on_case() callback on case_when or case_else." do
       expected = <<'END'
-+ topic: Parent
-  - case: When some condition
-  - case: Else
+* scope: test/visitor_test.rb
+  + topic: Parent
+    - case: When some condition
+    - case: Else
 END
       Oktest.scope do
         topic 'Parent' do
@@ -243,12 +269,13 @@ END
     end
   end
 
-  describe '#run_spec()' do
+  describe '#visit_spec()' do
     it "[!41uyj] calls on_spec() callback." do
       expected = <<'END'
-+ topic: Example
-  - spec: sample #1
-  - spec: sample #2
+* scope: test/visitor_test.rb
+  + topic: Example
+    - spec: sample #1
+    - spec: sample #2
 END
       Oktest.scope do
         topic 'Example' do
