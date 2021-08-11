@@ -75,6 +75,30 @@ class Node_TC < TC
     end
   end
 
+  describe '#each_child()' do
+    it "[!osoep] returns enumerator if block not given." do
+      node = Oktest::Node.new(nil)
+      assert_eq node.each_child.class, Enumerator
+    end
+    it "[!pve8m] yields block for each child." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      arr = []
+      p.each_child {|x| arr << x }
+      assert_eq arr.length, 2
+      assert_eq arr[0], c1
+      assert_eq arr[1], c2
+    end
+    it "[!8z6un] returns nil." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      ret = p.each_child {|c| 123 }
+      assert_eq ret, nil
+    end
+  end
+
   describe '#clear_children()' do
     it "[!o8xfb] removes all children." do
       p = Oktest::Node.new(nil)

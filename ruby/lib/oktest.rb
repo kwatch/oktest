@@ -689,6 +689,15 @@ module Oktest
       return !@children.empty?
     end
 
+    def each_child(&b)
+      #; [!osoep] returns enumerator if block not given.
+      return @children.each unless block_given?()
+      #; [!pve8m] yields block for each child.
+      @children.each(&b)
+      #; [!8z6un] returns nil.
+      nil
+    end
+
     def clear_children()
       #; [!o8xfb] removes all children.
       @children.clear()
