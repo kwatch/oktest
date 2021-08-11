@@ -647,11 +647,6 @@ module Oktest
 
   class Item
 
-    def accept_filter(filter)
-      #; [!49xz4] raises NotImplementedError.
-      raise NotImplementedError, "#{self.class.name}#accept_filter(): not implemented yet."
-    end
-
     def accept_visitor(visitor, *args)
       #; [!b0e20] raises NotImplementedError.
       raise NotImplementedError, "#{self.class.name}#accept_visitor(): not implemented yet."
@@ -775,11 +770,6 @@ module Oktest
 
     attr_reader :filename
 
-    def accept_filter(filter)
-      #; [!5ltmi] invokes 'scope_match?()' method of filter and returns result of it.
-      return filter.scope_match?(self)
-    end
-
     def accept_visitor(visitor, *args)
       #; [!vr6ko] invokes 'visit_spec()' method of visitor and returns result of it.
       return visitor.visit_scope(self, *args)
@@ -803,11 +793,6 @@ module Oktest
     end
 
     def topic?; true; end
-
-    def accept_filter(filter)
-      #; [!m80ok] invokes 'topic_match?()' method of filter and returns result of it.
-      return filter.topic_match?(self)
-    end
 
     def accept_visitor(visitor, *args)
       #; [!c1b33] invokes 'visit_topic()' method of visitor and returns result of it.
@@ -842,11 +827,6 @@ module Oktest
     def run_block_in_context_object(context, *args)
       #; [!tssim] run spec block in text object.
       context.instance_exec(*args, &@block)
-    end
-
-    def accept_filter(filter)
-      #; [!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it.
-      return filter.spec_match?(self)
     end
 
     def accept_visitor(visitor, *args)

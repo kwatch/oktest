@@ -11,20 +11,6 @@ require_relative './initialize'
 
 class Item_TC < TC
 
-  describe '#accept_filter()' do
-    it "[!49xz4] raises NotImplementedError." do
-      filter = Oktest::Filter.new(nil, nil, nil)
-      begin
-        Oktest::Item.new().accept_filter(filter)
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-        assert_eq exc.message, "Oktest::Item#accept_filter(): not implemented yet."
-      else
-        assert false, "NotImplemtendedError should be raised."
-      end
-    end
-  end
-
   describe '#accept_visitor()' do
     it "[!b0e20] raises NotImplementedError." do
       begin
@@ -179,18 +165,6 @@ class Node_TC < TC
     end
   end
 
-  describe '#accept_filter()' do
-    it "[!49xz4] raises NotImplementedError." do
-      begin
-        Oktest::Node.new(nil).accept_filter(Oktest::Filter.new(nil, nil, nil))
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-      else
-        assert false, "NotImplementedError expected."
-      end
-    end
-  end
-
   describe '#_repr()' do
     it "[!bt5j8] builds debug string." do
       p = Oktest::Node.new(nil)
@@ -213,24 +187,6 @@ end
 
 
 class ScopeNode_TC < TC
-
-  class DummyFilter1 < Oktest::Filter
-    def scope_match?(*args)
-      @_args = args
-      "<<96888>>"
-    end
-    attr_reader :_args
-  end
-
-  describe '#accept_filter()' do
-    it "[!5ltmi] invokes 'scope_match?()' method of filter and returns result of it." do
-      ft = DummyFilter1.new(nil, nil, nil)
-      sc = Oktest::ScopeNode.new(nil, __FILE__)
-      ret = sc.accept_filter(ft)
-      assert_eq ft._args, [sc]
-      assert_eq ret, "<<96888>>"
-    end
-  end
 
   describe '#accept_visitor()' do
     class DummyVisitor
@@ -256,24 +212,6 @@ class TopicNode_TC < TC
 
   def new_topic(target, tag: nil)
     return Oktest::TopicNode.new(nil, target, tag: tag)
-  end
-
-  class DummyFilter2 < Oktest::Filter
-    def topic_match?(*args)
-      @_args = args
-      "<<07570>>"
-    end
-    attr_reader :_args
-  end
-
-  describe '#accept_filter()' do
-    it "[!m80ok] invokes 'topic_match?()' method of filter and returns result of it." do
-      ft = DummyFilter2.new(nil, nil, nil)
-      to = Oktest::TopicNode.new(nil, Array)
-      ret = to.accept_filter(ft)
-      assert_eq ft._args, [to]
-      assert_eq ret, "<<07570>>"
-    end
   end
 
   describe '#accept_visitor()' do
@@ -625,24 +563,6 @@ class SpecLeafTC < TC
       assert_eq ctx.instance_variable_get('@called'), nil
       sp.run_block_in_context_object(ctx)
       assert_eq ctx.instance_variable_get('@called'), "<<29193>>"
-    end
-  end
-
-  class DummyFilter3 < Oktest::Filter
-    def spec_match?(*args)
-      @_args = args
-      "<<60733>>"
-    end
-    attr_reader :_args
-  end
-
-  describe '#accept_filter()' do
-    it "[!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it." do
-      ft = DummyFilter3.new(nil, nil, nil)
-      sc = Oktest::SpecLeaf.new(nil, "sample")
-      ret = sc.accept_filter(ft)
-      assert_eq ft._args, [sc]
-      assert_eq ret, "<<60733>>"
     end
   end
 
