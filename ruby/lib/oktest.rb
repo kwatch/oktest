@@ -705,8 +705,11 @@ module Oktest
 
     def remove_child_at(index)
       #; [!hsomo] removes child at index.
+      child = @children.delete_at(index)
+      #; [!7fhx1] unlinks reference between parent and child.
+      child.unlink_parent() if child
       #; [!hiz1b] returns removed child.
-      return @children.delete_at(index)
+      return child
     end
 
     def clear_children()

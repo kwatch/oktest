@@ -129,6 +129,14 @@ class Node_TC < TC
       ret = p.remove_child_at(0)
       assert_eq ret, c1
     end
+    it "[!7fhx1] unlinks reference between parent and child." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      p.remove_child_at(1)
+      assert_eq c2.parent, nil
+      assert_eq c1.parent, p
+    end
   end
 
   describe '#clear_children()' do
