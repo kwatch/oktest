@@ -24,6 +24,19 @@ class Item_TC < TC
     end
   end
 
+  describe '#unlink_parent()' do
+    it "[!5a0i9] raises NotImplementedError." do
+      begin
+        Oktest::Item.new().unlink_parent()
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+        assert_eq exc.message, "Oktest::Item#unlink_parent(): not implemented yet."
+      else
+        assert false, "NotImplemtendedError should be raised."
+      end
+    end
+  end
+
   describe '#_repr()' do
     it "[!qi1af] raises NotImplementedError." do
       begin
@@ -130,6 +143,22 @@ class Node_TC < TC
     it "[!cvaq1] return self." do
       p = Oktest::Node.new(nil)
       assert p.clear_children().equal?(p)
+    end
+  end
+
+  describe '#unlink_parent()' do
+    it "[!59m52] clears '@parent' instance variable." do
+      p = Oktest::Node.new(nil)
+      c = Oktest::Node.new(p)
+      assert_eq c.parent, p
+      c.unlink_parent()
+      assert_eq c.parent, nil
+    end
+    it "[!qksxv] returns parent object." do
+      p = Oktest::Node.new(nil)
+      c = Oktest::Node.new(p)
+      ret = c.unlink_parent()
+      assert_eq ret, p
     end
   end
 
@@ -623,6 +652,15 @@ class SpecLeafTC < TC
       ret = sc.accept_visitor(dummy, 7, 8)
       assert_eq dummy._args, [sc, 7, 8]
       assert_eq ret, "<<82980>>"
+    end
+  end
+
+  describe '#unlink_parent()' do
+    it "[!e9sv9] do nothing." do
+      to = Oktest::TopicNode.new(nil, "sample")
+      sp = Oktest::SpecLeaf.new(to, "sample")
+      ret = sp.unlink_parent()
+      assert_eq ret, nil
     end
   end
 

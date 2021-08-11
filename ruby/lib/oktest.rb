@@ -652,6 +652,11 @@ module Oktest
       raise NotImplementedError, "#{self.class.name}#accept_visitor(): not implemented yet."
     end
 
+    def unlink_parent()
+      #; [!5a0i9] raises NotImplementedError.
+      raise NotImplementedError.new("#{self.class.name}#unlink_parent(): not implemented yet.")
+    end
+
     def _repr(depth=0, buf="")       #:nodoc:
       #; [!qi1af] raises NotImplementedError.
       raise NotImplementedError, "#{self.class.name}#_repr(): not implemented yet."
@@ -709,6 +714,14 @@ module Oktest
       @children.clear()
       #; [!cvaq1] return self.
       self
+    end
+
+    def unlink_parent()
+      #; [!59m52] clears '@parent' instance variable.
+      #; [!qksxv] returns parent object.
+      parent = @parent
+      @parent = nil
+      return parent
     end
 
     def run_block_in_context_class(&block)
@@ -847,6 +860,11 @@ module Oktest
     def accept_visitor(visitor, *args)
       #; [!ya32z] invokes 'visit_spec()' method of visitor and returns result of it.
       return visitor.visit_spec(self, *args)
+    end
+
+    def unlink_parent()
+      #; [!e9sv9] do nothing.
+      nil
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
