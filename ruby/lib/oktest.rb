@@ -647,11 +647,6 @@ module Oktest
 
   class Item
 
-    def accept_runner(runner, *args)
-      #; [!olckb] raises NotImplementedError.
-      raise NotImplementedError, "#{self.class.name}#accept_runner(): not implemented yet."
-    end
-
     def accept_filter(filter)
       #; [!49xz4] raises NotImplementedError.
       raise NotImplementedError, "#{self.class.name}#accept_filter(): not implemented yet."
@@ -780,11 +775,6 @@ module Oktest
 
     attr_reader :filename
 
-    def accept_runner(runner, *args)
-      #; [!5mt5k] invokes 'run_topic()' method of runner.
-      runner.run_scope(self, *args)
-    end
-
     def accept_filter(filter)
       #; [!5ltmi] invokes 'scope_match?()' method of filter and returns result of it.
       return filter.scope_match?(self)
@@ -813,11 +803,6 @@ module Oktest
     end
 
     def topic?; true; end
-
-    def accept_runner(runner, *args)
-      #; [!og6l8] invokes '.run_topic()' object of runner.
-      runner.run_topic(self, *args)
-    end
 
     def accept_filter(filter)
       #; [!m80ok] invokes 'topic_match?()' method of filter and returns result of it.
@@ -857,11 +842,6 @@ module Oktest
     def run_block_in_context_object(context, *args)
       #; [!tssim] run spec block in text object.
       context.instance_exec(*args, &@block)
-    end
-
-    def accept_runner(runner, *args)
-      #; [!q9j3w] invokes 'run_spec()' method of runner.
-      runner.run_spec(self, *args)
     end
 
     def accept_filter(filter)

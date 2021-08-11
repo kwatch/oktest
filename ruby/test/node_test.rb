@@ -11,20 +11,6 @@ require_relative './initialize'
 
 class Item_TC < TC
 
-  describe '#accept_runner()' do
-    it "[!olckb] raises NotImplementedError." do
-      runner = Oktest::Runner.new(nil)
-      begin
-        Oktest::Item.new().accept_runner(runner)
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-        assert_eq exc.message, "Oktest::Item#accept_runner(): not implemented yet."
-      else
-        assert false, "NotImplemtendedError should be raised."
-      end
-    end
-  end
-
   describe '#accept_filter()' do
     it "[!49xz4] raises NotImplementedError." do
       filter = Oktest::Filter.new(nil, nil, nil)
@@ -144,20 +130,6 @@ class Node_TC < TC
     end
   end
 
-  describe '#accept_runner()' do
-    it "[!olckb] raises NotImplementedError." do
-      x = Oktest::Node.new(nil)
-      begin
-        x.accept_runner(Oktest::Runner.new(nil))
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-        assert_eq exc.message, "Oktest::Node#accept_runner(): not implemented yet."
-      else
-        assert false, "NotImplementedError expected."
-      end
-    end
-  end
-
   describe '#register_fixture_block()' do
     it "[!5ctsn] registers fixture name, block, and location." do
       x = Oktest::Node.new(nil)
@@ -242,22 +214,6 @@ end
 
 class ScopeNode_TC < TC
 
-  class DummyRunner1 < Oktest::Runner
-    def run_scope(*args)
-      @_args = args
-    end
-    attr_reader :_args
-  end
-
-  describe '#accept_runner()' do
-    it "[!5mt5k] invokes 'run_topic()' method of runner." do
-      r = DummyRunner1.new(nil)
-      sc = Oktest::ScopeNode.new(nil, __FILE__)
-      sc.accept_runner(r, 10, 20)
-      assert_eq r._args, [sc, 10, 20]
-    end
-  end
-
   class DummyFilter1 < Oktest::Filter
     def scope_match?(*args)
       @_args = args
@@ -298,24 +254,8 @@ end
 
 class TopicNode_TC < TC
 
-  class DummyRunner2 < Oktest::Runner
-    def run_topic(*args)
-      @_args = args
-    end
-    attr_reader :_args
-  end
-
   def new_topic(target, tag: nil)
     return Oktest::TopicNode.new(nil, target, tag: tag)
-  end
-
-  describe '#accept_runner()' do
-    it "[!og6l8] invokes '.run_topic()' object of runner." do
-      r = DummyRunner2.new(nil)
-      x = Oktest::TopicNode.new(nil, nil)
-      x.accept_runner(r, 30, 40)
-      assert_eq r._args, [x, 30, 40]
-    end
   end
 
   class DummyFilter2 < Oktest::Filter
@@ -677,13 +617,6 @@ class SpecLeafTC < TC
     return sp
   end
 
-  class DummyRunner3 < Oktest::Runner
-    def run_spec(*args)
-      @_args = args
-    end
-    attr_reader :_args
-  end
-
   describe '#run_block_in_context_object()' do
     it "[!tssim] run spec block in text object." do
       to = Oktest::TopicNode.new(nil, 'Example')
@@ -692,16 +625,6 @@ class SpecLeafTC < TC
       assert_eq ctx.instance_variable_get('@called'), nil
       sp.run_block_in_context_object(ctx)
       assert_eq ctx.instance_variable_get('@called'), "<<29193>>"
-    end
-  end
-
-  describe '#accept_runner()' do
-    it "[!q9j3w] invokes 'run_spec()' method of runner." do
-      r = DummyRunner3.new(nil)
-      sp = new_spec_object()
-      assert_eq sp.class, Oktest::SpecLeaf
-      sp.accept_runner(r, 3, 4, 5)
-      assert_eq r._args, [sp, 3, 4, 5]
     end
   end
 
