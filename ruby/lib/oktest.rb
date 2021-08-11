@@ -1856,7 +1856,11 @@ module Oktest
       #; [!doozg] supports negative filter by spec.
       #; [!ntv44] supports negative filter by tag name.
       positive = ! @negative
-      node.children.collect! {|item|
+      #
+      i = -1
+      removes = []
+      node.each_child do |item|
+        i += 1
         #; [!osoq2] can filter topics by full name.
         #; [!wzcco] can filter topics by pattern.
         #; [!eirmu] can filter topics by tag name.
@@ -1865,19 +1869,19 @@ module Oktest
         #; [!6sq7g] can filter specs by tag name.
         #; [!6to6n] can filter by multiple tag name.
         if item.accept_visitor(self)
-          positive ? item : nil
+          removes << i unless positive
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)
-          _filter_children!(item) ? item : nil
+          removes << i unless _filter_children!(item)
         #; [!1jphf] can filter specs from nested topics.
         elsif item.is_a?(SpecLeaf)
-          positive ? nil : item
+          removes << i if positive
         else
           raise "** internal error: item=#{item.inspect}"
         end
-      }
-      node.children.compact!
-      return !node.children.empty?
+      end
+      removes.reverse.each {|j| node.remove_child_at(j) }
+      return node.has_child?
     end
 
   end
