@@ -224,7 +224,14 @@ Oktest.scope do
       ok {1+1} == 2
     end
 
-    spec "example of todo"    # no block means TODO
+    spec "example of todo"    # spec without block means TODO
+
+    spec "example of todo (when passed unexpectedly)" do
+      TODO()                  # this spec should be failed,
+                              # because not implemented yet.
+      ok {1+1} == 2           # thefore if all assesions passed,
+                              # it means 'unexpected success'.
+    end
 
   end
 
@@ -238,7 +245,14 @@ $ oktest test/example03_test.rb   # or: ruby test/example03_test.rb
 * other examples
   - [Skip] example of skip (reason: requires Ruby3)
   - [TODO] example of todo
-## total:2 (pass:0, fail:0, error:0, skip:1, todo:1) in 0.000s
+  - [Fail] example of todo (when passed unexpectedly)
+----------------------------------------------------------------------
+[Fail] other examples > example of todo (when passed unexpectedly)
+    test/example03_test.rb:14:in `block (2 levels) in <top (required)>'
+        spec "example of todo (when passed unexpectedly)" do
+spec should be failed (because not implemented yet), but passed unexpectedly.
+----------------------------------------------------------------------
+## total:2 (pass:0, fail:1, error:0, skip:1, todo:1) in 0.000s
 ```
 
 
