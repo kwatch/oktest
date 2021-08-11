@@ -55,7 +55,7 @@ class Node_TC < TC
       p = Oktest::Node.new(nil)
       c = Oktest::Node.new(nil)
       p.add_child(c)
-      assert_eq p.children, [c]
+      assert_eq p.instance_eval('@children'), [c]
     end
     it "[!w5r6l] returns self." do
       p = Oktest::Node.new(nil)
@@ -301,7 +301,7 @@ class ScopeFunctions_TC < TC
       so = Oktest.scope do
       end
       assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
-      assert_eq Oktest::THE_GLOBAL_SCOPE.children, [so]
+      assert_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a, [so]
     end
   end
 
@@ -393,8 +393,8 @@ class Context_TC < TC
         topic Dir, tag: "exp" do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, Dir
       assert_eq to.tag, "exp"
@@ -408,8 +408,8 @@ class Context_TC < TC
         case_when "condition..." do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "When condition..."
       assert_eq to.tag, nil
@@ -420,7 +420,7 @@ class Context_TC < TC
         case_when "condition..." do
         end
       end
-      to = node.children[0]
+      to = node.each_child.first
       assert_eq to.target, "When condition..."
     end
   end
@@ -431,8 +431,8 @@ class Context_TC < TC
         case_else tag: "dev" do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else"
       assert_eq to.tag, "dev"
@@ -443,8 +443,8 @@ class Context_TC < TC
         case_else do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else"
     end
@@ -453,8 +453,8 @@ class Context_TC < TC
         case_else "(x < 0)" do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else (x < 0)"
     end
@@ -466,8 +466,8 @@ class Context_TC < TC
         spec "example #1", tag: "exp" do
         end
       end
-      assert_eq node.children.length, 1
-      sp = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      sp = node.each_child.first
       assert_eq sp.class, Oktest::SpecLeaf
       assert_eq sp.desc, "example #1"
       assert_eq sp.tag, "exp"
@@ -477,8 +477,8 @@ class Context_TC < TC
       node = new_node_with() do
         spec "example #3"
       end
-      assert_eq node.children.length, 1
-      sp = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      sp = node.each_child.first
       begin
         sp.block.call
       rescue Exception => exc

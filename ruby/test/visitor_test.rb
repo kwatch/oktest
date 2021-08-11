@@ -207,11 +207,11 @@ END
     end
     it "[!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE." do
       prepare()
-      n = Oktest::THE_GLOBAL_SCOPE.children.length
+      n = Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length
       sout, serr = capture do
         MyTraverser.new.start()
       end
-      assert_eq Oktest::THE_GLOBAL_SCOPE.children.length, n
+      assert_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length, n
     end
   end
 
