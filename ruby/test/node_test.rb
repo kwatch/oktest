@@ -24,6 +24,19 @@ class Item_TC < TC
     end
   end
 
+  describe '#unlink_parent()' do
+    it "[!5a0i9] raises NotImplementedError." do
+      begin
+        Oktest::Item.new().unlink_parent()
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+        assert_eq exc.message, "Oktest::Item#unlink_parent(): not implemented yet."
+      else
+        assert false, "NotImplemtendedError should be raised."
+      end
+    end
+  end
+
   describe '#_repr()' do
     it "[!qi1af] raises NotImplementedError." do
       begin
@@ -55,7 +68,7 @@ class Node_TC < TC
       p = Oktest::Node.new(nil)
       c = Oktest::Node.new(nil)
       p.add_child(c)
-      assert_eq p.children, [c]
+      assert_eq p.instance_eval('@children'), [c]
     end
     it "[!w5r6l] returns self." do
       p = Oktest::Node.new(nil)
@@ -75,6 +88,57 @@ class Node_TC < TC
     end
   end
 
+  describe '#each_child()' do
+    it "[!osoep] returns enumerator if block not given." do
+      node = Oktest::Node.new(nil)
+      assert_eq node.each_child.class, Enumerator
+    end
+    it "[!pve8m] yields block for each child." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      arr = []
+      p.each_child {|x| arr << x }
+      assert_eq arr.length, 2
+      assert_eq arr[0], c1
+      assert_eq arr[1], c2
+    end
+    it "[!8z6un] returns nil." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      ret = p.each_child {|c| 123 }
+      assert_eq ret, nil
+    end
+  end
+
+  describe '#remove_child()' do
+    it "[!hsomo] removes child at index." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      p.remove_child_at(0)
+      children = p.each_child.to_a
+      assert_eq children.length, 1
+      assert_eq children[0], c2
+    end
+    it "[!hiz1b] returns removed child." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      ret = p.remove_child_at(0)
+      assert_eq ret, c1
+    end
+    it "[!7fhx1] unlinks reference between parent and child." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      p.remove_child_at(1)
+      assert_eq c2.parent, nil
+      assert_eq c1.parent, p
+    end
+  end
+
   describe '#clear_children()' do
     it "[!o8xfb] removes all children." do
       p = Oktest::Node.new(nil)
@@ -87,6 +151,22 @@ class Node_TC < TC
     it "[!cvaq1] return self." do
       p = Oktest::Node.new(nil)
       assert p.clear_children().equal?(p)
+    end
+  end
+
+  describe '#unlink_parent()' do
+    it "[!59m52] clears '@parent' instance variable." do
+      p = Oktest::Node.new(nil)
+      c = Oktest::Node.new(p)
+      assert_eq c.parent, p
+      c.unlink_parent()
+      assert_eq c.parent, nil
+    end
+    it "[!qksxv] returns parent object." do
+      p = Oktest::Node.new(nil)
+      c = Oktest::Node.new(p)
+      ret = c.unlink_parent()
+      assert_eq ret, p
     end
   end
 
@@ -277,7 +357,7 @@ class ScopeFunctions_TC < TC
       so = Oktest.scope do
       end
       assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
-      assert_eq Oktest::THE_GLOBAL_SCOPE.children, [so]
+      assert_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a, [so]
     end
   end
 
@@ -369,8 +449,8 @@ class Context_TC < TC
         topic Dir, tag: "exp" do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, Dir
       assert_eq to.tag, "exp"
@@ -384,8 +464,8 @@ class Context_TC < TC
         case_when "condition..." do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "When condition..."
       assert_eq to.tag, nil
@@ -396,7 +476,7 @@ class Context_TC < TC
         case_when "condition..." do
         end
       end
-      to = node.children[0]
+      to = node.each_child.first
       assert_eq to.target, "When condition..."
     end
   end
@@ -407,8 +487,8 @@ class Context_TC < TC
         case_else tag: "dev" do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else"
       assert_eq to.tag, "dev"
@@ -419,8 +499,8 @@ class Context_TC < TC
         case_else do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else"
     end
@@ -429,8 +509,8 @@ class Context_TC < TC
         case_else "(x < 0)" do
         end
       end
-      assert_eq node.children.length, 1
-      to = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else (x < 0)"
     end
@@ -442,8 +522,8 @@ class Context_TC < TC
         spec "example #1", tag: "exp" do
         end
       end
-      assert_eq node.children.length, 1
-      sp = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      sp = node.each_child.first
       assert_eq sp.class, Oktest::SpecLeaf
       assert_eq sp.desc, "example #1"
       assert_eq sp.tag, "exp"
@@ -453,8 +533,8 @@ class Context_TC < TC
       node = new_node_with() do
         spec "example #3"
       end
-      assert_eq node.children.length, 1
-      sp = node.children[0]
+      assert_eq node.each_child.to_a.length, 1
+      sp = node.each_child.first
       begin
         sp.block.call
       rescue Exception => exc
@@ -580,6 +660,15 @@ class SpecLeafTC < TC
       ret = sc.accept_visitor(dummy, 7, 8)
       assert_eq dummy._args, [sc, 7, 8]
       assert_eq ret, "<<82980>>"
+    end
+  end
+
+  describe '#unlink_parent()' do
+    it "[!e9sv9] do nothing." do
+      to = Oktest::TopicNode.new(nil, "sample")
+      sp = Oktest::SpecLeaf.new(to, "sample")
+      ret = sp.unlink_parent()
+      assert_eq ret, nil
     end
   end
 

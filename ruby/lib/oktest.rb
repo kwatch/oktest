@@ -652,6 +652,11 @@ module Oktest
       raise NotImplementedError, "#{self.class.name}#accept_visitor(): not implemented yet."
     end
 
+    def unlink_parent()
+      #; [!5a0i9] raises NotImplementedError.
+      raise NotImplementedError.new("#{self.class.name}#unlink_parent(): not implemented yet.")
+    end
+
     def _repr(depth=0, buf="")       #:nodoc:
       #; [!qi1af] raises NotImplementedError.
       raise NotImplementedError, "#{self.class.name}#_repr(): not implemented yet."
@@ -673,7 +678,7 @@ module Oktest
       @hooks    = {}       # {name: block}
     end
 
-    attr_reader :parent, :children, :tag, :context_class, :fixtures, :hooks
+    attr_reader :parent, :tag, :context_class, :fixtures, :hooks
 
     def topic?; false; end
 
@@ -689,11 +694,37 @@ module Oktest
       return !@children.empty?
     end
 
+    def each_child(&b)
+      #; [!osoep] returns enumerator if block not given.
+      return @children.each unless block_given?()
+      #; [!pve8m] yields block for each child.
+      @children.each(&b)
+      #; [!8z6un] returns nil.
+      nil
+    end
+
+    def remove_child_at(index)
+      #; [!hsomo] removes child at index.
+      child = @children.delete_at(index)
+      #; [!7fhx1] unlinks reference between parent and child.
+      child.unlink_parent() if child
+      #; [!hiz1b] returns removed child.
+      return child
+    end
+
     def clear_children()
       #; [!o8xfb] removes all children.
       @children.clear()
       #; [!cvaq1] return self.
       self
+    end
+
+    def unlink_parent()
+      #; [!59m52] clears '@parent' instance variable.
+      #; [!qksxv] returns parent object.
+      parent = @parent
+      @parent = nil
+      return parent
     end
 
     def run_block_in_context_class(&block)
@@ -832,6 +863,11 @@ module Oktest
     def accept_visitor(visitor, *args)
       #; [!ya32z] invokes 'visit_spec()' method of visitor and returns result of it.
       return visitor.visit_spec(self, *args)
+    end
+
+    def unlink_parent()
+      #; [!e9sv9] do nothing.
+      nil
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
@@ -1061,12 +1097,12 @@ module Oktest
 
     def visit_scope(scope, depth, parent)
       #; [!hebhz] visits each child scope.
-      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+      scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
     end
 
     def visit_topic(topic, depth, parent)
       #; [!mu3fn] visits each child of topic.
-      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+      topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
     end
 
     def visit_spec(spec, depth, parent)
@@ -1082,13 +1118,13 @@ module Oktest
       #; [!5zonp] visits topics and specs and calls callbacks.
       #; [!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE.
       #visit_scope(THE_GLOBAL_SCOPE, -1, nil)
-      THE_GLOBAL_SCOPE.children.each {|c| c.accept_visitor(self, 0, nil) }
+      THE_GLOBAL_SCOPE.each_child {|c| c.accept_visitor(self, 0, nil) }
     end
 
     def visit_scope(scope, depth, parent)  #:nodoc:
       #; [!ledj3] calls on_scope() callback on scope.
       on_scope(scope.filename, scope.tag, depth) do
-        scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+        scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
       end
     end
 
@@ -1096,12 +1132,12 @@ module Oktest
       #; [!x8r9w] calls on_topic() callback on topic.
       if topic._prefix == '*'
         on_topic(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+          topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
         end
       #; [!qh0q3] calls on_case() callback on case_when or case_else.
       else
         on_case(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+          topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
         end
       end
     end
@@ -1151,7 +1187,7 @@ module Oktest
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+      scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
@@ -1160,7 +1196,7 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+      topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
@@ -1831,17 +1867,21 @@ module Oktest
     public
 
     def filter_children!(node)
-      _filter_children!(node.children)
+      _filter_children!(node)
     end
 
     private
 
-    def _filter_children!(children)   #:nodoc:
+    def _filter_children!(node)   #:nodoc:
       #; [!r6g6a] supports negative filter by topic.
       #; [!doozg] supports negative filter by spec.
       #; [!ntv44] supports negative filter by tag name.
       positive = ! @negative
-      children.collect! {|item|
+      #
+      i = -1
+      removes = []
+      node.each_child do |item|
+        i += 1
         #; [!osoq2] can filter topics by full name.
         #; [!wzcco] can filter topics by pattern.
         #; [!eirmu] can filter topics by tag name.
@@ -1850,19 +1890,19 @@ module Oktest
         #; [!6sq7g] can filter specs by tag name.
         #; [!6to6n] can filter by multiple tag name.
         if item.accept_visitor(self)
-          positive ? item : nil
+          removes << i unless positive
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)
-          _filter_children!(item.children) ? item : nil
+          removes << i unless _filter_children!(item)
         #; [!1jphf] can filter specs from nested topics.
         elsif item.is_a?(SpecLeaf)
-          positive ? nil : item
+          removes << i if positive
         else
           raise "** internal error: item=#{item.inspect}"
         end
-      }
-      children.compact!
-      return !children.empty?
+      end
+      removes.reverse.each {|j| node.remove_child_at(j) }
+      return node.has_child?
     end
 
   end
