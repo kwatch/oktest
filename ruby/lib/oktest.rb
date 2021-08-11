@@ -673,7 +673,7 @@ module Oktest
       @hooks    = {}       # {name: block}
     end
 
-    attr_reader :parent, :children, :tag, :context_class, :fixtures, :hooks
+    attr_reader :parent, :tag, :context_class, :fixtures, :hooks
 
     def topic?; false; end
 
