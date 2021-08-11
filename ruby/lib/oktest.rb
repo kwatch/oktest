@@ -920,7 +920,7 @@ module Oktest
 
   module SpecHelper
 
-    attr_accessor :__TODO, :_at_end_blocks
+    attr_accessor :__TODO, :__at_end_blocks
 
     def ok()
       #; [!3jhg6] creates new assertion object.
@@ -954,7 +954,7 @@ module Oktest
 
     def at_end(&block)
       #; [!x58eo] records clean-up block.
-      (@_at_end_blocks ||= []) << block
+      (@__at_end_blocks ||= []) << block
     end
 
     def capture_sio(input="", tty: false, &b)
@@ -1294,7 +1294,7 @@ module Oktest
     end
 
     def call_at_end_blocks(context)
-      blocks = context._at_end_blocks
+      blocks = context.__at_end_blocks
       if blocks
         blocks.reverse_each {|block| context.instance_eval(&block) }
         blocks.clear
