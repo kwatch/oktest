@@ -1173,7 +1173,7 @@ module Oktest
   STATUSES = [:PASS, :FAIL, :ERROR, :SKIP, :TODO]
 
 
-  class Runner
+  class Runner < Visitor
 
     def initialize(reporter)
       @reporter = reporter
@@ -1183,30 +1183,30 @@ module Oktest
       #; [!xrisl] runs topics and specs.
       #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
-      run_scope(THE_GLOBAL_SCOPE, -2, nil)
+      visit_scope(THE_GLOBAL_SCOPE, -2, nil)
       THE_GLOBAL_SCOPE.clear_children()
       @reporter.exit_all(self)
     end
 
-    def run_scope(scope, depth, parent)
+    def visit_scope(scope, depth, parent)
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.children.each {|c| c.accept_runner(self, depth+1, scope) }
+      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
 
-    def run_topic(topic, depth, parent)
+    def visit_topic(topic, depth, parent)
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
 
-    def run_spec(spec, depth, parent)
+    def visit_spec(spec, depth, parent)
       @reporter.enter_spec(spec, depth)
       #; [!u45di] runs spec block with context object which allows to call methods defined in topics.
       node = parent

@@ -85,7 +85,7 @@ END
     end
   end
 
-  describe "#run_spec()" do
+  describe "#visit_spec()" do
     it "[!yd24o] runs spec body, catching assertions or exceptions." do
       Oktest.scope do
         topic "Parent" do
@@ -326,7 +326,7 @@ END
     end
   end
 
-  describe "#run_topic()" do
+  describe "#visit_topic()" do
     it "[!i3yfv] calls 'before_all' and 'after_all' blocks." do
       sout, serr = capture do
         Oktest.scope do
@@ -378,7 +378,7 @@ END
     end
   end
 
-  describe "#run_scope()" do
+  describe "#visit_scope()" do
     it "[!5anr7] calls before_all and after_all blocks." do
       sout, serr = capture do
         Oktest.scope do
