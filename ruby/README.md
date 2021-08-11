@@ -9,6 +9,7 @@ Oktest.rb is a new-style testing library for Ruby.
 * Structured test specifications like RSpec.
 * Filtering testcases by pattern or tags.
 * Blue/red color instead of green/red for accesability.
+* Small code size (about 2300 lines) and good performance.
 
 ```ruby
 ### Oktest                           ### Test::Unit
