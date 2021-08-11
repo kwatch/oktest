@@ -920,7 +920,7 @@ module Oktest
 
   module SpecHelper
 
-    attr_accessor :_TODO, :_at_end_blocks
+    attr_accessor :__TODO, :_at_end_blocks
 
     def ok()
       #; [!3jhg6] creates new assertion object.
@@ -949,7 +949,7 @@ module Oktest
     end
 
     def TODO()
-      @_TODO = true
+      @__TODO = true
     end
 
     def at_end(&block)
@@ -1224,7 +1224,7 @@ module Oktest
       rescue Exception       => exc;  status = :ERROR
       end
       #; [!68cnr] if TODO() called in spec...
-      if context._TODO
+      if context.__TODO
         #; [!6ol3p] changes PASS status to FAIL because test passed unexpectedly.
         if status == :PASS
           status = :FAIL
