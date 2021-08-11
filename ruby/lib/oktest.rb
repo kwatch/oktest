@@ -1070,12 +1070,12 @@ module Oktest
 
     def visit_scope(scope, depth, parent)
       #; [!hebhz] visits each child scope.
-      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+      scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
     end
 
     def visit_topic(topic, depth, parent)
       #; [!mu3fn] visits each child of topic.
-      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+      topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
     end
 
     def visit_spec(spec, depth, parent)
@@ -1091,13 +1091,13 @@ module Oktest
       #; [!5zonp] visits topics and specs and calls callbacks.
       #; [!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE.
       #visit_scope(THE_GLOBAL_SCOPE, -1, nil)
-      THE_GLOBAL_SCOPE.children.each {|c| c.accept_visitor(self, 0, nil) }
+      THE_GLOBAL_SCOPE.each_child {|c| c.accept_visitor(self, 0, nil) }
     end
 
     def visit_scope(scope, depth, parent)  #:nodoc:
       #; [!ledj3] calls on_scope() callback on scope.
       on_scope(scope.filename, scope.tag, depth) do
-        scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+        scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
       end
     end
 
@@ -1105,12 +1105,12 @@ module Oktest
       #; [!x8r9w] calls on_topic() callback on topic.
       if topic._prefix == '*'
         on_topic(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+          topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
         end
       #; [!qh0q3] calls on_case() callback on case_when or case_else.
       else
         on_case(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+          topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
         end
       end
     end
@@ -1160,7 +1160,7 @@ module Oktest
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+      scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
@@ -1169,7 +1169,7 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+      topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
