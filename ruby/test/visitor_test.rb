@@ -9,9 +9,9 @@
 require_relative './initialize'
 
 
-class Visitor_TC < TC
+class Traverser_TC < TC
 
-  class MyVisitor < Oktest::Visitor
+  class MyTraverser < Oktest::Traverser
     def on_topic(target, tag, depth)
       print "  " * depth
       print "+ topic: #{target}"
@@ -76,7 +76,7 @@ class Visitor_TC < TC
     - spec: 1/1 should be 1. (tag: err)
 END
       prepare()
-      sout, serr = capture { MyVisitor.new.start() }
+      sout, serr = capture { MyTraverser.new.start() }
       assert_eq sout, expected
       assert_eq serr, ""
     end
@@ -84,7 +84,7 @@ END
       prepare()
       n = Oktest::THE_GLOBAL_SCOPE.children.length
       sout, serr = capture do
-        MyVisitor.new.start()
+        MyTraverser.new.start()
       end
       assert_eq Oktest::THE_GLOBAL_SCOPE.children.length, n
     end
@@ -102,7 +102,7 @@ END
           end
         end
       end
-      sout, serr = capture { MyVisitor.new.start() }
+      sout, serr = capture { MyTraverser.new.start() }
       assert_eq sout, expected
       assert_eq serr, ""
     end
@@ -120,7 +120,7 @@ END
           end
         end
       end
-      sout, serr = capture { MyVisitor.new.start() }
+      sout, serr = capture { MyTraverser.new.start() }
       assert_eq sout, expected
       assert_eq serr, ""
     end
@@ -139,7 +139,7 @@ END
           spec "sample #2" do ok {1-1} == 0 end
         end
       end
-      sout, serr = capture { MyVisitor.new.start() }
+      sout, serr = capture { MyTraverser.new.start() }
       assert_eq sout, expected
       assert_eq serr, ""
     end

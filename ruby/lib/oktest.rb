@@ -1071,7 +1071,7 @@ module Oktest
   end
 
 
-  class Visitor
+  class Traverser
 
     def start()
       #; [!5zonp] visits topics and specs and calls callbacks.
