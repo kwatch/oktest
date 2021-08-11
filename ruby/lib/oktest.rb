@@ -1801,7 +1801,7 @@ module Oktest
   end
 
 
-  class Filter
+  class Filter < Visitor
 
     def initialize(topic_pattern, spec_pattern, tag_pattern, negative: false)
       @topic_pattern = topic_pattern
@@ -1834,6 +1834,7 @@ module Oktest
       return true if @tag_pattern && _match_tag?(scope.tag, @tag_pattern)
       return false
     end
+    alias visit_scope scope_match?
 
     def topic_match?(topic)
       #; [!jpycj] returns true if topic target name matched to pattern.
@@ -1842,6 +1843,7 @@ module Oktest
       return true if @tag_pattern && _match_tag?(topic.tag, @tag_pattern)
       return false
     end
+    alias visit_topic topic_match?
 
     def spec_match?(spec)
       #; [!k45p3] returns true if spec description matched to pattern.
@@ -1850,6 +1852,7 @@ module Oktest
       return true if @tag_pattern && _match_tag?(spec.tag, @tag_pattern)
       return false
     end
+    alias visit_spec spec_match?
 
     private
 
@@ -1887,7 +1890,7 @@ module Oktest
         #; [!fd8wt] can filter specs by pattern.
         #; [!6sq7g] can filter specs by tag name.
         #; [!6to6n] can filter by multiple tag name.
-        if item.accept_filter(self)
+        if item.accept_visitor(self)
           positive ? item : nil
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)
