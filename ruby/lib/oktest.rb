@@ -1143,7 +1143,7 @@ module Oktest
       #; [!xrisl] runs topics and specs.
       #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
-      visit_scope(THE_GLOBAL_SCOPE, -2, nil)
+      visit_scope(THE_GLOBAL_SCOPE, -1, nil)
       THE_GLOBAL_SCOPE.clear_children()
       @reporter.exit_all(self)
     end
@@ -1512,7 +1512,7 @@ module Oktest
 
     def enter_topic(topic, depth)
       super
-      puts "#{'  ' * depth}#{topic._prefix} #{Color.topic(topic.target)}"
+      puts "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}"
     end
 
     def exit_topic(topic, depth)
@@ -1521,7 +1521,7 @@ module Oktest
 
     def enter_spec(spec, depth)
       if $stdout.tty?
-        str = "#{'  ' * depth}#{spec._prefix} [    ] #{spec.desc}"
+        str = "#{'  ' * (depth - 1)}#{spec._prefix} [    ] #{spec.desc}"
         print Util.strfold(str, 79)
         $stdout.flush
       end
@@ -1534,7 +1534,7 @@ module Oktest
         $stdout.flush
       end
       label = Color.status(status, LABELS[status] || '???')
-      msg = "#{'  ' * depth}- [#{label}] #{spec.desc}"
+      msg = "#{'  ' * (depth - 1)}- [#{label}] #{spec.desc}"
       msg << " " << Color.reason("(reason: #{error.message})") if status == :SKIP
       puts msg
     end

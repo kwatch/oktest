@@ -21,23 +21,23 @@ class Runner_TC < TC
       puts "/file"
     end
     def enter_topic(topic, depth)
-      puts "#{'  '*depth}topic: #{topic.target.inspect}"
+      puts "#{'  '*(depth-1)}topic: #{topic.target.inspect}"
     end
     def exit_topic(topic, depth)
-      puts "#{'  '*depth}/topic"
+      puts "#{'  '*(depth-1)}/topic"
     end
     def enter_spec(spec, depth)
-      puts "#{'  '*depth}spec: #{spec.desc.inspect}"
+      puts "#{'  '*(depth-1)}spec: #{spec.desc.inspect}"
     end
     def exit_spec(spec, depth, status, error, parent)
       if error
         if status == :FAIL
-          puts "#{'  '*depth}/spec: status=#{status.inspect}, error=#<ASSERTION: #{error.message}>"
+          puts "#{'  '*(depth-1)}/spec: status=#{status.inspect}, error=#<ASSERTION: #{error.message}>"
         else
-          puts "#{'  '*depth}/spec: status=#{status.inspect}, error=#{error.inspect}"
+          puts "#{'  '*(depth-1)}/spec: status=#{status.inspect}, error=#{error.inspect}"
         end
       else
-        puts "#{'  '*depth}/spec: status=#{status.inspect}"
+        puts "#{'  '*(depth-1)}/spec: status=#{status.inspect}"
       end
     end
     #
