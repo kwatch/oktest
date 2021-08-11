@@ -39,6 +39,19 @@ class Item_TC < TC
     end
   end
 
+  describe '#accept_visitor()' do
+    it "[!b0e20] raises NotImplementedError." do
+      begin
+        Oktest::Item.new().accept_visitor(nil)
+      rescue Exception => exc
+        assert_eq exc.class, NotImplementedError
+        assert_eq exc.message, "Oktest::Item#accept_visitor(): not implemented yet."
+      else
+        assert false, "NotImplemtendedError should be raised."
+      end
+    end
+  end
+
   describe '#_repr()' do
     it "[!qi1af] raises NotImplementedError." do
       begin
@@ -263,6 +276,23 @@ class ScopeNode_TC < TC
     end
   end
 
+  describe '#accept_visitor()' do
+    class DummyVisitor
+      def visit_scope(*args)
+        @_args = args
+        "<<43746>>"
+      end
+      attr_reader :_args
+    end
+    it "[!vr6ko] invokes 'visit_spec()' method of visitor and returns result of it." do
+      dummy = DummyVisitor.new()
+      sc = Oktest::ScopeNode.new(nil, __FILE__)
+      ret = sc.accept_visitor(dummy, 1, 2, 3)
+      assert_eq dummy._args, [sc, 1, 2, 3]
+      assert_eq ret, "<<43746>>"
+    end
+  end
+
 end
 
 
@@ -303,6 +333,23 @@ class TopicNode_TC < TC
       ret = to.accept_filter(ft)
       assert_eq ft._args, [to]
       assert_eq ret, "<<07570>>"
+    end
+  end
+
+  describe '#accept_visitor()' do
+    class DummyVisitor2
+      def visit_topic(*args)
+        @_args = args
+        "<<55977>>"
+      end
+      attr_reader :_args
+    end
+    it "[!c1b33] invokes 'visit_topic()' method of visitor and returns result of it." do
+      dummy = DummyVisitor2.new
+      to = Oktest::TopicNode.new(nil, Array)
+      ret = to.accept_visitor(dummy, 4, 5)
+      assert_eq dummy._args, [to, 4, 5]
+      assert_eq ret, "<<55977>>"
     end
   end
 
@@ -673,6 +720,23 @@ class SpecLeafTC < TC
       ret = sc.accept_filter(ft)
       assert_eq ft._args, [sc]
       assert_eq ret, "<<60733>>"
+    end
+  end
+
+  describe '#accept_visitor()' do
+    class DummyVisitor3
+      def visit_spec(*args)
+        @_args = args
+        "<<82980>>"
+      end
+      attr_reader :_args
+    end
+    it "[!ya32z] invokes 'visit_spec()' method of visitor and returns result of it." do
+      dummy = DummyVisitor3.new
+      sc = Oktest::SpecLeaf.new(nil, "sample")
+      ret = sc.accept_visitor(dummy, 7, 8)
+      assert_eq dummy._args, [sc, 7, 8]
+      assert_eq ret, "<<82980>>"
     end
   end
 

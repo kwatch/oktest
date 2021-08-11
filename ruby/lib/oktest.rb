@@ -657,6 +657,11 @@ module Oktest
       raise NotImplementedError, "#{self.class.name}#accept_filter(): not implemented yet."
     end
 
+    def accept_visitor(visitor, *args)
+      #; [!b0e20] raises NotImplementedError.
+      raise NotImplementedError, "#{self.class.name}#accept_visitor(): not implemented yet."
+    end
+
     def _repr(depth=0, buf="")       #:nodoc:
       #; [!qi1af] raises NotImplementedError.
       raise NotImplementedError, "#{self.class.name}#_repr(): not implemented yet."
@@ -785,6 +790,11 @@ module Oktest
       return filter.scope_match?(self)
     end
 
+    def accept_visitor(visitor, *args)
+      #; [!vr6ko] invokes 'visit_spec()' method of visitor and returns result of it.
+      return visitor.visit_scope(self, *args)
+    end
+
   end
 
 
@@ -812,6 +822,11 @@ module Oktest
     def accept_filter(filter)
       #; [!m80ok] invokes 'topic_match?()' method of filter and returns result of it.
       return filter.topic_match?(self)
+    end
+
+    def accept_visitor(visitor, *args)
+      #; [!c1b33] invokes 'visit_topic()' method of visitor and returns result of it.
+      return visitor.visit_topic(self, *args)
     end
 
     def +@
@@ -852,6 +867,11 @@ module Oktest
     def accept_filter(filter)
       #; [!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it.
       return filter.spec_match?(self)
+    end
+
+    def accept_visitor(visitor, *args)
+      #; [!ya32z] invokes 'visit_spec()' method of visitor and returns result of it.
+      return visitor.visit_spec(self, *args)
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
