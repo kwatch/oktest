@@ -9,6 +9,123 @@
 require_relative './initialize'
 
 
+class Visitor_TC < TC
+
+  class DummyVisitor0 < Oktest::Visitor
+    def initialize
+      @log = []
+    end
+    attr_reader :log
+    def visit_scope(spec, depth, parent)
+      indent = depth >= 0 ? "  " * depth : ""
+      @log << "#{indent}scope: #{spec.filename} {\n"
+      super
+      @log << "#{indent}}\n"
+    end
+    def visit_topic(topic, depth, parent)
+      indent = depth >= 0 ? "  " * depth : ""
+      @log << "#{indent}topic: #{topic.target} {\n"
+      super
+      @log << "#{indent}}\n"
+    end
+    def visit_spec(spec, depth, parent)
+      indent = depth >= 0 ? "  " * depth : ""
+      @log << "#{indent}spec: #{spec.desc} {\n"
+      super
+      @log << "#{indent}}\n"
+    end
+  end
+
+  def prepare()
+    Oktest.scope do
+      topic 'Example1' do
+        topic 'sample1-1' do
+          spec("1+1 should be 2") { ok {1+1} == 2 }
+          spec("1-1 should be 0") { ok {1-1} == 0 }
+        end
+      end
+    end
+  end
+
+  def setup
+  end
+
+  def teardown
+    Oktest::THE_GLOBAL_SCOPE.clear_children()
+  end
+
+  describe '#visit_spec()' do
+    it "[!9f7i9] do something on spec." do
+      expected = <<'END'
+spec: sample {
+}
+END
+      sp = Oktest::SpecLeaf.new(nil, "sample")
+      visitor = DummyVisitor0.new
+      visitor.visit_spec(sp, 0, nil)
+      assert_eq visitor.log.join(), expected
+    end
+  end
+
+  describe '#visit_topic()' do
+    it "[!mu3fn] visits each child of topic." do
+      expected = <<'END'
+topic: example {
+  spec: sample {
+  }
+}
+END
+      to = Oktest::TopicNode.new(nil, "example")
+      sp = Oktest::SpecLeaf.new(to, "sample")
+      visitor = DummyVisitor0.new
+      visitor.visit_topic(to, 0, nil)
+      assert_eq visitor.log.join(), expected
+    end
+  end
+
+  describe '#visit_scope()' do
+    it "[!hebhz] visits each child scope." do
+      expected = <<'END'
+scope: file.rb {
+  topic: example {
+  }
+  spec: sample {
+  }
+}
+END
+      sc = Oktest::ScopeNode.new(nil, "file.rb")
+      to = Oktest::TopicNode.new(sc, "example")
+      sp = Oktest::SpecLeaf.new(sc, "sample")
+      visitor = DummyVisitor0.new
+      visitor.visit_scope(sc, 0, nil)
+      assert_eq visitor.log.join(), expected
+    end
+  end
+
+  describe '#start()' do
+    it "[!8h8qf] start visiting tree." do
+      expected = <<'END'
+scope: test/visitor_test.rb {
+  topic: Example1 {
+    topic: sample1-1 {
+      spec: 1+1 should be 2 {
+      }
+      spec: 1-1 should be 0 {
+      }
+    }
+  }
+}
+END
+      prepare()
+      visitor = DummyVisitor0.new
+      visitor.start()
+      assert_eq visitor.log.join(), expected
+    end
+  end
+
+end
+
+
 class Traverser_TC < TC
 
   class MyTraverser < Oktest::Traverser

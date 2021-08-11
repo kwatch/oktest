@@ -1071,6 +1071,31 @@ module Oktest
   end
 
 
+  class Visitor
+
+    def start()
+      #; [!8h8qf] start visiting tree.
+      #visit_scope(THE_GLOBAL_SCOPE, -1, nil)
+      THE_GLOBAL_SCOPE.children.each {|c| c.accept_visitor(self, 0, nil) }
+    end
+
+    def visit_scope(scope, depth, parent)
+      #; [!hebhz] visits each child scope.
+      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+    end
+
+    def visit_topic(topic, depth, parent)
+      #; [!mu3fn] visits each child of topic.
+      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+    end
+
+    def visit_spec(spec, depth, parent)
+      #; [!9f7i9] do something on spec.
+    end
+
+  end
+
+
   class Traverser
 
     def start()
