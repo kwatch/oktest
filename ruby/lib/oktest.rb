@@ -1233,6 +1233,10 @@ module Oktest
         elsif status == :FAIL
           status = :TODO
           exc = TODO_EXCEPTION.new("not implemented yet")
+        #; [!4aecm] changes also ERROR status to TODO because test failed expectedly.
+        elsif status == :ERROR
+          status = :TODO
+          exc = TODO_EXCEPTION.new("#{exc.class} raised because not implemented yet")
         end
         exc.set_backtrace([spec.location])
       end
