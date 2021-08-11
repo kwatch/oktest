@@ -606,8 +606,7 @@ module Oktest
       block ||= proc { raise TodoException, "not implemented yet" }
       #; [!c8c8o] creates new spec object.
       location = caller(1).first
-      spec = SpecLeaf.new(desc, tag: tag, location: location, &block)
-      node.add_child(spec)
+      spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
       return spec
     end
 
@@ -646,7 +645,22 @@ module Oktest
   end
 
 
-  class Node
+  class Item
+
+    def accept_visitor(visitor, *args)
+      #; [!b0e20] raises NotImplementedError.
+      raise NotImplementedError, "#{self.class.name}#accept_visitor(): not implemented yet."
+    end
+
+    def _repr(depth=0, buf="")       #:nodoc:
+      #; [!qi1af] raises NotImplementedError.
+      raise NotImplementedError, "#{self.class.name}#_repr(): not implemented yet."
+    end
+
+  end
+
+
+  class Node < Item
 
     def initialize(parent, tag: nil)
       @parent   = parent
@@ -695,11 +709,6 @@ module Oktest
       return context
     end
 
-    def accept_runner(runner, *args)
-      #; [!olckb] raises NotImplementedError.
-      raise NotImplementedError.new("#{self.class.name}#accept_runner(): not implemented yet.")
-    end
-
     def register_fixture_block(name, location, &block)
       #; [!5ctsn] registers fixture name, block, and location.
       params = Util.required_param_names_of_block(block)  # [Symbol]
@@ -723,11 +732,6 @@ module Oktest
     def get_hook_block(key)
       #; [!u3fc6] returns block corresponding to key.
       return @hooks[key]
-    end
-
-    def accept_filter(filter)
-      #; [!49xz4] raises NotImplementedError.
-      raise NotImplementedError.new("#{self.class.name}#accept_filter(): not implemented yet.")
     end
 
     def _repr(depth=0, buf="")
@@ -766,14 +770,9 @@ module Oktest
 
     attr_reader :filename
 
-    def accept_runner(runner, *args)
-      #; [!5mt5k] invokes 'run_topic()' method of runner.
-      runner.run_scope(self, *args)
-    end
-
-    def accept_filter(filter)
-      #; [!5ltmi] invokes 'scope_match?()' method of filter and returns result of it.
-      return filter.scope_match?(self)
+    def accept_visitor(visitor, *args)
+      #; [!vr6ko] invokes 'visit_spec()' method of visitor and returns result of it.
+      return visitor.visit_scope(self, *args)
     end
 
   end
@@ -795,14 +794,9 @@ module Oktest
 
     def topic?; true; end
 
-    def accept_runner(runner, *args)
-      #; [!og6l8] invokes '.run_topic()' object of runner.
-      runner.run_topic(self, *args)
-    end
-
-    def accept_filter(filter)
-      #; [!m80ok] invokes 'topic_match?()' method of filter and returns result of it.
-      return filter.topic_match?(self)
+    def accept_visitor(visitor, *args)
+      #; [!c1b33] invokes 'visit_topic()' method of visitor and returns result of it.
+      return visitor.visit_topic(self, *args)
     end
 
     def +@
@@ -813,13 +807,15 @@ module Oktest
   end
 
 
-  class SpecLeaf
+  class SpecLeaf < Item
 
-    def initialize(desc, tag: nil, location: nil, &block)
+    def initialize(parent, desc, tag: nil, location: nil, &block)
+      #@parent = parent      # not keep parent node to avoid recursive reference
       @desc  = desc
       @tag   = tag
       @location = location   # necessary when raising fixture not found error
       @block = block
+      parent.add_child(self) if parent
     end
 
     attr_reader :desc, :tag, :location, :block
@@ -833,14 +829,9 @@ module Oktest
       context.instance_exec(*args, &@block)
     end
 
-    def accept_runner(runner, *args)
-      #; [!q9j3w] invokes 'run_spec()' method of runner.
-      runner.run_spec(self, *args)
-    end
-
-    def accept_filter(filter)
-      #; [!hj5vl] invokes 'sprc_match?()' method of filter and returns result of it.
-      return filter.spec_match?(self)
+    def accept_visitor(visitor, *args)
+      #; [!ya32z] invokes 'visit_spec()' method of visitor and returns result of it.
+      return visitor.visit_spec(self, *args)
     end
 
     def _repr(depth=0, buf="")       #:nodoc:
@@ -1063,30 +1054,65 @@ module Oktest
   class Visitor
 
     def start()
+      #; [!8h8qf] start visiting tree.
+      #visit_scope(THE_GLOBAL_SCOPE, -1, nil)
+      THE_GLOBAL_SCOPE.children.each {|c| c.accept_visitor(self, 0, nil) }
+    end
+
+    def visit_scope(scope, depth, parent)
+      #; [!hebhz] visits each child scope.
+      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
+    end
+
+    def visit_topic(topic, depth, parent)
+      #; [!mu3fn] visits each child of topic.
+      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
+    end
+
+    def visit_spec(spec, depth, parent)
+      #; [!9f7i9] do something on spec.
+    end
+
+  end
+
+
+  class Traverser < Visitor
+
+    def start()
       #; [!5zonp] visits topics and specs and calls callbacks.
       #; [!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE.
-      Oktest::THE_GLOBAL_SCOPE.children.each do |scope|
-        scope.children.each {|c| c.accept_runner(self, 0, nil) }
+      #visit_scope(THE_GLOBAL_SCOPE, -1, nil)
+      THE_GLOBAL_SCOPE.children.each {|c| c.accept_visitor(self, 0, nil) }
+    end
+
+    def visit_scope(scope, depth, parent)  #:nodoc:
+      #; [!ledj3] calls on_scope() callback on scope.
+      on_scope(scope.filename, scope.tag, depth) do
+        scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
       end
     end
 
-    def run_topic(topic, depth, parent)   #:nodoc:
+    def visit_topic(topic, depth, parent)   #:nodoc:
       #; [!x8r9w] calls on_topic() callback on topic.
       if topic._prefix == '*'
         on_topic(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
         end
       #; [!qh0q3] calls on_case() callback on case_when or case_else.
       else
         on_case(topic.target, topic.tag, depth) do
-          topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+          topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
         end
       end
     end
 
-    def run_spec(spec, depth, parent)   #:nodoc:
+    def visit_spec(spec, depth, parent)   #:nodoc:
       #; [!41uyj] calls on_spec() callback.
       on_spec(spec.desc, spec.tag, depth)
+    end
+
+    def on_scope(scope_filename, tag, depth)
+      yield
     end
 
     def on_topic(topic_target, tag, depth)
@@ -1106,7 +1132,7 @@ module Oktest
   STATUSES = [:PASS, :FAIL, :ERROR, :SKIP, :TODO]
 
 
-  class Runner
+  class Runner < Visitor
 
     def initialize(reporter)
       @reporter = reporter
@@ -1116,30 +1142,30 @@ module Oktest
       #; [!xrisl] runs topics and specs.
       #; [!dth2c] clears toplvel scope list.
       @reporter.enter_all(self)
-      run_scope(THE_GLOBAL_SCOPE, -2, nil)
+      visit_scope(THE_GLOBAL_SCOPE, -1, nil)
       THE_GLOBAL_SCOPE.clear_children()
       @reporter.exit_all(self)
     end
 
-    def run_scope(scope, depth, parent)
+    def visit_scope(scope, depth, parent)
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.children.each {|c| c.accept_runner(self, depth+1, scope) }
+      scope.children.each {|c| c.accept_visitor(self, depth+1, scope) }
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
 
-    def run_topic(topic, depth, parent)
+    def visit_topic(topic, depth, parent)
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.children.each {|c| c.accept_runner(self, depth+1, topic) }
+      topic.children.each {|c| c.accept_visitor(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
 
-    def run_spec(spec, depth, parent)
+    def visit_spec(spec, depth, parent)
       @reporter.enter_spec(spec, depth)
       #; [!u45di] runs spec block with context object which allows to call methods defined in topics.
       node = parent
@@ -1485,7 +1511,7 @@ module Oktest
 
     def enter_topic(topic, depth)
       super
-      puts "#{'  ' * depth}#{topic._prefix} #{Color.topic(topic.target)}"
+      puts "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}"
     end
 
     def exit_topic(topic, depth)
@@ -1494,7 +1520,7 @@ module Oktest
 
     def enter_spec(spec, depth)
       if $stdout.tty?
-        str = "#{'  ' * depth}#{spec._prefix} [    ] #{spec.desc}"
+        str = "#{'  ' * (depth - 1)}#{spec._prefix} [    ] #{spec.desc}"
         print Util.strfold(str, 79)
         $stdout.flush
       end
@@ -1507,7 +1533,7 @@ module Oktest
         $stdout.flush
       end
       label = Color.status(status, LABELS[status] || '???')
-      msg = "#{'  ' * depth}- [#{label}] #{spec.desc}"
+      msg = "#{'  ' * (depth - 1)}- [#{label}] #{spec.desc}"
       msg << " " << Color.reason("(reason: #{error.message})") if status == :SKIP
       puts msg
     end
@@ -1734,7 +1760,7 @@ module Oktest
   end
 
 
-  class Filter
+  class Filter < Visitor
 
     def initialize(topic_pattern, spec_pattern, tag_pattern, negative: false)
       @topic_pattern = topic_pattern
@@ -1767,6 +1793,7 @@ module Oktest
       return true if @tag_pattern && _match_tag?(scope.tag, @tag_pattern)
       return false
     end
+    alias visit_scope scope_match?
 
     def topic_match?(topic)
       #; [!jpycj] returns true if topic target name matched to pattern.
@@ -1775,6 +1802,7 @@ module Oktest
       return true if @tag_pattern && _match_tag?(topic.tag, @tag_pattern)
       return false
     end
+    alias visit_topic topic_match?
 
     def spec_match?(spec)
       #; [!k45p3] returns true if spec description matched to pattern.
@@ -1783,6 +1811,7 @@ module Oktest
       return true if @tag_pattern && _match_tag?(spec.tag, @tag_pattern)
       return false
     end
+    alias visit_spec spec_match?
 
     private
 
@@ -1820,7 +1849,7 @@ module Oktest
         #; [!fd8wt] can filter specs by pattern.
         #; [!6sq7g] can filter specs by tag name.
         #; [!6to6n] can filter by multiple tag name.
-        if item.accept_filter(self)
+        if item.accept_visitor(self)
           positive ? item : nil
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)

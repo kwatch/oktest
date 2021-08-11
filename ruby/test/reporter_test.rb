@@ -46,7 +46,7 @@ class BaseReporter_TC < TC
     t1 = Oktest::TopicNode.new(sc, 'Example')
     t2 = Oktest::TopicNode.new(t1, Array)
     t3 = Oktest::TopicNode.new(t2, 'When some condition')
-    spec = Oktest::SpecLeaf.new("1+1 shoould be 2.") { nil }
+    spec = Oktest::SpecLeaf.new(t3, "1+1 shoould be 2.") { nil }
     return t3, spec
   end
 
@@ -360,7 +360,7 @@ END
       t1 = Oktest::TopicNode.new(sc, 'Example')
       t2 = Oktest::TopicNode.new(t1, Array)
       t3 = Oktest::TopicNode.new(t2, 'When some condition')
-      s1 = Oktest::SpecLeaf.new("1+1 shoould be 2.") { nil }
+      s1 = Oktest::SpecLeaf.new(t3, "1+1 shoould be 2.") { nil }
       path = Oktest::BaseReporter.new.__send__(:spec_path, s1, t3)
       assert_eq path, "Example > Array > When some condition > 1+1 shoould be 2."
     end
