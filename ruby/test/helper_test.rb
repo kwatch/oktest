@@ -164,8 +164,8 @@ END
       begin
         dummy_file(tmpfile, "foobar")
         assert File.exist?(tmpfile), "tmpfile should be created."
-        assert_eq @_at_end_blocks.length, 1
-        pr = @_at_end_blocks.pop()
+        assert_eq @__at_end_blocks.length, 1
+        pr = @__at_end_blocks.pop()
         pr.call()
         assert !File.exist?(tmpfile), "tmpfile should be removed."
       ensure
@@ -219,7 +219,7 @@ END
         end
         assert !File.file?(tmpfile), "tmpfile should be removed."
         assert_eq ret, 1234
-        assert_eq @_at_end_blocks, nil
+        assert_eq @__at_end_blocks, nil
       ensure
         File.unlink(tmpfile) if File.exist?(tmpfile)
       end
@@ -233,8 +233,8 @@ END
       begin
         dummy_dir(tmpdir)
         assert File.exist?(tmpdir), "tmpdir should be created."
-        assert_eq @_at_end_blocks.length, 1
-        pr = @_at_end_blocks.pop()
+        assert_eq @__at_end_blocks.length, 1
+        pr = @__at_end_blocks.pop()
         pr.call()
         assert !File.exist?(tmpdir), "tmpdir should be removed."
       ensure
@@ -268,7 +268,7 @@ END
         assert File.exist?("#{tmpdir}/foo.txt"), "should exists."
         assert File.exist?("#{tmpdir}/d1/d2/bar.txt"), "should exists."
         #
-        pr = @_at_end_blocks.pop()
+        pr = @__at_end_blocks.pop()
         pr.call()
         assert !File.exist?(tmpdir), "tmpdir should be removed."
       ensure
@@ -306,7 +306,7 @@ END
         end
         assert !File.directory?(tmpdir), "tmpdir should be removed."
         assert_eq ret, 2345
-        assert_eq @_at_end_blocks, nil
+        assert_eq @__at_end_blocks, nil
       ensure
         Dir.rmdir(tmpdir) if File.exist?(tmpdir)
       end
@@ -329,8 +329,8 @@ END
       assert_eq hashobj['b'], 2000
       assert_eq hashobj[:c], 30
       assert_eq hashobj[:x], 9000
-      assert_eq @_at_end_blocks.length, 1
-      pr = @_at_end_blocks.pop()
+      assert_eq @__at_end_blocks.length, 1
+      pr = @__at_end_blocks.pop()
       pr.call()
       assert_eq hashobj[:a], 10
       assert_eq hashobj['b'], 20
@@ -357,7 +357,7 @@ END
       assert_eq hashobj['b'], 20
       assert_eq hashobj[:c], 30
       assert !hashobj.key?(:x), "key :x should not exist."
-      assert_eq @_at_end_blocks, nil
+      assert_eq @__at_end_blocks, nil
     end
   end
 
@@ -374,8 +374,8 @@ END
       assert_eq obj.id, 999
       assert_eq obj.name, "bob"
       #
-      assert_eq @_at_end_blocks.length, 1
-      pr = @_at_end_blocks.pop()
+      assert_eq @__at_end_blocks.length, 1
+      pr = @__at_end_blocks.pop()
       pr.call()
       assert_eq obj.id, 123
       assert_eq obj.name, "alice"
@@ -396,7 +396,7 @@ END
       assert_eq ret, 4567
       assert_eq obj.id, 123
       assert_eq obj.name, "alice"
-      assert_eq @_at_end_blocks, nil
+      assert_eq @__at_end_blocks, nil
     end
   end
 
@@ -413,8 +413,8 @@ END
       assert_eq obj.instance_variable_get('@id'), 999
       assert_eq obj.instance_variable_get('@name'), "bob"
       #
-      assert_eq @_at_end_blocks.length, 1
-      pr = @_at_end_blocks.pop()
+      assert_eq @__at_end_blocks.length, 1
+      pr = @__at_end_blocks.pop()
       pr.call()
       assert_eq obj.instance_variable_get('@id'), 123
       assert_eq obj.instance_variable_get('@name'), "alice"
@@ -435,7 +435,7 @@ END
       assert_eq ret, 4567
       assert_eq obj.id, 123
       assert_eq obj.name, "alice"
-      assert_eq @_at_end_blocks, nil
+      assert_eq @__at_end_blocks, nil
     end
   end
 

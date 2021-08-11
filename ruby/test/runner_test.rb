@@ -323,6 +323,23 @@ topic: "topic#A"
 END
         assert_eq sout, expected
       end
+      it "[!4aecm] changes also ERROR status to TODO because test failed expectedly." do
+        Oktest.scope do
+          topic "topic#B" do
+            spec("spec#2") { TODO(); ok {foobar} == nil }  # will be error expectedly
+          end
+        end
+        sout, serr = capture { Oktest::Runner.new(DummyReporter.new).start() }
+        expected = <<'END'
+file: "test/runner_test.rb"
+topic: "topic#B"
+  spec: "spec#2"
+  /spec: status=:TODO, error=#<Oktest::TodoException: NameError raised because not implemented yet>
+/topic
+/file
+END
+        assert_eq sout, expected
+      end
     end
   end
 

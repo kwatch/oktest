@@ -920,7 +920,7 @@ module Oktest
 
   module SpecHelper
 
-    attr_accessor :_TODO, :_at_end_blocks
+    attr_accessor :__TODO, :__at_end_blocks
 
     def ok()
       #; [!3jhg6] creates new assertion object.
@@ -949,12 +949,12 @@ module Oktest
     end
 
     def TODO()
-      @_TODO = true
+      @__TODO = true
     end
 
     def at_end(&block)
       #; [!x58eo] records clean-up block.
-      (@_at_end_blocks ||= []) << block
+      (@__at_end_blocks ||= []) << block
     end
 
     def capture_sio(input="", tty: false, &b)
@@ -1224,7 +1224,7 @@ module Oktest
       rescue Exception       => exc;  status = :ERROR
       end
       #; [!68cnr] if TODO() called in spec...
-      if context._TODO
+      if context.__TODO
         #; [!6ol3p] changes PASS status to FAIL because test passed unexpectedly.
         if status == :PASS
           status = :FAIL
@@ -1233,6 +1233,10 @@ module Oktest
         elsif status == :FAIL
           status = :TODO
           exc = TODO_EXCEPTION.new("not implemented yet")
+        #; [!4aecm] changes also ERROR status to TODO because test failed expectedly.
+        elsif status == :ERROR
+          status = :TODO
+          exc = TODO_EXCEPTION.new("#{exc.class} raised because not implemented yet")
         end
         exc.set_backtrace([spec.location])
       end
@@ -1290,7 +1294,7 @@ module Oktest
     end
 
     def call_at_end_blocks(context)
-      blocks = context._at_end_blocks
+      blocks = context.__at_end_blocks
       if blocks
         blocks.reverse_each {|block| context.instance_eval(&block) }
         blocks.clear
