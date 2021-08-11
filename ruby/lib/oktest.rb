@@ -698,6 +698,12 @@ module Oktest
       nil
     end
 
+    def remove_child_at(index)
+      #; [!hsomo] removes child at index.
+      #; [!hiz1b] returns removed child.
+      return @children.delete_at(index)
+    end
+
     def clear_children()
       #; [!o8xfb] removes all children.
       @children.clear()

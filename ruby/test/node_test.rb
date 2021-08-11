@@ -99,6 +99,25 @@ class Node_TC < TC
     end
   end
 
+  describe '#remove_child()' do
+    it "[!hsomo] removes child at index." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      p.remove_child_at(0)
+      children = p.each_child.to_a
+      assert_eq children.length, 1
+      assert_eq children[0], c2
+    end
+    it "[!hiz1b] returns removed child." do
+      p  = Oktest::Node.new(nil)
+      c1 = Oktest::Node.new(p)
+      c2 = Oktest::Node.new(p)
+      ret = p.remove_child_at(0)
+      assert_eq ret, c1
+    end
+  end
+
   describe '#clear_children()' do
     it "[!o8xfb] removes all children." do
       p = Oktest::Node.new(nil)
