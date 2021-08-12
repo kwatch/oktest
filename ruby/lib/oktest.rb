@@ -2127,6 +2127,10 @@ END
         color_enabled = Config.color_enabled
         Config.color_enabled = (opts.color == 'on')
       end
+      #; [!qs8ab] '--faster' chanages 'Config.ok_location' to false.
+      if opts.faster
+        Config.ok_location = false    # will make 'ok{}' faster
+      end
       #
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       #; [!hiu5b] finds test scripts in directory and runs them.
@@ -2160,7 +2164,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :color, :generate
+      attr_accessor :help, :version, :style, :filter, :color, :generate, :faster
     end
 
     def option_parser(opts)
@@ -2191,6 +2195,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.generate = val || true
       }
+      parser.on(      '--faster') { opts.faster = true }
       return parser
     end
 
@@ -2204,6 +2209,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
+      --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic

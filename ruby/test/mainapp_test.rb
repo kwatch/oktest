@@ -205,6 +205,7 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
+      --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic
@@ -550,6 +551,16 @@ END
         assert_eq serr, ""
       ensure
         File.unlink(filename)
+      end
+    end
+
+    it "[!qs8ab] '--faster' chanages 'Config.ok_location' to false." do
+      assert_eq Oktest::Config.ok_location, true
+      begin
+        run("--faster", @testfile)
+        assert_eq Oktest::Config.ok_location, false
+      ensure
+        Oktest::Config.ok_location = true
       end
     end
 
