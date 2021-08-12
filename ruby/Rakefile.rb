@@ -22,24 +22,24 @@ task :guide do
   puts <<END
 How to release:
 
-  $ git diff .
-  $ git status .
   $ which ruby
   $ rake test
   $ rake test:all
   $ rake readme:execute             # optional
   $ rake readme:toc                 # optional
+  $ git diff .
+  $ git status .
   $ git checkout -b #{branch}
-  $ git edit RELASE=#{rel}
+  $ git edit RELEASE=#{rel}
   $ git add -u
   $ git commit -m "ruby: preparation for release #{rel}"
   $ vim CHANGES.md
   $ git add -p CHANGES.md
-  $ git commit -m "ruby: upte 'CHANGES.md'"
+  $ git commit -m "ruby: update 'CHANGES.md'"
   $ git log -1
   $ rake package RELEASE=#{rel}
   $ rake package:extract            # confirm files in gem file
-  $ (cd #{proj}-#{rel}/data; find . -type f)
+  $ pushd #{proj}-#{rel}/data; find . -type f; popd
   $ gem install #{proj}-#{rel}.gem  # confirm gem package
   $ gem uninstall #{proj}
   $ gem push #{proj}-#{rel}.gem     # publish gem to rubygems.org
