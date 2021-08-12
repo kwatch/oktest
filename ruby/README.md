@@ -9,7 +9,7 @@ Oktest.rb is a new-style testing library for Ruby.
 * Structured test specifications like RSpec.
 * Filtering testcases by pattern or tags.
 * Blue/red color instead of green/red for accesability.
-* Small code size (about 2300 lines) and good performance.
+* Small code size (about 2400 lines) and good performance.
 
 ```ruby
 ### Oktest                           ### Test::Unit
@@ -305,6 +305,10 @@ $ oktest test/example01_test.rb -s quiet    # or -sq
 
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
+
+Quiet mode reports progress only of failed or error test cases (and doesn't
+report progress of passed ones), so it's output is very compact. This is
+very useful for large project which contains large number of test cases.
 
 
 ### Run All Test Scripts Under Directory
@@ -1124,7 +1128,7 @@ Oktest.scope do
     {members: [mem1, mem2]}
   end
 
-  topic "Named fixture" do
+  topic "Named fixture with args" do
 
     spec "example spec" do
       alice = {name: "Alice"}
@@ -1176,7 +1180,7 @@ Oktest.scope do
     {members: [alice, bob]}
   end
 
-  topic "Fixture Injection" do
+  topic "Fixture injection" do
 
     spec "example spec" do
       |alice, bob, team|          # !!! fixture injection !!!
@@ -1213,18 +1217,15 @@ require 'oktest'
 Oktest.global_scope do     # !!!!!
 
   fixture :alice do
-    {name: "Alice", age: 22}
+    {name: "Alice"}
   end
 
   fixture :bob do
-    {name: "Bob", age: 29}
+    {name: "Bob"}
   end
 
   fixture :team do |alice, bob|
-    {
-      name: "Blabla",
-      members: [alice, bob]
-    }
+    {members: [alice, bob]}
   end
 
 end
@@ -1725,7 +1726,7 @@ end
 
 ## custom traverser class
 class MyTraverser < Oktest::Traverser  # !!!!!
-  def on_scope(filename, tag, depth)    # !!!!!
+  def on_scope(filename, tag, depth)   # !!!!!
     print "  " * depth
     print "# scope: #{filename}"
     print " (tag: #{tag})" if tag
