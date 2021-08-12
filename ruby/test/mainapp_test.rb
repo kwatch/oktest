@@ -295,6 +295,23 @@ END
       assert_eq serr, ""
     end
 
+    it "[!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode." do
+      expected = <<END
+<R>f</R><R>E</R><Y>s</Y><Y>t</Y>
+----------------------------------------------------------------------
+END
+      #
+      ret, sout, serr = run("-sq", @testfile)
+      assert_eq ret, 2
+      assert edit_actual(sout).start_with?(edit_expected(expected)), "invalid testcase output"
+      assert_eq serr, ""
+      #
+      ret, sout, serr = run("-s", "quiet", @testfile)
+      assert_eq ret, 2
+      assert edit_actual(sout).start_with?(edit_expected(expected)), "invalid testcase output"
+      assert_eq serr, ""
+    end
+
     it "[!yz7g5] '-F topic=...' option filters topics." do
       expected = <<END
 * <b>Parent</b>

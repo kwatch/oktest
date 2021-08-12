@@ -1636,6 +1636,7 @@ module Oktest
     'verbose' => VerboseReporter,  'v' => VerboseReporter,
     'simple'  => SimpleReporter,   's' => SimpleReporter,
     'plain'   => PlainReporter,    'p' => PlainReporter,
+    'quiet'   => QuietReporter,    'q' => QuietReporter,
   }
 
 
@@ -2125,6 +2126,7 @@ END
       #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
       #; [!ef5v7] '-s simple' or '-ss' option prints test results in simple mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
+      #; [!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode.
       n_errors = Oktest.run(:style=>opts.style)
       #; [!dsrae] reports if 'ok()' called but assertion not performed.
       AssertionObject.report_not_yet()
