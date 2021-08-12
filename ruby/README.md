@@ -1513,6 +1513,25 @@ end
 ## Tips
 
 
+### `--faster` Option
+
+`ok {}` is slightly slower than `assert()` in MiniTest.
+In almost case, you don't need to care about it.  But if you are working in
+very larget project and you want to run test scripts faster, try `--faster`
+option of `oktest` command.
+
+```terminal
+$ oktest -s quiet --faster test/        ## only for very large project
+```
+
+Or set `Oktest::Config.ok_location = false` in your test script.
+
+```ruby
+require 'oktest'
+Oktest::Config.ok_location = false      ## only for very large project
+```
+
+
 ### `ok {}` in MiniTest
 
 If you want to use `ok {actual} == expected` style assertion in MiniTest,
