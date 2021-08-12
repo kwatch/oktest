@@ -315,6 +315,7 @@ module Oktest
         #; [!cownv] not support error message.
         ! errmsg  or
           raise ArgumentError, "#{errmsg.inspect}: NOT.raise?() can't take errmsg."
+        #; [!spzy2] is available with NOT.
         begin
           proc_obj.call
         rescue Exception => exc
