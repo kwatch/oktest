@@ -71,6 +71,7 @@ Oktest.rb requires Ruby 2.3 or later.
   * <a href="#fixtures">Fixtures</a>
     * <a href="#setup-and-teardown">Setup and Teardown</a>
     * <a href="#at_end-crean-up-handler"><code>at_end()</code>: Crean-up Handler</a>
+    * <a href="#named-fixtures">Named Fixtures</a>
     * <a href="#fixture-injection">Fixture Injection</a>
     * <a href="#global-scope">Global Scope</a>
   * <a href="#helpers">Helpers</a>
@@ -82,6 +83,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
     * <a href="#recorder"><code>recorder()</code></a>
   * <a href="#tips">Tips</a>
+    * <a href="#--faster-option"><code>--faster</code> Option</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
     * <a href="#traverser-class">Traverser Class</a>
@@ -1075,7 +1077,10 @@ end
   stopped instantly.
 
 
-### Fixture Injection
+### Named Fixtures
+
+`fixture() { ... }` in topic or scope block defines fixture builder,
+and `fixture()` in scope block returns fixture data.
 
 test/example23_test.rb:
 
@@ -1085,31 +1090,46 @@ require 'oktest'
 Oktest.scope do
 
   fixture :alice do               # define fixture
-    {name: "Alice", age: 22}
+    {name: "Alice"}
   end
 
   fixture :bob do                 # define fixture
-    {name: "Bob", age: 29}
+    {name: "Bob"}
   end
 
-  fixture :team do |alice, bob|   # !!! fixture injection !!!
-    {
-      name: "Blabla",
-      members: [alice, bob]
-    }
-  end
-
-  topic "Fixture Injection" do
+  topic "Named fixture" do
 
     spec "example spec" do
-      |alice, bob, team|          # !!! fixture injection !!!
+      alice = fixture(:alice)     # create fixture object
+      bob   = fixture(:bob)       # create fixture object
       ok {alice[:name]} == "Alice"
-      ok {alice[:age]} == 22
-      ok {bob[:name]} == "Bob"
-      ok {bob[:age]} == 29
-      #
-      ok {team[:name]} == "Blabla"
-      ok {team[:members]}.length(2)
+      ok {bob[:name]}   == "Bob"
+    end
+
+  end
+
+end
+```
+
+Fixture block can have parameters.
+
+test/example24_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  fixture :team do |mem1, mem2|   # define fixture with block params
+    {members: [mem1, mem2]}
+  end
+
+  topic "Named fixture" do
+
+    spec "example spec" do
+      alice = {name: "Alice"}
+      bob   = {name: "Bob"}
+      team = fixture(:team, alice, bob)  # create fixture with args
       ok {team[:members][0][:name]} == "Alice"
       ok {team[:members][1][:name]} == "Bob"
     end
@@ -1120,10 +1140,6 @@ end
 ```
 
 * Fixtures can be defined in block of `topic()` as well as block of `Object.scope()`.
-<!--
-* Special fixture name `this_topic` represents the first argument of `topic()`.
-* Special fixture name `this_spec` represents the description of `spec()`.
--->
 * If fixture requires clean-up operation, call `at_end()` in `fixture()` block.
 
 ```ruby
@@ -1134,6 +1150,53 @@ end
     tmpfile
   end
 ```
+
+
+### Fixture Injection
+
+Block parameters of `spec()` or `fixture()` represents fixture name, and
+Oktest.rb injects fixture objects into that parameters automatically.
+
+test/example25_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  fixture :alice do               # define fixture
+    {name: "Alice"}
+  end
+
+  fixture :bob do                 # define fixture
+    {name: "Bob"}
+  end
+
+  fixture :team do |alice, bob|   # !!! fixture injection !!!
+    {members: [alice, bob]}
+  end
+
+  topic "Fixture Injection" do
+
+    spec "example spec" do
+      |alice, bob, team|          # !!! fixture injection !!!
+      ok {alice[:name]} == "Alice"
+      ok {bob[:name]}   == "Bob"
+      #
+      ok {team[:members]}.length(2)
+      ok {team[:members][0]} == {name: "Alice"}
+      ok {team[:members][1]} == {name: "Bob"}
+    end
+
+  end
+
+end
+```
+
+<!--
+* Special fixture name `this_topic` represents the first argument of `topic()`.
+* Special fixture name `this_spec` represents the description of `spec()`.
+-->
 
 
 ### Global Scope
