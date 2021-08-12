@@ -660,7 +660,6 @@ ok {a} =~ e              # fail unless a =~ e
 ok {a} !~ e              # fail unless a !~ e
 
 ok {a}.same?(e)          # fail unless a.equal?(e)
-ok {a}.include?(e)       # fail unless a.include?(e)
 ok {a}.in?(e)            # fail unless e.include?(a)
 ok {a}.in_delta?(e, x)   # fail unless e-x < a < e+x
 ok {a}.truthy?           # fail unless !!a == true
@@ -702,6 +701,7 @@ ok {a}.nil?              # same as ok {a.nil?} == true
 ok {a}.empty?            # same as ok {a.empty?} == true
 ok {a}.key?(e)           # same as ok {a.key?(e)} == true
 ok {a}.is_a?(e)          # same as ok {a.is_a?(e)} == true
+ok {a}.include?(e)       # same as ok {a.include?(e)} == true
 ok {a}.between?(x, y)    # same as ok {a.between?(x, y)} == true
 ```
 

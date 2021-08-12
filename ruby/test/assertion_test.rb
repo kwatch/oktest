@@ -594,25 +594,6 @@ describe '#method_missing()' do
     end
   end
 
-  describe '#include?' do
-    it "[!2hddj] returns self when passed." do
-      should_return_self { ok {1..5}.include?(3) }
-    end
-    it "[!960j7] raises assertion error when failed." do
-      errmsg = "$<actual>.include?($<expected>): failed.\n"\
-               "    $<actual>:   1..2\n"\
-               "    $<expected>: 3"
-      FAIL!(errmsg) { ok {1..2}.include?(3) }
-    end
-    it "[!55git] is available with NOT." do
-      PASS! { ok {1..2}.NOT.include?(3) }
-      errmsg = "$<actual>.include?($<expected>) == false: failed.\n"\
-               "    $<actual>:   1..5\n"\
-               "    $<expected>: 3"
-      FAIL!(errmsg) { ok {1..5}.NOT.include?(3) }
-    end
-  end
-
   describe '#attr()' do
     it "[!lz3lb] returns self when passed." do
       should_return_self { ok {"SOS"}.attr(:length, 3) }
