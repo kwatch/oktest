@@ -196,8 +196,7 @@ END
       end
     end
 
-    it "[!9973n] '-h' or '--help' option prints help message." do
-      expected = <<END
+    HELP_MESSAGE = <<END
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
@@ -217,6 +216,17 @@ Filter examples:
 
 See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
 END
+
+    it "[!65vdx] prints help message if no arguments specified." do
+      expected = HELP_MESSAGE
+      ret, sout, serr = run()
+      assert_eq ret, 0
+      assert_eq sout, expected
+      assert_eq serr, ""
+    end
+
+    it "[!9973n] '-h' or '--help' option prints help message." do
+      expected = HELP_MESSAGE
       #
       ret, sout, serr = run("-h")
       assert_eq ret, 0

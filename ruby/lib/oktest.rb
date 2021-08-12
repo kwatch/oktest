@@ -2144,6 +2144,11 @@ END
         print generate(filenames, opts.generate)
         return 0
       end
+      #; [!65vdx] prints help message if no arguments specified.
+      if filenames.empty?
+        puts help_message()
+        return 0
+      end
       #; [!6ro7j] '--color=on' option enables output coloring forcedly.
       #; [!vmw0q] '--color=off' option disables output coloring forcedly.
       if opts.color
