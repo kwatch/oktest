@@ -496,15 +496,17 @@ END
     File.unlink(@filename) if @filename && File.exist?(@filename)
   end
 
+  def run(*opts)
+    return capture { Oktest::MainApp.main(opts) }
+  end
+
 end
 
 
 class VerboseReporter_TC < Reporter_TC
 
   it "[!6o9nw] reports topic name and spec desc." do
-    sout, serr = capture do
-      Oktest::MainApp.main(["-sv", @filename])
-    end
+    sout, serr = run("-sv", @filename)
     assert_eq edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
     assert_eq serr, ""
   end
@@ -515,9 +517,7 @@ end
 class SimpleReporter_TC < Reporter_TC
 
   it "[!xfd5o] reports filename." do
-    sout, serr = capture do
-      Oktest::MainApp.main(["-ss", @filename])
-    end
+    sout, serr = run("-ss", @filename)
     assert_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
     assert_eq serr, ""
   end
@@ -528,9 +528,7 @@ end
 class PlainReporter_TC < Reporter_TC
 
   it "[!w842j] reports progress." do
-    sout, serr = capture do
-      Oktest::MainApp.main(["-sp", @filename])
-    end
+    sout, serr = run("-sp", @filename)
     assert_eq edit_actual(sout), edit_expected(PLAIN_OUTPUT)
     assert_eq serr, ""
   end
@@ -541,9 +539,7 @@ end
 class QuietReporter_TC < Reporter_TC
 
   it "[!0z4im] reports all statuses except PASS status." do
-    sout, serr = capture do
-      Oktest::MainApp.main(["-sq", @filename])
-    end
+    sout, serr = run("-sq", @filename)
     assert_eq edit_actual(sout), edit_expected(QUIET_OUTPUT)
     assert_eq serr, ""
   end
