@@ -2115,6 +2115,11 @@ END
         puts VERSION
         return 0
       end
+      #; [!dk8eg] '-C' or '--create' option prints test code skeleton.
+      if opts.create
+        print SKELETON
+        return 0
+      end
       #; [!uxh5e] '-g' or '--generate' option prints test code.
       #; [!wmxu5] '--generate=unaryop' option prints test code with unary op.
       if opts.generate
@@ -2164,7 +2169,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :color, :generate, :faster
+      attr_accessor :help, :version, :style, :filter, :color, :create, :generate, :faster
     end
 
     def option_parser(opts)
@@ -2190,6 +2195,7 @@ END
         #; [!dptgn] '--color' is same as '--color=on'.
         opts.color = val || 'on'
       }
+      parser.on('-C', '--create') { opts.create = true }
       parser.on('-g', '--generate[=styleoption]') {|val|
         val.nil? || val == 'unaryop'  or
           raise OptionParser::InvalidArgument, val
@@ -2208,6 +2214,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
+  -C, --create           : print test code skeleton
   -g, --generate         : generate test code skeleton from ruby file
       --faster           : make 'ok{}' faster (for very large project)
 
@@ -2249,6 +2256,47 @@ END
       end
       return buf.join()
     end
+
+    SKELETON = <<'END'
+# coding: utf-8
+
+## see https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
+require 'oktest'
+
+Oktest.scope do
+
+  fixture :alice do
+    {name: "Alice"}
+  end
+  fixture :bob do
+    {name: "Bob"}
+  end
+
+  topic Class do
+
+    before do nil end
+    after do nil end
+    before_all do nil end
+    after_all do nil end
+
+    topic '#method_name()' do
+
+      spec "1+1 should be 2." do
+        ok {1+1} == 2
+      end
+
+      spec "fixture injection examle." do
+        |alice, bob|
+        ok {alice[:name]} == "Alice"
+        ok {bob[:name]} == "Bob"
+      end
+
+    end
+
+  end
+
+end
+END
 
   end
 

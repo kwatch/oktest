@@ -204,6 +204,7 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
+  -C, --create           : print test code skeleton
   -g, --generate         : generate test code skeleton from ruby file
       --faster           : make 'ok{}' faster (for very large project)
 
@@ -449,6 +450,13 @@ END
       else
         assert false, "OptionParser::InvalidArgument expected but not raised."
       end
+    end
+
+    it "[!dk8eg] '-C' or '--create' option prints test code skeleton." do
+      ret, sout, serr = run("-C")
+      assert_eq ret, 0
+      assert_eq sout, Oktest::MainApp::SKELETON
+      assert_eq serr, ""
     end
 
     HELLO_CLASS_DEF = <<'END'
