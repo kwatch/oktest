@@ -572,8 +572,8 @@ end
 END
       File.write(@testfile, input)
       expected = <<END
-** warning: ok() is called but not tested yet (at #{@testfile}:8:in `block (3 levels) in <top (required)>')
-** warning: ok() is called but not tested yet (at #{@testfile}:11:in `block (3 levels) in <top (required)>')
+** warning: ok() is called but not tested yet (at #{@testfile}:8:in `block (3 levels) in <top (required)>').
+** warning: ok() is called but not tested yet (at #{@testfile}:11:in `block (3 levels) in <top (required)>').
 END
       ret, sout, serr = run(@testfile)
       assert_eq ret, 1

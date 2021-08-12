@@ -58,7 +58,8 @@ module Oktest
       #; [!3nksf] reports if 'ok{}' called but assertion not performed.
       return if NOT_YET.empty?
       NOT_YET.each_value do |ass|
-        $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
+        s = ass.location ? " (at #{ass.location})" : nil
+        $stderr.write "** warning: ok() is called but not tested yet#{s}.\n"
       end
       #; [!f92q4] clears remained objects.
       NOT_YET.clear()
@@ -916,9 +917,14 @@ module Oktest
     attr_accessor :__TODO, :__at_end_blocks
 
     def ok()
-      #; [!3jhg6] creates new assertion object.
       #; [!bc3l2] records invoked location.
-      location = caller(1).first  # caller() makes performance slower, but necessary.
+      #; [!mqtdy] not record invoked location when `Config.ok_location == false`.
+      if Config.ok_location
+        location = caller(1).first  # caller() makes performance slower, but necessary.
+      else
+        location = nil
+      end
+      #; [!3jhg6] creates new assertion object.
       actual = yield
       ass = Oktest::AssertionObject.new(actual, true, location)
       Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
@@ -926,9 +932,14 @@ module Oktest
     end
 
     def not_ok()
-      #; [!d332o] creates new assertion object for negative condition.
       #; [!agmx8] records invoked location.
-      location = caller(1).first  # caller() makes performance slower, but necessary.
+      #; [!a9508] not record invoked location when `Config.ok_location == false`.
+      if Config.ok_location
+        location = caller(1).first  # caller() makes performance slower, but necessary.
+      else
+        location = nil
+      end
+      #; [!d332o] creates new assertion object for negative condition.
       actual = yield
       ass = Oktest::AssertionObject.new(actual, false, location)
       Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
