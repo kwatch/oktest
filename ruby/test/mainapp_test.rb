@@ -201,8 +201,8 @@ END
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s STYLE               : report style (verbose/simple/plain, or v/s/p)
-  -F PATTERN             : filter topic or spec with pattern (see below)
+  -s <STYLE>             : report style (verbose/simple/plain, or v/s/p)
+  -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
 
@@ -212,6 +212,8 @@ Filter examples:
   $ oktest -F tag=name               # filter by tag name
   $ oktest -F tag!=name              # negative filter by tag name
   $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
+
+See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
 END
       #
       ret, sout, serr = run("-h")
