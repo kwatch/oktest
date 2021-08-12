@@ -15,7 +15,7 @@ Oktest.rb is a new-style testing library for Ruby.
 ### Oktest                           ### Test::Unit
 require 'oktest'                     #  require 'test/unit'
                                      #
-Oketst.scope do                      #
+Oktest.scope do                      #
                                      #
   topic "Example" do                 #  class ExampleTest < Test::Unit::TestCase
                                      #
@@ -106,7 +106,16 @@ $ oktest --help
 $ mkdir test
 
 ### create test script
-$ vim test/example_test.rb
+$ oktest --create > test/example_test.rb
+$ less test/example_test.rb
+
+### run test script
+$ oktest -s verbose test
+* Class
+  * #method_name()
+    - [pass] 1+1 should be 2.
+    - [pass] fixture injection examle.
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.001s
 ```
 
 
@@ -152,7 +161,7 @@ end
 Result:
 
 ```terminal
-$ oketst test/example01_test.rb   # or: ruby test/example01_test.rb
+$ oktest test/example01_test.rb   # or: ruby test/example01_test.rb
 * Hello
   * #hello()
     - [pass] returns greeting message.
