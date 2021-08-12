@@ -544,6 +544,17 @@ class Context_TC < TC
         assert false, "TodoException should be called."
       end
     end
+    it "[!x48db] keeps called location only when block has parameters." do
+      lineno = __LINE__ + 3
+      node = new_node_with() do
+        spec "example #4" do nil end
+        spec "example #5" do |x| nil end
+      end
+      sp1, sp2 = node.each_child.to_a
+      assert_eq sp1.location, nil
+      assert sp2.location != nil, "not nil"
+      assert sp2.location.start_with?("#{__FILE__}:#{lineno}:in")
+    end
   end
 
   describe '#fixture()' do

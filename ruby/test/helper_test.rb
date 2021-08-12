@@ -38,6 +38,16 @@ class SpecHelper_TC < TC
       o = ok {"bar"}
       assert o.location.start_with?("#{__FILE__}:#{lineno}:")
     end
+    it "[!mqtdy] not record invoked location when `Config.ok_location == false`." do
+      bkup = Oktest::Config.ok_location
+      begin
+        Oktest::Config.ok_location = false
+        o = ok {"bar"}
+        assert_eq o.location, nil
+      ensure
+        Oktest::Config.ok_location = bkup
+      end
+    end
   end
 
   describe '#not_ok()' do
@@ -51,6 +61,16 @@ class SpecHelper_TC < TC
       lineno = __LINE__ + 1
       o = not_ok {"bar"}
       assert o.location.start_with?("#{__FILE__}:#{lineno}:")
+    end
+    it "[!a9508] not record invoked location when `Config.ok_location == false`." do
+      bkup = Oktest::Config.ok_location
+      begin
+        Oktest::Config.ok_location = false
+        o = not_ok {"bar"}
+        assert_eq o.location, nil
+      ensure
+        Oktest::Config.ok_location = bkup
+      end
     end
   end
 

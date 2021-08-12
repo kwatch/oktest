@@ -58,7 +58,8 @@ module Oktest
       #; [!3nksf] reports if 'ok{}' called but assertion not performed.
       return if NOT_YET.empty?
       NOT_YET.each_value do |ass|
-        $stderr.write "** warning: ok() is called but not tested yet (at #{ass.location})\n"
+        s = ass.location ? " (at #{ass.location})" : nil
+        $stderr.write "** warning: ok() is called but not tested yet#{s}.\n"
       end
       #; [!f92q4] clears remained objects.
       NOT_YET.clear()
@@ -591,8 +592,13 @@ module Oktest
       node.is_a?(Node)  or raise "internal error: node=#{node.inspect}"  # for debug
       #; [!ala78] provides raising TodoException block if block not given.
       block ||= proc { raise TodoException, "not implemented yet" }
+      #; [!x48db] keeps called location only when block has parameters.
+      if block.parameters.empty?
+        location = nil
+      else
+        location = caller(1).first  # caller() makes performance slower, but necessary.
+      end
       #; [!c8c8o] creates new spec object.
-      location = caller(1).first
       spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
       return spec
     end
@@ -600,7 +606,7 @@ module Oktest
     def self.fixture(name, &block)
       #; [!8wfrq] registers fixture factory block.
       #; [!y3ks3] retrieves block parameter names.
-      location = caller(1).first
+      location = caller(1).first  # caller() makes performance slower, but necessary.
       @__node.register_fixture_block(name, location, &block)
       self
     end
@@ -887,7 +893,8 @@ module Oktest
   def self.scope(tag: nil, &block)
     #; [!vxoy1] creates new scope object.
     #; [!rsimc] adds scope object as child of THE_GLOBAL_SCOPE.
-    filename = caller(1).first =~ /:\d+/ ? $` : nil
+    location = caller(1).first  # caller() makes performance slower, but necessary.
+    filename = location =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
     scope = ScopeNode.new(THE_GLOBAL_SCOPE, filename, tag: tag)
     #; [!jmc4q] raises error when nested called.
@@ -910,9 +917,14 @@ module Oktest
     attr_accessor :__TODO, :__at_end_blocks
 
     def ok()
-      #; [!3jhg6] creates new assertion object.
       #; [!bc3l2] records invoked location.
-      location = caller(1).first
+      #; [!mqtdy] not record invoked location when `Config.ok_location == false`.
+      if Config.ok_location
+        location = caller(1).first  # caller() makes performance slower, but necessary.
+      else
+        location = nil
+      end
+      #; [!3jhg6] creates new assertion object.
       actual = yield
       ass = Oktest::AssertionObject.new(actual, true, location)
       Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
@@ -920,9 +932,14 @@ module Oktest
     end
 
     def not_ok()
-      #; [!d332o] creates new assertion object for negative condition.
       #; [!agmx8] records invoked location.
-      location = caller(1).first
+      #; [!a9508] not record invoked location when `Config.ok_location == false`.
+      if Config.ok_location
+        location = caller(1).first  # caller() makes performance slower, but necessary.
+      else
+        location = nil
+      end
+      #; [!d332o] creates new assertion object for negative condition.
       actual = yield
       ass = Oktest::AssertionObject.new(actual, false, location)
       Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
@@ -936,7 +953,8 @@ module Oktest
     end
 
     def TODO()
-      @__TODO = true
+      location = caller(1).first   # ex: "foo_test.rb:123:in ...."
+      @__TODO = location
     end
 
     def at_end(&block)
@@ -1225,7 +1243,8 @@ module Oktest
           status = :TODO
           exc = TODO_EXCEPTION.new("#{exc.class} raised because not implemented yet")
         end
-        exc.set_backtrace([spec.location])
+        location = context.__TODO
+        exc.set_backtrace([location])
       end
       #; [!dihkr] calls 'at_end' blocks, even when exception raised.
       begin
@@ -1340,7 +1359,7 @@ module Oktest
       else
         #; [!nr79z] raises error when fixture not found.
         exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
-        exc.set_backtrace([location])
+        exc.set_backtrace([location]) if location
         raise exc
       end
     end
@@ -1798,12 +1817,13 @@ module Oktest
 
     @os_windows      = RUBY_PLATFORM =~ /mswin|mingw/i
     @auto_run        = true
+    @ok_location     = true     # false will make 'ok()' faster
     @color_available = ! @os_windows || ENV['COLORTERM'] =~ /color|24bit/i
     @color_enabled   = @color_available && $stdout.tty?
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
 
     class << self
-      attr_accessor :auto_run, :color_available, :color_enabled
+      attr_accessor :auto_run, :ok_location, :color_available, :color_enabled
     end
 
   end
@@ -2107,6 +2127,10 @@ END
         color_enabled = Config.color_enabled
         Config.color_enabled = (opts.color == 'on')
       end
+      #; [!qs8ab] '--faster' chanages 'Config.ok_location' to false.
+      if opts.faster
+        Config.ok_location = false    # will make 'ok{}' faster
+      end
       #
       $LOADED_FEATURES << __FILE__ unless $LOADED_FEATURES.include?(__FILE__) # avoid loading twice
       #; [!hiu5b] finds test scripts in directory and runs them.
@@ -2140,7 +2164,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :color, :generate
+      attr_accessor :help, :version, :style, :filter, :color, :generate, :faster
     end
 
     def option_parser(opts)
@@ -2171,6 +2195,7 @@ END
           raise OptionParser::InvalidArgument, val
         opts.generate = val || true
       }
+      parser.on(      '--faster') { opts.faster = true }
       return parser
     end
 
@@ -2184,6 +2209,7 @@ Usage: #{command} [<options>] [<file-or-directory>...]
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
+      --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic
