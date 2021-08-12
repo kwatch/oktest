@@ -495,7 +495,7 @@ end
 
 ### Generate Test Code Skeleton
 
-`oktest -g` (or `oktest --generate`) generates test code skeleton from ruby file.
+`oktest -G` (or `oktest --generate`) generates test code skeleton from ruby file.
 Comment line starting with `#;` is regarded as spec description.
 
 hello.rb:
@@ -518,7 +518,7 @@ end
 Generate test code skeleton:
 
 ```terminal
-$ oktest -g hello.rb > test/hello_test.rb
+$ oktest -G hello.rb > test/hello_test.rb
 ```
 
 test/hello_test.rb:
@@ -1665,7 +1665,7 @@ Oktest.scope do
 end
 ```
 
-Defining h method per topic may help you.
+Defining helper method per topic may help you.
 
 ```ruby
 $http = http                                   # !!!!

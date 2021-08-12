@@ -196,7 +196,8 @@ END
       end
     end
 
-    HELP_MESSAGE = <<END
+    #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
+    HELP_MESSAGE = <<"END"
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
@@ -204,7 +205,7 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton
-  -g, --generate         : generate test code skeleton from ruby file
+  -G, --generate         : generate test code skeleton from ruby file
       --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
@@ -482,7 +483,7 @@ class Hello
 end
 END
 
-    it "[!uxh5e] '-g' or '--generate' option prints test code." do
+    it "[!uxh5e] '-G' or '--generate' option prints test code." do
       input = HELLO_CLASS_DEF
       filename = "_tmpcode_4674.rb"
       File.write(filename, input)
@@ -513,7 +514,7 @@ end
 END
       #
       begin
-        ret, sout, serr = run("-g", filename)
+        ret, sout, serr = run("-G", filename)
         assert_eq ret, 0
         assert_eq sout, expected
         assert_eq serr, ""

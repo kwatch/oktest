@@ -2138,7 +2138,7 @@ END
         print SKELETON
         return 0
       end
-      #; [!uxh5e] '-g' or '--generate' option prints test code.
+      #; [!uxh5e] '-G' or '--generate' option prints test code.
       #; [!wmxu5] '--generate=unaryop' option prints test code with unary op.
       if opts.generate
         print generate(filenames, opts.generate)
@@ -2219,7 +2219,7 @@ END
         opts.color = val || 'on'
       }
       parser.on('-C', '--create') { opts.create = true }
-      parser.on('-g', '--generate[=styleoption]') {|val|
+      parser.on('-G', '--generate[=styleoption]') {|val|
         val.nil? || val == 'unaryop'  or
           raise OptionParser::InvalidArgument, val
         opts.generate = val || true
@@ -2230,15 +2230,18 @@ END
 
     def help_message(command=nil)
       command ||= File.basename($0)
-      return <<END
-Usage: #{command} [<options>] [<file-or-directory>...]
+      return HELP_MESSAGE % {command: command}
+    end
+
+    HELP_MESSAGE = <<'END'
+Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
   -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton
-  -g, --generate         : generate test code skeleton from ruby file
+  -G, --generate         : generate test code skeleton from ruby file
       --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
@@ -2250,7 +2253,6 @@ Filter examples:
 
 See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
 END
-    end
 
     def load_files(filenames)
       filenames.each do |fname|
