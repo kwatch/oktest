@@ -2230,8 +2230,11 @@ END
 
     def help_message(command=nil)
       command ||= File.basename($0)
-      return <<END
-Usage: #{command} [<options>] [<file-or-directory>...]
+      return HELP_MESSAGE % {command: command}
+    end
+
+    HELP_MESSAGE = <<'END'
+Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
   -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
@@ -2250,7 +2253,6 @@ Filter examples:
 
 See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
 END
-    end
 
     def load_files(filenames)
       filenames.each do |fname|

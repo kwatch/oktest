@@ -196,7 +196,8 @@ END
       end
     end
 
-    HELP_MESSAGE = <<END
+    #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
+    HELP_MESSAGE = <<"END"
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
