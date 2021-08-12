@@ -503,8 +503,7 @@ class VerboseReporter_TC < Reporter_TC
 
   it "[!6o9nw] reports topic name and spec desc." do
     sout, serr = capture do
-      load(@filename)
-      Oktest::MainApp.main(["-sv"])
+      Oktest::MainApp.main(["-sv", @filename])
     end
     assert_eq edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
     assert_eq serr, ""
@@ -517,8 +516,7 @@ class SimpleReporter_TC < Reporter_TC
 
   it "[!xfd5o] reports filename." do
     sout, serr = capture do
-      load(@filename)
-      Oktest::MainApp.main(["-ss"])
+      Oktest::MainApp.main(["-ss", @filename])
     end
     assert_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
     assert_eq serr, ""
@@ -531,8 +529,7 @@ class PlainReporter_TC < Reporter_TC
 
   it "[!w842j] reports progress." do
     sout, serr = capture do
-      load(@filename)
-      Oktest::MainApp.main(["-sp"])
+      Oktest::MainApp.main(["-sp", @filename])
     end
     assert_eq edit_actual(sout), edit_expected(PLAIN_OUTPUT)
     assert_eq serr, ""
@@ -545,8 +542,7 @@ class QuietReporter_TC < Reporter_TC
 
   it "[!0z4im] reports all statuses except PASS status." do
     sout, serr = capture do
-      load(@filename)
-      Oktest::MainApp.main(["-sq"])
+      Oktest::MainApp.main(["-sq", @filename])
     end
     assert_eq edit_actual(sout), edit_expected(QUIET_OUTPUT)
     assert_eq serr, ""
