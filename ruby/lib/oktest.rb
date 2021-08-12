@@ -591,8 +591,13 @@ module Oktest
       node.is_a?(Node)  or raise "internal error: node=#{node.inspect}"  # for debug
       #; [!ala78] provides raising TodoException block if block not given.
       block ||= proc { raise TodoException, "not implemented yet" }
+      #; [!x48db] keeps called location only when block has parameters.
+      if block.parameters.empty?
+        location = nil
+      else
+        location = caller(1).first  # caller() makes performance slower, but necessary.
+      end
       #; [!c8c8o] creates new spec object.
-      location = caller(1).first  # caller() makes performance slower, but necessary.
       spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
       return spec
     end
@@ -1343,7 +1348,7 @@ module Oktest
       else
         #; [!nr79z] raises error when fixture not found.
         exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
-        exc.set_backtrace([location])
+        exc.set_backtrace([location]) if location
         raise exc
       end
     end
