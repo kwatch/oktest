@@ -1092,7 +1092,7 @@ module Oktest
     def start()
       #; [!8h8qf] start visiting tree.
       #visit_scope(THE_GLOBAL_SCOPE, -1, nil)
-      THE_GLOBAL_SCOPE.children.each {|c| c.accept_visitor(self, 0, nil) }
+      THE_GLOBAL_SCOPE.each_child {|c| c.accept_visitor(self, 0, nil) }
     end
 
     def visit_scope(scope, depth, parent)
