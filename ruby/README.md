@@ -85,6 +85,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
     * <a href="#traverser-class">Traverser Class</a>
+  * <a href="#change-log">Change Log</a>
   * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
@@ -1672,6 +1673,12 @@ $ ruby test/example44_test.rb
     + case: Else
       - spec: sample #4
 ```
+
+
+
+## Change Log
+
+See [CHANGES.md](https://github.com/kwatch/oktest/blob/ruby/ruby/CHANGES.md).
 
 
 
