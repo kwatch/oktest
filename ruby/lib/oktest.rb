@@ -937,7 +937,8 @@ module Oktest
     end
 
     def TODO()
-      @__TODO = true
+      location = caller(1).first   # ex: "foo_test.rb:123:in ...."
+      @__TODO = location
     end
 
     def at_end(&block)
@@ -1226,7 +1227,8 @@ module Oktest
           status = :TODO
           exc = TODO_EXCEPTION.new("#{exc.class} raised because not implemented yet")
         end
-        exc.set_backtrace([spec.location])
+        location = context.__TODO
+        exc.set_backtrace([location])
       end
       #; [!dihkr] calls 'at_end' blocks, even when exception raised.
       begin
