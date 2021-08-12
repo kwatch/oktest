@@ -1590,7 +1590,7 @@ module Oktest
 
 
   class PlainReporter < BaseReporter
-    #; [!w842j] reports results only.
+    #; [!w842j] reports progress.
 
     def exit_all(runner)
       elapsed = Time.now - @start_at
@@ -1608,6 +1608,27 @@ module Oktest
   end
 
 
+  class QuietReporter < BaseReporter
+    #; [!0z4im] reports all statuses except PASS status.
+
+    def exit_all(runner)
+      elapsed = Time.now - @start_at
+      puts()
+      print_exceptions()
+      puts footer(elapsed)
+    end
+
+    def exit_spec(spec, depth, status, error, parent)
+      super
+      if status != :PASS
+        print Color.status(status, CHARS[status] || '?')
+        $stdout.flush
+      end
+    end
+
+  end
+
+
   REPORTER_CLASS = VerboseReporter
 
 
@@ -1615,6 +1636,7 @@ module Oktest
     'verbose' => VerboseReporter,  'v' => VerboseReporter,
     'simple'  => SimpleReporter,   's' => SimpleReporter,
     'plain'   => PlainReporter,    'p' => PlainReporter,
+    'quiet'   => QuietReporter,    'q' => QuietReporter,
   }
 
 
@@ -2104,6 +2126,7 @@ END
       #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
       #; [!ef5v7] '-s simple' or '-ss' option prints test results in simple mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
+      #; [!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode.
       n_errors = Oktest.run(:style=>opts.style)
       #; [!dsrae] reports if 'ok()' called but assertion not performed.
       AssertionObject.report_not_yet()
@@ -2157,7 +2180,7 @@ END
 Usage: #{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <STYLE>             : report style (verbose/simple/plain, or v/s/p)
+  -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -g, --generate         : generate test code skeleton from ruby file
