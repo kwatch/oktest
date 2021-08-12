@@ -287,6 +287,14 @@ $ oktest test/example01_test.rb -s simple   # or -ss
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
 
+Quiet mode:
+
+```terminal
+$ oktest test/example01_test.rb -s quiet    # or -sq
+
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
 
 ### Run All Test Scripts Under Directory
 
