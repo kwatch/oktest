@@ -30,7 +30,7 @@ How to release:
   $ git diff .
   $ git status .
   $ git checkout -b #{branch}
-  $ git edit RELEASE=#{rel}
+  $ rake edit RELEASE=#{rel}
   $ git add -u
   $ git commit -m "ruby: preparation for release #{rel}"
   $ vim CHANGES.md

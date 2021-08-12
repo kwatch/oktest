@@ -102,7 +102,7 @@ desc "edit metadata in files"
 task :edit do
   target_files().each do |fname|
     changed = edit_file(fname) do |s|
-      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELE ASE != '0.0.0'
+      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELEASE != '0.0.0'
       s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
       s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
       s
