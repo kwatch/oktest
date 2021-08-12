@@ -96,6 +96,75 @@ class SpecHelper_TC < TC
     end
   end
 
+  describe '#fixture()' do
+    it "[!m4ava] calls fixture block and returns result of it." do
+      val = nil
+      Oktest.scope() do
+        topic 'Example' do
+          fixture :foo do "<<foo>>" end
+          spec 'sample' do
+            val = fixture(:foo)
+          end
+        end
+      end
+      capture { Oktest.run() }
+      assert_eq val, "<<foo>>"
+    end
+    it "[!zgfg9] finds fixture block in current or parent node." do
+      val1 = val2 = val3 = nil
+      Oktest.scope() do
+        fixture :foo do "<<foo>>" end
+        topic 'Outer' do
+          fixture :bar do "<<bar>>" end
+          topic 'Inner' do
+            fixture :baz do "<<baz>>" end
+            spec 'sample' do
+              val1 = fixture(:baz)
+              val2 = fixture(:bar)
+              val3 = fixture(:foo)
+            end
+          end
+        end
+      end
+      capture { Oktest.run() }
+      assert_eq val1, "<<baz>>"
+      assert_eq val2, "<<bar>>"
+      assert_eq val3, "<<foo>>"
+    end
+    it "[!l2mcx] accepts block arguments." do
+      val = nil
+      Oktest.scope() do
+        fixture :foo do |x, y|
+          {x: x, y: y}
+        end
+        topic 'Example' do
+          spec 'sample' do
+            val = fixture(:foo, 10, 20)
+          end
+        end
+      end
+      capture { Oktest.run() }
+      assert_eq val, {x: 10, y: 20}
+    end
+    it "[!wxcsp] raises error when fixture not found." do
+      exc = nil
+      Oktest.scope() do
+        fixture :foo do "<<foo>>" end
+        topic 'Example' do
+          spec 'sample' do
+            begin
+              fixture(:bar)
+            rescue Exception => exc
+            end
+          end
+        end
+      end
+      capture { Oktest.run() }
+      assert_eq exc.class, Oktest::FixtureNotFoundError
+      assert_eq exc.message, "`:bar`: fixture not found."
+    end
+  end
+
   describe '#at_end()' do
     it "[!x58eo] records clean-up block." do
       Oktest.scope() do
