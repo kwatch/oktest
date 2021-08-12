@@ -406,20 +406,6 @@ module Oktest
       self
     end
 
-    def include?(expected)
-      __done()
-      #; [!960j7] raises assertion error when failed.
-      #; [!55git] is available with NOT.
-      __assert(@bool == !! @actual.include?(expected)) {
-        eq = @bool ? '' : ' == false'
-        "$<actual>.include?($<expected>)#{eq}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}\n"\
-        "    $<expected>: #{expected.inspect}"
-      }
-      #; [!2hddj] returns self when passed.
-      self
-    end
-
     def attr(name, expected)
       __done()
       #; [!79tgn] raises assertion error when failed.
