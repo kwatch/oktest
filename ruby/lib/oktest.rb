@@ -592,7 +592,7 @@ module Oktest
       #; [!ala78] provides raising TodoException block if block not given.
       block ||= proc { raise TodoException, "not implemented yet" }
       #; [!c8c8o] creates new spec object.
-      location = caller(1).first
+      location = caller(1).first  # caller() makes performance slower, but necessary.
       spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
       return spec
     end
@@ -600,7 +600,7 @@ module Oktest
     def self.fixture(name, &block)
       #; [!8wfrq] registers fixture factory block.
       #; [!y3ks3] retrieves block parameter names.
-      location = caller(1).first
+      location = caller(1).first  # caller() makes performance slower, but necessary.
       @__node.register_fixture_block(name, location, &block)
       self
     end
@@ -887,7 +887,8 @@ module Oktest
   def self.scope(tag: nil, &block)
     #; [!vxoy1] creates new scope object.
     #; [!rsimc] adds scope object as child of THE_GLOBAL_SCOPE.
-    filename = caller(1).first =~ /:\d+/ ? $` : nil
+    location = caller(1).first  # caller() makes performance slower, but necessary.
+    filename = location =~ /:\d+/ ? $` : nil
     filename = filename.sub(/\A\.\//, '')
     scope = ScopeNode.new(THE_GLOBAL_SCOPE, filename, tag: tag)
     #; [!jmc4q] raises error when nested called.
@@ -912,7 +913,7 @@ module Oktest
     def ok()
       #; [!3jhg6] creates new assertion object.
       #; [!bc3l2] records invoked location.
-      location = caller(1).first
+      location = caller(1).first  # caller() makes performance slower, but necessary.
       actual = yield
       ass = Oktest::AssertionObject.new(actual, true, location)
       Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
@@ -922,7 +923,7 @@ module Oktest
     def not_ok()
       #; [!d332o] creates new assertion object for negative condition.
       #; [!agmx8] records invoked location.
-      location = caller(1).first
+      location = caller(1).first  # caller() makes performance slower, but necessary.
       actual = yield
       ass = Oktest::AssertionObject.new(actual, false, location)
       Oktest::AssertionObject::NOT_YET[ass.__id__] = ass
