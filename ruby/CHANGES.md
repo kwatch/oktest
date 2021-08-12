@@ -1,10 +1,8 @@
 CHANGES
 =======
 
-$Release: $
 
-
-Release 0.5.0
+Release 1.0.0
 -------------
 
 * public release
