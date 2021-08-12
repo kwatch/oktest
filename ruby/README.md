@@ -84,7 +84,7 @@ Oktest.rb requires Ruby 2.3 or later.
   * <a href="#tips">Tips</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
-    * <a href="#visitor-class">Visitor Class</a>
+    * <a href="#traverser-class">Traverser Class</a>
   * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
@@ -913,7 +913,7 @@ end
 
 ### Setup and Teardown
 
-test/example21_test.rb:
+test/example21a_test.rb:
 
 ```ruby
 require 'oktest'
@@ -923,19 +923,19 @@ Oktest.scope do
   topic "Fixture example" do
 
     before do       # equivarent to setUp()
-      puts "** before() called"
+      puts "=== before() ==="
     end
 
     after do        # equivarent to tearDown()
-      puts "** after() called"
+      puts "=== after() ==="
     end
 
     before_all do   # equivarent to setUpAll()
-      puts "* before_all() called"
+      puts "*** before_all() ***"
     end
 
     after_all do    # equvarent to tearDownAll()
-      puts "* after_all() called"
+      puts "*** after_all() ***"
     end
 
     spec "example spec #1" do
@@ -954,18 +954,72 @@ end
 Result:
 
 ```terminal
-$ oktest test/example21_test.rb    # or: ruby test/example21_test.rb
-* before_all() called
-** before() called
+$ oktest -s plain test/example21_test.rb
+*** before_all() ***
+=== before() ===
 ---- example spec #1 ----
-** after() called
-.** before() called
+=== after() ===
+.=== before() ===
 ---- example spec #2 ----
-** after() called
-.* after_all() called
+=== after() ===
+.*** after_all() ***
 
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
+
+These blocks can be defined per `topic()` or `scope()`.
+
+* `before` block in outer topic/scope is called prior to `before` block in inner topic.
+* `after` block in inner topic is called prior to `after` block in outer topic/scope.
+
+test/example21b_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic 'Outer' do
+    before { puts "=== Outer: before ===" }         # !!!!!
+    after  { puts "=== Outer: after ===" }          # !!!!!
+
+    topic 'Middle' do
+      before { puts "==== Middle: before ====" }    # !!!!!
+      after  { puts "==== Middle: after ====" }     # !!!!!
+
+      topic 'Inner' do
+        before { puts "===== Inner: before =====" } # !!!!!
+        after  { puts "===== Inner: after =====" }  # !!!!!
+
+        spec "example" do
+	  ok {1+1} == 2
+	end
+
+      end
+
+    end
+
+  end
+
+end
+```
+
+Result:
+
+```terminal
+$ oktest -s plain test/example21b_test.rb
+=== Outer: before ===
+==== Middle: before ====
+===== Inner: before =====
+===== Inner: after =====
+==== Middle: after ====
+=== Outer: after ===
+.
+## total:1 (pass:1, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
+If something error raised in `before`/`after`/`before_all`/`after_all` blocks,
+test script execution will be stopped instantly.
 
 
 ### `at_end()`: Crean-up Handler
@@ -998,7 +1052,9 @@ end
 
 * `at_end()` can be called multiple times.
 * Registered blocks are invoked in reverse order at end of test case.
-* Registered blocks of `at_end()` are invoked before blocks of `after()`.
+* Registered blocks of `at_end()` are invoked prior to block of `after()`.
+* If something error raised in `at_end()`, test script execution will be
+  stopped instantly.
 
 
 ### Fixture Injection
@@ -1545,9 +1601,9 @@ end
 ```
 
 
-### Visitor Class
+### Traverser Class
 
-Oktest.rb provides visitor class.
+Oktest.rb provides `Traverser` class which implements Visitor pattern.
 
 test/example44_test.rb:
 
@@ -1567,8 +1623,15 @@ Oktest.scope do
   end
 end
 
-## custom visitor class
-class MyVisitor < Oktest::Visitor      # !!!!!
+## custom traverser class
+class MyTraverser < Oktest::Traverser  # !!!!!
+  def on_scope(filename, tag, depth)    # !!!!!
+    print "  " * depth
+    print "# scope: #{filename}"
+    print " (tag: #{tag})" if tag
+    print "\n"
+    yield                              # should yield !!!
+  end
   def on_topic(target, tag, depth)     # !!!!!
     print "  " * depth
     print "+ topic: #{target}"
@@ -1591,22 +1654,23 @@ class MyVisitor < Oktest::Visitor      # !!!!!
   end
 end
 
-## run custom visitor
+## run custom traverser
 Oktest::Config.auto_run = false    # stop running test cases
-MyVisitor.new.start()
+MyTraverser.new.start()
 ```
 
 Result:
 
 ```terminal
 $ ruby test/example44_test.rb
-+ topic: Example Topic
-  - spec: sample #1
-  - spec: sample #2
-  + case: When some condition...
-    - spec: sample #3
-  + case: Else
-    - spec: sample #4
+# scope: test/example44_test.rb
+  + topic: Example Topic
+    - spec: sample #1
+    - spec: sample #2
+    + case: When some condition...
+      - spec: sample #3
+    + case: Else
+      - spec: sample #4
 ```
 
 
