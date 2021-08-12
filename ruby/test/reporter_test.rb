@@ -476,6 +476,11 @@ END
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 
+  QUIET_PART = <<'END'
+<R>f</R><R>E</R><Y>s</Y><Y>t</Y>
+END
+  QUIET_OUTPUT = QUIET_PART + ERROR_PART + FOOTER
+
   def default_test
   end
 
@@ -524,12 +529,26 @@ end
 
 class PlainReporter_TC < Reporter_TC
 
-  it "[!w842j] reports results only." do
+  it "[!w842j] reports progress." do
     sout, serr = capture do
       load(@filename)
       Oktest::MainApp.main(["-sp"])
     end
     assert_eq edit_actual(sout), edit_expected(PLAIN_OUTPUT)
+    assert_eq serr, ""
+  end
+
+end
+
+
+class QuietReporter_TC < Reporter_TC
+
+  it "[!0z4im] reports all statuses except PASS status." do
+    sout, serr = capture do
+      load(@filename)
+      Oktest::MainApp.main(["-sq"])
+    end
+    assert_eq edit_actual(sout), edit_expected(QUIET_OUTPUT)
     assert_eq serr, ""
   end
 

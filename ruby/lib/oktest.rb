@@ -1590,7 +1590,7 @@ module Oktest
 
 
   class PlainReporter < BaseReporter
-    #; [!w842j] reports results only.
+    #; [!w842j] reports progress.
 
     def exit_all(runner)
       elapsed = Time.now - @start_at
@@ -1603,6 +1603,27 @@ module Oktest
       super
       print Color.status(status, CHARS[status] || '?')
       $stdout.flush
+    end
+
+  end
+
+
+  class QuietReporter < BaseReporter
+    #; [!0z4im] reports all statuses except PASS status.
+
+    def exit_all(runner)
+      elapsed = Time.now - @start_at
+      puts()
+      print_exceptions()
+      puts footer(elapsed)
+    end
+
+    def exit_spec(spec, depth, status, error, parent)
+      super
+      if status != :PASS
+        print Color.status(status, CHARS[status] || '?')
+        $stdout.flush
+      end
     end
 
   end
