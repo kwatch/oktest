@@ -34,7 +34,7 @@ Oktest.scope do                      #
       ok {'/tmp'}.dir_exist?         #      assert File.directory?('/tmp')
       ok {'/blabla'}.not_exist?      #      assert !File.exist?('/blabla')
       pr = proc { .... }             #      exc = assert_raise(Error) { .... }
-      ok {pr}.raise?(Error, "mesg")  #      assert exc.message, "mesg"
+      ok {pr}.raise?(Error, "mesg")  #      assert_equal "mesg", exc.message
     end                              #    end
                                      #
   end                                #  end
@@ -83,10 +83,11 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
     * <a href="#recorder"><code>recorder()</code></a>
   * <a href="#tips">Tips</a>
-    * <a href="#--faster-option"><code>--faster</code> Option</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
     * <a href="#traverser-class">Traverser Class</a>
+    * <a href="#benchmarks">Benchmarks</a>
+    * <a href="#--faster-option"><code>--faster</code> Option</a>
   * <a href="#change-log">Change Log</a>
   * <a href="#license-and-copyright">License and Copyright</a>
 
@@ -1586,25 +1587,6 @@ end
 ## Tips
 
 
-### `--faster` Option
-
-`ok {}` is slightly slower than `assert()` in MiniTest.
-In almost case, you don't need to care about it.  But if you are working in
-very larget project and you want to run test scripts faster, try `--faster`
-option of `oktest` command.
-
-```terminal
-$ oktest -s quiet --faster test/        ## only for very large project
-```
-
-Or set `Oktest::Config.ok_location = false` in your test script.
-
-```ruby
-require 'oktest'
-Oktest::Config.ok_location = false      ## only for very large project
-```
-
-
 ### `ok {}` in MiniTest
 
 If you want to use `ok {actual} == expected` style assertion in MiniTest,
@@ -1772,6 +1754,92 @@ $ ruby test/example44_test.rb
       - spec: sample #3
     + case: Else
       - spec: sample #4
+```
+
+
+### Benchmarks
+
+Oktest.rb gem file contains benchmark script.
+It shows that Oktest.rb runs more than three times faster than RSpec.
+
+```terminal
+$ gem install oktest        # ver 1.0.0
+$ gem install rspec         # ver 3.10.0
+$ gem install minitest      # ver 5.14.4
+$ gem install test-unit     # ver 3.4.4
+
+$ cp -pr $GEM_HOME/gems/oktest-1.0.0/benchmark .
+$ cd benchmark/
+$ rake -T
+$ ruby --version
+ruby 3.0.2p107 (2021-07-07 revision 0db68f0233) [x86_64-darwin18]
+
+$ rake benchmark:all
+```
+
+Example result:
+
+```
+==================== oktest ====================
+oktest -sq run_all.rb
+
+## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 4.86s
+
+        8.536 real        8.154 user        0.245 sys
+
+==================== oktest:faster ====================
+oktest -sq --faster run_all.rb
+
+## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 1.64s
+
+        5.068 real        4.819 user        0.202 sys
+
+==================== rspec ====================
+rspec run_all.rb | tail -4
+
+Finished in 14.44 seconds (files took 15.81 seconds to load)
+100000 examples, 0 failures
+
+
+        30.798 real        26.565 user        4.392 sys
+
+==================== minitest ====================
+ruby run_all.rb | tail -4
+
+Finished in 5.190405s, 19266.3193 runs/s, 19266.3193 assertions/s.
+
+100000 runs, 100000 assertions, 0 failures, 0 errors, 0 skips
+
+        8.767 real        8.157 user        0.761 sys
+
+==================== testunit ====================
+ruby run_all.rb | tail -5
+-------------------------------------------------------------------------------
+100000 tests, 100000 assertions, 0 failures, 0 errors, 0 pendings, 0 omissions, 0 notifications
+100% passed
+-------------------------------------------------------------------------------
+8957.19 tests/s, 8957.19 assertions/s
+
+        17.838 real        17.201 user        0.879 sys
+```
+
+
+### `--faster` Option
+
+`ok {}` is slightly slower than `assert()` in MiniTest.
+In almost case, you don't need to care about it.  But if you are working in
+very larget project and you want to run test scripts as fast as possible,
+try `--faster` option of `oktest` command.
+
+```terminal
+$ oktest -s quiet --faster test/        ## only for very large project
+```
+
+Or set `Oktest::Config.ok_location = false` in your test script.
+
+```ruby
+require 'oktest'
+Oktest::Config.ok_location = false      ## only for very large project
 ```
 
 
