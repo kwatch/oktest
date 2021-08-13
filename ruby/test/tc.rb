@@ -76,6 +76,24 @@ class TC
     raise AssertionFailed, errmsg
   end
 
+  def assert_exc(errcls, errmsg=nil, &b)
+    begin
+      yield
+    rescue NoMemoryError, SystemExit, SyntaxError, SignalException
+      raise
+    rescue Exception => exc
+      exc.class == errcls  or
+        raise AssertionFailed, "#{errcls} should be raised but got #{exc.inspect}"
+      errmsg.nil? || errmsg === exc.message  or
+        raise AssertionFailed, ("invalid error message.\n"\
+                                "  $<actual>:   #{exc.message.inspect}\n"\
+                                "  $<expected>: #{errmsg.inspect}")
+      return exc
+    else
+      raise AssertionFailed, "#{errcls.name} should be raised but not."
+    end
+  end
+
   def capture(input="", tty: true, &b)
     require 'stringio' unless defined?(StringIO)
     stdin, stdout, stderr = $stdin, $stdout, $stderr
