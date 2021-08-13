@@ -54,7 +54,7 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#install">Install</a>
     * <a href="#basic-example">Basic Example</a>
     * <a href="#assertion-failure-and-error">Assertion Failure, and Error</a>
-    * <a href="#skip-and-todo">Skip, and Todo</a>
+    * <a href="#skip-and-todo">Skip and Todo</a>
     * <a href="#reporting-style">Reporting Style</a>
     * <a href="#run-all-test-scripts-under-directory">Run All Test Scripts Under Directory</a>
     * <a href="#tag-and-filtering">Tag and Filtering</a>
@@ -207,14 +207,14 @@ $ oktest test/example02_test.rb   # or: ruby test/example02_test.rb
   - [ERROR] example of something error
 ----------------------------------------------------------------------
 [Fail] other examples > example of assertion failure
-    tmp/test/example02_test.rb:9:in `block (3 levels) in <main>'
+    test/example02_test.rb:9:in `block (3 levels) in <main>'
         ok {1+1} == 0     # FAIL
 $<actual> == $<expected>: failed.
     $<actual>:   2
     $<expected>: 0
 ----------------------------------------------------------------------
 [ERROR] other examples > example of something error
-    tmp/test/example02_test.rb:13:in `block (3 levels) in <main>'
+    test/example02_test.rb:13:in `block (3 levels) in <main>'
         x = foobar        # NameError
 NameError: undefined local variable or method `foobar' for #<#<Class:...>:...>
 ----------------------------------------------------------------------
@@ -222,7 +222,7 @@ NameError: undefined local variable or method `foobar' for #<#<Class:...>:...>
 ```
 
 
-### Skip, and Todo
+### Skip and Todo
 
 test/example03_test.rb:
 
@@ -317,15 +317,15 @@ very useful for large project which contains large number of test cases.
 How to run test scripts under `test` directory:
 
 ```terminal
-$ ls test
+$ ls test/
 example01_test.rb       example02_test.rb       example03_test.rb
 
 $ oktest -s simple test  # or: ruby -r oktest -e 'Oktest.main' -- test -s simple
-tmp/test/example01_test.rb: ..
-tmp/test/example02_test.rb: fE
+test/example01_test.rb: ..
+test/example02_test.rb: fE
 ----------------------------------------------------------------------
 [Fail] other examples > example of assertion failure
-    tmp/test/example02_test.rb:9:in `block (3 levels) in <top (required)>'
+    test/example02_test.rb:9:in `block (3 levels) in <top (required)>'
         ok {1+1} == 0     # FAIL
     -e:1:in `<main>'
 $<actual> == $<expected>: failed.
@@ -333,12 +333,12 @@ $<actual> == $<expected>: failed.
     $<expected>: 0
 ----------------------------------------------------------------------
 [ERROR] other examples > example of something error
-    tmp/test/example02_test.rb:13:in `block (3 levels) in <top (required)>'
+    test/example02_test.rb:13:in `block (3 levels) in <top (required)>'
         x = foobar        # NameError
     -e:1:in `<main>'
 NameError: undefined local variable or method `foobar' for #<#<Class:...>:...>
 ----------------------------------------------------------------------
-tmp/test/example03_test.rb: st
+test/example03_test.rb: st
 ## total:6 (pass:2, fail:1, error:1, skip:1, todo:1) in 0.000s
 ```
 
@@ -348,7 +348,8 @@ Test script filename should be `test_xxx.rb` or `xxx_test.rb`
 
 ### Tag and Filtering
 
-`topic()` and `spec()` accepts tag name, for example 'obsolete' or 'experimental'.
+`scope()`, `topic()`, and `spec()` accepts tag name, for example 'obsolete'
+or 'experimental'.
 
 test/example04_test.rb:
 
@@ -388,12 +389,12 @@ Oktest.scope do
 end
 ```
 
-It is possible to filter topics and specs by tag name (pattern).
+It is possible to filter topics and specs by tag name or pattern.
 
 ```terminal
-$ oktest -F tag=exp         tests/     # filter by tag name
-$ oktest -F tag='*exp*'     tests/     # filter by tag name pattern
-$ oktest -F tag='{exp,old}' tests/     # filter by multiple tag names
+$ oktest -F tag=exp         test/      # filter by tag name
+$ oktest -F tag='*exp*'     test/      # filter by tag name pattern
+$ oktest -F tag='{exp,old}' test/      # filter by multiple tag names
 ```
 
 It is also possible to filter topics or specs by name.
@@ -407,8 +408,8 @@ $ oktest -F spec='*#[1-3]'    test/    # filter specs by pattern
 If you need negative filter, use `!=` instead of `=`.
 
 ```terminal
-$ oktest -F spec!='*#5'      tests/    # exclude spec 'example #5'
-$ oktest -F tag!='{exp,old}' tests/    # exclude tag='exp' or tag='old'
+$ oktest -F spec!='*#5'      test/     # exclude spec 'example #5'
+$ oktest -F tag!='{exp,old}' test/     # exclude tag='exp' or tag='old'
 ```
 
 
