@@ -58,7 +58,7 @@ class TC
   class AssertionFailed < StandardError
   end
 
-  def assert(cond, msg=nil)
+  def assert(cond, msg="assertion failed")
     raise msg unless cond
   end
 
