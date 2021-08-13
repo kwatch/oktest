@@ -37,6 +37,7 @@ END
   ## files
   files = Dir['lib/oktest.rb', 'test/*.rb']
   files += ['README.md', 'MIT-LICENSE', 'oktest.gemspec', 'Rakefile.rb']
+  files += ['benchmark/Rakefile.rb', 'benchmark/run_all.rb']
   s.files       = files
   s.executables = ['oktest']
   s.bindir      = 'bin'
