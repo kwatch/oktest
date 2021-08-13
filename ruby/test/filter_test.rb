@@ -43,13 +43,8 @@ class Filter_TC < TC
       assert_eq filter_attrs(ft), [nil, '\[!abc123\]*', nil, false]
     end
     it "[!cmp6e] raises ArgumentError when invalid argument." do
-      begin
+      assert_exc(ArgumentError, '"abc123": unexpected pattern string.') do
         parse_filter_str("abc123")
-      rescue Exception => exc
-        assert_eq exc.class, ArgumentError
-        assert_eq exc.message, '"abc123": unexpected pattern string.'
-      else
-        assert false, "ArgumentError expected"
       end
     end
     it "[!5hl7z] parses 'xxx!=...' as negative filter pattern." do

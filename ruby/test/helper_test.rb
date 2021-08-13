@@ -76,13 +76,8 @@ class SpecHelper_TC < TC
 
   describe '#skip_when()' do
     it "[!3xqf4] raises SkipException if condition is truthy." do
-      begin
+      assert_exc(Oktest::SkipException, "..reason..") do
         skip_when (1+1 == 2), "..reason.."
-      rescue Exception => exc
-        assert_eq exc.class, Oktest::SkipException
-        assert_eq exc.message, "..reason.."
-      else
-        assert false, "SkipException expected"
       end
     end
     it "[!r7cxx] not raise nothing if condition is falsy." do
@@ -266,11 +261,9 @@ END
       [true, false].each do |flag|
         begin
           flag ? File.write(tmp, "") : Dir.mkdir(tmp)
-          dummy_file(tmp, "foobar")
-          assert false, "ArgumentError should be raised."
-        rescue => exc
-          assert exc.is_a?(ArgumentError), "ArgumentError expected."
-          assert_eq exc.message, "dummy_file('#{tmp}'): temporary file already exists."
+          assert_exc(ArgumentError, "dummy_file('#{tmp}'): temporary file already exists.") do
+            dummy_file(tmp, "foobar")
+          end
         ensure
           File.unlink(tmp) if File.file?(tmp)
           Dir.rmdir(tmp)   if File.directory?(tmp)
@@ -335,11 +328,9 @@ END
       [true, false].each do |flag|
         begin
           flag ? Dir.mkdir(tmp) : File.write(tmp, "")
-          dummy_dir(tmp)
-          assert false, "ArgumentError should be raised."
-        rescue => exc
-          assert exc.is_a?(ArgumentError), "ArgumentError expected but not."
-          assert exc.message, "dummy_dir('#{tmp}'): temporary directory already exists."
+          assert_exc(ArgumentError, "dummy_dir('#{tmp}'): temporary directory already exists.") do
+            dummy_dir(tmp)
+          end
         ensure
           Dir.rmdir(tmp)   if File.directory?(tmp)
           File.unlink(tmp) if File.file?(tmp)
