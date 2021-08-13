@@ -241,9 +241,7 @@ END
     end
 
     it "[!qqizl] '--version' option prints version number." do
-      expected = <<END
-0.0.0
-END
+      expected = '$Release: 0.0.0 $'.split()[1] + "\n"
       #
       ret, sout, serr = run("--version")
       assert_eq ret, 0
