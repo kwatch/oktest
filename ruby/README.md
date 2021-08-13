@@ -34,7 +34,7 @@ Oktest.scope do                      #
       ok {'/tmp'}.dir_exist?         #      assert File.directory?('/tmp')
       ok {'/blabla'}.not_exist?      #      assert !File.exist?('/blabla')
       pr = proc { .... }             #      exc = assert_raise(Error) { .... }
-      ok {pr}.raise?(Error, "mesg")  #      assert exc.message, "mesg"
+      ok {pr}.raise?(Error, "mesg")  #      assert_equal "mesg", exc.message
     end                              #    end
                                      #
   end                                #  end
@@ -1828,8 +1828,8 @@ ruby run_all.rb | tail -5
 
 `ok {}` is slightly slower than `assert()` in MiniTest.
 In almost case, you don't need to care about it.  But if you are working in
-very larget project and you want to run test scripts faster, try `--faster`
-option of `oktest` command.
+very larget project and you want to run test scripts as fast as possible,
+try `--faster` option of `oktest` command.
 
 ```terminal
 $ oktest -s quiet --faster test/        ## only for very large project
