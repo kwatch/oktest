@@ -13,39 +13,24 @@ class Item_TC < TC
 
   describe '#accept_visitor()' do
     it "[!b0e20] raises NotImplementedError." do
-      begin
+      assert_exc(NotImplementedError, "Oktest::Item#accept_visitor(): not implemented yet.") do
         Oktest::Item.new().accept_visitor(nil)
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-        assert_eq exc.message, "Oktest::Item#accept_visitor(): not implemented yet."
-      else
-        assert false, "NotImplemtendedError should be raised."
       end
     end
   end
 
   describe '#unlink_parent()' do
     it "[!5a0i9] raises NotImplementedError." do
-      begin
+      assert_exc(NotImplementedError, "Oktest::Item#unlink_parent(): not implemented yet.") do
         Oktest::Item.new().unlink_parent()
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-        assert_eq exc.message, "Oktest::Item#unlink_parent(): not implemented yet."
-      else
-        assert false, "NotImplemtendedError should be raised."
       end
     end
   end
 
   describe '#_repr()' do
     it "[!qi1af] raises NotImplementedError." do
-      begin
+      assert_exc(NotImplementedError, "Oktest::Item#_repr(): not implemented yet.") do
         Oktest::Item.new()._repr(0)
-      rescue Exception => exc
-        assert_eq exc.class, NotImplementedError
-        assert_eq exc.message, "Oktest::Item#_repr(): not implemented yet."
-      else
-        assert false, "NotImplemtendedError should be raised."
       end
     end
   end
@@ -336,21 +321,18 @@ class ScopeFunctions_TC < TC
       assert_eq x.class, Oktest::ScopeNode
     end
     it "[!jmc4q] raises error when nested called." do
-      x = 0
-      begin               ; x = 1
-        Oktest.scope do   ; x = 2
-          Oktest.scope do ; x = 3
+      begin                 ; x = 0
+        assert_exc(Oktest::OktestError, "scope() and global_scope() are not nestable.") do
+                            ; x = 1
+          Oktest.scope do   ; x = 2
+            Oktest.scope do ; x = 3
+            end
           end
         end
-      rescue Exception => exc
-        assert_eq exc.class, Oktest::OktestError
-        assert_eq exc.message, "scope() and global_scope() are not nestable."
-      else
-        assert false, "Oktest::OktestError expected."
+        assert_eq x, 2
       ensure
         Oktest.module_eval { @_in_scope = false }
       end
-      assert_eq x, 2
     end
     it "[!rsimc] adds scope object as child of THE_GLOBAL_SCOPE." do
       assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
@@ -380,53 +362,42 @@ class ScopeFunctions_TC < TC
       assert_eq v, {id: 37531}
     end
     it "[!pe0g2] raises error when nested called." do
-      x = 0
-      begin                      ; x = 1
-        Oktest.global_scope do   ; x = 2
-          Oktest.global_scope do ; x = 3
+      args = [Oktest::OktestError, "scope() and global_scope() are not nestable."]
+      begin                        ; x = 0
+        assert_exc(*args) do       ; x = 1
+          Oktest.global_scope do   ; x = 2
+            Oktest.global_scope do ; x = 3
+            end
           end
         end
-      rescue Exception => exc
-        assert_eq exc.class, Oktest::OktestError
-        assert_eq exc.message, "scope() and global_scope() are not nestable."
-      else
-        assert false, "Oktest::OktestError expected."
+        assert_eq x, 2
       ensure
         Oktest.module_eval { @_in_scope = false }
       end
-      assert_eq x, 2
       #
-      x = 0
-      begin                      ; x = 1
-        Oktest.scope do          ; x = 2
-          Oktest.global_scope do ; x = 3
+      begin                        ; x = 0
+        assert_exc(*args) do       ; x = 1
+          Oktest.scope do          ; x = 2
+            Oktest.global_scope do ; x = 3
+            end
           end
         end
-      rescue Exception => exc
-        assert_eq exc.class, Oktest::OktestError
-        assert_eq exc.message, "scope() and global_scope() are not nestable."
-      else
-        assert false, "Oktest::OktestError expected."
+        assert_eq x, 2
       ensure
         Oktest.module_eval { @_in_scope = false }
       end
-      assert_eq x, 2
       #
-      x = 0
-      begin                    ; x = 1
-        Oktest.global_scope do ; x = 2
-          Oktest.scope do      ; x = 3
+      begin                        ; x = 0
+        assert_exc(*args) do       ; x = 1
+          Oktest.global_scope do   ; x = 2
+            Oktest.scope do        ; x = 3
+            end
           end
         end
-      rescue Exception => exc
-        assert_eq exc.class, Oktest::OktestError
-        assert_eq exc.message, "scope() and global_scope() are not nestable."
-      else
-        assert false, "Oktest::OktestError expected."
+        assert_eq x, 2
       ensure
         Oktest.module_eval { @_in_scope = false }
       end
-      assert_eq x, 2
     end
   end
 
@@ -535,13 +506,8 @@ class Context_TC < TC
       end
       assert_eq node.each_child.to_a.length, 1
       sp = node.each_child.first
-      begin
+      assert_exc(Oktest::TodoException, "not implemented yet") do
         sp.block.call
-      rescue Exception => exc
-        assert_eq exc.class, Oktest::TodoException
-        assert_eq exc.message, "not implemented yet"
-      else
-        assert false, "TodoException should be called."
       end
     end
     it "[!x48db] keeps called location only when block has parameters." do
