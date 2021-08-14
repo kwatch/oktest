@@ -315,6 +315,25 @@ class ScopeFunctions_TC < TC
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
+  def with_dummy_location(location)
+    $_dummy_location = location
+    Oktest.module_eval do
+      class << self
+        def caller(n)
+          return [$_dummy_location]
+        end
+      end
+    end
+    yield
+  ensure
+    Oktest.module_eval do
+      class << self
+        remove_method :caller
+      end
+    end
+    $_dummy_location = nil
+  end
+
   describe 'Oktest.scope()' do
     it "[!vxoy1] creates new scope object." do
       x = Oktest.scope() { nil }
@@ -340,6 +359,16 @@ class ScopeFunctions_TC < TC
       end
       assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
       assert_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a, [so]
+    end
+    it "[!6ullm] change test script filename from absolute path to relative path." do
+      with_dummy_location(Dir.pwd + "/tests/foo_test.rb:123") do
+        sc = Oktest.scope() { nil }
+        assert_eq sc.filename, "tests/foo_test.rb"
+      end
+      with_dummy_location("./t/bar_test.rb:456") do
+        sc = Oktest.scope() { nil }
+        assert_eq sc.filename, "t/bar_test.rb"
+      end
     end
   end
 
