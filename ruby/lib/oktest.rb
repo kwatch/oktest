@@ -891,9 +891,10 @@ module Oktest
   end
 
   def self.scope(tag: nil, &block)
-    #; [!6ullm] changes test script filename from absolute path to relative path.
+    #; [!kem4y] detects test script filename.
     location = caller(1).first  # caller() makes performance slower, but necessary.
     filename = location =~ /:\d+/ ? $` : nil
+    #; [!6ullm] changes test script filename from absolute path to relative path.
     if filename
       pwd = Dir.pwd()
       if filename.start_with?(pwd)
