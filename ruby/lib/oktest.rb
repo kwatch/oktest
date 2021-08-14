@@ -891,21 +891,19 @@ module Oktest
   end
 
   def self.scope(tag: nil, &block)
-    #; [!vxoy1] creates new scope object.
-    #; [!rsimc] adds scope object as child of THE_GLOBAL_SCOPE.
+    #; [!6ullm] changes test script filename from absolute path to relative path.
     location = caller(1).first  # caller() makes performance slower, but necessary.
-    if location =~ /:\d+/
-      filename = $`
-      #; [!6ullm] change test script filename from absolute path to relative path.
+    filename = location =~ /:\d+/ ? $` : nil
+    if filename
       pwd = Dir.pwd()
       if filename.start_with?(pwd)
         filename = filename[pwd.length..-1].sub(/\A\//, '')
       elsif filename.start_with?('./')
         filename = filename[2..-1]
       end
-    else
-      filename = nil
     end
+    #; [!vxoy1] creates new scope object.
+    #; [!rsimc] adds scope object as child of THE_GLOBAL_SCOPE.
     scope = ScopeNode.new(THE_GLOBAL_SCOPE, filename, tag: tag)
     #; [!jmc4q] raises error when nested called.
     self.__scope(scope, &block)
