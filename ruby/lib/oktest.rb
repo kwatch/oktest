@@ -894,8 +894,12 @@ module Oktest
     #; [!vxoy1] creates new scope object.
     #; [!rsimc] adds scope object as child of THE_GLOBAL_SCOPE.
     location = caller(1).first  # caller() makes performance slower, but necessary.
-    filename = location =~ /:\d+/ ? $` : nil
-    filename = filename.sub(/\A\.\//, '')
+    if location =~ /:\d+/
+      filename = $`
+      filename = filename.sub(/\A\.\//, '')
+    else
+      filename = nil
+    end
     scope = ScopeNode.new(THE_GLOBAL_SCOPE, filename, tag: tag)
     #; [!jmc4q] raises error when nested called.
     self.__scope(scope, &block)
