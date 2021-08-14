@@ -896,7 +896,13 @@ module Oktest
     location = caller(1).first  # caller() makes performance slower, but necessary.
     if location =~ /:\d+/
       filename = $`
-      filename = filename.sub(/\A\.\//, '')
+      #; [!6ullm] change test script filename from absolute path to relative path.
+      pwd = Dir.pwd()
+      if filename.start_with?(pwd)
+        filename = filename[pwd.length..-1].sub(/\A\//, '')
+      elsif filename.start_with?('./')
+        filename = filename[2..-1]
+      end
     else
       filename = nil
     end
