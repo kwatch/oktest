@@ -360,6 +360,10 @@ class ScopeFunctions_TC < TC
       assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
       assert_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a, [so]
     end
+    it "[!kem4y] detects test script filename." do
+      sc = Oktest.scope() { nil }
+      assert_eq sc.filename, "test/node_test.rb"
+    end
     it "[!6ullm] changes test script filename from absolute path to relative path." do
       with_dummy_location(Dir.pwd + "/tests/foo_test.rb:123") do
         sc = Oktest.scope() { nil }
