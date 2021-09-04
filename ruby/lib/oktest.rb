@@ -2154,7 +2154,7 @@ END
         return 0
       end
       #; [!65vdx] prints help message if no arguments specified.
-      if filenames.empty?
+      if filenames.empty? && !THE_GLOBAL_SCOPE.has_child?
         puts help_message()
         return 0
       end
