@@ -9,7 +9,7 @@ Oktest.rb is a new-style testing library for Ruby.
 * Structured test specifications like RSpec.
 * Filtering testcases by pattern or tags.
 * Blue/red color instead of green/red for accesability.
-* Small code size (about 2400 lines) and good performance.
+* Small code size (about 2500 lines) and good performance.
 
 ```ruby
 ### Oktest                           ### Test::Unit
@@ -165,6 +165,7 @@ Result:
 
 ```terminal
 $ oktest test/example01_test.rb   # or: ruby test/example01_test.rb
+## test/example01_test.rb
 * Hello
   * #hello()
     - [pass] returns greeting message.
@@ -206,6 +207,7 @@ Result:
 
 ```terminal
 $ oktest test/example02_test.rb   # or: ruby test/example02_test.rb
+## test/example02_test.rb
 * other examples
   - [Fail] example of assertion failure
   - [ERROR] example of something error
@@ -260,6 +262,7 @@ Result:
 
 ```terminal
 $ oktest test/example03_test.rb   # or: ruby test/example03_test.rb
+## oktest test/example03_test.rb
 * other examples
   - [Skip] example of skip (reason: requires Ruby3)
   - [TODO] example of todo
@@ -280,6 +283,7 @@ Verbose mode (default):
 
 ```terminal
 $ oktest test/example01_test.rb -s verbose  # or -sv
+## test/example01_test.rb
 * Hello
   * #hello()
     - [pass] returns greeting message.
@@ -334,7 +338,7 @@ How to run test scripts under `test` directory:
 $ ls test/
 example01_test.rb       example02_test.rb       example03_test.rb
 
-$ oktest -s simple test  # or: ruby -r oktest -e 'Oktest.main' -- test -s simple
+$ oktest -s compact test  # or: ruby -r oktest -e 'Oktest.main' -- test -s compact
 test/example01_test.rb: ..
 test/example02_test.rb: fE
 ----------------------------------------------------------------------
@@ -467,6 +471,7 @@ Result:
 
 ```terminal
 $ ruby test/example05_test.rb
+## test/example05_test.rb
 * Integer
   * #abs()
     - When value is negative...
