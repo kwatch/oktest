@@ -2256,6 +2256,7 @@ END
       Config.auto_run = false
       #; [!18qpe] runs test scripts.
       #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
+      #; [!zfdr5] '-s simple' or '-ss' option prints test results in simple mode.
       #; [!ef5v7] '-s compact' or '-sc' option prints test results in compact mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
       #; [!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode.
@@ -2317,7 +2318,7 @@ END
 Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <STYLE>             : report style (verbose/compact/plain/quiet, or v/c/p/q)
+  -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton

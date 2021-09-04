@@ -201,7 +201,7 @@ END
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <STYLE>             : report style (verbose/compact/plain/quiet, or v/c/p/q)
+  -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton
@@ -267,6 +267,26 @@ END
       assert_eq serr, ""
       #
       ret, sout, serr = run("-s", "verbose", @testfile)
+      assert_eq ret, 2
+      assert edit_actual(sout).start_with?(edit_expected(expected)), "invalid testcase output"
+      assert_eq serr, ""
+    end
+
+    it "[!zfdr5] '-s simple' or '-ss' option prints test results in simple mode." do
+      expected = <<END
+## _tmp_test.rb
+* <b>Parent</b>: 
+  * <b>Child1</b>: <B>.</B><B>.</B>
+  * <b>Child2</b>: <R>f</R><R>E</R>
+----------------------------------------------------------------------
+END
+      #
+      ret, sout, serr = run("-ss", @testfile)
+      assert_eq ret, 2
+      assert edit_actual(sout).start_with?(edit_expected(expected)), "invalid testcase output"
+      assert_eq serr, ""
+      #
+      ret, sout, serr = run("-s", "simple", @testfile)
       assert_eq ret, 2
       assert edit_actual(sout).start_with?(edit_expected(expected)), "invalid testcase output"
       assert_eq serr, ""
