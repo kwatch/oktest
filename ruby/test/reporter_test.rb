@@ -418,6 +418,10 @@ Oktest.scope do
       end
     end
 
+    spec "last spec" do
+      ok {1+1} == 2
+    end
+
   end
 
 end
@@ -443,10 +447,11 @@ ZeroDivisionError: divided by 0
 END
 
   FOOTER = <<'END'
-## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:9 (<B>pass:5</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
 
   VERBOSE_PART = <<'END'
+## _test.tmp
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1+1 should be 2
@@ -463,16 +468,28 @@ END
     - [<B>pass</B>] x*x is positive.
   - <b>Else</b>
     - [<B>pass</B>] x*x is also positive.
+  - [<B>pass</B>] last spec
 END
   VERBOSE_OUTPUT = VERBOSE_PART + ERROR_PART + VERBOSE_PART2 + FOOTER
 
   SIMPLE_PART = <<'END'
-_test.tmp: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
+## _test.tmp
+* <b>Parent</b>: <B>.</B><B>.</B><B>.</B>
+  * <b>Child1</b>: <B>.</B><B>.</B>
+  * <b>Child2</b>: <R>f</R><R>E</R>
 END
-  SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + FOOTER
+  SIMPLE_PART2 = <<'END'
+  * <b>Child3</b>: <Y>s</Y><Y>t</Y>
+END
+  SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + SIMPLE_PART2 + FOOTER
+
+  COMPACT_PART = <<'END'
+_test.tmp: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B><B>.</B>
+END
+  COMPACT_OUTPUT = COMPACT_PART + ERROR_PART + FOOTER
 
   PLAIN_PART = <<'END'
-<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
+<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B><B>.</B>
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 
@@ -516,9 +533,20 @@ end
 
 class SimpleReporter_TC < Reporter_TC
 
-  it "[!xfd5o] reports filename." do
+  it "[!jxa1b] reports topics and progress." do
     sout, serr = run("-ss", @filename)
     assert_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
+    assert_eq serr, ""
+  end
+
+end
+
+
+class CompactReporter_TC < Reporter_TC
+
+  it "[!xfd5o] reports filename." do
+    sout, serr = run("-sc", @filename)
+    assert_eq edit_actual(sout), edit_expected(COMPACT_OUTPUT)
     assert_eq serr, ""
   end
 

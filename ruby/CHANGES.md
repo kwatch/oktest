@@ -3,6 +3,14 @@ CHANGES
 
 
 
+Release ???
+-------------
+
+* [change] change reporting style of '-s simple' option to print topics.
+* [change] add `-s compact` option which output is same as `-s simple` of previous release.
+
+
+
 Release 1.0.2
 -------------
 

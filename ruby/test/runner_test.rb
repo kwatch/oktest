@@ -44,6 +44,10 @@ class Runner_TC < TC
     def counts; {}; end
   end
 
+  class DummyReporter2 < DummyReporter
+    def order_policy; :spec_first; end
+  end
+
   describe "#start()" do
     build_topics = proc {
       Oktest.scope do
@@ -393,6 +397,47 @@ END
       assert_eq sout, expected
       assert_eq serr, ""
     end
+    it "[!p3a5o] run specs and case_when in advance of specs and topics when SimpleReporter." do
+      sout, serr = capture do
+        Oktest.scope do
+          topic "T1" do
+            topic "T2" do
+              spec("S1") { ok {1+1} == 2 }
+            end
+            spec("S2") { ok {1+1} == 2 }
+            topic "T3" do
+              spec("S3") { ok {1+1} == 2 }
+            end
+            case_when "T4" do
+              spec("S4") { ok {1+1} == 2 }
+            end
+          end
+        end
+        Oktest::Runner.new(DummyReporter2.new).start()
+      end
+      expected = <<'END'
+file: "test/runner_test.rb"
+topic: "T1"
+  spec: "S2"
+  /spec: status=:PASS
+  topic: "When T4"
+    spec: "S4"
+    /spec: status=:PASS
+  /topic
+  topic: "T2"
+    spec: "S1"
+    /spec: status=:PASS
+  /topic
+  topic: "T3"
+    spec: "S3"
+    /spec: status=:PASS
+  /topic
+/topic
+/file
+END
+      assert_eq sout, expected
+      assert_eq serr, ""
+    end
   end
 
   describe "#visit_scope()" do
@@ -416,6 +461,46 @@ file: "test/runner_test.rb"
 file: "test/runner_test.rb"
 [all] before_all#2
 [all] after_all#2
+/file
+END
+      assert_eq sout, expected
+      assert_eq serr, ""
+    end
+    it "[!c5cw0] run specs and case_when in advance of specs and topics when SimpleReporter." do
+      sout, serr = capture do
+        Oktest.scope do
+          topic "T1" do
+            spec("S1") { ok {1+1} == 2 }
+          end
+          spec("S2") { ok {1+1} == 2 }
+          case_when "T2" do
+            spec("S3") { ok {1+1} == 2 }
+          end
+          topic "T3" do
+            spec("S4") { ok {1+1} == 2 }
+          end
+          spec("S5") { ok {1+1} == 2 }
+        end
+        Oktest::Runner.new(DummyReporter2.new).start()
+      end
+      expected = <<'END'
+file: "test/runner_test.rb"
+spec: "S2"
+/spec: status=:PASS
+topic: "When T2"
+  spec: "S3"
+  /spec: status=:PASS
+/topic
+spec: "S5"
+/spec: status=:PASS
+topic: "T1"
+  spec: "S1"
+  /spec: status=:PASS
+/topic
+topic: "T3"
+  spec: "S4"
+  /spec: status=:PASS
+/topic
 /file
 END
       assert_eq sout, expected
@@ -474,12 +559,13 @@ class RunnerFunctions_TC < TC
   end
 
   VERBOSE_OUTPUT = <<'END'
+## test/runner_test.rb
 * <b>Example</b>
   - [<B>pass</B>] 1+1 should be 2
   - [<B>pass</B>] 1-1 should be 0
 ## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
-  SIMPLE_OUTPUT = <<'END'
+  COMPACT_OUTPUT = <<'END'
 test/runner_test.rb: <B>.</B><B>.</B>
 ## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
@@ -509,9 +595,9 @@ END
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
       #
-      expected = SIMPLE_OUTPUT
+      expected = COMPACT_OUTPUT
       prepare()
-      sout, serr = capture { Oktest.run(:style=>"simple") }
+      sout, serr = capture { Oktest.run(:style=>"compact") }
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
       #

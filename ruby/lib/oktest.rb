@@ -1215,11 +1215,25 @@ module Oktest
       @reporter.exit_all(self)
     end
 
+    def _spec_first(node)
+      a1, a2 = node.each_child.partition {|c|
+        c.is_a?(SpecLeaf) || (c.is_a?(TopicNode) && c._prefix != '*')
+      }
+      return a1+a2
+    end
+    private :_spec_first
+
     def visit_scope(scope, depth, parent)
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
+      #; [!c5cw0] run specs and case_when in advance of specs and topics when SimpleReporter.
+      if @reporter.order_policy() == :spec_first
+        _spec_first(scope).each {|c| c.accept_visitor(self, depth+1, scope) }
+      else
+        scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
+      end
+      #
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
@@ -1228,7 +1242,13 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
+      #; [!p3a5o] run specs and case_when in advance of specs and topics when SimpleReporter.
+      if @reporter.order_policy() == :spec_first
+        _spec_first(topic).each {|c| c.accept_visitor(self, depth+1, topic) }
+      else
+        topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
+      end
+      #
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
@@ -1429,6 +1449,7 @@ module Oktest
     def exit_spec(spec, depth, status, error, parent); end
     #
     def counts; {}; end
+    def order_policy(); nil; end     # :spec_first or nil
 
   end
 
@@ -1439,7 +1460,7 @@ module Oktest
     CHARS  = { :PASS=>'.', :FAIL=>'f', :ERROR=>'E', :SKIP=>'s', :TODO=>'t' }
 
 
-    def initialize
+    def initialize()
       @exceptions = []
       @counts = {}
     end
@@ -1582,6 +1603,10 @@ module Oktest
 
     LABELS = { :PASS=>'pass', :FAIL=>'Fail', :ERROR=>'ERROR', :SKIP=>'Skip', :TODO=>'TODO' }
 
+    def enter_scope(scope)
+      puts "## #{scope.filename}"
+    end
+
     def enter_topic(topic, depth)
       super
       puts "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}"
@@ -1615,6 +1640,64 @@ module Oktest
 
 
   class SimpleReporter < BaseReporter
+    #; [!jxa1b] reports topics and progress.
+
+    def initialize()
+      super
+      @_nl = true
+    end
+
+    def order_policy()
+      :spec_first
+    end
+
+    def _nl()
+      (puts(); @_nl = true) unless @_nl
+    end
+    private :_nl
+
+    def _nl_off()
+      @_nl = false
+    end
+    private :_nl_off
+
+    def enter_scope(scope)
+      _nl()
+      puts "## #{scope.filename}"
+    end
+
+    def exit_scope(scope)
+      _nl()
+      print_exceptions()
+    end
+
+    def enter_topic(topic, depth)
+      super
+      return if topic._prefix == '-'
+      _nl()
+      print "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}: "
+      $stdout.flush()
+      _nl_off()
+    end
+
+    def exit_topic(topic, depth)
+      super
+      return if topic._prefix == '-'
+      _nl()
+      print_exceptions()
+    end
+
+    def exit_spec(spec, depth, status, error, parent)
+      super
+      print Color.status(status, CHARS[status] || '?')
+      $stdout.flush
+      _nl_off()
+    end
+
+  end
+
+
+  class CompactReporter < BaseReporter
     #; [!xfd5o] reports filename.
 
     def enter_scope(scope)
@@ -1681,6 +1764,7 @@ module Oktest
   REPORTER_CLASSES = {
     'verbose' => VerboseReporter,  'v' => VerboseReporter,
     'simple'  => SimpleReporter,   's' => SimpleReporter,
+    'compact' => CompactReporter,  'c' => CompactReporter,
     'plain'   => PlainReporter,    'p' => PlainReporter,
     'quiet'   => QuietReporter,    'q' => QuietReporter,
   }
@@ -2185,7 +2269,8 @@ END
       Config.auto_run = false
       #; [!18qpe] runs test scripts.
       #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
-      #; [!ef5v7] '-s simple' or '-ss' option prints test results in simple mode.
+      #; [!zfdr5] '-s simple' or '-ss' option prints test results in simple mode.
+      #; [!ef5v7] '-s compact' or '-sc' option prints test results in compact mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
       #; [!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode.
       n_errors = Oktest.run(:style=>opts.style)
@@ -2246,7 +2331,7 @@ END
 Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
+  -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton

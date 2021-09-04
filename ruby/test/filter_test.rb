@@ -188,7 +188,7 @@ class Filter_TC < TC
       Oktest::Runner.new(reporter).start()
     end
     assert_eq serr, ""
-    return sout.sub(/^## total:.*\n/, '')
+    return sout.sub(/^## total:.*\n/, '').sub(/^## test\/filter_test\.rb\n/, '')
   end
 
   def uncolor(s)
