@@ -466,6 +466,19 @@ END
 END
   VERBOSE_OUTPUT = VERBOSE_PART + ERROR_PART + VERBOSE_PART2 + FOOTER
 
+  SIMPLE_PART = <<'END'
+## _test.tmp
+* <b>Parent</b>: 
+  * <b>Child1</b>: <B>.</B><B>.</B>
+  * <b>Child2</b>: <R>f</R><R>E</R>
+END
+  SIMPLE_PART2 = <<'END'
+  * <b>Child3</b>: <Y>s</Y><Y>t</Y>
+  - <b>When x is negative</b>: <B>.</B>
+  - <b>Else</b>: <B>.</B>
+END
+  SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + SIMPLE_PART2 + FOOTER
+
   COMPACT_PART = <<'END'
 _test.tmp: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
 END
@@ -508,6 +521,17 @@ class VerboseReporter_TC < Reporter_TC
   it "[!6o9nw] reports topic name and spec desc." do
     sout, serr = run("-sv", @filename)
     assert_eq edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
+    assert_eq serr, ""
+  end
+
+end
+
+
+class SimpleReporter_TC < Reporter_TC
+
+  it "[!jxa1b] reports topics and progress." do
+    sout, serr = run("-ss", @filename)
+    assert_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
     assert_eq serr, ""
   end
 

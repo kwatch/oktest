@@ -1451,7 +1451,7 @@ module Oktest
     CHARS  = { :PASS=>'.', :FAIL=>'f', :ERROR=>'E', :SKIP=>'s', :TODO=>'t' }
 
 
-    def initialize
+    def initialize()
       @exceptions = []
       @counts = {}
     end
@@ -1626,6 +1626,64 @@ module Oktest
   end
 
 
+  class SimpleReporter < BaseReporter
+    #; [!jxa1b] reports topics and progress.
+
+    def initialize()
+      super
+      @_nl = true
+    end
+
+    def order_policy()
+      :spec_first
+    end
+
+    def _nl()
+      unless @_nl
+        puts()
+        @_nl = true
+      end
+    end
+    private :_nl
+
+    def _nl_off()
+      @_nl = false
+    end
+    private :_nl_off
+
+    def enter_scope(scope)
+      _nl()
+      puts "## #{scope.filename}"
+    end
+
+    def exit_scope(scope)
+      _nl()
+      print_exceptions()
+    end
+
+    def enter_topic(topic, depth)
+      _nl()
+      super
+      print "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}: "
+      $stdout.flush()
+      _nl_off()
+    end
+
+    def exit_topic(topic, depth)
+      _nl()
+      print_exceptions()
+    end
+
+    def exit_spec(spec, depth, status, error, parent)
+      super
+      print Color.status(status, CHARS[status] || '?')
+      $stdout.flush
+      _nl_off()
+    end
+
+  end
+
+
   class CompactReporter < BaseReporter
     #; [!xfd5o] reports filename.
 
@@ -1692,6 +1750,7 @@ module Oktest
 
   REPORTER_CLASSES = {
     'verbose' => VerboseReporter,  'v' => VerboseReporter,
+    'simple'  => SimpleReporter,   's' => SimpleReporter,
     'compact' => CompactReporter,  'c' => CompactReporter,
     'plain'   => PlainReporter,    'p' => PlainReporter,
     'quiet'   => QuietReporter,    'q' => QuietReporter,
