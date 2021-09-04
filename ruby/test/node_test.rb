@@ -95,6 +95,19 @@ class Node_TC < TC
       ret = p.each_child {|c| 123 }
       assert_eq ret, nil
     end
+    it "[!p356a] change iteration order when subclass specified." do
+      p  = Oktest::Node.new(nil)
+      t1 = Oktest::TopicNode.new(p, "T1")
+      s1 = Oktest::SpecLeaf.new(p, "S1")
+      t2 = Oktest::TopicNode.new(p, "T2")
+      s2 = Oktest::SpecLeaf.new(p, "S2")
+      arr = []
+      p.each_child(Oktest::SpecLeaf) {|x| arr << x }
+      assert_eq arr[0], s1
+      assert_eq arr[1], s2
+      assert_eq arr[2], t1
+      assert_eq arr[3], t2
+    end
   end
 
   describe '#remove_child()' do

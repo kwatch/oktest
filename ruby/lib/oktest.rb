@@ -687,7 +687,17 @@ module Oktest
       return !@children.empty?
     end
 
-    def each_child(&b)
+    def each_child(subclass=nil, &b)
+      #; [!p356a] change iteration order when subclass specified.
+      if subclass
+        arr1, arr2 = @children.partition {|x| x.is_a?(subclass) }
+        if block_given?()
+          arr1.each(&b); arr2.each(&b)
+          return nil
+        else
+          return (arr1+arr2).each
+        end
+      end
       #; [!osoep] returns enumerator if block not given.
       return @children.each unless block_given?()
       #; [!pve8m] yields block for each child.
