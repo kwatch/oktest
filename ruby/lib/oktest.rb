@@ -1614,7 +1614,7 @@ module Oktest
   end
 
 
-  class SimpleReporter < BaseReporter
+  class CompactReporter < BaseReporter
     #; [!xfd5o] reports filename.
 
     def enter_scope(scope)
@@ -1680,7 +1680,7 @@ module Oktest
 
   REPORTER_CLASSES = {
     'verbose' => VerboseReporter,  'v' => VerboseReporter,
-    'simple'  => SimpleReporter,   's' => SimpleReporter,
+    'compact' => CompactReporter,  'c' => CompactReporter,
     'plain'   => PlainReporter,    'p' => PlainReporter,
     'quiet'   => QuietReporter,    'q' => QuietReporter,
   }
@@ -2185,7 +2185,7 @@ END
       Config.auto_run = false
       #; [!18qpe] runs test scripts.
       #; [!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode.
-      #; [!ef5v7] '-s simple' or '-ss' option prints test results in simple mode.
+      #; [!ef5v7] '-s compact' or '-sc' option prints test results in compact mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
       #; [!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode.
       n_errors = Oktest.run(:style=>opts.style)
@@ -2246,7 +2246,7 @@ END
 Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <STYLE>             : report style (verbose/simple/plain/quiet, or v/s/p/q)
+  -s <STYLE>             : report style (verbose/compact/plain/quiet, or v/c/p/q)
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton

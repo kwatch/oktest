@@ -479,7 +479,7 @@ class RunnerFunctions_TC < TC
   - [<B>pass</B>] 1-1 should be 0
 ## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
-  SIMPLE_OUTPUT = <<'END'
+  COMPACT_OUTPUT = <<'END'
 test/runner_test.rb: <B>.</B><B>.</B>
 ## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
@@ -509,9 +509,9 @@ END
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
       #
-      expected = SIMPLE_OUTPUT
+      expected = COMPACT_OUTPUT
       prepare()
-      sout, serr = capture { Oktest.run(:style=>"simple") }
+      sout, serr = capture { Oktest.run(:style=>"compact") }
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
       #
