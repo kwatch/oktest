@@ -172,6 +172,10 @@ $ oktest test/example01_test.rb   # or: ruby test/example01_test.rb
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
 
+For accessibility reason, Oktest.rb prints passed test cases in blue color
+instead of green color.
+See https://accessibility.psu.edu/color/colorcoding/#RB for details.
+
 
 ### Assertion Failure, and Error
 
@@ -1827,10 +1831,8 @@ ruby run_all.rb | tail -5
 
 ### `--faster` Option
 
-`ok {}` is slightly slower than `assert()` in MiniTest.
-In most cases, you don't need to care about it.  But if you are working in
-very larget project and you want to run test scripts as fast as possible,
-try `--faster` option of `oktest` command.
+If you are working in very larget project and you want to run test scripts
+as fast as possible, try `--faster` option of `oktest` command.
 
 ```terminal
 $ oktest -s quiet --faster test/        ## only for very large project
