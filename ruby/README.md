@@ -291,6 +291,16 @@ Simple mode:
 
 ```terminal
 $ oktest test/example01_test.rb -s simple   # or -ss
+## test/example01_test.rb
+* Hello: 
+  * #hello(): ..
+## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
+```
+
+Compact mode:
+
+```terminal
+$ oktest test/example01_test.rb -s compact  # or -sc
 test/example01_test.rb: ..
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
