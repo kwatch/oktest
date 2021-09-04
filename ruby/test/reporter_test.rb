@@ -451,6 +451,7 @@ END
 END
 
   VERBOSE_PART = <<'END'
+## _test.tmp
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1+1 should be 2

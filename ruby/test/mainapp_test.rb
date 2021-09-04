@@ -251,6 +251,7 @@ END
 
     it "[!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode." do
       expected = <<END
+## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1+1 should be 2
@@ -345,6 +346,7 @@ END
 
     it "[!yz7g5] '-F topic=...' option filters topics." do
       expected = <<END
+## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1+1 should be 2
@@ -360,6 +362,7 @@ END
 
     it "[!ww2mp] '-F spec=...' option filters specs." do
       expected = <<END
+## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1-1 should be 0
@@ -374,6 +377,7 @@ END
 
     it "[!8uvib] '-F tag=...' option filters by tag name." do
       expected = <<'END'
+## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1-1 should be 0
@@ -393,6 +397,7 @@ END
 
     it "[!m0iwm] '-F sid=...' option filters by spec id." do
       expected = <<'END'
+## _tmp_test.rb
 * <b>Parent</b>
   - <b>When x is negative</b>
     - [<B>pass</B>] [!6hs1j] x*x is positive.
@@ -407,6 +412,7 @@ END
 
     it "[!noi8i] '-F' option supports negative filter." do
       expected = <<'END'
+## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
     - [<B>pass</B>] 1+1 should be 2

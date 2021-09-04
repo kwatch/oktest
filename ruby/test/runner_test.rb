@@ -559,6 +559,7 @@ class RunnerFunctions_TC < TC
   end
 
   VERBOSE_OUTPUT = <<'END'
+## test/runner_test.rb
 * <b>Example</b>
   - [<B>pass</B>] 1+1 should be 2
   - [<B>pass</B>] 1-1 should be 0

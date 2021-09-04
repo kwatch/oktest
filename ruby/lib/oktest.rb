@@ -1603,6 +1603,10 @@ module Oktest
 
     LABELS = { :PASS=>'pass', :FAIL=>'Fail', :ERROR=>'ERROR', :SKIP=>'Skip', :TODO=>'TODO' }
 
+    def enter_scope(scope)
+      puts "## #{scope.filename}"
+    end
+
     def enter_topic(topic, depth)
       super
       puts "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}"
