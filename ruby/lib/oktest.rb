@@ -1214,6 +1214,7 @@ module Oktest
 
     def initialize(reporter)
       @reporter = reporter
+      @subclass = reporter.order_policy() == :spec_first ? SpecLeaf : nil
     end
 
     def start()
@@ -1229,7 +1230,7 @@ module Oktest
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
+      scope.each_child(@subclass) {|c| c.accept_visitor(self, depth+1, scope) }
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
@@ -1238,7 +1239,7 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
+      topic.each_child(@subclass) {|c| c.accept_visitor(self, depth+1, topic) }
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
@@ -1439,6 +1440,7 @@ module Oktest
     def exit_spec(spec, depth, status, error, parent); end
     #
     def counts; {}; end
+    def order_policy(); nil; end     # :spec_first or nil
 
   end
 
