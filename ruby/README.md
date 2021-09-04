@@ -390,6 +390,7 @@ end
 ```
 
 It is possible to filter topics and specs by tag name or pattern.
+Pattern (!= regular expression) supports `*`, `?`, `[]` and `{}`.
 
 ```terminal
 $ oktest -F tag=exp         test/      # filter by tag name
@@ -398,7 +399,6 @@ $ oktest -F tag='{exp,old}' test/      # filter by multiple tag names
 ```
 
 It is also possible to filter topics or specs by name.
-Pattern (!= regular expression) supports `*`, `?`, `[]`, and `{}`.
 
 ```terminal
 $ oktest -F topic='*Integer*' test/    # filter topics by pattern
@@ -467,7 +467,7 @@ $ ruby test/example05_test.rb
 
 ### Optional: Unary Operators
 
-`topic()` accepts unary `+` operator and `spec()` accepts unary `-` operator.
+`topic()` accepts unary plus (`+`) and `spec()` accepts unary minus (`-`).
 This makes test scripts more readable.
 
 <!--
@@ -501,7 +501,7 @@ end
 
 ### Generate Test Code Skeleton
 
-`oktest -G` (or `oktest --generate`) generates test code skeleton from ruby file.
+`oktest --generate` (or `oktest -G`) generates test code skeleton from ruby file.
 Comment line starting with `#;` is regarded as spec description.
 
 hello.rb:
@@ -524,7 +524,7 @@ end
 Generate test code skeleton:
 
 ```terminal
-$ oktest -G hello.rb > test/hello_test.rb
+$ oktest --generate hello.rb > test/hello_test.rb
 ```
 
 test/hello_test.rb:
@@ -609,7 +609,7 @@ Oktest.scope do
     end
 
     spec "example" do
-      s = hello()               # call method in spec block
+      s = hello()               # call it in spec block
       ok {s} == "Hello!"
     end
 
@@ -702,7 +702,7 @@ ok {a}.item(key, e)      # alias of `ok {a}.keyval(key, e)`
 ok {a}.length(e)         # fail unless a.length == e
 ```
 
-It is possible to chan method call of `.attr()` and `.keyval()`.
+It is possible to chain method call of `.attr()` and `.keyval()`.
 
 <!--
 test/example11b_test.rb:
@@ -874,7 +874,7 @@ end
 ```
 
 To catch subclass of error class, invoke `.raise!` instead of `.raise?`.
-For example: `ok {pr}.raise!(NameError, /foobar/, subclass: true)`.
+For example: `ok {pr}.raise!(NameError, /foobar/)`.
 
 <!--
 test/example14f_test.rb:
@@ -1076,7 +1076,7 @@ Oktest.scope do
 end
 ```
 
-* `at_end()` can be called multiple times.
+* `at_end()` can be called multiple times in a spec.
 * Registered blocks are invoked in reverse order at end of test case.
 * Registered blocks of `at_end()` are invoked prior to block of `after()`.
 * If something error raised in `at_end()`, test script execution will be
@@ -1086,7 +1086,7 @@ end
 ### Named Fixtures
 
 `fixture() { ... }` in topic or scope block defines fixture builder,
-and `fixture()` in scope block returns fixture data.
+and `fixture()` in spec block returns fixture data.
 
 test/example23_test.rb:
 
@@ -1145,7 +1145,7 @@ Oktest.scope do
 end
 ```
 
-* Fixtures can be defined in block of `topic()` as well as block of `Object.scope()`.
+* Fixture builders can be defined in `topic()` block as well as `Oktest.scope()` block.
 * If fixture requires clean-up operation, call `at_end()` in `fixture()` block.
 
 ```ruby
@@ -1268,7 +1268,7 @@ Oktest.scope do
 end
 ```
 
-* First argument of `capture_sio()` represents data from `$stdin`.
+* The first argument of `capture_sio()` represents data from `$stdin`.
   If it is not necessary, you can omit it like `caputre_sio() do ... end`.
 * If you need `$stdin.tty? == true` and `$stdout.tty? == true`,
   call `capture_sio(tty: true) do ... end`.
@@ -1276,7 +1276,7 @@ end
 
 ### `dummy_file()`
 
-`dummy_file()` creates dummy file temporarily.
+`dummy_file()` creates a dummy file temporarily.
 
 test/example32_test.rb:
 
@@ -1311,12 +1311,12 @@ Oktest.scope do
 end
 ```
 
-* If first argument of `dummy_file()` is nil, then it generates temporary file name automatically.
+* If the first argument of `dummy_file()` is nil, then it generates temporary file name automatically.
 
 
 ### `dummy_dir()`
 
-`dummy_dir()` creates dummy directory temporarily.
+`dummy_dir()` creates a dummy directory temporarily.
 
 test/example33_test.rb:
 
@@ -1353,7 +1353,7 @@ Oktest.scope do
 end
 ```
 
-* If first argument of `dummy_dir()` is nil, then it generates temorary directory name automatically.
+* If the first argument of `dummy_dir()` is nil, then it generates temorary directory name automatically.
 
 
 ### `dummy_values()`
@@ -1520,7 +1520,7 @@ end
 
 ### `recorder()`
 
-`recorder()` returns Benry::Recorder object.
+`recorder()` returns `Benry::Recorder` object.
 See [Benry::Recorder README](https://github.com/kwatch/benry-ruby/blob/ruby/benry-recorder/README.md)
 for detals.
 
@@ -1649,7 +1649,7 @@ Oktest.scope do
 end
 ```
 
-Defining helper method per topic may help you.
+Defining helper methods per topic may help you.
 
 ```ruby
 $http = http                                   # !!!!
@@ -1828,7 +1828,7 @@ ruby run_all.rb | tail -5
 ### `--faster` Option
 
 `ok {}` is slightly slower than `assert()` in MiniTest.
-In almost case, you don't need to care about it.  But if you are working in
+In most cases, you don't need to care about it.  But if you are working in
 very larget project and you want to run test scripts as fast as possible,
 try `--faster` option of `oktest` command.
 
