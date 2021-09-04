@@ -3,6 +3,13 @@ CHANGES
 
 
 
+Release 1.0.2
+-------------
+
+* [bugfix] `ruby foo_test.rb` runs test cases in that script instead of printing help message.
+
+
+
 Release 1.0.1
 -------------
 
