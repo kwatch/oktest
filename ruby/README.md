@@ -298,7 +298,7 @@ test/example01_test.rb: ..
 Plain mode:
 
 ```terminal
-$ oktest test/example01_test.rb -s simple   # or -ss
+$ oktest test/example01_test.rb -s plain    # or -sp
 ..
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
