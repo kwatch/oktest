@@ -275,7 +275,7 @@ END
     it "[!zfdr5] '-s simple' or '-ss' option prints test results in simple mode." do
       expected = <<END
 ## _tmp_test.rb
-* <b>Parent</b>: 
+* <b>Parent</b>: <B>.</B><B>.</B>
   * <b>Child1</b>: <B>.</B><B>.</B>
   * <b>Child2</b>: <R>f</R><R>E</R>
 ----------------------------------------------------------------------

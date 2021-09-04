@@ -1214,7 +1214,6 @@ module Oktest
 
     def initialize(reporter)
       @reporter = reporter
-      @subclass = reporter.order_policy() == :spec_first ? SpecLeaf : nil
     end
 
     def start()
@@ -1226,11 +1225,25 @@ module Oktest
       @reporter.exit_all(self)
     end
 
+    def _spec_first(node)
+      a1, a2 = node.each_child.partition {|c|
+        c.is_a?(SpecLeaf) || (c.is_a?(TopicNode) && c._prefix != '*')
+      }
+      return a1+a2
+    end
+    private :_spec_first
+
     def visit_scope(scope, depth, parent)
       @reporter.enter_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
       #; [!5anr7] calls before_all and after_all blocks.
       call_before_all_block(scope)
-      scope.each_child(@subclass) {|c| c.accept_visitor(self, depth+1, scope) }
+      #; [!c5cw0] run specs and case_when in advance of specs and topics when SimpleReporter.
+      if @reporter.order_policy() == :spec_first
+        _spec_first(scope).each {|c| c.accept_visitor(self, depth+1, scope) }
+      else
+        scope.each_child {|c| c.accept_visitor(self, depth+1, scope) }
+      end
+      #
       call_after_all_block(scope)
       @reporter.exit_scope(scope) unless scope.equal?(THE_GLOBAL_SCOPE)
     end
@@ -1239,7 +1252,13 @@ module Oktest
       @reporter.enter_topic(topic, depth)
       #; [!i3yfv] calls 'before_all' and 'after_all' blocks.
       call_before_all_block(topic)
-      topic.each_child(@subclass) {|c| c.accept_visitor(self, depth+1, topic) }
+      #; [!p3a5o] run specs and case_when in advance of specs and topics when SimpleReporter.
+      if @reporter.order_policy() == :spec_first
+        _spec_first(topic).each {|c| c.accept_visitor(self, depth+1, topic) }
+      else
+        topic.each_child {|c| c.accept_visitor(self, depth+1, topic) }
+      end
+      #
       call_after_all_block(topic)
       @reporter.exit_topic(topic, depth)
     end
@@ -1639,10 +1658,7 @@ module Oktest
     end
 
     def _nl()
-      unless @_nl
-        puts()
-        @_nl = true
-      end
+      (puts(); @_nl = true) unless @_nl
     end
     private :_nl
 
@@ -1662,14 +1678,17 @@ module Oktest
     end
 
     def enter_topic(topic, depth)
-      _nl()
       super
+      return if topic._prefix == '-'
+      _nl()
       print "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}: "
       $stdout.flush()
       _nl_off()
     end
 
     def exit_topic(topic, depth)
+      super
+      return if topic._prefix == '-'
       _nl()
       print_exceptions()
     end

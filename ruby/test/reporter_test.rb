@@ -473,14 +473,12 @@ END
 
   SIMPLE_PART = <<'END'
 ## _test.tmp
-* <b>Parent</b>: <B>.</B>
+* <b>Parent</b>: <B>.</B><B>.</B><B>.</B>
   * <b>Child1</b>: <B>.</B><B>.</B>
   * <b>Child2</b>: <R>f</R><R>E</R>
 END
   SIMPLE_PART2 = <<'END'
   * <b>Child3</b>: <Y>s</Y><Y>t</Y>
-  - <b>When x is negative</b>: <B>.</B>
-  - <b>Else</b>: <B>.</B>
 END
   SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + SIMPLE_PART2 + FOOTER
 
