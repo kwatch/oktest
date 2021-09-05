@@ -8,10 +8,6 @@
 
 require 'set'
 
-unless Set.instance_methods(false).include?(:===)   # Ruby 2.4 or older
-  class Set; alias === include?; end
-end
-
 
 module Oktest
 
