@@ -873,9 +873,9 @@ describe '#method_missing()' do
     end
   end
 
-  describe 'ANY()' do
+  describe '#Any()' do
     it "[!dlo1o] creates an 'Any' object." do
-      assert_eq ANY().class, Oktest::JsonMatcher::Any
+      assert_eq Any().class, Oktest::JsonMatcher::Any
     end
   end
 

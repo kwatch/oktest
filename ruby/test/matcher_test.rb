@@ -390,4 +390,11 @@ class Any_TC < TC
     end
   end
 
+  describe '#inspect()' do
+    it "[!6f0yv] returns 'Any()' string." do
+      o = Oktest::JsonMatcher::Any.new()
+      assert_eq o.inspect, "Any()"
+    end
+  end
+
 end

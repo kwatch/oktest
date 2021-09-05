@@ -776,7 +776,8 @@ END
         true
       end
       def inspect()
-        "ANY"
+        #; [!6f0yv] returns 'Any()' string.
+        "Any()"
       end
     end
 
@@ -1381,7 +1382,7 @@ END
       return JsonMatcher::Length.new(n)
     end
 
-    def ANY()
+    def Any()
       #; [!dlo1o] creates an 'Any' object.
       JsonMatcher::Any.new
     end
