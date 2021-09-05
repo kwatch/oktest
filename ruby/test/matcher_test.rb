@@ -120,7 +120,7 @@ class JsonMatcher_TC < TC
     end
     it "[!4ymj2] fails when actual value is not matched to item class of range object." do
       actual = {"val": 1.5}
-      errmsg = ("$<JSON>[\"val\"]: expected Integer value, but got Float value.\n"\
+      errmsg = ("$<JSON>[\"val\"]: expected #{1.class.name} value, but got Float value.\n"\
                 "    $<actual>:   1.5\n"\
                 "    $<expected>: 1..10\n")
       assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
@@ -332,6 +332,18 @@ class JsonMatcher_TC < TC
     it "[!57m2j] returns false when assertion error raised." do
       result = JSON(nil).instance_eval { _compare?([], "abc", /^\d+$/) }
       assert_eq result, false
+    end
+  end
+
+end
+
+
+class Enum_TC < TC
+
+  describe '#inspect()' do
+    it "[!fam11] returns 'Enum(...)' string." do
+      o = Oktest::JsonMatcher::Enum.new(['A', 'B', 'C'])
+      assert_eq o.inspect(), 'Enum("A", "B", "C")'
     end
   end
 

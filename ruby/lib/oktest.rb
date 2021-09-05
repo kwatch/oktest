@@ -748,6 +748,14 @@ END
       end
     end
 
+    class Enum < Set
+      alias === include?     # Ruby 2.4 or older doesn't have 'Set#==='.
+      def inspect()
+        #; [!fam11] returns 'Enum(...)' string.
+        "Enum(#{self.collect(&:inspect).join(', ')})"
+      end
+    end
+
     class Length
       def initialize(expected)
         @expected = expected
@@ -1349,8 +1357,8 @@ END
     end
 
     def Enum(*values)
-      #; [!fbfr0] creates Set object.
-      return Set.new(values)
+      #; [!fbfr0] creates Enum object which is a subclass of Set.
+      return JsonMatcher::Enum.new(values)
     end
 
     def BOOL()

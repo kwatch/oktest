@@ -831,9 +831,10 @@ describe '#method_missing()' do
   end
 
   describe '#Enum()' do
-    it "[!fbfr0] creates Set object." do
+    it "[!fbfr0] creates Enum object which is a subclass of Set." do
       o = Enum("a", "b", "c")
-      assert_eq o.class, Set
+      assert_eq o.class, Oktest::JsonMatcher::Enum
+      assert    o.class < Set
       assert_eq (o === "a"), true
       assert_eq (o === "b"), true
       assert_eq (o === "c"), true
