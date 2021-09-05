@@ -1037,8 +1037,8 @@ Oktest.scope do
         after  { puts "===== Inner: after =====" }  # !!!!!
 
         spec "example" do
-	  ok {1+1} == 2
-	end
+          ok {1+1} == 2
+        end
 
       end
 
