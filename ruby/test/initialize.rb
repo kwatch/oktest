@@ -12,3 +12,10 @@ end
 
 require_relative './tc'
 require 'oktest'
+
+
+# for Ruby 2.4 or older
+require 'set'
+unless Set.instance_methods(false).include?(:===)
+  class Set; alias === include?; end
+end

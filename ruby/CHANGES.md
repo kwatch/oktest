@@ -6,6 +6,8 @@ CHANGES
 Release ???
 -------------
 
+* [newfeature] JSON Matcher (like JSON Schema). See:
+  https://github.com/kwatch/oktest/blob/ruby/ruby/README.md#json-matcher
 * [change] change reporting style of '-s simple' option to print topics.
 * [change] add `-s compact` option which output is same as `-s simple` of previous release.
 

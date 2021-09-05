@@ -170,6 +170,15 @@ END
                "    $<expected>: \"str\""
       FAIL!(errmsg) { ok {String}.NOT === 'str' }
     end
+    it "[!mjh4d] raises error when combination of 'not_ok()' and matcher object." do
+      errmsg = "negative `===` is not available with matcher object."
+      assert_exc(Oktest::OktestError, errmsg) do
+        not_ok {Oktest::JsonMatcher.new({})} === {}
+      end
+      assert_exc(Oktest::OktestError, errmsg) do
+        ok {Oktest::JsonMatcher.new({})}.NOT === {}
+      end
+    end
   end
 
   describe '>' do
@@ -811,6 +820,62 @@ describe '#method_missing()' do
       errmsg = "File.exist?($<actual>): failed.\n"\
                "    $<actual>:   \"_not_exist\""
       FAIL!(errmsg) { ok {'_not_exist'}.NOT.not_exist? }
+    end
+  end
+
+  describe '#JSON()' do
+    it "[!n0k03] creates JsonMatcher object." do
+      o = JSON({})
+      assert_eq o.class, Oktest::JsonMatcher
+    end
+  end
+
+  describe '#Enum()' do
+    it "[!fbfr0] creates Enum object which is a subclass of Set." do
+      o = Enum("a", "b", "c")
+      assert_eq o.class, Oktest::JsonMatcher::Enum
+      assert    o.class < Set
+      assert_eq (o === "a"), true
+      assert_eq (o === "b"), true
+      assert_eq (o === "c"), true
+      assert_eq (o === "d"), false
+    end
+  end
+
+  describe '#Bool()' do
+    it "[!vub5j] creates a set of true and false." do
+      assert_eq Bool().class, Oktest::JsonMatcher::Enum
+      assert Bool() === true
+      assert Bool() === false
+      assert_eq (Bool() === 1), false
+      assert_eq (Bool() === 0), false
+    end
+  end
+
+  describe '#OR()' do
+    it "[!9e8im] creates `OR` object." do
+      o = OR(1, 2, 3)
+      assert_eq o.class, Oktest::JsonMatcher::OR
+    end
+  end
+
+  describe '#AND()' do
+    it "[!38jln] creates `AND` object." do
+      o = AND(4, 5, 6)
+      assert_eq o.class, Oktest::JsonMatcher::AND
+    end
+  end
+
+  describe '#Length()' do
+    it "[!qqas3] creates Length object." do
+      o = Length(3)
+      assert_eq o.class, Oktest::JsonMatcher::Length
+    end
+  end
+
+  describe '#Any()' do
+    it "[!dlo1o] creates an 'Any' object." do
+      assert_eq Any().class, Oktest::JsonMatcher::Any
     end
   end
 

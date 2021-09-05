@@ -6,6 +6,8 @@
 ### $License: MIT License $
 ###
 
+require 'set'
+
 
 module Oktest
 
@@ -114,6 +116,10 @@ module Oktest
 
     def ===(expected)
       __done()
+      #; [!mjh4d] raises error when combination of 'not_ok()' and matcher object.
+      if @bool == false && @actual.is_a?(Matcher)
+        raise OktestError, "negative `===` is not available with matcher object."
+      end
       #; [!42f6a] raises assertion error when failed.
       #; [!vhvyu] is avaialbe with NOT.
       __assert(@bool == (@actual === expected)) {
@@ -543,6 +549,246 @@ module Oktest
       }
       #; [!1ujag] returns self when passed.
       self
+    end
+
+  end
+
+
+  class Matcher
+
+    def initialize(actual)
+      @actual = actual
+    end
+
+    def ===(expected)
+      #; [!spybn] raises NotImplementedError.
+      raise NotImplementedError.new("#{self.class.name}#===(): not implemented yet.")
+    end
+
+    def ==(expected)
+      #; [!ymt1b] raises OktestError.
+      raise OktestError, "JSON(): use `===` instead of `==`."
+    end
+
+    def fail(errmsg)
+      #; [!8qpsd] raises assertion error.
+      raise Oktest::FAIL_EXCEPTION, errmsg
+    end
+
+  end
+
+
+  class JsonMatcher < Matcher
+
+    def ===(expected)
+      #; [!4uf1o] raises assertion error when JSON not matched.
+      _compare([], @actual, expected)
+      #; [!0g0u4] returns true when JSON matched.
+      return true
+    end
+
+    private
+
+    def _compare?(path, a, e)
+      #; [!nkvqo] returns true when nothing raised.
+      #; [!57m2j] returns false when assertion error raised.
+      _compare(path, a, e)
+      return true
+    rescue FAIL_EXCEPTION
+      return false
+    end
+
+    def _compare(path, a, e)
+      if a.is_a?(Hash) && e.is_a?(Hash)
+        _compare_hash(path, a, e)
+      elsif a.is_a?(Array) && e.is_a?(Array)
+        _compare_array(path, a, e)
+      elsif e.is_a?(Enumerator)
+        _compare_enumerator(path, a, e)
+      elsif e.is_a?(OR)
+        _compare_or(path, a, e)
+      elsif e.is_a?(AND)
+        _compare_and(path, a, e)
+      else
+        _compare_value(path, a, e)
+      end
+    end
+
+    def _compare_value(path, a, e)
+      #; [!1ukbv] scalar value matches to integer, string, bool, and so son.
+      #; [!8o55d] class object matches to instance object.
+      #; [!s625d] regexp object matches to string value.
+      #; [!aqkk0] range object matches to scalar value.
+      #; [!a7bfs] Set object matches to enum value.
+      e === a  or fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: #{e.inspect}
+END
+      #; [!4ymj2] fails when actual value is not matched to item class of range object.
+      if e.is_a?(Range)
+        expected_class = (e.begin || e.end).class
+        a.is_a?(expected_class)  or fail <<"END"
+$<JSON>#{_path(path)}: expected #{expected_class.name} value, but got #{a.class.name} value.
+    $<actual>:   #{a.inspect}
+    $<expected>: #{e.inspect}
+END
+      end
+    end
+
+    def _compare_array(path, a, e)
+      #; [!bz74w] fails when array lengths are different.
+      a.length == e.length  or fail <<"END"
+$<JSON>#{_path(path)}: $<actual>.length == $<expected>.length : failed.
+    $<actual>.length:   #{a.length}
+    $<expected>.length: #{e.length}
+    $<actual>:   #{a.inspect}
+    $<expected>: #{e.inspect}
+END
+      #; [!lh6d6] compares array items recursively.
+      path.push(nil)
+      i = -1
+      a.zip(e) do |a2, e2|
+        path[-1] = (i += 1)
+        _compare(path, a2, e2)
+      end
+      path.pop()
+    end
+
+    def _compare_hash(path, a, e)
+      #; [!rkv0z] compares two hashes with converting keys into string.
+      a2 = {}; a.each {|k, v| a2[k.to_s] = v }
+      e2 = {}; e.each {|k, v| e2[k.to_s] = v }
+      #; [!fmxyg] compares hash objects recursively.
+      path.push(nil)
+      a2.each_key do |k|
+        path[-1] = k
+        if e2.key?(k)
+          _compare(path, a2[k], e2[k])
+        #; [!jbyv6] key 'aaa?' represents optional key.
+        elsif e2.key?("#{k}?")
+          _compare(path, a2[k], e2["#{k}?"]) unless a2[k].nil?
+        #; [!uc4ag] key '*' matches to any key name.
+        elsif e2.key?("*")
+          _compare(path, a2[k], e2["*"])
+        #; [!mpbvu] fails when unexpected key exists in actual hash.
+        else
+          fail <<"END"
+$<JSON>#{_path(path)}: unexpected key.
+    $<actual>:   #{a2[k].inspect}
+END
+        end
+      end
+      path.pop()
+      #; [!4oasq] fails when expected key not exist in actual hash.
+      (e2.keys - a2.keys).each do |k|
+        k =~ /\?\z/ || k == "*"  or fail <<"END"
+$<JSON>#{_path(path)}: key \"#{k}\" expected but not found.
+    $<actual>.keys:   #{a2.keys.sort.inspect[1...-1]}
+    $<expected>.keys: #{e2.keys.sort.inspect[1...-1]}
+END
+      end
+    end
+
+    def _compare_enumerator(path, a, e)
+      #; [!ljrmc] fails when expected is an Enumerator object and actual is not an array.
+      e2 = e.first
+      a.is_a?(Array)  or fail <<"END"
+$<JSON>#{_path(path)}: Array value expected but got #{a.class.name} value.
+    $<actual>:   #{a.inspect}
+    $<expected>: [#{e2.inspect}].each
+END
+      #; [!sh5cg] Enumerator object matches to repeat of rule.
+      path.push(nil)
+      a.each_with_index do |a2, i|
+        path[-1] = i
+        _compare(path, a2, e2)
+      end
+      path.pop()
+    end
+
+    def _compare_or(path, a, e)
+      #; [!eqr3b] `OR()` matches to any of arguments.
+      #; [!5ybfg] `OR()` can contain `AND()`.
+      passed = e.items.any? {|e2| _compare?(path, a, e2) }
+      passed  or fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: OR(#{e.items.collect(&:inspect).join(', ')})
+END
+    end
+
+    def _compare_and(path, a, e)
+      #; [!4hk96] `AND()` matches to all of arguments.
+      #; [!scx22] `AND()` can contain `OR()`.
+      failed = e.items.find {|e2| ! _compare?(path, a, e2) }
+      ! failed  or fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: AND(#{failed.inspect})
+END
+    end
+
+    def _path(path)
+      #return path.collect {|x| "/#{x}" }.join()
+      return path.collect {|x| "[#{x.inspect}]" }.join()
+    end
+
+    protected
+
+    class OR
+      def initialize(*items)
+        @items = items
+      end
+      attr_reader :items
+      def inspect()
+        #; [!2mu33] returns 'OR(...)' string.
+        return "OR(#{@items.collect(&:inspect).join(', ')})"
+      end
+    end
+
+    class AND
+      def initialize(*items)
+        @items = items
+      end
+      attr_reader :items
+      def inspect()
+        #; [!w43ag] returns 'AND(...)' string.
+        return "AND(#{@items.collect(&:inspect).join(', ')})"
+      end
+    end
+
+    class Enum < Set
+      alias === include?     # Ruby 2.4 or older doesn't have 'Set#==='.
+      def inspect()
+        #; [!fam11] returns 'Enum(...)' string.
+        return "Enum(#{self.collect(&:inspect).join(', ')})"
+      end
+    end
+
+    class Length
+      def initialize(expected)
+        @expected = expected
+      end
+      def ===(actual)
+        #; [!03ozi] compares length of actual value with expected value.
+        return @expected === actual.length
+      end
+      def inspect()
+        #; [!nwv3e] returns 'Length(n)' string.
+        return "Length(#{@expected.inspect})"
+      end
+    end
+
+    class Any
+      def ===(actual)
+        #; [!mzion] returns true in any case.
+        true
+      end
+      def inspect()
+        #; [!6f0yv] returns 'Any()' string.
+        return "Any()"
+      end
     end
 
   end
@@ -1114,6 +1360,41 @@ module Oktest
       require 'benry/recorder' unless defined?(Benry::Recorder)
       #; [!glfvx] creates Benry::Recorder object.
       return Benry::Recorder.new
+    end
+
+    def JSON(actual)
+      #; [!n0k03] creates JsonMatcher object.
+      return JsonMatcher.new(actual)
+    end
+
+    def Enum(*values)
+      #; [!fbfr0] creates Enum object which is a subclass of Set.
+      return JsonMatcher::Enum.new(values)
+    end
+
+    def Bool()
+      #; [!vub5j] creates a set of true and false.
+      return Enum(true, false)
+    end
+
+    def OR(*args)
+      #; [!9e8im] creates `OR` object.
+      return JsonMatcher::OR.new(*args)
+    end
+
+    def AND(*args)
+      #; [!38jln] creates `AND` object.
+      return JsonMatcher::AND.new(*args)
+    end
+
+    def Length(n)
+      #; [!qqas3] creates Length object.
+      return JsonMatcher::Length.new(n)
+    end
+
+    def Any()
+      #; [!dlo1o] creates an 'Any' object.
+      return JsonMatcher::Any.new
     end
 
   end
