@@ -270,10 +270,10 @@ module Oktest
 
     def raise!(errcls=nil, errmsg=nil, &b)
       #; [!8k6ee] compares error class by '.is_a?' instead of '=='.
-      return raise?(errcls, errmsg, subclass: true, &b)
+      return raise?(errcls, errmsg, _subclass: true, &b)
     end
 
-    def raise?(errcls=nil, errmsg=nil, subclass: false, &b)
+    def raise?(errcls=nil, errmsg=nil, _subclass: false, &b)
       __done()
       #; [!2rnni] 1st argument can be error message string or rexp.
       if errmsg.nil? && ! errcls.nil? && ! (errcls.is_a?(Class) && errcls <= Exception)
@@ -295,8 +295,8 @@ module Oktest
           #; [!lq6jv] compares error class with '==' operator, not '.is_a?'.
           elsif exc.class == errcls    # not `exc.is_a?(errcls)`
             nil
-          #; [!hwg0z] compares error class with '.is_a?' if 'subclass: true' specified.
-          elsif subclass && exc.class < errcls
+          #; [!hwg0z] compares error class with '.is_a?' if '_subclass: true' specified.
+          elsif _subclass && exc.class < errcls
             nil
           #; [!4n3ed] reraises if exception is not matched to specified error class.
           else
@@ -334,8 +334,8 @@ module Oktest
           #; [!smprc] compares error class with '==' operator, not '.is_a?'.
           elsif exc.class == errcls    # not `exc.is_a?(errcls)`
             __assert(false) { "#{errcls.inspect} should not be raised but got #{exc.inspect}." }
-          #; [!34nd8] compares error class with '.is_a?' if 'subclass: true' specified.
-          elsif subclass && exc.class < errcls
+          #; [!34nd8] compares error class with '.is_a?' if '_subclass: true' specified.
+          elsif _subclass && exc.class < errcls
             __assert(false) { "#{errcls.inspect} should not be raised but got #{exc.inspect}." }
           #; [!shxne] reraises exception if different from specified error class.
           else
