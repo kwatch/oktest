@@ -1363,7 +1363,7 @@ END
 
     def BOOL()
       #; [!vub5j] creates a set of true and false.
-      Set.new([true, false])
+      return Enum(true, false)
     end
 
     def OR(*args)
