@@ -57,7 +57,7 @@ class JsonMatcher_TC < TC
   end
 
   def ANY()
-    return Oktest::JsonMatcher::AnythingOK.new
+    return Oktest::JsonMatcher::Any.new
   end
 
   describe '#===' do
@@ -377,11 +377,11 @@ class Length_TC < TC
 end
 
 
-class AnythingOK_TC < TC
+class Any_TC < TC
 
   describe '#===' do
     it "[!mzion] returns true in any case." do
-      o = Oktest::JsonMatcher::AnythingOK.new()
+      o = Oktest::JsonMatcher::Any.new()
       assert_eq (o === nil)  , true
       assert_eq (o === true) , true
       assert_eq (o === false), true

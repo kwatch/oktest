@@ -770,7 +770,7 @@ END
       end
     end
 
-    class AnythingOK
+    class Any
       def ===(actual)
         #; [!mzion] returns true in any case.
         true
@@ -1382,8 +1382,8 @@ END
     end
 
     def ANY()
-      #; [!dlo1o] creates an AnythingOK object.
-      JsonMatcher::AnythingOK.new
+      #; [!dlo1o] creates an 'Any' object.
+      JsonMatcher::Any.new
     end
 
   end
