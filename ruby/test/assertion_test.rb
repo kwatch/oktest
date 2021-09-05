@@ -850,4 +850,11 @@ describe '#method_missing()' do
     end
   end
 
+  describe '#Length()' do
+    it "[!qqas3] creates LengthMatcher object." do
+      o = Length(3)
+      assert_eq o.class, Oktest::LengthMatcher
+    end
+  end
+
 end

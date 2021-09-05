@@ -697,6 +697,25 @@ END
   end
 
 
+  class LengthMatcher     # not extend Matcher class!!
+
+    def initialize(expected)
+      @expected = expected
+    end
+
+    def ===(actual)
+      #; [!03ozi] compares length of actual value with expected value.
+      return @expected === actual.length
+    end
+
+    def inspect()
+      #; [!nwv3e] returns 'Length(n)' string.
+      "Length(#{@expected.inspect})"
+    end
+
+  end
+
+
   class Context
     ## * Context class is separated from ScopeNode, TopicNode, and SpecLeaf.
     ## * `topic()` and `spec()` creates subclass of Context class,
@@ -1277,6 +1296,11 @@ END
 
     #; [!vub5j] set of true and false.
     BOOL = Set.new([true, false])
+
+    def Length(n)
+      #; [!qqas3] creates LengthMatcher object.
+      return LengthMatcher.new(n)
+    end
 
   end
 
