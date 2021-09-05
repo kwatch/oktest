@@ -3,7 +3,7 @@ CHANGES
 
 
 
-Release ???
+Release 1.1.0
 -------------
 
 * [newfeature] JSON Matcher (like JSON Schema). See:
