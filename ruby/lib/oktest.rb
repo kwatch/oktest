@@ -1362,7 +1362,7 @@ END
       return JsonMatcher::Enum.new(values)
     end
 
-    def BOOL()
+    def Bool()
       #; [!vub5j] creates a set of true and false.
       return Enum(true, false)
     end

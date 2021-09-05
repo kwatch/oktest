@@ -842,13 +842,13 @@ describe '#method_missing()' do
     end
   end
 
-  describe '#BOOL()' do
+  describe '#Bool()' do
     it "[!vub5j] creates a set of true and false." do
-      assert_eq BOOL().class, Oktest::JsonMatcher::Enum
-      assert BOOL() === true
-      assert BOOL() === false
-      assert_eq (BOOL() === 1), false
-      assert_eq (BOOL() === 0), false
+      assert_eq Bool().class, Oktest::JsonMatcher::Enum
+      assert Bool() === true
+      assert Bool() === false
+      assert_eq (Bool() === 1), false
+      assert_eq (Bool() === 0), false
     end
   end
 
