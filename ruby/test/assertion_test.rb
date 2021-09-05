@@ -865,9 +865,9 @@ describe '#method_missing()' do
   end
 
   describe '#Length()' do
-    it "[!qqas3] creates LengthMatcher object." do
+    it "[!qqas3] creates Length object." do
       o = Length(3)
-      assert_eq o.class, Oktest::LengthMatcher
+      assert_eq o.class, Oktest::JsonMatcher::Length
     end
   end
 

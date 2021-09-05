@@ -745,23 +745,18 @@ END
       end
     end
 
-  end
-
-
-  class LengthMatcher     # not extend Matcher class!!
-
-    def initialize(expected)
-      @expected = expected
-    end
-
-    def ===(actual)
-      #; [!03ozi] compares length of actual value with expected value.
-      return @expected === actual.length
-    end
-
-    def inspect()
-      #; [!nwv3e] returns 'Length(n)' string.
-      "Length(#{@expected.inspect})"
+    class Length
+      def initialize(expected)
+        @expected = expected
+      end
+      def ===(actual)
+        #; [!03ozi] compares length of actual value with expected value.
+        return @expected === actual.length
+      end
+      def inspect()
+        #; [!nwv3e] returns 'Length(n)' string.
+        "Length(#{@expected.inspect})"
+      end
     end
 
   end
@@ -1359,8 +1354,8 @@ END
     end
 
     def Length(n)
-      #; [!qqas3] creates LengthMatcher object.
-      return LengthMatcher.new(n)
+      #; [!qqas3] creates Length object.
+      return JsonMatcher::Length.new(n)
     end
 
   end

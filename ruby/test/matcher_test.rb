@@ -327,16 +327,16 @@ class JsonMatcher_TC < TC
 end
 
 
-class LengthMatcher_TC < TC
+class Length_TC < TC
 
   describe '#===' do
     it "[!03ozi] compares length of actual value with expected value." do
-      o1 = Oktest::LengthMatcher.new(3)
+      o1 = Oktest::JsonMatcher::Length.new(3)
       assert_eq (o1 === "abc"), true
       assert_eq (o1 === "abcd"), false
       assert_eq (o1 === [1,2,3]), true
       assert_eq (o1 === [1, 2]), false
-      o2 = Oktest::LengthMatcher.new(1..3)
+      o2 = Oktest::JsonMatcher::Length.new(1..3)
       assert_eq (o2 === "a"), true
       assert_eq (o2 === "abc"), true
       assert_eq (o2 === ""), false
@@ -346,7 +346,7 @@ class LengthMatcher_TC < TC
 
   describe '#inspect()' do
     it "[!nwv3e] returns 'Length(n)' string." do
-      o = Oktest::LengthMatcher.new(1..3)
+      o = Oktest::JsonMatcher::Length.new(1..3)
       assert_eq o.inspect, "Length(1..3)"
     end
   end
