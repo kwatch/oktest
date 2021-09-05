@@ -6,6 +6,8 @@
 ### $License: MIT License $
 ###
 
+require 'set'
+
 
 module Oktest
 
@@ -1264,8 +1266,17 @@ END
     end
 
     def JSON(actual)
+      #; [!n0k03] creates JsonMatcher object.
       return JsonMatcher.new(actual)
     end
+
+    def Set(*values)
+      #; [!fbfr0] creates Set object.
+      return Set.new(values)
+    end
+
+    #; [!vub5j] set of true and false.
+    BOOL = Set.new([true, false])
 
   end
 

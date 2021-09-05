@@ -823,4 +823,31 @@ describe '#method_missing()' do
     end
   end
 
+  describe '#JSON()' do
+    it "[!n0k03] creates JsonMatcher object." do
+      o = JSON({})
+      assert_eq o.class, Oktest::JsonMatcher
+    end
+  end
+
+  describe '#Set()' do
+    it "[!fbfr0] creates Set object." do
+      o = Set("a", "b", "c")
+      assert_eq o.class, Set
+      assert o === "a"
+      assert o === "b"
+      assert o === "c"
+    end
+  end
+
+  describe '::BOOL' do
+    it "[!vub5j] set of true and false." do
+      assert_eq BOOL.class, Set
+      assert BOOL === true
+      assert BOOL === false
+      assert_eq (BOOL === 1), false
+      assert_eq (BOOL === 0), false
+    end
+  end
+
 end
