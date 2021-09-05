@@ -37,6 +37,8 @@ How to release:
   $ git add -p CHANGES.md
   $ git commit -m "ruby: update 'CHANGES.md'"
   $ git log -1
+  $ cid=$(git log -1 | awk 'NR==1{print $2}')
+  $ echo $cid
   $ rake package RELEASE=#{rel}
   $ rake package:extract            # confirm files in gem file
   $ pushd #{proj}-#{rel}/data; find . -type f; popd
@@ -48,7 +50,8 @@ How to release:
   $ git push --tags
   $ rake clean
   $ git checkout ruby
-  $ git cherry-pick xxxxxxxxx       # cherry-pick update of CHANGES.md
+  $ git log -1 $cid
+  $ git cherry-pick $cid            # cherry-pick update of CHANGES.md
 END
 end
 
