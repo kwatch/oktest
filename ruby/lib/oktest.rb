@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ###
-### $Release: $
+### $Release: 1.1.0 $
 ### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -12,7 +12,7 @@ require 'set'
 module Oktest
 
 
-  VERSION = '$Release: 0.0.0 $'.split()[1]
+  VERSION = '$Release: 1.1.0 $'.split()[1]
 
 
   class OktestError < StandardError
