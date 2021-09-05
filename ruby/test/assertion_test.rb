@@ -841,12 +841,26 @@ describe '#method_missing()' do
   end
 
   describe '::BOOL' do
-    it "[!vub5j] set of true and false." do
+    it "[!vub5j] is a set of true and false." do
       assert_eq BOOL.class, Set
       assert BOOL === true
       assert BOOL === false
       assert_eq (BOOL === 1), false
       assert_eq (BOOL === 0), false
+    end
+  end
+
+  describe '#OR()' do
+    it "[!9e8im] creates `OR` object." do
+      o = OR(1, 2, 3)
+      assert_eq o.class, Oktest::JsonMatcher::OR
+    end
+  end
+
+  describe '#AND()' do
+    it "[!38jln] creates `AND` object." do
+      o = AND(4, 5, 6)
+      assert_eq o.class, Oktest::JsonMatcher::AND
     end
   end
 

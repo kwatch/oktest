@@ -587,6 +587,17 @@ module Oktest
       return true
     end
 
+    private
+
+    def _compare?(path, a, e)
+      #; [!nkvqo] returns true when nothing raised.
+      #; [!57m2j] returns false when assertion error raised.
+      _compare(path, a, e)
+      return true
+    rescue FAIL_EXCEPTION
+      return false
+    end
+
     def _compare(path, a, e)
       if a.is_a?(Hash) && e.is_a?(Hash)
         _compare_hash(path, a, e)
@@ -609,6 +620,26 @@ END
           _compare(path, a2, e2)
         end
         path.pop()
+      #; [!eqr3b] `OR()` matches to any of arguments.
+      #; [!5ybfg] `OR()` can contain `AND()`.
+      elsif e.is_a?(OR)
+        passed = e.items.any? {|e2| _compare?(path, a, e2) }
+        passed  or
+          fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: OR(#{e.items.collect(&:inspect).join(', ')})
+END
+      #; [!4hk96] `AND()` matches to all of arguments.
+      #; [!scx22] `AND()` can contain `OR()`.
+      elsif e.is_a?(AND)
+        failed = e.items.find {|e2| ! _compare?(path, a, e2) }
+        ! failed  or
+          fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: AND(#{failed.inspect})
+END
       #; [!1ukbv] scalar value matches to integer, string, bool, and so son.
       #; [!8o55d] class object matches to instance object.
       #; [!s625d] regexp object matches to string value.
@@ -692,6 +723,26 @@ END
     def _path(path)
       #return path.collect {|x| "/#{x}" }.join()
       return path.collect {|x| "[#{x.inspect}]" }.join()
+    end
+
+    class OR
+      def initialize(*items)
+        @items = items
+      end
+      attr_reader :items
+      def inspect()
+        "OR(#{@items.collect(&:inspect).join(', ')})"
+      end
+    end
+
+    class AND
+      def initialize(*items)
+        @items = items
+      end
+      attr_reader :items
+      def inspect()
+        "AND(#{@items.collect(&:inspect).join(', ')})"
+      end
     end
 
   end
@@ -1294,8 +1345,18 @@ END
       return Set.new(values)
     end
 
-    #; [!vub5j] set of true and false.
+    #; [!vub5j] is a set of true and false.
     BOOL = Set.new([true, false])
+
+    def OR(*args)
+      #; [!9e8im] creates `OR` object.
+      return JsonMatcher::OR.new(*args)
+    end
+
+    def AND(*args)
+      #; [!38jln] creates `AND` object.
+      return JsonMatcher::AND.new(*args)
+    end
 
     def Length(n)
       #; [!qqas3] creates LengthMatcher object.

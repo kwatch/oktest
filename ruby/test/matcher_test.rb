@@ -48,6 +48,14 @@ class JsonMatcher_TC < TC
     return Oktest::JsonMatcher.new(x)
   end
 
+  def OR(*args)
+    return Oktest::JsonMatcher::OR.new(*args)
+  end
+
+  def AND(*args)
+    return Oktest::JsonMatcher::AND.new(*args)
+  end
+
   describe '#===' do
     it "[!4uf1o] raises assertion error when JSON not matched." do
       assert_exc(Oktest::FAIL_EXCEPTION) do
@@ -238,6 +246,81 @@ class JsonMatcher_TC < TC
       assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"name": String}
       end
+    end
+    it "[!eqr3b] `OR()` matches to any of arguments." do
+      result = JSON({"val": 123}) === {"val": OR(String, Integer)}
+      assert_eq result, true
+      result = JSON({"val": "123"}) === {"val": OR(String, Integer)}
+      assert_eq result, true
+      #
+      errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
+                "    $<actual>:   3.14\n"\
+                "    $<expected>: OR(String, Integer)\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
+        JSON({"val": 3.14}) === {"val": OR(String, Integer)}
+      end
+    end
+    it "[!4hk96] `AND()` matches to all of arguments." do
+      result = JSON({"val": "alice"}) === {"val": AND(String, /^[a-z]+$/)}
+      assert_eq result, true
+      #
+      errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
+                "    $<actual>:   \"Alice\"\n"\
+                "    $<expected>: AND(/^[a-z]+$/)\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
+        JSON({"val": "Alice"}) === {"val": AND(String, /^[a-z]+$/)}
+      end
+    end
+    it "[!5ybfg] `OR()` can contain `AND()`." do
+      expected = {"val": OR(AND(String, /^\d+$/), AND(Integer, 100..999))}
+      result = JSON({"val": "123"}) === expected
+      assert_eq result, true
+      result = JSON({"val": 123}) === expected
+      assert_eq result, true
+      #
+      errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
+                "    $<actual>:   \"abc\"\n"\
+                "    $<expected>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
+        JSON({"val": "abc"}) === expected
+      end
+      errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
+                "    $<actual>:   99\n"\
+                "    $<expected>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
+        JSON({"val": 99}) === expected
+      end
+    end
+    it "[!scx22] `AND()` can contain `OR()`." do
+      expected = {"val": AND(OR(String, Integer), OR(/^\d{3}$/, 100..999))}
+      result = JSON({"val": "123"}) === expected
+      assert_eq result, true
+      result = JSON({"val": 123}) === expected
+      assert_eq result, true
+      #
+      errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
+                "    $<actual>:   \"1\"\n"\
+                "    $<expected>: AND(OR(/^\\d{3}$/, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
+        JSON({"val": "1"}) === expected
+      end
+      errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
+                "    $<actual>:   0\n"\
+                "    $<expected>: AND(OR(/^\\d{3}$/, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
+        JSON({"val": 0}) === expected
+      end
+    end
+  end
+
+  describe '#_compare?()' do
+    it "[!nkvqo] returns true when nothing raised." do
+      result = JSON(nil).instance_eval { _compare?([], "abc", /^\w+$/) }
+      assert_eq result, true
+    end
+    it "[!57m2j] returns false when assertion error raised." do
+      result = JSON(nil).instance_eval { _compare?([], "abc", /^\d+$/) }
+      assert_eq result, false
     end
   end
 
