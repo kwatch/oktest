@@ -170,6 +170,15 @@ END
                "    $<expected>: \"str\""
       FAIL!(errmsg) { ok {String}.NOT === 'str' }
     end
+    it "[!mjh4d] raises error when combination of 'not_ok()' and matcher object." do
+      errmsg = "negative `===` is not available with matcher object."
+      assert_exc(Oktest::OktestError, errmsg) do
+        not_ok {Oktest::JsonMatcher.new({})} === {}
+      end
+      assert_exc(Oktest::OktestError, errmsg) do
+        ok {Oktest::JsonMatcher.new({})}.NOT === {}
+      end
+    end
   end
 
   describe '>' do

@@ -114,6 +114,10 @@ module Oktest
 
     def ===(expected)
       __done()
+      #; [!mjh4d] raises error when combination of 'not_ok()' and matcher object.
+      if @bool == false && @actual.is_a?(Matcher)
+        raise OktestError, "negative `===` is not available with matcher object."
+      end
       #; [!42f6a] raises assertion error when failed.
       #; [!vhvyu] is avaialbe with NOT.
       __assert(@bool == (@actual === expected)) {
