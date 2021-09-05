@@ -9,7 +9,7 @@ Oktest.rb is a new-style testing library for Ruby.
 * Structured test specifications like RSpec.
 * Filtering testcases by pattern or tags.
 * Blue/red color instead of green/red for accesability.
-* Small code size (about 2500 lines) and good performance.
+* Small code size (less than 3000 lines) and good performance.
 
 ```ruby
 ### Oktest                           ### Test::Unit
@@ -82,6 +82,11 @@ Oktest.rb requires Ruby 2.3 or later.
     * <a href="#dummy_attrs"><code>dummy_attrs()</code></a>
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
     * <a href="#recorder"><code>recorder()</code></a>
+  * <a href="#json-matcher">JSON Matcher</a>
+    * <a href="#simple-example">Simple Example</a>
+    * <a href="#nested-example">Nested Example</a>
+    * <a href="#complex-example">Complex Example</a>
+    * <a href="#helper-methods-for-json-matcher">Helper Methods for JSON Matcher</a>
   * <a href="#tips">Tips</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
@@ -1604,6 +1609,216 @@ end
 
 
 
+## JSON Matcher
+
+Oktest.rb provides easy way to assert JSON data.
+This is very convenient feature, but don't abuse it.
+
+
+### Simple Example
+
+<!--
+test/example41_test.rb:
+-->
+```ruby
+require 'oktest'
+require 'set'                               # !!!!!
+
+Oktest.scope do
+  topic 'JSON Example' do
+
+    spec "simple example" do
+      actual = {
+        "name":     "Alice",
+        "id":       1001,
+        "age":      18,
+        "email":    "alice@example.com",
+        "gender":   "F",
+        "deleted":  false,
+        "tags":     ["aaa", "bbb", "ccc"],
+       #"twitter":  "@alice",
+      }
+      ## assertion
+      ok {JSON(actual)} === {               # requires `JSON()` and `===`
+        "name":     "Alice",                # scalar value
+        "id":       1000..9999,             # range object
+        "age":      Integer,                # class object
+        "email":    /^\w+@example\.com$/,   # regexp
+        "gender":   Set.new(["M", "F"]),    # Set object ("M" or "F")
+        "deleted":  Set.new([true, false]), # boolean (true or false)
+        "tags":     [/^\w+$/].each,         # Enumerator object (!= Array obj)
+        "twitter?": /^@\w+$/,               # key 'xxx?' means optional value
+      }
+    end
+
+  end
+end
+```
+
+(Note: Ruby 2.4 or older doesn't have `Set#===()`, so above code will occur error
+ in Ruby 2.4 or older. Please add the folllowing hack in your test script.)
+
+```ruby
+require 'set'
+unless Set.instance_methods(false).include?(:===)  # for Ruby 2.4 or older
+  class Set; alias === include?; end
+end
+```
+
+Notice that `Enumerator` has different meaning from `Array` in JSON matcher.
+
+```ruby
+  actual = {"tags": ["foo", "bar", "baz"]}
+
+  ## Array
+  ok {JSON(actual)} == {"tags": ["foo", "bar", "baz"]}
+
+  ## Enumerator
+  ok {JSON(actual)} == {"tags": [/^\w+$/].each}
+```
+
+
+### Nested Example
+
+<!--
+test/example42_test.rb:
+-->
+```ruby
+require 'oktest'
+require 'set'                            # !!!!!
+
+Oktest.scope do
+  topic 'JSON Example' do
+
+    spec "nested example" do
+      actual = {
+        "teams": [
+          {
+            "team": "Section 9",
+            "members": [
+              {"id": 2500, "name": "Aramaki", "gender": "M"},
+              {"id": 2501, "name": "Motoko" , "gender": "F"},
+              {"id": 2502, "name": "Batou"  , "gender": "M"},
+            ],
+            "leader": "Aramaki",
+          },
+          {
+            "team": "SOS Brigade",
+            "members": [
+              {"id": 1001, "name": "Haruhi", "gender": "F"},
+              {"id": 1002, "name": "Mikuru", "gender": "F"},
+              {"id": 1003, "name": "Yuki"  , "gender": "F"},
+              {"id": 1004, "name": "Itsuki", "gender": "M"},
+              {"id": 1005, "name": "Kyon"  , "gender": "M"},
+            ],
+          },
+        ],
+      }
+      ## assertion
+      ok {JSON(actual)} === {            # requires `JSON()` and `===`
+        "teams": [
+          {
+            "team": String,
+            "members": [
+              {"id": 1000..9999, "name": String, "gender": Set.new(["M", "F"])}
+            ].each,                     # Enumerator object (!= Array obj)
+            "leader?": String,           # key 'xxx?' means optional value
+          }
+        ].each,                          # Enumerator object (!= Array obj)
+      }
+    end
+
+  end
+end
+```
+
+
+### Complex Example
+
+* `OR(x, y, z)` matches to `x`, `y`, or `z`.
+* `AND(x, y, z)` matches to `x`, `y`, and `z`.
+* Key `"*"` matches to any key of hash object.
+* `Any()` matches to anything.
+
+<!--
+test/example43_test.rb:
+-->
+```ruby
+require 'oktest'
+require 'set'
+
+Oktest.scope do
+  topic 'JSON Example' do
+
+    spec "OR() example" do
+      ok {JSON({"val": "123"})} === {"val": OR(String, Integer)}    # OR()
+      ok {JSON({"val":  123 })} === {"val": OR(String, Integer)}    # OR()
+    end
+
+    spec "AND() example" do
+      ok {JSON({"val": "123"})} === {"val": AND(String, /^\d+$/)}   # AND()
+      ok {JSON({"val":  123 })} === {"val": AND(Integer, 1..1000)}  # AND()
+    end
+
+    spec "`*` and `ANY` example" do
+      ok {JSON({"name": "Bob", "age": 20})} === {"*": Any()}    # '*' and Any()
+    end
+
+    spec "complex exapmle" do
+      actual = {
+        "item":   "awesome item",
+        "colors": ["red", "#cceeff", "green", "#fff"],
+        "memo":   "this is awesome.",
+        "url":    "https://example.com/awesome",
+      }
+      ## assertion
+      color_names = ["red", "blue", "green", "white", "black"]
+      color_pat   = /^\#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/
+      ok {JSON(actual)} === {
+        "colors": [
+          AND(String, OR(Set.new(color_names), color_pat)),   # AND() and OR()
+        ].each,
+        "*": Any(),             # match to any key (`"*"`) and value (`ANY`)
+      }
+    end
+
+  end
+end
+```
+
+(Note: `/^\d+$/` implies String value, and `1..100` implies Integer value.)
+
+```ruby
+## No need to write:
+##   ok {JSON{...}} === {"val": AND(String, /^\d+$/)}
+##   ok {JSON{...}} === {"val": AND(Integer, 1..100)}
+ok {JSON({"val": "A"})} === {"val": /^\d+$/}   # implies String value
+ok {JSON({"val": 99 })} === {"val": 1..100}    # implies Integer value
+```
+
+
+### Helper Methods for JSON Matcher
+
+Oktest.rb provides some helper methods and objects:
+
+* `Enum(x, y, z)` is almost same as `Set.new([x, y, z])`.
+* `Bool()` is same as `Enum(true, false)`.
+* `Length(3)` matches to length 3, and `Length(1..3)` matches to length 1..3.
+
+<!--
+test/example44_test.rb:
+-->
+```ruby
+  actual = {"gender": "M", "deleted": false, "code": "ABCD1234"}
+  ok {JSON(actual)} == {
+    "gender":  Enum("M", "F"),        # same as Set.new(["M", "F"])
+    "deleted": Bool(),                # same as Enum(true, false)
+    "code":    Length(6..10),         # code length should be 6..10
+  }
+```
+
+
+
 ## Tips
 
 
@@ -1612,7 +1827,7 @@ end
 If you want to use `ok {actual} == expected` style assertion in MiniTest,
 install `minitest-ok` gem instead of `otest` gem.
 
-test/example41_test.rb:
+test/example51_test.rb:
 
 ```ruby
 require 'minitest/spec'
@@ -1635,7 +1850,7 @@ See [minitest-ok README](https://github.com/kwatch/minitest-ok) for details.
 
 `rack-test_app` gem will help you to test Rack application very well.
 
-test/example42_test.rb:
+test/example52_test.rb:
 
 ```ruby
 require 'rack'
@@ -1708,7 +1923,7 @@ end
 
 Oktest.rb provides `Traverser` class which implements Visitor pattern.
 
-test/example44_test.rb:
+test/example54_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1765,8 +1980,8 @@ MyTraverser.new.start()
 Result:
 
 ```terminal
-$ ruby test/example44_test.rb
-# scope: test/example44_test.rb
+$ ruby test/example54_test.rb
+# scope: test/example54_test.rb
   + topic: Example Topic
     - spec: sample #1
     - spec: sample #2
