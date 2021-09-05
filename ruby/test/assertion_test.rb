@@ -830,13 +830,14 @@ describe '#method_missing()' do
     end
   end
 
-  describe '#Set()' do
+  describe '#Enum()' do
     it "[!fbfr0] creates Set object." do
-      o = Set("a", "b", "c")
+      o = Enum("a", "b", "c")
       assert_eq o.class, Set
-      assert o === "a"
-      assert o === "b"
-      assert o === "c"
+      assert_eq (o === "a"), true
+      assert_eq (o === "b"), true
+      assert_eq (o === "c"), true
+      assert_eq (o === "d"), false
     end
   end
 

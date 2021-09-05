@@ -1335,7 +1335,7 @@ END
       return JsonMatcher.new(actual)
     end
 
-    def Set(*values)
+    def Enum(*values)
       #; [!fbfr0] creates Set object.
       return Set.new(values)
     end
