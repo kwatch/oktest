@@ -1353,8 +1353,10 @@ END
       return Set.new(values)
     end
 
-    #; [!vub5j] is a set of true and false.
-    BOOL = Set.new([true, false])
+    def BOOL()
+      #; [!vub5j] creates a set of true and false.
+      Set.new([true, false])
+    end
 
     def OR(*args)
       #; [!9e8im] creates `OR` object.
@@ -1371,8 +1373,10 @@ END
       return JsonMatcher::Length.new(n)
     end
 
-    #; [!dlo1o] is an AnythingOK object.
-    ANY = JsonMatcher::AnythingOK.new
+    def ANY()
+      #; [!dlo1o] creates an AnythingOK object.
+      JsonMatcher::AnythingOK.new
+    end
 
   end
 

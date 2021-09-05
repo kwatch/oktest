@@ -56,7 +56,9 @@ class JsonMatcher_TC < TC
     return Oktest::JsonMatcher::AND.new(*args)
   end
 
-  ANY = Oktest::SpecHelper::ANY
+  def ANY()
+    return Oktest::JsonMatcher::AnythingOK.new
+  end
 
   describe '#===' do
     it "[!4uf1o] raises assertion error when JSON not matched." do
@@ -317,7 +319,7 @@ class JsonMatcher_TC < TC
       actual = {"name": "Alice", "age": 20}
       result = JSON(actual) === {"name": String, "*": Integer}
       assert_eq result, true
-      result = JSON(actual) === {"name": String, "*": ANY}
+      result = JSON(actual) === {"name": String, "*": ANY()}
       assert_eq result, true
     end
   end

@@ -841,13 +841,13 @@ describe '#method_missing()' do
     end
   end
 
-  describe '::BOOL' do
-    it "[!vub5j] is a set of true and false." do
-      assert_eq BOOL.class, Set
-      assert BOOL === true
-      assert BOOL === false
-      assert_eq (BOOL === 1), false
-      assert_eq (BOOL === 0), false
+  describe '#BOOL()' do
+    it "[!vub5j] creates a set of true and false." do
+      assert_eq BOOL().class, Set
+      assert BOOL() === true
+      assert BOOL() === false
+      assert_eq (BOOL() === 1), false
+      assert_eq (BOOL() === 0), false
     end
   end
 
@@ -873,8 +873,8 @@ describe '#method_missing()' do
   end
 
   describe '::ANY' do
-    it "[!dlo1o] is an AnythingOK object." do
-      assert_eq ANY.class, Oktest::JsonMatcher::AnythingOK
+    it "[!dlo1o] creates an AnythingOK object." do
+      assert_eq ANY().class, Oktest::JsonMatcher::AnythingOK
     end
   end
 
