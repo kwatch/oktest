@@ -603,63 +603,33 @@ module Oktest
         _compare_hash(path, a, e)
       elsif a.is_a?(Array) && e.is_a?(Array)
         _compare_array(path, a, e)
-      #; [!sh5cg] Enumerator object matches to repeat of rule.
       elsif e.is_a?(Enumerator)
-        #; [!ljrmc] fails when expected is an Enumerator object and actual is not an array.
-        e2 = e.first
-        if ! a.is_a?(Array)
-          fail <<"END"
-$<JSON>#{_path(path)}: Array value expected but got #{a.class.name} value.
-    $<actual>:   #{a.inspect}
-    $<expected>: [#{e2.inspect}].each
-END
-        end
-        path.push(nil)
-        a.each_with_index do |a2, i|
-          path[-1] = i
-          _compare(path, a2, e2)
-        end
-        path.pop()
-      #; [!eqr3b] `OR()` matches to any of arguments.
-      #; [!5ybfg] `OR()` can contain `AND()`.
+        _compare_enumerator(path, a, e)
       elsif e.is_a?(OR)
-        passed = e.items.any? {|e2| _compare?(path, a, e2) }
-        passed  or
-          fail <<"END"
-$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
-    $<actual>:   #{a.inspect}
-    $<expected>: OR(#{e.items.collect(&:inspect).join(', ')})
-END
-      #; [!4hk96] `AND()` matches to all of arguments.
-      #; [!scx22] `AND()` can contain `OR()`.
+        _compare_or(path, a, e)
       elsif e.is_a?(AND)
-        failed = e.items.find {|e2| ! _compare?(path, a, e2) }
-        ! failed  or
-          fail <<"END"
-$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
-    $<actual>:   #{a.inspect}
-    $<expected>: AND(#{failed.inspect})
-END
+        _compare_and(path, a, e)
+      else
+        _compare_value(path, a, e)
+      end
+    end
+
+    def _compare_value(path, a, e)
       #; [!1ukbv] scalar value matches to integer, string, bool, and so son.
       #; [!8o55d] class object matches to instance object.
       #; [!s625d] regexp object matches to string value.
       #; [!aqkk0] range object matches to scalar value.
       #; [!a7bfs] Set object matches to enum value.
-      elsif e === a
-        #; [!4ymj2] fails when actual value is not matched to item class of range object.
-        if e.is_a?(Range)
-          expected_class = (e.begin || e.end).class
-          if ! a.is_a?(expected_class)
-            fail <<"END"
-$<JSON>#{_path(path)}: expected #{expected_class.name} value, but got #{a.class.name} value.
+      e === a  or fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
     $<actual>:   #{a.inspect}
     $<expected>: #{e.inspect}
 END
-          end
-        end
-      else
-        fail <<"END"
-$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+      #; [!4ymj2] fails when actual value is not matched to item class of range object.
+      if e.is_a?(Range)
+        expected_class = (e.begin || e.end).class
+        a.is_a?(expected_class)  or fail <<"END"
+$<JSON>#{_path(path)}: expected #{expected_class.name} value, but got #{a.class.name} value.
     $<actual>:   #{a.inspect}
     $<expected>: #{e.inspect}
 END
@@ -668,15 +638,13 @@ END
 
     def _compare_array(path, a, e)
       #; [!bz74w] fails when array lengths are different.
-      if a.length != e.length
-        fail <<"END"
+      a.length == e.length  or fail <<"END"
 $<JSON>#{_path(path)}: $<actual>.length == $<expected>.length : failed.
     $<actual>.length:   #{a.length}
     $<expected>.length: #{e.length}
     $<actual>:   #{a.inspect}
     $<expected>: #{e.inspect}
 END
-      end
       #; [!lh6d6] compares array items recursively.
       path.push(nil)
       i = -1
@@ -714,8 +682,7 @@ END
       path.pop()
       #; [!4oasq] fails when expected key not exist in actual hash.
       (e2.keys - a2.keys).each do |k|
-        next if k =~ /\?\z/ || k == "*"
-        fail <<"END"
+        k =~ /\?\z/ || k == "*"  or fail <<"END"
 $<JSON>#{_path(path)}: key \"#{k}\" expected but not found.
     $<actual>.keys:   #{a2.keys.sort.inspect[1...-1]}
     $<expected>.keys: #{e2.keys.sort.inspect[1...-1]}
@@ -723,10 +690,51 @@ END
       end
     end
 
+    def _compare_enumerator(path, a, e)
+      #; [!ljrmc] fails when expected is an Enumerator object and actual is not an array.
+      e2 = e.first
+      a.is_a?(Array)  or fail <<"END"
+$<JSON>#{_path(path)}: Array value expected but got #{a.class.name} value.
+    $<actual>:   #{a.inspect}
+    $<expected>: [#{e2.inspect}].each
+END
+      #; [!sh5cg] Enumerator object matches to repeat of rule.
+      path.push(nil)
+      a.each_with_index do |a2, i|
+        path[-1] = i
+        _compare(path, a2, e2)
+      end
+      path.pop()
+    end
+
+    def _compare_or(path, a, e)
+      #; [!eqr3b] `OR()` matches to any of arguments.
+      #; [!5ybfg] `OR()` can contain `AND()`.
+      passed = e.items.any? {|e2| _compare?(path, a, e2) }
+      passed  or fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: OR(#{e.items.collect(&:inspect).join(', ')})
+END
+    end
+
+    def _compare_and(path, a, e)
+      #; [!4hk96] `AND()` matches to all of arguments.
+      #; [!scx22] `AND()` can contain `OR()`.
+      failed = e.items.find {|e2| ! _compare?(path, a, e2) }
+      ! failed  or fail <<"END"
+$<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
+    $<actual>:   #{a.inspect}
+    $<expected>: AND(#{failed.inspect})
+END
+    end
+
     def _path(path)
       #return path.collect {|x| "/#{x}" }.join()
       return path.collect {|x| "[#{x.inspect}]" }.join()
     end
+
+    protected
 
     class OR
       def initialize(*items)
