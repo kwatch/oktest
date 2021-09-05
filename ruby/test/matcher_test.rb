@@ -338,6 +338,30 @@ class JsonMatcher_TC < TC
 end
 
 
+class OR_TC < TC
+
+  describe '#inspect()' do
+    it "[!2mu33] returns 'OR(...)' string." do
+      o = Oktest::JsonMatcher::OR.new('A', 'B', 'C')
+      assert_eq o.inspect(), 'OR("A", "B", "C")'
+    end
+  end
+
+end
+
+
+class AND_TC < TC
+
+  describe '#inspect()' do
+    it "[!w43ag] returns 'AND(...)' string." do
+      o = Oktest::JsonMatcher::AND.new('A', 'B', 'C')
+      assert_eq o.inspect(), 'AND("A", "B", "C")'
+    end
+  end
+
+end
+
+
 class Enum_TC < TC
 
   describe '#inspect()' do

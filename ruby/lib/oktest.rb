@@ -734,7 +734,8 @@ END
       end
       attr_reader :items
       def inspect()
-        "OR(#{@items.collect(&:inspect).join(', ')})"
+        #; [!2mu33] returns 'OR(...)' string.
+        return "OR(#{@items.collect(&:inspect).join(', ')})"
       end
     end
 
@@ -744,7 +745,8 @@ END
       end
       attr_reader :items
       def inspect()
-        "AND(#{@items.collect(&:inspect).join(', ')})"
+        #; [!w43ag] returns 'AND(...)' string.
+        return "AND(#{@items.collect(&:inspect).join(', ')})"
       end
     end
 
@@ -752,7 +754,7 @@ END
       alias === include?     # Ruby 2.4 or older doesn't have 'Set#==='.
       def inspect()
         #; [!fam11] returns 'Enum(...)' string.
-        "Enum(#{self.collect(&:inspect).join(', ')})"
+        return "Enum(#{self.collect(&:inspect).join(', ')})"
       end
     end
 
@@ -766,7 +768,7 @@ END
       end
       def inspect()
         #; [!nwv3e] returns 'Length(n)' string.
-        "Length(#{@expected.inspect})"
+        return "Length(#{@expected.inspect})"
       end
     end
 
@@ -777,7 +779,7 @@ END
       end
       def inspect()
         #; [!6f0yv] returns 'Any()' string.
-        "Any()"
+        return "Any()"
       end
     end
 
@@ -1384,7 +1386,7 @@ END
 
     def Any()
       #; [!dlo1o] creates an 'Any' object.
-      JsonMatcher::Any.new
+      return JsonMatcher::Any.new
     end
 
   end
