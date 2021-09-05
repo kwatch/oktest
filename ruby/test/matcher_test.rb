@@ -56,6 +56,8 @@ class JsonMatcher_TC < TC
     return Oktest::JsonMatcher::AND.new(*args)
   end
 
+  ANY = Oktest::SpecHelper::ANY
+
   describe '#===' do
     it "[!4uf1o] raises assertion error when JSON not matched." do
       assert_exc(Oktest::FAIL_EXCEPTION) do
@@ -310,6 +312,13 @@ class JsonMatcher_TC < TC
       assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": 0}) === expected
       end
+    end
+    it "[!uc4ag] key '*' matches to any key name." do
+      actual = {"name": "Alice", "age": 20}
+      result = JSON(actual) === {"name": String, "*": Integer}
+      assert_eq result, true
+      result = JSON(actual) === {"name": String, "*": ANY}
+      assert_eq result, true
     end
   end
 

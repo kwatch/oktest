@@ -700,6 +700,9 @@ END
         #; [!jbyv6] key 'aaa?' represents optional key.
         elsif e2.key?("#{k}?")
           _compare(path, a2[k], e2["#{k}?"]) unless a2[k].nil?
+        #; [!uc4ag] key '*' matches to any key name.
+        elsif e2.key?("*")
+          _compare(path, a2[k], e2["*"])
         #; [!mpbvu] fails when unexpected key exists in actual hash.
         else
           fail <<"END"
@@ -711,7 +714,7 @@ END
       path.pop()
       #; [!4oasq] fails when expected key not exist in actual hash.
       (e2.keys - a2.keys).each do |k|
-        next if k =~ /\?\z/
+        next if k =~ /\?\z/ || k == "*"
         fail <<"END"
 $<JSON>#{_path(path)}: key \"#{k}\" expected but not found.
     $<actual>.keys:   #{a2.keys.sort.inspect[1...-1]}
