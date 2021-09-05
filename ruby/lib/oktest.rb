@@ -759,6 +759,16 @@ END
       end
     end
 
+    class AnythingOK
+      def ===(actual)
+        #; [!mzion] returns true in any case.
+        true
+      end
+      def inspect()
+        "ANY"
+      end
+    end
+
   end
 
 
@@ -1357,6 +1367,9 @@ END
       #; [!qqas3] creates Length object.
       return JsonMatcher::Length.new(n)
     end
+
+    #; [!dlo1o] is an AnythingOK object.
+    ANY = JsonMatcher::AnythingOK.new
 
   end
 

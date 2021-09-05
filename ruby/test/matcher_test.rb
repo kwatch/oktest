@@ -352,3 +352,19 @@ class Length_TC < TC
   end
 
 end
+
+
+class AnythingOK_TC < TC
+
+  describe '#===' do
+    it "[!mzion] returns true in any case." do
+      o = Oktest::JsonMatcher::AnythingOK.new()
+      assert_eq (o === nil)  , true
+      assert_eq (o === true) , true
+      assert_eq (o === false), true
+      assert_eq (o === 123)  , true
+      assert_eq (o === "abc"), true
+    end
+  end
+
+end
