@@ -2052,8 +2052,6 @@ END
 
 
   def self.run(reporter: nil, style: nil)
-    #; [!kfi8b] do nothing when 'Oktest.scope()' not called.
-    return unless THE_GLOBAL_SCOPE.has_child?
     #; [!6xn3t] creates reporter object according to 'style:' keyword arg.
     klass = (style ? REPORTER_CLASSES[style] : REPORTER_CLASS)  or
       raise ArgumentError, "#{style.inspect}: unknown style."
@@ -2582,6 +2580,7 @@ END
       }
       parser.on('-F PATTERN') {|val|
         #; [!71h2x] '-F ...' option will be error.
+        #; [!j01y7] if filerting by '-F' matched nothing, then prints zero result.
         val =~ /\A(topic|spec|tag|sid)(=|!=)/  or
           raise OptionParser::InvalidArgument, val
         opts.filter = val

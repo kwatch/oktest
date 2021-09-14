@@ -335,6 +335,8 @@ Quiet mode reports progress only of failed or error test cases (and doesn't
 report progress of passed ones), so it's output is very compact. This is
 very useful for large project which contains large number of test cases.
 
+(Note: `ruby test/example01_test.rb -s <STYLE>` is also available.)
+
 
 ### Run All Test Scripts Under Directory
 
