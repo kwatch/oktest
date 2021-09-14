@@ -2053,7 +2053,7 @@ END
 
   def self.run(reporter: nil, style: nil)
     #; [!kfi8b] do nothing when 'Oktest.scope()' not called.
-    return unless THE_GLOBAL_SCOPE.has_child?
+    return 0 unless THE_GLOBAL_SCOPE.has_child?
     #; [!6xn3t] creates reporter object according to 'style:' keyword arg.
     klass = (style ? REPORTER_CLASSES[style] : REPORTER_CLASS)  or
       raise ArgumentError, "#{style.inspect}: unknown style."
