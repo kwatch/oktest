@@ -3,6 +3,13 @@ CHANGES
 
 
 
+Release 1.1.1
+-------------
+
+* [bugfix] fix not to raise internal error when filterning by `-F` option matched to nothing.
+
+
+
 Release 1.1.0
 -------------
 
