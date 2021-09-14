@@ -434,6 +434,17 @@ END
       end
     end
 
+    it "[!j01y7] if filerting by '-F' matched nothing, then prints zero result." do
+      expected = <<'END'
+## total:0 (pass:0, fail:0, error:0, skip:0, todo:0) in 0.000s
+END
+      #
+      ret, sout, serr = run("-F", "tag=blablabla", @testfile)
+      assert_eq ret, 0
+      assert_eq edit_actual(sout), edit_expected(expected)
+      assert_eq serr, ""
+    end
+
     it "[!6ro7j] '--color=on' option enables output coloring forcedly." do
       [true, false].each do |bool|
         [true, false].each do |tty|

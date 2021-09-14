@@ -583,13 +583,6 @@ END
       assert_eq edit_actual(sout), edit_expected(expected)
       assert_eq serr, ""
     end
-    it "[!kfi8b] do nothing when 'Oktest.scope()' not called." do
-      ret = nil
-      sout, serr = capture { ret = Oktest.run() }
-      assert_eq sout, ""
-      assert_eq serr, ""
-      assert_eq ret, 0
-    end
     it "[!6xn3t] creates reporter object according to 'style:' keyword arg." do
       expected = VERBOSE_OUTPUT
       prepare()
