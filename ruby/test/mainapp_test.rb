@@ -1,5 +1,5 @@
 ###
-### $Release: 1.1.0 $
+### $Release: 1.1.1 $
 ### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -241,7 +241,7 @@ END
     end
 
     it "[!qqizl] '--version' option prints version number." do
-      expected = '$Release: 1.1.0 $'.split()[1] + "\n"
+      expected = '$Release: 1.1.1 $'.split()[1] + "\n"
       #
       ret, sout, serr = run("--version")
       assert_eq ret, 0
