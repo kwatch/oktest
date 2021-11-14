@@ -11,15 +11,6 @@ require_relative './initialize'
 
 module ReporterTestHelper
 
-  def plain2colored(str)
-    str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }
-    str = str.gsub(/<G>(.*?)<\/G>/) { Oktest::Color.green($1) }
-    str = str.gsub(/<B>(.*?)<\/B>/) { Oktest::Color.blue($1) }
-    str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
-    str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
-    return str
-  end
-
   def edit_actual(output)
     bkup = output.dup
     output = output.gsub(/^.*\r/, '')
@@ -246,7 +237,7 @@ END
       end
       #
       expected = <<END
-[<R>ERROR</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>
+[<E>ERROR</E>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>
     #{__FILE__}:#{lineno}:in `/'
         1/0
 END
@@ -283,7 +274,7 @@ END
       r = new_reporter_with_exceptions(exc)
       sep = "----------------------------------------------------------------------\n"
       expected1 = "[<R>Fail</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
-      expected2 = "[<R>ERROR</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
+      expected2 = "[<E>ERROR</E>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
       #
       sout, serr = capture { r.__send__(:print_exceptions) }
       assert sout.start_with?(sep + plain2colored(expected1)), "not matched"
@@ -349,7 +340,7 @@ END
     end
 
     it "[!gx0n2] builds footer line." do
-      expected = "## total:15 (<B>pass:5</B>, <R>fail:4</R>, <R>error:3</R>, <Y>skip:2</Y>, <Y>todo:1</Y>) in 0.500s"
+      expected = "## total:15 (<C>pass:5</C>, <R>fail:4</R>, <E>error:3</E>, <Y>skip:2</Y>, <Y>todo:1</Y>) in 0.500s"
       assert new_footer(), plain2colored(expected)
     end
   end
@@ -438,7 +429,7 @@ $<actual> == $<expected>: failed.
     $<actual>:   1
     $<expected>: 2
 ----------------------------------------------------------------------
-[<R>ERROR</R>] <b>Parent > Child2 > 1/1 should be 1</b>
+[<E>ERROR</E>] <b>Parent > Child2 > 1/1 should be 1</b>
     _test.tmp:21:in `/'
         ok {1/0} == 1
 %%%
@@ -447,36 +438,36 @@ ZeroDivisionError: divided by 0
 END
 
   FOOTER = <<'END'
-## total:9 (<B>pass:5</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:9 (<C>pass:5</C>, <R>fail:1</R>, <E>error:1</E>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
 
   VERBOSE_PART = <<'END'
 ## _test.tmp
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1+1 should be 2
-    - [<B>pass</B>] 1-1 should be 0
+    - [<C>pass</C>] 1+1 should be 2
+    - [<C>pass</C>] 1-1 should be 0
   * <b>Child2</b>
     - [<R>Fail</R>] 1*1 should be 1
-    - [<R>ERROR</R>] 1/1 should be 1
+    - [<E>ERROR</E>] 1/1 should be 1
 END
   VERBOSE_PART2 = <<'END'
   * <b>Child3</b>
     - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
     - [<Y>TODO</Y>] todo example
   - <b>When x is negative</b>
-    - [<B>pass</B>] x*x is positive.
+    - [<C>pass</C>] x*x is positive.
   - <b>Else</b>
-    - [<B>pass</B>] x*x is also positive.
-  - [<B>pass</B>] last spec
+    - [<C>pass</C>] x*x is also positive.
+  - [<C>pass</C>] last spec
 END
   VERBOSE_OUTPUT = VERBOSE_PART + ERROR_PART + VERBOSE_PART2 + FOOTER
 
   SIMPLE_PART = <<'END'
 ## _test.tmp
-* <b>Parent</b>: <B>.</B><B>.</B><B>.</B>
-  * <b>Child1</b>: <B>.</B><B>.</B>
-  * <b>Child2</b>: <R>f</R><R>E</R>
+* <b>Parent</b>: <C>.</C><C>.</C><C>.</C>
+  * <b>Child1</b>: <C>.</C><C>.</C>
+  * <b>Child2</b>: <R>f</R><E>E</E>
 END
   SIMPLE_PART2 = <<'END'
   * <b>Child3</b>: <Y>s</Y><Y>t</Y>
@@ -484,17 +475,17 @@ END
   SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + SIMPLE_PART2 + FOOTER
 
   COMPACT_PART = <<'END'
-_test.tmp: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B><B>.</B>
+_test.tmp: <C>.</C><C>.</C><R>f</R><E>E</E><Y>s</Y><Y>t</Y><C>.</C><C>.</C><C>.</C>
 END
   COMPACT_OUTPUT = COMPACT_PART + ERROR_PART + FOOTER
 
   PLAIN_PART = <<'END'
-<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B><B>.</B>
+<C>.</C><C>.</C><R>f</R><E>E</E><Y>s</Y><Y>t</Y><C>.</C><C>.</C><C>.</C>
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 
   QUIET_PART = <<'END'
-<R>f</R><R>E</R><Y>s</Y><Y>t</Y>
+<R>f</R><E>E</E><Y>s</Y><Y>t</Y>
 END
   QUIET_OUTPUT = QUIET_PART + ERROR_PART + FOOTER
 

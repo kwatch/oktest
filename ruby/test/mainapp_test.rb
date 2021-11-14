@@ -73,15 +73,6 @@ end
 
 END
 
-  def plain2colored(str)
-    str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }
-    str = str.gsub(/<G>(.*?)<\/G>/) { Oktest::Color.green($1) }
-    str = str.gsub(/<B>(.*?)<\/B>/) { Oktest::Color.blue($1) }
-    str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
-    str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
-    return str
-  end
-
   def edit_actual(output)
     bkup = output.dup
     output = output.gsub(/^.*\r/, '')
@@ -165,7 +156,7 @@ END
 
     it "[!18qpe] runs test scripts." do
       expected = <<'END'
-## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<C>pass:4</C>, <R>fail:1</R>, <E>error:1</E>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       ret, sout, serr = run(@testfile)
       assert_eq ret, 2
@@ -180,7 +171,7 @@ END
 
     it "[!hiu5b] finds test scripts in directory and runs them." do
       expected = <<'END'
-## total:8 (<B>pass:4</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<C>pass:4</C>, <R>fail:1</R>, <E>error:1</E>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       dir = "_tmpdir.d"
       dirs = [dir, "#{dir}/d1", "#{dir}/d1/d2"]
@@ -253,11 +244,11 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1+1 should be 2
-    - [<B>pass</B>] 1-1 should be 0
+    - [<C>pass</C>] 1+1 should be 2
+    - [<C>pass</C>] 1-1 should be 0
   * <b>Child2</b>
     - [<R>Fail</R>] 1*1 should be 1
-    - [<R>ERROR</R>] 1/1 should be 1
+    - [<E>ERROR</E>] 1/1 should be 1
 ----------------------------------------------------------------------
 END
       #
@@ -275,9 +266,9 @@ END
     it "[!zfdr5] '-s simple' or '-ss' option prints test results in simple mode." do
       expected = <<END
 ## _tmp_test.rb
-* <b>Parent</b>: <B>.</B><B>.</B>
-  * <b>Child1</b>: <B>.</B><B>.</B>
-  * <b>Child2</b>: <R>f</R><R>E</R>
+* <b>Parent</b>: <C>.</C><C>.</C>
+  * <b>Child1</b>: <C>.</C><C>.</C>
+  * <b>Child2</b>: <R>f</R><E>E</E>
 ----------------------------------------------------------------------
 END
       #
@@ -294,7 +285,7 @@ END
 
     it "[!ef5v7] '-s compact' or '-sc' option prints test results in compact mode." do
       expected = <<END
-#{@testfile}: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
+#{@testfile}: <C>.</C><C>.</C><R>f</R><E>E</E><Y>s</Y><Y>t</Y><C>.</C><C>.</C>
 ----------------------------------------------------------------------
 END
       #
@@ -311,7 +302,7 @@ END
 
     it "[!244te] '-s plain' or '-sp' option prints test results in plain mode." do
       expected = <<END
-<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B>
+<C>.</C><C>.</C><R>f</R><E>E</E><Y>s</Y><Y>t</Y><C>.</C><C>.</C>
 ----------------------------------------------------------------------
 END
       #
@@ -328,7 +319,7 @@ END
 
     it "[!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode." do
       expected = <<END
-<R>f</R><R>E</R><Y>s</Y><Y>t</Y>
+<R>f</R><E>E</E><Y>s</Y><Y>t</Y>
 ----------------------------------------------------------------------
 END
       #
@@ -348,9 +339,9 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1+1 should be 2
-    - [<B>pass</B>] 1-1 should be 0
-## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+    - [<C>pass</C>] 1+1 should be 2
+    - [<C>pass</C>] 1-1 should be 0
+## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
       ret, sout, serr = run("-F", "topic=Child1", @testfile)
@@ -364,8 +355,8 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1-1 should be 0
-## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+    - [<C>pass</C>] 1-1 should be 0
+## total:1 (<C>pass:1</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
       ret, sout, serr = run("-F", "spec=*1-1*", @testfile)
@@ -379,13 +370,13 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1-1 should be 0
+    - [<C>pass</C>] 1-1 should be 0
   * <b>Child3</b>
     - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
     - [<Y>TODO</Y>] todo example
   - <b>When x is negative</b>
-    - [<B>pass</B>] [!6hs1j] x*x is positive.
-## total:4 (<B>pass:2</B>, fail:0, error:0, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+    - [<C>pass</C>] [!6hs1j] x*x is positive.
+## total:4 (<C>pass:2</C>, fail:0, error:0, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       #
       ret, sout, serr = run("-F", "tag={new,exp}", @testfile)
@@ -399,8 +390,8 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>
   - <b>When x is negative</b>
-    - [<B>pass</B>] [!6hs1j] x*x is positive.
-## total:1 (<B>pass:1</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+    - [<C>pass</C>] [!6hs1j] x*x is positive.
+## total:1 (<C>pass:1</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
       ret, sout, serr = run("-F", "sid=6hs1j", @testfile)
@@ -414,11 +405,11 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1+1 should be 2
-    - [<B>pass</B>] 1-1 should be 0
+    - [<C>pass</C>] 1+1 should be 2
+    - [<C>pass</C>] 1-1 should be 0
   - <b>Else</b>
-    - [<B>pass</B>] [!pwiq7] x*x is also positive.
-## total:3 (<B>pass:3</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+    - [<C>pass</C>] [!pwiq7] x*x is also positive.
+## total:3 (<C>pass:3</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
       #
       ret, sout, serr = run("-F", "tag!={fail,err,exp}", @testfile)
@@ -449,7 +440,7 @@ END
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
           _, sout, serr = run("--color=on", @testfile, tty: tty)
-          assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+          assert sout.include?(edit_expected("[<C>pass</C>]")), "should contain blue string"
           assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
           assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
           assert_eq serr, ""
@@ -462,7 +453,7 @@ END
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
           _, sout, serr = run("--color", @testfile, tty: tty)
-          assert sout.include?(edit_expected("[<B>pass</B>]")), "should contain blue string"
+          assert sout.include?(edit_expected("[<C>pass</C>]")), "should contain blue string"
           assert sout.include?(edit_expected("[<R>Fail</R>]")), "should contain red string"
           assert sout.include?(edit_expected("[<Y>Skip</Y>]")), "should contain yellos string"
           assert_eq serr, ""
@@ -475,7 +466,7 @@ END
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
           _, sout, serr = run("--color=off", @testfile, tty: tty)
-          assert !sout.include?(edit_expected("[<B>pass</B>]")), "should not contain blue string"
+          assert !sout.include?(edit_expected("[<C>pass</C>]")), "should not contain blue string"
           assert !sout.include?(edit_expected("[<R>Fail</R>]")), "should not contain red string"
           assert !sout.include?(edit_expected("[<Y>Skip</Y>]")), "should not contain yellos string"
           assert_eq serr, ""
