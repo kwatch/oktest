@@ -1004,7 +1004,7 @@ END
       return @hooks[key]
     end
 
-    def _repr(depth=0, buf="")
+    def _repr(depth=0, buf=String.new)
       #; [!bt5j8] builds debug string.
       if depth < 0
         id_str = "%x" % self.object_id
@@ -1109,7 +1109,7 @@ END
       nil
     end
 
-    def _repr(depth=0, buf="")       #:nodoc:
+    def _repr(depth=0, buf=String.new)       #:nodoc:
       #; [!6nsgy] builds debug string.
       buf << "  " * depth << "- #{@desc}"
       buf << " (tag: #{@tag.inspect})" if @tag
@@ -1912,9 +1912,9 @@ END
         $stdout.flush
       end
       label = Color.status(status, LABELS[status] || '???')
-      msg = "#{'  ' * (depth - 1)}- [#{label}] #{spec.desc}"
+      msg = ["#{'  ' * (depth - 1)}- [#{label}] #{spec.desc}"]
       msg << " " << Color.reason("(reason: #{error.message})") if status == :SKIP
-      puts msg
+      puts msg.join()
     end
 
   end
