@@ -11,18 +11,6 @@ require_relative './initialize'
 
 module ReporterTestHelper
 
-  def plain2colored(str)
-    str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }
-    str = str.gsub(/<G>(.*?)<\/G>/) { Oktest::Color.green($1) }
-    str = str.gsub(/<B>(.*?)<\/B>/) { Oktest::Color.blue($1) }
-    str = str.gsub(/<C>(.*?)<\/C>/) { Oktest::Color.cyan($1) }
-    str = str.gsub(/<M>(.*?)<\/M>/) { Oktest::Color.magenta($1) }
-    str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
-    str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
-    str = str.gsub(/<E>(.*?)<\/E>/) { Oktest::Color.red_b($1) }
-    return str
-  end
-
   def edit_actual(output)
     bkup = output.dup
     output = output.gsub(/^.*\r/, '')
