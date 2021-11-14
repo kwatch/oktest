@@ -794,12 +794,18 @@ END
   end
 
 
+  module UtilHelper
+  end
+
+
   class Context
     ## * Context class is separated from ScopeNode, TopicNode, and SpecLeaf.
     ## * `topic()` and `spec()` creates subclass of Context class,
     ##    and run blocks in these subclasses.
     ## * `scope()` instanciates those subclasses, and run spec blocks
     ##    in that instance objects.
+
+    extend UtilHelper
 
     class << self
       attr_accessor :__node
@@ -976,6 +982,7 @@ END
       context = @context_class.new()
       #; [!9hbxn] context object has 'ok()' method.
       context.extend SpecHelper
+      context.extend UtilHelper
       return context
     end
 
