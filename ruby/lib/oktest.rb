@@ -2607,7 +2607,7 @@ END
       return HELP_MESSAGE % {command: command}
     end
 
-    HELP_MESSAGE = <<'END'
+    HELP_MESSAGE = <<'END'.gsub(/^#.*\n/, '')
 Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
@@ -2616,7 +2616,7 @@ Usage: %{command} [<options>] [<file-or-directory>...]
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton
   -G, --generate         : generate test code skeleton from ruby file
-      --faster           : make 'ok{}' faster (for very large project)
+#      --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic
