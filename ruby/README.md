@@ -2001,12 +2001,12 @@ Oktest.rb gem file contains benchmark script.
 It shows that Oktest.rb runs more than three times faster than RSpec.
 
 ```terminal
-$ gem install oktest        # ver 1.0.0
+$ gem install oktest        # ver 1.2.0
 $ gem install rspec         # ver 3.10.0
 $ gem install minitest      # ver 5.14.4
 $ gem install test-unit     # ver 3.4.4
 
-$ cp -pr $GEM_HOME/gems/oktest-1.0.0/benchmark .
+$ cp -pr $GEM_HOME/gems/oktest-1.2.0/benchmark .
 $ cd benchmark/
 $ rake -T
 $ ruby --version
@@ -2018,47 +2018,57 @@ $ rake benchmark:all
 Example result:
 
 ```
-==================== oktest ====================
+==================== {{*oktest*}} ====================
 oktest -sq run_all.rb
 
-## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 4.86s
+## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 2.36s
 
-        8.536 real        8.154 user        0.245 sys
+        {{*6.815 real*}}        6.511 user        0.257 sys
 
-==================== oktest:faster ====================
+==================== {{*oktest:faster*}} ====================
 oktest -sq --faster run_all.rb
 
-## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 1.64s
+## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 2.01s
 
-        5.068 real        4.819 user        0.202 sys
+        {{*6.401 real*}}        6.123 user        0.240 sys
 
-==================== rspec ====================
+==================== {{*rspec*}} ====================
 rspec run_all.rb | tail -4
 
-Finished in 14.44 seconds (files took 15.81 seconds to load)
+Finished in 15.27 seconds (files took 16.08 seconds to load)
 100000 examples, 0 failures
 
 
-        30.798 real        26.565 user        4.392 sys
+        {{*32.062 real*}}        27.778 user        4.383 sys
 
-==================== minitest ====================
+==================== {{*minitest*}} ====================
 ruby run_all.rb | tail -4
 
-Finished in 5.190405s, 19266.3193 runs/s, 19266.3193 assertions/s.
+Finished in 5.281425s, 18934.2838 runs/s, 37868.5677 assertions/s.
 
-100000 runs, 100000 assertions, 0 failures, 0 errors, 0 skips
+100000 runs, 200000 assertions, 0 failures, 0 errors, 0 skips
 
-        8.767 real        8.157 user        0.761 sys
+        {{*9.140 real*}}        8.657 user        0.705 sys
 
-==================== testunit ====================
+==================== {{*testunit*}} ====================
 ruby run_all.rb | tail -5
 -------------------------------------------------------------------------------
-100000 tests, 100000 assertions, 0 failures, 0 errors, 0 pendings, 0 omissions, 0 notifications
+100000 tests, 200000 assertions, 0 failures, 0 errors, 0 pendings, 0 omissions, 0 notifications
 100% passed
 -------------------------------------------------------------------------------
-8957.19 tests/s, 8957.19 assertions/s
+7775.59 tests/s, 15551.18 assertions/s
 
-        17.838 real        17.201 user        0.879 sys
+        {{*19.580 real*}}        19.020 user        0.885 sys
+```
+
+Summary:
+
+```
+Oktest:              6.815 real     6.511 user     0.257 sys
+Oktest (--fast):     6.401 real     6.123 user     0.240 sys
+RSpec:              32.062 real    27.778 user     4.383 sys
+MiniTest:            9.140 real     8.657 user     0.705 sys
+Test::Unit:         19.580 real    19.020 user     0.885 sys
 ```
 
 
