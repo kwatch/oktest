@@ -6,6 +6,7 @@ Release 1.2.0
 -------------
 
 * [enhance] performance of `ok{}` is improved.
+* [change] color of 'pass' status changed from blue to cyan, because blue color is not visible in dark background very much, while cyan color is visible in both light and dark background.
 * [change] command-line option `--faster` is removed from help message. `--faster` is still available, but not recommended because the performance without `--faster` is improved very much.
 
 
