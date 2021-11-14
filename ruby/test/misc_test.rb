@@ -69,7 +69,7 @@ class Color_TC < TC
 
   describe '.status()' do
     it "[!yev5y] returns string containing color escape sequence." do
-      assert_eq Oktest::Color.status(:PASS , "Pass" ), "\e[1;34mPass\e[0m"
+      assert_eq Oktest::Color.status(:PASS , "Pass" ), "\e[1;36mPass\e[0m"
       assert_eq Oktest::Color.status(:FAIL , "Fail" ), "\e[1;31mFail\e[0m"
       assert_eq Oktest::Color.status(:ERROR, "Error"), "\e[1;31mError\e[0m"
       assert_eq Oktest::Color.status(:SKIP , "Skip" ), "\e[1;33mSkip\e[0m"

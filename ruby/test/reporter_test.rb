@@ -15,6 +15,8 @@ module ReporterTestHelper
     str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }
     str = str.gsub(/<G>(.*?)<\/G>/) { Oktest::Color.green($1) }
     str = str.gsub(/<B>(.*?)<\/B>/) { Oktest::Color.blue($1) }
+    str = str.gsub(/<C>(.*?)<\/C>/) { Oktest::Color.cyan($1) }
+    str = str.gsub(/<M>(.*?)<\/M>/) { Oktest::Color.magenta($1) }
     str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
     str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
     return str
@@ -349,7 +351,7 @@ END
     end
 
     it "[!gx0n2] builds footer line." do
-      expected = "## total:15 (<B>pass:5</B>, <R>fail:4</R>, <R>error:3</R>, <Y>skip:2</Y>, <Y>todo:1</Y>) in 0.500s"
+      expected = "## total:15 (<C>pass:5</C>, <R>fail:4</R>, <R>error:3</R>, <Y>skip:2</Y>, <Y>todo:1</Y>) in 0.500s"
       assert new_footer(), plain2colored(expected)
     end
   end
@@ -447,15 +449,15 @@ ZeroDivisionError: divided by 0
 END
 
   FOOTER = <<'END'
-## total:9 (<B>pass:5</B>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:9 (<C>pass:5</C>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
 
   VERBOSE_PART = <<'END'
 ## _test.tmp
 * <b>Parent</b>
   * <b>Child1</b>
-    - [<B>pass</B>] 1+1 should be 2
-    - [<B>pass</B>] 1-1 should be 0
+    - [<C>pass</C>] 1+1 should be 2
+    - [<C>pass</C>] 1-1 should be 0
   * <b>Child2</b>
     - [<R>Fail</R>] 1*1 should be 1
     - [<R>ERROR</R>] 1/1 should be 1
@@ -465,17 +467,17 @@ END
     - [<Y>Skip</Y>] skip example <Y>(reason: a certain condition)</Y>
     - [<Y>TODO</Y>] todo example
   - <b>When x is negative</b>
-    - [<B>pass</B>] x*x is positive.
+    - [<C>pass</C>] x*x is positive.
   - <b>Else</b>
-    - [<B>pass</B>] x*x is also positive.
-  - [<B>pass</B>] last spec
+    - [<C>pass</C>] x*x is also positive.
+  - [<C>pass</C>] last spec
 END
   VERBOSE_OUTPUT = VERBOSE_PART + ERROR_PART + VERBOSE_PART2 + FOOTER
 
   SIMPLE_PART = <<'END'
 ## _test.tmp
-* <b>Parent</b>: <B>.</B><B>.</B><B>.</B>
-  * <b>Child1</b>: <B>.</B><B>.</B>
+* <b>Parent</b>: <C>.</C><C>.</C><C>.</C>
+  * <b>Child1</b>: <C>.</C><C>.</C>
   * <b>Child2</b>: <R>f</R><R>E</R>
 END
   SIMPLE_PART2 = <<'END'
@@ -484,12 +486,12 @@ END
   SIMPLE_OUTPUT = SIMPLE_PART + ERROR_PART + SIMPLE_PART2 + FOOTER
 
   COMPACT_PART = <<'END'
-_test.tmp: <B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B><B>.</B>
+_test.tmp: <C>.</C><C>.</C><R>f</R><R>E</R><Y>s</Y><Y>t</Y><C>.</C><C>.</C><C>.</C>
 END
   COMPACT_OUTPUT = COMPACT_PART + ERROR_PART + FOOTER
 
   PLAIN_PART = <<'END'
-<B>.</B><B>.</B><R>f</R><R>E</R><Y>s</Y><Y>t</Y><B>.</B><B>.</B><B>.</B>
+<C>.</C><C>.</C><R>f</R><R>E</R><Y>s</Y><Y>t</Y><C>.</C><C>.</C><C>.</C>
 END
   PLAIN_OUTPUT = PLAIN_PART + ERROR_PART + FOOTER
 

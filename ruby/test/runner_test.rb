@@ -525,6 +525,8 @@ class RunnerFunctions_TC < TC
     str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }
     str = str.gsub(/<G>(.*?)<\/G>/) { Oktest::Color.green($1) }
     str = str.gsub(/<B>(.*?)<\/B>/) { Oktest::Color.blue($1) }
+    str = str.gsub(/<C>(.*?)<\/C>/) { Oktest::Color.cyan($1) }
+    str = str.gsub(/<M>(.*?)<\/M>/) { Oktest::Color.magenta($1) }
     str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
     str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
     return str
@@ -561,17 +563,17 @@ class RunnerFunctions_TC < TC
   VERBOSE_OUTPUT = <<'END'
 ## test/runner_test.rb
 * <b>Example</b>
-  - [<B>pass</B>] 1+1 should be 2
-  - [<B>pass</B>] 1-1 should be 0
-## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+  - [<C>pass</C>] 1+1 should be 2
+  - [<C>pass</C>] 1-1 should be 0
+## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
   COMPACT_OUTPUT = <<'END'
-test/runner_test.rb: <B>.</B><B>.</B>
-## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+test/runner_test.rb: <C>.</C><C>.</C>
+## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
   PLAIN_OUTPUT = <<'END'
-<B>.</B><B>.</B>
-## total:2 (<B>pass:2</B>, fail:0, error:0, skip:0, todo:0) in 0.000s
+<C>.</C><C>.</C>
+## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
 
 

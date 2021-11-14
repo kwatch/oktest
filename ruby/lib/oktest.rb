@@ -2354,7 +2354,7 @@ END
 
     def topic  s; Config.color_enabled ? bold(s)   : s; end
     def spec   s; Config.color_enabled ? normal(s) : s; end
-    def pass   s; Config.color_enabled ? blue(s)   : s; end
+    def pass   s; Config.color_enabled ? cyan(s)   : s; end
     def fail   s; Config.color_enabled ? red(s)    : s; end
     def error  s; Config.color_enabled ? red(s)    : s; end
     def skip   s; Config.color_enabled ? yellow(s) : s; end
