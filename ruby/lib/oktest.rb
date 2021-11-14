@@ -2343,14 +2343,14 @@ END
 
     def normal  s;  return s; end
     def bold    s;  return "\e[0;1m#{s}\e[0m"; end
-    def black   s;  return "\e[1;30m#{s}\e[0m"; end
-    def red     s;  return "\e[1;31m#{s}\e[0m"; end
-    def green   s;  return "\e[1;32m#{s}\e[0m"; end
-    def yellow  s;  return "\e[1;33m#{s}\e[0m"; end
-    def blue    s;  return "\e[1;34m#{s}\e[0m"; end
-    def magenta s;  return "\e[1;35m#{s}\e[0m"; end
-    def cyan    s;  return "\e[1;36m#{s}\e[0m"; end
-    def white   s;  return "\e[1;37m#{s}\e[0m"; end
+    def black   s;  return "\e[0;30m#{s}\e[0m"; end
+    def red     s;  return "\e[0;31m#{s}\e[0m"; end
+    def green   s;  return "\e[0;32m#{s}\e[0m"; end
+    def yellow  s;  return "\e[0;33m#{s}\e[0m"; end
+    def blue    s;  return "\e[0;34m#{s}\e[0m"; end
+    def magenta s;  return "\e[0;35m#{s}\e[0m"; end
+    def cyan    s;  return "\e[0;36m#{s}\e[0m"; end
+    def white   s;  return "\e[0;37m#{s}\e[0m"; end
 
     def topic  s; Config.color_enabled ? bold(s)   : s; end
     def spec   s; Config.color_enabled ? normal(s) : s; end
