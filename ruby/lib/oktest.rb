@@ -842,7 +842,7 @@ END
       if block.parameters.empty?
         location = nil
       else
-        location = caller(1).first  # caller() makes performance slower, but necessary.
+        location = caller_locations(1, 1).first
       end
       #; [!c8c8o] creates new spec object.
       spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
@@ -852,7 +852,7 @@ END
     def self.fixture(name, &block)
       #; [!8wfrq] registers fixture factory block.
       #; [!y3ks3] retrieves block parameter names.
-      location = caller(1).first  # caller() makes performance slower, but necessary.
+      location = caller_locations(1, 1).first
       @__node.register_fixture_block(name, location, &block)
       self
     end
@@ -1138,8 +1138,8 @@ END
 
   def self.scope(tag: nil, &block)
     #; [!kem4y] detects test script filename.
-    location = caller(1).first  # caller() makes performance slower, but necessary.
-    filename = location =~ /:\d+/ ? $` : nil
+    location = caller_locations(1, 1).first
+    filename = location.path.to_s
     #; [!6ullm] changes test script filename from absolute path to relative path.
     if filename
       pwd = Dir.pwd()
@@ -1175,7 +1175,7 @@ END
       #; [!bc3l2] records invoked location.
       #; [!mqtdy] not record invoked location when `Config.ok_location == false`.
       if Config.ok_location
-        location = caller(1).first  # caller() makes performance slower, but necessary.
+        location = caller_locations(1, 1).first
       else
         location = nil
       end
@@ -1190,7 +1190,7 @@ END
       #; [!agmx8] records invoked location.
       #; [!a9508] not record invoked location when `Config.ok_location == false`.
       if Config.ok_location
-        location = caller(1).first  # caller() makes performance slower, but necessary.
+        location = caller_locations(1, 1).first
       else
         location = nil
       end
@@ -1216,7 +1216,7 @@ END
       #; [!wxcsp] raises error when fixture not found.
       unless tuple
         exc = FixtureNotFoundError.new("`#{name.inspect}`: fixture not found.")
-        exc.set_backtrace([caller(1).first])
+        exc.set_backtrace([caller_locations(1, 1).first.to_s])
         raise exc
       end
       #; [!m4ava] calls fixture block and returns result of it.
@@ -1226,7 +1226,7 @@ END
     end
 
     def TODO()
-      location = caller(1).first   # ex: "foo_test.rb:123:in ...."
+      location = caller_locations(1, 1).first   # ex: "foo_test.rb:123:in ...."
       @__TODO = location
     end
 
@@ -1572,7 +1572,7 @@ END
           exc = TODO_EXCEPTION.new("#{exc.class} raised because not implemented yet")
         end
         location = context.__TODO
-        exc.set_backtrace([location])
+        exc.set_backtrace([location.to_s])
       end
       #; [!dihkr] calls 'at_end' blocks, even when exception raised.
       begin
@@ -1687,7 +1687,7 @@ END
       else
         #; [!nr79z] raises error when fixture not found.
         exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
-        exc.set_backtrace([location]) if location
+        exc.set_backtrace([location.to_s]) if location
         raise exc
       end
     end
@@ -1702,7 +1702,7 @@ END
       loop = s1.empty? ? s2 : "#{s1}->#{s2}"
       #location = $1 if location =~ /(.*:\d+)/
       exc = LoopedDependencyError.new("fixture dependency is looped: #{loop}")
-      exc.set_backtrace([location])
+      exc.set_backtrace([location.to_s])
       return exc
     end
 
@@ -2607,7 +2607,7 @@ END
       return HELP_MESSAGE % {command: command}
     end
 
-    HELP_MESSAGE = <<'END'
+    HELP_MESSAGE = <<'END'.gsub(/^#.*\n/, '')
 Usage: %{command} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
@@ -2616,7 +2616,7 @@ Usage: %{command} [<options>] [<file-or-directory>...]
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton
   -G, --generate         : generate test code skeleton from ruby file
-      --faster           : make 'ok{}' faster (for very large project)
+#      --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic

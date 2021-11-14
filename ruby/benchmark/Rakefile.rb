@@ -29,6 +29,7 @@ Oktest.scope do
 <%     for k in 1..nspecs %>
       spec "#<%= k %>: 1+1 should be 2" do
         ok {1+1} == 2
+        ok {1+1} == 2
       end
 <%     end %>
 
@@ -53,6 +54,7 @@ RSpec.describe "Example #<%= i %>" do
 
 <%     for k in 1..nspecs %>
     it "#<%= k %>: 1+1 should be 2" do
+      expect(1+1).to eq 2
       expect(1+1).to eq 2
     end
 <%     end %>
@@ -80,6 +82,7 @@ describe "Example #<%= i %>" do
 <%     for k in 1..nspecs %>
     it "#<%= k %>: 1+1 should be 2" do
       assert_equal 2, 1+1
+      assert_equal 2, 1+1
     end
 <%     end %>
 
@@ -106,6 +109,7 @@ class Example_<%= n %>_<%= i %>_TC < Test::Unit::TestCase
 <%     for k in 1..nspecs %>
     def test_<%= n %>_<%= i %>_<%= j %>_<%= k %>()
       #assert 1+1 == 2
+      assert_equal 2, 1+1
       assert_equal 2, 1+1
     end
 <%     end %>

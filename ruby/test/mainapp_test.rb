@@ -206,7 +206,6 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
       --color[={on|off}] : enable/disable output coloring forcedly
   -C, --create           : print test code skeleton
   -G, --generate         : generate test code skeleton from ruby file
-      --faster           : make 'ok{}' faster (for very large project)
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic

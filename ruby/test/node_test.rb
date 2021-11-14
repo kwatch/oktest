@@ -315,12 +315,24 @@ class ScopeFunctions_TC < TC
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
+  class DummyLocation # < Thread::Backtrace::Location
+    def initialize(string)
+      string =~ /([^:]+):(\d+)/
+      @path = $1
+      @lineno = $2
+    end
+    attr_reader :path, :lineno
+  end
+
   def with_dummy_location(location)
     $_dummy_location = location
     Oktest.module_eval do
       class << self
-        def caller(n)
+        def caller(n, len=nil)
           return [$_dummy_location]
+        end
+        def caller_locations(n, len=nil)
+          return [DummyLocation.new($_dummy_location)]
         end
       end
     end
@@ -329,6 +341,7 @@ class ScopeFunctions_TC < TC
     Oktest.module_eval do
       class << self
         remove_method :caller
+        remove_method :caller_locations
       end
     end
     $_dummy_location = nil
@@ -552,7 +565,7 @@ class Context_TC < TC
       sp1, sp2 = node.each_child.to_a
       assert_eq sp1.location, nil
       assert sp2.location != nil, "not nil"
-      assert sp2.location.start_with?("#{__FILE__}:#{lineno}:in")
+      assert sp2.location.to_s.start_with?("#{__FILE__}:#{lineno}:in")
     end
   end
 
@@ -568,7 +581,7 @@ class Context_TC < TC
       assert    node.fixtures.key?(:alice), "key not registerd"
       assert    node.fixtures[:alice][0].is_a?(Proc), "block expected"
       assert_eq node.fixtures[:alice][1], nil
-      assert    node.fixtures[:alice][2].start_with?("#{__FILE__}:#{lineno}:in ")
+      assert    node.fixtures[:alice][2].to_s.start_with?("#{__FILE__}:#{lineno}:in ")
     end
     it "[!y3ks3] retrieves block parameter names." do
       node = new_node_with() do

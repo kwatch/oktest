@@ -2,6 +2,13 @@ CHANGES
 =======
 
 
+Release 1.2.0
+-------------
+
+* [enhance] performance of `ok{}` is improved.
+* [change] command-line option `--faster` is removed from help message. `--faster` is still available, but not recommended because the performance without `--faster` is improved very much.
+
+
 
 Release 1.1.1
 -------------
