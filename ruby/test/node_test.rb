@@ -319,7 +319,7 @@ class ScopeFunctions_TC < TC
     $_dummy_location = location
     Oktest.module_eval do
       class << self
-        def caller(n)
+        def caller(n, len=nil)
           return [$_dummy_location]
         end
       end
