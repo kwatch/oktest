@@ -529,6 +529,7 @@ class RunnerFunctions_TC < TC
     str = str.gsub(/<M>(.*?)<\/M>/) { Oktest::Color.magenta($1) }
     str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
     str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
+    str = str.gsub(/<E>(.*?)<\/E>/) { Oktest::Color.red_b($1) }
     return str
   end
 

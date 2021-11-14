@@ -2366,7 +2366,7 @@ END
     def spec   s; Config.color_enabled ? normal(s) : s; end
     def pass   s; Config.color_enabled ? cyan(s)   : s; end
     def fail   s; Config.color_enabled ? red(s)    : s; end
-    def error  s; Config.color_enabled ? red(s)    : s; end
+    def error  s; Config.color_enabled ? red_b(s)  : s; end  # bold
     def skip   s; Config.color_enabled ? yellow(s) : s; end
     def todo   s; Config.color_enabled ? yellow(s) : s; end
     def reason s; Config.color_enabled ? yellow(s) : s; end

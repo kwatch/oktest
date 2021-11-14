@@ -81,6 +81,7 @@ END
     str = str.gsub(/<M>(.*?)<\/M>/) { Oktest::Color.magenta($1) }
     str = str.gsub(/<Y>(.*?)<\/Y>/) { Oktest::Color.yellow($1) }
     str = str.gsub(/<b>(.*?)<\/b>/) { Oktest::Color.bold($1) }
+    str = str.gsub(/<E>(.*?)<\/E>/) { Oktest::Color.red_b($1) }
     return str
   end
 
@@ -167,7 +168,7 @@ END
 
     it "[!18qpe] runs test scripts." do
       expected = <<'END'
-## total:8 (<C>pass:4</C>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<C>pass:4</C>, <R>fail:1</R>, <E>error:1</E>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       ret, sout, serr = run(@testfile)
       assert_eq ret, 2
@@ -182,7 +183,7 @@ END
 
     it "[!hiu5b] finds test scripts in directory and runs them." do
       expected = <<'END'
-## total:8 (<C>pass:4</C>, <R>fail:1</R>, <R>error:1</R>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
+## total:8 (<C>pass:4</C>, <R>fail:1</R>, <E>error:1</E>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       dir = "_tmpdir.d"
       dirs = [dir, "#{dir}/d1", "#{dir}/d1/d2"]
@@ -259,7 +260,7 @@ END
     - [<C>pass</C>] 1-1 should be 0
   * <b>Child2</b>
     - [<R>Fail</R>] 1*1 should be 1
-    - [<R>ERROR</R>] 1/1 should be 1
+    - [<E>ERROR</E>] 1/1 should be 1
 ----------------------------------------------------------------------
 END
       #
@@ -279,7 +280,7 @@ END
 ## _tmp_test.rb
 * <b>Parent</b>: <C>.</C><C>.</C>
   * <b>Child1</b>: <C>.</C><C>.</C>
-  * <b>Child2</b>: <R>f</R><R>E</R>
+  * <b>Child2</b>: <R>f</R><E>E</E>
 ----------------------------------------------------------------------
 END
       #
@@ -296,7 +297,7 @@ END
 
     it "[!ef5v7] '-s compact' or '-sc' option prints test results in compact mode." do
       expected = <<END
-#{@testfile}: <C>.</C><C>.</C><R>f</R><R>E</R><Y>s</Y><Y>t</Y><C>.</C><C>.</C>
+#{@testfile}: <C>.</C><C>.</C><R>f</R><E>E</E><Y>s</Y><Y>t</Y><C>.</C><C>.</C>
 ----------------------------------------------------------------------
 END
       #
@@ -313,7 +314,7 @@ END
 
     it "[!244te] '-s plain' or '-sp' option prints test results in plain mode." do
       expected = <<END
-<C>.</C><C>.</C><R>f</R><R>E</R><Y>s</Y><Y>t</Y><C>.</C><C>.</C>
+<C>.</C><C>.</C><R>f</R><E>E</E><Y>s</Y><Y>t</Y><C>.</C><C>.</C>
 ----------------------------------------------------------------------
 END
       #
@@ -330,7 +331,7 @@ END
 
     it "[!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode." do
       expected = <<END
-<R>f</R><R>E</R><Y>s</Y><Y>t</Y>
+<R>f</R><E>E</E><Y>s</Y><Y>t</Y>
 ----------------------------------------------------------------------
 END
       #
