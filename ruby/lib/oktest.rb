@@ -2342,7 +2342,7 @@ END
     module_function
 
     def normal  s;  return s; end
-    def bold    s;  return "\e[0;1m#{s}\e[22m"; end
+    def bold    s;  return "\e[0;1m#{s}\e[0m"; end
     def black   s;  return "\e[1;30m#{s}\e[0m"; end
     def red     s;  return "\e[1;31m#{s}\e[0m"; end
     def green   s;  return "\e[1;32m#{s}\e[0m"; end
