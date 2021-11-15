@@ -2243,17 +2243,22 @@ END
     end
 
     def partial_regexp!(pattern, begin_='\A', end_='\z', mark="{== ==}")
-      #; [!ostkw] raises error if mark has no space or has more than two spaces.
-      pair = mark.split()
-      pair.length == 2  or
-        raise ArgumentError.new("#{mark.inspect}: mark should contain only one space (ex: `{== ==}`).")
-      open  = Regexp.escape(pair[0])
-      close = Regexp.escape(pair[1])
+      mark_rexp = PARTIAL_REGEXP_CACHE[mark]
+      if mark_rexp.nil?
+        #; [!ostkw] raises error if mark has no space or has more than two spaces.
+        pair = mark.split()
+        pair.length == 2  or
+          raise ArgumentError.new("#{mark.inspect}: mark should contain only one space (ex: `{== ==}`).")
+        open  = Regexp.escape(pair[0])
+        close = Regexp.escape(pair[1])
+        mark_rexp = Regexp.compile("#{open}(.*?)#{close}")
+        PARTIAL_REGEXP_CACHE[mark] = mark_rexp
+      end
       #; [!wn524] returns PartialRegexp object which inspect string is regexp literal style.
       pos = 0
       buf = []
       buf << begin_ if begin_
-      pattern.scan(Regexp.compile("#{open}(.*?)#{close}")) do
+      pattern.scan(mark_rexp) do
         m = Regexp.last_match
         text = pattern[pos, m.begin(0) - pos]
         buf << Regexp.escape(text) << $1.strip()
@@ -2264,6 +2269,8 @@ END
       buf << end_ if end_
       return PartialRegexp.compile(buf.join())
     end
+
+    PARTIAL_REGEXP_CACHE = {}   # :nodoc:
 
   end
 
