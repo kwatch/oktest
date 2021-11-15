@@ -13,7 +13,7 @@ class UtilHelper_TC < TC
 
   describe Oktest::UtilHelper do
 
-    describe '#partial_regexp()' do
+    describe '#partial_regexp!()' do
       pat = <<'END'
 * [Date]    {== \d\d\d\d-\d\d-\d\d ==}
 * [Secret]  {== [0-9a-f]{12} ==}
@@ -22,9 +22,9 @@ END
         r1 = nil; r2 = nil
         Oktest.scope do
           topic "topic" do
-            r1 = partial_regexp(pat, '\A', '\z')
+            r1 = partial_regexp!(pat, '\A', '\z')
             spec "spec" do
-              r2 = partial_regexp(pat, "", "")
+              r2 = partial_regexp!(pat, "", "")
             end
           end
         end
@@ -46,7 +46,7 @@ END
       end
     end
 
-    describe '#partial_regexp!()' do
+    describe '#partial_regexp()' do
       it "[!wo4hp] is available in both topic and spec blocks." do
       pat = <<'END'
 * [Date]    {== \d\d\d\d-\d\d-\d\d ==}
@@ -55,9 +55,9 @@ END
         r1 = nil; r2 = nil
         Oktest.scope do
           topic "topic" do
-            r1 = partial_regexp!(pat, '\A', '\z')
+            r1 = partial_regexp(pat, '\A', '\z')
             spec "spec" do
-              r2 = partial_regexp!(pat, "", "")
+              r2 = partial_regexp(pat, "", "")
             end
           end
         end

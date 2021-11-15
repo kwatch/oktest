@@ -2244,15 +2244,15 @@ END
       end
     end
 
-    def partial_regexp(pattern, begin_='\A', end_='\z', mark="{== ==}")
+    def partial_regexp!(pattern, begin_='\A', end_='\z', mark="{== ==}")
       #; [!peyu4] returns PartialRegexp object which inspect string is function call styel.
-      regexp = partial_regexp!(pattern, begin_, end_, mark)
+      regexp = partial_regexp(pattern, begin_, end_, mark)
       regexp.pattern_string = pattern
       regexp.begin = begin_; regexp.end = end_; regexp.mark = mark
       return regexp
     end
 
-    def partial_regexp!(pattern, begin_='\A', end_='\z', mark="{== ==}")
+    def partial_regexp(pattern, begin_='\A', end_='\z', mark="{== ==}")
       mark_rexp = PARTIAL_REGEXP_CACHE[mark]
       if mark_rexp.nil?
         #; [!ostkw] raises error if mark has no space or has more than two spaces.
