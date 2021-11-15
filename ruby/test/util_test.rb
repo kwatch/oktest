@@ -253,6 +253,67 @@ END
       end
     end
 
+    describe '.partial_regexp()' do
+      it "[!peyu4] returns PartialRegexp object which inspect string is function call styel." do
+        pattern_str = <<'HEREDOC'
+* [Date]    {== \d\d\d\d-\d\d-\d\d ==}
+* [Secret]  {== [0-9a-f]{8} ==}
+HEREDOC
+        prexp = Oktest::Util.partial_regexp(pattern_str)
+        assert_eq prexp.class, Oktest::Util::PartialRegexp
+        assert_eq prexp.pattern_string, pattern_str
+      end
+    end
+
+    describe '.partial_regexp!()' do
+      it "[!ostkw] raises error if mark has no space or has more than two spaces." do
+        assert_exc(ArgumentError, "\"{====}\": mark should contain only one space (ex: `{== ==}`).") do
+          Oktest::Util.partial_regexp!("xxx", '\A', '\z', "{====}")
+        end
+        assert_exc(ArgumentError, "\"{= == =}\": mark should contain only one space (ex: `{== ==}`).") do
+          Oktest::Util.partial_regexp!("xxx", '', '', "{= == =}")
+        end
+      end
+      it "[!wn524] returns PartialRegexp object which inspect string is regexp literal style." do
+        pattern_str = <<'HEREDOC'
+* [Date]    {== \d\d\d\d-\d\d-\d\d ==}
+* [Secret]  {== [0-9a-f]{8} ==}
+HEREDOC
+        prexp = Oktest::Util.partial_regexp!(pattern_str)
+        assert_eq prexp.class, Oktest::Util::PartialRegexp
+        assert_eq prexp.pattern_string, nil
+      end
+    end
+
+  end
+
+  describe Oktest::Util::PartialRegexp do
+    describe '#inspect()' do
+      it "[!uyh31] returns function call style string if @pattern_string is set." do
+        prexp = Oktest::Util.partial_regexp(<<'HEREHERE')
+* [Date]    {== \d\d\d\d-\d\d-\d\d ==}
+* [Secret]  {== [0-9a-f]{8} ==}
+HEREHERE
+        assert_eq prexp.inspect, <<'HEREHERE'
+partial_regexp(<<PREXP, '\A', '\z')
+* [Date]    {== \d\d\d\d-\d\d-\d\d ==}
+* [Secret]  {== [0-9a-f]{8} ==}
+PREXP
+HEREHERE
+      end
+      it "[!ts9v4] returns regexp literal style string if @pattern_string is not set." do
+        prexp = Oktest::Util.partial_regexp!(<<'HEREHERE')
+* [Date]    {== \d\d\d\d-\d\d-\d\d ==}
+* [Secret]  {== [0-9a-f]{8} ==}
+HEREHERE
+        assert_eq prexp.inspect, <<'HEREHERE'.chomp
+/\A
+\*\ \[Date\]\ \ \ \ \d\d\d\d-\d\d-\d\d\n
+\*\ \[Secret\]\ \ [0-9a-f]{8}\n
+\z/x
+HEREHERE
+      end
+    end
   end
 
 end

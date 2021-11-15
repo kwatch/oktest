@@ -795,6 +795,7 @@ END
 
 
   module UtilHelper
+
   end
 
 
@@ -2205,6 +2206,63 @@ END
         alias _unified_diff unified_diff
         alias unified_diff diff_unified
       end
+    end
+
+    class PartialRegexp < Regexp
+      attr_accessor :pattern_string, :begin, :end, :mark
+      def inspect()
+        #; [!uyh31] returns function call style string if @pattern_string is set.
+        if @pattern_string
+          c = @pattern_string.end_with?("\n") ? "" : ".chomp"
+          p = @pattern_string.chomp
+          b = @begin == '\A' ? "'\\A'" : @begin.inspect
+          e = @end   == '\z' ? "'\\z'" : @end.inspect
+          m = mark == "{== ==}" ? "" : ", #{mark.inspect}"
+          return "partial_regexp(<<PREXP#{c}, #{b}, #{e}#{m})\n#{p}\nPREXP\n"
+        #; [!ts9v4] returns regexp literal style string if @pattern_string is not set.
+        else
+          s = super
+          s = s.gsub(/([^\\](?:\\\\)*)((?:\\n)+)/) {
+            $1 + ("\\n\n" * ($2.length / 2))
+          }
+          if s =~ /\n/
+            s = s.sub(/\A\/(\\A)?/, "/\\1\n")
+            s = s + "x"   # `/.../x` means multiline regexp
+          end
+          return s
+        end
+      end
+    end
+
+    def partial_regexp(pattern, begin_='\A', end_='\z', mark="{== ==}")
+      #; [!peyu4] returns PartialRegexp object which inspect string is function call styel.
+      regexp = partial_regexp!(pattern, begin_, end_, mark)
+      regexp.pattern_string = pattern
+      regexp.begin = begin_; regexp.end = end_; regexp.mark = mark
+      return regexp
+    end
+
+    def partial_regexp!(pattern, begin_='\A', end_='\z', mark="{== ==}")
+      #; [!ostkw] raises error if mark has no space or has more than two spaces.
+      pair = mark.split()
+      pair.length == 2  or
+        raise ArgumentError.new("#{mark.inspect}: mark should contain only one space (ex: `{== ==}`).")
+      open  = Regexp.escape(pair[0])
+      close = Regexp.escape(pair[1])
+      #; [!wn524] returns PartialRegexp object which inspect string is regexp literal style.
+      pos = 0
+      buf = []
+      buf << begin_ if begin_
+      pattern.scan(Regexp.compile("#{open}(.*?)#{close}")) do
+        m = Regexp.last_match
+        text = pattern[pos, m.begin(0) - pos]
+        buf << Regexp.escape(text) << $1.strip()
+        pos = m.end(0)
+      end
+      rest = pos == 0 ? pattern : pattern[pos..-1]
+      buf << Regexp.escape(rest) unless rest.empty?
+      buf << end_ if end_
+      return PartialRegexp.compile(buf.join())
     end
 
   end
