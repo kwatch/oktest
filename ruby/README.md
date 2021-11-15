@@ -1611,6 +1611,124 @@ end
 ```
 
 
+### `partial_regexp()`, `partial_regexp!()`
+
+`partial_regexp()` can embed regexp pattern into string, and compile it into Regexp object. This is very useful to validate multiline string with regexp.
+
+Assume that you are testing the following function `f1()`. It generates multiline string containing date and random string.
+
+```ruby
+def f1()
+  today  = Date.today.to_s                  # ex: '2021-12-31'
+  secret = Random.bytes(8).unpack('H*')[0]  # ex: "cd0b260ac728eda5"
+  return <<END
+* [config.date]   #{today}
+* [config.secret] #{secret}
+END
+end
+```ruby
+
+To test `f1()`, you may write the following test code.
+As you can see, expected regexp literal is complicated.
+
+```ruby
+  topic 'f1()' do
+    spec "generates multiline string." do
+      expected = /\A\* \[config\.date\]   \d\d\d\d-\d\d-\d\d\n\* \[config\.secret\] [0-9a-f]+\n/
+      ok {f1()} =~ expected
+    end
+  end
+```
+
+[`x` option](https://ruby-doc.org/core-2.7.0/Regexp.html#class-Regexp-label-Free-Spacing+Mode+and+Comments) of regexp (such as `/.../x`) allows you to write regexp literal in multiline format.
+But you have to escape metachars (`*`, `.`, `[]`, and white space).
+
+```ruby
+  topic 'f1()' do
+    spec "generates multiline string." do
+      expected = /\A
+\*\ \[config\.date\]\ \ \ \d\d\d\d-\d\d-\d\d\n
+\*\ \[config\.secret\]\ [0-9a-f]+\n
+\z/x      # !!!!!
+      ok {f1()} =~ expected
+    end
+  end
+```
+
+In such case, `partial_regexp()` is very useful. It compiles string into Regexp object.
+Using `partial_regexp()`, you can write expected regexp very easily.
+
+```ruby
+  topic 'f1()' do
+    spec "generates multiline string." do
+      # - Regexp can be in `{== ==}`.
+      # - Other text part is escaped by `Regexp.escape()`.
+      expected = partial_regexp <<'END'      # !!!!!
+* [config.date]   {== \d\d\d\d-\d\d-\d\d ==}
+* [config.secret] {== [0-9a-f]+ ==}
+END
+      ok {f1()} =~ expected
+      ## above is equivarent to:
+      #expected = /\A
+      #\*\ \[config\.date\]\ \ \ \d\d\d\d-\d\d-\d\d\n
+      #\*\ \[config\.secret\]\ [0-9a-f]+\n
+      #\z/x      # !!!!!
+      #ok {f1()} =~ expected
+    end
+  end
+```
+
+`partial_regexp()` takes 4 arguments.
+
+```ruby
+def partial_regexp(pattern, begin_='\A', end_='\z', mark='{== ==}')
+```
+
+`partial_regexp()` adds `\A` and `\z` automatically.
+If you want not to add them, pass empty string as 2nd and 3rd argument, like this:
+
+```ruby
+partial_regexp <<-'END', ni, nil    # !!!!!
+...
+END
+```
+
+If you want to change embed mark, specify 4th argument, like this:
+
+```ruby
+partial_regexp <<-'END', '\A', '\z', '%%(.*?)%%'    # !!!!!
+* [config.date]   %% \d\d\d\d-\d\d-\d\d %%
+* [config.secret] %% [0-9a-f]+ %%
+END
+```
+
+Oktest.rb provides `partial_regexp!()`, too.
+Difference between `partial_regexp()` and `partial_regexp!()` is the result of `#inspect()`.
+This is imortant only when assertion failed and error message reported.
+You can use whichever you like.
+
+```ruby
+r1 = partial_regexp <<-'END'
+* [config.date]   {== \d\d\d\d-\d\d-\d\d ==}
+* [config.secret] {== [0-9a-f]+ ==}
+END
+p r1
+   #=> /\A
+   #   \*\ \[config\.date\]\ \ \ \d\d\d\d-\d\d-\d\d\n
+   #   \*\ \[config\.secret\]\ [0-9a-f]+\n
+   #   \z/x
+
+r2 = partial_regexp! <<-'END'                   # !!!!!
+* [config.date]   {== \d\d\d\d-\d\d-\d\d ==}
+* [config.secret] {== [0-9a-f]+ ==}
+END
+p r2
+   #=> partial_regexp(<<PREXP, '\A', '\z')
+   #   * [config.date]   {== \d\d\d\d-\d\d-\d\d ==}
+   #   * [config.secret] {== [0-9a-f]+ ==}
+   #   PREXP
+```
+
 
 ## JSON Matcher
 
