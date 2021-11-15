@@ -796,6 +796,16 @@ END
 
   module UtilHelper
 
+    def partial_regexp(pattern, begin_='\A', end_='\z', mark="{== ==}")
+      #; [!9drtn] is available in both topic and spec blocks.
+      return Util.partial_regexp(pattern, begin_, end_, mark)
+    end
+
+    def partial_regexp!(pattern, begin_='\A', end_='\z', mark="{== ==}")
+      #; [!wo4hp] is available in both topic and spec blocks.
+      return Util.partial_regexp!(pattern, begin_, end_, mark)
+    end
+
   end
 
 
