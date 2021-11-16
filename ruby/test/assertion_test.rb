@@ -15,6 +15,7 @@ class AssertionObject_TC < TC
 
   def FAIL!(errmsg, &b)
     failmsg = "expected to be failed, but succeeded unexpectedly."
+    errmsg = plain2colored(errmsg) if errmsg.is_a?(String)
     return ERROR!(Oktest::FAIL_EXCEPTION, errmsg, failmsg, &b)
   end
 
@@ -102,15 +103,15 @@ class AssertionObject_TC < TC
     end
     it "[!1iun4] raises assertion error when failed." do
       errmsg = "$<actual> == $<expected>: failed.\n"\
-               "    $<actual>:   2\n"\
-               "    $<expected>: 3"
+               "    <M>$<actual></M>:   2\n"\
+               "    <M>$<expected></M>: 3"
       FAIL!(errmsg) { ok {1+1} == 3 }
     end
     it "[!eyslp] is avaialbe with NOT." do
       PASS! { ok {1+1}.NOT == 3 }
       errmsg = "$<actual> != $<expected>: failed.\n"\
-               "    $<actual>:   2\n"\
-               "    $<expected>: 2"
+               "    <M>$<actual></M>:   2\n"\
+               "    <M>$<expected></M>: 2"
       FAIL!(errmsg) { ok {1+1}.NOT == 2 }
     end
     it "[!3xnqv] shows context diff when both actual and expected are text." do
@@ -139,16 +140,16 @@ END
     it "[!90tfb] raises assertion error when failed." do
       #errmsg = "<2> expected to be != to\n<2>."
       errmsg = "$<actual> != $<expected>: failed.\n"\
-               "    $<actual>:   2\n"\
-               "    $<expected>: 2"
+               "    <M>$<actual></M>:   2\n"\
+               "    <M>$<expected></M>: 2"
       FAIL!(errmsg) { ok {1+1} != 2 }
     end
     it "[!l6afg] is avaialbe with NOT." do
       PASS! { ok {1+1}.NOT != 2 }
       #errmsg = "<3> expected but was\n<2>."
       errmsg = "$<actual> == $<expected>: failed.\n"\
-               "    $<actual>:   2\n"\
-               "    $<expected>: 3"
+               "    <M>$<actual></M>:   2\n"\
+               "    <M>$<expected></M>: 3"
       FAIL!(errmsg) { ok {1+1}.NOT != 3 }
     end
   end #if RUBY_VERSION >= "1.9"
@@ -159,15 +160,15 @@ END
     end
     it "[!42f6a] raises assertion error when failed." do
       errmsg = "$<actual> === $<expected>: failed.\n"\
-               "    $<actual>:   Integer\n"\
-               "    $<expected>: \"str\""
+               "    <M>$<actual></M>:   Integer\n"\
+               "    <M>$<expected></M>: \"str\""
       FAIL!(errmsg) { ok {Integer} === 'str' }
     end
     it "[!vhvyu] is avaialbe with NOT." do
       PASS! { ok {Integer}.NOT === 'str' }
       errmsg = "!($<actual> === $<expected>): failed.\n"\
-               "    $<actual>:   String\n"\
-               "    $<expected>: \"str\""
+               "    <M>$<actual></M>:   String\n"\
+               "    <M>$<expected></M>: \"str\""
       FAIL!(errmsg) { ok {String}.NOT === 'str' }
     end
     it "[!mjh4d] raises error when combination of 'not_ok()' and matcher object." do
@@ -274,8 +275,8 @@ END
     it "[!xkldu] raises assertion error when failed." do
       #errmsg = 'Expected /^\\d+$/ to match "SOS".'
       errmsg = "$<actual> =~ $<expected>: failed.\n"\
-               "    $<expected>: /^\\d+$/\n"\
-               "    $<actual>:   <<'END'\n"\
+               "    <M>$<expected></M>: /^\\d+$/\n"\
+               "    <M>$<actual></M>:   <<'END'\n"\
                "SOS\n"\
                "END\n"
       FAIL!(errmsg) { ok {"SOS\n"} =~ /^\d+$/ }
@@ -284,8 +285,8 @@ END
       PASS! { ok {'SOS'}.NOT =~ /^\d+$/ }
       #errmsg = "</\\w+/> expected to not match\n<\"SOS\">."
       errmsg = "$<actual> !~ $<expected>: failed.\n"\
-               "    $<expected>: /\\w+/\n"\
-               "    $<actual>:   \"SOS\"\n"
+               "    <M>$<expected></M>: /\\w+/\n"\
+               "    <M>$<actual></M>:   \"SOS\"\n"
       FAIL!(errmsg) { ok {'SOS'}.NOT =~ /\w+/ }
     end if false
   end
@@ -297,16 +298,16 @@ END
     it "[!58udu] raises assertion error when failed." do
       #errmsg = "</^\\w+$/> expected to not match\n<\"SOS\">."
       errmsg = "$<actual> !~ $<expected>: failed.\n"\
-               "    $<expected>: /^\\w+$/\n"\
-               "    $<actual>:   \"SOS\"\n"
+               "    <M>$<expected></M>: /^\\w+$/\n"\
+               "    <M>$<actual></M>:   \"SOS\"\n"
       FAIL!(errmsg) { ok {'SOS'} !~ /^\w+$/ }
     end
     it "[!iuf5j] is avaialbe with NOT." do
       PASS! { ok {'SOS'}.NOT !~ /^\w+$/ }
       #errmsg = "Expected /\\d+/ to match \"SOS\"."
       errmsg = "$<actual> =~ $<expected>: failed.\n"\
-               "    $<expected>: /\\d+/\n"\
-               "    $<actual>:   <<'END'\nSOS\nEND\n"
+               "    <M>$<expected></M>: /\\d+/\n"\
+               "    <M>$<actual></M>:   <<'END'\nSOS\nEND\n"
       FAIL!(errmsg) { ok {"SOS\n"}.NOT !~ /\d+/ }
     end
   end #if RUBY_VERSION >= "1.9"
@@ -317,17 +318,17 @@ END
     end
     it "[!f3zui] raises assertion error when failed." do
       errmsg = "($<actual> - $<expected>).abs < #{0.1}: failed.\n"\
-               "    $<actual>:   1.375\n"\
-               "    $<expected>: 1.5\n"\
-               "    ($<actual> - $<expected>).abs: #{0.125}"
+               "    <M>$<actual></M>:   1.375\n"\
+               "    <M>$<expected></M>: 1.5\n"\
+               "    <M>($<actual> - $<expected>).abs</M>: #{0.125}"
       FAIL!(errmsg) { ok {1.375}.in_delta?(1.5, 0.1) }
     end
     it "[!t7liw] is avaialbe with NOT." do
       PASS! { ok {1.375}.NOT.in_delta?(1.5, 0.1) }
       errmsg = "($<actual> - $<expected>).abs < #{0.2} == false: failed.\n"\
-               "    $<actual>:   1.375\n"\
-               "    $<expected>: 1.5\n"\
-               "    ($<actual> - $<expected>).abs: #{0.125}"
+               "    <M>$<actual></M>:   1.375\n"\
+               "    <M>$<expected></M>: 1.5\n"\
+               "    <M>($<actual> - $<expected>).abs</M>: #{0.125}"
       FAIL!(errmsg) { ok {1.375}.NOT.in_delta?(1.5, 0.2) }
     end
   end
@@ -338,15 +339,15 @@ END
     end
     it "[!ozbf4] raises assertion error when failed." do
       errmsg = "$<actual>.equal?($<expected>): failed.\n"\
-               "    $<actual>:   \"SOS\"\n"\
-               "    $<expected>: \"SOS\"\n"
+               "    <M>$<actual></M>:   \"SOS\"\n"\
+               "    <M>$<expected></M>: \"SOS\"\n"
       FAIL!(errmsg) { ok {'SOS'}.same?('SOS') }
     end
     it "[!dwtig] is avaialbe with NOT." do
       PASS! { ok {'SOS'}.NOT.same? 'SOS' }
       errmsg = "$<actual>.equal?($<expected>) == false: failed.\n"\
-               "    $<actual>:   :SOS\n"\
-               "    $<expected>: :SOS\n"
+               "    <M>$<actual></M>:   :SOS\n"\
+               "    <M>$<expected></M>: :SOS\n"
       FAIL!(errmsg) { ok {:SOS}.NOT.same?(:SOS) }
     end
   end
@@ -373,22 +374,22 @@ describe '#method_missing()' do
       assert exc.backtrace[0].start_with?(__FILE__), "backtrace not skipped"
     end
     it "[!cun59] fails when boolean method failed returned false." do
-      errmsg = "$<actual>.empty?: failed.\n    $<actual>:   \"SOS\""
+      errmsg = "$<actual>.empty?: failed.\n    <M>$<actual></M>:   \"SOS\""
       FAIL!(errmsg) { ok {"SOS"}.empty? }
-      errmsg = "$<actual>.nil?: failed.\n    $<actual>:   \"\""
+      errmsg = "$<actual>.nil?: failed.\n    <M>$<actual></M>:   \"\""
       FAIL!(errmsg) { ok {""}.nil? }
-      errmsg = "$<actual>.is_a?(Integer): failed.\n    $<actual>:   3.14"
+      errmsg = "$<actual>.is_a?(Integer): failed.\n    <M>$<actual></M>:   3.14"
       FAIL!(errmsg) { ok {3.14}.is_a?(Integer) }
     end
     it "[!4objh] is available with NOT." do
       ok {"SOS"}.NOT.empty?
       ok {"SOS"}.NOT.nil?
       ok {"SOS"}.NOT.is_a?(Integer)
-      errmsg = "$<actual>.empty? == false: failed.\n    $<actual>:   \"\""
+      errmsg = "$<actual>.empty? == false: failed.\n    <M>$<actual></M>:   \"\""
       FAIL!(errmsg) { ok {""}.NOT.empty? }
-      errmsg = "$<actual>.nil? == false: failed.\n    $<actual>:   nil"
+      errmsg = "$<actual>.nil? == false: failed.\n    <M>$<actual></M>:   nil"
       FAIL!(errmsg) { ok {nil}.NOT.nil? }
-      errmsg = "$<actual>.is_a?(Integer) == false: failed.\n    $<actual>:   1"
+      errmsg = "$<actual>.is_a?(Integer) == false: failed.\n    <M>$<actual></M>:   1"
       FAIL!(errmsg) { ok {1}.NOT.is_a?(Integer) }
     end
     it "[!sljta] raises TypeError when boolean method returned non-boolean value." do
@@ -590,15 +591,15 @@ describe '#method_missing()' do
     end
     it "[!9rm8g] raises assertion error when failed." do
       errmsg = "$<expected>.include?($<actual>): failed.\n"\
-               "    $<actual>:   3\n"\
-               "    $<expected>: 1..2"
+               "    <M>$<actual></M>:   3\n"\
+               "    <M>$<expected></M>: 1..2"
       FAIL!(errmsg) { ok {3}.in?(1..2) }
     end
     it "[!singl] is available with NOT." do
       PASS! { ok {3}.NOT.in?(1..2) }
       errmsg = "$<expected>.include?($<actual>) == false: failed.\n"\
-               "    $<actual>:   3\n"\
-               "    $<expected>: 1..5"
+               "    <M>$<actual></M>:   3\n"\
+               "    <M>$<expected></M>: 1..5"
       FAIL!(errmsg) { ok {3}.NOT.in?(1..5) }
     end
   end
@@ -609,15 +610,15 @@ describe '#method_missing()' do
     end
     it "[!79tgn] raises assertion error when failed." do
       errmsg = "$<actual>.size == $<expected>: failed.\n"\
-               "    $<actual>.size: 3\n"\
-               "    $<expected>: 2"
+               "    <M>$<actual>.size</M>: 3\n"\
+               "    <M>$<expected></M>: 2"
       FAIL!(errmsg) { ok {"SOS"}.attr(:size, 2) }
     end
     it "[!cqnu3] is available with NOT." do
       PASS! { ok {"SOS"}.NOT.attr(:length, 2) }
       errmsg = "$<actual>.size != $<expected>: failed.\n"\
-               "    $<actual>.size: 3\n"\
-               "    $<expected>: 3"
+               "    <M>$<actual>.size</M>: 3\n"\
+               "    <M>$<expected></M>: 3"
       FAIL!(errmsg) { ok {"SOS"}.NOT.attr(:size, 3) }
     end
   end
@@ -628,15 +629,15 @@ describe '#method_missing()' do
     end
     it "[!7ta0s] raises assertion error when failed." do
       errmsg = "$<actual>.size == $<expected>: failed.\n"\
-               "    $<actual>.size: 3\n"\
-               "    $<expected>: 2"
+               "    <M>$<actual>.size</M>: 3\n"\
+               "    <M>$<expected></M>: 2"
       FAIL!(errmsg) { ok {"SOS"}.attrs(:size=>2) }
     end
     it "[!s0pnk] is available with NOT." do
       PASS! { ok {"SOS"}.NOT.attrs(:length=>2) }
       errmsg = "$<actual>.size != $<expected>: failed.\n"\
-               "    $<actual>.size: 3\n"\
-               "    $<expected>: 3"
+               "    <M>$<actual>.size</M>: 3\n"\
+               "    <M>$<expected></M>: 3"
       FAIL!(errmsg) { ok {"SOS"}.NOT.attrs(:size=>3) }
     end
   end
@@ -649,16 +650,16 @@ describe '#method_missing()' do
     it "[!vtrlz] raises assertion error when failed." do
       d = {'a'=>1}
       errmsg = "$<actual>[\"a\"] == $<expected>: failed.\n"\
-               "    $<actual>[\"a\"]: 1\n"\
-               "    $<expected>: \"1\""
+               "    <M>$<actual>[\"a\"]</M>: 1\n"\
+               "    <M>$<expected></M>: \"1\""
       FAIL!(errmsg) { ok {d}.keyval('a', '1') }
     end
     it "[!mmpwz] is available with NOT." do
       d = {'a'=>1}
       PASS! { ok {d}.NOT.keyval('a', '1') }
       errmsg = "$<actual>[\"a\"] != $<expected>: failed.\n"\
-               "    $<actual>[\"a\"]: 1\n"\
-               "    $<expected>: 1"
+               "    <M>$<actual>[\"a\"]</M>: 1\n"\
+               "    <M>$<expected></M>: 1"
       FAIL!(errmsg) { ok {d}.NOT.keyval('a', 1) }
     end
   end
@@ -671,16 +672,16 @@ describe '#method_missing()' do
     it "[!fyvmn] raises assertion error when failed." do
       d = {'a'=>1, 'b'=>2}
       errmsg = "$<actual>[\"a\"] == $<expected>: failed.\n"\
-               "    $<actual>[\"a\"]: 1\n"\
-               "    $<expected>: \"1\""
+               "    <M>$<actual>[\"a\"]</M>: 1\n"\
+               "    <M>$<expected></M>: \"1\""
       FAIL!(errmsg) { ok {d}.keyvals('a'=>'1', 'b'=>2) }
     end
     it "[!js2j2] is available with NOT." do
       d = {'a'=>1, 'b'=>2}
       PASS! { ok {d}.NOT.keyvals('a'=>'1') }
       errmsg = "$<actual>[\"a\"] != $<expected>: failed.\n"\
-               "    $<actual>[\"a\"]: 1\n"\
-               "    $<expected>: 1"
+               "    <M>$<actual>[\"a\"]</M>: 1\n"\
+               "    <M>$<expected></M>: 1"
       FAIL!(errmsg) { ok {d}.NOT.keyvals('a'=>1) }
     end
   end
@@ -691,15 +692,15 @@ describe '#method_missing()' do
     end
     it "[!1y787] raises assertion error when failed." do
       errmsg = "$<actual>.length == 5: failed.\n"\
-               "    $<actual>.length: 3\n"\
-               "    $<actual>:   \"SOS\""
+               "    <M>$<actual>.length</M>: 3\n"\
+               "    <M>$<actual></M>:   \"SOS\""
       FAIL!(errmsg) { ok {"SOS"}.length(5) }
     end
     it "[!kryx2] is available with NOT." do
       PASS! { ok {"SOS"}.NOT.length(5) }
       errmsg = "$<actual>.length != 3: failed.\n"\
-               "    $<actual>.length: 3\n"\
-               "    $<actual>:   \"SOS\""
+               "    <M>$<actual>.length</M>: 3\n"\
+               "    <M>$<actual></M>:   \"SOS\""
       FAIL!(errmsg) { ok {"SOS"}.NOT.length(3) }
     end
   end
@@ -710,13 +711,13 @@ describe '#method_missing()' do
     end
     it "[!3d94h] raises assertion error when failed." do
       errmsg = "!!$<actual> == true: failed.\n"\
-               "    $<actual>:   nil"
+               "    <M>$<actual></M>:   nil"
       FAIL!(errmsg) { ok {nil}.truthy? }
     end
     it "[!8rmgp] is available with NOT." do
       PASS! { ok {nil}.NOT.truthy? }
       errmsg = "!!$<actual> != true: failed.\n"\
-               "    $<actual>:   0"
+               "    <M>$<actual></M>:   0"
       FAIL!(errmsg) { ok {0}.NOT.truthy? }
     end
   end
@@ -727,13 +728,13 @@ describe '#method_missing()' do
     end
     it "[!7o48g] raises assertion error when failed." do
       errmsg = "!!$<actual> == false: failed.\n"\
-               "    $<actual>:   0"
+               "    <M>$<actual></M>:   0"
       FAIL!(errmsg) { ok {0}.falsy? }
     end
     it "[!i44q6] is available with NOT." do
       PASS! { ok {0}.NOT.falsy? }
       errmsg = "!!$<actual> != false: failed.\n"\
-               "    $<actual>:   nil"
+               "    <M>$<actual></M>:   nil"
       FAIL!(errmsg) { ok {nil}.NOT.falsy? }
     end
   end
@@ -744,13 +745,13 @@ describe '#method_missing()' do
     end
     it "[!69bs0] raises assertion error when failed." do
       errmsg = "File.file?($<actual>): failed.\n"\
-               "    $<actual>:   \".\""
+               "    <M>$<actual></M>:   \".\""
       FAIL!(errmsg) { ok {'.'}.file_exist? }
     end
     it "[!r1mze] is available with NOT." do
       PASS! { ok {'.'}.NOT.file_exist? }
       errmsg = "File.file?($<actual>) == false: failed.\n"\
-               "    $<actual>:   \"#{__FILE__}\""
+               "    <M>$<actual></M>:   \"#{__FILE__}\""
       FAIL!(errmsg) { ok {__FILE__}.NOT.file_exist? }
     end
   end
@@ -761,13 +762,13 @@ describe '#method_missing()' do
     end
     it "[!vfh7a] raises assertion error when failed." do
       errmsg = "File.directory?($<actual>): failed.\n"\
-               "    $<actual>:   \"#{__FILE__}\""
+               "    <M>$<actual></M>:   \"#{__FILE__}\""
       FAIL!(errmsg) { ok {__FILE__}.dir_exist? }
     end
     it "[!qtllp] is available with NOT." do
       PASS! { ok {__FILE__}.NOT.dir_exist? }
       errmsg = "File.directory?($<actual>) == false: failed.\n"\
-               "    $<actual>:   \".\""
+               "    <M>$<actual></M>:   \".\""
       FAIL!(errmsg) { ok {'.'}.NOT.dir_exist? }
     end
   end
@@ -788,10 +789,10 @@ describe '#method_missing()' do
     it "[!qwngl] raises assertion error when failed." do
       with_symlink do |linkname|
         errmsg = "File.symlink?($<actual>): failed.\n"\
-                 "    $<actual>:   \"_not_exist\""
+                 "    <M>$<actual></M>:   \"_not_exist\""
         FAIL!(errmsg) { ok {'_not_exist'}.symlink_exist? }
         errmsg = "File.symlink?($<actual>): failed.\n"\
-                 "    $<actual>:   \".\""
+                 "    <M>$<actual></M>:   \".\""
         FAIL!(errmsg) { ok {'.'}.symlink_exist? }
       end
     end
@@ -800,7 +801,7 @@ describe '#method_missing()' do
         PASS! { ok {'_not_exist'}.NOT.symlink_exist? }
         PASS! { ok {'.'}.NOT.symlink_exist? }
         errmsg = "File.symlink?($<actual>) == false: failed.\n"\
-                 "    $<actual>:   \"#{linkname}\""
+                 "    <M>$<actual></M>:   \"#{linkname}\""
         FAIL!(errmsg) { ok {linkname}.NOT.symlink_exist? }
       end
     end
@@ -812,13 +813,13 @@ describe '#method_missing()' do
     end
     it "[!ja84s] raises assertion error when failed." do
       errmsg = "File.exist?($<actual>) == false: failed.\n"\
-               "    $<actual>:   \".\""
+               "    <M>$<actual></M>:   \".\""
       FAIL!(errmsg) { ok {'.'}.not_exist? }
     end
     it "[!to5z3] is available with NOT." do
       PASS! { ok {'.'}.NOT.not_exist? }
       errmsg = "File.exist?($<actual>): failed.\n"\
-               "    $<actual>:   \"_not_exist\""
+               "    <M>$<actual></M>:   \"_not_exist\""
       FAIL!(errmsg) { ok {'_not_exist'}.NOT.not_exist? }
     end
   end
