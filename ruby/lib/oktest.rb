@@ -1568,9 +1568,9 @@ END
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
         params = Util.required_param_names_of_block(spec.block)
-        resolved = spec.fixture
         values = params.nil? || params.empty? ? [] \
-                 : get_fixture_values(params, node, spec, context, nil, resolved)
+                 : get_fixture_values(params, node, spec, context, spec.location,
+                                      spec.fixture ? spec.fixture.dup : {})
         spec.run_block_in_context_object(context, *values)
       rescue NoMemoryError   => exc;  raise exc
       rescue SignalException => exc;  raise exc
@@ -1666,32 +1666,29 @@ END
 
   class FixtureManager
 
-    def get_fixture_values(names, node, spec, context, location=nil, _resolved={}, _resolving=[])
-      _resolved ||= {}
+    def get_fixture_values(names, node, spec, context, location, resolved={}, _resolving=[])
       #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
-      _resolved[:this_topic] = node.target if !_resolved.key?(:this_topic) && node.topic?
+      resolved[:this_topic] = node.target if !resolved.key?(:this_topic) && node.topic?
       #; [!ja2ew] resolves 'this_spec' fixture name as description of current spec.
-      _resolved[:this_spec]  = spec.desc   if !_resolved.key?(:this_spec)
+      resolved[:this_spec]  = spec.desc   if !resolved.key?(:this_spec)
       #; [!v587k] resolves fixtures.
-      location ||= spec.location
       return names.collect {|name|
         #; [!np4p9] raises error when loop exists in dependency.
         ! _resolving.include?(name)  or
           raise _looped_dependency_error(name, _resolving, location)
-        get_fixture_value(name, node, spec, context, location, _resolved, _resolving)
+        get_fixture_value(name, node, spec, context, location, resolved, _resolving)
       }
     end
 
-    def get_fixture_value(name, node, spec, context, location=nil, _resolved={}, _resolving=[])
-      return _resolved[name] if _resolved.key?(name)
-      location ||= spec.location
+    def get_fixture_value(name, node, spec, context, location, resolved={}, _resolving=[])
+      return resolved[name] if resolved.key?(name)
       tuple = node.get_fixture_block(name)
       if tuple
         block, param_names, location = tuple
         #; [!2esaf] resolves fixture dependencies.
         if param_names
           _resolving << name
-          args = get_fixture_values(param_names, node, spec, context, location, _resolved, _resolving)
+          args = get_fixture_values(param_names, node, spec, context, location, resolved, _resolving)
           (popped = _resolving.pop) == name  or
             raise "** assertion failed: name=#{name.inspect}, resolvng[-1]=#{popped.inspect}"
         else
@@ -1700,18 +1697,18 @@ END
         #; [!gyyst] overwrites keyword params by fixture values.
         kwnames = Util.keyword_param_names_of_block(block)
         kwargs = {}
-        kwnames.each {|name| kwargs[name] = _resolved[name] if _resolved.key?(name) }
+        kwnames.each {|name| kwargs[name] = resolved[name] if resolved.key?(name) }
         #; [!4xghy] calls fixture block with context object as self.
         val = context.instance_exec(*args, **kwargs, &block)
         #; [!8t3ul] caches fixture value to call fixture block only once per spec.
-        _resolved[name] = val
+        resolved[name] = val
         return val
       elsif node.parent
         #; [!4chb9] traverses parent topics if fixture not found in current topic.
-        return get_fixture_value(name, node.parent, spec, context, location, _resolved, _resolving)
+        return get_fixture_value(name, node.parent, spec, context, location, resolved, _resolving)
       elsif ! node.equal?(THE_GLOBAL_SCOPE)
         #; [!wt3qk] suports global scope.
-        return get_fixture_value(name, THE_GLOBAL_SCOPE, spec, context, location, _resolved, _resolving)
+        return get_fixture_value(name, THE_GLOBAL_SCOPE, spec, context, location, resolved, _resolving)
       else
         #; [!nr79z] raises error when fixture not found.
         exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
