@@ -74,6 +74,15 @@ END
       end
     end
 
+    describe '.keyword_param_names_of_block()' do
+      it "[!p6qqp] returns keyword param names of proc object." do
+        pr = proc {|a, b=nil, c: nil, d: 1| nil }
+        assert_eq keyword_param_names_of_block(pr), [:c, :d]
+        pr = proc {|a, b=nil| nil }
+        assert_eq keyword_param_names_of_block(pr), []
+      end
+    end
+
     describe '.strfold()' do
       it "[!wb7m8] returns string as it is if string is not long." do
         s = "*" * 79

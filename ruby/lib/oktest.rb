@@ -2118,6 +2118,13 @@ END
       return param_names
     end
 
+    def keyword_param_names_of_block(block)
+      #; [!p6qqp] returns keyword param names of proc object.
+      names = []
+      block.parameters.each {|kind, name| names << name if kind == :key }
+      return names
+    end
+
     def strfold(str, width=80, mark='...')
       #; [!wb7m8] returns string as it is if string is not long.
       return str if str.bytesize <= width
