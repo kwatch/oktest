@@ -850,9 +850,12 @@ END
       return to
     end
 
-    def self.spec(desc, tag: nil, &block)
+    def self.spec(desc, tag: nil, fixture: nil, &block)
       node = @__node
       node.is_a?(Node)  or raise "internal error: node=#{node.inspect}"  # for debug
+      #; [!4vkbl] error when `fixture:` keyword arg is not a Hash object.
+      fixture.nil? || fixture.is_a?(Hash)  or
+        raise ArgumentError, "spec(fixture: #{fixture.inspect}): fixture argument should be a Hash object, but got #{fixture.class.name} object."
       #; [!ala78] provides raising TodoException block if block not given.
       block ||= proc { raise TodoException, "not implemented yet" }
       #; [!x48db] keeps called location only when block has parameters.
@@ -862,7 +865,7 @@ END
         location = caller_locations(1, 1).first
       end
       #; [!c8c8o] creates new spec object.
-      spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
+      spec = SpecLeaf.new(node, desc, tag: tag, fixture: fixture, location: location, &block)
       return spec
     end
 
@@ -1097,16 +1100,17 @@ END
 
   class SpecLeaf < Item
 
-    def initialize(parent, desc, tag: nil, location: nil, &block)
+    def initialize(parent, desc, tag: nil, fixture: nil, location: nil, &block)
       #@parent = parent      # not keep parent node to avoid recursive reference
       @desc  = desc
       @tag   = tag
+      @fixture  = fixture
       @location = location   # necessary when raising fixture not found error
       @block = block
       parent.add_child(self) if parent
     end
 
-    attr_reader :desc, :tag, :location, :block
+    attr_reader :desc, :tag, :fixture, :location, :block
 
     def _prefix
       '-'
@@ -1564,8 +1568,9 @@ END
       #; [!yd24o] runs spec body, catching assertions or exceptions.
       begin
         params = Util.required_param_names_of_block(spec.block)
+        resolved = spec.fixture
         values = params.nil? || params.empty? ? [] \
-                 : get_fixture_values(params, node, spec, context)
+                 : get_fixture_values(params, node, spec, context, nil, resolved)
         spec.run_block_in_context_object(context, *values)
       rescue NoMemoryError   => exc;  raise exc
       rescue SignalException => exc;  raise exc
@@ -1604,8 +1609,8 @@ END
 
     private
 
-    def get_fixture_values(names, node, spec, context)
-      return THE_FIXTURE_MANAGER.get_fixture_values(names, node, spec, context)
+    def get_fixture_values(names, node, spec, context, location=nil, resolved=nil)
+      return THE_FIXTURE_MANAGER.get_fixture_values(names, node, spec, context, location, resolved)
     end
 
     def _call_blocks_parent_first(node, name, context)
@@ -1662,6 +1667,7 @@ END
   class FixtureManager
 
     def get_fixture_values(names, node, spec, context, location=nil, _resolved={}, _resolving=[])
+      _resolved ||= {}
       #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
       _resolved[:this_topic] = node.target if !_resolved.key?(:this_topic) && node.topic?
       #; [!ja2ew] resolves 'this_spec' fixture name as description of current spec.
@@ -1688,11 +1694,15 @@ END
           args = get_fixture_values(param_names, node, spec, context, location, _resolved, _resolving)
           (popped = _resolving.pop) == name  or
             raise "** assertion failed: name=#{name.inspect}, resolvng[-1]=#{popped.inspect}"
-          #; [!4xghy] calls fixture block with context object as self.
-          val = context.instance_exec(*args, &block)
         else
-          val = context.instance_eval(&block)
+          args = []
         end
+        #; [!gyyst] overwrites keyword params by fixture values.
+        kwnames = Util.keyword_param_names_of_block(block)
+        kwargs = {}
+        kwnames.each {|name| kwargs[name] = _resolved[name] if _resolved.key?(name) }
+        #; [!4xghy] calls fixture block with context object as self.
+        val = context.instance_exec(*args, **kwargs, &block)
         #; [!8t3ul] caches fixture value to call fixture block only once per spec.
         _resolved[name] = val
         return val
