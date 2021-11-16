@@ -107,7 +107,7 @@ END
       sout, serr = capture do
         runner = Oktest::Runner.new(DummyReporter.new).start()
       end
-      expected = <<'END'
+      expected = plain2colored(<<'END')
 file: "test/runner_test.rb"
 topic: "Parent"
   topic: "Child"
@@ -115,8 +115,8 @@ topic: "Parent"
     /spec: status=:PASS
     spec: "spec#2"
     /spec: status=:FAIL, error=#<ASSERTION: $<actual> == $<expected>: failed.
-    $<actual>:   2
-    $<expected>: 1>
+    <M>$<actual></M>:   2
+    <M>$<expected></M>: 1>
     spec: "spec#3"
     /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for "":String>
     spec: "spec#4"
@@ -249,7 +249,7 @@ END
         end
         runner = Oktest::Runner.new(DummyReporter.new).start()
       end
-      expected = <<'END'
+      expected = plain2colored(<<'END')
 file: "test/runner_test.rb"
 topic: "Parent"
   topic: "Child"
@@ -258,8 +258,8 @@ topic: "Parent"
 [Parent] after
 [all] after
     /spec: status=:FAIL, error=#<ASSERTION: $<actual> == $<expected>: failed.
-    $<actual>:   2
-    $<expected>: 1>
+    <M>$<actual></M>:   2
+    <M>$<expected></M>: 1>
   /topic
 /topic
 /file

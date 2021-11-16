@@ -71,6 +71,14 @@ module Oktest
       raise FAIL_EXCEPTION, yield unless result
     end
 
+    def __actual
+      Color.actual("$<actual>")
+    end
+
+    def __expected
+      Color.expected("$<expected>")
+    end
+
     def NOT()
       #; [!63dde] toggles internal boolean.
       @bool = ! @bool
@@ -92,8 +100,8 @@ module Oktest
         else
           op = @bool ? '==' : '!='
           "$<actual> #{op} $<expected>: failed.\n"\
-          "    $<actual>:   #{@actual.inspect}\n"\
-          "    $<expected>: #{expected.inspect}"
+          "    #{__actual()}:   #{@actual.inspect}\n"\
+          "    #{__expected()}: #{expected.inspect}"
         end
       }
       #; [!c6p0e] returns self when passed.
@@ -107,8 +115,8 @@ module Oktest
       __assert(@bool == (@actual != expected)) {
         op = @bool ? '!=' : '=='
         "$<actual> #{op} $<expected>: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}\n"\
-        "    $<expected>: #{expected.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}"
       }
       #; [!iakbb] returns self when passed.
       self
@@ -126,8 +134,8 @@ module Oktest
         s = "$<actual> === $<expected>"
         s = "!(#{s})" unless @bool
         "#{s}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}\n"\
-        "    $<expected>: #{expected.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}"
       }
       #; [!uh8bm] returns self when passed.
       self
@@ -179,11 +187,11 @@ module Oktest
     def __assert_match(result, op1, op2, expected)
       __assert(@bool == !!result) {
         msg = "$<actual> #{@bool ? op1 : op2} $<expected>: failed.\n"\
-              "    $<expected>: #{expected.inspect}\n"
+              "    #{__expected()}: #{expected.inspect}\n"
         if @actual =~ /\n\z/
-          msg + "    $<actual>:   <<'END'\n#{@actual}END\n"
+          msg + "    #{__actual()}:   <<'END'\n#{@actual}END\n"
         else
-          msg + "    $<actual>:   #{@actual.inspect}\n"
+          msg + "    #{__actual()}:   #{@actual.inspect}\n"
         end
       }
     end
@@ -214,9 +222,9 @@ module Oktest
       __assert(@bool == !!((@actual - expected).abs < delta)) {
         eq = @bool ? '' : ' == false'
         "($<actual> - $<expected>).abs < #{delta}#{eq}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}\n"\
-        "    $<expected>: #{expected.inspect}\n"\
-        "    ($<actual> - $<expected>).abs: #{(@actual - expected).abs.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}\n"\
+        "    #{Color.actual('($<actual> - $<expected>).abs')}: #{(@actual - expected).abs.inspect}"
       }
       #; [!m0791] returns self when passed.
       self
@@ -229,8 +237,8 @@ module Oktest
       __assert(@bool == !! @actual.equal?(expected)) {
         eq = @bool ? '' : ' == false'
         "$<actual>.equal?($<expected>)#{eq}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}\n"\
-        "    $<expected>: #{expected.inspect}\n"
+        "    #{__actual()}:   #{@actual.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}\n"
       }
       #; [!yk7zo] returns self when passed.
       self
@@ -258,7 +266,7 @@ module Oktest
           args = args.empty? ? '' : "(#{args.collect {|x| x.inspect }.join(', ')})"
           eq = @bool ? '' : ' == false'
           "$<actual>.#{method_name}#{args}#{eq}: failed.\n"\
-          "    $<actual>:   #{@actual.inspect}"
+          "    #{__actual()}:   #{@actual.inspect}"
         }
       #; [!sljta] raises TypeError when boolean method returned non-boolean value.
       else
@@ -312,7 +320,7 @@ module Oktest
           __assert(errmsg === exc.message) {
             op = errmsg.is_a?(Regexp) ? '=~' : '=='
             "$<error_message> #{op} #{errmsg.inspect}: failed.\n"\
-            "    $<error_message>: #{exc.message.inspect}"
+            "    #{Color.actual('$<error_message>')}: #{exc.message.inspect}"
           }
         end
         #; [!dq97o] if block given, call it with exception object.
@@ -407,8 +415,8 @@ module Oktest
       __assert(@bool == !! expected.include?(@actual)) {
         eq = @bool ? '' : ' == false'
         "$<expected>.include?($<actual>)#{eq}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}\n"\
-        "    $<expected>: #{expected.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}"
       }
       #; [!jzoxg] returns self when passed.
       self
@@ -422,8 +430,8 @@ module Oktest
       __assert(@bool == (expected == val)) {
         op = @bool ? '==' : '!='
         "$<actual>.#{name} #{op} $<expected>: failed.\n"\
-        "    $<actual>.#{name}: #{val.inspect}\n"\
-        "    $<expected>: #{expected.inspect}"\
+        "    #{Color.actual('$<actual>.'+name.to_s)}: #{val.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}"\
       }
       #; [!lz3lb] returns self when passed.
       self
@@ -446,8 +454,8 @@ module Oktest
       __assert(@bool == (expected == val)) {
         op = @bool ? '==' : '!='
         "$<actual>[#{key.inspect}] #{op} $<expected>: failed.\n"\
-        "    $<actual>[#{key.inspect}]: #{val.inspect}\n"\
-        "    $<expected>: #{expected.inspect}"\
+        "    #{Color.actual('$<actual>['+key.inspect+']')}: #{val.inspect}\n"\
+        "    #{__expected()}: #{expected.inspect}"\
       }
       #; [!byebv] returns self when passed.
       self
@@ -471,8 +479,8 @@ module Oktest
       __assert(@bool == (@actual.length == n)) {
         op = @bool ? '==' : '!='
         "$<actual>.length #{op} #{n}: failed.\n"\
-        "    $<actual>.length: #{@actual.length}\n"\
-        "    $<actual>:   #{actual.inspect}"
+        "    #{Color.actual('$<actual>.length')}: #{@actual.length}\n"\
+        "    #{__actual()}:   #{actual.inspect}"
       }
       #; [!l9vnv] returns self when passed.
       self
@@ -485,7 +493,7 @@ module Oktest
       __assert(@bool == (!!@actual == true)) {
         op = @bool ? '==' : '!='
         "!!$<actual> #{op} true: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}"
       }
       #; [!nhmuk] returns self when passed.
       self
@@ -498,7 +506,7 @@ module Oktest
       __assert(@bool == (!!@actual == false)) {
         op = @bool ? '==' : '!='
         "!!$<actual> #{op} false: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}"
       }
       #; [!w1vm6] returns self when passed.
       self
@@ -507,7 +515,7 @@ module Oktest
     def __assert_fs(bool, s)
       __assert(@bool == bool) {
         "#{s}#{@bool ? '' : ' == false'}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}"
       }
     end
     private :__assert_fs
@@ -545,7 +553,7 @@ module Oktest
       #; [!to5z3] is available with NOT.
       __assert(@bool == ! File.exist?(@actual)) {
         "File.exist?($<actual>)#{@bool ? ' == false' : ''}: failed.\n"\
-        "    $<actual>:   #{@actual.inspect}"
+        "    #{__actual()}:   #{@actual.inspect}"
       }
       #; [!1ujag] returns self when passed.
       self
@@ -589,6 +597,14 @@ module Oktest
 
     private
 
+    def __actual
+      Color.actual("$<actual>")
+    end
+
+    def __expected
+      Color.expected("$<expected>")
+    end
+
     def _compare?(path, a, e)
       #; [!nkvqo] returns true when nothing raised.
       #; [!57m2j] returns false when assertion error raised.
@@ -622,16 +638,16 @@ module Oktest
       #; [!a7bfs] Set object matches to enum value.
       e === a  or fail <<"END"
 $<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
-    $<actual>:   #{a.inspect}
-    $<expected>: #{e.inspect}
+    #{__actual()}:   #{a.inspect}
+    #{__expected()}: #{e.inspect}
 END
       #; [!4ymj2] fails when actual value is not matched to item class of range object.
       if e.is_a?(Range)
         expected_class = (e.begin || e.end).class
         a.is_a?(expected_class)  or fail <<"END"
 $<JSON>#{_path(path)}: expected #{expected_class.name} value, but got #{a.class.name} value.
-    $<actual>:   #{a.inspect}
-    $<expected>: #{e.inspect}
+    #{__actual()}:   #{a.inspect}
+    #{__expected()}: #{e.inspect}
 END
       end
     end
@@ -640,10 +656,10 @@ END
       #; [!bz74w] fails when array lengths are different.
       a.length == e.length  or fail <<"END"
 $<JSON>#{_path(path)}: $<actual>.length == $<expected>.length : failed.
-    $<actual>.length:   #{a.length}
-    $<expected>.length: #{e.length}
-    $<actual>:   #{a.inspect}
-    $<expected>: #{e.inspect}
+    #{Color.actual('$<actual>.length')}:   #{a.length}
+    #{Color.actual('$<expected>.length')}: #{e.length}
+    #{__actual()}:   #{a.inspect}
+    #{__expected()}: #{e.inspect}
 END
       #; [!lh6d6] compares array items recursively.
       path.push(nil)
@@ -675,7 +691,7 @@ END
         else
           fail <<"END"
 $<JSON>#{_path(path)}: unexpected key.
-    $<actual>:   #{a2[k].inspect}
+    #{__actual()}:   #{a2[k].inspect}
 END
         end
       end
@@ -684,8 +700,8 @@ END
       (e2.keys - a2.keys).each do |k|
         k =~ /\?\z/ || k == "*"  or fail <<"END"
 $<JSON>#{_path(path)}: key \"#{k}\" expected but not found.
-    $<actual>.keys:   #{a2.keys.sort.inspect[1...-1]}
-    $<expected>.keys: #{e2.keys.sort.inspect[1...-1]}
+    #{Color.actual('$<actual>.keys')}:   #{a2.keys.sort.inspect[1...-1]}
+    #{Color.actual('$<expected>.keys')}: #{e2.keys.sort.inspect[1...-1]}
 END
       end
     end
@@ -695,8 +711,8 @@ END
       e2 = e.first
       a.is_a?(Array)  or fail <<"END"
 $<JSON>#{_path(path)}: Array value expected but got #{a.class.name} value.
-    $<actual>:   #{a.inspect}
-    $<expected>: [#{e2.inspect}].each
+    #{__actual()}:   #{a.inspect}
+    #{__expected()}: [#{e2.inspect}].each
 END
       #; [!sh5cg] Enumerator object matches to repeat of rule.
       path.push(nil)
@@ -713,8 +729,8 @@ END
       passed = e.items.any? {|e2| _compare?(path, a, e2) }
       passed  or fail <<"END"
 $<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
-    $<actual>:   #{a.inspect}
-    $<expected>: OR(#{e.items.collect(&:inspect).join(', ')})
+    #{__actual()}:   #{a.inspect}
+    #{__expected()}: OR(#{e.items.collect(&:inspect).join(', ')})
 END
     end
 
@@ -724,8 +740,8 @@ END
       failed = e.items.find {|e2| ! _compare?(path, a, e2) }
       ! failed  or fail <<"END"
 $<JSON>#{_path(path)}: $<expected> === $<actual> : failed.
-    $<actual>:   #{a.inspect}
-    $<expected>: AND(#{failed.inspect})
+    #{__actual()}:   #{a.inspect}
+    #{__expected()}: AND(#{failed.inspect})
 END
     end
 
@@ -2466,6 +2482,8 @@ END
     def skip   s; Config.color_enabled ? yellow(s) : s; end
     def todo   s; Config.color_enabled ? yellow(s) : s; end
     def reason s; Config.color_enabled ? yellow(s) : s; end
+    def actual   s; Config.color_enabled ? magenta(s) : s; end
+    def expected s; Config.color_enabled ? magenta(s) : s; end
 
     def status(status, s)
       #; [!yev5y] returns string containing color escape sequence.
