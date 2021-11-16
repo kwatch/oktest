@@ -426,8 +426,8 @@ END
         ok {1*1} == 2
 %%%
 $<actual> == $<expected>: failed.
-    <M>$<actual></M>:   1
-    <M>$<expected></M>: 2
+    $<actual>:   1
+    $<expected>: 2
 ----------------------------------------------------------------------
 [<E>ERROR</E>] <b>Parent > Child2 > 1/1 should be 1</b>
     _test.tmp:21:in `/'

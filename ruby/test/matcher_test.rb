@@ -76,9 +76,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"name\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"Alice\"\n"\
-                "    <M>$<expected></M>: \"alice\"\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"Alice\"\n"\
+                "    $<expected>: \"alice\"\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"name": "alice", "age": 20, "deleted": false}
       end
     end
@@ -88,9 +88,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"deleted\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   false\n"\
-                "    <M>$<expected></M>: TrueClass\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   false\n"\
+                "    $<expected>: TrueClass\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"name": String, "age": Integer, "deleted": TrueClass}
       end
     end
@@ -100,9 +100,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"email\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"alice@example.com\"\n"\
-                "    <M>$<expected></M>: /^\\w[-.\\w]+@example\\.org$/\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"alice@example.com\"\n"\
+                "    $<expected>: /^\\w[-.\\w]+@example\\.org$/\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"email": /^\w[-.\w]+@example\.org$/}
       end
     end
@@ -112,18 +112,18 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"int\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   5\n"\
-                "    <M>$<expected></M>: 1...5\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   5\n"\
+                "    $<expected>: 1...5\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"int": 1...5, "float": 3.1..3.2, "str": "aaa".."zzz"}
       end
     end
     it "[!4ymj2] fails when actual value is not matched to item class of range object." do
       actual = {"val": 1.5}
       errmsg = ("$<JSON>[\"val\"]: expected #{1.class.name} value, but got Float value.\n"\
-                "    <M>$<actual></M>:   1.5\n"\
-                "    <M>$<expected></M>: 1..10\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   1.5\n"\
+                "    $<expected>: 1..10\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"val": 1..10}
       end
     end
@@ -133,9 +133,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"gender\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"female\"\n"\
-                "    <M>$<expected></M>: #<Set: {\"M\", \"F\"}>\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"female\"\n"\
+                "    $<expected>: #<Set: {\"M\", \"F\"}>\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"gender": Set.new(["M", "F"])}
       end
     end
@@ -145,18 +145,18 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"tags\"][0]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"foo\"\n"\
-                "    <M>$<expected></M>: Integer\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"foo\"\n"\
+                "    $<expected>: Integer\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"tags": [Integer].each}
       end
     end
     it "[!ljrmc] fails when expected is an Enumerator object and actual is not an array." do
       actual = {"tags": "foo"}
       errmsg = ("$<JSON>[\"tags\"]: Array value expected but got String value.\n"\
-                "    <M>$<actual></M>:   \"foo\"\n"\
-                "    <M>$<expected></M>: [String].each\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"foo\"\n"\
+                "    $<expected>: [String].each\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"tags": [String].each}
       end
     end
@@ -168,9 +168,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"items\"][0][\"id\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   101\n"\
-                "    <M>$<expected></M>: 1000..9999\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   101\n"\
+                "    $<expected>: 1000..9999\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {
           "items": [{"name": String, "id?": 1000..9999}].each
         }
@@ -179,11 +179,11 @@ class JsonMatcher_TC < TC
     it "[!bz74w] fails when array lengths are different." do
       actual = {"arr": ["A", "B", "C"]}
       errmsg = ("$<JSON>[\"arr\"]: $<actual>.length == $<expected>.length : failed.\n"\
-                "    <M>$<actual>.length</M>:   3\n"\
-                "    <M>$<expected>.length</M>: 4\n"\
-                "    <M>$<actual></M>:   [\"A\", \"B\", \"C\"]\n"\
-                "    <M>$<expected></M>: [\"A\", \"B\", \"C\", \"D\"]\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>.length:   3\n"\
+                "    $<expected>.length: 4\n"\
+                "    $<actual>:   [\"A\", \"B\", \"C\"]\n"\
+                "    $<expected>: [\"A\", \"B\", \"C\", \"D\"]\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"arr": ["A", "B", "C", "D"]}
       end
     end
@@ -199,9 +199,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"item\"][\"price\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   500\n"\
-                "    <M>$<expected></M>: Float\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   500\n"\
+                "    $<expected>: Float\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {
           "owner": {"name": String, "age": 0..100},
           "item": {"id": 1..99999, "name": String, "price?": Float},
@@ -237,17 +237,17 @@ class JsonMatcher_TC < TC
     it "[!mpbvu] fails when unexpected key exists in actual hash." do
       actual = {"id": 101, "name": "Alice"}
       errmsg = ("$<JSON>: key \"gender\" expected but not found.\n"\
-                "    <M>$<actual>.keys</M>:   \"id\", \"name\"\n"\
-                "    <M>$<expected>.keys</M>: \"gender\", \"id\", \"name\"\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>.keys:   \"id\", \"name\"\n"\
+                "    $<expected>.keys: \"gender\", \"id\", \"name\"\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"id": Integer, "name": String, "gender": String}
       end
     end
     it "[!4oasq] fails when expected key not exist in actual hash." do
       actual = {"id": 101, "name": "Alice"}
       errmsg = ("$<JSON>[\"id\"]: unexpected key.\n"\
-                "    <M>$<actual></M>:   101\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   101\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON(actual) === {"name": String}
       end
     end
@@ -258,9 +258,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   3.14\n"\
-                "    <M>$<expected></M>: OR(String, Integer)\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   3.14\n"\
+                "    $<expected>: OR(String, Integer)\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": 3.14}) === {"val": OR(String, Integer)}
       end
     end
@@ -269,9 +269,9 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"Alice\"\n"\
-                "    <M>$<expected></M>: AND(/^[a-z]+$/)\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"Alice\"\n"\
+                "    $<expected>: AND(/^[a-z]+$/)\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": "Alice"}) === {"val": AND(String, /^[a-z]+$/)}
       end
     end
@@ -283,15 +283,15 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"abc\"\n"\
-                "    <M>$<expected></M>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"abc\"\n"\
+                "    $<expected>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": "abc"}) === expected
       end
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   99\n"\
-                "    <M>$<expected></M>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   99\n"\
+                "    $<expected>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": 99}) === expected
       end
     end
@@ -303,15 +303,15 @@ class JsonMatcher_TC < TC
       assert_eq result, true
       #
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   \"1\"\n"\
-                "    <M>$<expected></M>: AND(OR(/^\\d{3}$/, 100..999))\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   \"1\"\n"\
+                "    $<expected>: AND(OR(/^\\d{3}$/, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": "1"}) === expected
       end
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
-                "    <M>$<actual></M>:   0\n"\
-                "    <M>$<expected></M>: AND(OR(/^\\d{3}$/, 100..999))\n")
-      assert_exc(Oktest::FAIL_EXCEPTION, plain2colored(errmsg)) do
+                "    $<actual>:   0\n"\
+                "    $<expected>: AND(OR(/^\\d{3}$/, 100..999))\n")
+      assert_exc(Oktest::FAIL_EXCEPTION, errmsg) do
         JSON({"val": 0}) === expected
       end
     end
