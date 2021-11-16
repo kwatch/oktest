@@ -850,9 +850,12 @@ END
       return to
     end
 
-    def self.spec(desc, tag: nil, &block)
+    def self.spec(desc, tag: nil, fixture: nil, &block)
       node = @__node
       node.is_a?(Node)  or raise "internal error: node=#{node.inspect}"  # for debug
+      #; [!4vkbl] error when `fixture:` keyword arg is not a Hash object.
+      fixture.nil? || fixture.is_a?(Hash)  or
+        raise ArgumentError, "spec(fixture: #{fixture.inspect}): fixture argument should be a Hash object, but got #{fixture.class.name} object."
       #; [!ala78] provides raising TodoException block if block not given.
       block ||= proc { raise TodoException, "not implemented yet" }
       #; [!x48db] keeps called location only when block has parameters.
@@ -862,7 +865,7 @@ END
         location = caller_locations(1, 1).first
       end
       #; [!c8c8o] creates new spec object.
-      spec = SpecLeaf.new(node, desc, tag: tag, location: location, &block)
+      spec = SpecLeaf.new(node, desc, tag: tag, fixture: fixture, location: location, &block)
       return spec
     end
 
@@ -1097,16 +1100,17 @@ END
 
   class SpecLeaf < Item
 
-    def initialize(parent, desc, tag: nil, location: nil, &block)
+    def initialize(parent, desc, tag: nil, fixture: nil, location: nil, &block)
       #@parent = parent      # not keep parent node to avoid recursive reference
       @desc  = desc
       @tag   = tag
+      @fixture  = fixture
       @location = location   # necessary when raising fixture not found error
       @block = block
       parent.add_child(self) if parent
     end
 
-    attr_reader :desc, :tag, :location, :block
+    attr_reader :desc, :tag, :fixture, :location, :block
 
     def _prefix
       '-'
@@ -1565,7 +1569,8 @@ END
       begin
         params = Util.required_param_names_of_block(spec.block)
         values = params.nil? || params.empty? ? [] \
-                 : get_fixture_values(params, node, spec, context)
+                 : get_fixture_values(params, node, spec, context, spec.location,
+                                      spec.fixture ? spec.fixture.dup : {})
         spec.run_block_in_context_object(context, *values)
       rescue NoMemoryError   => exc;  raise exc
       rescue SignalException => exc;  raise exc
@@ -1604,8 +1609,8 @@ END
 
     private
 
-    def get_fixture_values(names, node, spec, context)
-      return THE_FIXTURE_MANAGER.get_fixture_values(names, node, spec, context)
+    def get_fixture_values(names, node, spec, context, location=nil, resolved=nil)
+      return THE_FIXTURE_MANAGER.get_fixture_values(names, node, spec, context, location, resolved)
     end
 
     def _call_blocks_parent_first(node, name, context)
@@ -1661,47 +1666,49 @@ END
 
   class FixtureManager
 
-    def get_fixture_values(names, node, spec, context, location=nil, _resolved={}, _resolving=[])
+    def get_fixture_values(names, node, spec, context, location, resolved={}, _resolving=[])
       #; [!w6ffs] resolves 'this_topic' fixture name as target objec of current topic.
-      _resolved[:this_topic] = node.target if !_resolved.key?(:this_topic) && node.topic?
+      resolved[:this_topic] = node.target if !resolved.key?(:this_topic) && node.topic?
       #; [!ja2ew] resolves 'this_spec' fixture name as description of current spec.
-      _resolved[:this_spec]  = spec.desc   if !_resolved.key?(:this_spec)
+      resolved[:this_spec]  = spec.desc   if !resolved.key?(:this_spec)
       #; [!v587k] resolves fixtures.
-      location ||= spec.location
       return names.collect {|name|
         #; [!np4p9] raises error when loop exists in dependency.
         ! _resolving.include?(name)  or
           raise _looped_dependency_error(name, _resolving, location)
-        get_fixture_value(name, node, spec, context, location, _resolved, _resolving)
+        get_fixture_value(name, node, spec, context, location, resolved, _resolving)
       }
     end
 
-    def get_fixture_value(name, node, spec, context, location=nil, _resolved={}, _resolving=[])
-      return _resolved[name] if _resolved.key?(name)
-      location ||= spec.location
+    def get_fixture_value(name, node, spec, context, location, resolved={}, _resolving=[])
+      return resolved[name] if resolved.key?(name)
       tuple = node.get_fixture_block(name)
       if tuple
         block, param_names, location = tuple
         #; [!2esaf] resolves fixture dependencies.
         if param_names
           _resolving << name
-          args = get_fixture_values(param_names, node, spec, context, location, _resolved, _resolving)
+          args = get_fixture_values(param_names, node, spec, context, location, resolved, _resolving)
           (popped = _resolving.pop) == name  or
             raise "** assertion failed: name=#{name.inspect}, resolvng[-1]=#{popped.inspect}"
-          #; [!4xghy] calls fixture block with context object as self.
-          val = context.instance_exec(*args, &block)
         else
-          val = context.instance_eval(&block)
+          args = []
         end
+        #; [!gyyst] overwrites keyword params by fixture values.
+        kwnames = Util.keyword_param_names_of_block(block)
+        kwargs = {}
+        kwnames.each {|name| kwargs[name] = resolved[name] if resolved.key?(name) }
+        #; [!4xghy] calls fixture block with context object as self.
+        val = context.instance_exec(*args, **kwargs, &block)
         #; [!8t3ul] caches fixture value to call fixture block only once per spec.
-        _resolved[name] = val
+        resolved[name] = val
         return val
       elsif node.parent
         #; [!4chb9] traverses parent topics if fixture not found in current topic.
-        return get_fixture_value(name, node.parent, spec, context, location, _resolved, _resolving)
+        return get_fixture_value(name, node.parent, spec, context, location, resolved, _resolving)
       elsif ! node.equal?(THE_GLOBAL_SCOPE)
         #; [!wt3qk] suports global scope.
-        return get_fixture_value(name, THE_GLOBAL_SCOPE, spec, context, location, _resolved, _resolving)
+        return get_fixture_value(name, THE_GLOBAL_SCOPE, spec, context, location, resolved, _resolving)
       else
         #; [!nr79z] raises error when fixture not found.
         exc = FixtureNotFoundError.new("#{name}: fixture not found. (spec: #{spec.desc})")
@@ -2116,6 +2123,13 @@ END
       #; [!d5kym] collects only normal parameter names.
       param_names = block.parameters[0...n].collect {|pair| pair[1] }
       return param_names
+    end
+
+    def keyword_param_names_of_block(block)
+      #; [!p6qqp] returns keyword param names of proc object.
+      names = []
+      block.parameters.each {|kind, name| names << name if kind == :key }
+      return names
     end
 
     def strfold(str, width=80, mark='...')

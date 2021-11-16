@@ -546,6 +546,16 @@ class Context_TC < TC
       assert_eq sp.tag, "exp"
       assert_eq sp._prefix, "-"
     end
+    it "[!4vkbl] error when `fixture:` keyword arg is not a Hash object." do
+      new_node_with() do
+        spec "example #2", fixture: {x: 1} do end   # not raise anything
+      end
+      assert_exc(ArgumentError, 'spec(fixture: "x: 1"): fixture argument should be a Hash object, but got String object.') do
+        new_node_with() do
+          spec "example #2", fixture: "x: 1" do end
+        end
+      end
+    end
     it "[!ala78] provides raising TodoException block if block not given." do
       node = new_node_with() do
         spec "example #3"

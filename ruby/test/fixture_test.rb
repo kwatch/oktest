@@ -116,6 +116,19 @@ END
       assert_eq sout, expected
     end
 
+    it "[!gyyst] overwrites keyword params by fixture values." do
+      Oktest.scope do
+        topic "topic#1" do
+          fixture(:x) {|y, z: 3| {y: y, z: z} }
+          fixture(:y) { 2 }
+          spec("not overwrite") {|x| p x }
+          spec("overwrite", fixture: {y: 4, z: 5}) {|x| p x }
+        end
+      end
+      sout = run_all()
+      assert_eq sout, "{:y=>2, :z=>3}\n{:y=>4, :z=>5}\n"
+    end
+
     it "[!4xghy] calls fixture block with context object as self." do
       Oktest.scope do
         topic "Parent" do

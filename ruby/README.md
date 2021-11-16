@@ -74,6 +74,7 @@ Oktest.rb requires Ruby 2.0 or later.
     * <a href="#at_end-crean-up-handler"><code>at_end()</code>: Crean-up Handler</a>
     * <a href="#named-fixtures">Named Fixtures</a>
     * <a href="#fixture-injection">Fixture Injection</a>
+    * <a href="#fixture-keyword-argument"><code>fixture:</code> keyword argument</a>
     * <a href="#global-scope">Global Scope</a>
   * <a href="#helpers">Helpers</a>
     * <a href="#capture_sio"><code>capture_sio()</code></a>
@@ -83,6 +84,7 @@ Oktest.rb requires Ruby 2.0 or later.
     * <a href="#dummy_attrs"><code>dummy_attrs()</code></a>
     * <a href="#dummy_ivars"><code>dummy_ivars()</code></a>
     * <a href="#recorder"><code>recorder()</code></a>
+    * <a href="#partial_regexp"><code>partial_regexp()</code></a>
   * <a href="#json-matcher">JSON Matcher</a>
     * <a href="#simple-example">Simple Example</a>
     * <a href="#nested-example">Nested Example</a>
@@ -1232,12 +1234,42 @@ end
 -->
 
 
+### `fixture:` keyword argument
+
+`scope()` takes `fixture:` keyword argument which overwrites fixture value.
+
+test/example26_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  fixture :user do |uname, uid: 101|   # `uid` is keyword param
+    {name: uname, id: uid}
+  end
+
+  fixture :uname do
+    "Alice"
+  end
+
+  ## keyword argument `fixture:` overwrites fixture values
+  spec "example", fixture: {uname: "Bob", uid: 201} do   # !!!!!
+    |user|
+    ok {user[:name]} == "Bob"    # != "Alice"
+    ok {user[:id]}   == 201      # != 101
+  end
+
+end
+```
+
+
 ### Global Scope
 
 It is a good idea to separate common fixtures into dedicated file.
 In this case, use `Oktest.global_scope()` instead of `Oktest.scope()`.
 
-test/common_fixtures.rb:
+test/example27_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1611,7 +1643,7 @@ end
 ```
 
 
-### `partial_regexp()`, `partial_regexp!()`
+### `partial_regexp()`
 
 `partial_regexp()` can embed regexp pattern into string, and compile it into Regexp object. This is very useful to validate multiline string with regexp.
 
@@ -1685,10 +1717,10 @@ def partial_regexp(pattern, begin_='\A', end_='\z', mark='{== ==}')
 ```
 
 `partial_regexp()` adds `\A` and `\z` automatically.
-If you want not to add them, pass empty string as 2nd and 3rd argument, like this:
+If you want not to add them, pass empty string or nil as 2nd and 3rd argument, like this:
 
 ```ruby
-partial_regexp <<-'END', ni, nil    # !!!!!
+partial_regexp <<-'END', '', ''    # !!!!!
 ...
 END
 ```
