@@ -43,7 +43,7 @@ Oktest.scope do                      #
 end                                  #
 ```
 
-Oktest.rb requires Ruby 2.3 or later.
+Oktest.rb requires Ruby 2.0 or later.
 
 
 
