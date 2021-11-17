@@ -2612,8 +2612,8 @@ END
         puts VERSION
         return 0
       end
-      #; [!dk8eg] '-C' or '--create' option prints test code skeleton.
-      if opts.create
+      #; [!dk8eg] '-S' or '--skeleton' option prints test code skeleton.
+      if opts.skeleton
         print SKELETON
         return 0
       end
@@ -2672,7 +2672,7 @@ END
     private
 
     class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :color, :create, :generate, :faster
+      attr_accessor :help, :version, :style, :filter, :color, :skeleton, :generate, :faster
     end
 
     def option_parser(opts)
@@ -2699,7 +2699,7 @@ END
         #; [!dptgn] '--color' is same as '--color=on'.
         opts.color = val || 'on'
       }
-      parser.on('-C', '--create') { opts.create = true }
+      parser.on('-S', '--skeleton') { opts.skeleton = true }
       parser.on('-G', '--generate[=styleoption]') {|val|
         val.nil? || val == 'unaryop'  or
           raise OptionParser::InvalidArgument, val
@@ -2721,7 +2721,7 @@ Usage: %{command} [<options>] [<file-or-directory>...]
   -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
-  -C, --create           : print test code skeleton
+  -S, --skeleton         : print test code skeleton
   -G, --generate         : generate test code skeleton from ruby file
 #      --faster           : make 'ok{}' faster (for very large project)
 
