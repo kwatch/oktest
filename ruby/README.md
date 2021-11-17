@@ -118,7 +118,7 @@ $ oktest --help
 $ mkdir test
 
 ### create test script
-$ oktest --create > test/example_test.rb
+$ oktest --skeleton > test/example_test.rb
 $ less test/example_test.rb
 
 ### run test script
