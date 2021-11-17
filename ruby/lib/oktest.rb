@@ -2601,9 +2601,9 @@ END
       color_enabled = nil
       opts = Options.new
       parser = option_parser(opts)
-      #; [!v5xie] parses $OKTEST_OPTION environment variable.
-      if ENV.key?('OKTEST_OPTION')
-        parser.parse(ENV['OKTEST_OPTION'].split())
+      #; [!v5xie] parses $OKTEST_RB environment variable.
+      if ENV.key?('OKTEST_RB')
+        parser.parse(ENV['OKTEST_RB'].split())
       end
       #
       filenames = parser.parse(args)

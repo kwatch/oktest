@@ -187,7 +187,7 @@ END
       end
     end
 
-    it "[!v5xie] parses $OKTEST_OPTION environment variable." do
+    it "[!v5xie] parses $OKTEST_RB environment variable." do
       ret, sout, serr = run(@testfile, tty: false)
       expected = plain2colored(<<'END')
 ## _tmp_test.rb
@@ -199,7 +199,7 @@ END
       assert sout.start_with?(expected), "expected verbose-style, but not."
       #
       begin
-        ENV['OKTEST_OPTION'] = "-ss"
+        ENV['OKTEST_RB'] = "-ss"
         ret, sout, serr = run(@testfile, tty: false)
         expected = plain2colored(<<'END')
 ## _tmp_test.rb
@@ -209,7 +209,7 @@ END
 END
         assert sout.start_with?(expected), "expected simple-style, but not."
       ensure
-        ENV.delete('OKTEST_OPTION')
+        ENV.delete('OKTEST_RB')
       end
     end
 
