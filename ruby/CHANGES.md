@@ -10,6 +10,7 @@ Release 1.2.0
   <https://github.com/kwatch/oktest/blob/ruby/ruby/README.md#partial_regexp>
 * [enhance] New keyword argument `fixture:` is added to `spec()`. For example `spec("...", fixture: {key: "value"})` overwrites value of fixture `key`. See:
   <https://github.com/kwatch/oktest/blob/ruby/ruby/README.md#fixture-keyword-argument>
+* [enhance] Environemnt variable `$OKTEST_RB` supported which stores default command-line options.
 * [change] Color of 'pass' status changed from blue to cyan, because blue color is not visible in dark background very much, while cyan color is visible in both light and dark background.
 * [change] Command-line option `--faster` is removed from help message. `--faster` is still available, but not recommended because the performance of `ok{}` is significantly improved.
 
