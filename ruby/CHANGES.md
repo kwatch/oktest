@@ -13,6 +13,7 @@ Release 1.2.0
 * [enhance] Environemnt variable `$OKTEST_RB` supported which stores default command-line options.
 * [change] Color of 'pass' status changed from blue to cyan, because blue color is not visible in dark background very much, while cyan color is visible in both light and dark background.
 * [change] Command-line option `--faster` is removed from help message. `--faster` is still available, but not recommended because the performance of `ok{}` is significantly improved.
+* [change] Command-line opton `-C`/`--create` are rename to `-S`/`--skeleton`.
 
 
 
