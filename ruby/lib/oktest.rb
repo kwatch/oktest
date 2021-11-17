@@ -1871,7 +1871,7 @@ END
       end
       lines = []
       msg.each_line {|line| lines << line }
-      puts lines.shift.chomp
+      puts Color.errmsg(lines.shift.chomp)
       puts lines.join.chomp unless lines.empty?
       puts exc.diff if exc.respond_to?(:diff) && exc.diff   # for oktest.rb
     end
@@ -2466,6 +2466,7 @@ END
     def skip   s; Config.color_enabled ? yellow(s) : s; end
     def todo   s; Config.color_enabled ? yellow(s) : s; end
     def reason s; Config.color_enabled ? yellow(s) : s; end
+    def errmsg s; Config.color_enabled ? red(s)    : s; end
 
     def status(status, s)
       #; [!yev5y] returns string containing color escape sequence.

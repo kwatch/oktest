@@ -136,7 +136,11 @@ class BaseReporter_TC < TC
       sout, serr = capture do
         r.__send__(:print_exc_message, exc, :FAIL)
       end
-      assert_eq sout, errmsg
+      assert_eq sout, plain2colored(<<END)
+<R>something failed</R>
+  expect: foo
+  actual: bar
+END
       assert_eq serr, ""
     end
     it "[!pd41p] prints detail of exception." do
@@ -146,7 +150,11 @@ class BaseReporter_TC < TC
       sout, serr = capture do
         r.__send__(:print_exc_message, exc, :ERROR)
       end
-      assert_eq sout, "Oktest::AssertionFailed: "+errmsg
+      assert_eq sout, plain2colored(<<END)
+<R>Oktest::AssertionFailed: something failed</R>
+  expect: foo
+  actual: bar
+END
       assert_eq serr, ""
     end
   end
@@ -425,7 +433,7 @@ END
     _test.tmp:18:in `block (4 levels) in <top (required)>'
         ok {1*1} == 2
 %%%
-$<actual> == $<expected>: failed.
+<R>$<actual> == $<expected>: failed.</R>
     $<actual>:   1
     $<expected>: 2
 ----------------------------------------------------------------------
@@ -433,7 +441,7 @@ $<actual> == $<expected>: failed.
     _test.tmp:21:in `/'
         ok {1/0} == 1
 %%%
-ZeroDivisionError: divided by 0
+<R>ZeroDivisionError: divided by 0</R>
 ----------------------------------------------------------------------
 END
 
