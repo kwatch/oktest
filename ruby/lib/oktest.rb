@@ -2601,6 +2601,11 @@ END
       color_enabled = nil
       opts = Options.new
       parser = option_parser(opts)
+      #; [!v5xie] parses $OKTEST_OPTION environment variable.
+      if ENV.key?('OKTEST_OPTION')
+        parser.parse(ENV['OKTEST_OPTION'].split())
+      end
+      #
       filenames = parser.parse(args)
       #; [!9973n] '-h' or '--help' option prints help message.
       if opts.help

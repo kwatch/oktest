@@ -187,6 +187,32 @@ END
       end
     end
 
+    it "[!v5xie] parses $OKTEST_OPTION environment variable." do
+      ret, sout, serr = run(@testfile, tty: false)
+      expected = plain2colored(<<'END')
+## _tmp_test.rb
+* <b>Parent</b>
+  * <b>Child1</b>
+    - [<C>pass</C>] 1+1 should be 2
+    - [<C>pass</C>] 1-1 should be 0
+END
+      assert sout.start_with?(expected), "expected verbose-style, but not."
+      #
+      begin
+        ENV['OKTEST_OPTION'] = "-ss"
+        ret, sout, serr = run(@testfile, tty: false)
+        expected = plain2colored(<<'END')
+## _tmp_test.rb
+* <b>Parent</b>: <C>.</C><C>.</C>
+  * <b>Child1</b>: <C>.</C><C>.</C>
+  * <b>Child2</b>: <R>f</R><E>E</E>
+END
+        assert sout.start_with?(expected), "expected simple-style, but not."
+      ensure
+        ENV.delete('OKTEST_OPTION')
+      end
+    end
+
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
     HELP_MESSAGE = <<"END"
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
