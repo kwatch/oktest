@@ -195,7 +195,7 @@ Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
   -F <PATTERN>           : filter topic or spec with pattern (see below)
       --color[={on|off}] : enable/disable output coloring forcedly
-  -C, --create           : print test code skeleton
+  -S, --skeleton         : print test code skeleton
   -G, --generate         : generate test code skeleton from ruby file
 
 Filter examples:
@@ -480,8 +480,8 @@ END
       end
     end
 
-    it "[!dk8eg] '-C' or '--create' option prints test code skeleton." do
-      ret, sout, serr = run("-C")
+    it "[!dk8eg] '-S' or '--skeleton' option prints test code skeleton." do
+      ret, sout, serr = run("-S")
       assert_eq ret, 0
       assert_eq sout, Oktest::MainApp::SKELETON
       assert_eq serr, ""
