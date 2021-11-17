@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ###
-### $Release: 0.0.0 $
+### $Release: 1.2.0 $
 ### $License: MIT License $
 ### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
 ###
@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.name        = "oktest"
   s.author      = "kwatch"
   s.email       = "kwatch@gmail.com"
-  s.version     = "$Release: 0.0.0 $".split()[1]
+  s.version     = "$Release: 1.2.0 $".split()[1]
   s.license     = "MIT"
   s.platform    = Gem::Platform::RUBY
   s.homepage    = "https://github.com/kwatch/oktest/tree/ruby"
