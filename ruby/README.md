@@ -93,6 +93,7 @@ Oktest.rb requires Ruby 2.0 or later.
   * <a href="#tips">Tips</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
+    * <a href="#environment-variale-oktest_rb">Environment Variale <code>$OKTEST_RB</code></a>
     * <a href="#traverser-class">Traverser Class</a>
     * <a href="#benchmarks">Benchmarks</a>
     * <a href="#--faster-option"><code>--faster</code> Option</a>
@@ -2069,6 +2070,20 @@ Oktest.scope do
   end
 
 end
+```
+
+
+### Environment Variale `$OKTEST_RB`
+
+You can set default command-line option to environment variale `$OKTEST_RB`.
+For examle, you can specify default reporting style with `$OKTEST_RB`.
+
+```terminal
+### change default reporting style to plain-style.
+$ export OKTEST_RB="-s plain"                  # !!!!!
+
+### run test script in plain-style reporting without '-s' option.
+$ ruby test/foo_test.rb
 ```
 
 
