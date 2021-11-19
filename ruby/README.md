@@ -2183,39 +2183,39 @@ $ rake benchmark:all
 Example result:
 
 ```
-==================== {{*oktest*}} ====================
+==================== oktest ====================
 oktest -sq run_all.rb
 
 ## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 2.36s
 
-        {{*6.815 real*}}        6.511 user        0.257 sys
+        6.815 real        6.511 user        0.257 sys
 
-==================== {{*oktest:faster*}} ====================
+==================== oktest:faster ====================
 oktest -sq --faster run_all.rb
 
 ## total:100000 (pass:100000, fail:0, error:0, skip:0, todo:0) in 2.01s
 
-        {{*6.401 real*}}        6.123 user        0.240 sys
+        6.401 real        6.123 user        0.240 sys
 
-==================== {{*rspec*}} ====================
+==================== rspec ====================
 rspec run_all.rb | tail -4
 
 Finished in 15.27 seconds (files took 16.08 seconds to load)
 100000 examples, 0 failures
 
 
-        {{*32.062 real*}}        27.778 user        4.383 sys
+        32.062 real        27.778 user        4.383 sys
 
-==================== {{*minitest*}} ====================
+==================== minitest ====================
 ruby run_all.rb | tail -4
 
 Finished in 5.281425s, 18934.2838 runs/s, 37868.5677 assertions/s.
 
 100000 runs, 200000 assertions, 0 failures, 0 errors, 0 skips
 
-        {{*9.140 real*}}        8.657 user        0.705 sys
+        9.140 real        8.657 user        0.705 sys
 
-==================== {{*testunit*}} ====================
+==================== testunit ====================
 ruby run_all.rb | tail -5
 -------------------------------------------------------------------------------
 100000 tests, 200000 assertions, 0 failures, 0 errors, 0 pendings, 0 omissions, 0 notifications
@@ -2223,7 +2223,7 @@ ruby run_all.rb | tail -5
 -------------------------------------------------------------------------------
 7775.59 tests/s, 15551.18 assertions/s
 
-        {{*19.580 real*}}        19.020 user        0.885 sys
+        19.580 real        19.020 user        0.885 sys
 ```
 
 Summary:
