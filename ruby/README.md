@@ -2239,19 +2239,20 @@ Test::Unit:         19.580 real    19.020 user     0.885 sys
 
 ### `--faster` Option
 
-If you are working in very larget project and you want to run test scripts
-as fast as possible, try `--faster` option of `oktest` command.
+~~If you are working in very larget project and you want to run test scripts as fast as possible, try `--faster` option of `oktest` command.~~
 
 ```terminal
 $ oktest -s quiet --faster test/        ## only for very large project
 ```
 
-Or set `Oktest::Config.ok_location = false` in your test script.
+~~Or set `Oktest::Config.ok_location = false` in your test script.~~
 
 ```ruby
 require 'oktest'
 Oktest::Config.ok_location = false      ## only for very large project
 ```
+
+`--faster` option is still available but no longer recommended, because performance of `ok{}` is improved significantly since Oktest.rb 1.2.0.
 
 
 
