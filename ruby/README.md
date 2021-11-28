@@ -2198,6 +2198,16 @@ ruby 3.0.2p107 (2021-07-07 revision 0db68f0233) [x86_64-darwin18]
 $ rake benchmark:all
 ```
 
+Summary of example result:
+
+```
+Oktest:              6.815 real     6.511 user     0.257 sys
+Oktest (--fast):     6.401 real     6.123 user     0.240 sys
+RSpec:              32.062 real    27.778 user     4.383 sys
+MiniTest:            9.140 real     8.657 user     0.705 sys
+Test::Unit:         19.580 real    19.020 user     0.885 sys
+```
+
 Example result:
 
 ```
@@ -2242,16 +2252,6 @@ ruby run_all.rb | tail -5
 7775.59 tests/s, 15551.18 assertions/s
 
         19.580 real        19.020 user        0.885 sys
-```
-
-Summary:
-
-```
-Oktest:              6.815 real     6.511 user     0.257 sys
-Oktest (--fast):     6.401 real     6.123 user     0.240 sys
-RSpec:              32.062 real    27.778 user     4.383 sys
-MiniTest:            9.140 real     8.657 user     0.705 sys
-Test::Unit:         19.580 real    19.020 user     0.885 sys
 ```
 
 
