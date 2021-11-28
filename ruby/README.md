@@ -95,8 +95,8 @@ Oktest.rb requires Ruby 2.0 or later.
     * <a href="#testing-rack-application">Testing Rack Application</a>
     * <a href="#environment-variale-oktest_rb">Environment Variale <code>$OKTEST_RB</code></a>
     * <a href="#traverser-class">Traverser Class</a>
-    * <a href="#benchmarks">Benchmarks</a>
     * <a href="#--faster-option"><code>--faster</code> Option</a>
+    * <a href="#benchmarks">Benchmarks</a>
   * <a href="#change-log">Change Log</a>
   * <a href="#license-and-copyright">License and Copyright</a>
 
@@ -2160,6 +2160,24 @@ $ ruby test/example54_test.rb
 ```
 
 
+### `--faster` Option
+
+~~If you are working in very larget project and you want to run test scripts as fast as possible, try `--faster` option of `oktest` command.~~
+
+```terminal
+$ oktest -s quiet --faster test/        ## only for very large project
+```
+
+~~Or set `Oktest::Config.ok_location = false` in your test script.~~
+
+```ruby
+require 'oktest'
+Oktest::Config.ok_location = false      ## only for very large project
+```
+
+`--faster` option is still available but no longer recommended, because performance of `ok{}` is improved significantly since Oktest.rb 1.2.0.
+
+
 ### Benchmarks
 
 Oktest.rb gem file contains benchmark script.
@@ -2235,24 +2253,6 @@ RSpec:              32.062 real    27.778 user     4.383 sys
 MiniTest:            9.140 real     8.657 user     0.705 sys
 Test::Unit:         19.580 real    19.020 user     0.885 sys
 ```
-
-
-### `--faster` Option
-
-~~If you are working in very larget project and you want to run test scripts as fast as possible, try `--faster` option of `oktest` command.~~
-
-```terminal
-$ oktest -s quiet --faster test/        ## only for very large project
-```
-
-~~Or set `Oktest::Config.ok_location = false` in your test script.~~
-
-```ruby
-require 'oktest'
-Oktest::Config.ok_location = false      ## only for very large project
-```
-
-`--faster` option is still available but no longer recommended, because performance of `ok{}` is improved significantly since Oktest.rb 1.2.0.
 
 
 
