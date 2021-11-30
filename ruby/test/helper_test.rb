@@ -129,17 +129,17 @@ class SpecHelper_TC < TC
     it "[!l2mcx] accepts block arguments." do
       val = nil
       Oktest.scope() do
-        fixture :foo do |x, y|
-          {x: x, y: y}
+        fixture :foo do |x, y, z: 0|
+          {x: x, y: y, z: z}
         end
         topic 'Example' do
           spec 'sample' do
-            val = fixture(:foo, 10, 20)
+            val = fixture(:foo, 10, 20, z: 30)
           end
         end
       end
       capture { Oktest.run() }
-      assert_eq val, {x: 10, y: 20}
+      assert_eq val, {x: 10, y: 20, z: 30}
     end
     it "[!wxcsp] raises error when fixture not found." do
       exc = nil

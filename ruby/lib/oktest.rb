@@ -1229,7 +1229,7 @@ END
       raise SkipException, reason if condition
     end
 
-    def fixture(name, *args)
+    def fixture(name, *args, **kwargs)
       #; [!zgfg9] finds fixture block in current or parent node.
       node = self.class.__node
       while node && (tuple = node.get_fixture_block(name)) == nil
@@ -1244,7 +1244,7 @@ END
       #; [!m4ava] calls fixture block and returns result of it.
       #; [!l2mcx] accepts block arguments.
       block, _, _ = tuple
-      return block.call(*args)
+      return block.call(*args, **kwargs)
     end
 
     def TODO()
