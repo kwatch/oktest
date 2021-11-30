@@ -2,6 +2,16 @@ CHANGES
 =======
 
 
+
+Release 1.2.1
+-------------
+
+* [bugfix] Fix `VerboseReporter` class to report detail of errors even when no topics.
+* [bugfix] Fix `fixture()` in specs to accept keyword arguments.
+* [bugfix] Fix wrong text on `README.md`.
+
+
+
 Release 1.2.0
 -------------
 
