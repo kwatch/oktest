@@ -1010,15 +1010,15 @@ end
 Result:
 
 ```terminal
-$ oktest -s plain test/example21_test.rb
+$ oktest -s quiet test/example21a_test.rb
 *** before_all() ***
 === before() ===
 ---- example spec #1 ----
 === after() ===
-.=== before() ===
+=== before() ===
 ---- example spec #2 ----
 === after() ===
-.*** after_all() ***
+*** after_all() ***
 
 ## total:2 (pass:2, fail:0, error:0, skip:0, todo:0) in 0.000s
 ```
@@ -1729,7 +1729,7 @@ END
 If you want to change embed mark, specify 4th argument, like this:
 
 ```ruby
-partial_regexp <<-'END', '\A', '\z', '%%(.*?)%%'    # !!!!!
+partial_regexp <<-'END', '\A', '\z', '%% %%'    # !!!!!
 * [config.date]   %% \d\d\d\d-\d\d-\d\d %%
 * [config.secret] %% [0-9a-f]+ %%
 END
@@ -2202,7 +2202,7 @@ Summary of example result:
 
 ```
 Oktest:              6.815 real     6.511 user     0.257 sys
-Oktest (--fast):     6.401 real     6.123 user     0.240 sys
+Oktest (--faster):   6.401 real     6.123 user     0.240 sys
 RSpec:              32.062 real    27.778 user     4.383 sys
 MiniTest:            9.140 real     8.657 user     0.705 sys
 Test::Unit:         19.580 real    19.020 user     0.885 sys
