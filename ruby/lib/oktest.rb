@@ -1913,6 +1913,12 @@ END
       puts "## #{scope.filename}"
     end
 
+    def exit_scope(scope)
+      #; [!ibdu7] reports errors even when no topics.
+      super
+      print_exceptions()
+    end
+
     def enter_topic(topic, depth)
       super
       puts "#{'  ' * (depth - 1)}#{topic._prefix} #{Color.topic(topic.target)}"

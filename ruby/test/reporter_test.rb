@@ -527,6 +527,37 @@ class VerboseReporter_TC < Reporter_TC
     assert_eq serr, ""
   end
 
+  it "[!ibdu7] reports errors even when no topics." do
+    input = <<'END'
+require 'oktest'
+Oktest.scope do
+  spec "example" do
+    ok {1-1} == 2
+  end
+end
+END
+    File.write(@filename, input)
+    #
+    expected = <<'END'
+## _test.tmp
+- [<R>Fail</R>] example
+----------------------------------------------------------------------
+[<R>Fail</R>] <b>example</b>
+    _test.tmp:4:in `block (2 levels) in <top (required)>'
+        ok {1-1} == 2
+%%%
+<R>$<actual> == $<expected>: failed.</R>
+    $<actual>:   0
+    $<expected>: 2
+----------------------------------------------------------------------
+## total:1 (pass:0, <R>fail:1</R>, error:0, skip:0, todo:0) in 0.000s
+END
+    #
+    sout, serr = run("-sv", @filename)
+    assert_eq edit_actual(sout), edit_expected(expected)
+    assert_eq serr, ""
+  end
+
 end
 
 
