@@ -1077,7 +1077,7 @@ END
     end
 
     attr_reader :target
-    attr_accessor :_prefix
+    attr_writer :_prefix
 
     def _prefix
       @_prefix || '*'
