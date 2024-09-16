@@ -69,14 +69,14 @@ namespace :readme do
     url = ENV['README_URL']  or abort "$README_URL required."
     htmlfile = "README.html"
     sh "curl -s -o #{htmlfile} #{url}"
-    rexp = /<h(\d) dir="auto"><a id="user-content-(.*?)" class="anchor" aria-hidden="true" href="(.*?)">.*?<\/a>(.*)<\/h\1>/
+    rexp = /<h(\d) class="heading-element" dir="auto">(.*?)<\/h\1><a id="user-content-(.*?)" class="anchor" aria-label=".*?" href="(.*?)">/
     html_str = File.read(htmlfile, encoding: 'utf-8')
     buf = []
     html_str.scan(rexp) do
       level = $1.to_i
-      id = $2
-      href = $3
-      title = $4
+      id = $3
+      href = $4
+      title = $2
       next if title =~ /Table of Contents/
       indent = "  " * (level - 1)
       buf << "#{indent}* <a href=\"#{href}\">#{title}</a>\n"
