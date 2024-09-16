@@ -71,7 +71,7 @@ if ENV['VS_HOME'] && $ruby_versions
     $ruby_versions.each do |ver|
       bindir = Dir.glob("#{vs_home}/ruby/#{ver}.*/bin").sort_by(&comp).last
       next unless bindir
-      puts "==== ruby #{ver} (#{File.dirname(bindir)}) ===="
+      puts "\e[33m==== ruby #{ver} (#{File.dirname(bindir)}) ====\e[0m"
       sh "#{bindir}/ruby test/run_all.rb" do |ok, res|
         $stderr.puts "** test failed" unless ok
       end
