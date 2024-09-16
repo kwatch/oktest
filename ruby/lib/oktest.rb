@@ -269,10 +269,11 @@ module Oktest
       #; [!cun59] fails when boolean method failed returned false.
       #; [!4objh] is available with NOT.
       if ret == true || ret == false
+        #; [!5y9iu] reports args and kwargs in error message.
+        s = __inspect_args_and_kwargs(args, kwargs)
         __assert(@bool == ret) {
-          args = args.empty? ? '' : "(#{args.collect {|x| x.inspect }.join(', ')})"
           eq = @bool ? '' : ' == false'
-          "$<actual>.#{method_name}#{args}#{eq}: failed.\n"\
+          "$<actual>.#{method_name}#{s}#{eq}: failed.\n"\
           "    $<actual>:   #{@actual.inspect}"
         }
       #; [!sljta] raises TypeError when boolean method returned non-boolean value.
@@ -283,6 +284,16 @@ module Oktest
       self
     end
     private :__method_missing
+
+    def __inspect_args_and_kwargs(args, kwargs)
+      kwargs ||= {}
+      arr = [
+        (args.empty?   ? nil : args.collect {|x| x.inspect}),
+        (kwargs.empty? ? nil : kwargs.collect {|k, v| "#{k}: #{v.inspect}" }),
+      ].compact.flatten
+      return arr.empty? ? "" : "(#{arr.join(', ')})"
+    end
+    private :__inspect_args_and_kwargs
 
     def raise!(errcls=nil, errmsg=nil, &b)
       #; [!8k6ee] compares error class by '.is_a?' instead of '=='.

@@ -420,6 +420,27 @@ END
         ok {s}.sos?
       end
     end
+    it "[!5y9iu] reports args and kwargs in error message." do
+      if RUBY_VERSION >= "2.7"
+        str = '123, "abc", x: "45", y: true'
+      else
+        str = '123, "abc", {:x=>"45", :y=>true}'
+      end
+      errmsg = "$<actual>.bla?(#{str}): failed.\n"\
+               "    $<actual>:   \"Blabla\""
+      FAIL!(errmsg) do
+        s = "Blabla"
+        def s.bla?(*a, **k); return false; end
+        ok {s}.bla?(123, "abc", x: "45", y: true)
+      end
+      #
+      obj = Oktest::AssertionObject.new(nil, true, nil)
+      expected = '(123, "abc", c: "45", d: true)'
+      actual = obj.instance_eval {
+        __inspect_args_and_kwargs([123, "abc"], c: "45", d: true)
+      }
+      assert_eq actual, expected
+    end
   end
 
   describe '#raise?' do
