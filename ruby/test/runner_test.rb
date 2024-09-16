@@ -118,7 +118,24 @@ topic: "Parent"
     $<actual>:   2
     $<expected>: 1>
     spec: "spec#3"
+END
+      if RUBY_VERSION >= "3.3"
+        expected += <<'END'
+    /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for an instance of String>
+END
+      elsif RUBY_VERSION =~ /^3\.1\./
+        expected += <<'END'
+    /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for "":String
+
+            spec("spec#3") { "".null? }                   # error
+                               ^^^^^^>
+END
+      else
+        expected += <<'END'
     /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for "":String>
+END
+      end
+      expected += <<'END'
     spec: "spec#4"
     /spec: status=:SKIP, error=#<Oktest::SkipException: REASON>
     spec: "spec#5"
@@ -285,7 +302,24 @@ topic: "topic#A"
   /spec: status=:PASS
   spec: "spec#2"
   - at_end A2
+END
+      if RUBY_VERSION >= "3.3"
+        expected += <<'END'
+  /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for an instance of String>
+END
+      elsif RUBY_VERSION =~ /^3\.1\./
+        expected += <<'END'
+  /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for "":String
+
+            spec("spec#2") { at_end { puts "  - at_end A2" }; "".null? }   # raises NoMethodError
+                                                                ^^^^^^>
+END
+      else
+        expected += <<'END'
   /spec: status=:ERROR, error=#<NoMethodError: undefined method `null?' for "":String>
+END
+      end
+      expected += <<'END'
 /topic
 /file
 END
