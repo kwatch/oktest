@@ -2,6 +2,14 @@ CHANGES
 =======
 
 
+Release 1.3.0
+-------------
+
+* [enhance] `ok {}.raise?` now returns exception object instead of self.
+            For example: `exc = ok {...}.raise?(FooError); ok{exc.message} =~ /..../`
+* [enhance] `ok {}.method_missing()` now supports keyword arguments and block argument.
+
+
 
 Release 1.2.1
 -------------
