@@ -817,10 +817,15 @@ ok {pr}.raise?(NoMethodError) {|exc|
   ok {exc.class}   == NoMethodError
   ok {exc.message} == "undefined method `len' for \"abc\":String"
 }
+## or (Oktest.rb >= 1.3)
+exc = ok {pr}.raise?(NoMethodError)
+ok {exc.class}   == NoMethodError
+ok {exc.message} == "undefined method `len' for \"abc\":String"
 
 ## assert that procedure does NOT raise any exception
-ok {pr}.NOT.raise?   # no exception class nor error message
-not_ok {pr}.raise?   # same as above
+ok {pr}.raise_nothing? # (>= Oktest 1.3)
+ok {pr}.NOT.raise?     # no exception class nor error message
+not_ok {pr}.raise?     # same as above
 
 ## assert that procedure throws symbol.
 pr2 = proc do
