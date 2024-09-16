@@ -2,6 +2,13 @@ CHANGES
 =======
 
 
+Release 1.3.1
+-------------
+
+* [bugfix] Fix gemspec informations.
+
+
+
 Release 1.3.0
 -------------
 
