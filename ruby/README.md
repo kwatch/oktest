@@ -4,7 +4,7 @@
 
 Oktest.rb is a new-style testing library for Ruby.
 
-* `ok {actual} == expected` style [assertion](#assertions).
+* `ok {actual} == expected` style [assertions](#assertions).
 * [Fixture injection](#fixture-injection) inspired by dependency injection.
 * Structured test specifications like RSpec.
 * [JSON Matcher](#json-matcher) similar to JSON Schema.
