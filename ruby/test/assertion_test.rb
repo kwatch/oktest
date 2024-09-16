@@ -404,7 +404,17 @@ describe '#method_missing()' do
   describe '#raise?' do
     it "[!y1b28] returns self when passed." do
       pr = proc { "SOS".sos }
-      should_return_self { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String")  }
+      if RUBY_VERSION >= "3.3"
+        expected = "undefined method `sos' for an instance of String"
+      elsif RUBY_VERSION =~ /^3\.1\./
+        expected = "undefined method `sos' for \"SOS\":String\n"\
+                   "\n"\
+                   "      pr = proc { \"SOS\".sos }\n"\
+                   "                       ^^^^"
+      else
+        expected = "undefined method `sos' for \"SOS\":String"
+      end
+      should_return_self { ok {pr}.raise?(NoMethodError, expected)  }
     end
     it "[!2rnni] 1st argument can be error message string or rexp." do
       pr = proc { raise "something wrong" }
@@ -440,14 +450,36 @@ describe '#method_missing()' do
       end
       it "[!4n3ed] reraises if exception is not matched to specified error class." do
         pr = proc { "SOS".sos }
-        errmsg = "undefined method `sos' for \"SOS\":String"
+        if RUBY_VERSION >= "3.3"
+          errmsg = "undefined method `sos' for an instance of String"
+        elsif RUBY_VERSION =~ /^3\.1\./
+          errmsg = "undefined method `sos' for \"SOS\":String\n"\
+                   "\n"\
+                   "        pr = proc { \"SOS\".sos }\n"\
+                   "                         ^^^^"
+        else
+          errmsg = "undefined method `sos' for \"SOS\":String"
+        end
         ERROR!(NoMethodError, errmsg) { ok {pr}.raise?(ArgumentError) }
       end
       it "[!tpxlv] accepts string or regexp as error message." do
+        if RUBY_VERSION >= "3.1"
+          expected = "undefined method `sos' for \"SOS\":String\n"\
+                     "\n"\
+                     "        pr = proc { \"SOS\".sos }\n"\
+                     "                         ^^^^"
+        else
+          expected = "undefined method `sos' for \"SOS\":String"
+        end
         pr = proc { "SOS".sos }
-        PASS! { ok {pr}.raise?(NoMethodError, "undefined method `sos' for \"SOS\":String") }
+        PASS! { ok {pr}.raise?(NoMethodError, ) }
         pr = proc { "SOS".sos }
-        PASS! { ok {pr}.raise?(NoMethodError, /^undefined method `sos' for "SOS":String$/) }
+        if RUBY_VERSION >= "3.3"
+          expected = /^undefined method `sos' for an instance of String$/
+        else
+          expected = /^undefined method `sos' for "SOS":String$/
+        end
+        PASS! { ok {pr}.raise?(NoMethodError, expected) }
       end
       it "[!4c6x3] not check exception class when nil specified as errcls." do
         pr = proc { foobar() }
@@ -483,7 +515,16 @@ describe '#method_missing()' do
       end
       it "[!61vtv] assertion fails when specified exception raised." do
         pr = proc { "SOS".foobar }
-        errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foobar' for \"SOS\":String>."
+        if RUBY_VERSION >= "3.3"
+          errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foobar' for an instance of String>."
+        elsif RUBY_VERSION =~ /^3\.1\./
+          errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foobar' for \"SOS\":String\n"\
+                   "\n"\
+                   "        pr = proc { \"SOS\".foobar }\n"\
+                   "                         ^^^^^^^>."
+        else
+          errmsg = "NoMethodError should not be raised but got #<NoMethodError: undefined method `foobar' for \"SOS\":String>."
+        end
         FAIL!(errmsg) { ok {pr}.NOT.raise?(NoMethodError) }
       end
       it "[!smprc] compares error class with '==' operator, not '.is_a?'." do
@@ -516,7 +557,17 @@ describe '#method_missing()' do
       PASS! { ok {pr}.raise?(NoMethodError) }
       assert pr.respond_to?(:exc)
       assert pr.exc.is_a?(NoMethodError)
-      assert_eq pr.exc.message, "undefined method `foobar' for \"SOS\":String"
+      if RUBY_VERSION >= "3.3"
+        errmsg = "undefined method `foobar' for an instance of String"
+      elsif RUBY_VERSION =~ /^3\.1\./
+        errmsg = "undefined method `foobar' for \"SOS\":String\n"\
+                 "\n"\
+                 "      pr = proc { \"SOS\".foobar }\n"\
+                 "                       ^^^^^^^"
+      else
+        errmsg = "undefined method `foobar' for \"SOS\":String"
+      end
+      assert_eq pr.exc.message, errmsg
       #
       pr = proc { nil }
       assert !pr.respond_to?(:exc)
