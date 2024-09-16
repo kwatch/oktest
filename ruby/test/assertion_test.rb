@@ -351,7 +351,7 @@ END
     end
   end
 
-describe '#method_missing()' do
+  describe '#method_missing()' do
     it "[!7bbrv] returns self when passed." do
       should_return_self { ok {"file.png"}.end_with?(".png") }
     end
@@ -363,6 +363,27 @@ describe '#method_missing()' do
     it "[!ttow6] raises NoMethodError when not a boolean method." do
       ERROR!(NoMethodError) do
         ok {"a"}.start_with
+      end
+    end
+    it "[!gd3vg] supports keyword arguments on Ruby >= 2.7." do
+      #if RUBY_VERSION >= "2.7"
+      if true
+        eval <<-END
+          class Dummy392
+            def foo?(a, b, c: nil, d: nil)
+              return true
+            end
+          end
+        END
+        PASS! { ok {Dummy392.new}.foo?(123, 'abc', c: 45, d: true) }
+        if RUBY_VERSION >= "2.7"
+          errmsg = "unknown keywords: :x, :y"
+        else
+          errmsg = "unknown keywords: x, y"
+        end
+        ERROR!(ArgumentError, errmsg) do
+          ok {Dummy392.new}.foo?(123, 'abc', x: 45, y: true)
+        end
       end
     end
     it "[!f0ekh] skip top of backtrace when NoMethodError raised." do

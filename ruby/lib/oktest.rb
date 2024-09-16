@@ -236,14 +236,29 @@ module Oktest
       self
     end
 
-    def method_missing(method_name, *args)
+    if RUBY_VERSION >= "2.7"
+      def method_missing(method_name, *args, **kwargs)
+        #; [!ttow6] raises NoMethodError when not a boolean method.
+        return super unless method_name.to_s =~ /\?\z/
+        #; [!gd3vg] supports keyword arguments on Ruby >= 2.7.
+        __method_missing(method_name, args, kwargs) {
+          @actual.__send__(method_name, *args, **kwargs)
+        }
+      end
+    else
+      def method_missing(method_name, *args)
+        return super unless method_name.to_s =~ /\?\z/
+        __method_missing(method_name, args, nil) {
+          @actual.__send__(method_name, *args)
+        }
+      end
+    end
+
+    def __method_missing(method_name, args, kwargs)
       __done()
       #; [!yjnxb] enables to handle boolean methods.
-      #; [!ttow6] raises NoMethodError when not a boolean method.
-      method_name.to_s =~ /\?\z/  or
-        super
       begin
-        ret = @actual.__send__(method_name, *args)
+        ret = yield
       rescue NoMethodError, TypeError => exc
         #; [!f0ekh] skip top of backtrace when NoMethodError raised.
         while !exc.backtrace.empty? && exc.backtrace[0].start_with?(__FILE__)
@@ -267,6 +282,7 @@ module Oktest
       #; [!7bbrv] returns self when passed.
       self
     end
+    private :__method_missing
 
     def raise!(errcls=nil, errmsg=nil, &b)
       #; [!8k6ee] compares error class by '.is_a?' instead of '=='.
