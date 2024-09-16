@@ -11,6 +11,15 @@ RELEASE =~ /\A\d+\.\d+\.\d+/  or abort "RELEASE=#{RELEASE}: invalid release numb
 $ruby_versions ||= %w[2.4 2.5 2.6 2.7 3.0]
 
 
+task :default => :help
+
+
+desc "list tasks"
+task :help do
+  system "rake -T"
+end
+
+
 require 'rake/clean'
 CLEAN << "build"
 CLEAN.concat Dir.glob("#{PROJECT}-*.gem").collect {|x| x.sub(/\.gem$/, '') }
