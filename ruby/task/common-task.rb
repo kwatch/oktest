@@ -8,7 +8,7 @@ defined? LICENSE    or abort "LICENSE required."
 
 RELEASE =~ /\A\d+\.\d+\.\d+/  or abort "RELEASE=#{RELEASE}: invalid release number."
 
-$ruby_versions ||= %w[2.4 2.5 2.6 2.7 3.0]
+$ruby_versions ||= %w[2.4 2.5 2.6 2.7 3.0 3.1 3.2 3.3]
 
 
 task :default => :help
