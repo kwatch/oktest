@@ -834,8 +834,8 @@ end
 ok {pr2}.throw?(:quit)  # pass if :quit thrown, fail if other or nothing thrown
 ```
 
-If procedure contains `raise "errmsg"` instead of `raise ErrorClass, "errmsg"`,
-you can omit exception class such as `ok {pr}.raise?("errmsg")`.
+If a procedure contains `raise "errmsg"` instead of `raise ErrorClass, "errmsg"`,
+you can omit exception class like `ok {pr}.raise?("errmsg")`.
 
 <!--
 test/example14b_test.rb:
