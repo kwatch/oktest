@@ -2310,7 +2310,7 @@ END
     @os_windows      = RUBY_PLATFORM =~ /mswin|mingw/i
     @auto_run        = true
     @ok_location     = true     # false will make 'ok()' faster
-    @color_available = ! @os_windows || ENV['COLORTERM'] =~ /color|24bit/i
+    @color_available = ! @os_windows || ENV['WT_SESSION'] || ENV['COLORTERM'] =~ /color|24bit/i
     @color_enabled   = @color_available && $stdout.tty?
     @diff_command    = @os_windows ? "diff.exe -u" : "diff -u"
 
