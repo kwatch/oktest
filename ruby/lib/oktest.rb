@@ -237,19 +237,19 @@ module Oktest
     end
 
     if RUBY_VERSION >= "2.7"
-      def method_missing(method_name, *args, **kwargs)
+      def method_missing(method_name, *args, **kwargs, &b)
         #; [!ttow6] raises NoMethodError when not a boolean method.
         return super unless method_name.to_s =~ /\?\z/
         #; [!gd3vg] supports keyword arguments on Ruby >= 2.7.
         __method_missing(method_name, args, kwargs) {
-          @actual.__send__(method_name, *args, **kwargs)
+          @actual.__send__(method_name, *args, **kwargs, &b)
         }
       end
     else
-      def method_missing(method_name, *args)
+      def method_missing(method_name, *args, &b)
         return super unless method_name.to_s =~ /\?\z/
         __method_missing(method_name, args, nil) {
-          @actual.__send__(method_name, *args)
+          @actual.__send__(method_name, *args, &b)
         }
       end
     end
