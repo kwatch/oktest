@@ -236,14 +236,29 @@ module Oktest
       self
     end
 
-    def method_missing(method_name, *args)
+    if RUBY_VERSION >= "2.7"
+      def method_missing(method_name, *args, **kwargs, &b)
+        #; [!ttow6] raises NoMethodError when not a boolean method.
+        return super unless method_name.to_s =~ /\?\z/
+        #; [!gd3vg] supports keyword arguments on Ruby >= 2.7.
+        __method_missing(method_name, args, kwargs) {
+          @actual.__send__(method_name, *args, **kwargs, &b)
+        }
+      end
+    else
+      def method_missing(method_name, *args, &b)
+        return super unless method_name.to_s =~ /\?\z/
+        __method_missing(method_name, args, nil) {
+          @actual.__send__(method_name, *args, &b)
+        }
+      end
+    end
+
+    def __method_missing(method_name, args, kwargs)
       __done()
       #; [!yjnxb] enables to handle boolean methods.
-      #; [!ttow6] raises NoMethodError when not a boolean method.
-      method_name.to_s =~ /\?\z/  or
-        super
       begin
-        ret = @actual.__send__(method_name, *args)
+        ret = yield
       rescue NoMethodError, TypeError => exc
         #; [!f0ekh] skip top of backtrace when NoMethodError raised.
         while !exc.backtrace.empty? && exc.backtrace[0].start_with?(__FILE__)
@@ -254,10 +269,11 @@ module Oktest
       #; [!cun59] fails when boolean method failed returned false.
       #; [!4objh] is available with NOT.
       if ret == true || ret == false
+        #; [!5y9iu] reports args and kwargs in error message.
+        s = __inspect_args_and_kwargs(args, kwargs)
         __assert(@bool == ret) {
-          args = args.empty? ? '' : "(#{args.collect {|x| x.inspect }.join(', ')})"
           eq = @bool ? '' : ' == false'
-          "$<actual>.#{method_name}#{args}#{eq}: failed.\n"\
+          "$<actual>.#{method_name}#{s}#{eq}: failed.\n"\
           "    $<actual>:   #{@actual.inspect}"
         }
       #; [!sljta] raises TypeError when boolean method returned non-boolean value.
@@ -267,6 +283,17 @@ module Oktest
       #; [!7bbrv] returns self when passed.
       self
     end
+    private :__method_missing
+
+    def __inspect_args_and_kwargs(args, kwargs)
+      kwargs ||= {}
+      arr = [
+        (args.empty?   ? nil : args.collect {|x| x.inspect}),
+        (kwargs.empty? ? nil : kwargs.collect {|k, v| "#{k}: #{v.inspect}" }),
+      ].compact.flatten
+      return arr.empty? ? "" : "(#{arr.join(', ')})"
+    end
+    private :__inspect_args_and_kwargs
 
     def raise!(errcls=nil, errmsg=nil, &b)
       #; [!8k6ee] compares error class by '.is_a?' instead of '=='.

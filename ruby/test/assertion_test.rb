@@ -351,7 +351,7 @@ END
     end
   end
 
-describe '#method_missing()' do
+  describe '#method_missing()' do
     it "[!7bbrv] returns self when passed." do
       should_return_self { ok {"file.png"}.end_with?(".png") }
     end
@@ -363,6 +363,27 @@ describe '#method_missing()' do
     it "[!ttow6] raises NoMethodError when not a boolean method." do
       ERROR!(NoMethodError) do
         ok {"a"}.start_with
+      end
+    end
+    it "[!gd3vg] supports keyword arguments on Ruby >= 2.7." do
+      #if RUBY_VERSION >= "2.7"
+      if true
+        eval <<-END
+          class Dummy392
+            def foo?(a, b, c: nil, d: nil)
+              return true
+            end
+          end
+        END
+        PASS! { ok {Dummy392.new}.foo?(123, 'abc', c: 45, d: true) }
+        if RUBY_VERSION >= "2.7"
+          errmsg = "unknown keywords: :x, :y"
+        else
+          errmsg = "unknown keywords: x, y"
+        end
+        ERROR!(ArgumentError, errmsg) do
+          ok {Dummy392.new}.foo?(123, 'abc', x: 45, y: true)
+        end
       end
     end
     it "[!f0ekh] skip top of backtrace when NoMethodError raised." do
@@ -398,6 +419,27 @@ describe '#method_missing()' do
         def s.sos?; return 1; end
         ok {s}.sos?
       end
+    end
+    it "[!5y9iu] reports args and kwargs in error message." do
+      if RUBY_VERSION >= "2.7"
+        str = '123, "abc", x: "45", y: true'
+      else
+        str = '123, "abc", {:x=>"45", :y=>true}'
+      end
+      errmsg = "$<actual>.bla?(#{str}): failed.\n"\
+               "    $<actual>:   \"Blabla\""
+      FAIL!(errmsg) do
+        s = "Blabla"
+        def s.bla?(*a, **k); return false; end
+        ok {s}.bla?(123, "abc", x: "45", y: true)
+      end
+      #
+      obj = Oktest::AssertionObject.new(nil, true, nil)
+      expected = '(123, "abc", c: "45", d: true)'
+      actual = obj.instance_eval {
+        __inspect_args_and_kwargs([123, "abc"], c: "45", d: true)
+      }
+      assert_eq actual, expected
     end
   end
 
