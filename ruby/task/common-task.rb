@@ -60,10 +60,10 @@ if ENV['VS_HOME'] && $ruby_versions
     ENV['TC_QUIET'] = "Y" if File.exist?("test/tc.rb")
     comp = proc {|x, y| x.to_s.split('.').map(&:to_i) <=> y.to_s.split('.').map(&:to_i) }
     $ruby_versions.each do |ver|
-      dir = Dir.glob("#{vs_home}/ruby/#{ver}.*").sort_by(&comp).last
-      next unless dir
-      puts "==== ruby #{ver} (#{dir}) ===="
-      sh "#{dir}/bin/ruby test/run_all.rb" do |ok, res|
+      bindir = Dir.glob("#{vs_home}/ruby/#{ver}.*/bin").sort_by(&comp).last
+      next unless bindir
+      puts "==== ruby #{ver} (#{File.dirname(bindir)}) ===="
+      sh "#{bindir}/ruby test/run_all.rb" do |ok, res|
         $stderr.puts "** test failed" unless ok
       end
     end
