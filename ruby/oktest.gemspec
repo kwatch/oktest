@@ -16,17 +16,16 @@ Gem::Specification.new do |s|
   s.version     = "$Release: 1.3.0 $".split()[1]
   s.license     = "MIT"
   s.platform    = Gem::Platform::RUBY
-  s.homepage    = "https://github.com/kwatch/oktest/tree/ruby"
-  s.summary     = "new style testing library"
+  s.homepage    = "https://github.com/kwatch/oktest/tree/ruby/ruby"
+  s.summary     = "a new style testing library"
   s.description = <<'END'
 Oktest.rb is a new-style testing library for Ruby.
+You can write `ok {1+1} == 2` instead of `assert_equal 2, 1+1` or
+`expect(1+1).to eq 2`.
 
-* `ok {actual} == expected` style assertion.
-* **Fixture injection** inspired by dependency injection.
-* Structured test specifications like RSpec.
-* Filtering testcases by pattern or tags.
-* Blue/red color instead of green/red for accesability.
-* Small code size (about 2300 lines) and good performance.
+In addition, Oktest.rb supports **Fixture injection** feature
+inspired by dependency injection and **JSON Matcher** feature
+similar to JSON schema.
 
 See https://github.com/kwatch/oktest/tree/ruby/ruby for details.
 END
