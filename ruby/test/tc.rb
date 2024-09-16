@@ -34,9 +34,9 @@ class TC
       obj.instance_eval(&b)
     rescue => exc
       if exc.is_a?(AssertionFailed)
-        COUNTS[:fail]  += 1; puts "FAILED!" unless ENV['TC_QUIET']
+        COUNTS[:fail]  += 1; puts "\e[31mFAILED!\e[0m" unless ENV['TC_QUIET']
       else
-        COUNTS[:error] += 1; puts "ERROR!"  unless ENV['TC_QUIET']
+        COUNTS[:error] += 1; puts "\e[31mERROR!\e[0m"  unless ENV['TC_QUIET']
       end
       puts "  #{exc.class.name}: #{exc.message}"
       exc.backtrace.each do |bt|
