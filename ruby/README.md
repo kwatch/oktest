@@ -944,7 +944,7 @@ require 'oktest'
 
 Oktest::AssertionObject.class_eval do
   def readable?     # custom assertion: file readable?
-    _done()
+    __done()
     result = File.readable?(@actual)
     __assert(result == @bool) {
       "File.readable?($<actual>) == #{@bool}: failed.\n" +
