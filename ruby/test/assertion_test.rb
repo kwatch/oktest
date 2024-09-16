@@ -402,7 +402,7 @@ describe '#method_missing()' do
   end
 
   describe '#raise?' do
-    it "[!y1b28] returns self when passed." do
+    it "[!y1b28] returns exception object." do
       pr = proc { "SOS".sos }
       if RUBY_VERSION >= "3.3"
         expected = "undefined method `sos' for an instance of String"
@@ -414,7 +414,9 @@ describe '#method_missing()' do
       else
         expected = "undefined method `sos' for \"SOS\":String"
       end
-      should_return_self { ok {pr}.raise?(NoMethodError, expected)  }
+      ret = ok {pr}.raise?(NoMethodError, expected)
+      assert_eq ret.class, NoMethodError
+      assert_eq ret.message, expected
     end
     it "[!2rnni] 1st argument can be error message string or rexp." do
       pr = proc { raise "something wrong" }

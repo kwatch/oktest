@@ -349,8 +349,8 @@ module Oktest
       #; [!vnc6b] sets exception object into '#exc' attribute.
       (class << proc_obj; self; end).class_eval { attr_accessor :exc }
       proc_obj.exc = exc
-      #; [!y1b28] returns self when passed.
-      self
+      #; [!y1b28] returns exception object.
+      return exc
     end
 
     def throw?(expected)
