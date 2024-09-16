@@ -2270,4 +2270,4 @@ See [CHANGES.md](https://github.com/kwatch/oktest/blob/ruby/ruby/CHANGES.md).
 ## License and Copyright
 
 * $License: MIT License $
-* $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
+* $Copyright: copyright(c) 2011-2024 kuwata-lab.com all rights reserved $

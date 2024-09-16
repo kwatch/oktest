@@ -2,13 +2,13 @@
 
 ###
 ### $Release: $
-### $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2011-2024 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
 
 PROJECT   = "oktest"
 RELEASE   = ENV['RELEASE'] || "0.0.0"
-COPYRIGHT = "copyright(c) 2011-2021 kuwata-lab.com all rights reserved"
+COPYRIGHT = "copyright(c) 2011-2024 kuwata-lab.com all rights reserved"
 LICENSE   = "MIT License"
 
 $ruby_versions ||= %w[2.4 2.5 2.6 2.7 3.0 3.1 3.2 3.3]
