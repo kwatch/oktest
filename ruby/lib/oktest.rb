@@ -1337,6 +1337,16 @@ END
       return sout
     end
 
+    def capture_stderr(input="", tty: false, &b)
+      #; [!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`
+      sout, serr = capture_stdio(input, tty: tty, &b)
+      __assert(sout == "") {
+        "Output of $stdout expected to be empty, but got: #{sout.inspect}"
+      }
+      #; [!5vs64] returns output of stderr.
+      return serr
+    end
+
     def __do_dummy(val, recover, &b)
       if block_given?()
         begin
