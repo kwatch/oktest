@@ -1324,6 +1324,9 @@ END
       $stdin, $stdout, $stderr = bkup
     end
 
+    #; [!qjmaa] 'capture_sio()' is an alias of 'capture_stdio()'.
+    alias capture_sio capture_stdio
+
     def __do_dummy(val, recover, &b)
       if block_given?()
         begin

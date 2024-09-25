@@ -241,6 +241,23 @@ END
     end
   end
 
+  describe '#capture_sio()' do
+    it "[!qjmaa] 'capture_sio()' is an alias of 'capture_stdio()'." do
+      sin = nil
+      sout, serr = capture_sio("INPUT", tty: true) do
+        sin = $stdin.read()
+        puts "OUTPUT"
+        $stderr.puts "ERROR"
+        assert_eq $stdin.tty?, true
+        assert_eq $stdout.tty?, true
+        assert_eq $stdout.tty?, true
+      end
+      assert_eq sin, "INPUT"
+      assert_eq sout, "OUTPUT\n"
+      assert_eq serr, "ERROR\n"
+    end
+  end
+
   describe '#dummy_file()' do
     it "[!7e0bo] creates dummy file." do
       tmpfile = "_tmp_3511.txt"
