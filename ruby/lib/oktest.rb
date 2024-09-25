@@ -871,8 +871,9 @@ END
 
     def self.case_when(desc, tag: nil, &block)
       #; [!ofw1i] target is a description starting with 'When '.
+      #; [!53qxv] not add 'When ' if description starts with it.
       case desc
-      when nil                      ; desc2 = nil
+      when /^(\[!\w+\] )?[wW]hen\b/ ; desc2 = desc
       else                          ; desc2 = "When #{desc}"
       end
       #; [!g3cvh] returns topic object.
@@ -882,8 +883,10 @@ END
     def self.case_else(desc=nil, tag: nil, &block)
       #; [!hs1to] 1st parameter is optional.
       #; [!j5gnp] target is a description which is 'Else'.
+      #; [!3nn8d] not add 'Else ' if description starts with it.
       case desc
       when nil                      ; desc2 = "Else"
+      when /^(\[!\w+\] )?[eE]lse\b/ ; desc2 = desc
       else                          ; desc2 = "Else #{desc}"
       end
       #; [!oww4b] returns topic object.
