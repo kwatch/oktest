@@ -2920,12 +2920,22 @@ __END__
 ## see https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
 require 'oktest'
 
-Oktest.scope do
 
-  fixture :alice do
+## define common fixtures or helper methods in global scope block.
+## (strongly recommended to separate global scope block into a dedicated file.)
+Oktest.global_scope do
+
+  fixture :alice do           # global fixture example
     {name: "Alice"}
   end
-  fixture :bob do
+
+end
+
+
+## define test cases and fixtures in normal scope block.
+Oktest.scope do
+
+  fixture :bob do             # local fixture example
     {name: "Bob"}
   end
 
@@ -2940,6 +2950,11 @@ Oktest.scope do
 
       spec "1+1 should be 2." do
         ok {1+1} == 2
+      end
+
+      spec "1/0 should raise error." do
+        pr = proc { 1/0 }
+        ok {pr}.raise?(ZeroDivisionError, /divided by 0/)
       end
 
       spec "fixture injection examle." do
