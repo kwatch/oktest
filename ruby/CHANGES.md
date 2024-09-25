@@ -2,6 +2,18 @@ CHANGES
 =======
 
 
+Release 1.4.0
+-------------
+
+* [enhance] `ok {}.raise_nothing?` provided which is same as but non-ambiguous than `ok {}.NOT.raise?`.
+* [change] `capture_sio()` is renamed to `capture_stdio()`. For backward compatibility, `capture_sio()` is still available as an alias of `capture_stdio()`.
+* [enhance] `capture_stdout()` provided which is almost same as `sout, serr = capture_stdio(); ok {serr} == ""`.
+* [enhance] `capture_stderr()` provided which is almost same as `sout, serr = capture_stdio(); ok {sout} == ""`.
+* [enhance] `capture_command()` provided which invokes command and captures output of stdout and stderr.
+* [enhance] `capture_command!()` provided which is similar to `capture_command()` but not raise error even when command failed.
+
+
+
 Release 1.3.1
 -------------
 
