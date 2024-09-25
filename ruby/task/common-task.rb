@@ -57,26 +57,47 @@ end unless Rake::Task.task_defined?(:guide)
 
 
 desc "do test"
-task :test do
-  ruby "test/run_all.rb"
-end unless Rake::Task.task_defined?(:test)
+task :test => :'test:quiet'
 
 
-if ENV['VS_HOME'] && $ruby_versions
-  desc "do test for different ruby versions"
-  task :'test:all' do
-    vs_home = ENV['VS_HOME'].split(/:/).first
+namespace :test do
+
+  desc "do test in verbose mode"
+  task :verbose do
+    ruby "test/run_all.rb"
+  end
+
+  desc "do test in quiet mode"
+  task :quiet do
+    _be_quiet()
+    ruby "test/run_all.rb"
+  end
+
+  def _be_quiet()
     ENV['TC_QUIET'] = "Y" if File.exist?("test/tc.rb")
+  end
+
+  desc "do test for different ruby versions"
+  task :all do
+    defined? $ruby_versions  or abort "`$ruby_versions` should be defined."
+    ENV['VS_HOME']  or abort "Environment variable `$VS_HOME` should be set."
+    vs_home = ENV['VS_HOME'].split(/:/).first
+    _be_quiet()
     comp = proc {|x, y| x.to_s.split('.').map(&:to_i) <=> y.to_s.split('.').map(&:to_i) }
     $ruby_versions.each do |ver|
-      bindir = Dir.glob("#{vs_home}/ruby/#{ver}.*/bin").sort_by(&comp).last
-      next unless bindir
+      bindir_pattern = "#{vs_home}/ruby/#{ver}.*/bin"
+      bindir = Dir.glob(bindir_pattern).sort_by(&comp).last
+      if ! bindir
+        puts "\e[31m[ERROR] #{bindir_pattern}: not exist.\e[0m"
+        next
+      end
       puts "\e[33m==== ruby #{ver} (#{File.dirname(bindir)}) ====\e[0m"
       sh "#{bindir}/ruby test/run_all.rb" do |ok, res|
         $stderr.puts "** test failed" unless ok
       end
     end
-  end unless Rake::Task.task_defined?(:'test:all')
+  end
+
 end
 
 
