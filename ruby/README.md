@@ -823,7 +823,7 @@ ok {exc.class}   == NoMethodError
 ok {exc.message} == "undefined method `len' for \"abc\":String"
 
 ## assert that procedure does NOT raise any exception
-ok {pr}.raise_nothing? # (>= Oktest 1.3)
+ok {pr}.raise_nothing? # (>= Oktest 1.4)
 ok {pr}.NOT.raise?     # no exception class nor error message
 not_ok {pr}.raise?     # same as above
 
