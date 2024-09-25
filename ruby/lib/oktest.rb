@@ -1347,6 +1347,17 @@ END
       return serr
     end
 
+    def capture_command(command, input="")
+      require 'open3' unless defined?(::Open3)
+      #; [!wyp17] executes command with stdin data.
+      sout, serr, pstat = ::Open3.capture3(command, :stdin_data=>input)
+      #; [!jd63p] raises error if command failed.
+      pstat.exitstatus == 0  or
+        raise "Command failed with status (#{pstat.exitstatus}): `#{command}`"
+      #; [!h5994] returns output of stdin and stderr.
+      return sout, serr
+    end
+
     def __do_dummy(val, recover, &b)
       if block_given?()
         begin
