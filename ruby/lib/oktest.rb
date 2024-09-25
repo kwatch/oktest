@@ -2722,7 +2722,7 @@ END
       end
       #; [!dk8eg] '-S' or '--skeleton' option prints test code skeleton.
       if opts.skeleton
-        print SKELETON
+        print skeleton()
         return 0
       end
       #; [!uxh5e] '-G' or '--generate' option prints test code.
@@ -2871,46 +2871,12 @@ END
       return buf.join()
     end
 
-    SKELETON = <<'END'
-# coding: utf-8
-
-## see https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
-require 'oktest'
-
-Oktest.scope do
-
-  fixture :alice do
-    {name: "Alice"}
-  end
-  fixture :bob do
-    {name: "Bob"}
-  end
-
-  topic Class do
-
-    before do nil end
-    after do nil end
-    before_all do nil end
-    after_all do nil end
-
-    topic '#method_name()' do
-
-      spec "1+1 should be 2." do
-        ok {1+1} == 2
-      end
-
-      spec "fixture injection examle." do
-        |alice, bob|
-        ok {alice[:name]} == "Alice"
-        ok {bob[:name]} == "Bob"
-      end
-
+    def skeleton()
+      #; [!s2i1p] returns skeleton string of test script.
+      #; [!opvik] skeleton string is valid ruby code.
+      str = File.read(__FILE__, encoding: 'utf-8')
+      return str.split(/^__END__\n/, 2)[1]
     end
-
-  end
-
-end
-END
 
   end
 
@@ -2945,4 +2911,60 @@ at_exit { Oktest.on_exit() }
 if __FILE__ == $0
   $LOADED_FEATURES << File.expand_path(__FILE__)  # avoid loading oktest.rb twice
   Oktest.main()   # run test scripts
+end
+
+
+__END__
+# coding: utf-8
+
+## see https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
+require 'oktest'
+
+
+## define common fixtures or helper methods in global scope block.
+## (strongly recommended to separate global scope block into a dedicated file.)
+Oktest.global_scope do
+
+  fixture :alice do           # global fixture example
+    {name: "Alice"}
+  end
+
+end
+
+
+## define test cases and fixtures in normal scope block.
+Oktest.scope do
+
+  fixture :bob do             # local fixture example
+    {name: "Bob"}
+  end
+
+  topic Class do
+
+    before do nil end
+    after do nil end
+    before_all do nil end
+    after_all do nil end
+
+    topic '#method_name()' do
+
+      spec "1+1 should be 2." do
+        ok {1+1} == 2
+      end
+
+      spec "1/0 should raise error." do
+        pr = proc { 1/0 }
+        ok {pr}.raise?(ZeroDivisionError, /divided by 0/)
+      end
+
+      spec "fixture injection examle." do
+        |alice, bob|
+        ok {alice[:name]} == "Alice"
+        ok {bob[:name]} == "Bob"
+      end
+
+    end
+
+  end
+
 end
