@@ -380,6 +380,18 @@ module Oktest
       return exc
     end
 
+    def raise_nothing?()
+      __done()
+      #; [!leqey] do nothing without calling proc object.
+      proc_obj = @actual
+      if @bool
+        proc_obj.call
+      #; [!a61b7] not available with `.NOT`.
+      else
+        raise OktestError, "`raise_nothing?()` is not available with `.NOT`."
+      end
+    end
+
     def throw?(expected)
       __done()
       proc_obj = @actual

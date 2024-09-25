@@ -630,6 +630,18 @@ END
     end
   end
 
+  describe '#raise_nothing?' do
+    it "[!leqey] do nothing without calling proc object." do
+      pr = proc { 1/0 }
+      ERROR!(ZeroDivisionError) { ok {pr}.raise_nothing? }
+    end
+    it "[!a61b7] not available with `.NOT`." do
+      pr = proc { nil }
+      errmsg = "`raise_nothing?()` is not available with `.NOT`."
+      ERROR!(Oktest::OktestError, errmsg) { ok {pr}.NOT.raise_nothing? }
+    end
+  end
+
   describe '#thrown?' do
     it "[!w7935] raises ArgumentError when arg of 'thrown?()' is nil." do
       ERROR!(ArgumentError, "throw?(nil): expected tag required.") do
