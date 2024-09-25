@@ -509,7 +509,7 @@ END
     it "[!dk8eg] '-S' or '--skeleton' option prints test code skeleton." do
       ret, sout, serr = run("-S")
       assert_eq ret, 0
-      assert_eq sout, Oktest::MainApp::SKELETON
+      assert_eq sout, Oktest::MainApp.new.__send__(:skeleton)
       assert_eq serr, ""
     end
 
@@ -673,6 +673,25 @@ END
       end
     end
 
+  end
+
+  describe '#skeleton()' do
+    it "[!s2i1p] returns skeleton string of test script." do
+      str = Oktest::MainApp.new.__send__(:skeleton)
+      assert str =~ /^require 'oktest'$/
+      assert str =~ /^Oktest\.scope do$/
+    end
+    it "[!opvik] skeleton string is valid ruby code." do
+      str = Oktest::MainApp.new.__send__(:skeleton)
+      filename = "tmp.skeleten.rb"
+      File.write(filename, str, encoding: 'utf-8')
+      begin
+        result = `ruby -wc #{filename}`
+        assert_eq result, "Syntax OK\n"
+      ensure
+        File.unlink filename
+      end
+    end
   end
 
 end

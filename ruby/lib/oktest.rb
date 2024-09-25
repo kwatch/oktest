@@ -2722,7 +2722,7 @@ END
       end
       #; [!dk8eg] '-S' or '--skeleton' option prints test code skeleton.
       if opts.skeleton
-        print SKELETON
+        print skeleton()
         return 0
       end
       #; [!uxh5e] '-G' or '--generate' option prints test code.
@@ -2871,7 +2871,50 @@ END
       return buf.join()
     end
 
-    SKELETON = <<'END'
+    def skeleton()
+      #; [!s2i1p] returns skeleton string of test script.
+      #; [!opvik] skeleton string is valid ruby code.
+      str = File.read(__FILE__, encoding: 'utf-8')
+      return str.split(/^__END__\n/, 2)[1]
+    end
+
+  end
+
+
+  def self.main(argv=nil)
+    status = MainApp.main(argv)
+    exit(status)
+  end
+
+  def self.on_exit()     # :nodoc:
+    Oktest.main() if self.auto_run?()
+  end
+
+  def self.auto_run?()   # :nodoc:
+    #; [!7vm4d] returns false if error raised when loading test scripts.
+    #; [!oae85] returns true if exit() called.
+    exc = $!
+    return false if exc && !exc.is_a?(SystemExit)
+    #; [!rg5aw] returns false if Oktest.scope() never been called.
+    return false unless THE_GLOBAL_SCOPE.has_child?
+    #; [!0j3ek] returns true if Config.auto_run is enabled.
+    return Config.auto_run
+  end
+
+
+end
+
+
+at_exit { Oktest.on_exit() }
+
+
+if __FILE__ == $0
+  $LOADED_FEATURES << File.expand_path(__FILE__)  # avoid loading oktest.rb twice
+  Oktest.main()   # run test scripts
+end
+
+
+__END__
 # coding: utf-8
 
 ## see https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
@@ -2909,40 +2952,4 @@ Oktest.scope do
 
   end
 
-end
-END
-
-  end
-
-
-  def self.main(argv=nil)
-    status = MainApp.main(argv)
-    exit(status)
-  end
-
-  def self.on_exit()     # :nodoc:
-    Oktest.main() if self.auto_run?()
-  end
-
-  def self.auto_run?()   # :nodoc:
-    #; [!7vm4d] returns false if error raised when loading test scripts.
-    #; [!oae85] returns true if exit() called.
-    exc = $!
-    return false if exc && !exc.is_a?(SystemExit)
-    #; [!rg5aw] returns false if Oktest.scope() never been called.
-    return false unless THE_GLOBAL_SCOPE.has_child?
-    #; [!0j3ek] returns true if Config.auto_run is enabled.
-    return Config.auto_run
-  end
-
-
-end
-
-
-at_exit { Oktest.on_exit() }
-
-
-if __FILE__ == $0
-  $LOADED_FEATURES << File.expand_path(__FILE__)  # avoid loading oktest.rb twice
-  Oktest.main()   # run test scripts
 end
