@@ -81,6 +81,8 @@ Oktest.rb requires Ruby 2.4 or later.
     * <a href="#capture_sio"><code>capture_sio()</code></a>
     * <a href="#capture_stdout"><code>capture_stdout()</code></a>
     * <a href="#capture_stderr"><code>capture_stderr()</code></a>
+    * <a href="#capture_command"><code>capture_command()</code></a>
+    * <a href="#capture_command"><code>capture_command!()</code></a>
     * <a href="#dummy_file"><code>dummy_file()</code></a>
     * <a href="#dummy_dir"><code>dummy_dir()</code></a>
     * <a href="#dummy_values"><code>dummy_values()</code></a>
@@ -826,7 +828,7 @@ ok {exc.class}   == NoMethodError
 ok {exc.message} == "undefined method `len' for \"abc\":String"
 
 ## assert that procedure does NOT raise any exception
-ok {pr}.raise_nothing? # (>= Oktest 1.4)
+ok {pr}.raise_nothing? # (Oktest >= 1.4)
 ok {pr}.NOT.raise?     # no exception class nor error message
 not_ok {pr}.raise?     # same as above
 
@@ -1340,12 +1342,16 @@ end
   If it is not necessary, you can omit it like `caputre_stdio() do ... end`.
 * If you need `$stdin.tty? == true` and `$stdout.tty? == true`,
   call `capture_stdio(tty: true) do ... end`.
+* Available on Oktest >= 1.4.
 
 
 ### `capture_sio()`
 
 `capture_sio()` is an alias of `capture_stdio()`.
 This is provided for backward compatibility.
+
+(`capture_stdio()` is provided as `capture_sio()` on Oktest < 1.4,
+ and `capture_sio()` is renamed to `capture_stdio()` since Oktest 1.4.)
 
 
 ### `capture_stdout()`
@@ -1363,6 +1369,8 @@ def capture_stdout(*args, **kwargs, &b)
 end
 ```
 
+* Available on Oktest >= 1.4.
+
 
 ### `capture_stderr()`
 
@@ -1378,6 +1386,58 @@ def capture_stderr(*args, **kwargs, &b)
   return serr
 end
 ```
+
+* Available on Oktest >= 1.4.
+
+
+### `capture_command()`
+
+`capture_command()` executes a command and returns output of stdout and stderr.
+
+test/example32_test.rb:
+
+```ruby
+require 'oktest'
+
+Oktest.scope do
+
+  topic "Capturing" do
+
+    spec "example spec" do
+      input = "AAA\nBBB\n"
+      sout, serr = capture_command("cat -n", input)     # !!!!!
+      ok {sout} == "     1\tAAA\n     2\tBBB\n"
+      ok {serr} == ""
+    end
+
+    spec "skip if command not installed" do
+      begin
+        sout, serr = capture_command "foobar"
+      rescue Errno::ENOENT
+        skip_when true, "command `foobar` not installed."
+      end
+    end
+
+  end
+
+end
+```
+
+* The second argument of `capture_command()` represents `$stdin` data.
+  It is optional.
+* `capture_command()` raises RuntimeError if command failed.
+* `capture_command()` accepts error handler block. The block will be called only when command failed. If error handler block is specified, `capture_command()` doesn't raise RuntimeError even if command failed.
+* `capture_command()` raises `Errno::ENOENT` exception if command not found. This exception will not be handled by error handler block.
+* Keyword parameter `tty: true` is not available.
+* Available on Oktest >= 1.4.
+
+
+### `capture_command!()`
+
+`capture_command!()` is similar to `capture_command()` but not raise error
+when command failed.
+
+* Available on Oktest >= 1.4.
 
 
 ### `dummy_file()`

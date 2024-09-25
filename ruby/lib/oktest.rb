@@ -1347,6 +1347,33 @@ END
       return serr
     end
 
+    def capture_command(command, input="", &error_handler)
+      require 'open3' unless defined?(::Open3)
+      #; [!wyp17] executes command with stdin data.
+      sout, serr, pstat = ::Open3.capture3(command, :stdin_data=>input)
+      #; [!jd63p] raises error if command failed.
+      #; [!lsmgq] calls error handler block if command failed.
+      #; [!vivq3] doesn't call error handler block if command finished successfully.
+      #; [!nxw59] not raise error if command failed and error handler specified.
+      if pstat.exitstatus != 0
+        if block_given?()
+          yield pstat
+        else
+          raise "Command failed with status (#{pstat.exitstatus}): `#{command}`"
+        end
+      end
+      #; [!h5994] returns output of stdin and stderr.
+      return sout, serr
+    end
+
+    def capture_command!(command, input="", &error_handler)
+      #; [!vlbpo] executes command with stdin data.
+      #; [!yfohb] not raise error even if command failed.
+      #; [!3xdgo] returns output of stdin and stderr.
+      error_handler ||= proc do end
+      capture_command(command, input, &error_handler)
+    end
+
     def __do_dummy(val, recover, &b)
       if block_given?()
         begin

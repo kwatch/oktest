@@ -315,6 +315,83 @@ END
     end
   end
 
+  describe '#capture_command()' do
+    it "[!wyp17] executes command with stdin data." do
+      sout, serr = capture_command("cat -n", "AAA\nBBB\n")
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+    end
+    it "[!jd63p] raises error if command failed." do
+      begin
+        capture_command("ls *not*exist*")
+      rescue => exc
+        assert_eq exc.class, RuntimeError
+        assert_eq exc.message, "Command failed with status (1): `ls *not*exist*`"
+      else
+        assert false, "Exception should be raised but not."
+      end
+    end
+    it "[!lsmgq] calls error handler block if command failed." do
+      called = nil
+      sout, serr = capture_command("ls *not*exist*") do |pstat|
+        called = pstat
+      end
+      assert called.is_a?(Process::Status)
+      assert called.exitstatus == 1
+      assert_eq sout, ""
+      assert_eq serr, "ls: *not*exist*: No such file or directory\n"
+    end
+    it "[!vivq3] doesn't call error handler block if command finished successfully." do
+      called = nil
+      sout, serr = capture_command("cat -n", "AAA\nBBB\n") do |pstat|
+        called = pstat
+      end
+      assert_eq called, nil
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+    end
+    it "[!nxw59] not raise error if command failed and error handler specified." do
+      begin
+        sout, serr = capture_command("ls *not*exist*") do end
+      rescue => exc
+        assert false, "Exception should not raised, but raised #{exc.inspect}"
+      end
+      assert_eq sout, ""
+      assert_eq serr, "ls: *not*exist*: No such file or directory\n"
+    end
+    it "[!h5994] returns output of stdin and stderr." do
+      sout, serr = capture_command("cat -n", "AAA\nBBB\n")
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+      #
+      sout, serr = capture_command("echo ERR >&2")
+      assert_eq sout, ""
+      assert_eq serr, "ERR\n"
+    end
+  end
+
+  describe '#capture_command!()' do
+    it "[!vlbpo] executes command with stdin data." do
+      sout, serr = capture_command!("cat -n", "AAA\nBBB\n")
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+    end
+    it "[!yfohb] not raise error even if command failed." do
+      sout, serr = capture_command!("ls *not*exist*")
+      assert_eq sout, ""
+      assert_eq serr, "ls: *not*exist*: No such file or directory\n"
+    end
+    it "[!3xdgo] returns output of stdin and stderr." do
+      sout, serr = capture_command!("cat -n", "AAA\nBBB\n")
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+      #
+      sout, serr = capture_command!("echo ERR >&2")
+      assert_eq sout, ""
+      assert_eq serr, "ERR\n"
+    end
+  end
+
   describe '#dummy_file()' do
     it "[!7e0bo] creates dummy file." do
       tmpfile = "_tmp_3511.txt"
