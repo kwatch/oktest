@@ -26,6 +26,11 @@ class SpecHelper_TC < TC
     Oktest::AssertionObject::NOT_YET.clear()
   end
 
+  def __assert(result, &b)    # copied from `Oktest::AssertionObject`
+    raise Oktest::FAIL_EXCEPTION, yield unless result
+  end
+  private :__assert
+
   describe '#ok()' do
     it "[!3jhg6] creates new assertion object." do
       o = ok {"foo"}
@@ -255,6 +260,32 @@ END
       assert_eq sin, "INPUT"
       assert_eq sout, "OUTPUT\n"
       assert_eq serr, "ERROR\n"
+    end
+  end
+
+  describe '#capture_stdout()' do
+    it "[!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`" do
+      sin = nil
+      sout = capture_stdout("INPUT", tty: true) do
+        sin = $stdin.read()
+        puts "OUTPUT"
+        assert_eq $stdin.tty?, true
+        assert_eq $stdout.tty?, true
+        assert_eq $stderr.tty?, true
+      end
+      assert_eq sin, "INPUT"
+      assert_eq sout, "OUTPUT\n"
+    end
+    it "[!5n04e] returns output of stdout." do
+      begin
+        sout = capture_stdout() do
+          $stderr.print "ERROR"
+        end
+      rescue Oktest::AssertionFailed => exc
+        assert_eq exc.message, "Output of $stderr expected to be empty, but got: \"ERROR\""
+      else
+        assert false, "AsssertionFailed should be raised."
+      end
     end
   end
 

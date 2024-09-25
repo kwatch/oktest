@@ -1327,6 +1327,16 @@ END
     #; [!qjmaa] 'capture_sio()' is an alias of 'capture_stdio()'.
     alias capture_sio capture_stdio
 
+    def capture_stdout(input="", tty: false, &b)
+      #; [!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`
+      sout, serr = capture_stdio(input, tty: tty, &b)
+      __assert(serr == "") {
+        "Output of $stderr expected to be empty, but got: #{serr.inspect}"
+      }
+      #; [!5n04e] returns output of stdout.
+      return sout
+    end
+
     def __do_dummy(val, recover, &b)
       if block_given?()
         begin
