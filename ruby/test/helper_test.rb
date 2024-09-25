@@ -26,6 +26,11 @@ class SpecHelper_TC < TC
     Oktest::AssertionObject::NOT_YET.clear()
   end
 
+  def __assert(result, &b)    # copied from `Oktest::AssertionObject`
+    raise Oktest::FAIL_EXCEPTION, yield unless result
+  end
+  private :__assert
+
   describe '#ok()' do
     it "[!3jhg6] creates new assertion object." do
       o = ok {"foo"}
@@ -181,9 +186,9 @@ END
     end
   end
 
-  describe '#capture_sio()' do
+  describe '#capture_stdio()' do
     it "[!1kbnj] captures $stdio and $stderr." do
-      sout, serr = capture_sio() do
+      sout, serr = capture_stdio() do
         puts "fooo"
         $stderr.puts "baaa"
       end
@@ -192,7 +197,7 @@ END
     end
     it "[!53mai] takes $stdin data." do
       data = nil
-      sout, serr = capture_sio("blabla") do
+      sout, serr = capture_stdio("blabla") do
         data = $stdin.read()
       end
       data = "blabla"
@@ -201,7 +206,7 @@ END
       stdin_, stdout_, stderr_ = $stdin, $stdout, $stderr
       exception = nil
       begin
-        sout, serr = capture_sio() do
+        sout, serr = capture_stdio() do
           puts "fooo"
           $stderr.puts "baaa"
           assert stdin_  != $stdin , "stdin should be replaced"
@@ -219,7 +224,7 @@ END
       assert stderr_ == $stderr, "stderr should be recovered"
     end
     it "[!4j494] returns outpouts of stdout and stderr." do
-      sout, serr = capture_sio() do
+      sout, serr = capture_stdio() do
         puts "foo"
         $stderr.puts "bar"
       end
@@ -227,16 +232,85 @@ END
       assert_eq serr, "bar\n"
     end
     it "[!6ik8b] can simulate tty." do
-      sout, serr = capture_sio() do
+      sout, serr = capture_stdio() do
         assert_eq $stdin.tty?, false
         assert_eq $stdout.tty?, false
         assert_eq $stderr.tty?, false
       end
       #
-      sout, serr = capture_sio(tty: true) do
+      sout, serr = capture_stdio(tty: true) do
         assert_eq $stdin.tty?, true
         assert_eq $stdout.tty?, true
         assert_eq $stderr.tty?, true
+      end
+    end
+  end
+
+  describe '#capture_sio()' do
+    it "[!qjmaa] 'capture_sio()' is an alias of 'capture_stdio()'." do
+      sin = nil
+      sout, serr = capture_sio("INPUT", tty: true) do
+        sin = $stdin.read()
+        puts "OUTPUT"
+        $stderr.puts "ERROR"
+        assert_eq $stdin.tty?, true
+        assert_eq $stdout.tty?, true
+        assert_eq $stdout.tty?, true
+      end
+      assert_eq sin, "INPUT"
+      assert_eq sout, "OUTPUT\n"
+      assert_eq serr, "ERROR\n"
+    end
+  end
+
+  describe '#capture_stdout()' do
+    it "[!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`" do
+      sin = nil
+      sout = capture_stdout("INPUT", tty: true) do
+        sin = $stdin.read()
+        puts "OUTPUT"
+        assert_eq $stdin.tty?, true
+        assert_eq $stdout.tty?, true
+        assert_eq $stderr.tty?, true
+      end
+      assert_eq sin, "INPUT"
+      assert_eq sout, "OUTPUT\n"
+    end
+    it "[!5n04e] returns output of stdout." do
+      begin
+        sout = capture_stdout() do
+          $stderr.print "ERROR"
+        end
+      rescue Oktest::AssertionFailed => exc
+        assert_eq exc.message, "Output of $stderr expected to be empty, but got: \"ERROR\""
+      else
+        assert false, "AsssertionFailed should be raised."
+      end
+    end
+  end
+
+  describe '#capture_stderr()' do
+    it "[!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`" do
+      sin = nil
+      serr = capture_stderr("INPUT", tty: true) do
+        sin = $stdin.read()
+        $stderr.puts "ERROR"
+        assert_eq $stdin.tty?, true
+        assert_eq $stdout.tty?, true
+        assert_eq $stderr.tty?, true
+      end
+      assert_eq sin, "INPUT"
+      assert_eq serr, "ERROR\n"
+    end
+    it "[!5vs64] returns output of stderr." do
+      begin
+        sout = capture_stderr() do
+          print "OUTPUT"
+        end
+      rescue Oktest::AssertionFailed => exc
+        assert_eq exc.message, "Output of $stdout expected to be empty, but got: \"OUTPUT\""
+      else
+        assert false, "AsssertionFailed should be raised."
       end
     end
   end

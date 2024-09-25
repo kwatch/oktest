@@ -77,7 +77,10 @@ Oktest.rb requires Ruby 2.4 or later.
     * <a href="#fixture-keyword-argument"><code>fixture:</code> keyword argument</a>
     * <a href="#global-scope">Global Scope</a>
   * <a href="#helpers">Helpers</a>
+    * <a href="#capture_stdio"><code>capture_stdio()</code></a>
     * <a href="#capture_sio"><code>capture_sio()</code></a>
+    * <a href="#capture_stdout"><code>capture_stdout()</code></a>
+    * <a href="#capture_stderr"><code>capture_stderr()</code></a>
     * <a href="#dummy_file"><code>dummy_file()</code></a>
     * <a href="#dummy_dir"><code>dummy_dir()</code></a>
     * <a href="#dummy_values"><code>dummy_values()</code></a>
@@ -1303,9 +1306,9 @@ end
 ## Helpers
 
 
-### `capture_sio()`
+### `capture_stdio()`
 
-`capture_sio()` captures standard I/O.
+`capture_stdio()` captures standard I/O.
 
 test/example31_test.rb:
 
@@ -1318,7 +1321,7 @@ Oktest.scope do
 
     spec "example spec" do
       data = nil
-      sout, serr = capture_sio("blabla") do            # !!!!!
+      sout, serr = capture_stdio("blabla") do          # !!!!!
         data = $stdin.read()     # read from stdin
         puts "fooo"              # write into stdout
         $stderr.puts "baaa"      # write into stderr
@@ -1333,10 +1336,48 @@ Oktest.scope do
 end
 ```
 
-* The first argument of `capture_sio()` represents data from `$stdin`.
-  If it is not necessary, you can omit it like `caputre_sio() do ... end`.
+* The first argument of `capture_stdio()` represents data from `$stdin`.
+  If it is not necessary, you can omit it like `caputre_stdio() do ... end`.
 * If you need `$stdin.tty? == true` and `$stdout.tty? == true`,
-  call `capture_sio(tty: true) do ... end`.
+  call `capture_stdio(tty: true) do ... end`.
+
+
+### `capture_sio()`
+
+`capture_sio()` is an alias of `capture_stdio()`.
+This is provided for backward compatibility.
+
+
+### `capture_stdout()`
+
+`capture_stdout()` captures output of $stdout.
+If output of $stderr is not empty, assertion error will be raised.
+
+`capture_stdout()` is almost same as the following.
+
+```ruby
+def capture_stdout(*args, **kwargs, &b)
+  sout, serr = capture_stdio(*args, **kwargs, &b)
+  ok {serr} == ""
+  return sout
+end
+```
+
+
+### `capture_stderr()`
+
+`capture_stderr()` captures output of $stderr.
+If output of $stdout is not empty, assertion error will be raised.
+
+`capture_stderr()` is almost same as the following.
+
+```ruby
+def capture_stderr(*args, **kwargs, &b)
+  sout, serr = capture_stdio(*args, **kwargs, &b)
+  ok {sout} == ""
+  return serr
+end
+```
 
 
 ### `dummy_file()`

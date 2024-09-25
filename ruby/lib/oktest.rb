@@ -1302,7 +1302,7 @@ END
       (@__at_end_blocks ||= []) << block
     end
 
-    def capture_sio(input="", tty: false, &b)
+    def capture_stdio(input="", tty: false, &b)
       require 'stringio' unless defined?(StringIO)
       bkup = [$stdin, $stdout, $stderr]
       #; [!53mai] takes $stdin data.
@@ -1322,6 +1322,29 @@ END
     ensure
       #; [!wq8a9] recovers stdio even when exception raised.
       $stdin, $stdout, $stderr = bkup
+    end
+
+    #; [!qjmaa] 'capture_sio()' is an alias of 'capture_stdio()'.
+    alias capture_sio capture_stdio
+
+    def capture_stdout(input="", tty: false, &b)
+      #; [!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`
+      sout, serr = capture_stdio(input, tty: tty, &b)
+      __assert(serr == "") {
+        "Output of $stderr expected to be empty, but got: #{serr.inspect}"
+      }
+      #; [!5n04e] returns output of stdout.
+      return sout
+    end
+
+    def capture_stderr(input="", tty: false, &b)
+      #; [!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`
+      sout, serr = capture_stdio(input, tty: tty, &b)
+      __assert(sout == "") {
+        "Output of $stdout expected to be empty, but got: #{sout.inspect}"
+      }
+      #; [!5vs64] returns output of stderr.
+      return serr
     end
 
     def __do_dummy(val, recover, &b)
