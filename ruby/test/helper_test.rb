@@ -181,9 +181,9 @@ END
     end
   end
 
-  describe '#capture_sio()' do
+  describe '#capture_stdio()' do
     it "[!1kbnj] captures $stdio and $stderr." do
-      sout, serr = capture_sio() do
+      sout, serr = capture_stdio() do
         puts "fooo"
         $stderr.puts "baaa"
       end
@@ -192,7 +192,7 @@ END
     end
     it "[!53mai] takes $stdin data." do
       data = nil
-      sout, serr = capture_sio("blabla") do
+      sout, serr = capture_stdio("blabla") do
         data = $stdin.read()
       end
       data = "blabla"
@@ -201,7 +201,7 @@ END
       stdin_, stdout_, stderr_ = $stdin, $stdout, $stderr
       exception = nil
       begin
-        sout, serr = capture_sio() do
+        sout, serr = capture_stdio() do
           puts "fooo"
           $stderr.puts "baaa"
           assert stdin_  != $stdin , "stdin should be replaced"
@@ -219,7 +219,7 @@ END
       assert stderr_ == $stderr, "stderr should be recovered"
     end
     it "[!4j494] returns outpouts of stdout and stderr." do
-      sout, serr = capture_sio() do
+      sout, serr = capture_stdio() do
         puts "foo"
         $stderr.puts "bar"
       end
@@ -227,13 +227,13 @@ END
       assert_eq serr, "bar\n"
     end
     it "[!6ik8b] can simulate tty." do
-      sout, serr = capture_sio() do
+      sout, serr = capture_stdio() do
         assert_eq $stdin.tty?, false
         assert_eq $stdout.tty?, false
         assert_eq $stderr.tty?, false
       end
       #
-      sout, serr = capture_sio(tty: true) do
+      sout, serr = capture_stdio(tty: true) do
         assert_eq $stdin.tty?, true
         assert_eq $stdout.tty?, true
         assert_eq $stderr.tty?, true

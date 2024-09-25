@@ -1302,7 +1302,7 @@ END
       (@__at_end_blocks ||= []) << block
     end
 
-    def capture_sio(input="", tty: false, &b)
+    def capture_stdio(input="", tty: false, &b)
       require 'stringio' unless defined?(StringIO)
       bkup = [$stdin, $stdout, $stderr]
       #; [!53mai] takes $stdin data.
