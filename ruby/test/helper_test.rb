@@ -342,6 +342,28 @@ END
     end
   end
 
+  describe '#capture_command!()' do
+    it "[!vlbpo] executes command with stdin data." do
+      sout, serr = capture_command!("cat -n", "AAA\nBBB\n")
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+    end
+    it "[!yfohb] not raise error even if command failed." do
+      sout, serr = capture_command!("ls *not*exist*")
+      assert_eq sout, ""
+      assert_eq serr, "ls: *not*exist*: No such file or directory\n"
+    end
+    it "[!3xdgo] returns output of stdin and stderr." do
+      sout, serr = capture_command!("cat -n", "AAA\nBBB\n")
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
+      #
+      sout, serr = capture_command!("echo ERR >&2")
+      assert_eq sout, ""
+      assert_eq serr, "ERR\n"
+    end
+  end
+
   describe '#dummy_file()' do
     it "[!7e0bo] creates dummy file." do
       tmpfile = "_tmp_3511.txt"

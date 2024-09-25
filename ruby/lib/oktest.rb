@@ -1358,6 +1358,15 @@ END
       return sout, serr
     end
 
+    def capture_command!(command, input="")
+      require 'open3' unless defined?(::Open3)
+      #; [!vlbpo] executes command with stdin data.
+      sout, serr, _pstat = ::Open3.capture3(command, :stdin_data=>input)
+      #; [!yfohb] not raise error even if command failed.
+      #; [!3xdgo] returns output of stdin and stderr.
+      return sout, serr
+    end
+
     def __do_dummy(val, recover, &b)
       if block_given?()
         begin
