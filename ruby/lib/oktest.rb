@@ -1369,6 +1369,8 @@ END
     def capture_command!(command, input="", &error_handler)
       #; [!vlbpo] executes command with stdin data.
       #; [!yfohb] not raise error even if command failed.
+      #; [!andyj] calls error handler block if command failed.
+      #; [!xnkqc] doesn't call error handler block if command finished successfully.
       #; [!3xdgo] returns output of stdin and stderr.
       error_handler ||= proc do end
       capture_command(command, input, &error_handler)

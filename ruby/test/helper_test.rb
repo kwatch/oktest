@@ -342,11 +342,11 @@ END
       assert_eq serr, "ls: *not*exist*: No such file or directory\n"
     end
     it "[!vivq3] doesn't call error handler block if command finished successfully." do
-      called = nil
-      sout, serr = capture_command("cat -n", "AAA\nBBB\n") do |pstat|
-        called = pstat
+      called = false
+      sout, serr = capture_command("cat -n", "AAA\nBBB\n") do
+        called = true
       end
-      assert_eq called, nil
+      assert_eq called, false
       assert_eq sout, "     1\tAAA\n     2\tBBB\n"
       assert_eq serr, ""
     end
@@ -380,6 +380,25 @@ END
       sout, serr = capture_command!("ls *not*exist*")
       assert_eq sout, ""
       assert_eq serr, "ls: *not*exist*: No such file or directory\n"
+    end
+    it "[!andyj] calls error handler block if command failed." do
+      called = nil
+      sout, serr = capture_command!("ls *not*exist*") do |pstat|
+        called = pstat
+      end
+      assert called.is_a?(Process::Status)
+      assert called.exitstatus == 1
+      assert_eq sout, ""
+      assert_eq serr, "ls: *not*exist*: No such file or directory\n"
+    end
+    it "[!xnkqc] doesn't call error handler block if command finished successfully." do
+      called = false
+      sout, serr = capture_command!("cat -n", "AAA\nBBB\n") do
+        called = true
+      end
+      assert_eq called, false
+      assert_eq sout, "     1\tAAA\n     2\tBBB\n"
+      assert_eq serr, ""
     end
     it "[!3xdgo] returns output of stdin and stderr." do
       sout, serr = capture_command!("cat -n", "AAA\nBBB\n")
