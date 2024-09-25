@@ -870,17 +870,24 @@ END
     end
 
     def self.case_when(desc, tag: nil, &block)
-      #; [!g3cvh] returns topic object.
       #; [!ofw1i] target is a description starting with 'When '.
-      return __case_when("When #{desc}", tag, &block)
+      case desc
+      when nil                      ; desc2 = nil
+      else                          ; desc2 = "When #{desc}"
+      end
+      #; [!g3cvh] returns topic object.
+      return __case_when(desc2, tag, &block)
     end
 
     def self.case_else(desc=nil, tag: nil, &block)
       #; [!hs1to] 1st parameter is optional.
-      desc = desc ? "Else #{desc}" : "Else"
-      #; [!oww4b] returns topic object.
       #; [!j5gnp] target is a description which is 'Else'.
-      return __case_when(desc, tag, &block)
+      case desc
+      when nil                      ; desc2 = "Else"
+      else                          ; desc2 = "Else #{desc}"
+      end
+      #; [!oww4b] returns topic object.
+      return __case_when(desc2, tag, &block)
     end
 
     def self.__case_when(desc, tag, &block)  #:nodoc:
