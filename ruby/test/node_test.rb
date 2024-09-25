@@ -496,6 +496,21 @@ class Context_TC < TC
       to = node.each_child.first
       assert_eq to.target, "When condition..."
     end
+    it "[!53qxv] not add 'When ' if description starts with it." do
+      node = new_node_with() do
+        case_when "when condition..." do
+        end
+      end
+      to = node.each_child.first
+      assert_eq to.target, "when condition..."
+      #
+      node = new_node_with() do
+        case_when "[""!abc] when..." do
+        end
+      end
+      to = node.each_child.first
+      assert_eq to.target, "[""!abc] when..."
+    end
   end
 
   describe '#case_else()' do
@@ -520,6 +535,25 @@ class Context_TC < TC
       to = node.each_child.first
       assert_eq to.class, Oktest::TopicNode
       assert_eq to.target, "Else"
+    end
+    it "[!3nn8d] not add 'Else ' if description starts with it." do
+      node = new_node_with() do
+        case_else "else (x < 0)" do
+        end
+      end
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
+      assert_eq to.class, Oktest::TopicNode
+      assert_eq to.target, "else (x < 0)"
+      #
+      node = new_node_with() do
+        case_else "[""!abc] else..." do
+        end
+      end
+      assert_eq node.each_child.to_a.length, 1
+      to = node.each_child.first
+      assert_eq to.class, Oktest::TopicNode
+      assert_eq to.target, "[""!abc] else..."
     end
     it "[!hs1to] 1st parameter is optional." do
       node = new_node_with() do
