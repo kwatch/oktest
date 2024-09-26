@@ -2703,7 +2703,9 @@ END
       end
       #
       opts_dict = parser.parse(args)
-      opts = Options.new(opts_dict)
+      #opts = Options.new(**opts_dict)       # Ruby >= 3.2
+      opts = Options.new()
+      opts_dict.each {|k, v| opts[k] = v }   # Ruby < 3.2
       filenames = args
       #; [!9973n] '-h' or '--help' option prints help message.
       if opts.help
@@ -2774,14 +2776,7 @@ END
 
     private
 
-    class Options   #:nodoc:
-      attr_accessor :help, :version, :style, :filter, :color, :skeleton, :generate, :faster
-      def initialize(dict={})
-        dict.each do |k, v|
-          self.__send__("#{k}=", v)
-        end
-      end
-    end
+    Options = Struct.new("Options", :help, :version, :style, :filter, :color, :skeleton, :generate, :faster)   # :nodoc:
 
     def option_schema()
       require 'benry/cmdopt' unless defined?(::Benry::CmdOpt)
