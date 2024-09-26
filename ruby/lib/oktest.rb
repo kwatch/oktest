@@ -2693,7 +2693,7 @@ END
       #; [!uqomj] reports error when required argument is missing.
       #; [!8i755] reports error when argument is invalid.
       rescue Benry::CmdOpt::OptionError => exc
-        $stderr.puts("#{File.basename($0)}: #{exc.message}")
+        $stderr.puts("[ERROR] #{exc.message}")
         return 1
       end
     end
