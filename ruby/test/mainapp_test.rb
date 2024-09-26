@@ -228,24 +228,30 @@ END
     end
 
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
-    HELP_MESSAGE = <<"END"
-Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
-  -h, --help             : show help
-      --version          : print version
-  -s <reporting-style>   : verbose/simple/compact/plain/quiet, or v/s/c/p/q
-  -F <key>=<pattern>     : filter topic or spec with pattern (see below)
-      --color[=<on|off>] : enable/disable output coloring forcedly
-  -S, --skeleton         : print test code skeleton
+    HELP_MESSAGE = (<<"END") % {command: File.basename($0)}
+Oktest (#{Oktest::VERSION}) -- New style testing library
+
+Usage:
+  $ %{command} [<options>] [<file|directory>...]
+
+Options:
+  -h, --help               : show help
+      --version            : print version
+  -s <reporting-style>     : verbose/simple/compact/plain/quiet, or v/s/c/p/q
+  -F <key>=<pattern>       : filter topic or spec with pattern (see below)
+      --color[=<on|off>]   : enable/disable output coloring forcedly
+  -S, --skeleton           : print test code skeleton
   -G, --generate[=<style>] : generate test code skeleton from ruby file
 
 Filter examples:
-  $ oktest -F topic=Hello            # filter by topic
-  $ oktest -F spec='*hello*'         # filter by spec
-  $ oktest -F tag=name               # filter by tag name
-  $ oktest -F tag!=name              # negative filter by tag name
-  $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
+  $ %{command} -F topic=Hello            # filter by topic
+  $ %{command} -F spec='*hello*'         # filter by spec
+  $ %{command} -F tag=name               # filter by tag name
+  $ %{command} -F tag!=name              # negative filter by tag name
+  $ %{command} -F tag='{name1,name2}'    # filter by multiple tag names
 
-See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
+Document:
+  https://github.com/kwatch/oktest/blob/ruby/ruby/README.md
 END
 
     it "[!65vdx] prints help message if no arguments specified." do

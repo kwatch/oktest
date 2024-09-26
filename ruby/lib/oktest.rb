@@ -2802,22 +2802,26 @@ END
 
     def help_message(schema, command=nil)
       command ||= File.basename($0)
-      return HELP_MESSAGE % {command: command, options: schema.to_s(22).chomp}
-    end
+      return <<"END"
+Oktest (#{VERSION}) -- New style testing library
 
-    HELP_MESSAGE = <<'END'
-Usage: %{command} [<options>] [<file-or-directory>...]
-%{options}
+Usage:
+  $ #{command} [<options>] [<file|directory>...]
+
+Options:
+#{schema.to_s.chomp}
 
 Filter examples:
-  $ oktest -F topic=Hello            # filter by topic
-  $ oktest -F spec='*hello*'         # filter by spec
-  $ oktest -F tag=name               # filter by tag name
-  $ oktest -F tag!=name              # negative filter by tag name
-  $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
+  $ #{command} -F topic=Hello            # filter by topic
+  $ #{command} -F spec='*hello*'         # filter by spec
+  $ #{command} -F tag=name               # filter by tag name
+  $ #{command} -F tag!=name              # negative filter by tag name
+  $ #{command} -F tag='{name1,name2}'    # filter by multiple tag names
 
-See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
+Document:
+  https://github.com/kwatch/oktest/blob/ruby/ruby/README.md
 END
+    end
 
     def load_files(filenames)
       filenames.each do |fname|
