@@ -2687,29 +2687,24 @@ END
       #; [!jr49p] reports error when unknown option specified.
       #; [!uqomj] reports error when required argument is missing.
       #; [!8i755] reports error when argument is invalid.
-      rescue OptionParser::ParseError => exc
-        case exc
-        when OptionParser::InvalidOption   ; s = "unknown option."
-        when OptionParser::InvalidArgument ; s = "invalid argument."
-        when OptionParser::MissingArgument ; s = "argument required."
-        else                               ; s = nil
-        end
-        msg = s ? "#{exc.args.join(' ')}: #{s}" : exc.message
-        $stderr.puts("#{File.basename($0)}: #{msg}")
+      rescue Benry::CmdOpt::OptionError => exc
+        $stderr.puts("#{File.basename($0)}: #{exc.message}")
         return 1
       end
     end
 
     def run(*args)
       color_enabled = nil
-      opts = Options.new
-      parser = option_parser(opts)
+      schema = option_schema()
+      parser = option_parser(schema)
       #; [!v5xie] parses $OKTEST_RB environment variable.
       if ENV.key?('OKTEST_RB')
-        parser.parse(ENV['OKTEST_RB'].split())
+        args = ENV['OKTEST_RB'].split() + args
       end
       #
-      filenames = parser.parse(args)
+      opts_dict = parser.parse(args)
+      opts = Options.new(opts_dict)
+      filenames = args
       #; [!9973n] '-h' or '--help' option prints help message.
       if opts.help
         puts help_message()
@@ -2738,9 +2733,9 @@ END
       end
       #; [!6ro7j] '--color=on' option enables output coloring forcedly.
       #; [!vmw0q] '--color=off' option disables output coloring forcedly.
-      if opts.color
+      if opts.color != nil
         color_enabled = Config.color_enabled
-        Config.color_enabled = (opts.color == 'on')
+        Config.color_enabled = opts.color
       end
       #; [!qs8ab] '--faster' chanages 'Config.ok_location' to false.
       if opts.faster
@@ -2781,40 +2776,38 @@ END
 
     class Options   #:nodoc:
       attr_accessor :help, :version, :style, :filter, :color, :skeleton, :generate, :faster
+      def initialize(dict={})
+        dict.each do |k, v|
+          self.__send__("#{k}=", v)
+        end
+      end
     end
 
-    def option_parser(opts)
-      require 'optparse' unless defined?(OptionParser)
-      parser = OptionParser.new
-      parser.on('-h', '--help')    { opts.help    = true }
-      parser.on(      '--version') { opts.version = true }
-      parser.on('-s STYLE') {|val|
-        REPORTER_CLASSES.key?(val)  or
-          raise OptionParser::InvalidArgument, val
-        opts.style = val
-      }
-      parser.on('-F PATTERN') {|val|
-        #; [!71h2x] '-F ...' option will be error.
-        #; [!j01y7] if filerting by '-F' matched nothing, then prints zero result.
-        val =~ /\A(topic|spec|tag|sid)(=|!=)/  or
-          raise OptionParser::InvalidArgument, val
-        opts.filter = val
-      }
-      parser.on(      '--color[={on|off}]') {|val|
-        #; [!9nr94] '--color=true' option raises error.
-        val.nil? || val == 'on' || val == 'off'  or
-          raise OptionParser::InvalidArgument, val
-        #; [!dptgn] '--color' is same as '--color=on'.
-        opts.color = val || 'on'
-      }
-      parser.on('-S', '--skeleton') { opts.skeleton = true }
-      parser.on('-G', '--generate[=styleoption]') {|val|
-        val.nil? || val == 'unaryop'  or
-          raise OptionParser::InvalidArgument, val
-        opts.generate = val || true
-      }
-      parser.on(      '--faster') { opts.faster = true }
-      return parser
+    def option_schema()
+      require 'benry/cmdopt' unless defined?(::Benry::CmdOpt)
+      reporting_styles = REPORTER_CLASSES.keys.partition {|s| s.length > 1 }.flatten()
+      schema = Benry::CmdOpt::Schema.new()
+      schema.add(:help    , "-h, --help"   , "show help")
+      schema.add(:version , "    --version", "print version")
+      schema.add(:style   , "-s <reporting-style>", "verbose/simple/compact/plain/quiet, or v/s/c/p/q",
+                                             enum: reporting_styles)
+      #; [!71h2x] '-F ...' option will be error.
+      #; [!j01y7] if filerting by '-F' matched nothing, then prints zero result.
+      schema.add(:filter  , "-F <key>=<pattern>", "filter topic or spec with pattern (see below)",
+                                             /\A(topic|spec|tag|sid)(=|!=)/)
+      #; [!dptgn] '--color' is same as '--color=on'.
+      schema.add(:color   , "    --color[=<on|off>]", "enable/disable output coloring forcedly",
+                                             type: TrueClass)
+      schema.add(:skeleton, "-S, --skeleton", "print test code skeleton")
+      schema.add(:generate, "-G, --generate[=<style>]", "generate test code skeleton from ruby file",
+                                             enum: ['unaryop'])
+      schema.add(:faster  , "    --faster", "make 'ok{}' faster (for very large project)",
+                                             hidden: true)
+      return schema
+    end
+
+    def option_parser(schema)
+      return Benry::CmdOpt::Parser.new(schema)
     end
 
     def help_message(command=nil)
