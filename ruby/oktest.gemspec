@@ -31,6 +31,7 @@ See https://github.com/kwatch/oktest/tree/ruby/ruby for details.
 END
   s.required_ruby_version = ">= 2.4"
   s.add_dependency "diff-lcs", "~> 1.0"
+  s.add_dependency "benry-cmdopt", "~> 2.3"
   s.add_dependency "benry-recorder", "~> 1.0"
 
   ## files
