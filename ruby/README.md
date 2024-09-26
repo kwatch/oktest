@@ -82,7 +82,7 @@ Oktest.rb requires Ruby 2.4 or later.
     * <a href="#capture_stdout"><code>capture_stdout()</code></a>
     * <a href="#capture_stderr"><code>capture_stderr()</code></a>
     * <a href="#capture_command"><code>capture_command()</code></a>
-    * <a href="#capture_command"><code>capture_command!()</code></a>
+    * <a href="#capture_command-1"><code>capture_command!()</code></a>
     * <a href="#dummy_file"><code>dummy_file()</code></a>
     * <a href="#dummy_dir"><code>dummy_dir()</code></a>
     * <a href="#dummy_values"><code>dummy_values()</code></a>
