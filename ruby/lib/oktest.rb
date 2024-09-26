@@ -2787,14 +2787,14 @@ END
       #; [!71h2x] '-F ...' option will be error.
       #; [!j01y7] if filerting by '-F' matched nothing, then prints zero result.
       schema.add(:filter  , "-F <key>=<pattern>", "filter topic or spec with pattern (see below)",
-                                             /\A(topic|spec|tag|sid)(=|!=)/)
+                                             rexp: /\A(topic|spec|tag|sid)(=|!=)/)
       #; [!dptgn] '--color' is same as '--color=on'.
       schema.add(:color   , "    --color[=<on|off>]", "enable/disable output coloring forcedly",
                                              type: TrueClass)
       schema.add(:skeleton, "-S, --skeleton", "print test code skeleton")
       schema.add(:generate, "-G, --generate[=<style>]", "generate test code skeleton from ruby file",
                                              enum: ['unaryop'])
-      schema.add(:faster  , "    --faster", "make 'ok{}' faster (for very large project)",
+      schema.add(:faster  , "    --faster" , "make 'ok{}' faster (for very large project)",
                                              hidden: true)
       return schema
     end
