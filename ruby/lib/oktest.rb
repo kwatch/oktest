@@ -2702,30 +2702,27 @@ END
         args = ENV['OKTEST_RB'].split() + args
       end
       #
-      opts_dict = parser.parse(args)
-      #opts = Options.new(**opts_dict)       # Ruby >= 3.2
-      opts = Options.new()
-      opts_dict.each {|k, v| opts[k] = v }   # Ruby < 3.2
+      opts = parser.parse(args)
       filenames = args
       #; [!9973n] '-h' or '--help' option prints help message.
-      if opts.help
+      if opts[:help]
         puts help_message(schema)
         return 0
       end
       #; [!qqizl] '--version' option prints version number.
-      if opts.version
+      if opts[:version]
         puts VERSION
         return 0
       end
       #; [!dk8eg] '-S' or '--skeleton' option prints test code skeleton.
-      if opts.skeleton
+      if opts[:skeleton]
         print skeleton()
         return 0
       end
       #; [!uxh5e] '-G' or '--generate' option prints test code.
       #; [!wmxu5] '--generate=unaryop' option prints test code with unary op.
-      if opts.generate
-        print generate(filenames, opts.generate)
+      if opts[:generate]
+        print generate(filenames, opts[:generate])
         return 0
       end
       #; [!65vdx] prints help message if no arguments specified.
@@ -2735,12 +2732,12 @@ END
       end
       #; [!6ro7j] '--color=on' option enables output coloring forcedly.
       #; [!vmw0q] '--color=off' option disables output coloring forcedly.
-      if opts.color != nil
+      if opts[:color] != nil
         color_enabled = Config.color_enabled
-        Config.color_enabled = opts.color
+        Config.color_enabled = opts[:color]
       end
       #; [!qs8ab] '--faster' chanages 'Config.ok_location' to false.
-      if opts.faster
+      if opts[:faster]
         Config.ok_location = false    # will make 'ok{}' faster
       end
       #
@@ -2752,8 +2749,8 @@ END
       #; [!8uvib] '-F tag=...' option filters by tag name.
       #; [!m0iwm] '-F sid=...' option filters by spec id.
       #; [!noi8i] '-F' option supports negative filter.
-      if opts.filter
-        filter_obj = FILTER_CLASS.create_from(opts.filter)
+      if opts[:filter]
+        filter_obj = FILTER_CLASS.create_from(opts[:filter])
         Oktest.filter(filter_obj)
       end
       #; [!bim36] changes auto-running to off.
@@ -2764,7 +2761,7 @@ END
       #; [!ef5v7] '-s compact' or '-sc' option prints test results in compact mode.
       #; [!244te] '-s plain' or '-sp' option prints test results in plain mode.
       #; [!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode.
-      n_errors = Oktest.run(:style=>opts.style)
+      n_errors = Oktest.run(:style=>opts[:style])
       #; [!dsrae] reports if 'ok()' called but assertion not performed.
       AssertionObject.report_not_yet()
       #; [!bzgiw] returns total number of failures and errors.
@@ -2775,8 +2772,6 @@ END
     end
 
     private
-
-    Options = Struct.new("Options", :help, :version, :style, :filter, :color, :skeleton, :generate, :faster)   # :nodoc:
 
     def option_schema()
       require 'benry/cmdopt' unless defined?(::Benry::CmdOpt)
