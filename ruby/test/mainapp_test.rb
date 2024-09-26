@@ -108,37 +108,37 @@ END
     it "[!d5mql] returns 1 when a certain error raised." do
       ret, sout, serr = main(["-U"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -U: unknown option.\n"
+      assert_eq serr, "#{File.basename($0)}: -U: Unknown option.\n"
     end
 
     it "[!jr49p] reports error when unknown option specified." do
       ret, sout, serr = main(["-X"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -X: unknown option.\n"
+      assert_eq serr, "#{File.basename($0)}: -X: Unknown option.\n"
       #
       ret, sout, serr = main(["--foobar"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: --foobar: unknown option.\n"
+      assert_eq serr, "#{File.basename($0)}: --foobar: Unknown long option.\n"
     end
 
     it "[!uqomj] reports error when required argument is missing." do
       ret, sout, serr = main(["-s"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -s: argument required.\n"
+      assert_eq serr, "#{File.basename($0)}: -s: Argument required.\n"
     end
 
     it "[!8i755] reports error when argument is invalid." do
       ret, sout, serr = main(["-s", "foobar"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -s foobar: invalid argument.\n"
+      assert_eq serr, "#{File.basename($0)}: -s foobar: Expected one of verbose/simple/compact/plain/quiet/v/s/c/p/q.\n"
       #
       ret, sout, serr = main(["-F", "aaa=*pat*"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -F aaa=*pat*: invalid argument.\n"
+      assert_eq serr, "#{File.basename($0)}: -F aaa=*pat*: Pattern unmatched.\n"
       #
-      ret, sout, serr = main(["--color=true"])
+      ret, sout, serr = main(["--color=abc"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: --color=true: invalid argument.\n"
+      assert_eq serr, "#{File.basename($0)}: --color=abc: Boolean expected.\n"
     end
 
   end
@@ -161,6 +161,13 @@ END
       ret, sout, serr = run(@testfile)
       assert_eq ret, 2
       assert edit_actual(sout).end_with?(edit_expected(expected)), "invalid status line"
+    end
+
+    it "[!k402d] raises error if file not found." do
+      filename = "not-exist-file"
+      assert_exc(Benry::CmdOpt::OptionError, "#{filename}: not found.") do
+        run(filename)
+      end
     end
 
     it "[!bim36] changes auto-running to off." do
@@ -213,16 +220,23 @@ END
       end
     end
 
+    it "[!tt2gj] parses command options even after filenames." do
+      ret, sout, serr = run(@testfile, "--version")
+      assert_eq ret, 0
+      assert_eq sout, Oktest::VERSION+"\n"
+      assert_eq serr, ""
+    end
+
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
     HELP_MESSAGE = <<"END"
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
-  -F <PATTERN>           : filter topic or spec with pattern (see below)
-      --color[={on|off}] : enable/disable output coloring forcedly
+  -s <reporting-style>   : verbose/simple/compact/plain/quiet, or v/s/c/p/q
+  -F <key>=<pattern>     : filter topic or spec with pattern (see below)
+      --color[=<on|off>] : enable/disable output coloring forcedly
   -S, --skeleton         : print test code skeleton
-  -G, --generate         : generate test code skeleton from ruby file
+  -G, --generate[=<style>] : generate test code skeleton from ruby file
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic
@@ -445,7 +459,7 @@ END
     end
 
     it "[!71h2x] '-F ...' option will be error." do
-      assert_exc(OptionParser::InvalidArgument, "invalid argument: -F *pat*") do
+      assert_exc(Benry::CmdOpt::OptionError, "-F *pat*: Pattern unmatched.") do
         run("-F", "*pat*", @testfile)
       end
     end
@@ -497,12 +511,6 @@ END
           assert !sout.include?(edit_expected("[<Y>Skip</Y>]")), "should not contain yellos string"
           assert_eq serr, ""
         end
-      end
-    end
-
-    it "[!9nr94] '--color=true' option raises error." do
-      assert_exc(OptionParser::InvalidArgument, "invalid argument: --color=true") do
-        run("--color=true", @testfile)
       end
     end
 
@@ -602,7 +610,7 @@ end
 END
       #
       begin
-        ret, sout, serr = run("-gunaryop", filename)
+        ret, sout, serr = run("-Gunaryop", filename)
         assert_eq ret, 0
         assert_eq sout, expected
         assert_eq serr, ""
