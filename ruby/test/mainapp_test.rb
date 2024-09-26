@@ -228,24 +228,30 @@ END
     end
 
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
-    HELP_MESSAGE = <<"END"
-Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
-  -h, --help             : show help
-      --version          : print version
-  -s <reporting-style>   : verbose/simple/compact/plain/quiet, or v/s/c/p/q
-  -F <key>=<pattern>     : filter topic or spec with pattern (see below)
-      --color[=<on|off>] : enable/disable output coloring forcedly
-  -S, --skeleton         : print test code skeleton
+    HELP_MESSAGE = (<<"END") % {command: File.basename($0)}
+\e[1mOktest\e[0m (#{Oktest::VERSION}) -- New style testing library
+
+\e[36mUsage:\e[0m
+  $ \e[1m%{command}\e[0m [<options>] [<file|directory>...]
+
+\e[36mOptions:\e[0m
+  -h, --help               : show help
+      --version            : print version
+  -s <reporting-style>     : verbose/simple/compact/plain/quiet, or v/s/c/p/q
+  -F <key>=<pattern>       : filter topic or spec with pattern (see below)
+      --color[=<on|off>]   : enable/disable output coloring forcedly
+  -S, --skeleton           : print test code skeleton
   -G, --generate[=<style>] : generate test code skeleton from ruby file
 
-Filter examples:
-  $ oktest -F topic=Hello            # filter by topic
-  $ oktest -F spec='*hello*'         # filter by spec
-  $ oktest -F tag=name               # filter by tag name
-  $ oktest -F tag!=name              # negative filter by tag name
-  $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
+\e[36mFilter Examples:\e[0m
+  $ %{command} -F topic=Hello            # filter by topic
+  $ %{command} -F spec='*hello*'         # filter by spec
+  $ %{command} -F tag=name               # filter by tag name
+  $ %{command} -F tag!=name              # negative filter by tag name
+  $ %{command} -F tag='{name1,name2}'    # filter by multiple tag names
 
-See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
+\e[36mDocument:\e[0m
+  https://github.com/kwatch/oktest/blob/ruby/ruby/README.md
 END
 
     it "[!65vdx] prints help message if no arguments specified." do
@@ -268,6 +274,16 @@ END
       assert_eq ret, 0
       assert_eq sout, expected
       assert_eq serr, ""
+    end
+
+    it "[!v938d] help message will be colored only when stdout is a tty." do
+      ret, sout, serr = run("-h", tty: true)
+      assert sout =~ /\e\[1mOktest\e\[0m/
+      assert sout =~ /\e\[36mOptions:\e\[0m/
+      #
+      ret, sout, serr = run("-h", tty: false)
+      assert sout !~ /\e\[1mOktest\e\[0m/
+      assert sout !~ /\e\[36mOptions:\e\[0m/
     end
 
     it "[!qqizl] '--version' option prints version number." do

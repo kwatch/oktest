@@ -2802,22 +2802,33 @@ END
 
     def help_message(schema, command=nil)
       command ||= File.basename($0)
-      return HELP_MESSAGE % {command: command, options: schema.to_s(22).chomp}
-    end
+      #; [!v938d] help message will be colored only when stdout is a tty.
+      if $stdout.tty?
+        bold   = proc {|s| "\e[1m#{s}\e[0m" }    # bold
+        header = proc {|s| "\e[36m#{s}\e[0m" }   # cyan
+      else
+        bold = header = proc {|s| s }
+      end
+      return <<"END"
+#{bold.('Oktest')} (#{VERSION}) -- New style testing library
 
-    HELP_MESSAGE = <<'END'
-Usage: %{command} [<options>] [<file-or-directory>...]
-%{options}
+#{header.('Usage:')}
+  $ #{bold.(command)} [<options>] [<file|directory>...]
 
-Filter examples:
-  $ oktest -F topic=Hello            # filter by topic
-  $ oktest -F spec='*hello*'         # filter by spec
-  $ oktest -F tag=name               # filter by tag name
-  $ oktest -F tag!=name              # negative filter by tag name
-  $ oktest -F tag='{name1,name2}'    # filter by multiple tag names
+#{header.('Options:')}
+#{schema.to_s.chomp}
 
-See https://github.com/kwatch/oktest/blob/ruby/ruby/README.md for details.
+#{header.('Filter Examples:')}
+  $ #{command} -F topic=Hello            # filter by topic
+  $ #{command} -F spec='*hello*'         # filter by spec
+  $ #{command} -F tag=name               # filter by tag name
+  $ #{command} -F tag!=name              # negative filter by tag name
+  $ #{command} -F tag='{name1,name2}'    # filter by multiple tag names
+
+#{header.('Document:')}
+  https://github.com/kwatch/oktest/blob/ruby/ruby/README.md
 END
+    end
 
     def load_files(filenames)
       filenames.each do |fname|
