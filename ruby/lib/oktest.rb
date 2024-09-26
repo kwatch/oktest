@@ -2802,8 +2802,13 @@ END
 
     def help_message(schema, command=nil)
       command ||= File.basename($0)
-      bold = proc {|s| "\e[1m#{s}\e[0m" }
-      header = proc {|s| "\e[36m#{s}\e[0m" }
+      #; [!v938d] help message will be colored only when stdout is a tty.
+      if $stdout.tty?
+        bold   = proc {|s| "\e[1m#{s}\e[0m" }    # bold
+        header = proc {|s| "\e[36m#{s}\e[0m" }   # cyan
+      else
+        bold = header = proc {|s| s }
+      end
       return <<"END"
 #{bold.('Oktest')} (#{VERSION}) -- New style testing library
 

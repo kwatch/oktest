@@ -276,6 +276,16 @@ END
       assert_eq serr, ""
     end
 
+    it "[!v938d] help message will be colored only when stdout is a tty." do
+      ret, sout, serr = run("-h", tty: true)
+      assert sout =~ /\e\[1mOktest\e\[0m/
+      assert sout =~ /\e\[36mOptions:\e\[0m/
+      #
+      ret, sout, serr = run("-h", tty: false)
+      assert sout !~ /\e\[1mOktest\e\[0m/
+      assert sout !~ /\e\[36mOptions:\e\[0m/
+    end
+
     it "[!qqizl] '--version' option prints version number." do
       expected = '$Release: 0.0.0 $'.split()[1] + "\n"
       #
