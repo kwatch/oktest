@@ -2677,6 +2677,11 @@ END
 
   class MainApp
 
+    def initialize(command=nil)
+      @command = command || File.basename($0)
+      @schema  = option_schema()
+    end
+
     def self.main(argv=nil)
       #; [!tb6sx] returns 0 when no errors raised.
       #; [!d5mql] returns 1 when a certain error raised.
@@ -2695,18 +2700,16 @@ END
 
     def run(*args)
       color_enabled = nil
-      schema = option_schema()
-      parser = option_parser(schema)
       #; [!v5xie] parses $OKTEST_RB environment variable.
       if ENV.key?('OKTEST_RB')
         args = ENV['OKTEST_RB'].split() + args
       end
       #; [!tt2gj] parses command options even after filenames.
-      opts = parser.parse(args, all: true)
+      opts = parse_opts(args)
       filenames = args
       #; [!9973n] '-h' or '--help' option prints help message.
       if opts[:help]
-        puts help_message(schema)
+        puts help_message()
         return 0
       end
       #; [!qqizl] '--version' option prints version number.
@@ -2727,7 +2730,7 @@ END
       end
       #; [!65vdx] prints help message if no arguments specified.
       if filenames.empty? && !THE_GLOBAL_SCOPE.has_child?
-        puts help_message(schema)
+        puts help_message()
         return 0
       end
       #; [!6ro7j] '--color=on' option enables output coloring forcedly.
@@ -2796,12 +2799,14 @@ END
       return schema
     end
 
-    def option_parser(schema)
-      return Benry::CmdOpt::Parser.new(schema)
+    def parse_opts(args)
+      parser = Benry::CmdOpt::Parser.new(@schema)
+      return parser.parse(args, all: true)
     end
 
-    def help_message(schema, command=nil)
-      command ||= File.basename($0)
+    def help_message()
+      command = @command
+      schema  = @schema
       #; [!v938d] help message will be colored only when stdout is a tty.
       if $stdout.tty?
         bold   = proc {|s| "\e[1m#{s}\e[0m" }    # bold
