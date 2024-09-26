@@ -1444,7 +1444,7 @@ when command failed.
 
 `dummy_file()` creates a dummy file temporarily.
 
-test/example32_test.rb:
+test/example33_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1484,7 +1484,7 @@ end
 
 `dummy_dir()` creates a dummy directory temporarily.
 
-test/example33_test.rb:
+test/example34_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1526,7 +1526,7 @@ end
 
 `dummy_values()` changes hash values temporarily.
 
-test/example34_test.rb:
+test/example35_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1578,7 +1578,7 @@ end
 
 `dummy_attrs()` changes object attribute values temporarily.
 
-test/example35_test.rb:
+test/example36_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1633,7 +1633,7 @@ end
 
 `dummy_ivars()` changes instance variables in object with dummy values temporarily.
 
-test/example36_test.rb:
+test/example37_test.rb:
 
 ```ruby
 require 'oktest'
@@ -1690,7 +1690,7 @@ end
 See [Benry::Recorder README](https://github.com/kwatch/benry-ruby/blob/ruby/benry-recorder/README.md)
 for detals.
 
-test/example37_test.rb:
+test/example38_test.rb:
 
 ```ruby
 require 'oktest'
