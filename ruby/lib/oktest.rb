@@ -2802,23 +2802,25 @@ END
 
     def help_message(schema, command=nil)
       command ||= File.basename($0)
+      bold = proc {|s| "\e[1m#{s}\e[0m" }
+      header = proc {|s| "\e[36m#{s}\e[0m" }
       return <<"END"
-Oktest (#{VERSION}) -- New style testing library
+#{bold.('Oktest')} (#{VERSION}) -- New style testing library
 
-Usage:
-  $ #{command} [<options>] [<file|directory>...]
+#{header.('Usage:')}
+  $ #{bold.(command)} [<options>] [<file|directory>...]
 
-Options:
+#{header.('Options:')}
 #{schema.to_s.chomp}
 
-Filter examples:
+#{header.('Filter Examples:')}
   $ #{command} -F topic=Hello            # filter by topic
   $ #{command} -F spec='*hello*'         # filter by spec
   $ #{command} -F tag=name               # filter by tag name
   $ #{command} -F tag!=name              # negative filter by tag name
   $ #{command} -F tag='{name1,name2}'    # filter by multiple tag names
 
-Document:
+#{header.('Document:')}
   https://github.com/kwatch/oktest/blob/ruby/ruby/README.md
 END
     end

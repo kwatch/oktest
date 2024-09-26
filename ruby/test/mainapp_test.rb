@@ -229,12 +229,12 @@ END
 
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
     HELP_MESSAGE = (<<"END") % {command: File.basename($0)}
-Oktest (#{Oktest::VERSION}) -- New style testing library
+\e[1mOktest\e[0m (#{Oktest::VERSION}) -- New style testing library
 
-Usage:
-  $ %{command} [<options>] [<file|directory>...]
+\e[36mUsage:\e[0m
+  $ \e[1m%{command}\e[0m [<options>] [<file|directory>...]
 
-Options:
+\e[36mOptions:\e[0m
   -h, --help               : show help
       --version            : print version
   -s <reporting-style>     : verbose/simple/compact/plain/quiet, or v/s/c/p/q
@@ -243,14 +243,14 @@ Options:
   -S, --skeleton           : print test code skeleton
   -G, --generate[=<style>] : generate test code skeleton from ruby file
 
-Filter examples:
+\e[36mFilter Examples:\e[0m
   $ %{command} -F topic=Hello            # filter by topic
   $ %{command} -F spec='*hello*'         # filter by spec
   $ %{command} -F tag=name               # filter by tag name
   $ %{command} -F tag!=name              # negative filter by tag name
   $ %{command} -F tag='{name1,name2}'    # filter by multiple tag names
 
-Document:
+\e[36mDocument:\e[0m
   https://github.com/kwatch/oktest/blob/ruby/ruby/README.md
 END
 
