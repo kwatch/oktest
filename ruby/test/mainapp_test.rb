@@ -108,37 +108,37 @@ END
     it "[!d5mql] returns 1 when a certain error raised." do
       ret, sout, serr = main(["-U"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -U: Unknown option.\n"
+      assert_eq serr, "[ERROR] -U: Unknown option.\n"
     end
 
     it "[!jr49p] reports error when unknown option specified." do
       ret, sout, serr = main(["-X"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -X: Unknown option.\n"
+      assert_eq serr, "[ERROR] -X: Unknown option.\n"
       #
       ret, sout, serr = main(["--foobar"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: --foobar: Unknown long option.\n"
+      assert_eq serr, "[ERROR] --foobar: Unknown long option.\n"
     end
 
     it "[!uqomj] reports error when required argument is missing." do
       ret, sout, serr = main(["-s"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -s: Argument required.\n"
+      assert_eq serr, "[ERROR] -s: Argument required.\n"
     end
 
     it "[!8i755] reports error when argument is invalid." do
       ret, sout, serr = main(["-s", "foobar"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -s foobar: Expected one of verbose/simple/compact/plain/quiet/v/s/c/p/q.\n"
+      assert_eq serr, "[ERROR] -s foobar: Expected one of verbose/simple/compact/plain/quiet/v/s/c/p/q.\n"
       #
       ret, sout, serr = main(["-F", "aaa=*pat*"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: -F aaa=*pat*: Pattern unmatched.\n"
+      assert_eq serr, "[ERROR] -F aaa=*pat*: Pattern unmatched.\n"
       #
       ret, sout, serr = main(["--color=abc"])
       assert_eq ret, 1
-      assert_eq serr, "#{File.basename($0)}: --color=abc: Boolean expected.\n"
+      assert_eq serr, "[ERROR] --color=abc: Boolean expected.\n"
     end
 
   end
