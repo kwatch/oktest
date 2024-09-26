@@ -220,6 +220,13 @@ END
       end
     end
 
+    it "[!tt2gj] parses command options even after filenames." do
+      ret, sout, serr = run(@testfile, "--version")
+      assert_eq ret, 0
+      assert_eq sout, Oktest::VERSION+"\n"
+      assert_eq serr, ""
+    end
+
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
     HELP_MESSAGE = <<"END"
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]

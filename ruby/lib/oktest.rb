@@ -2701,8 +2701,8 @@ END
       if ENV.key?('OKTEST_RB')
         args = ENV['OKTEST_RB'].split() + args
       end
-      #
-      opts = parser.parse(args)
+      #; [!tt2gj] parses command options even after filenames.
+      opts = parser.parse(args, all: true)
       filenames = args
       #; [!9973n] '-h' or '--help' option prints help message.
       if opts[:help]
