@@ -163,6 +163,13 @@ END
       assert edit_actual(sout).end_with?(edit_expected(expected)), "invalid status line"
     end
 
+    it "[!k402d] raises error if file not found." do
+      filename = "not-exist-file"
+      assert_exc(Benry::CmdOpt::OptionError, "#{filename}: not found.") do
+        run(filename)
+      end
+    end
+
     it "[!bim36] changes auto-running to off." do
       Oktest::Config.auto_run = true
       _ = run(@testfile)

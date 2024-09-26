@@ -2821,8 +2821,9 @@ END
 
     def load_files(filenames)
       filenames.each do |fname|
+        #; [!k402d] raises error if file not found.
         File.exist?(fname)  or
-          raise OptionParser::InvalidOption, "#{fname}: not found."
+          raise Benry::CmdOpt::OptionError, "#{fname}: not found."
       end
       filenames.each do |fname|
         File.directory?(fname) ? load_dir(fname) : load(fname)
