@@ -218,11 +218,11 @@ END
 Usage: #{File.basename($0)} [<options>] [<file-or-directory>...]
   -h, --help             : show help
       --version          : print version
-  -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
-  -F <PATTERN>           : filter topic or spec with pattern (see below)
-      --color[={on|off}] : enable/disable output coloring forcedly
+  -s <reporting-style>   : verbose/simple/compact/plain/quiet, or v/s/c/p/q
+  -F <key>=<pattern>     : filter topic or spec with pattern (see below)
+      --color[=<on|off>] : enable/disable output coloring forcedly
   -S, --skeleton         : print test code skeleton
-  -G, --generate         : generate test code skeleton from ruby file
+  -G, --generate[=<style>] : generate test code skeleton from ruby file
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic

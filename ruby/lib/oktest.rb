@@ -2707,7 +2707,7 @@ END
       filenames = args
       #; [!9973n] '-h' or '--help' option prints help message.
       if opts.help
-        puts help_message()
+        puts help_message(schema)
         return 0
       end
       #; [!qqizl] '--version' option prints version number.
@@ -2728,7 +2728,7 @@ END
       end
       #; [!65vdx] prints help message if no arguments specified.
       if filenames.empty? && !THE_GLOBAL_SCOPE.has_child?
-        puts help_message()
+        puts help_message(schema)
         return 0
       end
       #; [!6ro7j] '--color=on' option enables output coloring forcedly.
@@ -2810,21 +2810,14 @@ END
       return Benry::CmdOpt::Parser.new(schema)
     end
 
-    def help_message(command=nil)
+    def help_message(schema, command=nil)
       command ||= File.basename($0)
-      return HELP_MESSAGE % {command: command}
+      return HELP_MESSAGE % {command: command, options: schema.to_s(22).chomp}
     end
 
-    HELP_MESSAGE = <<'END'.gsub(/^#.*\n/, '')
+    HELP_MESSAGE = <<'END'
 Usage: %{command} [<options>] [<file-or-directory>...]
-  -h, --help             : show help
-      --version          : print version
-  -s <REPORT-STYLE>      : verbose/simple/compact/plain/quiet, or v/s/c/p/q
-  -F <PATTERN>           : filter topic or spec with pattern (see below)
-      --color[={on|off}] : enable/disable output coloring forcedly
-  -S, --skeleton         : print test code skeleton
-  -G, --generate         : generate test code skeleton from ruby file
-#      --faster           : make 'ok{}' faster (for very large project)
+%{options}
 
 Filter examples:
   $ oktest -F topic=Hello            # filter by topic
