@@ -2651,7 +2651,8 @@ END
           _transform(child_tuple, depth+1, buf)
         end
         buf << "\n"
-        buf << "#{indent}  end  # #{topic}\n"
+        buf << "#{indent}  end\n"                  if keyword == 'def'
+        buf << "#{indent}  end  # #{topic}\n"  unless keyword == 'def'
         buf << "\n"
       end
     end

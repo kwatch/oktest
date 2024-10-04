@@ -59,7 +59,7 @@ END
 
       spec "returns greeting message."
 
-    end  # #hello()
+    end
 
 
   end  # Hello
@@ -81,7 +81,7 @@ END
 
     - spec("returns greeting message.")
 
-    end  # #hello()
+    end
 
 
   end  # Hello
@@ -111,7 +111,7 @@ Oktest.scope do
 
       spec "returns greeting message."
 
-    end  # #hello()
+    end
 
 
   end  # Hello
