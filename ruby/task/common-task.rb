@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 
 
 defined? PROJECT    or abort "PROJECT required."

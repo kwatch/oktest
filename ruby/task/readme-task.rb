@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 
 README_FILE      = "README.md"       unless defined? README_FILE
 README_EXTRACT   = /^file: +(\S+)/   unless defined? README_EXTRACT

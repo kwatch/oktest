@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# frozen_string_literal: true
+
 ###
 ### $Release: $
 ### $Copyright: copyright(c) 2011-2024 kuwata-lab.com all rights reserved $
