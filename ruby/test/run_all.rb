@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 
 #Dir.chdir File.dirname(__FILE__) do
 #  Dir.glob("**/*_test.rb") do |x|
