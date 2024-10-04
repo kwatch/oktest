@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 ###
-### $Release: $
+### $Release: 1.4.0 $
 ### $Copyright: copyright(c) 2011-2024 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -290,7 +290,7 @@ END
     end
 
     it "[!qqizl] '--version' option prints version number." do
-      expected = '$Release: 0.0.0 $'.split()[1] + "\n"
+      expected = '$Release: 1.4.0 $'.split()[1] + "\n"
       #
       ret, sout, serr = run("--version")
       assert_eq ret, 0
