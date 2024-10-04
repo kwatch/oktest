@@ -341,10 +341,10 @@ END
       errmsg = "$<actual>.equal?($<expected>): failed.\n"\
                "    $<actual>:   \"SOS\"\n"\
                "    $<expected>: \"SOS\"\n"
-      FAIL!(errmsg) { ok {'SOS'}.same?('SOS') }
+      FAIL!(errmsg) { ok {'SOS'.dup}.same?('SOS') }
     end
     it "[!dwtig] is avaialbe with NOT." do
-      PASS! { ok {'SOS'}.NOT.same? 'SOS' }
+      PASS! { ok {'SOS'.dup}.NOT.same? 'SOS' }
       errmsg = "$<actual>.equal?($<expected>) == false: failed.\n"\
                "    $<actual>:   :SOS\n"\
                "    $<expected>: :SOS\n"
@@ -416,7 +416,7 @@ END
     it "[!sljta] raises TypeError when boolean method returned non-boolean value." do
       errmsg = "ok(): String#sos?() expected to return true or false, but got 1."
       ERROR!(TypeError, errmsg) do
-        s = "SOS"
+        s = "SOS".dup
         def s.sos?; return 1; end
         ok {s}.sos?
       end
@@ -430,7 +430,7 @@ END
       errmsg = "$<actual>.bla?(#{str}): failed.\n"\
                "    $<actual>:   \"Blabla\""
       FAIL!(errmsg) do
-        s = "Blabla"
+        s = "Blabla".dup
         def s.bla?(*a, **k); return false; end
         ok {s}.bla?(123, "abc", x: "45", y: true)
       end
@@ -659,7 +659,7 @@ END
       pr = proc { throw "sym" }
       expected = ("Thrown tag \"sym\" is equal to but not same as expected.\n"\
                   "    (`\"sym\".equal?(\"sym\")` should be true but not.)")
-      FAIL!(expected) { ok {pr}.throw?("sym") }
+      FAIL!(expected) { ok {pr}.throw?("sym".dup) }
     end
     it "[!flgwy] assertion fails when thrown tag is different from expectd." do
       FAIL!(":sym4 should be thrown but actually :sym9 thrown.") do

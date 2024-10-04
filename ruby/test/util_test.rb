@@ -33,7 +33,7 @@ END
         assert c.is_a?(Array), "array object expected."
         assert_eq c[0], __FILE__
         assert_eq c[1][0], "# -*- coding: utf-8 -*-\n"
-        assert_eq c[1][11], "class Util_TC < TC\n"
+        assert_eq c[1][12], "class Util_TC < TC\n"
         #
         data1 = c[1]
         _ = Oktest::Util.file_line(__FILE__, 1)
