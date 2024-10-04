@@ -264,7 +264,7 @@ END
   end
 
   describe '#capture_stdout()' do
-    it "[!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`" do
+    it "[!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`." do
       sin = nil
       sout = capture_stdout("INPUT", tty: true) do
         sin = $stdin.read()
@@ -276,21 +276,23 @@ END
       assert_eq sin, "INPUT"
       assert_eq sout, "OUTPUT\n"
     end
-    it "[!5n04e] returns output of stdout." do
-      begin
-        sout = capture_stdout() do
+    it "[!may84] fails when stderr is not empty." do
+      assert_exc(Oktest::AssertionFailed, "Output of $stderr expected to be empty, but got: \"ERROR\"") do
+        capture_stdout() do
           $stderr.print "ERROR"
         end
-      rescue Oktest::AssertionFailed => exc
-        assert_eq exc.message, "Output of $stderr expected to be empty, but got: \"ERROR\""
-      else
-        assert false, "AsssertionFailed should be raised."
       end
+    end
+    it "[!5n04e] returns output of stdout." do
+      sout = capture_stdout() do
+        print "OUTPUT"
+      end
+      assert_eq sout, "OUTPUT"
     end
   end
 
   describe '#capture_stderr()' do
-    it "[!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`" do
+    it "[!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`." do
       sin = nil
       serr = capture_stderr("INPUT", tty: true) do
         sin = $stdin.read()
@@ -302,16 +304,18 @@ END
       assert_eq sin, "INPUT"
       assert_eq serr, "ERROR\n"
     end
-    it "[!5vs64] returns output of stderr." do
-      begin
-        sout = capture_stderr() do
+    it "[!3zh32] fails when stdout is not empty." do
+      assert_exc(Oktest::AssertionFailed, "Output of $stdout expected to be empty, but got: \"OUTPUT\"") do
+        capture_stderr() do
           print "OUTPUT"
         end
-      rescue Oktest::AssertionFailed => exc
-        assert_eq exc.message, "Output of $stdout expected to be empty, but got: \"OUTPUT\""
-      else
-        assert false, "AsssertionFailed should be raised."
       end
+    end
+    it "[!5vs64] returns output of stderr." do
+      serr = capture_stderr() do
+        $stderr.print "ERROR"
+      end
+      assert_eq serr, "ERROR"
     end
   end
 
