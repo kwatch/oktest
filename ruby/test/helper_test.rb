@@ -26,11 +26,6 @@ class SpecHelper_TC < TC
     Oktest::AssertionObject::NOT_YET.clear()
   end
 
-  def __assert(result, &b)    # copied from `Oktest::AssertionObject`
-    raise Oktest::FAIL_EXCEPTION, yield unless result
-  end
-  private :__assert
-
   describe '#ok()' do
     it "[!3jhg6] creates new assertion object." do
       o = ok {"foo"}
