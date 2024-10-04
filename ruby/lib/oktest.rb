@@ -1328,21 +1328,21 @@ END
     alias capture_sio capture_stdio
 
     def capture_stdout(input="", tty: false, &b)
-      #; [!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`
+      #; [!4agii] same as `sout, serr = capture_stdio(); ok {serr} == ''`.
+      #; [!may84] fails when stderr is not empty.
       sout, serr = capture_stdio(input, tty: tty, &b)
-      __assert(serr == "") {
-        "Output of $stderr expected to be empty, but got: #{serr.inspect}"
-      }
+      serr == ""  or
+        raise FAIL_EXCEPTION, "Output of $stderr expected to be empty, but got: #{serr.inspect}"
       #; [!5n04e] returns output of stdout.
       return sout
     end
 
     def capture_stderr(input="", tty: false, &b)
-      #; [!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`
+      #; [!46tj4] same as `sout, serr = capture_stdio(); ok {sout} == ''`.
+      #; [!3zh32] fails when stdout is not empty.
       sout, serr = capture_stdio(input, tty: tty, &b)
-      __assert(sout == "") {
-        "Output of $stdout expected to be empty, but got: #{sout.inspect}"
-      }
+      sout == ""  or
+        raise FAIL_EXCEPTION, "Output of $stdout expected to be empty, but got: #{sout.inspect}"
       #; [!5vs64] returns output of stderr.
       return serr
     end
