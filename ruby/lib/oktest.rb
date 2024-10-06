@@ -2178,6 +2178,15 @@ END
 
   DEFAULT_REPORTING_STYLE = 'verbose'
 
+  def self.DEFAULT_REPORTING_STYLE=(style)
+    #; [!lbufd] raises error if unknown style specified.
+    REPORTER_CLASSES.key?(style)  or
+      raise ArgumentError, "#{style}: Unknown reporting style."
+    #; [!dsbmo] changes value of default reporting style.
+    remove_const :DEFAULT_REPORTING_STYLE
+    const_set    :DEFAULT_REPORTING_STYLE, style
+  end
+
 
   def self.run(reporter: nil, style: nil)
     #; [!6xn3t] creates reporter object according to 'style:' keyword arg.
