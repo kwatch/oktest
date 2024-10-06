@@ -2168,9 +2168,6 @@ END
   end
 
 
-  REPORTER_CLASS = VerboseReporter
-
-
   REPORTER_CLASSES = {
     'verbose' => VerboseReporter,  'v' => VerboseReporter,
     'simple'  => SimpleReporter,   's' => SimpleReporter,
@@ -2179,10 +2176,22 @@ END
     'quiet'   => QuietReporter,    'q' => QuietReporter,
   }
 
+  DEFAULT_REPORTING_STYLE = 'verbose'
+
+  def self.DEFAULT_REPORTING_STYLE=(style)
+    #; [!lbufd] raises error if unknown style specified.
+    REPORTER_CLASSES.key?(style)  or
+      raise ArgumentError, "#{style}: Unknown reporting style."
+    #; [!dsbmo] changes value of default reporting style.
+    remove_const :DEFAULT_REPORTING_STYLE
+    const_set    :DEFAULT_REPORTING_STYLE, style
+  end
+
 
   def self.run(reporter: nil, style: nil)
     #; [!6xn3t] creates reporter object according to 'style:' keyword arg.
-    klass = (style ? REPORTER_CLASSES[style] : REPORTER_CLASS)  or
+    style ||= DEFAULT_REPORTING_STYLE
+    klass = REPORTER_CLASSES[style]  or
       raise ArgumentError, "#{style.inspect}: unknown style."
     reporter ||= klass.new
     #; [!mn451] run test cases.

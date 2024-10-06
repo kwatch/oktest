@@ -604,3 +604,25 @@ class QuietReporter_TC < Reporter_TC
   end
 
 end
+
+
+class OkestReporintStyle_TC < TC
+
+  describe 'Oktest.DEFAULT_REPORTING_STYLE=()' do
+    it "[!lbufd] raises error if unknown style specified." do
+      assert_exc(ArgumentError, "foo: Unknown reporting style.") do
+        Oktest.DEFAULT_REPORTING_STYLE=("foo")
+      end
+    end
+    it "[!dsbmo] changes value of default reporting style." do
+      assert_eq Oktest::DEFAULT_REPORTING_STYLE, "verbose"
+      begin
+        Oktest.DEFAULT_REPORTING_STYLE = "plain"
+        assert_eq Oktest::DEFAULT_REPORTING_STYLE, "plain"
+      ensure
+        Oktest.DEFAULT_REPORTING_STYLE = "verbose"
+      end
+    end
+  end
+
+end
