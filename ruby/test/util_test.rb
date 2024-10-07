@@ -44,7 +44,7 @@ END
       c = Oktest::Util.instance_variable_get('@__cache')
       data1 = c[1]
       #
-      otherfile = File.join(File.dirname(__FILE__), "initialize.rb")
+      otherfile = File.join(File.dirname(__FILE__), "init.rb")
       _ = Oktest::Util.file_line(otherfile, 1)
       c3 = Oktest::Util.instance_variable_get('@__cache')
       test_eq c3[0], otherfile
