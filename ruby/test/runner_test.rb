@@ -7,10 +7,11 @@
 ### $License: MIT License $
 ###
 
-require_relative './initialize'
+require_relative './init'
 
 
-class Runner_TC < TC
+Object.new.instance_eval do   # Oktest::Runner
+  extend NanoTest
 
   class DummyReporter < Oktest::Reporter
     def enter_all(runner); end
@@ -49,7 +50,7 @@ class Runner_TC < TC
     def order_policy; :spec_first; end
   end
 
-  describe "#start()" do
+  test_target 'Oktest::Runner#start()' do
     build_topics = proc {
       Oktest.scope do
         topic "Parent" do
@@ -61,7 +62,7 @@ class Runner_TC < TC
         end
       end
     }
-    it "[!xrisl] runs topics and specs." do
+    test_subject "[!xrisl] runs topics and specs." do
       sout, serr = capture do
         build_topics.call
         Oktest::Runner.new(DummyReporter.new).start()
@@ -76,22 +77,22 @@ topic: "Parent"
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!dth2c] clears toplvel scope list." do
-      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
+    test_subject "[!dth2c] clears toplvel scope list." do
+      test_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
       sout, serr = capture do
         build_topics.call
-        assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
+        test_eq Oktest::THE_GLOBAL_SCOPE.has_child?, true
         Oktest::Runner.new(DummyReporter.new).start()
       end
-      assert_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
+      test_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
     end
   end
 
-  describe "#visit_spec()" do
-    it "[!yd24o] runs spec body, catching assertions or exceptions." do
+  test_target 'Oktest::Runner#visit_spec()' do
+    test_subject "[!yd24o] runs spec body, catching assertions or exceptions." do
       Oktest.scope do
         topic "Parent" do
           topic "Child" do
@@ -149,10 +150,10 @@ END
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!u45di] runs spec block with context object which allows to call methods defined in topics." do
+    test_subject "[!u45di] runs spec block with context object which allows to call methods defined in topics." do
       Oktest.scope do
         def v1; "V1"; end
         topic "Parent" do
@@ -183,10 +184,10 @@ topic: "Parent"
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!yagka] calls 'before' and 'after' blocks with context object as self." do
+    test_subject "[!yagka] calls 'before' and 'after' blocks with context object as self." do
       sout, serr = capture do
         Oktest.scope do
           before     { @x ||= 1; puts "      [all] before: @x=#{@x}" }
@@ -250,10 +251,10 @@ topic: "Parent"
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!76g7q] calls 'after' blocks even when exception raised." do
+    test_subject "[!76g7q] calls 'after' blocks even when exception raised." do
       sout, serr = capture do
         Oktest.scope do
           after { puts "[all] after" }
@@ -282,10 +283,10 @@ topic: "Parent"
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!dihkr] calls 'at_end' blocks, even when exception raised." do
+    test_subject "[!dihkr] calls 'at_end' blocks, even when exception raised." do
       sout, serr = capture do
         Oktest.scope do
           topic "topic#A" do
@@ -324,11 +325,11 @@ END
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    describe "[!68cnr] if TODO() called in spec..." do
-      it "[!6ol3p] changes PASS status to FAIL because test passed unexpectedly." do
+    test_when "[!68cnr] if TODO() called in spec..." do
+      test_subject "[!6ol3p] changes PASS status to FAIL because test passed unexpectedly." do
         Oktest.scope do
           topic "topic#A" do
             spec("spec#1") { TODO(); ok {1+1} == 2 }  # passed unexpectedly
@@ -343,9 +344,9 @@ topic: "topic#A"
 /topic
 /file
 END
-        assert_eq sout, expected
+        test_eq sout, expected
       end
-      it "[!6syw4] changes FAIL status to TODO because test failed expectedly." do
+      test_subject "[!6syw4] changes FAIL status to TODO because test failed expectedly." do
         Oktest.scope do
           topic "topic#A" do
             spec("spec#1") { TODO(); ok {1+1} == 1 }  # failed expectedly
@@ -360,9 +361,9 @@ topic: "topic#A"
 /topic
 /file
 END
-        assert_eq sout, expected
+        test_eq sout, expected
       end
-      it "[!4aecm] changes also ERROR status to TODO because test failed expectedly." do
+      test_subject "[!4aecm] changes also ERROR status to TODO because test failed expectedly." do
         Oktest.scope do
           topic "topic#B" do
             spec("spec#2") { TODO(); ok {foobar} == nil }  # will be error expectedly
@@ -377,13 +378,13 @@ topic: "topic#B"
 /topic
 /file
 END
-        assert_eq sout, expected
+        test_eq sout, expected
       end
     end
   end
 
-  describe "#visit_topic()" do
-    it "[!i3yfv] calls 'before_all' and 'after_all' blocks." do
+  test_target 'Oktest::Runner#visit_topic()' do
+    test_subject "[!i3yfv] calls 'before_all' and 'after_all' blocks." do
       sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all" }
@@ -429,10 +430,10 @@ topic: "Parent"
 [all] after_all
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!p3a5o] run specs and case_when in advance of specs and topics when SimpleReporter." do
+    test_subject "[!p3a5o] run specs and case_when in advance of specs and topics when SimpleReporter." do
       sout, serr = capture do
         Oktest.scope do
           topic "T1" do
@@ -470,13 +471,13 @@ topic: "T1"
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
   end
 
-  describe "#visit_scope()" do
-    it "[!5anr7] calls before_all and after_all blocks." do
+  test_target 'Oktest::Runner#visit_scope()' do
+    test_subject "[!5anr7] calls before_all and after_all blocks." do
       sout, serr = capture do
         Oktest.scope do
           before_all { puts "[all] before_all#1" }
@@ -498,10 +499,10 @@ file: "test/runner_test.rb"
 [all] after_all#2
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!c5cw0] run specs and case_when in advance of specs and topics when SimpleReporter." do
+    test_subject "[!c5cw0] run specs and case_when in advance of specs and topics when SimpleReporter." do
       sout, serr = capture do
         Oktest.scope do
           topic "T1" do
@@ -538,8 +539,8 @@ topic: "T3"
 /topic
 /file
 END
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
   end
 
@@ -547,16 +548,16 @@ END
 end
 
 
-class RunnerFunctions_TC < TC
+Object.new.instance_eval do   # Oktest
+  extend NanoTest
 
-  def setup()
-  end
-
-  def teardown()
+  def self.test_subject(desc, &b)
+    NanoTest.test_subject(desc, &b)
+  ensure
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
-  def edit_actual(output)
+  def self.edit_actual(output)
     bkup = output.dup
     output = output.gsub(/^.*\r/, '')
     output = output.gsub(/^    .*(_test\.tmp:\d+)/, '    \1')
@@ -565,13 +566,13 @@ class RunnerFunctions_TC < TC
     return output
   end
 
-  def edit_expected(expected)
+  def self.edit_expected(expected)
     expected = expected.gsub(/^    (.*:\d+)(:in `block .*)/, '    \1') if RUBY_VERSION < "1.9"
     expected = plain2colored(expected)
     return expected
   end
 
-  def prepare()
+  def self.prepare()
     Oktest.scope do
       topic 'Example' do
         spec '1+1 should be 2' do
@@ -584,55 +585,55 @@ class RunnerFunctions_TC < TC
     end
   end
 
-  VERBOSE_OUTPUT = <<'END'
+  verbose_output = <<'END'
 ## test/runner_test.rb
 * <b>Example</b>
   - [<C>pass</C>] 1+1 should be 2
   - [<C>pass</C>] 1-1 should be 0
 ## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
-  COMPACT_OUTPUT = <<'END'
+  compact_output = <<'END'
 test/runner_test.rb: <C>.</C><C>.</C>
 ## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
-  PLAIN_OUTPUT = <<'END'
+  plain_output = <<'END'
 <C>.</C><C>.</C>
 ## total:2 (<C>pass:2</C>, fail:0, error:0, skip:0, todo:0) in 0.000s
 END
 
 
-  describe 'Oktest.run()' do
-    it "[!mn451] run test cases." do
-      expected = VERBOSE_OUTPUT
+  test_target 'Oktest.run()' do
+    test_subject "[!mn451] run test cases." do
+      expected = verbose_output
       prepare()
       sout, serr = capture { Oktest.run() }
-      assert_eq edit_actual(sout), edit_expected(expected)
-      assert_eq serr, ""
+      test_eq edit_actual(sout), edit_expected(expected)
+      test_eq serr, ""
     end
-    it "[!6xn3t] creates reporter object according to 'style:' keyword arg." do
-      expected = VERBOSE_OUTPUT
+    test_subject "[!6xn3t] creates reporter object according to 'style:' keyword arg." do
+      expected = verbose_output
       prepare()
       sout, serr = capture { Oktest.run(:style=>"verbose") }
-      assert_eq edit_actual(sout), edit_expected(expected)
-      assert_eq serr, ""
+      test_eq edit_actual(sout), edit_expected(expected)
+      test_eq serr, ""
       #
-      expected = COMPACT_OUTPUT
+      expected = compact_output
       prepare()
       sout, serr = capture { Oktest.run(:style=>"compact") }
-      assert_eq edit_actual(sout), edit_expected(expected)
-      assert_eq serr, ""
+      test_eq edit_actual(sout), edit_expected(expected)
+      test_eq serr, ""
       #
-      expected = PLAIN_OUTPUT
+      expected = plain_output
       prepare()
       sout, serr = capture { Oktest.run(:style=>"plain") }
-      assert_eq edit_actual(sout), edit_expected(expected)
-      assert_eq serr, ""
+      test_eq edit_actual(sout), edit_expected(expected)
+      test_eq serr, ""
     end
-    it "[!p52se] returns total number of failures and errors." do
+    test_subject "[!p52se] returns total number of failures and errors." do
       prepare()
       ret = nil
       _ = capture { ret = Oktest.run() }
-      assert_eq ret, 0          # no failures, no errors
+      test_eq ret, 0          # no failures, no errors
       #
       Oktest.scope do
         topic 'Example' do
@@ -644,7 +645,7 @@ END
         end
       end
       _ = capture { ret = Oktest.run() }
-      assert_eq ret, 2          # 1 failure, 1 error
+      test_eq ret, 2          # 1 failure, 1 error
     end
   end
 
