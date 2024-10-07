@@ -65,13 +65,13 @@ namespace :test do
 
   desc "do test in verbose mode"
   task :verbose do
-    ruby "test/run_all.rb"
+    ruby "test/all.rb"
   end
 
   desc "do test in quiet mode"
   task :quiet do
     _be_quiet()
-    ruby "test/run_all.rb"
+    ruby "test/all.rb"
   end
 
   def _be_quiet()
@@ -93,7 +93,7 @@ namespace :test do
         next
       end
       puts "\e[33m==== ruby #{ver} (#{File.dirname(bindir)}) ====\e[0m"
-      sh "#{bindir}/ruby test/run_all.rb" do |ok, res|
+      sh "#{bindir}/ruby test/all.rb" do |ok, res|
         $stderr.puts "** test failed" unless ok
       end
     end
