@@ -41,5 +41,5 @@ END
   s.files       = files
   s.executables = ['oktest']
   s.bindir      = 'bin'
-  s.test_file   = 'test/run_all.rb'
+  s.test_file   = 'test/all.rb'
 end
