@@ -7,14 +7,15 @@
 ### $License: MIT License $
 ###
 
-require_relative './initialize'
+require_relative './init'
 
 require 'stringio'
 
 
-class TestGenerator_TC < TC
+Object.new.instance_eval do   # Oktest::TestGenerator
+  extend NanoTest
 
-  INPUT = <<END
+  INPUT_3 = <<'END'
 class Hello
   def hello(name=nil)
     #; default name is 'world'.
@@ -27,10 +28,10 @@ class Hello
 end
 END
 
-  describe '#parse()' do
-    it "[!5mzd3] parses ruby code." do
+  test_target 'Oktest::TestGenerator#parse()' do
+    test_subject "[!5mzd3] parses ruby code." do
       g = Oktest::TestGenerator.new()
-      tree = g.parse(StringIO.new(INPUT))
+      tree = g.parse(StringIO.new(INPUT_3))
       expected = [
         ["", "class", "Hello", [
           ["  ", "def", "#hello", [
@@ -39,14 +40,14 @@ END
           ]]
         ]]
       ]
-      assert_eq tree, expected
+      test_eq tree, expected
     end
   end
 
-  describe '#transform()' do
-    it "[!te7zw] converts tree into test code." do
+  test_target 'Oktest::TestGenerator#transform()' do
+    test_subject "[!te7zw] converts tree into test code." do
       g = Oktest::TestGenerator.new()
-      tree = g.parse(StringIO.new(INPUT))
+      tree = g.parse(StringIO.new(INPUT_3))
       code = g.transform(tree, 1)
       expected = <<'END'
 
@@ -64,11 +65,11 @@ END
 
   end  # Hello
 END
-      assert_eq code, expected
+      test_eq code, expected
     end
-    it "[!q5duk] supports 'unaryop' style option." do
+    test_subject "[!q5duk] supports 'unaryop' style option." do
       g = Oktest::TestGenerator.new('unaryop')
-      tree = g.parse(StringIO.new(INPUT))
+      tree = g.parse(StringIO.new(INPUT_3))
       code = g.transform(tree, 1)
       expected = <<'END'
 
@@ -86,14 +87,14 @@ END
 
   end  # Hello
 END
-      assert_eq code, expected
+      test_eq code, expected
     end
   end
 
-  describe '#generate()' do
-    it "[!5hdw4] generates test code." do
+  test_target 'Oktest::TestGenerator#generate()' do
+    test_subject "[!5hdw4] generates test code." do
       g = Oktest::TestGenerator.new()
-      code = g.generate(StringIO.new(INPUT))
+      code = g.generate(StringIO.new(INPUT_3))
       expected = <<'END'
 # coding: utf-8
 
@@ -119,7 +120,7 @@ Oktest.scope do
 
 end
 END
-      assert_eq code, expected
+      test_eq code, expected
     end
   end
 

@@ -7,29 +7,30 @@
 ### $License: MIT License $
 ###
 
-require_relative './initialize'
+require_relative './init'
 
 
-class FixtureManager_TC < TC
+Object.new.instance_eval do   # Oktest::FixtureManager
+  extend NanoTest
 
-  class DummyReporter2 < Oktest::Reporter
+  class DummyReporter5 < Oktest::Reporter
     def exit_spec(spec, depth, status, error, parent)
       puts error.inspect if error
     end
   end
 
-  def run_all(dummy: false)
-    reporter = dummy ? DummyReporter2.new : Oktest::Reporter.new
+  def self.run_all(dummy: false)
+    reporter = dummy ? DummyReporter5.new : Oktest::Reporter.new
     sout, serr = capture do
       Oktest::Runner.new(reporter).start()
     end
-    assert_eq serr, ""
+    test_eq serr, ""
     return sout
   end
 
-  describe '#get_fixture_values()' do
+  test_target 'Oktest::FixtureManager#get_fixture_values()' do
 
-    it "[!v587k] resolves fixtures." do
+    test_subject "[!v587k] resolves fixtures." do
       Oktest.scope do
         fixture(:x) { 10 }
         topic "Parent" do
@@ -44,10 +45,10 @@ class FixtureManager_TC < TC
       end
       expected = "[10, 20, 30]\n"
       sout = run_all()
-      assert_eq sout, expected
+      test_eq sout, expected
     end
 
-    it "[!ja2ew] resolves 'this_spec' fixture name as description of current spec." do
+    test_subject "[!ja2ew] resolves 'this_spec' fixture name as description of current spec." do
       Oktest.scope do
         topic Integer do
           spec "1+1 should be 2." do |this_spec|
@@ -56,10 +57,10 @@ class FixtureManager_TC < TC
         end
       end
       sout = run_all()
-      assert_eq sout, "this_spec=\"1+1 should be 2.\"\n"
+      test_eq sout, "this_spec=\"1+1 should be 2.\"\n"
     end
 
-    it "[!w6ffs] resolves 'this_topic' fixture name as target objec of current topic." do
+    test_subject "[!w6ffs] resolves 'this_topic' fixture name as target objec of current topic." do
       Oktest.scope do
         topic Integer do
           spec "1+1 should be 2." do |this_topic|
@@ -68,10 +69,10 @@ class FixtureManager_TC < TC
         end
       end
       sout = run_all()
-      assert_eq sout, "this_topic=Integer\n"
+      test_eq sout, "this_topic=Integer\n"
     end
 
-    it "[!np4p9] raises error when loop exists in dependency." do
+    test_subject "[!np4p9] raises error when loop exists in dependency." do
       Oktest.scope do
         topic "Parent" do
           fixture(:a) {|b| nil }
@@ -85,14 +86,14 @@ class FixtureManager_TC < TC
       end
       expected = "\#<Oktest::LoopedDependencyError: fixture dependency is looped: a->b=>c=>d=>b>\n"
       sout = run_all(dummy: true)
-      assert_eq sout, expected
+      test_eq sout, expected
     end
 
   end
 
-  describe '#get_fixture_value()' do
+  test_target 'Oktest::FixtureManager#get_fixture_value()' do
 
-    it "[!2esaf] resolves fixture dependencies." do
+    test_subject "[!2esaf] resolves fixture dependencies." do
       Oktest.scope do
         topic "Parent" do
           fixture(:a) {|b, c| ["A"] + b + c }
@@ -114,10 +115,10 @@ class FixtureManager_TC < TC
 ["A", "B", "C", "D"]
 END
       sout = run_all()
-      assert_eq sout, expected
+      test_eq sout, expected
     end
 
-    it "[!gyyst] overwrites keyword params by fixture values." do
+    test_subject "[!gyyst] overwrites keyword params by fixture values." do
       Oktest.scope do
         topic "topic#1" do
           fixture(:x) {|y, z: 3| {y: y, z: z} }
@@ -127,10 +128,10 @@ END
         end
       end
       sout = run_all()
-      assert_eq sout, "{:y=>2, :z=>3}\n{:y=>4, :z=>5}\n"
+      test_eq sout, "{:y=>2, :z=>3}\n{:y=>4, :z=>5}\n"
     end
 
-    it "[!4xghy] calls fixture block with context object as self." do
+    test_subject "[!4xghy] calls fixture block with context object as self." do
       Oktest.scope do
         topic "Parent" do
           fixture(:x) { @x = 10; 20 }
@@ -141,10 +142,10 @@ END
 10
 END
       sout = run_all()
-      assert_eq sout, expected
+      test_eq sout, expected
     end
 
-    it "[!8t3ul] caches fixture value to call fixture block only once per spec." do
+    test_subject "[!8t3ul] caches fixture value to call fixture block only once per spec." do
       Oktest.scope do
         topic "Parent" do
           fixture(:x) { puts "** x called."; 10 }
@@ -162,10 +163,10 @@ END
 12
 END
       sout = run_all()
-      assert_eq sout, expected
+      test_eq sout, expected
     end
 
-    it "[!4chb9] traverses parent topics if fixture not found in current topic." do
+    test_subject "[!4chb9] traverses parent topics if fixture not found in current topic." do
       Oktest.scope do
         topic 'Parent' do
           fixture(:x) { 10 }
@@ -179,10 +180,10 @@ END
         end
       end
       sout = run_all()
-      assert_eq sout, "\"x=10, y=11, z=12\"\n"
+      test_eq sout, "\"x=10, y=11, z=12\"\n"
     end
 
-    it "[!wt3qk] suports global scope." do
+    test_subject "[!wt3qk] suports global scope." do
       Oktest.global_scope do
         fixture :gf1592 do {id: "gf1592"} end
         fixture :gf6535 do |gf1592| {id: "gf6535", parent: gf1592} end
@@ -197,10 +198,10 @@ END
         end
       end
       _ = run_all()
-      assert_eq data, {:id=>"gf8979", :parent=>{:id=>"gf6535", :parent=>{:id=>"gf1592"}}}
+      test_eq data, {:id=>"gf8979", :parent=>{:id=>"gf6535", :parent=>{:id=>"gf1592"}}}
     end
 
-    it "[!nr79z] raises error when fixture not found." do
+    test_subject "[!nr79z] raises error when fixture not found." do
       Oktest.scope do
         topic "Parent" do
           fixture(:x) { 10 }
@@ -211,7 +212,7 @@ END
       end
       expected = "#<Oktest::FixtureNotFoundError: y: fixture not found. (spec: spec#1)>\n"
       sout = run_all(dummy: true)
-      assert_eq sout, expected
+      test_eq sout, expected
     end
 
   end

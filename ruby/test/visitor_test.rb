@@ -7,10 +7,11 @@
 ### $License: MIT License $
 ###
 
-require_relative './initialize'
+require_relative './init'
 
 
-class Visitor_TC < TC
+Object.new.instance_eval do   # Oktest::Visitor
+  extend NanoTest
 
   class DummyVisitor0 < Oktest::Visitor
     def initialize
@@ -48,15 +49,15 @@ class Visitor_TC < TC
     end
   end
 
-  def setup
-  end
-
-  def teardown
+  def self.test_subject(desc, &b)
+    NanoTest.test_subject(desc, &b)
+  ensure
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
-  describe '#visit_spec()' do
-    it "[!9f7i9] do something on spec." do
+
+  test_target 'Oktest::Visitor#visit_spec()' do
+    test_subject "[!9f7i9] do something on spec." do
       expected = <<'END'
 spec: sample {
 }
@@ -64,12 +65,12 @@ END
       sp = Oktest::SpecLeaf.new(nil, "sample")
       visitor = DummyVisitor0.new
       visitor.visit_spec(sp, 0, nil)
-      assert_eq visitor.log.join(), expected
+      test_eq visitor.log.join(), expected
     end
   end
 
-  describe '#visit_topic()' do
-    it "[!mu3fn] visits each child of topic." do
+  test_target 'Oktest::Visitor#visit_topic()' do
+    test_subject "[!mu3fn] visits each child of topic." do
       expected = <<'END'
 topic: example {
   spec: sample {
@@ -80,12 +81,12 @@ END
       sp = Oktest::SpecLeaf.new(to, "sample")
       visitor = DummyVisitor0.new
       visitor.visit_topic(to, 0, nil)
-      assert_eq visitor.log.join(), expected
+      test_eq visitor.log.join(), expected
     end
   end
 
-  describe '#visit_scope()' do
-    it "[!hebhz] visits each child scope." do
+  test_target 'Oktest::Visitor#visit_scope()' do
+    test_subject "[!hebhz] visits each child scope." do
       expected = <<'END'
 scope: file.rb {
   topic: example {
@@ -99,12 +100,12 @@ END
       sp = Oktest::SpecLeaf.new(sc, "sample")
       visitor = DummyVisitor0.new
       visitor.visit_scope(sc, 0, nil)
-      assert_eq visitor.log.join(), expected
+      test_eq visitor.log.join(), expected
     end
   end
 
-  describe '#start()' do
-    it "[!8h8qf] start visiting tree." do
+  test_target 'Oktest::Visitor#start()' do
+    test_subject "[!8h8qf] start visiting tree." do
       expected = <<'END'
 scope: test/visitor_test.rb {
   topic: Example1 {
@@ -120,14 +121,15 @@ END
       prepare()
       visitor = DummyVisitor0.new
       visitor.start()
-      assert_eq visitor.log.join(), expected
+      test_eq visitor.log.join(), expected
     end
   end
 
 end
 
 
-class Traverser_TC < TC
+Object.new.instance_eval do   # Oktest::Traverser
+  extend NanoTest
 
   class MyTraverser < Oktest::Traverser
     def on_scope(filename, tag, depth)
@@ -159,7 +161,7 @@ class Traverser_TC < TC
     end
   end
 
-  def prepare()
+  def self.prepare()
     Oktest.scope do
       topic 'Example' do
         topic Integer, tag: 'cls' do
@@ -180,13 +182,15 @@ class Traverser_TC < TC
     end
   end
 
-  def teardown()
+  def self.test_subject(desc, &b)
+    NanoTest.test_subject(desc, &b)
+  ensure
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
 
 
-  describe '#start()' do
-    it "[!5zonp] visits topics and specs and calls callbacks." do
+  test_target 'Oktest::Traverser#start()' do
+    test_subject "[!5zonp] visits topics and specs and calls callbacks." do
       expected = <<'END'
 * scope: test/visitor_test.rb
   + topic: Example
@@ -203,21 +207,21 @@ class Traverser_TC < TC
 END
       prepare()
       sout, serr = capture { MyTraverser.new.start() }
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE." do
+    test_subject "[!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE." do
       prepare()
       n = Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length
       sout, serr = capture do
         MyTraverser.new.start()
       end
-      assert_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length, n
+      test_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length, n
     end
   end
 
-  describe '#visit_scope()' do
-    it "[!ledj3] calls on_scope() callback on scope." do
+  test_target 'Oktest::Traverser#visit_scope()' do
+    test_subject "[!ledj3] calls on_scope() callback on scope." do
       expected = <<'END'
 * scope: test/visitor_test.rb
 * scope: test/visitor_test.rb
@@ -227,13 +231,13 @@ END
       Oktest.scope do
       end
       sout, serr = capture { MyTraverser.new.start() }
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
   end
 
-  describe '#visit_topic()' do
-    it "[!x8r9w] calls on_topic() callback on topic." do
+  test_target 'Oktest::Traverser#visit_topic()' do
+    test_subject "[!x8r9w] calls on_topic() callback on topic." do
       expected = <<'END'
 * scope: test/visitor_test.rb
   + topic: Parent
@@ -246,10 +250,10 @@ END
         end
       end
       sout, serr = capture { MyTraverser.new.start() }
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
-    it "[!qh0q3] calls on_case() callback on case_when or case_else." do
+    test_subject "[!qh0q3] calls on_case() callback on case_when or case_else." do
       expected = <<'END'
 * scope: test/visitor_test.rb
   + topic: Parent
@@ -265,13 +269,13 @@ END
         end
       end
       sout, serr = capture { MyTraverser.new.start() }
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
   end
 
-  describe '#visit_spec()' do
-    it "[!41uyj] calls on_spec() callback." do
+  test_target 'Oktest::Traverser#visit_spec()' do
+    test_subject "[!41uyj] calls on_spec() callback." do
       expected = <<'END'
 * scope: test/visitor_test.rb
   + topic: Example
@@ -285,8 +289,8 @@ END
         end
       end
       sout, serr = capture { MyTraverser.new.start() }
-      assert_eq sout, expected
-      assert_eq serr, ""
+      test_eq sout, expected
+      test_eq serr, ""
     end
   end
 
