@@ -479,6 +479,16 @@ Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
     end
   end
 
+  test_target 'Oktest.topic()' do
+    test_subject "[!c5j3f] same as `Oktest.scope do topic target do ... end end`." do
+      arg_ = nil
+      Oktest.topic "FooBar" do |arg|
+        arg_ = arg
+      end
+      test_eq arg_, "FooBar"
+    end
+  end
+
 end
 
 
