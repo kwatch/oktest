@@ -35,7 +35,7 @@ module NanoTest
     end
   end
 
-  def test_exception(exception_class, &b)
+  def test_exception?(exception_class, &b)
     begin
       yield
     rescue exception_class => exc
@@ -143,15 +143,15 @@ if __FILE__ == $0
     end
   end
 
-  ## test_exception()
-  do_test "test_exception() raises nothing if expected exception raised in block." do
-    test_exception ZeroDivisionError do
+  ## test_exception?()
+  do_test "test_exception?() raises nothing if expected exception raised in block." do
+    test_exception? ZeroDivisionError do
       1 / 0
     end
   end
-  do_test "test_exception() raises TestFailed if expected exception not raised in block." do
+  do_test "test_exception?() raises TestFailed if expected exception not raised in block." do
     begin
-      test_exception ZeroDivisionError do
+      test_exception? ZeroDivisionError do
         1.0 / 0.0
       end
     rescue NanoTest::TestFailed => exc

@@ -18,7 +18,7 @@ Object.new.instance_eval do   # Oktest::Matcher
   test_target 'Oktest::Matcher#===' do
     test_subject "[!spybn] raises NotImplementedError." do
       errmsg = "Oktest::Matcher#===(): not implemented yet."
-      exc = test_exception NotImplementedError do
+      exc = test_exception? NotImplementedError do
         Oktest::Matcher.new(nil) === nil
       end
       test_eq? exc.message, errmsg
@@ -28,7 +28,7 @@ Object.new.instance_eval do   # Oktest::Matcher
   test_target 'Oktest::Matcher#==' do
     test_subject "[!ymt1b] raises OktestError." do
       errmsg = "JSON(): use `===` instead of `==`."
-      exc = test_exception Oktest::OktestError do
+      exc = test_exception? Oktest::OktestError do
         Oktest::Matcher.new(nil) == nil
       end
       test_eq? exc.message, errmsg
@@ -38,7 +38,7 @@ Object.new.instance_eval do   # Oktest::Matcher
   test_target 'Oktest::Matcher#fail()' do
     test_subject "[!8qpsd] raises assertion error." do
       errmsg = "<<errmsg>>"
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         Oktest::Matcher.new(nil).fail("<<errmsg>>")
       end
       test_eq? exc.message, errmsg
@@ -69,7 +69,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
 
   test_target 'Oktest::JsonMatcher#===' do
     test_subject "[!4uf1o] raises assertion error when JSON not matched." do
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"status": "ok"}) === {"status": "OK"}
       end
     end
@@ -85,7 +85,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"name\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"Alice\"\n"\
                 "    $<expected>: \"alice\"\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"name": "alice", "age": 20, "deleted": false}
       end
       test_eq? exc.message, errmsg
@@ -98,7 +98,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"deleted\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   false\n"\
                 "    $<expected>: TrueClass\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"name": String, "age": Integer, "deleted": TrueClass}
       end
       test_eq? exc.message, errmsg
@@ -111,7 +111,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"email\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"alice@example.com\"\n"\
                 "    $<expected>: /^\\w[-.\\w]+@example\\.org$/\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"email": /^\w[-.\w]+@example\.org$/}
       end
       test_eq? exc.message, errmsg
@@ -124,7 +124,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"int\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   5\n"\
                 "    $<expected>: 1...5\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"int": 1...5, "float": 3.1..3.2, "str": "aaa".."zzz"}
       end
       test_eq? exc.message, errmsg
@@ -134,7 +134,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"val\"]: expected #{1.class.name} value, but got Float value.\n"\
                 "    $<actual>:   1.5\n"\
                 "    $<expected>: 1..10\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"val": 1..10}
       end
       test_eq? exc.message, errmsg
@@ -147,7 +147,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"gender\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"female\"\n"\
                 "    $<expected>: #<Set: {\"M\", \"F\"}>\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"gender": Set.new(["M", "F"])}
       end
       test_eq? exc.message, errmsg
@@ -160,7 +160,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"tags\"][0]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"foo\"\n"\
                 "    $<expected>: Integer\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"tags": [Integer].each}
       end
       test_eq? exc.message, errmsg
@@ -170,7 +170,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"tags\"]: Array value expected but got String value.\n"\
                 "    $<actual>:   \"foo\"\n"\
                 "    $<expected>: [String].each\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"tags": [String].each}
       end
       test_eq? exc.message, errmsg
@@ -185,7 +185,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"items\"][0][\"id\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   101\n"\
                 "    $<expected>: 1000..9999\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {
           "items": [{"name": String, "id?": 1000..9999}].each
         }
@@ -199,7 +199,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
                 "    $<expected>.length: 4\n"\
                 "    $<actual>:   [\"A\", \"B\", \"C\"]\n"\
                 "    $<expected>: [\"A\", \"B\", \"C\", \"D\"]\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"arr": ["A", "B", "C", "D"]}
       end
       test_eq? exc.message, errmsg
@@ -218,7 +218,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"item\"][\"price\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   500\n"\
                 "    $<expected>: Float\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {
           "owner": {"name": String, "age": 0..100},
           "item": {"id": 1..99999, "name": String, "price?": Float},
@@ -257,7 +257,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>: key \"gender\" expected but not found.\n"\
                 "    $<actual>.keys:   \"id\", \"name\"\n"\
                 "    $<expected>.keys: \"gender\", \"id\", \"name\"\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"id": Integer, "name": String, "gender": String}
       end
       test_eq? exc.message, errmsg
@@ -266,7 +266,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       actual = {"id": 101, "name": "Alice"}
       errmsg = ("$<JSON>[\"id\"]: unexpected key.\n"\
                 "    $<actual>:   101\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON(actual) === {"name": String}
       end
       test_eq? exc.message, errmsg
@@ -280,7 +280,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   3.14\n"\
                 "    $<expected>: OR(String, Integer)\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"val": 3.14}) === {"val": OR(String, Integer)}
       end
       test_eq? exc.message, errmsg
@@ -292,7 +292,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"Alice\"\n"\
                 "    $<expected>: AND(/^[a-z]+$/)\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"val": "Alice"}) === {"val": AND(String, /^[a-z]+$/)}
       end
       test_eq? exc.message, errmsg
@@ -307,14 +307,14 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"abc\"\n"\
                 "    $<expected>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"val": "abc"}) === expected
       end
       test_eq? exc.message, errmsg
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   99\n"\
                 "    $<expected>: OR(AND(String, /^\\d+$/), AND(Integer, 100..999))\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"val": 99}) === expected
       end
       test_eq? exc.message, errmsg
@@ -329,14 +329,14 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   \"1\"\n"\
                 "    $<expected>: AND(OR(/^\\d{3}$/, 100..999))\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"val": "1"}) === expected
       end
       test_eq? exc.message, errmsg
       errmsg = ("$<JSON>[\"val\"]: $<expected> === $<actual> : failed.\n"\
                 "    $<actual>:   0\n"\
                 "    $<expected>: AND(OR(/^\\d{3}$/, 100..999))\n")
-      exc = test_exception Oktest::FAIL_EXCEPTION do
+      exc = test_exception? Oktest::FAIL_EXCEPTION do
         JSON({"val": 0}) === expected
       end
       test_eq? exc.message, errmsg

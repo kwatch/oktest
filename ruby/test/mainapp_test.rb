@@ -170,7 +170,7 @@ END
 
     test_subject "[!k402d] raises error if file not found." do
       filename = "not-exist-file"
-      exc = test_exception Benry::CmdOpt::OptionError do
+      exc = test_exception? Benry::CmdOpt::OptionError do
         run(filename)
       end
       test_eq? exc.message, "#{filename}: not found."
@@ -481,7 +481,7 @@ END
     end
 
     test_subject "[!71h2x] '-F ...' option will be error." do
-      exc = test_exception Benry::CmdOpt::OptionError do
+      exc = test_exception? Benry::CmdOpt::OptionError do
         run("-F", "*pat*", @testfile)
       end
       test_eq? exc.message, "-F *pat*: Pattern unmatched."

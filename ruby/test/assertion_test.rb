@@ -173,11 +173,11 @@ END
     end
     test_subject "[!mjh4d] raises error when combination of 'not_ok()' and matcher object." do
       errmsg = "negative `===` is not available with matcher object."
-      exc = test_exception Oktest::OktestError do
+      exc = test_exception? Oktest::OktestError do
         not_ok {Oktest::JsonMatcher.new({})} === {}
       end
       test_eq? errmsg, exc.message
-      exc = test_exception Oktest::OktestError do
+      exc = test_exception? Oktest::OktestError do
         ok {Oktest::JsonMatcher.new({})}.NOT === {}
       end
       test_eq? errmsg, exc.message

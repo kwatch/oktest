@@ -45,7 +45,7 @@ Object.new.instance_eval do   # Oktest::Filter
       test_eq? filter_attrs(ft), [nil, '\[!abc123\]*', nil, false]
     end
     test_subject "[!cmp6e] raises ArgumentError when invalid argument." do
-      exc = test_exception ArgumentError do
+      exc = test_exception? ArgumentError do
         parse_filter_str("abc123")
       end
       test_eq? exc.message, '"abc123": unexpected pattern string.'

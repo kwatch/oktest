@@ -15,7 +15,7 @@ Object.new.instance_eval do   # Oktest::Item
 
   test_target 'Oktest::Item#accept_visitor()' do
     test_subject "[!b0e20] raises NotImplementedError." do
-      exc = test_exception NotImplementedError do
+      exc = test_exception? NotImplementedError do
         Oktest::Item.new().accept_visitor(nil)
       end
       test_eq? exc.message, "Oktest::Item#accept_visitor(): not implemented yet."
@@ -24,7 +24,7 @@ Object.new.instance_eval do   # Oktest::Item
 
   test_target 'Oktest::Item#unlink_parent()' do
     test_subject "[!5a0i9] raises NotImplementedError." do
-      exc = test_exception NotImplementedError do
+      exc = test_exception? NotImplementedError do
         Oktest::Item.new().unlink_parent()
       end
       test_eq? exc.message, "Oktest::Item#unlink_parent(): not implemented yet."
@@ -33,7 +33,7 @@ Object.new.instance_eval do   # Oktest::Item
 
   test_target 'Oktest::Item#_repr()' do
     test_subject "[!qi1af] raises NotImplementedError." do
-      exc = test_exception NotImplementedError do
+      exc = test_exception? NotImplementedError do
         Oktest::Item.new()._repr(0)
       end
       test_eq? exc.message, "Oktest::Item#_repr(): not implemented yet."
@@ -379,7 +379,7 @@ Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
     end
     test_subject "[!jmc4q] raises error when nested called." do
       begin                 ; x = 0
-        exc = test_exception Oktest::OktestError do
+        exc = test_exception? Oktest::OktestError do
                             ; x = 1
           Oktest.scope do   ; x = 2
             Oktest.scope do ; x = 3
@@ -436,7 +436,7 @@ Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
     test_subject "[!pe0g2] raises error when nested called." do
       expected_errmsg = "scope() and global_scope() are not nestable."
       begin                        ; x = 0
-        exc = test_exception Oktest::OktestError do
+        exc = test_exception? Oktest::OktestError do
                                    ; x = 1
           Oktest.global_scope do   ; x = 2
             Oktest.global_scope do ; x = 3
@@ -450,7 +450,7 @@ Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
       end
       #
       begin                        ; x = 0
-        exc = test_exception Oktest::OktestError do
+        exc = test_exception? Oktest::OktestError do
                                    ; x = 1
           Oktest.scope do          ; x = 2
             Oktest.global_scope do ; x = 3
@@ -465,7 +465,7 @@ Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
       end
       #
       begin                        ; x = 0
-        exc = test_exception Oktest::OktestError do       ; x = 1
+        exc = test_exception? Oktest::OktestError do       ; x = 1
           Oktest.global_scope do   ; x = 2
             Oktest.scope do        ; x = 3
             end
@@ -627,7 +627,7 @@ Object.new.instance_eval do   # Oktest::Context
       new_node_with() do
         spec "example #2", fixture: {x: 1} do end   # not raise anything
       end
-      exc = test_exception ArgumentError do
+      exc = test_exception? ArgumentError do
         new_node_with() do
           spec "example #2", fixture: "x: 1" do end
         end
@@ -640,7 +640,7 @@ Object.new.instance_eval do   # Oktest::Context
       end
       test_eq? node.each_child.to_a.length, 1
       sp = node.each_child.first
-      exc = test_exception Oktest::TodoException do
+      exc = test_exception? Oktest::TodoException do
         sp.block.call
       end
       test_eq? exc.message, "not implemented yet"

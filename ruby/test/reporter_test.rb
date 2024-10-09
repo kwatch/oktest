@@ -261,7 +261,7 @@ END
       test_eq? serr, ""
     end
     test_subject "[!jbped] skips backtrace of oktest.rb when assertion failure." do
-      exc = test_exception Oktest::AssertionFailed do
+      exc = test_exception? Oktest::AssertionFailed do
         eval "raise Oktest::AssertionFailed, 'dummie'", binding(), "lib/oktest.rb", 100
       end
       #
@@ -273,7 +273,7 @@ END
       test_eq? serr, ""
     end
     test_subject "[!cfkzg] don't skip first backtrace entry when error." do
-      exc = test_exception Oktest::AssertionFailed do
+      exc = test_exception? Oktest::AssertionFailed do
         eval "raise Oktest::AssertionFailed, 'dummie'", binding(), "lib/oktest.rb", 100
       end
       #
@@ -628,7 +628,7 @@ Object.new.instance_eval do   # Oktest
 
   test_target 'Oktest.DEFAULT_REPORTING_STYLE=()' do
     test_subject "[!lbufd] raises error if unknown style specified." do
-      exc = test_exception ArgumentError do
+      exc = test_exception? ArgumentError do
         Oktest.DEFAULT_REPORTING_STYLE = "foo"
       end
       test_eq? exc.message, "foo: Unknown reporting style."

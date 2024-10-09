@@ -276,11 +276,11 @@ HEREDOC
 
   test_target 'Oktest::Util.partial_regexp()' do
     test_subject "[!ostkw] raises error if mark has no space or has more than two spaces." do
-      exc = test_exception ArgumentError do
+      exc = test_exception? ArgumentError do
         Oktest::Util.partial_regexp("xxx", '\A', '\z', "{====}")
       end
       test_eq? exc.message, "\"{====}\": mark should contain only one space (ex: `{== ==}`)."
-      exc = test_exception ArgumentError do
+      exc = test_exception? ArgumentError do
         Oktest::Util.partial_regexp("xxx", '', '', "{= == =}")
       end
       test_eq? exc.message, "\"{= == =}\": mark should contain only one space (ex: `{== ==}`)."

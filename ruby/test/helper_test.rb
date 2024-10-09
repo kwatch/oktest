@@ -80,7 +80,7 @@ Object.new.instance_eval do   # Oktest::SpecHelper
 
   test_target 'Oktest::SpecHelper#skip_when()' do
     test_subject "[!3xqf4] raises SkipException if condition is truthy." do
-      exc = test_exception Oktest::SkipException do
+      exc = test_exception? Oktest::SkipException do
         skip_when (1+1 == 2), "..reason.."
       end
       test_eq? exc.message, "..reason.."
@@ -277,7 +277,7 @@ END
       test_eq? sout, "OUTPUT\n"
     end
     test_subject "[!may84] fails when stderr is not empty." do
-      exc = test_exception Oktest::AssertionFailed do
+      exc = test_exception? Oktest::AssertionFailed do
         capture_stdout() do
           $stderr.print "ERROR"
         end
@@ -306,7 +306,7 @@ END
       test_eq? serr, "ERROR\n"
     end
     test_subject "[!3zh32] fails when stdout is not empty." do
-      exc = test_exception Oktest::AssertionFailed do
+      exc = test_exception? Oktest::AssertionFailed do
         capture_stderr() do
           print "OUTPUT"
         end
@@ -437,7 +437,7 @@ END
       [true, false].each do |flag|
         begin
           flag ? File.write(tmp, "") : Dir.mkdir(tmp)
-          exc = test_exception ArgumentError do
+          exc = test_exception? ArgumentError do
             dummy_file(tmp, "foobar")
           end
           test_eq? exc.message, "dummy_file('#{tmp}'): temporary file already exists."
@@ -505,7 +505,7 @@ END
       [true, false].each do |flag|
         begin
           flag ? Dir.mkdir(tmp) : File.write(tmp, "")
-          exc = test_exception ArgumentError do
+          exc = test_exception? ArgumentError do
             dummy_dir(tmp)
           end
           test_eq? exc.message, "dummy_dir('#{tmp}'): temporary directory already exists."
