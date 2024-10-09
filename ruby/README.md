@@ -2082,6 +2082,27 @@ test/example44_test.rb:
 ## Tips
 
 
+### `Oktest.topic()`
+
+If you want to reduce nested block depth, `Oktest.topic()` will help you.
+
+```ruby
+## This...
+Oktest.topic HelloClass do
+  ...
+end
+
+## ...is equivarent to...
+Oktest.scope do
+  Oktest.toic HelloClass do
+    ...
+  end
+end
+```
+
+(Since Oktest >= 1.5)
+
+
 ### Topic target
 
 `topic()` passes an target argument to the block.
