@@ -1125,6 +1125,13 @@ END
     attr_reader :target
     attr_writer :_prefix
 
+    def run_block_in_context_class(&block)
+      #; [!i2kvj] run block in context class.
+      #; [!pr3vj] run block with topic target as an argument.
+      target = @target
+      @context_class.class_exec(target, &block)
+    end
+
     def _prefix
       @_prefix || '*'
     end
