@@ -20,14 +20,14 @@ module NanoTest
   class TestFailed < StandardError
   end
 
-  def test_ok(result, msg: nil)
+  def test_ok?(result, msg: nil)
     unless result
       msg ||= "Test failed."
       raise TestFailed, msg
     end
   end
 
-  def test_eq(actual, expected)
+  def test_eq?(actual, expected)
     unless actual == expected
       s1 = "  $<expected>: #{expected.inspect}"
       s2 = "  $<actual>:   #{actual.inspect}"
@@ -101,13 +101,13 @@ if __FILE__ == $0
     called == true  or fail "Failed: #{desc}"
   end
 
-  ## test_ok()
-  do_test "test_ok() raises nothing if arg is truthy." do |desc|
-    test_ok (1+1) == 2
+  ## test_ok?()
+  do_test "test_ok?() raises nothing if arg is truthy." do |desc|
+    test_ok? (1+1) == 2
   end
-  do_test "test_ok() raises TestFailed if arg is falty." do |desc|
+  do_test "test_ok?() raises TestFailed if arg is falty." do |desc|
     begin
-      test_ok (1+1) == 3
+      test_ok? (1+1) == 3
     rescue NanoTest::TestFailed => exc
       expected = "Test failed."
       exc.message == expected  or fail "Failed: #{desc}"
@@ -115,10 +115,10 @@ if __FILE__ == $0
       fail "TestFailed should be raised but not: #{desc}"
     end
   end
-  do_test "test_ok() accepts a message string." do |desc|
+  do_test "test_ok?() accepts a message string." do |desc|
     msg = "should be equal to 2"
     begin
-      test_ok (1+1) == 3, msg: msg
+      test_ok? (1+1) == 3, msg: msg
     rescue NanoTest::TestFailed => exc
       exc.message == msg  or fail "Failed: #{desc}"
     else
@@ -126,13 +126,13 @@ if __FILE__ == $0
     end
   end
 
-  ## test_eq()
-  do_test "test_eq() raises nothing if args are equal." do |desc|
-    test_eq "ABC", "ABC"
+  ## test_eq?()
+  do_test "test_eq?() raises nothing if args are equal." do |desc|
+    test_eq? "ABC", "ABC"
   end
-  do_test "test_eq() raises TestFailed if args are not equal." do |desc|
+  do_test "test_eq?() raises TestFailed if args are not equal." do |desc|
     begin
-      test_eq "ABC", "abc"
+      test_eq? "ABC", "abc"
     rescue NanoTest::TestFailed => exc
       expected = "$<actual> == $<expected> : failed.\n"\
                  "  $<expected>: \"abc\"\n"\

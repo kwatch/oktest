@@ -106,44 +106,44 @@ END
 
     test_subject "[!tb6sx] returns 0 when no errors raised." do
       ret, sout, serr = main(["-h"])
-      test_eq ret, 0
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? serr, ""
     end
 
     test_subject "[!d5mql] returns 1 when a certain error raised." do
       ret, sout, serr = main(["-U"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] -U: Unknown option.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] -U: Unknown option.\n"
     end
 
     test_subject "[!jr49p] reports error when unknown option specified." do
       ret, sout, serr = main(["-X"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] -X: Unknown option.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] -X: Unknown option.\n"
       #
       ret, sout, serr = main(["--foobar"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] --foobar: Unknown long option.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] --foobar: Unknown long option.\n"
     end
 
     test_subject "[!uqomj] reports error when required argument is missing." do
       ret, sout, serr = main(["-s"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] -s: Argument required.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] -s: Argument required.\n"
     end
 
     test_subject "[!8i755] reports error when argument is invalid." do
       ret, sout, serr = main(["-s", "foobar"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] -s foobar: Expected one of verbose/simple/compact/plain/quiet/v/s/c/p/q.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] -s foobar: Expected one of verbose/simple/compact/plain/quiet/v/s/c/p/q.\n"
       #
       ret, sout, serr = main(["-F", "aaa=*pat*"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] -F aaa=*pat*: Pattern unmatched.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] -F aaa=*pat*: Pattern unmatched.\n"
       #
       ret, sout, serr = main(["--color=abc"])
-      test_eq ret, 1
-      test_eq serr, "[ERROR] --color=abc: Boolean expected.\n"
+      test_eq? ret, 1
+      test_eq? serr, "[ERROR] --color=abc: Boolean expected.\n"
     end
 
   end
@@ -164,8 +164,8 @@ END
 ## total:8 (<C>pass:4</C>, <R>fail:1</R>, <E>error:1</E>, <Y>skip:1</Y>, <Y>todo:1</Y>) in 0.000s
 END
       ret, sout, serr = run(@testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).end_with?(edit_expected(expected)), msg: "invalid status line"
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).end_with?(edit_expected(expected)), msg: "invalid status line"
     end
 
     test_subject "[!k402d] raises error if file not found." do
@@ -173,13 +173,13 @@ END
       exc = test_exception Benry::CmdOpt::OptionError do
         run(filename)
       end
-      test_eq exc.message, "#{filename}: not found."
+      test_eq? exc.message, "#{filename}: not found."
     end
 
     test_subject "[!bim36] changes auto-running to off." do
       Oktest::Config.auto_run = true
       _ = run(@testfile)
-      test_eq Oktest::Config.auto_run, false
+      test_eq? Oktest::Config.auto_run, false
     end
 
     test_subject "[!hiu5b] finds test scripts in directory and runs them." do
@@ -192,8 +192,8 @@ END
       File.rename(@testfile, "#{dir}/d1/d2/#{@testfile}")
       begin
         ret, sout, serr = run(dir)
-        test_eq ret, 2
-        test_ok edit_actual(sout).end_with?(edit_expected(expected)), msg: "invalid status line"
+        test_eq? ret, 2
+        test_ok? edit_actual(sout).end_with?(edit_expected(expected)), msg: "invalid status line"
       ensure
         File.rename("#{dir}/d1/d2/#{@testfile}", @testfile)
         dirs.reverse.each {|x| Dir.rmdir(x) }
@@ -209,7 +209,7 @@ END
     - [<C>pass</C>] 1+1 should be 2
     - [<C>pass</C>] 1-1 should be 0
 END
-      test_ok sout.start_with?(expected), msg: "expected verbose-style, but not."
+      test_ok? sout.start_with?(expected), msg: "expected verbose-style, but not."
       #
       begin
         ENV['OKTEST_RB'] = "-ss"
@@ -220,7 +220,7 @@ END
   * <b>Child1</b>: <C>.</C><C>.</C>
   * <b>Child2</b>: <R>f</R><E>E</E>
 END
-        test_ok sout.start_with?(expected), msg: "expected simple-style, but not."
+        test_ok? sout.start_with?(expected), msg: "expected simple-style, but not."
       ensure
         ENV.delete('OKTEST_RB')
       end
@@ -228,9 +228,9 @@ END
 
     test_subject "[!tt2gj] parses command options even after filenames." do
       ret, sout, serr = run(@testfile, "--version")
-      test_eq ret, 0
-      test_eq sout, Oktest::VERSION+"\n"
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? sout, Oktest::VERSION+"\n"
+      test_eq? serr, ""
     end
 
     #HELP_MESSAGE = Oktest::MainApp::HELP_MESSAGE % {command: File.basename($0)}
@@ -263,42 +263,42 @@ END
     test_subject "[!65vdx] prints help message if no arguments specified." do
       expected = HELP_MESSAGE
       ret, sout, serr = run()
-      test_eq ret, 0
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
 
     test_subject "[!9973n] '-h' or '--help' option prints help message." do
       expected = HELP_MESSAGE
       #
       ret, sout, serr = run("-h")
-      test_eq ret, 0
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? sout, expected
+      test_eq? serr, ""
       #
       ret, sout, serr = run("--help")
-      test_eq ret, 0
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
 
     test_subject "[!v938d] help message will be colored only when stdout is a tty." do
       ret, sout, serr = run("-h", tty: true)
-      test_ok sout =~ /\e\[1mOktest\e\[0m/
-      test_ok sout =~ /\e\[36mOptions:\e\[0m/
+      test_ok? sout =~ /\e\[1mOktest\e\[0m/
+      test_ok? sout =~ /\e\[36mOptions:\e\[0m/
       #
       ret, sout, serr = run("-h", tty: false)
-      test_ok sout !~ /\e\[1mOktest\e\[0m/
-      test_ok sout !~ /\e\[36mOptions:\e\[0m/
+      test_ok? sout !~ /\e\[1mOktest\e\[0m/
+      test_ok? sout !~ /\e\[36mOptions:\e\[0m/
     end
 
     test_subject "[!qqizl] '--version' option prints version number." do
       expected = '$Release: 0.0.0 $'.split()[1] + "\n"
       #
       ret, sout, serr = run("--version")
-      test_eq ret, 0
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
 
     test_subject "[!0qd92] '-s verbose' or '-sv' option prints test results in verbose mode." do
@@ -315,14 +315,14 @@ END
 END
       #
       ret, sout, serr = run("-sv", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
       #
       ret, sout, serr = run("-s", "verbose", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
     end
 
     test_subject "[!zfdr5] '-s simple' or '-ss' option prints test results in simple mode." do
@@ -335,14 +335,14 @@ END
 END
       #
       ret, sout, serr = run("-ss", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
       #
       ret, sout, serr = run("-s", "simple", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
     end
 
     test_subject "[!ef5v7] '-s compact' or '-sc' option prints test results in compact mode." do
@@ -352,14 +352,14 @@ END
 END
       #
       ret, sout, serr = run("-sc", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
       #
       ret, sout, serr = run("-s", "compact", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
     end
 
     test_subject "[!244te] '-s plain' or '-sp' option prints test results in plain mode." do
@@ -369,14 +369,14 @@ END
 END
       #
       ret, sout, serr = run("-sp", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
       #
       ret, sout, serr = run("-s", "plain", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
     end
 
     test_subject "[!ai61w] '-s quiet' or '-sq' option prints test results in quiet mode." do
@@ -386,14 +386,14 @@ END
 END
       #
       ret, sout, serr = run("-sq", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
       #
       ret, sout, serr = run("-s", "quiet", @testfile)
-      test_eq ret, 2
-      test_ok edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
-      test_eq serr, ""
+      test_eq? ret, 2
+      test_ok? edit_actual(sout).start_with?(edit_expected(expected)), msg: "invalid testcase output"
+      test_eq? serr, ""
     end
 
     test_subject "[!yz7g5] '-F topic=...' option filters topics." do
@@ -407,9 +407,9 @@ END
 END
       #
       ret, sout, serr = run("-F", "topic=Child1", @testfile)
-      test_eq ret, 0
-      test_eq edit_actual(sout), edit_expected(expected)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? edit_actual(sout), edit_expected(expected)
+      test_eq? serr, ""
     end
 
     test_subject "[!ww2mp] '-F spec=...' option filters specs." do
@@ -422,9 +422,9 @@ END
 END
       #
       ret, sout, serr = run("-F", "spec=*1-1*", @testfile)
-      test_eq ret, 0
-      test_eq edit_actual(sout), edit_expected(expected)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? edit_actual(sout), edit_expected(expected)
+      test_eq? serr, ""
     end
 
     test_subject "[!8uvib] '-F tag=...' option filters by tag name." do
@@ -442,9 +442,9 @@ END
 END
       #
       ret, sout, serr = run("-F", "tag={new,exp}", @testfile)
-      test_eq ret, 0
-      test_eq edit_actual(sout), edit_expected(expected)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? edit_actual(sout), edit_expected(expected)
+      test_eq? serr, ""
     end
 
     test_subject "[!m0iwm] '-F sid=...' option filters by spec id." do
@@ -457,9 +457,9 @@ END
 END
       #
       ret, sout, serr = run("-F", "sid=6hs1j", @testfile)
-      test_eq ret, 0
-      test_eq edit_actual(sout), edit_expected(expected)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? edit_actual(sout), edit_expected(expected)
+      test_eq? serr, ""
     end
 
     test_subject "[!noi8i] '-F' option supports negative filter." do
@@ -475,16 +475,16 @@ END
 END
       #
       ret, sout, serr = run("-F", "tag!={fail,err,exp}", @testfile)
-      test_eq ret, 0
-      test_eq edit_actual(sout), edit_expected(expected)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? edit_actual(sout), edit_expected(expected)
+      test_eq? serr, ""
     end
 
     test_subject "[!71h2x] '-F ...' option will be error." do
       exc = test_exception Benry::CmdOpt::OptionError do
         run("-F", "*pat*", @testfile)
       end
-      test_eq exc.message, "-F *pat*: Pattern unmatched."
+      test_eq? exc.message, "-F *pat*: Pattern unmatched."
     end
 
     test_subject "[!j01y7] if filerting by '-F' matched nothing, then prints zero result." do
@@ -493,9 +493,9 @@ END
 END
       #
       ret, sout, serr = run("-F", "tag=blablabla", @testfile)
-      test_eq ret, 0
-      test_eq edit_actual(sout), edit_expected(expected)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? edit_actual(sout), edit_expected(expected)
+      test_eq? serr, ""
     end
 
     test_subject "[!6ro7j] '--color=on' option enables output coloring forcedly." do
@@ -503,10 +503,10 @@ END
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
           _, sout, serr = run("--color=on", @testfile, tty: tty)
-          test_ok sout.include?(edit_expected("[<C>pass</C>]")), msg: "should contain blue string"
-          test_ok sout.include?(edit_expected("[<R>Fail</R>]")), msg: "should contain red string"
-          test_ok sout.include?(edit_expected("[<Y>Skip</Y>]")), msg: "should contain yellos string"
-          test_eq serr, ""
+          test_ok? sout.include?(edit_expected("[<C>pass</C>]")), msg: "should contain blue string"
+          test_ok? sout.include?(edit_expected("[<R>Fail</R>]")), msg: "should contain red string"
+          test_ok? sout.include?(edit_expected("[<Y>Skip</Y>]")), msg: "should contain yellos string"
+          test_eq? serr, ""
         end
       end
     end
@@ -516,10 +516,10 @@ END
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
           _, sout, serr = run("--color", @testfile, tty: tty)
-          test_ok sout.include?(edit_expected("[<C>pass</C>]")), msg: "should contain blue string"
-          test_ok sout.include?(edit_expected("[<R>Fail</R>]")), msg: "should contain red string"
-          test_ok sout.include?(edit_expected("[<Y>Skip</Y>]")), msg: "should contain yellos string"
-          test_eq serr, ""
+          test_ok? sout.include?(edit_expected("[<C>pass</C>]")), msg: "should contain blue string"
+          test_ok? sout.include?(edit_expected("[<R>Fail</R>]")), msg: "should contain red string"
+          test_ok? sout.include?(edit_expected("[<Y>Skip</Y>]")), msg: "should contain yellos string"
+          test_eq? serr, ""
         end
       end
     end
@@ -529,19 +529,19 @@ END
         [true, false].each do |tty|
           Oktest::Config.color_enabled = bool
           _, sout, serr = run("--color=off", @testfile, tty: tty)
-          test_ok !sout.include?(edit_expected("[<C>pass</C>]")), msg: "should not contain blue string"
-          test_ok !sout.include?(edit_expected("[<R>Fail</R>]")), msg: "should not contain red string"
-          test_ok !sout.include?(edit_expected("[<Y>Skip</Y>]")), msg: "should not contain yellos string"
-          test_eq serr, ""
+          test_ok? !sout.include?(edit_expected("[<C>pass</C>]")), msg: "should not contain blue string"
+          test_ok? !sout.include?(edit_expected("[<R>Fail</R>]")), msg: "should not contain red string"
+          test_ok? !sout.include?(edit_expected("[<Y>Skip</Y>]")), msg: "should not contain yellos string"
+          test_eq? serr, ""
         end
       end
     end
 
     test_subject "[!dk8eg] '-S' or '--skeleton' option prints test code skeleton." do
       ret, sout, serr = run("-S")
-      test_eq ret, 0
-      test_eq sout, Oktest::MainApp.new.__send__(:skeleton)
-      test_eq serr, ""
+      test_eq? ret, 0
+      test_eq? sout, Oktest::MainApp.new.__send__(:skeleton)
+      test_eq? serr, ""
     end
 
     HELLO_CLASS_DEF = <<'END'
@@ -589,14 +589,14 @@ END
       #
       begin
         ret, sout, serr = run("-G", filename)
-        test_eq ret, 0
-        test_eq sout, expected
-        test_eq serr, ""
+        test_eq? ret, 0
+        test_eq? sout, expected
+        test_eq? serr, ""
         #
         ret, sout, serr = run("--generate", filename)
-        test_eq ret, 0
-        test_eq sout, expected
-        test_eq serr, ""
+        test_eq? ret, 0
+        test_eq? sout, expected
+        test_eq? serr, ""
       ensure
         File.unlink(filename)
       end
@@ -634,24 +634,24 @@ END
       #
       begin
         ret, sout, serr = run("-Gunaryop", filename)
-        test_eq ret, 0
-        test_eq sout, expected
-        test_eq serr, ""
+        test_eq? ret, 0
+        test_eq? sout, expected
+        test_eq? serr, ""
         #
         ret, sout, serr = run("--generate=unaryop", filename)
-        test_eq ret, 0
-        test_eq sout, expected
-        test_eq serr, ""
+        test_eq? ret, 0
+        test_eq? sout, expected
+        test_eq? serr, ""
       ensure
         File.unlink(filename)
       end
     end
 
     test_subject "[!qs8ab] '--faster' chanages 'Config.ok_location' to false." do
-      test_eq Oktest::Config.ok_location, true
+      test_eq? Oktest::Config.ok_location, true
       begin
         run("--faster", @testfile)
-        test_eq Oktest::Config.ok_location, false
+        test_eq? Oktest::Config.ok_location, false
       ensure
         Oktest::Config.ok_location = true
       end
@@ -680,13 +680,13 @@ END
 ** warning: ok() is called but not tested yet (at #{@testfile}:11:in `block (3 levels) in <top (required)>').
 END
       ret, sout, serr = run(@testfile)
-      test_eq ret, 1
-      test_eq serr, expected
+      test_eq? ret, 1
+      test_eq? serr, expected
     end
 
     test_subject "[!bzgiw] returns total number of failures and errors." do
       ret, sout, serr = run(@testfile)
-      test_eq ret, 2    # 1 failure, 1 error
+      test_eq? ret, 2    # 1 failure, 1 error
     end
 
     test_subject "[!937kw] recovers 'Config.color_enabled' value." do
@@ -696,7 +696,7 @@ END
           ["on", "off"].each do |flag|
             Oktest::Config.color_enabled = bool
             run(@testfile, "--color=#{flag}")
-            test_eq Oktest::Config.color_enabled, bool
+            test_eq? Oktest::Config.color_enabled, bool
           end
         end
       ensure
@@ -709,8 +709,8 @@ END
   test_target 'Oktest::MainApp#skeleton()' do
     test_subject "[!s2i1p] returns skeleton string of test script." do
       str = Oktest::MainApp.new.__send__(:skeleton)
-      test_ok str =~ /^require 'oktest'$/
-      test_ok str =~ /^Oktest\.scope do$/
+      test_ok? str =~ /^require 'oktest'$/
+      test_ok? str =~ /^Oktest\.scope do$/
     end
     test_subject "[!opvik] skeleton string is valid ruby code." do
       str = Oktest::MainApp.new.__send__(:skeleton)
@@ -718,7 +718,7 @@ END
       File.write(filename, str, encoding: 'utf-8')
       begin
         result = `ruby -wc #{filename}`  # may reports warning
-        test_eq result, "Syntax OK\n"
+        test_eq? result, "Syntax OK\n"
       ensure
         File.unlink filename
       end

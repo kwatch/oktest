@@ -65,7 +65,7 @@ END
       sp = Oktest::SpecLeaf.new(nil, "sample")
       visitor = DummyVisitor0.new
       visitor.visit_spec(sp, 0, nil)
-      test_eq visitor.log.join(), expected
+      test_eq? visitor.log.join(), expected
     end
   end
 
@@ -81,7 +81,7 @@ END
       sp = Oktest::SpecLeaf.new(to, "sample")
       visitor = DummyVisitor0.new
       visitor.visit_topic(to, 0, nil)
-      test_eq visitor.log.join(), expected
+      test_eq? visitor.log.join(), expected
     end
   end
 
@@ -100,7 +100,7 @@ END
       sp = Oktest::SpecLeaf.new(sc, "sample")
       visitor = DummyVisitor0.new
       visitor.visit_scope(sc, 0, nil)
-      test_eq visitor.log.join(), expected
+      test_eq? visitor.log.join(), expected
     end
   end
 
@@ -121,7 +121,7 @@ END
       prepare()
       visitor = DummyVisitor0.new
       visitor.start()
-      test_eq visitor.log.join(), expected
+      test_eq? visitor.log.join(), expected
     end
   end
 
@@ -207,8 +207,8 @@ Object.new.instance_eval do   # Oktest::Traverser
 END
       prepare()
       sout, serr = capture { MyTraverser.new.start() }
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
     test_subject "[!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE." do
       prepare()
@@ -216,7 +216,7 @@ END
       sout, serr = capture do
         MyTraverser.new.start()
       end
-      test_eq Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length, n
+      test_eq? Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length, n
     end
   end
 
@@ -231,8 +231,8 @@ END
       Oktest.scope do
       end
       sout, serr = capture { MyTraverser.new.start() }
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
   end
 
@@ -250,8 +250,8 @@ END
         end
       end
       sout, serr = capture { MyTraverser.new.start() }
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
     test_subject "[!qh0q3] calls on_case() callback on case_when or case_else." do
       expected = <<'END'
@@ -269,8 +269,8 @@ END
         end
       end
       sout, serr = capture { MyTraverser.new.start() }
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
   end
 
@@ -289,8 +289,8 @@ END
         end
       end
       sout, serr = capture { MyTraverser.new.start() }
-      test_eq sout, expected
-      test_eq serr, ""
+      test_eq? sout, expected
+      test_eq? serr, ""
     end
   end
 

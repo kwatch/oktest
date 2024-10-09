@@ -29,11 +29,11 @@ Object.new.instance_eval do   # Oktest::AssertionObject
         raise
     else
       _failmsg ||= "#{errcls} expected to be raised, but nothing raised."
-      test_ok false, _failmsg
+      test_ok? false, _failmsg
     end
     #
     if errmsg
-      test_ok errmsg === exc.message,
+      test_ok? errmsg === exc.message,
               msg: ("unexpected error message:\n"\
                     "  expected: #{errmsg}\n"\
                     "  actual:   #{exc.message}")
@@ -48,32 +48,32 @@ Object.new.instance_eval do   # Oktest::AssertionObject
 
   def self.should_return_self(&b)
     obj = yield
-    test_ok obj.class == Oktest::AssertionObject
+    test_ok? obj.class == Oktest::AssertionObject
   end
 
 
   test_target 'Oktest::AssertionObject.report_not_yet()' do
     test_subject "[!3nksf] reports if 'ok{}' called but assertion not performed." do
-      test_ok Oktest::AssertionObject::NOT_YET.empty?, msg: "should be empty"
+      test_ok? Oktest::AssertionObject::NOT_YET.empty?, msg: "should be empty"
       sout, serr = capture do
         Oktest::AssertionObject.report_not_yet()
       end
-      test_eq sout, ""
-      test_eq serr, ""
+      test_eq? sout, ""
+      test_eq? serr, ""
       #
       lineno = __LINE__ + 1
       ok {1+1}
-      test_ok ! Oktest::AssertionObject::NOT_YET.empty?, msg: "should not be empty"
+      test_ok? ! Oktest::AssertionObject::NOT_YET.empty?, msg: "should not be empty"
       sout, serr = capture { Oktest::AssertionObject.report_not_yet() }
       expected = "** warning: ok() is called but not tested yet (at #{__FILE__}:#{lineno}:in"
-      test_eq sout, ""
-      test_ok serr.start_with?(expected), msg: "not matched"
+      test_eq? sout, ""
+      test_ok? serr.start_with?(expected), msg: "not matched"
     end
     test_subject "[!f92q4] clears remained objects." do
       ok {1+1}
-      test_ok ! Oktest::AssertionObject::NOT_YET.empty?, msg: "should not be empty"
+      test_ok? ! Oktest::AssertionObject::NOT_YET.empty?, msg: "should not be empty"
       sout, serr = capture { Oktest::AssertionObject.report_not_yet() }
-      test_ok Oktest::AssertionObject::NOT_YET.empty?, msg: "should be empty"
+      test_ok? Oktest::AssertionObject::NOT_YET.empty?, msg: "should be empty"
     end
   end
 
@@ -88,9 +88,9 @@ Object.new.instance_eval do   # Oktest::AssertionObject
     test_subject "[!63dde] toggles internal boolean." do
       begin
         x = ok {1+1}
-        test_eq x.bool, true
+        test_eq? x.bool, true
         x.NOT
-        test_eq x.bool, false
+        test_eq? x.bool, false
       ensure
         Oktest::AssertionObject::NOT_YET.clear()
       end
@@ -176,11 +176,11 @@ END
       exc = test_exception Oktest::OktestError do
         not_ok {Oktest::JsonMatcher.new({})} === {}
       end
-      test_eq errmsg, exc.message
+      test_eq? errmsg, exc.message
       exc = test_exception Oktest::OktestError do
         ok {Oktest::JsonMatcher.new({})}.NOT === {}
       end
-      test_eq errmsg, exc.message
+      test_eq? errmsg, exc.message
     end
   end
 
@@ -393,8 +393,8 @@ END
       exc = ERROR!(NoMethodError) do
         ok {[1]}.start_with?(1)
       end
-      test_ok exc.backtrace[0] !~ /\/oktest\.rbc?:/, msg: "backtrace not skipped"
-      test_ok exc.backtrace[0].start_with?(__FILE__), msg: "backtrace not skipped"
+      test_ok? exc.backtrace[0] !~ /\/oktest\.rbc?:/, msg: "backtrace not skipped"
+      test_ok? exc.backtrace[0].start_with?(__FILE__), msg: "backtrace not skipped"
     end
     test_subject "[!cun59] fails when boolean method failed returned false." do
       errmsg = "$<actual>.empty?: failed.\n    $<actual>:   \"SOS\""
@@ -442,7 +442,7 @@ END
       actual = obj.instance_eval {
         __inspect_args_and_kwargs([123, "abc"], c: "45", d: true)
       }
-      test_eq actual, expected
+      test_eq? actual, expected
     end
   end
 
@@ -460,8 +460,8 @@ END
         expected = "undefined method `sos' for \"SOS\":String"
       end
       ret = ok {pr}.raise?(NoMethodError, expected)
-      test_eq ret.class, NoMethodError
-      test_eq ret.message, expected
+      test_eq? ret.class, NoMethodError
+      test_eq? ret.message, expected
     end
     test_subject "[!2rnni] 1st argument can be error message string or rexp." do
       pr = proc { raise "something wrong" }
@@ -486,13 +486,13 @@ END
       test_subject "[!lq6jv] compares error class with '==' operator, not '.is_a?'." do
         pr = proc { "SOS".foobar }
         PASS! { ok {pr}.raise?(NoMethodError) }
-        test_ok NoMethodError < NameError, msg: "NoMethodError extends NameError"
+        test_ok? NoMethodError < NameError, msg: "NoMethodError extends NameError"
         ERROR!(NoMethodError, /foobar/) { ok {pr}.raise?(NameError) }
       end
       test_subject "[!hwg0z] compares error class with '.is_a?' if '_subclass: true' specified." do
         pr = proc { "SOS".foobar }
         PASS! { ok {pr}.raise?(NoMethodError, nil) }
-        test_ok NoMethodError < NameError, msg: "NoMethodError extends NameError"
+        test_ok? NoMethodError < NameError, msg: "NoMethodError extends NameError"
         PASS! { ok {pr}.raise?(NameError, nil, _subclass: true) }
       end
       test_subject "[!4n3ed] reraises if exception is not matched to specified error class." do
@@ -542,8 +542,8 @@ END
         ok {pr}.raise?(NoMethodError) do |exc2|
           exc1 = exc2
         end
-        test_ok exc1 != nil
-        test_ok exc1.equal?(pr.exc)
+        test_ok? exc1 != nil
+        test_ok? exc1.equal?(pr.exc)
       end
     end
     test_target 'Oktest::AssertionObject[!qkr3h] when `ok{}.NOT` called...' do
@@ -577,13 +577,13 @@ END
       test_subject "[!smprc] compares error class with '==' operator, not '.is_a?'." do
         pr = proc { "SOS".foobar }
         FAIL!(/foobar/) { ok {pr}.NOT.raise?(NoMethodError) }
-        test_ok NoMethodError < NameError, msg: "NoMethodError extends NameError"
+        test_ok? NoMethodError < NameError, msg: "NoMethodError extends NameError"
         ERROR!(NoMethodError) { ok {pr}.NOT.raise?(NameError) }
       end
       test_subject "[!34nd8] compares error class with '.is_a?' if '_subclass: true' specified." do
         pr = proc { "SOS".foobar }
         FAIL!(/foobar/) { ok {pr}.NOT.raise?(NoMethodError, nil) }
-        test_ok NoMethodError < NameError, msg: "NoMethodError extends NameError"
+        test_ok? NoMethodError < NameError, msg: "NoMethodError extends NameError"
         FAIL!(/foobar/) { ok {pr}.NOT.raise?(NameError, nil, _subclass: true) }
       end
       test_subject "[!shxne] reraises exception if different from specified error class." do
@@ -600,10 +600,10 @@ END
     end
     test_subject "[!vnc6b] sets exception object into '#exc' attribute." do
       pr = proc { "SOS".foobar }
-      test_ok !pr.respond_to?(:exc)
+      test_ok? !pr.respond_to?(:exc)
       PASS! { ok {pr}.raise?(NoMethodError) }
-      test_ok pr.respond_to?(:exc)
-      test_ok pr.exc.is_a?(NoMethodError)
+      test_ok? pr.respond_to?(:exc)
+      test_ok? pr.exc.is_a?(NoMethodError)
       if RUBY_VERSION >= "3.3"
         errmsg = "undefined method `foobar' for an instance of String"
       elsif RUBY_VERSION =~ /^3\.1\./
@@ -614,13 +614,13 @@ END
       else
         errmsg = "undefined method `foobar' for \"SOS\":String"
       end
-      test_eq pr.exc.message, errmsg
+      test_eq? pr.exc.message, errmsg
       #
       pr = proc { nil }
-      test_ok !pr.respond_to?(:exc)
+      test_ok? !pr.respond_to?(:exc)
       PASS! { ok {pr}.NOT.raise?(NoMethodError) }
-      test_ok pr.respond_to?(:exc)
-      test_eq pr.exc, nil
+      test_ok? pr.respond_to?(:exc)
+      test_eq? pr.exc, nil
     end
   end
 
@@ -655,7 +655,7 @@ END
     test_subject "[!lglzr] assertion passes when expected symbol thrown." do
       pr = proc { throw :sym2 }
       ok {pr}.throw?(:sym2)
-      test_ok true, msg: "ok"
+      test_ok? true, msg: "ok"
     end
     test_subject "[!gf9nx] assertion fails when thrown tag is equal to but not same as expected." do
       pr = proc { throw "sym" }
@@ -936,56 +936,56 @@ END
   test_target 'Oktest::AssertionObject#JSON()' do
     test_subject "[!n0k03] creates JsonMatcher object." do
       o = JSON({})
-      test_eq o.class, Oktest::JsonMatcher
+      test_eq? o.class, Oktest::JsonMatcher
     end
   end
 
   test_target 'Oktest::AssertionObject#Enum()' do
     test_subject "[!fbfr0] creates Enum object which is a subclass of Set." do
       o = Enum("a", "b", "c")
-      test_eq o.class, Oktest::JsonMatcher::Enum
-      test_ok  o.class < Set
-      test_eq (o === "a"), true
-      test_eq (o === "b"), true
-      test_eq (o === "c"), true
-      test_eq (o === "d"), false
+      test_eq? o.class, Oktest::JsonMatcher::Enum
+      test_ok?  o.class < Set
+      test_eq? (o === "a"), true
+      test_eq? (o === "b"), true
+      test_eq? (o === "c"), true
+      test_eq? (o === "d"), false
     end
   end
 
   test_target 'Oktest::AssertionObject#Bool()' do
     test_subject "[!vub5j] creates a set of true and false." do
-      test_eq Bool().class, Oktest::JsonMatcher::Enum
-      test_ok Bool() === true
-      test_ok Bool() === false
-      test_eq (Bool() === 1), false
-      test_eq (Bool() === 0), false
+      test_eq? Bool().class, Oktest::JsonMatcher::Enum
+      test_ok? Bool() === true
+      test_ok? Bool() === false
+      test_eq? (Bool() === 1), false
+      test_eq? (Bool() === 0), false
     end
   end
 
   test_target 'Oktest::AssertionObject#OR()' do
     test_subject "[!9e8im] creates `OR` object." do
       o = OR(1, 2, 3)
-      test_eq o.class, Oktest::JsonMatcher::OR
+      test_eq? o.class, Oktest::JsonMatcher::OR
     end
   end
 
   test_target 'Oktest::AssertionObject#AND()' do
     test_subject "[!38jln] creates `AND` object." do
       o = AND(4, 5, 6)
-      test_eq o.class, Oktest::JsonMatcher::AND
+      test_eq? o.class, Oktest::JsonMatcher::AND
     end
   end
 
   test_target 'Oktest::AssertionObject#Length()' do
     test_subject "[!qqas3] creates Length object." do
       o = Length(3)
-      test_eq o.class, Oktest::JsonMatcher::Length
+      test_eq? o.class, Oktest::JsonMatcher::Length
     end
   end
 
   test_target 'Oktest::AssertionObject#Any()' do
     test_subject "[!dlo1o] creates an 'Any' object." do
-      test_eq Any().class, Oktest::JsonMatcher::Any
+      test_eq? Any().class, Oktest::JsonMatcher::Any
     end
   end
 

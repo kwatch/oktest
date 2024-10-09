@@ -40,7 +40,7 @@ END
           ]]
         ]]
       ]
-      test_eq tree, expected
+      test_eq? tree, expected
     end
   end
 
@@ -65,7 +65,7 @@ END
 
   end  # Hello
 END
-      test_eq code, expected
+      test_eq? code, expected
     end
     test_subject "[!q5duk] supports 'unaryop' style option." do
       g = Oktest::TestGenerator.new('unaryop')
@@ -87,7 +87,7 @@ END
 
   end  # Hello
 END
-      test_eq code, expected
+      test_eq? code, expected
     end
   end
 
@@ -120,7 +120,7 @@ Oktest.scope do
 
 end
 END
-      test_eq code, expected
+      test_eq? code, expected
     end
   end
 
