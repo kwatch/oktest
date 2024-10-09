@@ -1241,6 +1241,13 @@ END
     @_in_scope = false
   end
 
+  def self.topic(target, &block)
+    #; [!c5j3f] same as `Oktest.scope do topic target do ... end end`.
+    self.scope do
+      topic(target, &block)
+    end
+  end
+
 
   module SpecHelper
 
