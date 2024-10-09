@@ -22,7 +22,7 @@ module NanoTest
     yield desc
   end
 
-  alias capture capture_output
+  alias capture capture_output!
 
   def plain2colored(str)
     str = str.gsub(/<R>(.*?)<\/R>/) { Oktest::Color.red($1) }

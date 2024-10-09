@@ -45,7 +45,7 @@ module NanoTest
     end
   end
 
-  def capture_output(stdin="", tty: false, &b)
+  def capture_output!(stdin="", tty: false, &b)
     require 'stringio' unless defined?(StringIO)
     bkup = [$stdin, $stdout, $stderr]
     $stdin  = StringIO.new(stdin)
@@ -160,25 +160,25 @@ if __FILE__ == $0
     end
   end
 
-  ## capture_output()
-  do_test "capture_output() captures stdout and stderro." do |desc|
-    sout, serr = capture_output() do
+  ## capture_output!()
+  do_test "capture_output!() captures stdout and stderro." do |desc|
+    sout, serr = capture_output!() do
       print "ABC"
       $stderr.print "DEF"
     end
     sout == "ABC"  or fail "Failed (sout): #{desc}"
     serr == "DEF"  or fail "Failed (serr): #{desc}"
   end
-  do_test "capture_output() accepts stdin data." do |desc|
+  do_test "capture_output!() accepts stdin data." do |desc|
     data = nil
-    capture_output("abc\n") do
+    capture_output!("abc\n") do
       data = $stdin.read()
     end
     data == "abc\n"  or fail "Failed: #{desc}"
   end
-  do_test "capture_output() restores original stdin, stdout and stderr." do |desc|
+  do_test "capture_output!() restores original stdin, stdout and stderr." do |desc|
     io = [$stdin, $stdout, $stderr]
-    capture_output() do
+    capture_output!() do
       $stdin  != io[0]  or fail "Failed (stdin): #{desc}"
       $stdout != io[1]  or fail "Failed (stdout): #{desc}"
       $stderr != io[2]  or fail "Failed (stderr): #{desc}"
@@ -187,18 +187,18 @@ if __FILE__ == $0
     $stdout == io[1]  or fail "Failed (stdout): #{desc}"
     $stderr == io[2]  or fail "Failed (stderr): #{desc}"
   end
-  do_test "capture_output() makes io objects to pseudo tty." do |desc|
-    capture_output(tty: true) do
+  do_test "capture_output!() makes io objects to pseudo tty." do |desc|
+    capture_output!(tty: true) do
       $stdin.tty?  == true   or fail "Failed (stdin): #{desc}"
       $stdout.tty? == true   or fail "Failed (stdout): #{desc}"
       $stderr.tty? == true   or fail "Failed (stderr): #{desc}"
     end
-    capture_output(tty: false) do
+    capture_output!(tty: false) do
       $stdin.tty?  == false  or fail "Failed (stdin): #{desc}"
       $stdout.tty? == false  or fail "Failed (stdout): #{desc}"
       $stderr.tty? == false  or fail "Failed (stderr): #{desc}"
     end
-    capture_output() do
+    capture_output!() do
       $stdin.tty?  == false  or fail "Failed (stdin): #{desc}"
       $stdout.tty? == false  or fail "Failed (stdout): #{desc}"
       $stderr.tty? == false  or fail "Failed (stderr): #{desc}"
