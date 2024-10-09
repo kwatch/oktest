@@ -21,7 +21,7 @@ Object.new.instance_eval do   # Oktest::FixtureManager
 
   def self.run_all(dummy: false)
     reporter = dummy ? DummyReporter5.new : Oktest::Reporter.new
-    sout, serr = capture do
+    sout, serr = capture_output! do
       Oktest::Runner.new(reporter).start()
     end
     test_eq? serr, ""

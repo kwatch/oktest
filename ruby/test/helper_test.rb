@@ -107,7 +107,7 @@ Object.new.instance_eval do   # Oktest::SpecHelper
           end
         end
       end
-      capture { Oktest.run() }
+      capture_output! { Oktest.run() }
       test_eq? val, "<<foo>>"
     end
     test_subject "[!zgfg9] finds fixture block in current or parent node." do
@@ -126,7 +126,7 @@ Object.new.instance_eval do   # Oktest::SpecHelper
           end
         end
       end
-      capture { Oktest.run() }
+      capture_output! { Oktest.run() }
       test_eq? val1, "<<baz>>"
       test_eq? val2, "<<bar>>"
       test_eq? val3, "<<foo>>"
@@ -143,7 +143,7 @@ Object.new.instance_eval do   # Oktest::SpecHelper
           end
         end
       end
-      capture { Oktest.run() }
+      capture_output! { Oktest.run() }
       test_eq? val, {x: 10, y: 20, z: 30}
     end
     test_subject "[!wxcsp] raises error when fixture not found." do
@@ -159,7 +159,7 @@ Object.new.instance_eval do   # Oktest::SpecHelper
           end
         end
       end
-      capture { Oktest.run() }
+      capture_output! { Oktest.run() }
       test_eq? exc.class, Oktest::FixtureNotFoundError
       test_eq? exc.message, "`:bar`: fixture not found."
     end
@@ -176,7 +176,7 @@ Object.new.instance_eval do   # Oktest::SpecHelper
           end
         end
       end
-      sout, serr = capture { Oktest.run() }
+      sout, serr = capture_output! { Oktest.run() }
       expected = <<'END'
 before at_end()
 after at_end()

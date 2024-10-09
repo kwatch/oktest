@@ -206,14 +206,14 @@ Object.new.instance_eval do   # Oktest::Traverser
       - spec: 1/1 should be 1. (tag: err)
 END
       prepare()
-      sout, serr = capture { MyTraverser.new.start() }
+      sout, serr = capture_output! { MyTraverser.new.start() }
       test_eq? sout, expected
       test_eq? serr, ""
     end
     test_subject "[!gkopz] doesn't change Oktest::THE_GLOBAL_SCOPE." do
       prepare()
       n = Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length
-      sout, serr = capture do
+      sout, serr = capture_output! do
         MyTraverser.new.start()
       end
       test_eq? Oktest::THE_GLOBAL_SCOPE.each_child.to_a.length, n
@@ -230,7 +230,7 @@ END
       end
       Oktest.scope do
       end
-      sout, serr = capture { MyTraverser.new.start() }
+      sout, serr = capture_output! { MyTraverser.new.start() }
       test_eq? sout, expected
       test_eq? serr, ""
     end
@@ -249,7 +249,7 @@ END
           end
         end
       end
-      sout, serr = capture { MyTraverser.new.start() }
+      sout, serr = capture_output! { MyTraverser.new.start() }
       test_eq? sout, expected
       test_eq? serr, ""
     end
@@ -268,7 +268,7 @@ END
           end
         end
       end
-      sout, serr = capture { MyTraverser.new.start() }
+      sout, serr = capture_output! { MyTraverser.new.start() }
       test_eq? sout, expected
       test_eq? serr, ""
     end
@@ -288,7 +288,7 @@ END
           spec "sample #2" do ok {1-1} == 0 end
         end
       end
-      sout, serr = capture { MyTraverser.new.start() }
+      sout, serr = capture_output! { MyTraverser.new.start() }
       test_eq? sout, expected
       test_eq? serr, ""
     end

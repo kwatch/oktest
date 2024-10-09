@@ -83,7 +83,7 @@ END
   end
 
   def run(*opts)
-    return capture { Oktest::MainApp.main(opts) }
+    return capture_output! { Oktest::MainApp.main(opts) }
   end
 
   def edit_actual(output)
@@ -134,7 +134,7 @@ Object.new.instance_eval do   # Oktest::BaseReporter
       r = Oktest::BaseReporter.new
       r.enter_all(nil)
       r.instance_eval { @start_at = Time.now - 7.0 }
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.exit_all(nil)
       end
       test_eq? sout, "## total:0 (pass:0, fail:0, error:0, skip:0, todo:0) in 7.00s\n"
@@ -209,7 +209,7 @@ Object.new.instance_eval do   # Oktest::BaseReporter
       errmsg = error_msg()
       exc = Oktest::AssertionFailed.new(errmsg)
       r = Oktest::BaseReporter.new
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.__send__(:print_exc_message, exc, :FAIL)
       end
       test_eq? sout, plain2colored(<<END)
@@ -223,7 +223,7 @@ END
       errmsg = error_msg()
       exc = Oktest::AssertionFailed.new(errmsg)
       r = Oktest::BaseReporter.new
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.__send__(:print_exc_message, exc, :ERROR)
       end
       test_eq? sout, plain2colored(<<END)
@@ -253,7 +253,7 @@ END
 END
       #
       r = Oktest::BaseReporter.new
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.__send__(:print_exc_backtrace, exc, :FAIL)
       end
       sout = sout.sub(/ in <.*?>/, " in <main>")
@@ -266,7 +266,7 @@ END
       end
       #
       status = :FAIL
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc_backtrace, exc, status)
       end
       test_ok? sout !~ /lib\/oktest\.rb:/, msg: "should skip but not"
@@ -278,7 +278,7 @@ END
       end
       #
       status = :ERROR
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc_backtrace, exc, status)
       end
       test_ok? sout =~ /lib\/oktest\.rb:100/, msg: "should not skip but does"
@@ -304,7 +304,7 @@ END
       #
       topic1, spec1 = new_topic_and_spec()
       status = :FAIL
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc, spec1, status, exc, topic1)
       end
       sout = sout.gsub(/ in <.*?>/, " in <main>")
@@ -328,7 +328,7 @@ END
       #
       topic1, spec1 = new_topic_and_spec()
       status = :ERROR
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc, spec1, status, exc, topic1)
       end
       test_ok? sout.start_with?(plain2colored(expected)), msg: "not matched"
@@ -360,7 +360,7 @@ END
       expected1 = "[<R>Fail</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
       expected2 = "[<E>ERROR</E>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
       #
-      sout, serr = capture { r.__send__(:print_exceptions) }
+      sout, serr = capture_output! { r.__send__(:print_exceptions) }
       test_ok? sout.start_with?(sep + plain2colored(expected1)), msg: "not matched"
       test_ok? sout.include?(sep + plain2colored(expected2)), msg: "not matched"
       test_ok? sout.end_with?(sep), msg: "not matched"
@@ -368,7 +368,7 @@ END
     end
     test_subject "[!2s9r2] prints nothing when no fails nor errors." do
       r = new_reporter_with_exceptions(nil)
-      sout, serr = capture { r.__send__(:print_exceptions) }
+      sout, serr = capture_output! { r.__send__(:print_exceptions) }
       test_eq? sout, ""
       test_eq? serr, ""
     end
@@ -378,7 +378,7 @@ END
       end
       r = new_reporter_with_exceptions(exc)
       test_ok? ! r.instance_variable_get('@exceptions').empty?
-      sout, serr = capture { r.__send__(:print_exceptions) }
+      sout, serr = capture_output! { r.__send__(:print_exceptions) }
       test_ok?   r.instance_variable_get('@exceptions').empty?
     end
   end

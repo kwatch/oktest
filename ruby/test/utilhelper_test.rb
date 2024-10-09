@@ -28,7 +28,7 @@ END
           end
         end
       end
-      capture { Oktest.run() }
+      capture_output! { Oktest.run() }
       test_eq? r1.class, Oktest::Util::PartialRegexp
       test_eq? r2.class, Oktest::Util::PartialRegexp
       test_eq? r1.inspect, <<'END'
@@ -61,7 +61,7 @@ END
           end
         end
       end
-      capture { Oktest.run() }
+      capture_output! { Oktest.run() }
       test_eq? r1.class, Oktest::Util::PartialRegexp
       test_eq? r2.class, Oktest::Util::PartialRegexp
       test_eq? r1.inspect, <<'END'.chomp

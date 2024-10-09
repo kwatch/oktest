@@ -187,7 +187,7 @@ Object.new.instance_eval do   # Oktest::Filter
     filter = Oktest::Filter.new(topic_pattern, spec_pattern, tag_pattern, negative: negative)
     Oktest.filter(filter)
     reporter = Oktest::VerboseReporter.new()
-    sout, serr = capture('', tty: false) do
+    sout, serr = capture_output! '', tty: false do
       Oktest::Runner.new(reporter).start()
     end
     test_eq? serr, ""

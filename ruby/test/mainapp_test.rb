@@ -98,7 +98,7 @@ END
 
     def self.main(argv)
       ret = nil
-      sout, serr = capture do
+      sout, serr = capture_output! do
         ret = Oktest::MainApp.main(argv)
       end
       return ret, sout, serr
@@ -153,7 +153,7 @@ END
 
     def self.run(*args, tty: true)
       ret = nil
-      sout, serr = capture("", tty: tty) do
+      sout, serr = capture_output! "", tty: tty do
         ret = Oktest::MainApp.new.run(*args)
       end
       return ret, sout, serr

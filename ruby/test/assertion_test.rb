@@ -55,7 +55,7 @@ Object.new.instance_eval do   # Oktest::AssertionObject
   test_target 'Oktest::AssertionObject.report_not_yet()' do
     test_subject "[!3nksf] reports if 'ok{}' called but assertion not performed." do
       test_ok? Oktest::AssertionObject::NOT_YET.empty?, msg: "should be empty"
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::AssertionObject.report_not_yet()
       end
       test_eq? sout, ""
@@ -64,7 +64,7 @@ Object.new.instance_eval do   # Oktest::AssertionObject
       lineno = __LINE__ + 1
       ok {1+1}
       test_ok? ! Oktest::AssertionObject::NOT_YET.empty?, msg: "should not be empty"
-      sout, serr = capture { Oktest::AssertionObject.report_not_yet() }
+      sout, serr = capture_output! { Oktest::AssertionObject.report_not_yet() }
       expected = "** warning: ok() is called but not tested yet (at #{__FILE__}:#{lineno}:in"
       test_eq? sout, ""
       test_ok? serr.start_with?(expected), msg: "not matched"
@@ -72,7 +72,7 @@ Object.new.instance_eval do   # Oktest::AssertionObject
     test_subject "[!f92q4] clears remained objects." do
       ok {1+1}
       test_ok? ! Oktest::AssertionObject::NOT_YET.empty?, msg: "should not be empty"
-      sout, serr = capture { Oktest::AssertionObject.report_not_yet() }
+      sout, serr = capture_output! { Oktest::AssertionObject.report_not_yet() }
       test_ok? Oktest::AssertionObject::NOT_YET.empty?, msg: "should be empty"
     end
   end
