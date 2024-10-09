@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::Runner
+class Runner__Test
   extend NanoTest
 
   class DummyReporter < Oktest::Reporter
@@ -548,7 +548,7 @@ END
 end
 
 
-Object.new.instance_eval do   # Oktest
+class OktestFunctions__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)

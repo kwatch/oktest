@@ -104,7 +104,7 @@ END
 end
 
 
-Object.new.instance_eval do   # Oktest::BaseReporter
+class BaseReporter__Test
   extend NanoTest
   extend ReporterTestHelper
 
@@ -248,7 +248,7 @@ END
       end
       #
       expected = <<END
-    test/reporter_test.rb:#{lineno}:in `block (3 levels) in <main>'
+    test/reporter_test.rb:#{lineno}:in `block (2 levels) in <main>'
         raise Oktest::AssertionFailed, "something failed."
 END
       #
@@ -298,7 +298,7 @@ END
       #
       expected = <<END
 [<R>Fail</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>
-    #{__FILE__}:#{lineno}:in `block (3 levels) in <main>'
+    #{__FILE__}:#{lineno}:in `block (2 levels) in <main>'
         raise Oktest::AssertionFailed, 'dummie:43201'
 END
       #
@@ -521,7 +521,7 @@ end
 include ReporterOutput
 
 
-Object.new.instance_eval do   # Oktest::VerboseReporter
+class VerboseReporter__Test
   extend NanoTest
   extend ReporterTestHelper
 
@@ -565,7 +565,7 @@ END
 end
 
 
-Object.new.instance_eval do   # Oktest::SimpleReporter
+class SimpleReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
@@ -579,7 +579,7 @@ Object.new.instance_eval do   # Oktest::SimpleReporter
 end
 
 
-Object.new.instance_eval do   # Oktest::CompactReporter
+class CompactReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
@@ -593,7 +593,7 @@ Object.new.instance_eval do   # Oktest::CompactReporter
 end
 
 
-Object.new.instance_eval do   # Oktest::PlainReporter
+class PlainReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
@@ -607,7 +607,7 @@ Object.new.instance_eval do   # Oktest::PlainReporter
 end
 
 
-Object.new.instance_eval do   # Oktest::QuietReporter
+class QuietReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
@@ -621,7 +621,7 @@ Object.new.instance_eval do   # Oktest::QuietReporter
 end
 
 
-Object.new.instance_eval do   # Oktest
+class DefaultReprotingStyle__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput

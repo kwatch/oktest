@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest
+class Misc__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)
@@ -66,7 +66,7 @@ Object.new.instance_eval do   # Oktest
 end
 
 
-Object.new.instance_eval do   # Oktest::Color
+class Color__Test
   extend NanoTest
 
   test_target 'Oktest::Color.status()' do

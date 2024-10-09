@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::Item
+class Item__Test
   extend NanoTest
 
   test_target 'Oktest::Item#accept_visitor()' do
@@ -43,7 +43,7 @@ Object.new.instance_eval do   # Oktest::Item
 end
 
 
-Object.new.instance_eval do   # Oktest::Node
+class Node__Test
   extend NanoTest
 
   def self.test_scope(desc, &b)
@@ -255,7 +255,7 @@ END
 end
 
 
-Object.new.instance_eval do   # Oktest::ScopeNoe
+class ScopeNode__Test
   extend NanoTest
 
   test_target 'Oktest::ScopeNode#accept_visitor()' do
@@ -278,7 +278,7 @@ Object.new.instance_eval do   # Oktest::ScopeNoe
 end
 
 
-Object.new.instance_eval do   # Oktest::TopicNode
+class TopicNode__Test
   extend NanoTest
 
   def self.new_topic(target, tag: nil)
@@ -331,7 +331,7 @@ Object.new.instance_eval do   # Oktest::TopicNode
 end
 
 
-Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
+class OktestFuncs__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)
@@ -492,7 +492,7 @@ Object.new.instance_eval do   # Oktest.scope(), Oktest.global_scope()
 end
 
 
-Object.new.instance_eval do   # Oktest::Context
+class Context__Test
   extend NanoTest
 
   def self.new_node_with(&b)
@@ -728,7 +728,7 @@ Object.new.instance_eval do   # Oktest::Context
 end
 
 
-Object.new.instance_eval do   # Oktest::SpecLeaf
+class SpecLeaf__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)

@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::AssertionObject
+class AssertionObject__Test
   extend NanoTest
   extend Oktest::SpecHelper
 

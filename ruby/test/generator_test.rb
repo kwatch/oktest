@@ -12,7 +12,7 @@ require_relative './init'
 require 'stringio'
 
 
-Object.new.instance_eval do   # Oktest::TestGenerator
+class TestGenerator__Test
   extend NanoTest
 
   INPUT_3 = <<'END'

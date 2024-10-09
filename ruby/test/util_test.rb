@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::Util
+class Util__Test
   extend NanoTest
   extend Oktest::Util
 
@@ -299,7 +299,7 @@ HEREDOC
 end
 
 
-Object.new.instance_eval do   # Oktest::Util::PartialRegexp
+class Util_PartialRegexp__Test
   extend NanoTest
 
   test_target 'Oktest::Util::PartialRegexp#inspect()' do

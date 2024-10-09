@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::FixtureManager
+class FixtureManager__Test
   extend NanoTest
 
   class DummyReporter5 < Oktest::Reporter

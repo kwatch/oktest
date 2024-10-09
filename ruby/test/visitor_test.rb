@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::Visitor
+class Visitor__Test
   extend NanoTest
 
   class DummyVisitor0 < Oktest::Visitor
@@ -128,7 +128,7 @@ END
 end
 
 
-Object.new.instance_eval do   # Oktest::Traverser
+class Traverser__Test
   extend NanoTest
 
   class MyTraverser < Oktest::Traverser

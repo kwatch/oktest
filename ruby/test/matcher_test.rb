@@ -11,7 +11,7 @@ require_relative './init'
 require 'set'
 
 
-Object.new.instance_eval do   # Oktest::Matcher
+class Matcher__Test
   extend NanoTest
   extend Oktest::SpecHelper
 
@@ -48,7 +48,7 @@ Object.new.instance_eval do   # Oktest::Matcher
 end
 
 
-Object.new.instance_eval do   # Oktest::JsonMatcher
+class JsonMatcher__Test
   extend NanoTest
 
   def self.JSON(x)
@@ -364,7 +364,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher
 end
 
 
-Object.new.instance_eval do   # Oktest::JsonMatcher::OR
+class JsonMatcher_OR__Test
   extend NanoTest
 
   test_target 'Oktest::JsonMatcher::OR#inspect()' do
@@ -377,7 +377,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher::OR
 end
 
 
-Object.new.instance_eval do   # Oktest::JsonMatcher::AND
+class JsonMatcher_AND__Test
   extend NanoTest
 
   test_target 'Oktest::JsonMatcher::AND#inspect()' do
@@ -390,7 +390,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher::AND
 end
 
 
-Object.new.instance_eval do   # Oktest::JsonMatcher::Enum
+class JsonMatcher_Enum__Test
   extend NanoTest
 
   test_target 'Oktest::JsonMatcher::Enum#inspect()' do
@@ -403,7 +403,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher::Enum
 end
 
 
-Object.new.instance_eval do   # Oktest::JsonMatcher::Length
+class JsonMatcher_Length__Test
   extend NanoTest
 
   test_target 'Oktest::JsonMatcher::Length#===' do
@@ -431,7 +431,7 @@ Object.new.instance_eval do   # Oktest::JsonMatcher::Length
 end
 
 
-Object.new.instance_eval do   # Oktest::JsonMatcher::Any
+class JsonMatcher_Any__Test
   extend NanoTest
 
   test_target 'Oktest::JsonMatcher::Any#===' do

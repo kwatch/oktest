@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::UtilHelper
+class UtilHelper__Test
   extend NanoTest
 
   test_target 'Oktest::UtilHelper#partial_regexp!()' do

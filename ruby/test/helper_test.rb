@@ -19,7 +19,7 @@ class DummyUser
 end
 
 
-Object.new.instance_eval do   # Oktest::SpecHelper
+class SpecHelper__Test
   extend NanoTest
   extend Oktest::SpecHelper
 
