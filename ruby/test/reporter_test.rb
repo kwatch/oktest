@@ -200,7 +200,7 @@ Object.new.instance_eval do   # Oktest::BaseReporter
   end
 
   test_target 'Oktest::BaseReporter#print_exc_message()' do
-    def error_msg()
+    def self.error_msg()
       return ("something failed\n"\
               "  expect: foo\n"\
               "  actual: bar\n")
@@ -337,7 +337,7 @@ END
   end
 
   test_target 'Oktest::BaseReporter#print_exception()' do
-    def new_reporter_with_exceptions(exc)
+    def self.new_reporter_with_exceptions(exc)
       topic1, spec1 = new_topic_and_spec()
       r = Oktest::BaseReporter.new
       r.instance_eval do
@@ -384,7 +384,7 @@ END
   end
 
   test_target 'Oktest::BaseReporter#footer()' do
-    def new_footer(elapsed=0.5)
+    def self.new_footer(elapsed=0.5)
       r = Oktest::BaseReporter.new
       r.enter_all(nil)
       r.instance_eval do

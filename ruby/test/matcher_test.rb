@@ -51,19 +51,19 @@ end
 Object.new.instance_eval do   # Oktest::JsonMatcher
   extend NanoTest
 
-  def JSON(x)
+  def self.JSON(x)
     return Oktest::JsonMatcher.new(x)
   end
 
-  def OR(*args)
+  def self.OR(*args)
     return Oktest::JsonMatcher::OR.new(*args)
   end
 
-  def AND(*args)
+  def self.AND(*args)
     return Oktest::JsonMatcher::AND.new(*args)
   end
 
-  def ANY()
+  def self.ANY()
     return Oktest::JsonMatcher::Any.new
   end
 

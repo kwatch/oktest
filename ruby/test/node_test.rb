@@ -281,7 +281,7 @@ end
 Object.new.instance_eval do   # Oktest::TopicNode
   extend NanoTest
 
-  def new_topic(target, tag: nil)
+  def self.new_topic(target, tag: nil)
     return Oktest::TopicNode.new(nil, target, tag: tag)
   end
 

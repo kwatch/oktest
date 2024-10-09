@@ -38,7 +38,7 @@ Object.new.instance_eval do   # Oktest::Visitor
     end
   end
 
-  def prepare()
+  def self.prepare()
     Oktest.scope do
       topic 'Example1' do
         topic 'sample1-1' do
