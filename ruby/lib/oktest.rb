@@ -2506,12 +2506,12 @@ END
     public
 
     def filter_children!(node)
-      _filter_children!(node)
+      _filter_children!(node, 0)
     end
 
     private
 
-    def _filter_children!(node)   #:nodoc:
+    def _filter_children!(node, _depth)   #:nodoc:
       #; [!r6g6a] supports negative filter by topic.
       #; [!doozg] supports negative filter by spec.
       #; [!ntv44] supports negative filter by tag name.
@@ -2532,7 +2532,7 @@ END
           removes << i unless positive
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)
-          removes << i unless _filter_children!(item)
+          removes << i unless _filter_children!(item, _depth+1)
         #; [!1jphf] can filter specs from nested topics.
         elsif item.is_a?(SpecLeaf)
           removes << i if positive
