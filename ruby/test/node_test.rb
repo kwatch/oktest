@@ -285,6 +285,25 @@ Object.new.instance_eval do   # Oktest::TopicNode
     return Oktest::TopicNode.new(nil, target, tag: tag)
   end
 
+  test_target 'Oktest::TopicNode#run_block_in_context_class()' do
+    test_subject "[!i2kvj] run block in context class." do
+      topicobj = new_topic("foobar1")
+      self_ = nil
+      topicobj.run_block_in_context_class do
+        self_ = self
+      end
+      test_ok self_ < Oktest::Context
+    end
+    test_subject "[!pr3vj] run block with topic target as an argument." do
+      topicobj = new_topic("foobar2")
+      arg_ = nil
+      topicobj.run_block_in_context_class do |arg|
+        arg_ = arg
+      end
+      test_eq arg_, "foobar2"
+    end
+  end
+
   test_target 'Oktest::TopicNode#accept_visitor()' do
     class DummyVisitor2
       def visit_topic(*args)

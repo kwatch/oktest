@@ -161,9 +161,9 @@ END
           topic "Child" do
             def v3; "V3"; end
             spec "spec#1" do
-              p v1
-              p v2
-              p v3
+              p v1()
+              p v2()
+              p v3()
             end
           end
         end

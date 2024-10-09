@@ -2082,6 +2082,20 @@ test/example44_test.rb:
 ## Tips
 
 
+### Topic target
+
+`topic()` passes an target argument to the block.
+
+```ruby
+  topic '/api/orders/{id}' do |urlpath|
+    p urlpath   #=> "/api/orders/{id}"
+    ...
+  end
+```
+
+(Since Oktest >= 1.5)
+
+
 ### `ok {}` in MiniTest
 
 If you want to use `ok {actual} == expected` style assertion in MiniTest,

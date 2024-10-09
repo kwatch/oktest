@@ -1125,6 +1125,13 @@ END
     attr_reader :target
     attr_writer :_prefix
 
+    def run_block_in_context_class(&block)
+      #; [!i2kvj] run block in context class.
+      #; [!pr3vj] run block with topic target as an argument.
+      target = @target
+      @context_class.class_exec(target, &block)
+    end
+
     def _prefix
       @_prefix || '*'
     end
@@ -2499,12 +2506,12 @@ END
     public
 
     def filter_children!(node)
-      _filter_children!(node)
+      _filter_children!(node, 0)
     end
 
     private
 
-    def _filter_children!(node)   #:nodoc:
+    def _filter_children!(node, _depth)   #:nodoc:
       #; [!r6g6a] supports negative filter by topic.
       #; [!doozg] supports negative filter by spec.
       #; [!ntv44] supports negative filter by tag name.
@@ -2525,7 +2532,7 @@ END
           removes << i unless positive
         #; [!mz6id] can filter nested topics.
         elsif item.is_a?(Node)
-          removes << i unless _filter_children!(item)
+          removes << i unless _filter_children!(item, _depth+1)
         #; [!1jphf] can filter specs from nested topics.
         elsif item.is_a?(SpecLeaf)
           removes << i if positive
