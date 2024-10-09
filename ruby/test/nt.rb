@@ -12,10 +12,10 @@ module NanoTest
   def test_subject(subject, &b)
     yield
     print "."
-    $microtest_count += 1
+    $nanotest_count += 1
   end
 
-  $microtest_count = 0
+  $nanotest_count = 0
 
   class TestFailed < StandardError
   end
@@ -68,9 +68,9 @@ end
 
 
 at_exit {
-  if $microtest_count > 0
+  if $nanotest_count > 0
     puts "\n"
-    puts "(#{$microtest_count} tests)"
+    puts "(#{$nanotest_count} tests)"
   end
 }
 
@@ -205,7 +205,7 @@ if __FILE__ == $0
     end
   end
 
-  $microtest_count = 0
+  $nanotest_count = 0
   puts ""
 
 end
