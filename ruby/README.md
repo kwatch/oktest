@@ -1904,8 +1904,8 @@ Oktest.scope do
         "id":       1000..9999,             # range object
         "age":      Integer,                # class object
         "email":    /^\w+@example\.com$/,   # regexp
-        "gender":   Set.new(["M", "F"]),    # Set object ("M" or "F")
-        "deleted":  Set.new([true, false]), # boolean (true or false)
+        "gender":   Set["M", "F"],          # Set object ("M" or "F")
+        "deleted":  Set[true, false],       # boolean (true or false)
         "tags":     [/^\w+$/].each,         # Enumerator object (!= Array obj)
         "twitter?": /^@\w+$/,               # key 'xxx?' means optional value
       }
@@ -1980,7 +1980,7 @@ Oktest.scope do
           {
             "team": String,
             "members": [
-              {"id": 1000..9999, "name": String, "gender": Set.new(["M", "F"])}
+              {"id": 1000..9999, "name": String, "gender": Set["M", "F"]}
             ].each,                     # Enumerator object (!= Array obj)
             "leader?": String,           # key 'xxx?' means optional value
           }
@@ -2061,7 +2061,7 @@ ok {JSON({"val": 99 })} === {"val": 1..100}    # implies Integer value
 
 Oktest.rb provides some helper methods and objects:
 
-* `Enum(x, y, z)` is almost same as `Set.new([x, y, z])`.
+* `Enum(x, y, z)` is almost same as `Set[x, y, z]`.
 * `Bool()` is same as `Enum(true, false)`.
 * `Length(3)` matches to length 3, and `Length(1..3)` matches to length 1..3.
 
@@ -2071,7 +2071,7 @@ test/example44_test.rb:
 ```ruby
   actual = {"gender": "M", "deleted": false, "code": "ABCD1234"}
   ok {JSON(actual)} == {
-    "gender":  Enum("M", "F"),        # same as Set.new(["M", "F"])
+    "gender":  Enum("M", "F"),        # same as Set["M", "F"]
     "deleted": Bool(),                # same as Enum(true, false)
     "code":    Length(6..10),         # code length should be 6..10
   }
