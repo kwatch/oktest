@@ -29,22 +29,22 @@ module NanoTest
 
   def test_eq?(actual, expected, msg: nil)
     unless actual == expected
-      msg ||= "$<actual> == $<expected> : failed."
-      #s1 = "    $<actual>:   #{actual.inspect}"
-      #s2 = "    $<expected>: #{expected.inspect}"
+      msg ||= "<ACTUAL> == <EXPECTED> : failed."
+      #s1 = "    <ACTUAL>:   #{actual.inspect}"
+      #s2 = "    <EXPECTED>: #{expected.inspect}"
       require 'pp' unless defined?(PP)
-      s1 = "    $<actual>:   #{PP.pp(actual, String.new).chomp}"
-      s2 = "    $<expected>: #{PP.pp(expected, String.new).chomp}"
+      s1 = "    <ACTUAL>:   #{PP.pp(actual, String.new).chomp}"
+      s2 = "    <EXPECTED>: #{PP.pp(expected, String.new).chomp}"
       raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
     end
   end
 
   def test_match?(actual_str, expected_rexp, msg: nil)
     unless actual_str =~ expected_rexp
-      msg ||= "$<actual> =~ $<expected> : failed."
+      msg ||= "<ACTUAL> =~ <EXPECTED> : failed."
       require 'pp' unless defined?(PP)
-      s1 = "    $<actual>:   #{PP.pp(actual_str, String.new).chomp}"
-      s2 = "    $<expected>: #{PP.pp(expected_rexp, String.new).chomp}"
+      s1 = "    <ACTUAL>:   #{PP.pp(actual_str, String.new).chomp}"
+      s2 = "    <EXPECTED>: #{PP.pp(expected_rexp, String.new).chomp}"
       raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
     end
   end
@@ -148,9 +148,9 @@ if __FILE__ == $0
     begin
       test_eq? "ABC", "abc"
     rescue NanoTest::TestFailed => exc
-      expected = "$<actual> == $<expected> : failed.\n"\
-                 "    $<actual>:   \"ABC\"\n"\
-                 "    $<expected>: \"abc\""
+      expected = "<ACTUAL> == <EXPECTED> : failed.\n"\
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: \"abc\""
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
@@ -169,12 +169,12 @@ if __FILE__ == $0
       test_eq? actual1, expected1
     rescue NanoTest::TestFailed => exc
       expected = <<'END'
-$<actual> == $<expected> : failed.
-    $<actual>:   {:name=>"Alice",
+<ACTUAL> == <EXPECTED> : failed.
+    <ACTUAL>:   {:name=>"Alice",
  :email=>"alice@gmail.com",
  :gender=>"F",
  :department=>"Sales & Marketing"}
-    $<expected>: {:name=>"Alice",
+    <EXPECTED>: {:name=>"Alice",
  :email=>"alice@gmail.org",
  :gender=>"F",
  :department=>"Sales & Marketing"}
@@ -190,8 +190,8 @@ END
       test_eq? "ABC", "abc", msg: "NOT EQUAL"
     rescue NanoTest::TestFailed => exc
       expected = "NOT EQUAL\n"\
-                 "    $<actual>:   \"ABC\"\n"\
-                 "    $<expected>: \"abc\""
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: \"abc\""
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
@@ -206,9 +206,9 @@ END
     begin
       test_match? "ABC", /^\d+$/
     rescue NanoTest::TestFailed => exc
-      expected = "$<actual> =~ $<expected> : failed.\n"\
-                 "    $<actual>:   \"ABC\"\n"\
-                 "    $<expected>: /^\\d+$/"
+      expected = "<ACTUAL> =~ <EXPECTED> : failed.\n"\
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: /^\\d+$/"
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
@@ -219,9 +219,9 @@ END
       test_match? "ABC\nDEF\nGHI\n", /^\d+$/
     rescue NanoTest::TestFailed => exc
       expected = <<'END'
-$<actual> =~ $<expected> : failed.
-    $<actual>:   "ABC\n" + "DEF\n" + "GHI\n"
-    $<expected>: /^\d+$/
+<ACTUAL> =~ <EXPECTED> : failed.
+    <ACTUAL>:   "ABC\n" + "DEF\n" + "GHI\n"
+    <EXPECTED>: /^\d+$/
 END
       expected = expected.chomp
       exc.message == expected  or fail "Failed: #{desc}"
@@ -234,8 +234,8 @@ END
       test_match? "ABC", /^\d+$/, msg: "NOT MATCHED"
     rescue NanoTest::TestFailed => exc
       expected = "NOT MATCHED\n"\
-                 "    $<actual>:   \"ABC\"\n"\
-                 "    $<expected>: /^\\d+$/"
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: /^\\d+$/"
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
