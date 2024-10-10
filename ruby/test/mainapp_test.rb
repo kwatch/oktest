@@ -20,7 +20,7 @@ class MainApp__Test
     color_enabled = Oktest::Config.color_enabled
     Oktest::Config.color_enabled = true
     #
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::Config.color_enabled = color_enabled
     File.unlink(@testfile)

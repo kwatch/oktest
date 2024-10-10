@@ -24,7 +24,7 @@ class SpecHelper__Test
   extend Oktest::SpecHelper
 
   def self.test_subject(desc, &b)
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::AssertionObject::NOT_YET.clear()
     @__at_end_blocks = nil

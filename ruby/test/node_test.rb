@@ -335,7 +335,7 @@ class OktestFuncs__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end
@@ -732,7 +732,7 @@ class SpecLeaf__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::THE_GLOBAL_SCOPE.clear_children()
   end

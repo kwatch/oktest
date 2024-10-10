@@ -16,7 +16,7 @@ class Misc__Test
   def self.test_subject(desc, &b)
     auto_run = Oktest::Config.auto_run
     Oktest::Config.auto_run = true
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::Config.auto_run = auto_run
     Oktest::THE_GLOBAL_SCOPE.clear_children()

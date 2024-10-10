@@ -76,7 +76,7 @@ END
     File.write(@filename, INPUT_7)
     color_enabled = Oktest::Config.color_enabled
     Oktest::Config.color_enabled = true
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::Config.color_enabled = color_enabled
     File.unlink(@filename) if @filename && File.exist?(@filename)
