@@ -38,12 +38,13 @@ module NanoTest
     end
   end
 
-  def test_match?(actual_str, expected_rexp)
+  def test_match?(actual_str, expected_rexp, msg: nil)
     unless actual_str =~ expected_rexp
+      msg ||= "$<actual> =~ $<expected> : failed."
       require 'pp' unless defined?(PP)
       s1 = "    $<actual>:   #{PP.pp(actual_str, String.new).chomp}"
       s2 = "    $<expected>: #{PP.pp(expected_rexp, String.new).chomp}"
-      raise TestFailed, "$<actual> =~ $<expected> : failed.\n#{s1}\n#{s2}"
+      raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
     end
   end
 
@@ -210,6 +211,18 @@ $<actual> =~ $<expected> : failed.
     $<expected>: /^\d+$/
 END
       expected = expected.chomp
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_match?() accepts 'msg:' kwarg." do
+    begin
+      test_match? "ABC", /^\d+$/, msg: "NOT MATCHED"
+    rescue NanoTest::TestFailed => exc
+      expected = "NOT MATCHED\n"\
+                 "    $<actual>:   \"ABC\"\n"\
+                 "    $<expected>: /^\\d+$/"
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
