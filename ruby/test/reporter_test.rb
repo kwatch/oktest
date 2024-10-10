@@ -281,7 +281,7 @@ END
       sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc_backtrace, exc, status)
       end
-      test_ok? sout =~ /lib\/oktest\.rb:100/, msg: "should not skip but does"
+      test_match? sout, /lib\/oktest\.rb:100/, msg: "should not skip but does"
       test_eq? serr, ""
     end
   end
@@ -395,32 +395,32 @@ END
 
     test_subject "[!iy4uo] calculates total count of specs." do
       ft = new_footer()
-      test_ok? ft =~ /total:15 /, msg: "failed to calculate total counts."
+      test_match? ft, /total:15 /, msg: "failed to calculate total counts."
     end
 
     test_subject "[!2nnma] includes count of each status." do
       ft = new_footer()
-      test_ok? ft =~ /pass:5\b/  , msg: "failed to count passed status."
-      test_ok? ft =~ /fail:4\b/  , msg: "failed to count failed status."
-      test_ok? ft =~ /error:3\b/ , msg: "failed to count error status."
-      test_ok? ft =~ /skip:2\b/  , msg: "failed to count skipped status."
-      test_ok? ft =~ /todo:1\b/  , msg: "failed to count todo status."
+      test_match? ft, /pass:5\b/  , msg: "failed to count passed status."
+      test_match? ft, /fail:4\b/  , msg: "failed to count failed status."
+      test_match? ft, /error:3\b/ , msg: "failed to count error status."
+      test_match? ft, /skip:2\b/  , msg: "failed to count skipped status."
+      test_match? ft, /todo:1\b/  , msg: "failed to count todo status."
     end
 
     test_subject "[!fp57l] includes elapsed time." do
       ft = new_footer()
-      test_ok? ft =~ / in 0.500s$/, msg: "failed to embed elapsed time."
+      test_match? ft, / in 0.500s$/, msg: "failed to embed elapsed time."
     end
 
     test_subject "[!r5y02] elapsed time format is adjusted along to time length." do
-      test_ok? new_footer(     0.5) =~ / in 0.500s$/       , msg: "failed to embed elapsed time."
-      test_ok? new_footer(     6.5) =~ / in 6.50s$/        , msg: "failed to embed elapsed time."
-      test_ok? new_footer(    17.5) =~ / in 17.5s$/        , msg: "failed to embed elapsed time."
-      test_ok? new_footer(    61.5) =~ / in 1:01.5s$/      , msg: "failed to embed elapsed time."
-      test_ok? new_footer(   610.5) =~ / in 10:10.5s$/     , msg: "failed to embed elapsed time."
-      test_ok? new_footer(  3600.5) =~ / in 1:00:00.5s$/   , msg: "failed to embed elapsed time."
-      test_ok? new_footer( 36000.5) =~ / in 10:00:00.5s$/  , msg: "failed to embed elapsed time."
-      test_ok? new_footer(360000.5) =~ / in 100:00:00.5s$/ , msg: "failed to embed elapsed time."
+      test_match? new_footer(     0.5), / in 0.500s$/       , msg: "failed to embed elapsed time."
+      test_match? new_footer(     6.5), / in 6.50s$/        , msg: "failed to embed elapsed time."
+      test_match? new_footer(    17.5), / in 17.5s$/        , msg: "failed to embed elapsed time."
+      test_match? new_footer(    61.5), / in 1:01.5s$/      , msg: "failed to embed elapsed time."
+      test_match? new_footer(   610.5), / in 10:10.5s$/     , msg: "failed to embed elapsed time."
+      test_match? new_footer(  3600.5), / in 1:00:00.5s$/   , msg: "failed to embed elapsed time."
+      test_match? new_footer( 36000.5), / in 10:00:00.5s$/  , msg: "failed to embed elapsed time."
+      test_match? new_footer(360000.5), / in 100:00:00.5s$/ , msg: "failed to embed elapsed time."
     end
 
     test_subject "[!gx0n2] builds footer line." do

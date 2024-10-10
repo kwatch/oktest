@@ -709,8 +709,8 @@ END
   test_target 'Oktest::MainApp#skeleton()' do
     test_subject "[!s2i1p] returns skeleton string of test script." do
       str = Oktest::MainApp.new.__send__(:skeleton)
-      test_ok? str =~ /^require 'oktest'$/
-      test_ok? str =~ /^Oktest\.scope do$/
+      test_match? str, /^require 'oktest'$/
+      test_match? str, /^Oktest\.scope do$/
     end
     test_subject "[!opvik] skeleton string is valid ruby code." do
       str = Oktest::MainApp.new.__send__(:skeleton)

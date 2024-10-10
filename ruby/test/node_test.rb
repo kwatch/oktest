@@ -248,7 +248,7 @@ class Node__Test
 END
       result = p._repr()
       #test_eq? result, expected
-      test_ok? result =~ Regexp.compile('\A'+expected), msg: "not matched"
+      test_match? result, Regexp.compile('\A'+expected), msg: "not matched"
     end
   end
 
