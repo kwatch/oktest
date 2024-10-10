@@ -21,32 +21,29 @@ module NanoTest
   end
 
   def test_ok?(result, msg: nil)
-    unless result
-      msg ||= "Test failed."
-      raise TestFailed, msg
-    end
+    return true if result
+    msg ||= "Test failed."
+    raise TestFailed, msg
   end
 
   def test_eq?(actual, expected, msg: nil)
-    unless actual == expected
-      msg ||= "<ACTUAL> == <EXPECTED> : failed."
-      #s1 = "    <ACTUAL>:   #{actual.inspect}"
-      #s2 = "    <EXPECTED>: #{expected.inspect}"
-      require 'pp' unless defined?(PP)
-      s1 = "    <ACTUAL>:   #{PP.pp(actual, String.new).chomp}"
-      s2 = "    <EXPECTED>: #{PP.pp(expected, String.new).chomp}"
-      raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
-    end
+    return true if actual == expected
+    msg ||= "<ACTUAL> == <EXPECTED> : failed."
+    #s1 = "    <ACTUAL>:   #{actual.inspect}"
+    #s2 = "    <EXPECTED>: #{expected.inspect}"
+    require 'pp' unless defined?(PP)
+    s1 = "    <ACTUAL>:   #{PP.pp(actual, String.new).chomp}"
+    s2 = "    <EXPECTED>: #{PP.pp(expected, String.new).chomp}"
+    raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
   end
 
   def test_match?(actual_str, expected_rexp, msg: nil)
-    unless actual_str =~ expected_rexp
-      msg ||= "<ACTUAL> =~ <EXPECTED> : failed."
-      require 'pp' unless defined?(PP)
-      s1 = "    <ACTUAL>:   #{PP.pp(actual_str, String.new).chomp}"
-      s2 = "    <EXPECTED>: #{PP.pp(expected_rexp, String.new).chomp}"
-      raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
-    end
+    return true if actual_str =~ expected_rexp
+    msg ||= "<ACTUAL> =~ <EXPECTED> : failed."
+    require 'pp' unless defined?(PP)
+    s1 = "    <ACTUAL>:   #{PP.pp(actual_str, String.new).chomp}"
+    s2 = "    <EXPECTED>: #{PP.pp(expected_rexp, String.new).chomp}"
+    raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
   end
 
   def test_exception?(exception_class, &b)
