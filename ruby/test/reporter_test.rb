@@ -76,14 +76,14 @@ END
     File.write(@filename, INPUT_7)
     color_enabled = Oktest::Config.color_enabled
     Oktest::Config.color_enabled = true
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::Config.color_enabled = color_enabled
     File.unlink(@filename) if @filename && File.exist?(@filename)
   end
 
   def run(*opts)
-    return capture { Oktest::MainApp.main(opts) }
+    return capture_output! { Oktest::MainApp.main(opts) }
   end
 
   def edit_actual(output)
@@ -104,7 +104,7 @@ END
 end
 
 
-Object.new.instance_eval do   # Oktest::BaseReporter
+class BaseReporter__Test
   extend NanoTest
   extend ReporterTestHelper
 
@@ -121,11 +121,11 @@ Object.new.instance_eval do   # Oktest::BaseReporter
     test_subject "[!pq3ia] initalizes counter by zero." do
       r = Oktest::BaseReporter.new
       c = r.instance_eval { @counts }
-      test_eq c, {}
+      test_eq? c, {}
       #
       r.enter_all(nil)
       c = r.instance_eval { @counts }
-      test_eq c, {:PASS=>0, :FAIL=>0, :ERROR=>0, :SKIP=>0, :TODO=>0}
+      test_eq? c, {:PASS=>0, :FAIL=>0, :ERROR=>0, :SKIP=>0, :TODO=>0}
     end
   end
 
@@ -134,11 +134,11 @@ Object.new.instance_eval do   # Oktest::BaseReporter
       r = Oktest::BaseReporter.new
       r.enter_all(nil)
       r.instance_eval { @start_at = Time.now - 7.0 }
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.exit_all(nil)
       end
-      test_eq sout, "## total:0 (pass:0, fail:0, error:0, skip:0, todo:0) in 7.00s\n"
-      test_eq serr, ""
+      test_eq? sout, "## total:0 (pass:0, fail:0, error:0, skip:0, todo:0) in 7.00s\n"
+      test_eq? serr, ""
     end
   end
 
@@ -152,19 +152,19 @@ Object.new.instance_eval do   # Oktest::BaseReporter
       topic1, spec1 = new_topic_and_spec()
       #
       r.exit_spec(spec1, 1, :PASS, nil, topic1)
-      test_eq r.counts, {:PASS=>1, :FAIL=>0, :ERROR=>0, :SKIP=>0, :TODO=>0}
+      test_eq? r.counts, {:PASS=>1, :FAIL=>0, :ERROR=>0, :SKIP=>0, :TODO=>0}
       #
       r.exit_spec(spec1, 1, :FAIL, exc, topic1)
-      test_eq r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>0, :SKIP=>0, :TODO=>0}
+      test_eq? r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>0, :SKIP=>0, :TODO=>0}
       #
       r.exit_spec(spec1, 1, :ERROR, exc, topic1)
-      test_eq r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>1, :SKIP=>0, :TODO=>0}
+      test_eq? r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>1, :SKIP=>0, :TODO=>0}
       #
       r.exit_spec(spec1, 1, :SKIP, nil, topic1)
-      test_eq r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>1, :SKIP=>1, :TODO=>0}
+      test_eq? r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>1, :SKIP=>1, :TODO=>0}
       #
       r.exit_spec(spec1, 1, :TODO, nil, topic1)
-      test_eq r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>1, :SKIP=>1, :TODO=>1}
+      test_eq? r.counts, {:PASS=>1, :FAIL=>1, :ERROR=>1, :SKIP=>1, :TODO=>1}
     end
     test_subject "[!nupb4] keeps exception info when status is FAIL or ERROR." do
       begin; 1/0
@@ -182,9 +182,9 @@ Object.new.instance_eval do   # Oktest::BaseReporter
       r.exit_spec(spec1, 1, :TODO, nil, topic1)
       #
       exceptions = r.instance_variable_get('@exceptions')
-      test_eq exceptions.length, 2
-      test_eq exceptions[0][1], :FAIL
-      test_eq exceptions[1][1], :ERROR
+      test_eq? exceptions.length, 2
+      test_eq? exceptions[0][1], :FAIL
+      test_eq? exceptions[1][1], :ERROR
     end
   end
 
@@ -195,12 +195,12 @@ Object.new.instance_eval do   # Oktest::BaseReporter
         @counts = {:PASS=>5, :FAIL=>4, :ERROR=>3, :SKIP=>2, :TODO=>1}
       end
       r.__send__(:reset_counts)
-      test_eq r.instance_variable_get('@counts'), {:PASS=>0, :FAIL=>0, :ERROR=>0, :SKIP=>0, :TODO=>0}
+      test_eq? r.instance_variable_get('@counts'), {:PASS=>0, :FAIL=>0, :ERROR=>0, :SKIP=>0, :TODO=>0}
     end
   end
 
   test_target 'Oktest::BaseReporter#print_exc_message()' do
-    def error_msg()
+    def self.error_msg()
       return ("something failed\n"\
               "  expect: foo\n"\
               "  actual: bar\n")
@@ -209,29 +209,29 @@ Object.new.instance_eval do   # Oktest::BaseReporter
       errmsg = error_msg()
       exc = Oktest::AssertionFailed.new(errmsg)
       r = Oktest::BaseReporter.new
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.__send__(:print_exc_message, exc, :FAIL)
       end
-      test_eq sout, plain2colored(<<END)
+      test_eq? sout, plain2colored(<<END)
 <R>something failed</R>
   expect: foo
   actual: bar
 END
-      test_eq serr, ""
+      test_eq? serr, ""
     end
     test_subject "[!pd41p] prints detail of exception." do
       errmsg = error_msg()
       exc = Oktest::AssertionFailed.new(errmsg)
       r = Oktest::BaseReporter.new
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.__send__(:print_exc_message, exc, :ERROR)
       end
-      test_eq sout, plain2colored(<<END)
+      test_eq? sout, plain2colored(<<END)
 <R>Oktest::AssertionFailed: something failed</R>
   expect: foo
   actual: bar
 END
-      test_eq serr, ""
+      test_eq? serr, ""
     end
   end
 
@@ -248,41 +248,41 @@ END
       end
       #
       expected = <<END
-    test/reporter_test.rb:#{lineno}:in `block (3 levels) in <main>'
+    test/reporter_test.rb:#{lineno}:in `block (2 levels) in <main>'
         raise Oktest::AssertionFailed, "something failed."
 END
       #
       r = Oktest::BaseReporter.new
-      sout, serr = capture do
+      sout, serr = capture_output! do
         r.__send__(:print_exc_backtrace, exc, :FAIL)
       end
       sout = sout.sub(/ in <.*?>/, " in <main>")
-      test_ok sout.start_with?(expected), msg: "traceback not matched"
-      test_eq serr, ""
+      test_ok? sout.start_with?(expected), msg: "traceback not matched"
+      test_eq? serr, ""
     end
     test_subject "[!jbped] skips backtrace of oktest.rb when assertion failure." do
-      exc = test_exception Oktest::AssertionFailed do
+      exc = test_exception? Oktest::AssertionFailed do
         eval "raise Oktest::AssertionFailed, 'dummie'", binding(), "lib/oktest.rb", 100
       end
       #
       status = :FAIL
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc_backtrace, exc, status)
       end
-      test_ok sout !~ /lib\/oktest\.rb:/, msg: "should skip but not"
-      test_eq serr, ""
+      test_ok? sout !~ /lib\/oktest\.rb:/, msg: "should skip but not"
+      test_eq? serr, ""
     end
     test_subject "[!cfkzg] don't skip first backtrace entry when error." do
-      exc = test_exception Oktest::AssertionFailed do
+      exc = test_exception? Oktest::AssertionFailed do
         eval "raise Oktest::AssertionFailed, 'dummie'", binding(), "lib/oktest.rb", 100
       end
       #
       status = :ERROR
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc_backtrace, exc, status)
       end
-      test_ok sout =~ /lib\/oktest\.rb:100/, msg: "should not skip but does"
-      test_eq serr, ""
+      test_match? sout, /lib\/oktest\.rb:100/, msg: "should not skip but does"
+      test_eq? serr, ""
     end
   end
 
@@ -298,18 +298,18 @@ END
       #
       expected = <<END
 [<R>Fail</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>
-    #{__FILE__}:#{lineno}:in `block (3 levels) in <main>'
+    #{__FILE__}:#{lineno}:in `block (2 levels) in <main>'
         raise Oktest::AssertionFailed, 'dummie:43201'
 END
       #
       topic1, spec1 = new_topic_and_spec()
       status = :FAIL
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc, spec1, status, exc, topic1)
       end
       sout = sout.gsub(/ in <.*?>/, " in <main>")
-      test_ok sout.start_with?(plain2colored(expected)), msg: "not matched"
-      test_eq serr, ""
+      test_ok? sout.start_with?(plain2colored(expected)), msg: "not matched"
+      test_eq? serr, ""
     end
     test_subject "[!pcpy4] prints exception info of error." do
       begin
@@ -328,16 +328,16 @@ END
       #
       topic1, spec1 = new_topic_and_spec()
       status = :ERROR
-      sout, serr = capture do
+      sout, serr = capture_output! do
         Oktest::BaseReporter.new.__send__(:print_exc, spec1, status, exc, topic1)
       end
-      test_ok sout.start_with?(plain2colored(expected)), msg: "not matched"
-      test_eq serr, ""
+      test_ok? sout.start_with?(plain2colored(expected)), msg: "not matched"
+      test_eq? serr, ""
     end
   end
 
   test_target 'Oktest::BaseReporter#print_exception()' do
-    def new_reporter_with_exceptions(exc)
+    def self.new_reporter_with_exceptions(exc)
       topic1, spec1 = new_topic_and_spec()
       r = Oktest::BaseReporter.new
       r.instance_eval do
@@ -360,31 +360,31 @@ END
       expected1 = "[<R>Fail</R>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
       expected2 = "[<E>ERROR</E>] <b>Example > Array > When some condition > 1+1 shoould be 2.</b>\n"
       #
-      sout, serr = capture { r.__send__(:print_exceptions) }
-      test_ok sout.start_with?(sep + plain2colored(expected1)), msg: "not matched"
-      test_ok sout.include?(sep + plain2colored(expected2)), msg: "not matched"
-      test_ok sout.end_with?(sep), msg: "not matched"
-      test_eq serr, ""
+      sout, serr = capture_output! { r.__send__(:print_exceptions) }
+      test_ok? sout.start_with?(sep + plain2colored(expected1)), msg: "not matched"
+      test_ok? sout.include?(sep + plain2colored(expected2)), msg: "not matched"
+      test_ok? sout.end_with?(sep), msg: "not matched"
+      test_eq? serr, ""
     end
     test_subject "[!2s9r2] prints nothing when no fails nor errors." do
       r = new_reporter_with_exceptions(nil)
-      sout, serr = capture { r.__send__(:print_exceptions) }
-      test_eq sout, ""
-      test_eq serr, ""
+      sout, serr = capture_output! { r.__send__(:print_exceptions) }
+      test_eq? sout, ""
+      test_eq? serr, ""
     end
     test_subject "[!ueeih] clears exceptions." do
       begin 1/0
       rescue => exc
       end
       r = new_reporter_with_exceptions(exc)
-      test_ok ! r.instance_variable_get('@exceptions').empty?
-      sout, serr = capture { r.__send__(:print_exceptions) }
-      test_ok   r.instance_variable_get('@exceptions').empty?
+      test_ok? ! r.instance_variable_get('@exceptions').empty?
+      sout, serr = capture_output! { r.__send__(:print_exceptions) }
+      test_ok?   r.instance_variable_get('@exceptions').empty?
     end
   end
 
   test_target 'Oktest::BaseReporter#footer()' do
-    def new_footer(elapsed=0.5)
+    def self.new_footer(elapsed=0.5)
       r = Oktest::BaseReporter.new
       r.enter_all(nil)
       r.instance_eval do
@@ -395,37 +395,37 @@ END
 
     test_subject "[!iy4uo] calculates total count of specs." do
       ft = new_footer()
-      test_ok ft =~ /total:15 /, msg: "failed to calculate total counts."
+      test_match? ft, /total:15 /, msg: "failed to calculate total counts."
     end
 
     test_subject "[!2nnma] includes count of each status." do
       ft = new_footer()
-      test_ok ft =~ /pass:5\b/  , msg: "failed to count passed status."
-      test_ok ft =~ /fail:4\b/  , msg: "failed to count failed status."
-      test_ok ft =~ /error:3\b/ , msg: "failed to count error status."
-      test_ok ft =~ /skip:2\b/  , msg: "failed to count skipped status."
-      test_ok ft =~ /todo:1\b/  , msg: "failed to count todo status."
+      test_match? ft, /pass:5\b/  , msg: "failed to count passed status."
+      test_match? ft, /fail:4\b/  , msg: "failed to count failed status."
+      test_match? ft, /error:3\b/ , msg: "failed to count error status."
+      test_match? ft, /skip:2\b/  , msg: "failed to count skipped status."
+      test_match? ft, /todo:1\b/  , msg: "failed to count todo status."
     end
 
     test_subject "[!fp57l] includes elapsed time." do
       ft = new_footer()
-      test_ok ft =~ / in 0.500s$/, msg: "failed to embed elapsed time."
+      test_match? ft, / in 0.500s$/, msg: "failed to embed elapsed time."
     end
 
     test_subject "[!r5y02] elapsed time format is adjusted along to time length." do
-      test_ok new_footer(     0.5) =~ / in 0.500s$/       , msg: "failed to embed elapsed time."
-      test_ok new_footer(     6.5) =~ / in 6.50s$/        , msg: "failed to embed elapsed time."
-      test_ok new_footer(    17.5) =~ / in 17.5s$/        , msg: "failed to embed elapsed time."
-      test_ok new_footer(    61.5) =~ / in 1:01.5s$/      , msg: "failed to embed elapsed time."
-      test_ok new_footer(   610.5) =~ / in 10:10.5s$/     , msg: "failed to embed elapsed time."
-      test_ok new_footer(  3600.5) =~ / in 1:00:00.5s$/   , msg: "failed to embed elapsed time."
-      test_ok new_footer( 36000.5) =~ / in 10:00:00.5s$/  , msg: "failed to embed elapsed time."
-      test_ok new_footer(360000.5) =~ / in 100:00:00.5s$/ , msg: "failed to embed elapsed time."
+      test_match? new_footer(     0.5), / in 0.500s$/       , msg: "failed to embed elapsed time."
+      test_match? new_footer(     6.5), / in 6.50s$/        , msg: "failed to embed elapsed time."
+      test_match? new_footer(    17.5), / in 17.5s$/        , msg: "failed to embed elapsed time."
+      test_match? new_footer(    61.5), / in 1:01.5s$/      , msg: "failed to embed elapsed time."
+      test_match? new_footer(   610.5), / in 10:10.5s$/     , msg: "failed to embed elapsed time."
+      test_match? new_footer(  3600.5), / in 1:00:00.5s$/   , msg: "failed to embed elapsed time."
+      test_match? new_footer( 36000.5), / in 10:00:00.5s$/  , msg: "failed to embed elapsed time."
+      test_match? new_footer(360000.5), / in 100:00:00.5s$/ , msg: "failed to embed elapsed time."
     end
 
     test_subject "[!gx0n2] builds footer line." do
       expected = "## total:15 (<C>pass:5</C>, <R>fail:4</R>, <E>error:3</E>, <Y>skip:2</Y>, <Y>todo:1</Y>) in 0.500s"
-      test_eq new_footer(), plain2colored(expected)
+      test_eq? new_footer(), plain2colored(expected)
     end
   end
 
@@ -437,7 +437,7 @@ END
       t3 = Oktest::TopicNode.new(t2, 'When some condition')
       s1 = Oktest::SpecLeaf.new(t3, "1+1 shoould be 2.") { nil }
       path = Oktest::BaseReporter.new.__send__(:spec_path, s1, t3)
-      test_eq path, "Example > Array > When some condition > 1+1 shoould be 2."
+      test_eq? path, "Example > Array > When some condition > 1+1 shoould be 2."
     end
   end
 
@@ -521,14 +521,14 @@ end
 include ReporterOutput
 
 
-Object.new.instance_eval do   # Oktest::VerboseReporter
+class VerboseReporter__Test
   extend NanoTest
   extend ReporterTestHelper
 
   test_subject "[!6o9nw] reports topic name and spec desc." do
     sout, serr = run("-sv", @filename)
-    test_eq edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
-    test_eq serr, ""
+    test_eq? edit_actual(sout), edit_expected(VERBOSE_OUTPUT)
+    test_eq? serr, ""
   end
 
   test_subject "[!ibdu7] reports errors even when no topics." do
@@ -558,86 +558,86 @@ END
 END
     #
     sout, serr = run("-sv", @filename)
-    test_eq edit_actual(sout), edit_expected(expected)
-    test_eq serr, ""
+    test_eq? edit_actual(sout), edit_expected(expected)
+    test_eq? serr, ""
   end
 
 end
 
 
-Object.new.instance_eval do   # Oktest::SimpleReporter
+class SimpleReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
 
   test_subject "[!jxa1b] reports topics and progress." do
     sout, serr = run("-ss", @filename)
-    test_eq edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
-    test_eq serr, ""
+    test_eq? edit_actual(sout), edit_expected(SIMPLE_OUTPUT)
+    test_eq? serr, ""
   end
 
 end
 
 
-Object.new.instance_eval do   # Oktest::CompactReporter
+class CompactReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
 
   test_subject "[!xfd5o] reports filename." do
     sout, serr = run("-sc", @filename)
-    test_eq edit_actual(sout), edit_expected(COMPACT_OUTPUT)
-    test_eq serr, ""
+    test_eq? edit_actual(sout), edit_expected(COMPACT_OUTPUT)
+    test_eq? serr, ""
   end
 
 end
 
 
-Object.new.instance_eval do   # Oktest::PlainReporter
+class PlainReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
 
   test_subject "[!w842j] reports progress." do
     sout, serr = run("-sp", @filename)
-    test_eq edit_actual(sout), edit_expected(PLAIN_OUTPUT)
-    test_eq serr, ""
+    test_eq? edit_actual(sout), edit_expected(PLAIN_OUTPUT)
+    test_eq? serr, ""
   end
 
 end
 
 
-Object.new.instance_eval do   # Oktest::QuietReporter
+class QuietReporter__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
 
   test_subject "[!0z4im] reports all statuses except PASS status." do
     sout, serr = run("-sq", @filename)
-    test_eq edit_actual(sout), edit_expected(QUIET_OUTPUT)
-    test_eq serr, ""
+    test_eq? edit_actual(sout), edit_expected(QUIET_OUTPUT)
+    test_eq? serr, ""
   end
 
 end
 
 
-Object.new.instance_eval do   # Oktest
+class DefaultReprotingStyle__Test
   extend NanoTest
   extend ReporterTestHelper
   extend ReporterOutput
 
   test_target 'Oktest.DEFAULT_REPORTING_STYLE=()' do
     test_subject "[!lbufd] raises error if unknown style specified." do
-      exc = test_exception ArgumentError do
+      exc = test_exception? ArgumentError do
         Oktest.DEFAULT_REPORTING_STYLE = "foo"
       end
-      test_eq exc.message, "foo: Unknown reporting style."
+      test_eq? exc.message, "foo: Unknown reporting style."
     end
     test_subject "[!dsbmo] changes value of default reporting style." do
-      test_eq Oktest::DEFAULT_REPORTING_STYLE, "verbose"
+      test_eq? Oktest::DEFAULT_REPORTING_STYLE, "verbose"
       begin
         Oktest.DEFAULT_REPORTING_STYLE = "plain"
-        test_eq Oktest::DEFAULT_REPORTING_STYLE, "plain"
+        test_eq? Oktest::DEFAULT_REPORTING_STYLE, "plain"
       ensure
         Oktest.DEFAULT_REPORTING_STYLE = "verbose"
       end

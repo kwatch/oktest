@@ -10,13 +10,13 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest
+class Misc__Test
   extend NanoTest
 
   def self.test_subject(desc, &b)
     auto_run = Oktest::Config.auto_run
     Oktest::Config.auto_run = true
-    NanoTest.test_subject(desc, &b)
+    super
   ensure
     Oktest::Config.auto_run = auto_run
     Oktest::THE_GLOBAL_SCOPE.clear_children()
@@ -29,9 +29,9 @@ Object.new.instance_eval do   # Oktest
       begin
         1/0
       rescue => exc
-        test_eq Oktest.auto_run?, false
+        test_eq? Oktest.auto_run?, false
       end
-      test_ok exc != nil, msg: "exception not raised"
+      test_ok? exc != nil, msg: "exception not raised"
     end
     test_subject "[!oae85] returns true if exit() called." do
       Oktest.scope do
@@ -40,13 +40,13 @@ Object.new.instance_eval do   # Oktest
       begin
         exit(0)
       rescue SystemExit => exc
-        test_eq Oktest.auto_run?, true
+        test_eq? Oktest.auto_run?, true
       end
-      test_ok exc != nil, msg: "exception not raised"
+      test_ok? exc != nil, msg: "exception not raised"
     end
     test_subject "[!rg5aw] returns false if Oktest.scope() never been called." do
-      test_eq Oktest::THE_GLOBAL_SCOPE.has_child?, false
-      test_eq Oktest.auto_run?, false
+      test_eq? Oktest::THE_GLOBAL_SCOPE.has_child?, false
+      test_eq? Oktest.auto_run?, false
     end
     test_subject "[!0j3ek] returns true if Config.auto_run is enabled." do
       Oktest.scope do
@@ -54,9 +54,9 @@ Object.new.instance_eval do   # Oktest
       bkup = Oktest::Config.auto_run
       begin
         Oktest::Config.auto_run = true
-        test_eq Oktest.auto_run?, true
+        test_eq? Oktest.auto_run?, true
         Oktest::Config.auto_run = false
-        test_eq Oktest.auto_run?, false
+        test_eq? Oktest.auto_run?, false
       ensure
         Oktest::Config.auto_run = bkup
       end
@@ -66,16 +66,16 @@ Object.new.instance_eval do   # Oktest
 end
 
 
-Object.new.instance_eval do   # Oktest::Color
+class Color__Test
   extend NanoTest
 
   test_target 'Oktest::Color.status()' do
     test_subject "[!yev5y] returns string containing color escape sequence." do
-      test_eq Oktest::Color.status(:PASS , "Pass" ), "\e[0;36mPass\e[0m"
-      test_eq Oktest::Color.status(:FAIL , "Fail" ), "\e[0;31mFail\e[0m"
-      test_eq Oktest::Color.status(:ERROR, "Error"), "\e[1;31mError\e[0m"
-      test_eq Oktest::Color.status(:SKIP , "Skip" ), "\e[0;33mSkip\e[0m"
-      test_eq Oktest::Color.status(:TODO , "Todo" ), "\e[0;33mTodo\e[0m"
+      test_eq? Oktest::Color.status(:PASS , "Pass" ), "\e[0;36mPass\e[0m"
+      test_eq? Oktest::Color.status(:FAIL , "Fail" ), "\e[0;31mFail\e[0m"
+      test_eq? Oktest::Color.status(:ERROR, "Error"), "\e[1;31mError\e[0m"
+      test_eq? Oktest::Color.status(:SKIP , "Skip" ), "\e[0;33mSkip\e[0m"
+      test_eq? Oktest::Color.status(:TODO , "Todo" ), "\e[0;33mTodo\e[0m"
     end
   end
 

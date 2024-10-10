@@ -12,30 +12,44 @@ module NanoTest
   def test_subject(subject, &b)
     yield
     print "."
-    $microtest_count += 1
+    $nantotest_subject_count += 1
   end
 
-  $microtest_count = 0
+  $nantotest_subject_count = 0
 
   class TestFailed < StandardError
   end
 
-  def test_ok(result, msg: nil)
+  def test_ok?(result, msg: nil)
     unless result
       msg ||= "Test failed."
       raise TestFailed, msg
     end
   end
 
-  def test_eq(actual, expected)
+  def test_eq?(actual, expected, msg: nil)
     unless actual == expected
-      s1 = "  $<expected>: #{expected.inspect}"
-      s2 = "  $<actual>:   #{actual.inspect}"
-      raise TestFailed, "$<actual> == $<expected> : failed.\n#{s1}\n#{s2}"
+      msg ||= "<ACTUAL> == <EXPECTED> : failed."
+      #s1 = "    <ACTUAL>:   #{actual.inspect}"
+      #s2 = "    <EXPECTED>: #{expected.inspect}"
+      require 'pp' unless defined?(PP)
+      s1 = "    <ACTUAL>:   #{PP.pp(actual, String.new).chomp}"
+      s2 = "    <EXPECTED>: #{PP.pp(expected, String.new).chomp}"
+      raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
     end
   end
 
-  def test_exception(exception_class, &b)
+  def test_match?(actual_str, expected_rexp, msg: nil)
+    unless actual_str =~ expected_rexp
+      msg ||= "<ACTUAL> =~ <EXPECTED> : failed."
+      require 'pp' unless defined?(PP)
+      s1 = "    <ACTUAL>:   #{PP.pp(actual_str, String.new).chomp}"
+      s2 = "    <EXPECTED>: #{PP.pp(expected_rexp, String.new).chomp}"
+      raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
+    end
+  end
+
+  def test_exception?(exception_class, &b)
     begin
       yield
     rescue exception_class => exc
@@ -45,7 +59,7 @@ module NanoTest
     end
   end
 
-  def capture_output(stdin="", tty: false, &b)
+  def capture_output!(stdin="", tty: false, &b)
     require 'stringio' unless defined?(StringIO)
     bkup = [$stdin, $stdout, $stderr]
     $stdin  = StringIO.new(stdin)
@@ -68,9 +82,9 @@ end
 
 
 at_exit {
-  if $microtest_count > 0
+  if $nantotest_subject_count > 0
     puts "\n"
-    puts "(#{$microtest_count} tests)"
+    puts "(#{$nantotest_subject_count} tests)"
   end
 }
 
@@ -101,13 +115,13 @@ if __FILE__ == $0
     called == true  or fail "Failed: #{desc}"
   end
 
-  ## test_ok()
-  do_test "test_ok() raises nothing if arg is truthy." do |desc|
-    test_ok (1+1) == 2
+  ## test_ok?()
+  do_test "test_ok?() raises nothing if arg is truthy." do |desc|
+    test_ok? (1+1) == 2
   end
-  do_test "test_ok() raises TestFailed if arg is falty." do |desc|
+  do_test "test_ok?() raises TestFailed if arg is falty." do |desc|
     begin
-      test_ok (1+1) == 3
+      test_ok? (1+1) == 3
     rescue NanoTest::TestFailed => exc
       expected = "Test failed."
       exc.message == expected  or fail "Failed: #{desc}"
@@ -115,10 +129,10 @@ if __FILE__ == $0
       fail "TestFailed should be raised but not: #{desc}"
     end
   end
-  do_test "test_ok() accepts a message string." do |desc|
+  do_test "test_ok?() accepts a message string." do |desc|
     msg = "should be equal to 2"
     begin
-      test_ok (1+1) == 3, msg: msg
+      test_ok? (1+1) == 3, msg: msg
     rescue NanoTest::TestFailed => exc
       exc.message == msg  or fail "Failed: #{desc}"
     else
@@ -126,32 +140,117 @@ if __FILE__ == $0
     end
   end
 
-  ## test_eq()
-  do_test "test_eq() raises nothing if args are equal." do |desc|
-    test_eq "ABC", "ABC"
+  ## test_eq?()
+  do_test "test_eq?() raises nothing if args are equal." do |desc|
+    test_eq? "ABC", "ABC"
   end
-  do_test "test_eq() raises TestFailed if args are not equal." do |desc|
+  do_test "test_eq?() raises TestFailed if args are not equal." do |desc|
     begin
-      test_eq "ABC", "abc"
+      test_eq? "ABC", "abc"
     rescue NanoTest::TestFailed => exc
-      expected = "$<actual> == $<expected> : failed.\n"\
-                 "  $<expected>: \"abc\"\n"\
-                 "  $<actual>:   \"ABC\""
+      expected = "<ACTUAL> == <EXPECTED> : failed.\n"\
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: \"abc\""
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_eq?() reports actual and expected value in pretty print format." do |desc|
+    begin
+      actual1 = {
+        name: "Alice", email: "alice@gmail.com", gender: "F",
+        department: "Sales & Marketing",
+      }
+      expected1 = {
+        name: "Alice", email: "alice@gmail.org", gender: "F",
+        department: "Sales & Marketing",
+      }
+      test_eq? actual1, expected1
+    rescue NanoTest::TestFailed => exc
+      expected = <<'END'
+<ACTUAL> == <EXPECTED> : failed.
+    <ACTUAL>:   {:name=>"Alice",
+ :email=>"alice@gmail.com",
+ :gender=>"F",
+ :department=>"Sales & Marketing"}
+    <EXPECTED>: {:name=>"Alice",
+ :email=>"alice@gmail.org",
+ :gender=>"F",
+ :department=>"Sales & Marketing"}
+END
+      expected = expected.chomp
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_eq?() accepts 'msg:' kwarg." do
+    begin
+      test_eq? "ABC", "abc", msg: "NOT EQUAL"
+    rescue NanoTest::TestFailed => exc
+      expected = "NOT EQUAL\n"\
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: \"abc\""
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
     end
   end
 
-  ## test_exception()
-  do_test "test_exception() raises nothing if expected exception raised in block." do
-    test_exception ZeroDivisionError do
+  ## test_match?()
+  do_test "test_match?() raises nothing if str matched to regexp." do |desc|
+    test_match? "123", /^\d+$/
+  end
+  do_test "test_match?() raises TestFailed if str not matched to regexp." do |desc|
+    begin
+      test_match? "ABC", /^\d+$/
+    rescue NanoTest::TestFailed => exc
+      expected = "<ACTUAL> =~ <EXPECTED> : failed.\n"\
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: /^\\d+$/"
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_match?() reports str and regexp values in pretty print format." do |desc|
+    begin
+      test_match? "ABC\nDEF\nGHI\n", /^\d+$/
+    rescue NanoTest::TestFailed => exc
+      expected = <<'END'
+<ACTUAL> =~ <EXPECTED> : failed.
+    <ACTUAL>:   "ABC\n" + "DEF\n" + "GHI\n"
+    <EXPECTED>: /^\d+$/
+END
+      expected = expected.chomp
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_match?() accepts 'msg:' kwarg." do
+    begin
+      test_match? "ABC", /^\d+$/, msg: "NOT MATCHED"
+    rescue NanoTest::TestFailed => exc
+      expected = "NOT MATCHED\n"\
+                 "    <ACTUAL>:   \"ABC\"\n"\
+                 "    <EXPECTED>: /^\\d+$/"
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+
+  ## test_exception?()
+  do_test "test_exception?() raises nothing if expected exception raised in block." do
+    test_exception? ZeroDivisionError do
       1 / 0
     end
   end
-  do_test "test_exception() raises TestFailed if expected exception not raised in block." do
+  do_test "test_exception?() raises TestFailed if expected exception not raised in block." do
     begin
-      test_exception ZeroDivisionError do
+      test_exception? ZeroDivisionError do
         1.0 / 0.0
       end
     rescue NanoTest::TestFailed => exc
@@ -160,25 +259,25 @@ if __FILE__ == $0
     end
   end
 
-  ## capture_output()
-  do_test "capture_output() captures stdout and stderro." do |desc|
-    sout, serr = capture_output() do
+  ## capture_output!()
+  do_test "capture_output!() captures stdout and stderro." do |desc|
+    sout, serr = capture_output!() do
       print "ABC"
       $stderr.print "DEF"
     end
     sout == "ABC"  or fail "Failed (sout): #{desc}"
     serr == "DEF"  or fail "Failed (serr): #{desc}"
   end
-  do_test "capture_output() accepts stdin data." do |desc|
+  do_test "capture_output!() accepts stdin data." do |desc|
     data = nil
-    capture_output("abc\n") do
+    capture_output!("abc\n") do
       data = $stdin.read()
     end
     data == "abc\n"  or fail "Failed: #{desc}"
   end
-  do_test "capture_output() restores original stdin, stdout and stderr." do |desc|
+  do_test "capture_output!() restores original stdin, stdout and stderr." do |desc|
     io = [$stdin, $stdout, $stderr]
-    capture_output() do
+    capture_output!() do
       $stdin  != io[0]  or fail "Failed (stdin): #{desc}"
       $stdout != io[1]  or fail "Failed (stdout): #{desc}"
       $stderr != io[2]  or fail "Failed (stderr): #{desc}"
@@ -187,25 +286,25 @@ if __FILE__ == $0
     $stdout == io[1]  or fail "Failed (stdout): #{desc}"
     $stderr == io[2]  or fail "Failed (stderr): #{desc}"
   end
-  do_test "capture_output() makes io objects to pseudo tty." do |desc|
-    capture_output(tty: true) do
+  do_test "capture_output!() makes io objects to pseudo tty." do |desc|
+    capture_output!(tty: true) do
       $stdin.tty?  == true   or fail "Failed (stdin): #{desc}"
       $stdout.tty? == true   or fail "Failed (stdout): #{desc}"
       $stderr.tty? == true   or fail "Failed (stderr): #{desc}"
     end
-    capture_output(tty: false) do
+    capture_output!(tty: false) do
       $stdin.tty?  == false  or fail "Failed (stdin): #{desc}"
       $stdout.tty? == false  or fail "Failed (stdout): #{desc}"
       $stderr.tty? == false  or fail "Failed (stderr): #{desc}"
     end
-    capture_output() do
+    capture_output!() do
       $stdin.tty?  == false  or fail "Failed (stdin): #{desc}"
       $stdout.tty? == false  or fail "Failed (stdout): #{desc}"
       $stderr.tty? == false  or fail "Failed (stderr): #{desc}"
     end
   end
 
-  $microtest_count = 0
+  $nantotest_subject_count = 0
   puts ""
 
 end

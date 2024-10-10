@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::FixtureManager
+class FixtureManager__Test
   extend NanoTest
 
   class DummyReporter5 < Oktest::Reporter
@@ -21,10 +21,10 @@ Object.new.instance_eval do   # Oktest::FixtureManager
 
   def self.run_all(dummy: false)
     reporter = dummy ? DummyReporter5.new : Oktest::Reporter.new
-    sout, serr = capture do
+    sout, serr = capture_output! do
       Oktest::Runner.new(reporter).start()
     end
-    test_eq serr, ""
+    test_eq? serr, ""
     return sout
   end
 
@@ -45,7 +45,7 @@ Object.new.instance_eval do   # Oktest::FixtureManager
       end
       expected = "[10, 20, 30]\n"
       sout = run_all()
-      test_eq sout, expected
+      test_eq? sout, expected
     end
 
     test_subject "[!ja2ew] resolves 'this_spec' fixture name as description of current spec." do
@@ -57,7 +57,7 @@ Object.new.instance_eval do   # Oktest::FixtureManager
         end
       end
       sout = run_all()
-      test_eq sout, "this_spec=\"1+1 should be 2.\"\n"
+      test_eq? sout, "this_spec=\"1+1 should be 2.\"\n"
     end
 
     test_subject "[!w6ffs] resolves 'this_topic' fixture name as target objec of current topic." do
@@ -69,7 +69,7 @@ Object.new.instance_eval do   # Oktest::FixtureManager
         end
       end
       sout = run_all()
-      test_eq sout, "this_topic=Integer\n"
+      test_eq? sout, "this_topic=Integer\n"
     end
 
     test_subject "[!np4p9] raises error when loop exists in dependency." do
@@ -86,7 +86,7 @@ Object.new.instance_eval do   # Oktest::FixtureManager
       end
       expected = "\#<Oktest::LoopedDependencyError: fixture dependency is looped: a->b=>c=>d=>b>\n"
       sout = run_all(dummy: true)
-      test_eq sout, expected
+      test_eq? sout, expected
     end
 
   end
@@ -115,7 +115,7 @@ Object.new.instance_eval do   # Oktest::FixtureManager
 ["A", "B", "C", "D"]
 END
       sout = run_all()
-      test_eq sout, expected
+      test_eq? sout, expected
     end
 
     test_subject "[!gyyst] overwrites keyword params by fixture values." do
@@ -128,7 +128,7 @@ END
         end
       end
       sout = run_all()
-      test_eq sout, "{:y=>2, :z=>3}\n{:y=>4, :z=>5}\n"
+      test_eq? sout, "{:y=>2, :z=>3}\n{:y=>4, :z=>5}\n"
     end
 
     test_subject "[!4xghy] calls fixture block with context object as self." do
@@ -142,7 +142,7 @@ END
 10
 END
       sout = run_all()
-      test_eq sout, expected
+      test_eq? sout, expected
     end
 
     test_subject "[!8t3ul] caches fixture value to call fixture block only once per spec." do
@@ -163,7 +163,7 @@ END
 12
 END
       sout = run_all()
-      test_eq sout, expected
+      test_eq? sout, expected
     end
 
     test_subject "[!4chb9] traverses parent topics if fixture not found in current topic." do
@@ -180,7 +180,7 @@ END
         end
       end
       sout = run_all()
-      test_eq sout, "\"x=10, y=11, z=12\"\n"
+      test_eq? sout, "\"x=10, y=11, z=12\"\n"
     end
 
     test_subject "[!wt3qk] suports global scope." do
@@ -198,7 +198,7 @@ END
         end
       end
       _ = run_all()
-      test_eq data, {:id=>"gf8979", :parent=>{:id=>"gf6535", :parent=>{:id=>"gf1592"}}}
+      test_eq? data, {:id=>"gf8979", :parent=>{:id=>"gf6535", :parent=>{:id=>"gf1592"}}}
     end
 
     test_subject "[!nr79z] raises error when fixture not found." do
@@ -212,7 +212,7 @@ END
       end
       expected = "#<Oktest::FixtureNotFoundError: y: fixture not found. (spec: spec#1)>\n"
       sout = run_all(dummy: true)
-      test_eq sout, expected
+      test_eq? sout, expected
     end
 
   end

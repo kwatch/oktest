@@ -10,7 +10,7 @@
 require_relative './init'
 
 
-Object.new.instance_eval do   # Oktest::UtilHelper
+class UtilHelper__Test
   extend NanoTest
 
   test_target 'Oktest::UtilHelper#partial_regexp!()' do
@@ -28,16 +28,16 @@ END
           end
         end
       end
-      capture { Oktest.run() }
-      test_eq r1.class, Oktest::Util::PartialRegexp
-      test_eq r2.class, Oktest::Util::PartialRegexp
-      test_eq r1.inspect, <<'END'
+      capture_output! { Oktest.run() }
+      test_eq? r1.class, Oktest::Util::PartialRegexp
+      test_eq? r2.class, Oktest::Util::PartialRegexp
+      test_eq? r1.inspect, <<'END'
 partial_regexp(<<PREXP, '\A', '\z')
 * [Date]    {== \d\d\d\d-\d\d-\d\d ==}
 * [Secret]  {== [0-9a-f]{12} ==}
 PREXP
 END
-      test_eq r2.inspect, <<'END'
+      test_eq? r2.inspect, <<'END'
 partial_regexp(<<PREXP, "", "")
 * [Date]    {== \d\d\d\d-\d\d-\d\d ==}
 * [Secret]  {== [0-9a-f]{12} ==}
@@ -61,16 +61,16 @@ END
           end
         end
       end
-      capture { Oktest.run() }
-      test_eq r1.class, Oktest::Util::PartialRegexp
-      test_eq r2.class, Oktest::Util::PartialRegexp
-      test_eq r1.inspect, <<'END'.chomp
+      capture_output! { Oktest.run() }
+      test_eq? r1.class, Oktest::Util::PartialRegexp
+      test_eq? r2.class, Oktest::Util::PartialRegexp
+      test_eq? r1.inspect, <<'END'.chomp
 /\A
 \*\ \[Date\]\ \ \ \ \d\d\d\d-\d\d-\d\d\n
 \*\ \[Secret\]\ \ [0-9a-f]{12}\n
 \z/x
 END
-      test_eq r2.inspect, <<'END'.chomp
+      test_eq? r2.inspect, <<'END'.chomp
 /
 \*\ \[Date\]\ \ \ \ \d\d\d\d-\d\d-\d\d\n
 \*\ \[Secret\]\ \ [0-9a-f]{12}\n
