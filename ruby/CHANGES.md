@@ -2,6 +2,18 @@ CHANGES
 =======
 
 
+Release 1.5.0
+-------------
+
+* [enhance] `topic()` now passes an argument to block. ex: `topic "/api/foo" do |urlpath| ...`
+* [enhance] `Oktest.topic()` added which is equivarent to `Oktest.scope { topic() }`. This method can reduce nested block depth in test scripts.
+* [change] Removed `Oktest::REPORTER_CLASS`.
+* [enhance] Defined `Oktest::DEFAULT_REPORTING_STYLE` instead of `REPORTER_CLASS`.
+* [enhance] Defined `Oktest.DEFAULT_REPORTING_STYLE=(style)` to change reporting style easily.
+* [change] (internal) Test scripts are rewrited.
+
+
+
 Release 1.4.0
 -------------
 
