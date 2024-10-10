@@ -11,7 +11,7 @@ File.class_eval do
   $LOAD_PATH << join(dirname(dirname(expand_path(__FILE__))), 'lib')
 end
 
-require_relative './nt'
+require_relative './nanot'
 require 'oktest'
 
 
