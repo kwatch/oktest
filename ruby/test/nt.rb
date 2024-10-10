@@ -27,14 +27,15 @@ module NanoTest
     end
   end
 
-  def test_eq?(actual, expected)
+  def test_eq?(actual, expected, msg: nil)
     unless actual == expected
+      msg ||= "$<actual> == $<expected> : failed."
       #s1 = "    $<actual>:   #{actual.inspect}"
       #s2 = "    $<expected>: #{expected.inspect}"
       require 'pp' unless defined?(PP)
       s1 = "    $<actual>:   #{PP.pp(actual, String.new).chomp}"
       s2 = "    $<expected>: #{PP.pp(expected, String.new).chomp}"
-      raise TestFailed, "$<actual> == $<expected> : failed.\n#{s1}\n#{s2}"
+      raise TestFailed, "#{msg}\n#{s1}\n#{s2}"
     end
   end
 
@@ -179,6 +180,18 @@ $<actual> == $<expected> : failed.
  :department=>"Sales & Marketing"}
 END
       expected = expected.chomp
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_eq?() accepts 'msg:' kwarg." do
+    begin
+      test_eq? "ABC", "abc", msg: "NOT EQUAL"
+    rescue NanoTest::TestFailed => exc
+      expected = "NOT EQUAL\n"\
+                 "    $<actual>:   \"ABC\"\n"\
+                 "    $<expected>: \"abc\""
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
