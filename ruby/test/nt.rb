@@ -29,8 +29,8 @@ module NanoTest
 
   def test_eq?(actual, expected)
     unless actual == expected
-      s1 = "  $<expected>: #{expected.inspect}"
-      s2 = "  $<actual>:   #{actual.inspect}"
+      s1 = "  $<actual>:   #{actual.inspect}"
+      s2 = "  $<expected>: #{expected.inspect}"
       raise TestFailed, "$<actual> == $<expected> : failed.\n#{s1}\n#{s2}"
     end
   end
@@ -135,8 +135,8 @@ if __FILE__ == $0
       test_eq? "ABC", "abc"
     rescue NanoTest::TestFailed => exc
       expected = "$<actual> == $<expected> : failed.\n"\
-                 "  $<expected>: \"abc\"\n"\
-                 "  $<actual>:   \"ABC\""
+                 "  $<actual>:   \"ABC\"\n"\
+                 "  $<expected>: \"abc\""
       exc.message == expected  or fail "Failed: #{desc}"
     else
       fail "TestFailed should be raised but not: #{desc}"
