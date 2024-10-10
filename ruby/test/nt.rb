@@ -38,6 +38,15 @@ module NanoTest
     end
   end
 
+  def test_match?(actual_str, expected_rexp)
+    unless actual_str =~ expected_rexp
+      require 'pp' unless defined?(PP)
+      s1 = "    $<actual>:   #{PP.pp(actual_str, String.new).chomp}"
+      s2 = "    $<expected>: #{PP.pp(expected_rexp, String.new).chomp}"
+      raise TestFailed, "$<actual> =~ $<expected> : failed.\n#{s1}\n#{s2}"
+    end
+  end
+
   def test_exception?(exception_class, &b)
     begin
       yield
@@ -167,6 +176,38 @@ $<actual> == $<expected> : failed.
  :email=>"alice@gmail.org",
  :gender=>"F",
  :department=>"Sales & Marketing"}
+END
+      expected = expected.chomp
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+
+  ## test_match?()
+  do_test "test_match?() raises nothing if str matched to regexp." do |desc|
+    test_match? "123", /^\d+$/
+  end
+  do_test "test_match?() raises TestFailed if str not matched to regexp." do |desc|
+    begin
+      test_match? "ABC", /^\d+$/
+    rescue NanoTest::TestFailed => exc
+      expected = "$<actual> =~ $<expected> : failed.\n"\
+                 "    $<actual>:   \"ABC\"\n"\
+                 "    $<expected>: /^\\d+$/"
+      exc.message == expected  or fail "Failed: #{desc}"
+    else
+      fail "TestFailed should be raised but not: #{desc}"
+    end
+  end
+  do_test "test_match?() reports str and regexp values in pretty print format." do |desc|
+    begin
+      test_match? "ABC\nDEF\nGHI\n", /^\d+$/
+    rescue NanoTest::TestFailed => exc
+      expected = <<'END'
+$<actual> =~ $<expected> : failed.
+    $<actual>:   "ABC\n" + "DEF\n" + "GHI\n"
+    $<expected>: /^\d+$/
 END
       expected = expected.chomp
       exc.message == expected  or fail "Failed: #{desc}"
