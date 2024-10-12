@@ -96,6 +96,8 @@ Oktest.rb requires Ruby 2.4 or later.
     * <a href="#complex-example">Complex Example</a>
     * <a href="#helper-methods-for-json-matcher">Helper Methods for JSON Matcher</a>
   * <a href="#tips">Tips</a>
+    * <a href="#oktesttopic"><code>Oktest.topic()</code></a>
+    * <a href="#topic-target">Topic target</a>
     * <a href="#ok--in-minitest"><code>ok {}</code> in MiniTest</a>
     * <a href="#testing-rack-application">Testing Rack Application</a>
     * <a href="#environment-variale-oktest_rb">Environment Variale <code>$OKTEST_RB</code></a>
