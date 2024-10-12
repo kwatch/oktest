@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 ###
-### $Release: $
+### $Release: 1.5.0 $
 ### $Copyright: copyright(c) 2011-2024 kuwata-lab.com all rights reserved $
 ### $License: MIT License $
 ###
@@ -13,7 +13,7 @@ require 'set'
 module Oktest
 
 
-  VERSION = '$Release: 0.0.0 $'.split()[1]
+  VERSION = '$Release: 1.5.0 $'.split()[1]
 
 
   class OktestError < StandardError

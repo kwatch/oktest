@@ -2,9 +2,9 @@
 # frozen_string_literal: true
 
 ###
-### $Release: $
+### $Release: 1.5.0 $
 ### $Copyright: copyright(c) 2011-2024 kuwata-lab.com all rights reserved $
-### $License: MTT License $
+### $License: MIT License $
 ###
 
 require_relative './init'
